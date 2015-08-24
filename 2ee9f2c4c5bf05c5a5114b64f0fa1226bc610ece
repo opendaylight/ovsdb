@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_305eaae7",
+        "filename": "karaf/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-24T20:19:25Z",
+      "side": 1,
+      "message": "scope shold be runtime",
+      "range": {
+        "startLine": 106,
+        "startChar": 16,
+        "endLine": 106,
+        "endChar": 17
+      },
+      "revId": "2ee9f2c4c5bf05c5a5114b64f0fa1226bc610ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_f06fd290",
+        "filename": "routemgr/routemgr-features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-24T20:19:25Z",
+      "side": 1,
+      "message": "why not leave it as project.groupId?",
+      "revId": "2ee9f2c4c5bf05c5a5114b64f0fa1226bc610ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

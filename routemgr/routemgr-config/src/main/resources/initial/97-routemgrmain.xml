@@ -15,6 +15,20 @@
                         prefix:routemgr-impl
                     </type>
                     <name>routemgr-impl</name>
+		    <!-- TODO: need real stuff -->
+		    <routemgr-dummy>0</routemgr-dummy>
+		    <broker>
+		      <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
+		      <name>binding-osgi-broker</name>
+		    </broker>
+		    <schema-service>
+		      <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+		      <name>yang-schema-service</name>
+		    </schema-service>
+		    <binding-normalized-node-serializer>
+		      <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-normalized-node-serializer</type>
+		      <name>runtime-mapping-singleton</name>
+		    </binding-normalized-node-serializer>
                     <notification-service>
                     <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
                        binding:binding-notification-service

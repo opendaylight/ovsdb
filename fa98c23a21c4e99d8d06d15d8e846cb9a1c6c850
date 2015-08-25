@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_df6501e2",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "I would suggest to use ns:yang:ovsdb:hwvtep and use hwvtep as a prefix.",
+      "parentUuid": "3a79b1b5_a6b5bdce",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_868201ff",
         "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
         "patchSetId": 4
@@ -30,6 +48,30 @@
       "writtenOn": "2015-08-18T13:08:17Z",
       "side": 1,
       "message": "should this data be more from somethign like May or June: 2015-05-01?",
+      "range": {
+        "startLine": 13,
+        "startChar": 21,
+        "endLine": 13,
+        "endChar": 22
+      },
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_7f62add9",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "use the date on which this model was created, or i would suggest to change it before you merge it if this review takes more then 1 month :).",
+      "parentUuid": "3a79b1b5_868201ff",
       "range": {
         "startLine": 13,
         "startChar": 21,
@@ -82,6 +124,70 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_ffca3da0",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "I think we don\u0027t need this parent leaf here, please take out all the attributes and put it under hwtep-icast-mac-table-attributes. When you will use these attributes you can define your key there if that\u0027s the reason for putting the leaf over all the below leafs.",
+      "range": {
+        "startLine": 55,
+        "startChar": 8,
+        "endLine": 55,
+        "endChar": 12
+      },
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_3feaf50f",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "we should take out mac-entry and logical-switch-ref and put it under hwvtep-mac-table-generic-attributes grouping.",
+      "parentUuid": "3a79b1b5_6679e52e",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_1fd0594f",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "you can remove this key and define key where you use this grouping.",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 15
+      },
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_2673ed4e",
         "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
         "patchSetId": 4
@@ -98,6 +204,69 @@
         "startChar": 28,
         "endLine": 63,
         "endChar": 31
+      },
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_7fbe2d01",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "same as above. remove the parent lead and key.",
+      "range": {
+        "startLine": 80,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 28
+      },
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_5f6491b8",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "do we really have any schema for tunnel attributes. I think if we want to define the construct on top of schema construct we should define those in separate yang module.",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_5f3d718e",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "you can take out both of these attributes and use \"name\" and \"description\" as a leaf name and put it under \"switch-identification\" grouping and use it for this grouping and  hwvtep-physical-port-attributes \u0026 hwvtep-local-switch-attributes grouping.",
+      "range": {
+        "startLine": 131,
+        "startChar": 8,
+        "endLine": 138,
+        "endChar": 9
       },
       "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
@@ -133,6 +302,120 @@
       "writtenOn": "2015-08-18T13:08:17Z",
       "side": 1,
       "message": "wondering if hwvtep is needed here?",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_5f0b31d6",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "do we really need list of manager, i am not sure we can modify the manager through the controller, because this is the first step for connecting device to the controller. And if it allows to set manager from the controller/external entity, do we want to allow that? If not, but we want to keep this data for some reason, i think we should mark it config false.",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_ff0f9ddf",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "please change it to \"switch-ref\"",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_1f15b9f0",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "we should define identity for vxlan_over_ipv4.",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_bff925ca",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "suggestion \"locators-ref\"",
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_dff661d7",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "as i suggested above, if we define switch-identification attributes, we can use that grouping here.",
+      "range": {
+        "startLine": 251,
+        "startChar": 0,
+        "endLine": 258,
+        "endChar": 9
+      },
+      "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_7f038db8",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T23:12:55Z",
+      "side": 1,
+      "message": "if we define identification attributes grouping, we can use that here.",
+      "range": {
+        "startLine": 271,
+        "startChar": 1,
+        "endLine": 279,
+        "endChar": 9
+      },
       "revId": "fa98c23a21c4e99d8d06d15d8e846cb9a1c6c850",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

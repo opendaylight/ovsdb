@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Aswin Suryanarayanan <aswin.suryanarayanan@hp.com>
+Code-Review+1: Stephen Kitt <skitt@redhat.com>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Tue, 25 Aug 2015 12:29:56 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/24579
+Project: ovsdb
+Branch: refs/heads/master

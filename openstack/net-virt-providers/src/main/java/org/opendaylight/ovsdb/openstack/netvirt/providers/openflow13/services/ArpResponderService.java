@@ -10,6 +10,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -41,12 +42,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 //import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 public class ArpResponderService extends AbstractServiceInstance implements ArpProvider, ConfigInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(ArpResponderService.class);
+
     public ArpResponderService() {
         super(Service.ARP_RESPONDER);
     }
@@ -80,6 +85,14 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
             } else {
                 MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
             }
+        }
+
+        if (ipAddress instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 case
+            LOG.debug("ipv6 address case is not implemented yet. dpid {} segmentationId {} macAddressStr, ipAddress {} action {}",
+                      dpid, segmentationId, macAddressStr, ipAddress, action);
+            return new Status(StatusCode.NOTIMPLEMENTED);
         }
 
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));

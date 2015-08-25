@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_f9201d9d",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "We should probably move them into the library... The only reason to keep them separate would be if it makes sense to use the library without the schemas (or vice versa), but I don\u0027t know enough about that to decide.",
+      "parentUuid": "3a79b1b5_5e1ed771",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_be25abc3",
         "filename": "features/ovsdb/src/main/features/features.xml",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-25T13:05:45Z",
       "side": 1,
       "message": "I think the convention should still be odl-ovsdb-library",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_b93aa5cb",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "Yes, so do I; the archetype generates \"odl-library\" but then you end up using a bundle called \"library\" which is too generic.",
+      "parentUuid": "3a79b1b5_be25abc3",
       "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_d93761e2",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "I\u0027m not sure what the difference is yet, and I haven\u0027t investigated what was used previously. The TODO is there so I don\u0027t forget to settle the question ;-).",
+      "parentUuid": "3a79b1b5_de22e7b8",
+      "range": {
+        "startLine": 38,
+        "startChar": 65,
+        "endLine": 38,
+        "endChar": 66
+      },
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_fe124361",
         "filename": "library/api/src/main/yang/library.yang",
         "patchSetId": 5
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_592cb199",
+        "filename": "library/api/src/main/yang/library.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "The generator archetype creates one by default, I\u0027m working on getting everything working before cleaning the unneeded stuff up.",
+      "parentUuid": "3a79b1b5_fe124361",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_be0ccb43",
         "filename": "library/features/pom.xml",
         "patchSetId": 5
@@ -87,6 +165,24 @@
       "writtenOn": "2015-08-25T13:05:45Z",
       "side": 1,
       "message": "what is restconf for? Possible even the mdsal features. The library should be able to function without any restonf, dlux or model and only needs the config piece.",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_79340dde",
+        "filename": "library/features/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "The archetype generates a restconf component by default, and a UI component, which is why the default POM references include restconf and dlux. Thanks for pointing them out though, I\u0027ll delete them (and mdsal as far as possible).",
+      "parentUuid": "3a79b1b5_be0ccb43",
       "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -127,6 +223,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_9931e9ee",
+        "filename": "library/features/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "Yes definitely!",
+      "parentUuid": "3a79b1b5_de098732",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_7e063322",
         "filename": "library/impl/pom.xml",
         "patchSetId": 5
@@ -144,6 +258,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_394e9570",
+        "filename": "library/impl/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "Duly noted, thanks!",
+      "parentUuid": "3a79b1b5_7e063322",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_f909fd2c",
         "filename": "library/impl/src/main/config/default-config.xml",
         "patchSetId": 5
@@ -155,6 +287,24 @@
       "writtenOn": "2015-08-25T13:05:45Z",
       "side": 1,
       "message": "still wondering if we should leave ovsdb in there and fix the other config files we have in ovsdb to do the same.",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_59535117",
+        "filename": "library/impl/src/main/config/default-config.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-25T13:18:39Z",
+      "side": 1,
+      "message": "I think we should make it ovsdb-library, library is way too generic.",
+      "parentUuid": "3a79b1b5_f909fd2c",
       "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

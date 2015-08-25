@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_5e1ed771",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "What are your thoughts on how the schemas are in a different bundle? Does it make more sense to have them as part of the library?",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_be25abc3",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "I think the convention should still be odl-ovsdb-library",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_de22e7b8",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "what is the difference? Is there a need to change from what was previously used?",
+      "range": {
+        "startLine": 38,
+        "startChar": 65,
+        "endLine": 38,
+        "endChar": 66
+      },
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_fe124361",
+        "filename": "library/api/src/main/yang/library.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "why is there an api model?",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_be0ccb43",
+        "filename": "library/features/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "what is restconf for? Possible even the mdsal features. The library should be able to function without any restonf, dlux or model and only needs the config piece.",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_1e185f80",
+        "filename": "library/features/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "what is dlux for?",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_de098732",
+        "filename": "library/features/src/main/features/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "I would think rest and ui are not needed since the library is only used internally and nothing is exposed to the northbound. In the future we might be able to expose something but as of now there is nothing exposed.",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_7e063322",
+        "filename": "library/impl/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "We should add in sonar, failsafe, jacoco, etc... when ready.\n\nEven checkstyle.",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_f909fd2c",
+        "filename": "library/impl/src/main/config/default-config.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-25T13:05:45Z",
+      "side": 1,
+      "message": "still wondering if we should leave ovsdb in there and fix the other config files we have in ovsdb to do the same.",
+      "revId": "091799ec627ad041985e83dd6ce2b0f6443988c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

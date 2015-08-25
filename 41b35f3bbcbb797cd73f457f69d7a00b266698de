@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_c4545856",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-25T19:50:41Z",
+      "side": 1,
+      "message": "nit : you can put both of these condition in one block \n\nif (!southbound.isBridgeOnOvsdbNode(ovsdbNode, bridgeName) || southbound.getBridgeFromConfig(ovsdbNode, bridgeName) \u003d\u003d null){\nrv \u003d southbound.addBridge(ovsdbNode, bridgeName, getControllerTarget(ovsdbNode));\n}",
+      "revId": "41b35f3bbcbb797cd73f457f69d7a00b266698de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

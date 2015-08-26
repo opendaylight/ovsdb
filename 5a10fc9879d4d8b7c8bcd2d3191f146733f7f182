@@ -22,6 +22,30 @@
       "revId": "5a10fc9879d4d8b7c8bcd2d3191f146733f7f182",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_74816f8e",
+        "filename": "openstack/net-virt-it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/it/NetvirtIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-26T16:08:14Z",
+      "side": 1,
+      "message": "Good catch :-). Since it\u0027s a TODO I\u0027ll leave it there, to encourage people even more to fix things and remove the TODO...",
+      "parentUuid": "3a79b1b5_b402a73c",
+      "range": {
+        "startLine": 95,
+        "startChar": 29,
+        "endLine": 95,
+        "endChar": 33
+      },
+      "revId": "5a10fc9879d4d8b7c8bcd2d3191f146733f7f182",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

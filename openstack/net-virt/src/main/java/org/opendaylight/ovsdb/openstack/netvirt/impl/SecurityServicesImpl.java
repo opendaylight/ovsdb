@@ -105,6 +105,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return null;
             }
             NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+            if (neutronPort == null) {
+                return null;
+            }
             /*Since all the fixed ip assigned to a port should be
              *from the same network, first port is sufficient.*/
             List<Neutron_IPs> fixedIps = neutronPort.getFixedIPs();
@@ -171,6 +174,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return false;
             }
             NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+            if (neutronPort == null) {
+                return false;
+            }
             List<Neutron_IPs> neutronPortFixedIp = neutronPort.getFixedIPs();
             if (null == neutronPortFixedIp || neutronPortFixedIp.isEmpty()) {
                 return false;

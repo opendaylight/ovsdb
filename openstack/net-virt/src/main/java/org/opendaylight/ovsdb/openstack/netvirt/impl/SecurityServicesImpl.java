@@ -251,6 +251,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             return null;
         }
         NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPort == null) {
+            LOG.error("getIpAddress: neutron port of {} is not found", neutronPortId);
+            return null;
+        }
         return neutronPort.getFixedIPs();
     }
 

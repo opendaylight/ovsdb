@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -118,6 +122,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final String NETDEV_DP_TYPE = "netdev";
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
+    public static final int NUM_THREADS = 4;
     private static DataBroker dataBroker = null;
     private static String addressStr;
     private static String portStr;
@@ -268,9 +273,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .setRemotePort(port)
                 .build());
         return new ConnectionInfoBuilder()
-                       .setRemoteIp(address)
-                       .setRemotePort(port)
-                       .build();
+                .setRemoteIp(address)
+                .setRemotePort(port)
+                .build();
     }
 
     private String connectionInfoToString(final ConnectionInfo connectionInfo) {
@@ -529,8 +534,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private boolean addTerminationPoint(final NodeId bridgeNodeId, final String portName,
-            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder)
-        throws InterruptedException {
+                                        final OvsdbTerminationPointAugmentationBuilder
+                                                ovsdbTerminationPointAugmentationBuilder)
+            throws InterruptedException {
 
         InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(bridgeNodeId);
         NodeBuilder portNodeBuilder = new NodeBuilder();
@@ -565,12 +571,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * @throws InterruptedException
      */
     private boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
-            final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-            final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-            final Class<? extends DatapathTypeBase> dpType,
-            final List<BridgeExternalIds> externalIds,
-            final List<ControllerEntry> controllerEntries,
-            final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
+                              final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                              final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                              final Class<? extends DatapathTypeBase> dpType,
+                              final List<BridgeExternalIds> externalIds,
+                              final List<ControllerEntry> controllerEntries,
+                              final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         if (bridgeIid == null) {
@@ -613,7 +619,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private boolean addBridge(final ConnectionInfo connectionInfo, final String bridgeName)
-        throws InterruptedException {
+            throws InterruptedException {
 
         return addBridge(connectionInfo, null, bridgeName, null, true,
                 SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null, null);
@@ -633,7 +639,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * @return <code>store</code> type data store contents
      */
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName,
-            LogicalDatastoreType store) {
+                                              LogicalDatastoreType store) {
         Node bridgeNode = getBridgeNode(connectionInfo, bridgeName, store);
         Assert.assertNotNull(bridgeNode);
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
@@ -666,7 +672,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName, LogicalDatastoreType store) {
         InstanceIdentifier<Node> bridgeIid =
                 createInstanceIdentifier(connectionInfo,
-                    new OvsdbBridgeName(bridgeName));
+                        new OvsdbBridgeName(bridgeName));
         return mdsalUtils.read(store, bridgeIid);
     }
 
@@ -687,7 +693,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName)
-        throws InterruptedException {
+            throws InterruptedException {
 
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
                 createInstanceIdentifier(connectionInfo,
@@ -714,7 +720,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
         return createInstanceIdentifier(connectionInfo,
-            bridge.getBridgeName());
+                bridge.getBridgeName());
     }
 
     /**
@@ -727,8 +733,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * @param index
      * @return
      */
-    private OvsdbTerminationPointAugmentation getOvsdbTerminationPointAugmentation(ConnectionInfo connectionInfo,
-            String bridgeName, LogicalDatastoreType store, int index ) {
+    private OvsdbTerminationPointAugmentation getOvsdbTerminationPointAugmentation(
+            ConnectionInfo connectionInfo, String bridgeName, LogicalDatastoreType store, int index ) {
 
         List<TerminationPoint> tpList = getBridgeNode(connectionInfo, bridgeName, store).getTerminationPoint();
         if (tpList == null) {
@@ -736,7 +742,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
         return ((OvsdbTerminationPointAugmentation)
                 tpList.get(index)
-                .getAugmentation(OvsdbTerminationPointAugmentation.class));
+                        .getAugmentation(OvsdbTerminationPointAugmentation.class));
     }
 
     @Test
@@ -790,7 +796,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRDTerminationPointOfPortRequest() throws InterruptedException {
         final Long OFPORT_EXPECTED = new Long(45008);
         final Long OFPORT_INPUT = new Long(45008);
-        final Long OFPORT_UPDATE = new Long(45009);
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
@@ -871,12 +876,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneExternalIdName = "TestOneExternalId";
         int externalIdCounter = 0;
         List<PortExternalIds> oneExternalId = (List<PortExternalIds>) Lists.newArrayList(
-            (new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()));
+                (new PortExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
+                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
+                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()));
         Map<String,List<PortExternalIds>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
         testCase.put(INPUT_VALUES_KEY, oneExternalId);
@@ -889,36 +894,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFiveExternalIdName = "TestFiveExternalId";
         externalIdCounter = 0;
         List<PortExternalIds> fiveExternalId = (List<PortExternalIds>) Lists.newArrayList(
-            (new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()));
+                (new PortExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new PortExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new PortExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new PortExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new PortExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
         testCase.put(INPUT_VALUES_KEY, fiveExternalId);
@@ -938,15 +943,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodExternalIdOneMalformedExternalIdValue";
         externalIdCounter = 0;
         PortExternalIds oneGood = new PortExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                    GOOD_KEY, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
+                        GOOD_KEY, ++externalIdCounter))
                 .setExternalIdValue(String.format(FORMAT_STR,
                         testOneGoodExternalIdOneMalformedExternalIdValueName,
-                            GOOD_VALUE, externalIdCounter))
+                        GOOD_VALUE, externalIdCounter))
                 .build();
         PortExternalIds oneBad = new PortExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR,
-                    testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR,
+                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
                 .build();
         List<PortExternalIds> oneGoodOneBadInput = (List<PortExternalIds>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -970,15 +975,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodExternalIdOneMalformedExternalIdKey";
         externalIdCounter = 0;
         oneGood = new PortExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                    GOOD_KEY, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                        GOOD_KEY, ++externalIdCounter))
                 .setExternalIdValue(String.format(FORMAT_STR,
                         testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                            GOOD_VALUE, externalIdCounter))
+                        GOOD_VALUE, externalIdCounter))
                 .build();
         oneBad = new PortExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR,
-                    testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR,
+                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
                 .build();
         oneGoodOneBadInput = (List<PortExternalIds>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -996,7 +1001,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
      */
     private void assertExpectedPortExternalIdsExist( List<PortExternalIds> expected,
-            List<PortExternalIds> test ) {
+                                                     List<PortExternalIds> test ) {
 
         if (expected != null) {
             for (PortExternalIds expectedExternalId : expected) {
@@ -1006,126 +1011,183 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Tests the CRUD operations for <code>Port</code> <code>external_ids</code>.
+     * Tests the CRUD operations for <code>Port</code>
+     * <code>external_ids</code>.
      *
-     * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for specific test case information
+     * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for
+     * specific test case information
      */
     @Test
-    public void testCRUDTerminationPointPortExternalIds() throws InterruptedException {
+    public void testCRUDTerminationPointPortExternalIds()
+            throws InterruptedException, ExecutionException {
+
         final String TEST_PREFIX = "CRUDTPPortExternalIds";
-        final int TERMINATION_POINT_TEST_INDEX = 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
 
-        // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
-        // the update has been performed.
-        Map<String, Map<String, List<PortExternalIds>>> updateFromTestCases = generatePortExternalIdsTestCases();
-        Map<String, Map<String, List<PortExternalIds>>> updateToTestCases = generatePortExternalIdsTestCases();
-        Map<String, List<PortExternalIds>> updateFromTestCase = null;
-        List<PortExternalIds> updateFromInputExternalIds = null;
-        List<PortExternalIds> updateFromExpectedExternalIds = null;
-        List<PortExternalIds> updateFromConfigurationExternalIds = null;
-        List<PortExternalIds> updateFromOperationalExternalIds = null;
-        Map<String, List<PortExternalIds>> updateToTestCase = null;
-        List<PortExternalIds> updateToInputExternalIds = null;
-        List<PortExternalIds> updateToExpectedExternalIds = null;
-        List<PortExternalIds> updateToConfigurationExternalIds = null;
-        List<PortExternalIds> updateToOperationalExternalIds = null;
-        String testBridgeName = null;
-        String testPortName = null;
-        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
-        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
-        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
-        TerminationPointBuilder tpUpdateBuilder = null;
-        NodeBuilder portUpdateNodeBuilder = null;
-        NodeId testBridgeNodeId = null;
-        NodeId portUpdateNodeId = null;
-        InstanceIdentifier<Node> portIid = null;
-        boolean result = false;
+        // updateFromTestCases represent the original test case value.
+        // updateToTestCases represent the new value after the update has been
+        // performed.
+        Map<String, Map<String, List<PortExternalIds>>> updateFromTestCases =
+                generatePortExternalIdsTestCases();
+        Map<String, Map<String, List<PortExternalIds>>> updateToTestCases =
+                generatePortExternalIdsTestCases();
+        Map<String, List<PortExternalIds>> updateFromTestCase;
+        List<PortExternalIds> updateFromInputExternalIds;
+        List<PortExternalIds> updateFromExpectedExternalIds;
+        Map<String, List<PortExternalIds>> updateToTestCase;
+        List<PortExternalIds> updateToInputExternalIds;
+        List<PortExternalIds> updateToExpectedExternalIds;
+        String testBridgeName;
+        String testPortName;
 
+        int counter = 1;
+        // multihreads the test using NUM_THREADS
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputExternalIds = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedExternalIds = updateFromTestCase.get(EXPECTED_VALUES_KEY);
+            updateFromTestCase = updateFromTestCases.get(
+                    updateFromTestCaseKey);
+            updateFromInputExternalIds = updateFromTestCase.get(
+                    INPUT_VALUES_KEY);
+            updateFromExpectedExternalIds = updateFromTestCase.get(
+                    EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                testPortName = testBridgeName = String.format("%s_%s_%d",
+                        TEST_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputExternalIds = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedExternalIds = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
-                // CREATE: Create the test bridge
-                Assert.assertTrue(addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null, null));
-                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
-                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
-                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
-                tpCreateAugmentationBuilder.setName(testPortName);
-                tpCreateAugmentationBuilder.setPortExternalIds(updateFromInputExternalIds);
-                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
-
-                // READ: Read the test port and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateFromConfigurationExternalIds = updateFromConfigurationTerminationPointAugmentation
-                        .getPortExternalIds();
-                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromConfigurationExternalIds);
-                updateFromOperationalTerminationPointAugmenation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateFromOperationalExternalIds = updateFromOperationalTerminationPointAugmenation
-                        .getPortExternalIds();
-                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromOperationalExternalIds);
-
-                // UPDATE:  update the external_ids
-                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
-                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setPortExternalIds(updateToInputExternalIds);
-                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
-                portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = createManagedNodeId(portIid);
-                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
-                tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        portIid, portUpdateNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test port and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateToConfigurationExternalIds = updateToConfigurationTerminationPointAugmentation
-                        .getPortExternalIds();
-                assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
-                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToConfigurationExternalIds);
-                updateToOperationalTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateToOperationalExternalIds = updateToOperationalTerminationPointAugmentation.getPortExternalIds();
-                if (updateFromExpectedExternalIds != null) {
-                    assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
-                    assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToOperationalExternalIds);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                updateToInputExternalIds = updateToTestCase.get(
+                        INPUT_VALUES_KEY);
+                updateToExpectedExternalIds = updateToTestCase.get(
+                        EXPECTED_VALUES_KEY);
+                TestCRUDTerminationPointPortExternalIdsRunnable testRunnable =
+                        new TestCRUDTerminationPointPortExternalIdsRunnable(
+                                connectionInfo, testBridgeName, testPortName,
+                                updateFromInputExternalIds,
+                                updateFromExpectedExternalIds,
+                                updateToInputExternalIds,
+                                updateToExpectedExternalIds);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
+
+    class TestCRUDTerminationPointPortExternalIdsRunnable implements Runnable {
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        String testPortName;
+        List<PortExternalIds> updateFromInputExternalIds;
+        List<PortExternalIds> updateFromExpectedExternalIds;
+        List<PortExternalIds> updateToInputExternalIds;
+        List<PortExternalIds> updateToExpectedExternalIds;
+
+        public TestCRUDTerminationPointPortExternalIdsRunnable(
+                ConnectionInfo connectionInfo,
+                String testBridgeName, String testPortName,
+                List<PortExternalIds> updateFromInputExternalIds,
+                List<PortExternalIds> updateFromExpectedExternalIds,
+                List<PortExternalIds> updateToInputExternalIds,
+                List<PortExternalIds> updateToExpectedExternalIds) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.testPortName = testPortName;
+            this.updateFromInputExternalIds = updateFromInputExternalIds;
+            this.updateFromExpectedExternalIds = updateFromExpectedExternalIds;
+            this.updateToInputExternalIds = updateToInputExternalIds;
+            this.updateToExpectedExternalIds = updateToExpectedExternalIds;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void test() throws InterruptedException {
+
+            final int TERMINATION_POINT_TEST_INDEX = 0;
+            // CREATE: Create the test bridge
+            Assert.assertTrue(addBridge(connectionInfo, null,
+                    testBridgeName, null, true,
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, null, null, null));
+            NodeId testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
+                    connectionInfo, new OvsdbBridgeName(testBridgeName)));
+            OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            tpCreateAugmentationBuilder.setName(testPortName);
+            tpCreateAugmentationBuilder.setPortExternalIds(updateFromInputExternalIds);
+            Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+            // READ: Read the test port and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<PortExternalIds> updateFromConfigurationExternalIds =
+                    updateFromConfigurationTerminationPointAugmentation
+                            .getPortExternalIds();
+            assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromConfigurationExternalIds);
+            OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<PortExternalIds> updateFromOperationalExternalIds = updateFromOperationalTerminationPointAugmenation
+                    .getPortExternalIds();
+            assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromOperationalExternalIds);
+
+            // UPDATE:  update the external_ids
+            testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setPortExternalIds(updateToInputExternalIds);
+            InstanceIdentifier portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test port and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<PortExternalIds> updateToConfigurationExternalIds = updateToConfigurationTerminationPointAugmentation
+                    .getPortExternalIds();
+            assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
+            assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToConfigurationExternalIds);
+            OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<PortExternalIds> updateToOperationalExternalIds =
+                    updateToOperationalTerminationPointAugmentation.getPortExternalIds();
+            if (updateFromExpectedExternalIds != null) {
+                assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
+                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToOperationalExternalIds);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
+    }
+
+
 
     /*
      * Generates the test cases involved in testing InterfaceExternalIds.  See inline comments for descriptions of
@@ -1159,12 +1221,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneExternalIdName = "TestOneExternalId";
         int externalIdCounter = 0;
         List<InterfaceExternalIds> oneExternalId = (List<InterfaceExternalIds>) Lists.newArrayList(
-            (new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                            INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                            INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()));
+                (new InterfaceExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
+                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
+                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()));
         Map<String,List<InterfaceExternalIds>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
         testCase.put(INPUT_VALUES_KEY, oneExternalId);
@@ -1177,36 +1239,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFiveExternalIdName = "TestFiveExternalId";
         externalIdCounter = 0;
         List<InterfaceExternalIds> fiveExternalId = (List<InterfaceExternalIds>) Lists.newArrayList(
-            (new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                        INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()));
+                (new InterfaceExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new InterfaceExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new InterfaceExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new InterfaceExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new InterfaceExternalIdsBuilder()
+                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
         testCase.put(INPUT_VALUES_KEY, fiveExternalId);
@@ -1226,15 +1288,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodExternalIdOneMalformedExternalIdValue";
         externalIdCounter = 0;
         InterfaceExternalIds oneGood = new InterfaceExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                    GOOD_KEY, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
+                        GOOD_KEY, ++externalIdCounter))
                 .setExternalIdValue(String.format(FORMAT_STR,
                         testOneGoodExternalIdOneMalformedExternalIdValueName,
-                            GOOD_VALUE, externalIdCounter))
+                        GOOD_VALUE, externalIdCounter))
                 .build();
         InterfaceExternalIds oneBad = new InterfaceExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR,
-                    testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR,
+                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
                 .build();
         List<InterfaceExternalIds> oneGoodOneBadInput = (List<InterfaceExternalIds>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -1258,15 +1320,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodExternalIdOneMalformedExternalIdKey";
         externalIdCounter = 0;
         oneGood = new InterfaceExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                    GOOD_KEY, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                        GOOD_KEY, ++externalIdCounter))
                 .setExternalIdValue(String.format(FORMAT_STR,
                         testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                            GOOD_VALUE, externalIdCounter))
+                        GOOD_VALUE, externalIdCounter))
                 .build();
         oneBad = new InterfaceExternalIdsBuilder()
-            .setExternalIdKey(String.format(FORMAT_STR,
-                    testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
+                .setExternalIdKey(String.format(FORMAT_STR,
+                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
                 .build();
         oneGoodOneBadInput = (List<InterfaceExternalIds>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -1284,7 +1346,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of InterfaceExternalIds against an expected "set"
      */
     private void assertExpectedInterfaceExternalIdsExist( List<InterfaceExternalIds> expected,
-            List<InterfaceExternalIds> test ) {
+                                                          List<InterfaceExternalIds> test ) {
 
         if (expected != null) {
             for (InterfaceExternalIds expectedExternalId : expected) {
@@ -1299,7 +1361,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * @see <code>SouthboundIT.generateInterfaceExternalIdsTestCases()</code> for specific test case information
      */
     @Test
-    public void testCRUDTerminationPointInterfaceExternalIds() throws InterruptedException {
+    public void testCRUDTerminationPointInterfaceExternalIds() throws InterruptedException, ExecutionException {
         final String TEST_PREFIX = "CRUDTPInterfaceExternalIds";
         final int TERMINATION_POINT_TEST_INDEX = 0;
 
@@ -1312,117 +1374,162 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 generateInterfaceExternalIdsTestCases();
         Map<String, Map<String, List<InterfaceExternalIds>>> updateToTestCases =
                 generateInterfaceExternalIdsTestCases();
-        Map<String, List<InterfaceExternalIds>> updateFromTestCase = null;
-        List<InterfaceExternalIds> updateFromInputExternalIds = null;
-        List<InterfaceExternalIds> updateFromExpectedExternalIds = null;
-        List<InterfaceExternalIds> updateFromConfigurationExternalIds = null;
-        List<InterfaceExternalIds> updateFromOperationalExternalIds = null;
-        Map<String, List<InterfaceExternalIds>> updateToTestCase = null;
-        List<InterfaceExternalIds> updateToInputExternalIds = null;
-        List<InterfaceExternalIds> updateToExpectedExternalIds = null;
-        List<InterfaceExternalIds> updateToConfigurationExternalIds = null;
-        List<InterfaceExternalIds> updateToOperationalExternalIds = null;
-        String testBridgeName = null;
-        String testPortName = null;
-        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
-        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
-        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
-        TerminationPointBuilder tpUpdateBuilder = null;
-        NodeBuilder portUpdateNodeBuilder = null;
-        NodeId testBridgeNodeId = null;
-        NodeId portUpdateNodeId = null;
-        InstanceIdentifier<Node> portIid = null;
-        boolean result = false;
+        Map<String, List<InterfaceExternalIds>> updateFromTestCase;
+        List<InterfaceExternalIds> updateFromInputExternalIds;
+        List<InterfaceExternalIds> updateFromExpectedExternalIds;
+        Map<String, List<InterfaceExternalIds>> updateToTestCase;
+        List<InterfaceExternalIds> updateToInputExternalIds;
+        List<InterfaceExternalIds> updateToExpectedExternalIds;
+        String testBridgeName;
+        String testPortName;
 
+        int counter = 1;
+        // multihreads the test using NUM_THREADS
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
             updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
             updateFromInputExternalIds = updateFromTestCase.get(INPUT_VALUES_KEY);
             updateFromExpectedExternalIds = updateFromTestCase.get(EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
                 updateToInputExternalIds = updateToTestCase.get(INPUT_VALUES_KEY);
                 updateToExpectedExternalIds = updateToTestCase.get(EXPECTED_VALUES_KEY);
 
-                // CREATE: Create the test interface
-                Assert.assertTrue(addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null, null));
-                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
-                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
-                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
-                tpCreateAugmentationBuilder.setName(testPortName);
-                tpCreateAugmentationBuilder.setInterfaceExternalIds(updateFromInputExternalIds);
-                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
-
-                // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateFromConfigurationExternalIds = updateFromConfigurationTerminationPointAugmentation
-                        .getInterfaceExternalIds();
-                assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
-                        updateFromConfigurationExternalIds);
-                updateFromOperationalTerminationPointAugmenation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateFromOperationalExternalIds = updateFromOperationalTerminationPointAugmenation
-                        .getInterfaceExternalIds();
-                assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
-                        updateFromOperationalExternalIds);
-
-                // UPDATE:  update the external_ids
-                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
-                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setInterfaceExternalIds(updateToInputExternalIds);
-                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
-                portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = createManagedNodeId(portIid);
-                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
-                tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        portIid, portUpdateNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateToConfigurationExternalIds = updateToConfigurationTerminationPointAugmentation
-                        .getInterfaceExternalIds();
-                assertExpectedInterfaceExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
-                assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
-                        updateToConfigurationExternalIds);
-                updateToOperationalTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateToOperationalExternalIds = updateToOperationalTerminationPointAugmentation
-                        .getInterfaceExternalIds();
-                if (updateFromExpectedExternalIds != null) {
-                    assertExpectedInterfaceExternalIdsExist(updateToExpectedExternalIds,
-                            updateToOperationalExternalIds);
-                    assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
-                            updateToOperationalExternalIds);
-                } else {
-                    Assert.assertNull(updateToOperationalExternalIds);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                TestCRUDTerminationPointInterfaceExternalIdsRunnable testRunnable =
+                        new TestCRUDTerminationPointInterfaceExternalIdsRunnable(
+                                connectionInfo, testBridgeName, testPortName,
+                                updateFromInputExternalIds,
+                                updateFromExpectedExternalIds,
+                                updateToInputExternalIds,
+                                updateToExpectedExternalIds);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    class TestCRUDTerminationPointInterfaceExternalIdsRunnable implements Runnable {
+
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        String testPortName;
+        List<InterfaceExternalIds> updateFromInputExternalIds;
+        List<InterfaceExternalIds> updateFromExpectedExternalIds;
+        List<InterfaceExternalIds> updateToInputExternalIds;
+        List<InterfaceExternalIds> updateToExpectedExternalIds;
+
+        TestCRUDTerminationPointInterfaceExternalIdsRunnable(
+                ConnectionInfo connectionInfo, String testBridgeName,
+                String testPortName,
+                List<InterfaceExternalIds> updateFromInputExternalIds,
+                List<InterfaceExternalIds> updateFromExpectedExternalIds,
+                List<InterfaceExternalIds> updateToInputExternalIds,
+                List<InterfaceExternalIds> updateToExpectedExternalIds) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.testPortName = testPortName;
+            this.updateFromInputExternalIds = updateFromInputExternalIds;
+            this.updateFromExpectedExternalIds = updateFromExpectedExternalIds;
+            this.updateToInputExternalIds = updateToInputExternalIds;
+            this.updateToExpectedExternalIds = updateToExpectedExternalIds;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void test() throws InterruptedException {
+
+            final int TERMINATION_POINT_TEST_INDEX = 0;
+            // CREATE: Create the test interface
+            Assert.assertTrue(addBridge(connectionInfo, null,
+                    testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, null, null, null));
+            NodeId testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
+                    connectionInfo, new OvsdbBridgeName(testBridgeName)));
+            OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            tpCreateAugmentationBuilder.setName(testPortName);
+            tpCreateAugmentationBuilder.setInterfaceExternalIds(updateFromInputExternalIds);
+            Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+            // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceExternalIds> updateFromConfigurationExternalIds =
+                    updateFromConfigurationTerminationPointAugmentation
+                            .getInterfaceExternalIds();
+            assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
+                    updateFromConfigurationExternalIds);
+            OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceExternalIds> updateFromOperationalExternalIds =
+                    updateFromOperationalTerminationPointAugmenation
+                            .getInterfaceExternalIds();
+            assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
+                    updateFromOperationalExternalIds);
+
+            // UPDATE:  update the external_ids
+            testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setInterfaceExternalIds(updateToInputExternalIds);
+            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceExternalIds> updateToConfigurationExternalIds =
+                    updateToConfigurationTerminationPointAugmentation
+                    .getInterfaceExternalIds();
+            assertExpectedInterfaceExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
+            assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
+                    updateToConfigurationExternalIds);
+            OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceExternalIds> updateToOperationalExternalIds = updateToOperationalTerminationPointAugmentation
+                    .getInterfaceExternalIds();
+            if (updateFromExpectedExternalIds != null) {
+                assertExpectedInterfaceExternalIdsExist(updateToExpectedExternalIds,
+                        updateToOperationalExternalIds);
+                assertExpectedInterfaceExternalIdsExist(updateFromExpectedExternalIds,
+                        updateToOperationalExternalIds);
+            } else {
+                Assert.assertNull(updateToOperationalExternalIds);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
     }
 
     /*
@@ -1457,12 +1564,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneOptionsName = "TestOneOptions";
         int optionsCounter = 0;
         List<Options> oneOptions = (List<Options>) Lists.newArrayList(
-            (new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testOneOptionsName,
-                            TP_OPTIONS_KEY, ++optionsCounter))
-                    .setValue(String.format(FORMAT_STR, testOneOptionsName,
-                            TP_OPTIONS_VALUE, optionsCounter))
-                    .build()));
+                (new OptionsBuilder()
+                        .setOption(String.format(FORMAT_STR, testOneOptionsName,
+                                TP_OPTIONS_KEY, ++optionsCounter))
+                        .setValue(String.format(FORMAT_STR, testOneOptionsName,
+                                TP_OPTIONS_VALUE, optionsCounter))
+                        .build()));
         Map<String,List<Options>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneOptions);
         testCase.put(INPUT_VALUES_KEY, oneOptions);
@@ -1475,36 +1582,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFiveOptionsName = "TestFiveOptions";
         optionsCounter = 0;
         List<Options> fiveOptions = (List<Options>) Lists.newArrayList(
-            (new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_KEY, ++optionsCounter))
-                    .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_VALUE, optionsCounter))
-                    .build()),
-            (new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_KEY, ++optionsCounter))
-                    .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_VALUE, optionsCounter))
-                    .build()),
-            (new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_KEY, ++optionsCounter))
-                    .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_VALUE, optionsCounter))
-                    .build()),
-            (new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_KEY, ++optionsCounter))
-                    .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_VALUE, optionsCounter))
-                    .build()),
-            (new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                        TP_OPTIONS_KEY, ++optionsCounter))
-                    .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                            TP_OPTIONS_VALUE, optionsCounter))
-                    .build()));
+                (new OptionsBuilder()
+                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_KEY, ++optionsCounter))
+                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_VALUE, optionsCounter))
+                        .build()),
+                (new OptionsBuilder()
+                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_KEY, ++optionsCounter))
+                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_VALUE, optionsCounter))
+                        .build()),
+                (new OptionsBuilder()
+                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_KEY, ++optionsCounter))
+                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_VALUE, optionsCounter))
+                        .build()),
+                (new OptionsBuilder()
+                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_KEY, ++optionsCounter))
+                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_VALUE, optionsCounter))
+                        .build()),
+                (new OptionsBuilder()
+                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_KEY, ++optionsCounter))
+                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
+                                TP_OPTIONS_VALUE, optionsCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fiveOptions);
         testCase.put(INPUT_VALUES_KEY, fiveOptions);
@@ -1524,15 +1631,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodOptionsOneMalformedOptionsValue";
         optionsCounter = 0;
         Options oneGood = new OptionsBuilder()
-            .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsValueName,
-                    GOOD_KEY, ++optionsCounter))
+                .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsValueName,
+                        GOOD_KEY, ++optionsCounter))
                 .setValue(String.format(FORMAT_STR,
                         testOneGoodOptionsOneMalformedOptionsValueName,
-                            GOOD_VALUE, optionsCounter))
+                        GOOD_VALUE, optionsCounter))
                 .build();
         Options oneBad = new OptionsBuilder()
-            .setOption(String.format(FORMAT_STR,
-                    testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY, ++optionsCounter))
+                .setOption(String.format(FORMAT_STR,
+                        testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY, ++optionsCounter))
                 .build();
         List<Options> oneGoodOneBadInput = (List<Options>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -1556,15 +1663,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodOptionsOneMalformedOptionsKey";
         optionsCounter = 0;
         oneGood = new OptionsBuilder()
-            .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsKeyName,
-                    GOOD_KEY, ++optionsCounter))
+                .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsKeyName,
+                        GOOD_KEY, ++optionsCounter))
                 .setValue(String.format(FORMAT_STR,
                         testOneGoodOptionsOneMalformedOptionsKeyName,
-                            GOOD_VALUE, optionsCounter))
+                        GOOD_VALUE, optionsCounter))
                 .build();
         oneBad = new OptionsBuilder()
-            .setOption(String.format(FORMAT_STR,
-                    testOneGoodOptionsOneMalformedOptionsKeyName, NO_KEY_FOR_VALUE, ++optionsCounter))
+                .setOption(String.format(FORMAT_STR,
+                        testOneGoodOptionsOneMalformedOptionsKeyName, NO_KEY_FOR_VALUE, ++optionsCounter))
                 .build();
         oneGoodOneBadInput = (List<Options>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -1582,7 +1689,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of Options against an expected "set"
      */
     private void assertExpectedOptionsExist( List<Options> expected,
-            List<Options> test ) {
+                                             List<Options> test ) {
 
         if (expected != null) {
             for (Options expectedOption : expected) {
@@ -1599,7 +1706,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDTerminationPointOptions() throws InterruptedException {
         final String TEST_PREFIX = "CRUDTPOptions";
-        final int TERMINATION_POINT_TEST_INDEX = 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
@@ -1610,112 +1716,152 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 generateTerminationPointOptionsTestCases();
         Map<String, Map<String, List<Options>>> updateToTestCases =
                 generateTerminationPointOptionsTestCases();
-        Map<String, List<Options>> updateFromTestCase = null;
-        List<Options> updateFromInputOptions = null;
-        List<Options> updateFromExpectedOptions = null;
-        List<Options> updateFromConfigurationOptions = null;
-        List<Options> updateFromOperationalOptions = null;
-        Map<String, List<Options>> updateToTestCase = null;
-        List<Options> updateToInputOptions = null;
-        List<Options> updateToExpectedOptions = null;
-        List<Options> updateToConfigurationOptions = null;
-        List<Options> updateToOperationalOptions = null;
-        String testBridgeName = null;
-        String testPortName = null;
-        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
-        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
-        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
-        TerminationPointBuilder tpUpdateBuilder = null;
-        NodeBuilder portUpdateNodeBuilder = null;
-        NodeId testBridgeNodeId = null;
-        NodeId portUpdateNodeId = null;
-        InstanceIdentifier<Node> portIid = null;
-        boolean result = false;
+        Map<String, List<Options>> updateFromTestCase;
+        List<Options> updateFromInputOptions;
+        List<Options> updateFromExpectedOptions;
+        Map<String, List<Options>> updateToTestCase;
+        List<Options> updateToInputOptions;
+        List<Options> updateToExpectedOptions;
+        String testBridgeName;
+        String testPortName;
 
+        int counter = 1;
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
             updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
             updateFromInputOptions = updateFromTestCase.get(INPUT_VALUES_KEY);
             updateFromExpectedOptions = updateFromTestCase.get(EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
                 updateToInputOptions = updateToTestCase.get(INPUT_VALUES_KEY);
                 updateToExpectedOptions = updateToTestCase.get(EXPECTED_VALUES_KEY);
 
-                // CREATE: Create the test interface
-                Assert.assertTrue(addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null, null));
-                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
-                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
-                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
-                tpCreateAugmentationBuilder.setName(testPortName);
-                tpCreateAugmentationBuilder.setOptions(updateFromInputOptions);
-                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
-
-                // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateFromConfigurationOptions = updateFromConfigurationTerminationPointAugmentation
-                        .getOptions();
-                assertExpectedOptionsExist(updateFromExpectedOptions,
-                        updateFromConfigurationOptions);
-                updateFromOperationalTerminationPointAugmenation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateFromOperationalOptions = updateFromOperationalTerminationPointAugmenation
-                        .getOptions();
-                assertExpectedOptionsExist(updateFromExpectedOptions,
-                        updateFromOperationalOptions);
-
-                // UPDATE:  update the external_ids
-                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
-                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setOptions(updateToInputOptions);
-                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
-                portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = createManagedNodeId(portIid);
-                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
-                tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        portIid, portUpdateNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateToConfigurationOptions = updateToConfigurationTerminationPointAugmentation
-                        .getOptions();
-                assertExpectedOptionsExist(updateToExpectedOptions, updateToConfigurationOptions);
-                assertExpectedOptionsExist(updateFromExpectedOptions, updateToConfigurationOptions);
-                updateToOperationalTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateToOperationalOptions = updateToOperationalTerminationPointAugmentation
-                        .getOptions();
-                if (updateFromExpectedOptions != null) {
-                    assertExpectedOptionsExist(updateToExpectedOptions, updateToOperationalOptions);
-                    assertExpectedOptionsExist(updateFromExpectedOptions, updateToOperationalOptions);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                TestCRUDTerminationPointOptionsRunnable testRunnable =
+                        new TestCRUDTerminationPointOptionsRunnable(
+                                connectionInfo, testBridgeName, testPortName,
+                                updateFromInputOptions,
+                                updateFromExpectedOptions,
+                                updateToInputOptions,
+                                updateToExpectedOptions);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    class TestCRUDTerminationPointOptionsRunnable implements Runnable {
+
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        String testPortName;
+        List<Options> updateFromInputOptions;
+        List<Options> updateFromExpectedOptions;
+        List<Options> updateToInputOptions;
+        List<Options> updateToExpectedOptions;
+
+        TestCRUDTerminationPointOptionsRunnable(
+                ConnectionInfo connectionInfo, String testBridgeName,
+                String testPortName,
+                List<Options> updateFromInputOptions,
+                List<Options> updateFromExpectedOptions,
+                List<Options> updateToInputOptions,
+                List<Options> updateToExpectedOptions) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.testPortName = testPortName;
+            this.updateFromInputOptions = updateFromInputOptions;
+            this.updateFromExpectedOptions = updateFromExpectedOptions;
+            this.updateToInputOptions = updateToInputOptions;
+            this.updateToExpectedOptions = updateToExpectedOptions;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void test() throws InterruptedException {
+            final int TERMINATION_POINT_TEST_INDEX = 0;
+            // CREATE: Create the test interface
+            Assert.assertTrue(addBridge(connectionInfo, null,
+                    testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, null, null, null));
+            NodeId testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
+                    connectionInfo, new OvsdbBridgeName(testBridgeName)));
+            OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            tpCreateAugmentationBuilder.setName(testPortName);
+            tpCreateAugmentationBuilder.setOptions(updateFromInputOptions);
+            Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+            // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<Options> updateFromConfigurationOptions = updateFromConfigurationTerminationPointAugmentation
+                    .getOptions();
+            assertExpectedOptionsExist(updateFromExpectedOptions,
+                    updateFromConfigurationOptions);
+            OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<Options> updateFromOperationalOptions = updateFromOperationalTerminationPointAugmenation
+                    .getOptions();
+            assertExpectedOptionsExist(updateFromExpectedOptions,
+                    updateFromOperationalOptions);
+
+            // UPDATE:  update the external_ids
+            testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setOptions(updateToInputOptions);
+            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<Options> updateToConfigurationOptions = updateToConfigurationTerminationPointAugmentation
+                    .getOptions();
+            assertExpectedOptionsExist(updateToExpectedOptions, updateToConfigurationOptions);
+            assertExpectedOptionsExist(updateFromExpectedOptions, updateToConfigurationOptions);
+            OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<Options> updateToOperationalOptions = updateToOperationalTerminationPointAugmentation
+                    .getOptions();
+            if (updateFromExpectedOptions != null) {
+                assertExpectedOptionsExist(updateToExpectedOptions, updateToOperationalOptions);
+                assertExpectedOptionsExist(updateFromExpectedOptions, updateToOperationalOptions);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
     }
 
     /*
@@ -1750,12 +1896,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneOtherConfigsName = "TestOneInterfaceOtherConfigs";
         int otherConfigsCounter = 0;
         List<InterfaceOtherConfigs> oneOtherConfigs = (List<InterfaceOtherConfigs>) Lists.newArrayList(
-            (new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
-                            INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
-                            INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()));
+                (new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
+                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
+                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()));
         Map<String,List<InterfaceOtherConfigs>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneOtherConfigs);
         testCase.put(INPUT_VALUES_KEY, oneOtherConfigs);
@@ -1768,36 +1914,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFiveInterfaceOtherConfigsName = "TestFiveInterfaceOtherConfigs";
         otherConfigsCounter = 0;
         List<InterfaceOtherConfigs> fiveInterfaceOtherConfigs = (List<InterfaceOtherConfigs>) Lists.newArrayList(
-            (new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                        INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                            INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()));
+                (new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
+                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fiveInterfaceOtherConfigs);
         testCase.put(INPUT_VALUES_KEY, fiveInterfaceOtherConfigs);
@@ -1817,17 +1963,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue";
         otherConfigsCounter = 0;
         InterfaceOtherConfigs oneGood = new InterfaceOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                    GOOD_KEY, ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
+                        GOOD_KEY, ++otherConfigsCounter))
                 .setOtherConfigValue(String.format(FORMAT_STR,
                         testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                            GOOD_VALUE, otherConfigsCounter))
+                        GOOD_VALUE, otherConfigsCounter))
                 .build();
         InterfaceOtherConfigs oneBad = new InterfaceOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName, NO_VALUE_FOR_KEY,
-                    ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName, NO_VALUE_FOR_KEY,
+                        ++otherConfigsCounter))
                 .build();
         List<InterfaceOtherConfigs> oneGoodOneBadInput = (List<InterfaceOtherConfigs>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -1851,17 +1997,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey";
         otherConfigsCounter = 0;
         oneGood = new InterfaceOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                    GOOD_KEY, ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
+                        GOOD_KEY, ++otherConfigsCounter))
                 .setOtherConfigValue(String.format(FORMAT_STR,
                         testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                            GOOD_VALUE, otherConfigsCounter))
+                        GOOD_VALUE, otherConfigsCounter))
                 .build();
         oneBad = new InterfaceOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName, NO_KEY_FOR_VALUE,
-                    ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName, NO_KEY_FOR_VALUE,
+                        ++otherConfigsCounter))
                 .build();
         oneGoodOneBadInput = (List<InterfaceOtherConfigs>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -1879,7 +2025,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of Options against an expected "set"
      */
     private void assertExpectedInterfaceOtherConfigsExist( List<InterfaceOtherConfigs> expected,
-            List<InterfaceOtherConfigs> test ) {
+                                                           List<InterfaceOtherConfigs> test ) {
 
         if (expected != null && test != null) {
             for (InterfaceOtherConfigs expectedOtherConfigs : expected) {
@@ -1896,7 +2042,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDTerminationPointInterfaceOtherConfigs() throws InterruptedException {
         final String TEST_PREFIX = "CRUDTPInterfaceOtherConfigs";
-        final int TERMINATION_POINT_TEST_INDEX = 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
@@ -1907,124 +2052,170 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 generateInterfaceOtherConfigsTestCases();
         Map<String, Map<String, List<InterfaceOtherConfigs>>> updateToTestCases =
                 generateInterfaceOtherConfigsTestCases();
-        Map<String, List<InterfaceOtherConfigs>> updateFromTestCase = null;
-        List<InterfaceOtherConfigs> updateFromInputOtherConfigs = null;
-        List<InterfaceOtherConfigs> updateFromExpectedOtherConfigs = null;
-        List<InterfaceOtherConfigs> updateFromConfigurationOtherConfigs = null;
-        List<InterfaceOtherConfigs> updateFromOperationalOtherConfigs = null;
-        Map<String, List<InterfaceOtherConfigs>> updateToTestCase = null;
-        List<InterfaceOtherConfigs> updateToInputOtherConfigs = null;
-        List<InterfaceOtherConfigs> updateToExpectedOtherConfigs = null;
-        List<InterfaceOtherConfigs> updateToConfigurationOtherConfigs = null;
-        List<InterfaceOtherConfigs> updateToOperationalOtherConfigs = null;
-        String testBridgeName = null;
-        String testPortName = null;
-        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
-        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
-        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
-        TerminationPointBuilder tpUpdateBuilder = null;
-        NodeBuilder portUpdateNodeBuilder = null;
-        NodeId testBridgeNodeId = null;
-        NodeId portUpdateNodeId = null;
-        InstanceIdentifier<Node> portIid = null;
-        boolean result = false;
+        Map<String, List<InterfaceOtherConfigs>> updateFromTestCase;
+        List<InterfaceOtherConfigs> updateFromInputOtherConfigs;
+        List<InterfaceOtherConfigs> updateFromExpectedOtherConfigs;
+        Map<String, List<InterfaceOtherConfigs>> updateToTestCase;
+        List<InterfaceOtherConfigs> updateToInputOtherConfigs;
+        List<InterfaceOtherConfigs> updateToExpectedOtherConfigs;
+        String testBridgeName;
+        String testPortName;
 
+        int counter = 1;
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
             updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
             updateFromInputOtherConfigs = updateFromTestCase.get(INPUT_VALUES_KEY);
             updateFromExpectedOtherConfigs = updateFromTestCase.get(EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
                 updateToInputOtherConfigs = updateToTestCase.get(INPUT_VALUES_KEY);
                 updateToExpectedOtherConfigs = updateToTestCase.get(EXPECTED_VALUES_KEY);
 
-                // CREATE: Create the test interface
-                Assert.assertTrue(addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null, null));
-                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
-                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
-                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
-                tpCreateAugmentationBuilder.setName(testPortName);
-                tpCreateAugmentationBuilder.setInterfaceOtherConfigs(updateFromInputOtherConfigs);
-                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
-
-                // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                if (updateFromConfigurationTerminationPointAugmentation != null) {
-                    updateFromConfigurationOtherConfigs = updateFromConfigurationTerminationPointAugmentation
-                        .getInterfaceOtherConfigs();
-                } else {
-                    updateFromConfigurationOtherConfigs = null;
-                }
-                assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateFromConfigurationOtherConfigs);
-                updateFromOperationalTerminationPointAugmenation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                if (updateFromOperationalOtherConfigs != null) {
-                    updateFromOperationalOtherConfigs = updateFromOperationalTerminationPointAugmenation
-                            .getInterfaceOtherConfigs();
-                } else {
-                    updateFromOperationalOtherConfigs = null;
-                }
-                assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateFromOperationalOtherConfigs);
-
-                // UPDATE:  update the other_configs
-                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
-                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setInterfaceOtherConfigs(updateToInputOtherConfigs);
-                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
-                portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = createManagedNodeId(portIid);
-                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
-                tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        portIid, portUpdateNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateToConfigurationOtherConfigs = updateToConfigurationTerminationPointAugmentation
-                        .getInterfaceOtherConfigs();
-                assertExpectedInterfaceOtherConfigsExist(updateToExpectedOtherConfigs,
-                        updateToConfigurationOtherConfigs);
-                assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateToConfigurationOtherConfigs);
-                updateToOperationalTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateToOperationalOtherConfigs = updateToOperationalTerminationPointAugmentation
-                        .getInterfaceOtherConfigs();
-                if (updateFromExpectedOtherConfigs != null) {
-                    assertExpectedInterfaceOtherConfigsExist(updateToExpectedOtherConfigs,
-                            updateToOperationalOtherConfigs);
-                    assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
-                            updateToOperationalOtherConfigs);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                TestCRUDTerminationPointInterfaceOtherConfigsRunnable testRunnable =
+                        new TestCRUDTerminationPointInterfaceOtherConfigsRunnable(
+                                connectionInfo, testBridgeName, testPortName,
+                                updateFromInputOtherConfigs,
+                                updateFromExpectedOtherConfigs,
+                                updateToInputOtherConfigs,
+                                updateToExpectedOtherConfigs);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    class TestCRUDTerminationPointInterfaceOtherConfigsRunnable implements Runnable {
+
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        String testPortName;
+        List<InterfaceOtherConfigs> updateFromInputOtherConfigs;
+        List<InterfaceOtherConfigs> updateFromExpectedOtherConfigs;
+        List<InterfaceOtherConfigs> updateToInputOtherConfigs;
+        List<InterfaceOtherConfigs> updateToExpectedOtherConfigs;
+
+        TestCRUDTerminationPointInterfaceOtherConfigsRunnable(
+                ConnectionInfo connectionInfo, String testBridgeName,
+                String testPortName,
+                List<InterfaceOtherConfigs> updateFromInputOtherConfigs,
+                List<InterfaceOtherConfigs> updateFromExpectedOtherConfigs,
+                List<InterfaceOtherConfigs> updateToInputOtherConfigs,
+                List<InterfaceOtherConfigs> updateToExpectedOtherConfigs) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.testPortName = testPortName;
+            this.updateFromInputOtherConfigs = updateFromInputOtherConfigs;
+            this.updateFromExpectedOtherConfigs = updateFromExpectedOtherConfigs;
+            this.updateToInputOtherConfigs = updateToInputOtherConfigs;
+            this.updateToExpectedOtherConfigs = updateToExpectedOtherConfigs;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void test() throws InterruptedException {
+            final int TERMINATION_POINT_TEST_INDEX = 0;
+
+            // CREATE: Create the test interface
+            Assert.assertTrue(addBridge(connectionInfo, null,
+                    testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, null, null, null));
+            NodeId testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
+                    connectionInfo, new OvsdbBridgeName(testBridgeName)));
+            OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            tpCreateAugmentationBuilder.setName(testPortName);
+            tpCreateAugmentationBuilder.setInterfaceOtherConfigs(updateFromInputOtherConfigs);
+            Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+            // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                    LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceOtherConfigs> updateFromConfigurationOtherConfigs;
+            if (updateFromConfigurationTerminationPointAugmentation != null) {
+                updateFromConfigurationOtherConfigs = updateFromConfigurationTerminationPointAugmentation
+                        .getInterfaceOtherConfigs();
+            } else {
+                updateFromConfigurationOtherConfigs = null;
+            }
+            assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateFromConfigurationOtherConfigs);
+            OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceOtherConfigs> updateFromOperationalOtherConfigs =
+                    updateFromOperationalTerminationPointAugmenation.getInterfaceOtherConfigs();
+            if (updateFromOperationalOtherConfigs != null) {
+                updateFromOperationalOtherConfigs = updateFromOperationalTerminationPointAugmenation
+                        .getInterfaceOtherConfigs();
+            } else {
+                updateFromOperationalOtherConfigs = null;
+            }
+            assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateFromOperationalOtherConfigs);
+
+            // UPDATE:  update the other_configs
+            testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setInterfaceOtherConfigs(updateToInputOtherConfigs);
+            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceOtherConfigs> updateToConfigurationOtherConfigs =
+                    updateToConfigurationTerminationPointAugmentation
+                            .getInterfaceOtherConfigs();
+            assertExpectedInterfaceOtherConfigsExist(updateToExpectedOtherConfigs,
+                    updateToConfigurationOtherConfigs);
+            assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateToConfigurationOtherConfigs);
+            OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<InterfaceOtherConfigs> updateToOperationalOtherConfigs =
+                    updateToOperationalTerminationPointAugmentation
+                            .getInterfaceOtherConfigs();
+            if (updateFromExpectedOtherConfigs != null) {
+                assertExpectedInterfaceOtherConfigsExist(updateToExpectedOtherConfigs,
+                        updateToOperationalOtherConfigs);
+                assertExpectedInterfaceOtherConfigsExist(updateFromExpectedOtherConfigs,
+                        updateToOperationalOtherConfigs);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
     }
 
     /*
@@ -2059,12 +2250,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneOtherConfigsName = "TestOnePortOtherConfigs";
         int otherConfigsCounter = 0;
         List<PortOtherConfigs> oneOtherConfigs = (List<PortOtherConfigs>) Lists.newArrayList(
-            (new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
-                            PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
-                            PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()));
+                (new PortOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
+                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
+                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()));
         Map<String,List<PortOtherConfigs>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneOtherConfigs);
         testCase.put(INPUT_VALUES_KEY, oneOtherConfigs);
@@ -2077,36 +2268,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFivePortOtherConfigsName = "TestFivePortOtherConfigs";
         otherConfigsCounter = 0;
         List<PortOtherConfigs> fivePortOtherConfigs = (List<PortOtherConfigs>) Lists.newArrayList(
-            (new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()),
-            (new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                        PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                    .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                            PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                    .build()));
+                (new PortOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new PortOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new PortOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new PortOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()),
+                (new PortOtherConfigsBuilder()
+                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
+                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
+                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fivePortOtherConfigs);
         testCase.put(INPUT_VALUES_KEY, fivePortOtherConfigs);
@@ -2126,17 +2317,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue";
         otherConfigsCounter = 0;
         PortOtherConfigs oneGood = new PortOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                    GOOD_KEY, ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
+                        GOOD_KEY, ++otherConfigsCounter))
                 .setOtherConfigValue(String.format(FORMAT_STR,
                         testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                            GOOD_VALUE, otherConfigsCounter))
+                        GOOD_VALUE, otherConfigsCounter))
                 .build();
         PortOtherConfigs oneBad = new PortOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName, NO_VALUE_FOR_KEY,
-                    ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName, NO_VALUE_FOR_KEY,
+                        ++otherConfigsCounter))
                 .build();
         List<PortOtherConfigs> oneGoodOneBadInput = (List<PortOtherConfigs>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -2160,17 +2351,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey";
         otherConfigsCounter = 0;
         oneGood = new PortOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                    GOOD_KEY, ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
+                        GOOD_KEY, ++otherConfigsCounter))
                 .setOtherConfigValue(String.format(FORMAT_STR,
                         testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                            GOOD_VALUE, otherConfigsCounter))
+                        GOOD_VALUE, otherConfigsCounter))
                 .build();
         oneBad = new PortOtherConfigsBuilder()
-            .setOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName, NO_KEY_FOR_VALUE,
-                    ++otherConfigsCounter))
+                .setOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName, NO_KEY_FOR_VALUE,
+                        ++otherConfigsCounter))
                 .build();
         oneGoodOneBadInput = (List<PortOtherConfigs>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -2188,7 +2379,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of Options against an expected "set"
      */
     private void assertExpectedPortOtherConfigsExist( List<PortOtherConfigs> expected,
-            List<PortOtherConfigs> test ) {
+                                                      List<PortOtherConfigs> test ) {
 
         if (expected != null && test != null) {
             for (PortOtherConfigs expectedOtherConfigs : expected) {
@@ -2205,7 +2396,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDTerminationPointPortOtherConfigs() throws InterruptedException {
         final String TEST_PREFIX = "CRUDTPPortOtherConfigs";
-        final int TERMINATION_POINT_TEST_INDEX = 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
@@ -2216,124 +2406,166 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 generatePortOtherConfigsTestCases();
         Map<String, Map<String, List<PortOtherConfigs>>> updateToTestCases =
                 generatePortOtherConfigsTestCases();
-        Map<String, List<PortOtherConfigs>> updateFromTestCase = null;
-        List<PortOtherConfigs> updateFromInputOtherConfigs = null;
-        List<PortOtherConfigs> updateFromExpectedOtherConfigs = null;
-        List<PortOtherConfigs> updateFromConfigurationOtherConfigs = null;
-        List<PortOtherConfigs> updateFromOperationalOtherConfigs = null;
-        Map<String, List<PortOtherConfigs>> updateToTestCase = null;
-        List<PortOtherConfigs> updateToInputOtherConfigs = null;
-        List<PortOtherConfigs> updateToExpectedOtherConfigs = null;
-        List<PortOtherConfigs> updateToConfigurationOtherConfigs = null;
-        List<PortOtherConfigs> updateToOperationalOtherConfigs = null;
-        String testBridgeName = null;
-        String testPortName = null;
-        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
-        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
-        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
-        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
-        TerminationPointBuilder tpUpdateBuilder = null;
-        NodeBuilder portUpdateNodeBuilder = null;
-        NodeId testBridgeNodeId = null;
-        NodeId portUpdateNodeId = null;
-        InstanceIdentifier<Node> portIid = null;
-        boolean result = false;
+        Map<String, List<PortOtherConfigs>> updateFromTestCase;
+        List<PortOtherConfigs> updateFromInputOtherConfigs;
+        List<PortOtherConfigs> updateFromExpectedOtherConfigs;
+        Map<String, List<PortOtherConfigs>> updateToTestCase;
+        List<PortOtherConfigs> updateToInputOtherConfigs;
+        List<PortOtherConfigs> updateToExpectedOtherConfigs;
+        String testBridgeName;
+        String testPortName;
 
+        int counter = 1;
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
             updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
             updateFromInputOtherConfigs = updateFromTestCase.get(INPUT_VALUES_KEY);
             updateFromExpectedOtherConfigs = updateFromTestCase.get(EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
                 updateToInputOtherConfigs = updateToTestCase.get(INPUT_VALUES_KEY);
                 updateToExpectedOtherConfigs = updateToTestCase.get(EXPECTED_VALUES_KEY);
 
-                // CREATE: Create the test port
-                Assert.assertTrue(addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null, null));
-                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
-                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
-                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
-                tpCreateAugmentationBuilder.setName(testPortName);
-                tpCreateAugmentationBuilder.setPortOtherConfigs(updateFromInputOtherConfigs);
-                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
-
-                // READ: Read the test port and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                if (updateFromConfigurationTerminationPointAugmentation != null) {
-                    updateFromConfigurationOtherConfigs = updateFromConfigurationTerminationPointAugmentation
-                        .getPortOtherConfigs();
-                } else {
-                    updateFromConfigurationOtherConfigs = null;
-                }
-                assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateFromConfigurationOtherConfigs);
-                updateFromOperationalTerminationPointAugmenation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                if (updateFromOperationalOtherConfigs != null) {
-                    updateFromOperationalOtherConfigs = updateFromOperationalTerminationPointAugmenation
-                            .getPortOtherConfigs();
-                } else {
-                    updateFromOperationalOtherConfigs = null;
-                }
-                assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateFromOperationalOtherConfigs);
-
-                // UPDATE:  update the other_configs
-                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
-                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setPortOtherConfigs(updateToInputOtherConfigs);
-                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
-                portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = createManagedNodeId(portIid);
-                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
-                tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        portIid, portUpdateNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test port and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
-                updateToConfigurationOtherConfigs = updateToConfigurationTerminationPointAugmentation
-                        .getPortOtherConfigs();
-                assertExpectedPortOtherConfigsExist(updateToExpectedOtherConfigs,
-                        updateToConfigurationOtherConfigs);
-                assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateToConfigurationOtherConfigs);
-                updateToOperationalTerminationPointAugmentation =
-                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
-                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
-                updateToOperationalOtherConfigs = updateToOperationalTerminationPointAugmentation
-                        .getPortOtherConfigs();
-                if (updateFromExpectedOtherConfigs != null) {
-                    assertExpectedPortOtherConfigsExist(updateToExpectedOtherConfigs,
-                            updateToOperationalOtherConfigs);
-                    assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
-                            updateToOperationalOtherConfigs);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                TestCRUDTerminationPointPortOtherConfigsRunnable testRunnable =
+                        new TestCRUDTerminationPointPortOtherConfigsRunnable(
+                                connectionInfo, testBridgeName, testPortName,
+                                updateFromInputOtherConfigs,
+                                updateFromExpectedOtherConfigs,
+                                updateToInputOtherConfigs,
+                                updateToExpectedOtherConfigs);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    class TestCRUDTerminationPointPortOtherConfigsRunnable implements Runnable {
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        String testPortName;
+        List<PortOtherConfigs> updateFromInputOtherConfigs;
+        List<PortOtherConfigs> updateFromExpectedOtherConfigs;
+        List<PortOtherConfigs> updateToInputOtherConfigs;
+        List<PortOtherConfigs> updateToExpectedOtherConfigs;
+
+        TestCRUDTerminationPointPortOtherConfigsRunnable(
+                ConnectionInfo connectionInfo, String testBridgeName,
+                String testPortName,
+                List<PortOtherConfigs> updateFromInputOtherConfigs,
+                List<PortOtherConfigs> updateFromExpectedOtherConfigs,
+                List<PortOtherConfigs> updateToInputOtherConfigs,
+                List<PortOtherConfigs> updateToExpectedOtherConfigs) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.testPortName = testPortName;
+            this.updateFromInputOtherConfigs = updateFromInputOtherConfigs;
+            this.updateFromExpectedOtherConfigs = updateFromExpectedOtherConfigs;
+            this.updateToInputOtherConfigs = updateToInputOtherConfigs;
+            this.updateToExpectedOtherConfigs = updateToExpectedOtherConfigs;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void test() throws InterruptedException {
+            final int TERMINATION_POINT_TEST_INDEX = 0;
+            // CREATE: Create the test port
+            Assert.assertTrue(addBridge(connectionInfo, null,
+                    testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, null, null, null));
+            NodeId testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
+                    connectionInfo, new OvsdbBridgeName(testBridgeName)));
+            OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            tpCreateAugmentationBuilder.setName(testPortName);
+            tpCreateAugmentationBuilder.setPortOtherConfigs(updateFromInputOtherConfigs);
+            Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+            // READ: Read the test port and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<PortOtherConfigs> updateFromConfigurationOtherConfigs;
+            if (updateFromConfigurationTerminationPointAugmentation != null) {
+                updateFromConfigurationOtherConfigs = updateFromConfigurationTerminationPointAugmentation
+                        .getPortOtherConfigs();
+            } else {
+                updateFromConfigurationOtherConfigs = null;
+            }
+            assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateFromConfigurationOtherConfigs);
+            OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<PortOtherConfigs> updateFromOperationalOtherConfigs =
+                    updateFromOperationalTerminationPointAugmenation.getPortOtherConfigs();
+            if (updateFromOperationalOtherConfigs != null) {
+                updateFromOperationalOtherConfigs = updateFromOperationalTerminationPointAugmenation
+                        .getPortOtherConfigs();
+            } else {
+                updateFromOperationalOtherConfigs = null;
+            }
+            assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateFromOperationalOtherConfigs);
+
+            // UPDATE:  update the other_configs
+            testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setPortOtherConfigs(updateToInputOtherConfigs);
+            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test port and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+            List<PortOtherConfigs> updateToConfigurationOtherConfigs = updateToConfigurationTerminationPointAugmentation
+                    .getPortOtherConfigs();
+            assertExpectedPortOtherConfigsExist(updateToExpectedOtherConfigs,
+                    updateToConfigurationOtherConfigs);
+            assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateToConfigurationOtherConfigs);
+            OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
+                    getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                            LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+            List<PortOtherConfigs> updateToOperationalOtherConfigs = updateToOperationalTerminationPointAugmentation
+                    .getPortOtherConfigs();
+            if (updateFromExpectedOtherConfigs != null) {
+                assertExpectedPortOtherConfigsExist(updateToExpectedOtherConfigs,
+                        updateToOperationalOtherConfigs);
+                assertExpectedPortOtherConfigsExist(updateFromExpectedOtherConfigs,
+                        updateToOperationalOtherConfigs);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
     }
 
     @Test
@@ -2655,12 +2887,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneOtherConfigName = "TestOneOtherConfig";
         int otherConfigCounter = 0;
         List<BridgeOtherConfigs> oneOtherConfig = (List<BridgeOtherConfigs>) Lists.newArrayList(
-            (new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                    .build()));
+                (new BridgeOtherConfigsBuilder()
+                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                        .build()));
         Map<String,List<BridgeOtherConfigs>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneOtherConfig);
         testCase.put(INPUT_VALUES_KEY, oneOtherConfig);
@@ -2673,36 +2905,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFiveOtherConfigName = "TestFiveOtherConfig";
         otherConfigCounter = 0;
         List<BridgeOtherConfigs> fiveOtherConfig = (List<BridgeOtherConfigs>) Lists.newArrayList(
-            (new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                    .build()),
-            (new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                    .build()),
-            (new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                    .build()),
-            (new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                    .build()),
-            (new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                    .build()));
+                (new BridgeOtherConfigsBuilder()
+                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                        .build()),
+                (new BridgeOtherConfigsBuilder()
+                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                        .build()),
+                (new BridgeOtherConfigsBuilder()
+                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                        .build()),
+                (new BridgeOtherConfigsBuilder()
+                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                        .build()),
+                (new BridgeOtherConfigsBuilder()
+                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fiveOtherConfig);
         testCase.put(INPUT_VALUES_KEY, fiveOtherConfig);
@@ -2722,15 +2954,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodOtherConfigOneMalformedOtherConfigValue";
         otherConfigCounter = 0;
         BridgeOtherConfigs oneGood = new BridgeOtherConfigsBuilder()
-            .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigValueName,
-                    GOOD_KEY, ++otherConfigCounter))
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodOtherConfigOneMalformedOtherConfigValueName, GOOD_KEY, ++otherConfigCounter))
                 .setBridgeOtherConfigValue(String.format(FORMAT_STR,
                         testOneGoodOtherConfigOneMalformedOtherConfigValueName,
-                            GOOD_VALUE, otherConfigCounter))
+                        GOOD_VALUE, otherConfigCounter))
                 .build();
         BridgeOtherConfigs oneBad = new BridgeOtherConfigsBuilder()
-            .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY, ++otherConfigCounter))
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY, ++otherConfigCounter))
                 .build();
         List<BridgeOtherConfigs> oneGoodOneBadInput = (List<BridgeOtherConfigs>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -2754,15 +2986,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodOtherConfigOneMalformedOtherConfigIdKey";
         otherConfigCounter = 0;
         oneGood = new BridgeOtherConfigsBuilder()
-            .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
-                    GOOD_KEY, ++otherConfigCounter))
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
+                        GOOD_KEY, ++otherConfigCounter))
                 .setBridgeOtherConfigValue(String.format(FORMAT_STR,
                         testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
-                            GOOD_VALUE, otherConfigCounter))
+                        GOOD_VALUE, otherConfigCounter))
                 .build();
         oneBad = new BridgeOtherConfigsBuilder()
-            .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                    testOneGoodOtherConfigOneMalformedOtherConfigKeyName, NO_KEY_FOR_VALUE, ++otherConfigCounter))
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
+                        testOneGoodOtherConfigOneMalformedOtherConfigKeyName, NO_KEY_FOR_VALUE, ++otherConfigCounter))
                 .build();
         oneGoodOneBadInput = (List<BridgeOtherConfigs>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -2780,7 +3012,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
      */
     private void assertExpectedBridgeOtherConfigsExist( List<BridgeOtherConfigs> expected,
-            List<BridgeOtherConfigs> test ) {
+                                                        List<BridgeOtherConfigs> test ) {
 
         if (expected != null) {
             for (BridgeOtherConfigs expectedOtherConfig : expected) {
@@ -2801,80 +3033,129 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // the update has been performed.
         Map<String, Map<String, List<BridgeOtherConfigs>>> updateFromTestCases = generateBridgeOtherConfigsTestCases();
         Map<String, Map<String, List<BridgeOtherConfigs>>> updateToTestCases = generateBridgeOtherConfigsTestCases();
-        Map<String, List<BridgeOtherConfigs>> updateFromTestCase = null;
-        List<BridgeOtherConfigs> updateFromInputOtherConfigs = null;
-        List<BridgeOtherConfigs> updateFromExpectedOtherConfigs = null;
-        List<BridgeOtherConfigs> updateFromConfigurationOtherConfigs = null;
-        List<BridgeOtherConfigs> updateFromOperationalOtherConfigs = null;
-        Map<String, List<BridgeOtherConfigs>> updateToTestCase = null;
-        List<BridgeOtherConfigs> updateToInputOtherConfigs = null;
-        List<BridgeOtherConfigs> updateToExpectedOtherConfigs = null;
-        List<BridgeOtherConfigs> updateToConfigurationOtherConfigs = null;
-        List<BridgeOtherConfigs> updateToOperationalOtherConfigs = null;
-        String testBridgeName = null;
+        Map<String, List<BridgeOtherConfigs>> updateFromTestCase;
+        Map<String, List<BridgeOtherConfigs>> updateToTestCase;
+        List<BridgeOtherConfigs> updateFromInputOtherConfigs;
+        List<BridgeOtherConfigs> updateFromExpectedOtherConfigs;
+        List<BridgeOtherConfigs> updateToInputOtherConfigs;
+        List<BridgeOtherConfigs> updateToExpectedOtherConfigs;
+        String testBridgeName;
+
+        int counter = 1;
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
             updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
             updateFromInputOtherConfigs = updateFromTestCase.get(INPUT_VALUES_KEY);
             updateFromExpectedOtherConfigs = updateFromTestCase.get(EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testBridgeName = String.format("%s_%s", TEST_BRIDGE_PREFIX, testCaseKey);
+                testBridgeName = String.format("%s_%s_%d", TEST_BRIDGE_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
                 updateToInputOtherConfigs = updateToTestCase.get(INPUT_VALUES_KEY);
                 updateToExpectedOtherConfigs = updateToTestCase.get(EXPECTED_VALUES_KEY);
 
-                // CREATE: Create the test bridge
-                boolean bridgeAdded = addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null, updateFromInputOtherConfigs);
-                Assert.assertTrue(bridgeAdded);
-
-                // READ: Read the test bridge and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationOtherConfigs = getBridge(connectionInfo, testBridgeName,
-                        LogicalDatastoreType.CONFIGURATION).getBridgeOtherConfigs();
-                assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateFromConfigurationOtherConfigs);
-                updateFromOperationalOtherConfigs = getBridge(connectionInfo, testBridgeName).getBridgeOtherConfigs();
-                assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateFromOperationalOtherConfigs);
-
-                // UPDATE:  update the external_ids
-                OvsdbBridgeAugmentationBuilder bridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-                bridgeAugmentationBuilder.setBridgeOtherConfigs(updateToInputOtherConfigs);
-                InstanceIdentifier<Node> bridgeIid =
-                        createInstanceIdentifier(connectionInfo,
-                            new OvsdbBridgeName(testBridgeName));
-                NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-                Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
-                bridgeNodeBuilder.setNodeId(bridgeNode.getNodeId());
-                bridgeNodeBuilder.setKey(bridgeNode.getKey());
-                bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, bridgeAugmentationBuilder.build());
-                boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
-                        bridgeNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test bridge and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationOtherConfigs = getBridge(connectionInfo, testBridgeName,
-                        LogicalDatastoreType.CONFIGURATION).getBridgeOtherConfigs();
-                assertExpectedBridgeOtherConfigsExist(updateToExpectedOtherConfigs, updateToConfigurationOtherConfigs);
-                assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
-                        updateToConfigurationOtherConfigs);
-                updateToOperationalOtherConfigs = getBridge(connectionInfo, testBridgeName)
-                        .getBridgeOtherConfigs();
-                if (updateFromExpectedOtherConfigs != null) {
-                    assertExpectedBridgeOtherConfigsExist(updateToExpectedOtherConfigs,
-                            updateToOperationalOtherConfigs);
-                    assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
-                            updateToOperationalOtherConfigs);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                TestCRUDBridgeOtherConfigsRunnable testRunnable =
+                        new TestCRUDBridgeOtherConfigsRunnable(
+                                connectionInfo, testBridgeName,
+                                updateFromInputOtherConfigs,
+                                updateFromExpectedOtherConfigs,
+                                updateToInputOtherConfigs,
+                                updateToExpectedOtherConfigs);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
+
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    class TestCRUDBridgeOtherConfigsRunnable implements Runnable {
+
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        List<BridgeOtherConfigs> updateFromInputOtherConfigs;
+        List<BridgeOtherConfigs> updateFromExpectedOtherConfigs;
+        List<BridgeOtherConfigs> updateToInputOtherConfigs;
+        List<BridgeOtherConfigs> updateToExpectedOtherConfigs;
+
+        TestCRUDBridgeOtherConfigsRunnable(
+                ConnectionInfo connectionInfo, String testBridgeName,
+                List<BridgeOtherConfigs> updateFromInputOtherConfigs,
+                List<BridgeOtherConfigs> updateFromExpectedOtherConfigs,
+                List<BridgeOtherConfigs> updateToInputOtherConfigs,
+                List<BridgeOtherConfigs> updateToExpectedOtherConfigs) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.updateFromInputOtherConfigs = updateFromInputOtherConfigs;
+            this.updateFromExpectedOtherConfigs = updateFromExpectedOtherConfigs;
+            this.updateToInputOtherConfigs = updateToInputOtherConfigs;
+            this.updateToExpectedOtherConfigs = updateToExpectedOtherConfigs;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void test() throws InterruptedException {
+            // CREATE: Create the test bridge
+            boolean bridgeAdded = addBridge(connectionInfo, null,
+                    testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, null, null, updateFromInputOtherConfigs);
+            Assert.assertTrue(bridgeAdded);
+
+            // READ: Read the test bridge and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            List<BridgeOtherConfigs> updateFromConfigurationOtherConfigs = getBridge(connectionInfo, testBridgeName,
+                    LogicalDatastoreType.CONFIGURATION).getBridgeOtherConfigs();
+            assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateFromConfigurationOtherConfigs);
+            List<BridgeOtherConfigs> updateFromOperationalOtherConfigs = getBridge(connectionInfo, testBridgeName)
+                    .getBridgeOtherConfigs();
+            assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateFromOperationalOtherConfigs);
+
+            // UPDATE:  update the external_ids
+            OvsdbBridgeAugmentationBuilder bridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+            bridgeAugmentationBuilder.setBridgeOtherConfigs(updateToInputOtherConfigs);
+            InstanceIdentifier<Node> bridgeIid =
+                    createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(testBridgeName));
+            NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+            Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
+            bridgeNodeBuilder.setNodeId(bridgeNode.getNodeId());
+            bridgeNodeBuilder.setKey(bridgeNode.getKey());
+            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, bridgeAugmentationBuilder.build());
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
+                    bridgeNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test bridge and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            List<BridgeOtherConfigs> updateToConfigurationOtherConfigs = getBridge(connectionInfo, testBridgeName,
+                    LogicalDatastoreType.CONFIGURATION).getBridgeOtherConfigs();
+            assertExpectedBridgeOtherConfigsExist(updateToExpectedOtherConfigs, updateToConfigurationOtherConfigs);
+            assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
+                    updateToConfigurationOtherConfigs);
+            List<BridgeOtherConfigs> updateToOperationalOtherConfigs = getBridge(connectionInfo, testBridgeName)
+                    .getBridgeOtherConfigs();
+            if (updateFromExpectedOtherConfigs != null) {
+                assertExpectedBridgeOtherConfigsExist(updateToExpectedOtherConfigs,
+                        updateToOperationalOtherConfigs);
+                assertExpectedBridgeOtherConfigsExist(updateFromExpectedOtherConfigs,
+                        updateToOperationalOtherConfigs);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
     }
 
     /*
@@ -2907,12 +3188,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testOneExternalIdName = "TestOneExternalId";
         int externalIdCounter = 0;
         List<BridgeExternalIds> oneExternalId = (List<BridgeExternalIds>) Lists.newArrayList(
-            (new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()));
+                (new BridgeExternalIdsBuilder()
+                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
+                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
+                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()));
         Map<String,List<BridgeExternalIds>> testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
         testCase.put(INPUT_VALUES_KEY, oneExternalId);
@@ -2925,36 +3206,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String testFiveExternalIdName = "TestFiveExternalId";
         externalIdCounter = 0;
         List<BridgeExternalIds> fiveExternalId = (List<BridgeExternalIds>) Lists.newArrayList(
-            (new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()),
-            (new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                    .build()));
+                (new BridgeExternalIdsBuilder()
+                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new BridgeExternalIdsBuilder()
+                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new BridgeExternalIdsBuilder()
+                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new BridgeExternalIdsBuilder()
+                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()),
+                (new BridgeExternalIdsBuilder()
+                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                        .build()));
         testCase = Maps.newHashMap();
         testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
         testCase.put(INPUT_VALUES_KEY, fiveExternalId);
@@ -2974,15 +3255,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodExternalIdOneMalformedExternalIdValue";
         externalIdCounter = 0;
         BridgeExternalIds oneGood = new BridgeExternalIdsBuilder()
-            .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                    GOOD_KEY, ++externalIdCounter))
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
+                        GOOD_KEY, ++externalIdCounter))
                 .setBridgeExternalIdValue(String.format(FORMAT_STR,
                         testOneGoodExternalIdOneMalformedExternalIdValueName,
-                            GOOD_VALUE, externalIdCounter))
+                        GOOD_VALUE, externalIdCounter))
                 .build();
         BridgeExternalIds oneBad = new BridgeExternalIdsBuilder()
-            .setBridgeExternalIdKey(String.format(FORMAT_STR,
-                    testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
+                .setBridgeExternalIdKey(String.format(FORMAT_STR,
+                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
                 .build();
         List<BridgeExternalIds> oneGoodOneBadInput = (List<BridgeExternalIds>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -3006,15 +3287,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 "TestOneGoodExternalIdOneMalformedExternalIdKey";
         externalIdCounter = 0;
         oneGood = new BridgeExternalIdsBuilder()
-            .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                    GOOD_KEY, ++externalIdCounter))
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                        GOOD_KEY, ++externalIdCounter))
                 .setBridgeExternalIdValue(String.format(FORMAT_STR,
                         testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                            GOOD_VALUE, externalIdCounter))
+                        GOOD_VALUE, externalIdCounter))
                 .build();
         oneBad = new BridgeExternalIdsBuilder()
-            .setBridgeExternalIdKey(String.format(FORMAT_STR,
-                    testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
+                .setBridgeExternalIdKey(String.format(FORMAT_STR,
+                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
                 .build();
         oneGoodOneBadInput = (List<BridgeExternalIds>) Lists.newArrayList(
                 oneGood, oneBad);
@@ -3031,7 +3312,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
      */
     private void assertExpectedBridgeExternalIdsExist( List<BridgeExternalIds> expected,
-            List<BridgeExternalIds> test ) {
+                                                       List<BridgeExternalIds> test ) {
 
         if (expected != null) {
             for (BridgeExternalIds expectedExternalId : expected) {
@@ -3052,75 +3333,123 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // the update has been performed.
         Map<String, Map<String, List<BridgeExternalIds>>> updateFromTestCases = generateBridgeExternalIdsTestCases();
         Map<String, Map<String, List<BridgeExternalIds>>> updateToTestCases = generateBridgeExternalIdsTestCases();
-        Map<String, List<BridgeExternalIds>> updateFromTestCase = null;
-        List<BridgeExternalIds> updateFromInputExternalIds = null;
-        List<BridgeExternalIds> updateFromExpectedExternalIds = null;
-        List<BridgeExternalIds> updateFromConfigurationExternalIds = null;
-        List<BridgeExternalIds> updateFromOperationalExternalIds = null;
-        Map<String, List<BridgeExternalIds>> updateToTestCase = null;
-        List<BridgeExternalIds> updateToInputExternalIds = null;
-        List<BridgeExternalIds> updateToExpectedExternalIds = null;
-        List<BridgeExternalIds> updateToConfigurationExternalIds = null;
-        List<BridgeExternalIds> updateToOperationalExternalIds = null;
-        String testBridgeName = null;
+        Map<String, List<BridgeExternalIds>> updateFromTestCase;
+        List<BridgeExternalIds> updateFromInputExternalIds;
+        List<BridgeExternalIds> updateFromExpectedExternalIds;
+        Map<String, List<BridgeExternalIds>> updateToTestCase;
+        List<BridgeExternalIds> updateToInputExternalIds;
+        List<BridgeExternalIds> updateToExpectedExternalIds;
+        String testBridgeName;
+
+        int counter = 1;
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
             updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
             updateFromInputExternalIds = updateFromTestCase.get(INPUT_VALUES_KEY);
             updateFromExpectedExternalIds = updateFromTestCase.get(EXPECTED_VALUES_KEY);
             for (String testCaseKey : updateToTestCases.keySet()) {
-                testBridgeName = String.format("%s_%s", TEST_BRIDGE_PREFIX, testCaseKey);
+                testBridgeName = String.format("%s_%s_d", TEST_BRIDGE_PREFIX, testCaseKey, counter);
+                counter += 1;
                 updateToTestCase = updateToTestCases.get(testCaseKey);
                 updateToInputExternalIds = updateToTestCase.get(INPUT_VALUES_KEY);
                 updateToExpectedExternalIds = updateToTestCase.get(EXPECTED_VALUES_KEY);
 
-                // CREATE: Create the test bridge
-                boolean bridgeAdded = addBridge(connectionInfo, null,
-                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, updateFromInputExternalIds, null, null);
-                Assert.assertTrue(bridgeAdded);
-
-                // READ: Read the test bridge and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateFromConfigurationExternalIds = getBridge(connectionInfo, testBridgeName,
-                        LogicalDatastoreType.CONFIGURATION).getBridgeExternalIds();
-                assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateFromConfigurationExternalIds);
-                updateFromOperationalExternalIds = getBridge(connectionInfo, testBridgeName).getBridgeExternalIds();
-                assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateFromOperationalExternalIds);
-
-                // UPDATE:  update the external_ids
-                OvsdbBridgeAugmentationBuilder bridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-                bridgeAugmentationBuilder.setBridgeExternalIds(updateToInputExternalIds);
-                InstanceIdentifier<Node> bridgeIid =
-                        createInstanceIdentifier(connectionInfo,
-                            new OvsdbBridgeName(testBridgeName));
-                NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-                Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
-                bridgeNodeBuilder.setNodeId(bridgeNode.getNodeId());
-                bridgeNodeBuilder.setKey(bridgeNode.getKey());
-                bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, bridgeAugmentationBuilder.build());
-                boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
-                        bridgeNodeBuilder.build());
-                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                Assert.assertTrue(result);
-
-                // READ: the test bridge and ensure changes are propagated to the CONFIGURATION data store,
-                // then repeat for OPERATIONAL data store
-                updateToConfigurationExternalIds = getBridge(connectionInfo, testBridgeName,
-                        LogicalDatastoreType.CONFIGURATION).getBridgeExternalIds();
-                assertExpectedBridgeExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
-                assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateToConfigurationExternalIds);
-                updateToOperationalExternalIds = getBridge(connectionInfo, testBridgeName)
-                        .getBridgeExternalIds();
-                if (updateFromExpectedExternalIds != null) {
-                    assertExpectedBridgeExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
-                    assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateToOperationalExternalIds);
-                }
-
-                // DELETE
-                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+                TestCRUDBridgeExternalIdsRunnable testRunnable =
+                        new TestCRUDBridgeExternalIdsRunnable(
+                                connectionInfo, testBridgeName,
+                                updateFromInputExternalIds,
+                                updateFromExpectedExternalIds,
+                                updateToInputExternalIds,
+                                updateToExpectedExternalIds);
+                executor.submit(testRunnable);
             }
         }
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.MINUTES);
+
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    class TestCRUDBridgeExternalIdsRunnable implements Runnable {
+        ConnectionInfo connectionInfo;
+        String testBridgeName;
+        List<BridgeExternalIds> updateFromInputExternalIds;
+        List<BridgeExternalIds> updateFromExpectedExternalIds;
+        List<BridgeExternalIds> updateToInputExternalIds;
+        List<BridgeExternalIds> updateToExpectedExternalIds;
+
+        TestCRUDBridgeExternalIdsRunnable(
+                ConnectionInfo connectionInfo, String testBridgeName,
+                List<BridgeExternalIds> updateFromInputExternalIds,
+                List<BridgeExternalIds> updateFromExpectedExternalIds,
+                List<BridgeExternalIds> updateToInputExternalIds,
+                List<BridgeExternalIds> updateToExpectedExternalIds) {
+
+            this.connectionInfo = connectionInfo;
+            this.testBridgeName = testBridgeName;
+            this.updateFromInputExternalIds = updateFromInputExternalIds;
+            this.updateFromExpectedExternalIds = updateFromExpectedExternalIds;
+            this.updateToInputExternalIds = updateToInputExternalIds;
+            this.updateToExpectedExternalIds = updateToExpectedExternalIds;
+        }
+
+        @Override
+        public void run() {
+            try {
+                test();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void test() throws InterruptedException {
+            // CREATE: Create the test bridge
+            boolean bridgeAdded = addBridge(connectionInfo, null,
+                    testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                    true, null, updateFromInputExternalIds, null, null);
+            Assert.assertTrue(bridgeAdded);
+
+            // READ: Read the test bridge and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            List<BridgeExternalIds> updateFromConfigurationExternalIds = getBridge(connectionInfo, testBridgeName,
+                    LogicalDatastoreType.CONFIGURATION).getBridgeExternalIds();
+            assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateFromConfigurationExternalIds);
+            List<BridgeExternalIds> updateFromOperationalExternalIds = getBridge(connectionInfo, testBridgeName)
+                    .getBridgeExternalIds();
+            assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateFromOperationalExternalIds);
+
+            // UPDATE:  update the external_ids
+            OvsdbBridgeAugmentationBuilder bridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+            bridgeAugmentationBuilder.setBridgeExternalIds(updateToInputExternalIds);
+            InstanceIdentifier<Node> bridgeIid =
+                    createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(testBridgeName));
+            NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+            Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
+            bridgeNodeBuilder.setNodeId(bridgeNode.getNodeId());
+            bridgeNodeBuilder.setKey(bridgeNode.getKey());
+            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, bridgeAugmentationBuilder.build());
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
+                    bridgeNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            Assert.assertTrue(result);
+
+            // READ: the test bridge and ensure changes are propagated to the CONFIGURATION data store,
+            // then repeat for OPERATIONAL data store
+            List<BridgeExternalIds> updateToConfigurationExternalIds = getBridge(connectionInfo, testBridgeName,
+                    LogicalDatastoreType.CONFIGURATION).getBridgeExternalIds();
+            assertExpectedBridgeExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
+            assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateToConfigurationExternalIds);
+            List<BridgeExternalIds> updateToOperationalExternalIds = getBridge(connectionInfo, testBridgeName)
+                    .getBridgeExternalIds();
+            if (updateFromExpectedExternalIds != null) {
+                assertExpectedBridgeExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
+                assertExpectedBridgeExternalIdsExist(updateFromExpectedExternalIds, updateToOperationalExternalIds);
+            }
+
+            // DELETE
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
@@ -3166,4 +3495,3 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return nodeKey.getNodeId();
     }
 }
-

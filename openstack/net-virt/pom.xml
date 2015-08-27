@@ -45,7 +45,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
 
   <properties>
-    <networkconfig.neutron.version>0.6.0-SNAPSHOT</networkconfig.neutron.version>
     <ovsdb.utils.config.version>1.2.0-SNAPSHOT</ovsdb.utils.config.version>
     <ovsdb.utils.servicehelper.version>1.2.0-SNAPSHOT</ovsdb.utils.servicehelper.version>
     <powermock.version>1.5.2</powermock.version>
@@ -81,11 +80,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.neutron</groupId>
-      <artifactId>neutron-spi</artifactId>
-      <version>${networkconfig.neutron.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -129,6 +123,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.yangtools.model</groupId>
       <artifactId>ietf-yang-types</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -197,6 +195,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <Embed-Dependency>utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>
+              org.opendaylight.ovsdb.openstack.netvirt.translator,
               org.opendaylight.ovsdb.openstack.netvirt.api,
               org.opendaylight.ovsdb.openstack.netvirt
             </Export-Package>

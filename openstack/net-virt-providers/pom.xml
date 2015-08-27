@@ -86,11 +86,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>model-inventory</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.neutron</groupId>
-      <artifactId>neutron-spi</artifactId>
-      <version>${networkconfig.neutron.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-base</artifactId>
       <version>${openflowplugin.version}</version>

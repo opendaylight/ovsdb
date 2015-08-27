@@ -10,10 +10,10 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.base.Preconditions;
 import java.util.List;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.INeutronPortCRUD;
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;

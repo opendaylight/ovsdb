@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.opendaylight.neutron.spi.NeutronFloatingIP;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;

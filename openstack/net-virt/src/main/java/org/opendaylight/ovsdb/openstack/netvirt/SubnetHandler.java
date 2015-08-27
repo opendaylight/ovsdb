@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
 
-import org.opendaylight.neutron.spi.INeutronSubnetAware;
-import org.opendaylight.neutron.spi.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronSubnetAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;

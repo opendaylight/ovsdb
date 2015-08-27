@@ -10,10 +10,10 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
 
-import org.opendaylight.neutron.spi.INeutronSecurityGroupAware;
-import org.opendaylight.neutron.spi.INeutronSecurityRuleAware;
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.NeutronSecurityRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronSecurityGroupAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronSecurityRuleAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;

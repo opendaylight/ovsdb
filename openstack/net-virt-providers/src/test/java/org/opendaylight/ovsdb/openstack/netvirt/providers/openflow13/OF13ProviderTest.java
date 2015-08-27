@@ -34,7 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;

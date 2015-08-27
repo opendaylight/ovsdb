@@ -8,15 +8,15 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.neutron.spi.NeutronFloatingIP;
-import org.opendaylight.neutron.spi.NeutronLoadBalancer;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.NeutronRouter;
-import org.opendaylight.neutron.spi.NeutronRouter_Interface;
-import org.opendaylight.neutron.spi.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 
 public class NorthboundEvent extends AbstractEvent {

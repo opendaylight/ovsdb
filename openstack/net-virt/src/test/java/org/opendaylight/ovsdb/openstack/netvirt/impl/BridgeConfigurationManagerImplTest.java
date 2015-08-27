@@ -33,7 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;

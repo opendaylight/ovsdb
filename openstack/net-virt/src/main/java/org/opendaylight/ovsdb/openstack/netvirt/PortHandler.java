@@ -11,8 +11,8 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import org.opendaylight.neutron.spi.INeutronPortAware;
-import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronPortAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;

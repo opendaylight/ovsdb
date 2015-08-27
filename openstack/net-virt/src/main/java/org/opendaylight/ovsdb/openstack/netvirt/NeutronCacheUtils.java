@@ -8,13 +8,13 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.INeutronPortCRUD;
-import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.NeutronSubnet;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronSubnetCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 
 import java.util.AbstractMap;
 import java.util.Iterator;

@@ -14,7 +14,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.neutron.spi.*;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.*;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.*;
 import org.osgi.framework.BundleActivator;

@@ -10,9 +10,9 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import java.util.List;
 
-import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 

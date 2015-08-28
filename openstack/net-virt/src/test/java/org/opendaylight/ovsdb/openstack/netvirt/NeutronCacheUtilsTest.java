@@ -19,13 +19,13 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronNetworkCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronPortCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**

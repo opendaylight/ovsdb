@@ -9,11 +9,13 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.base.Preconditions;
+
 import java.util.List;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronNetworkCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronPortCRUD;
+
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;

@@ -21,6 +21,21 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBala
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFirewallInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFirewallPolicyInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFirewallRuleInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFloatingIPInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerHealthMonitorInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerListenerInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerPoolInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerPoolMemberInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronNetworkInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronPortInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronRouterInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronSecurityGroupInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronSecurityRuleInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronSubnetInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallPolicyAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallRuleAware;
@@ -48,6 +63,7 @@ public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
     private List<ServiceRegistration<?>> registrations = new ArrayList<>();
     private List<Object> services = new ArrayList<>();
+    private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<ServiceRegistration<?>>();
     private ProviderContext providerContext;
 
     public ConfigActivator(ProviderContext providerContext) {
@@ -57,6 +73,7 @@ public class ConfigActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         LOG.info("ConfigActivator start:");
+        registerCRUDServiceProviders(context, this.providerContext);
 
         ConfigurationServiceImpl configurationService = new ConfigurationServiceImpl();
         registerService(context, new String[] {ConfigurationService.class.getName()},
@@ -183,6 +200,26 @@ public class ConfigActivator implements BundleActivator {
         services.clear();
     }
 
+    private void registerCRUDServiceProviders(BundleContext context,
+            ProviderContext providerContext) {
+        LOG.debug("Registering CRUD service providers");
+        NeutronRouterInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronPortInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronSubnetInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronNetworkInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronSecurityGroupInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronSecurityRuleInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFirewallInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFirewallPolicyInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFirewallRuleInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerPoolInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerListenerInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerHealthMonitorInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerPoolMemberInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFloatingIPInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+    }
+
     private void trackService(BundleContext context, final Class<?> clazz, final ConfigInterface... dependents) {
         @SuppressWarnings("unchecked")
         ServiceTracker tracker = new ServiceTracker(context, clazz, null) {
@@ -216,9 +253,15 @@ public class ConfigActivator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        LOG.info("ConfigActivator stop");
+        LOG.info("Stop Translator CRUD service provides");
         // ServiceTrackers and services are already released when bundle stops,
         // so we don't need to close the trackers or unregister the services
+        for (ServiceRegistration registration : translatorCRUDRegistrations) {
+            if (registration != null) {
+                registration.unregister();
+            }
+        }
+
     }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,

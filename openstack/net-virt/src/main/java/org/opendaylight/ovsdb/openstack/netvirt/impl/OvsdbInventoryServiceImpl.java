@@ -8,7 +8,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.collect.Sets;
+
 import java.util.Set;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -16,6 +18,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronNetworkChangeListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -45,6 +48,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         LOG.info("OvsdbInventoryServiceImpl initialized");
         ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
         mdsalUtils = new MdsalUtils(dataBroker);
+        initializeNeutronModelsDataChangeListeners(dataBroker);
     }
 
     @Override
@@ -85,4 +89,10 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
             LOG.error("Error initializing netvirt topology");
         }
     }
+
+    private void initializeNeutronModelsDataChangeListeners(
+            DataBroker db) {
+        new NeutronNetworkChangeListener(db);
+    }
+
 }

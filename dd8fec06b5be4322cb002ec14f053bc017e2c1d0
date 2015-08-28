@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_f646df22",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-28T08:19:49Z",
+      "side": 1,
+      "message": "can you please update this log message in following format, so that whoever is looking at the log messages should know which connection it accidentally/intensionally tried to connect.\n\nLOG.warn(\"Connection to device {} already exist. Plugin don\u0027t allow multiple connection to same device, hence dropping the request {}\", key, ovsdbNode);",
+      "revId": "dd8fec06b5be4322cb002ec14f053bc017e2c1d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

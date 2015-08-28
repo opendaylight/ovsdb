@@ -11,12 +11,12 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronPortCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;

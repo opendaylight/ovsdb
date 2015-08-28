@@ -11,9 +11,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronNetworkAware;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronNetworkAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;

@@ -10,12 +10,12 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
 
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronFirewallAware;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronFirewallPolicyAware;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.INeutronFirewallRuleAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFirewall;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFirewallPolicy;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFirewallRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallPolicyAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallRuleAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;

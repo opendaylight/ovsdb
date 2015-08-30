@@ -191,5 +191,4 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
     public void close() throws Exception {
         registration.close();
     }
-
 }

@@ -52,7 +52,6 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         LOG.info("OvsdbInventoryServiceImpl initialized");
         ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
         mdsalUtils = new MdsalUtils(dataBroker);
-        initializeNeutronModelsDataChangeListeners(dataBroker);
     }
 
     @Override
@@ -70,6 +69,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     @Override
     public void providersReady() {
         ovsdbDataChangeListener.start();
+        initializeNeutronModelsDataChangeListeners(dataBroker);
         initializeNetvirtTopology();
     }
 

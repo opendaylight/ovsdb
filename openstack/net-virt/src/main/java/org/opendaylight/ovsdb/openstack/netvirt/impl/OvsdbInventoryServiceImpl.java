@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronFloatingIPChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronNetworkChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronPortChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronRouterChangeListener;
@@ -99,6 +100,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         new NeutronSubnetChangeListener(db);
         new NeutronPortChangeListener(db);
         new NeutronRouterChangeListener(db);
+        new NeutronFloatingIPChangeListener(db);
     }
 
 }

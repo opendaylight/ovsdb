@@ -400,14 +400,16 @@ public class NeutronL3Adapter implements ConfigInterface {
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE) ||
             neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE_DISTRIBUTED)) {
 
-            for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
-                NeutronRouter_Interface neutronRouterInterface =
+            if (neutronPort.getFixedIPs() != null) {
+                for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
+                    NeutronRouter_Interface neutronRouterInterface =
                         new NeutronRouter_Interface(neutronIP.getSubnetUUID(), neutronPort.getPortUUID());
-                // id of router interface to be same as subnet
-                neutronRouterInterface.setID(neutronIP.getSubnetUUID());
-                neutronRouterInterface.setTenantID(neutronPort.getTenantID());
+                    // id of router interface to be same as subnet
+                    neutronRouterInterface.setID(neutronIP.getSubnetUUID());
+                    neutronRouterInterface.setTenantID(neutronPort.getTenantID());
 
-                this.handleNeutronRouterInterfaceEvent(null /*neutronRouter*/, neutronRouterInterface, action);
+                    this.handleNeutronRouterInterfaceEvent(null /*neutronRouter*/, neutronRouterInterface, action);
+                }
             }
         } else {
             // We made it here, port is not used as a router interface. If this is not a delete action, make sure that
@@ -468,10 +470,12 @@ public class NeutronL3Adapter implements ConfigInterface {
             boolean currPortShouldBeDeleted = false;
             // Note: delete in this case only applies to 1)router interface delete and 2)ports on the same subnet
             if (isDelete) {
-                for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
-                    if (neutronRouterInterface.getSubnetUUID().equalsIgnoreCase(neutronIP.getSubnetUUID())) {
-                        currPortShouldBeDeleted = true;
-                        break;
+                if (neutronPort.getFixedIPs() != null) {
+                    for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
+                        if (neutronRouterInterface.getSubnetUUID().equalsIgnoreCase(neutronIP.getSubnetUUID())) {
+                            currPortShouldBeDeleted = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -798,7 +802,9 @@ public class NeutronL3Adapter implements ConfigInterface {
             if (dpid == null) {
                 continue;
             }
-
+            if (neutronPort.getFixedIPs() == null) {
+                continue;
+            }
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 final String tenantIpStr = neutronIP.getIpAddress();
                 if (tenantIpStr.isEmpty()) {
@@ -1361,6 +1367,9 @@ public class NeutronL3Adapter implements ConfigInterface {
     }
 
     private NeutronSubnet getExternalNetworkSubnet(NeutronPort gatewayPort){
+        if (gatewayPort.getFixedIPs() == null) {
+            return null;
+        }
         for (Neutron_IPs neutronIPs : gatewayPort.getFixedIPs()) {
             String subnetUUID = neutronIPs.getSubnetUUID();
             NeutronSubnet extSubnet = neutronSubnetCache.getSubnet(subnetUUID);
@@ -1402,7 +1411,8 @@ public class NeutronL3Adapter implements ConfigInterface {
 
                 // TODO: address IPv6 case.
                 if (externalSubnet != null &&
-                    externalSubnet.getIpVersion() == 4) {
+                    externalSubnet.getIpVersion() == 4 &&
+                    gatewayPort.getFixedIPs() != null) {
                     LOG.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
                     ListenableFuture<MacAddress> gatewayMacAddress =
                         gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),

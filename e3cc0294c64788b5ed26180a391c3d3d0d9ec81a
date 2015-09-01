@@ -1,0 +1,153 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_4bab69d6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtepsouthbound.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "wonder if ovsdb should be in the namespace?",
+      "range": {
+        "startLine": 3,
+        "startChar": 51,
+        "endLine": 3,
+        "endChar": 67
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_6ba66512",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtepsouthbound.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "change the date to something recent",
+      "range": {
+        "startLine": 6,
+        "startChar": 22,
+        "endLine": 6,
+        "endChar": 24
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_ebb9152f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-artifacts/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "looks like and others was added twice. The archetype adds it.",
+      "range": {
+        "startLine": 3,
+        "startChar": 70,
+        "endLine": 3,
+        "endChar": 71
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0bb57130",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "should add -ovsdb, so it would be like odl-ovsdb-hwvtepsouthbound-api. Same for the other features here.",
+      "range": {
+        "startLine": 16,
+        "startChar": 21,
+        "endLine": 16,
+        "endChar": 37
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_cb869965",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/impl/HwvtepSouthboundProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "typically there ends up another directory level, like org.opendaylight.ovsdb.hwvtepsouthbound.",
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_6b7d056e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/yang/hwvtepsouthbound-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "use recent date",
+      "range": {
+        "startLine": 12,
+        "startChar": 19,
+        "endLine": 12,
+        "endChar": 21
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_8b80a147",
+        "filename": "hwvtepsouthbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-01T13:36:00Z",
+      "side": 1,
+      "message": "use the ovsdb stuff here",
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

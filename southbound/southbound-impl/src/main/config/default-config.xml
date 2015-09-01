@@ -9,7 +9,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <snapshot>
   <required-capabilities>
-    <!--<capability>urn:opendaylight:params:xml:ns:yang:southbound:impl?module=southbound-impl&amp;revision=2015-01-05</capability>-->
+    <!--<capability>urn:opendaylight:params:xml:ns:yang:southbound:impl?module=southbound-impl&amp;revision=2015-09-01</capability>-->
   </required-capabilities>
   <configuration>
 

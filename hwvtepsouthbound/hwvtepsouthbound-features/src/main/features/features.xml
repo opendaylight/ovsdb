@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-hwvtepsouthbound-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <feature name='odl-hwvtepsouthbound-api' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: api'>
+    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-api/${project.version}</bundle>
+  </feature>
+  <feature name='odl-hwvtepsouthbound' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound'>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-hwvtepsouthbound-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-impl/${project.version}</bundle>
+    <configfile finalname="${configfile.directory}/hwvtepsouthbound.xml">mvn:org.opendaylight.ovsdb/hwvtepsouthbound-impl/${project.version}/xml/config</configfile>
+  </feature>
+  <feature name='odl-hwvtepsouthbound-rest' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: REST'>
+    <feature version="${project.version}">odl-hwvtepsouthbound</feature>
+    <feature version="${mdsal.version}">odl-restconf</feature>
+  </feature>
+  <feature name='odl-hwvtepsouthbound-ui' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: UI'>
+    <feature version="${project.version}">odl-hwvtepsouthbound-rest</feature>
+    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+  </feature>
+
+</features>

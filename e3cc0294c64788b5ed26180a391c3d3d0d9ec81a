@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_8bf741f5",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtepsouthbound.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-09-01T13:55:16Z",
+      "side": 1,
+      "message": "Will do. This is placeholder yang file, will replace with hwvtep.yang once get updated version from Daya.",
+      "parentUuid": "3a79b1b5_6ba66512",
+      "range": {
+        "startLine": 6,
+        "startChar": 22,
+        "endLine": 6,
+        "endChar": 24
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_ebb9152f",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-artifacts/pom.xml",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2015-09-01T13:36:00Z",
       "side": 1,
       "message": "looks like and others was added twice. The archetype adds it.",
+      "range": {
+        "startLine": 3,
+        "startChar": 70,
+        "endLine": 3,
+        "endChar": 71
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_4bd92982",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-artifacts/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-09-01T13:55:16Z",
+      "side": 1,
+      "message": "Didn\u0027t know that archetype adds others, will fix.",
+      "parentUuid": "3a79b1b5_ebb9152f",
       "range": {
         "startLine": 3,
         "startChar": 70,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_ebe7d53e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-09-01T13:55:16Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "3a79b1b5_0bb57130",
+      "range": {
+        "startLine": 16,
+        "startChar": 21,
+        "endLine": 16,
+        "endChar": 37
+      },
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_cb869965",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/impl/HwvtepSouthboundProvider.java",
         "patchSetId": 1
@@ -105,6 +177,24 @@
       "writtenOn": "2015-09-01T13:36:00Z",
       "side": 1,
       "message": "typically there ends up another directory level, like org.opendaylight.ovsdb.hwvtepsouthbound.",
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0be33134",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/impl/HwvtepSouthboundProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-09-01T13:55:16Z",
+      "side": 1,
+      "message": "Aha, so this is what package field in prompts is used for. Thought it would add hwvtepsouthbound, will fix.",
+      "parentUuid": "3a79b1b5_cb869965",
       "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -145,6 +235,24 @@
       "writtenOn": "2015-09-01T13:36:00Z",
       "side": 1,
       "message": "use the ovsdb stuff here",
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_abd1dd58",
+        "filename": "hwvtepsouthbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-09-01T13:55:16Z",
+      "side": 1,
+      "message": "Will do. Do we need Description, License etc. also?",
+      "parentUuid": "3a79b1b5_8b80a147",
       "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

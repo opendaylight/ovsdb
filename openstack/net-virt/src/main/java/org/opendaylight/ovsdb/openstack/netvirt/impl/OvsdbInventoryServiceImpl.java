@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronPo
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronRouterChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronSubnetChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronLoadBalancerPoolChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronLoadBalancerPoolMemberChangeListener;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -103,6 +104,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         new NeutronRouterChangeListener(db);
         new NeutronFloatingIPChangeListener(db);
         new NeutronLoadBalancerPoolChangeListener(db);
+        new NeutronLoadBalancerPoolMemberChangeListener(db);
     }
 
 }

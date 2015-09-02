@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_a6f7cff4",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "This can be initialised to the number of cores using Runtime.getRuntime().availableProcessors()",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a6ceefb2",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1047,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "It might be worth sharing a single executor across all tests and using invokeAll() to avoid blowing the system up if things go badly wrong.",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_66d9b782",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1075,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "Do we care about the return value? Usually it would be\n\n    if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {\n        executor.shutdownNow();\n    }",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_46defb6e",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "LOG.info() maybe?",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_06e8030f",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1411,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_26e3bf34",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1447,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c6d1ab58",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1752,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "There\u0027s a certain pattern here ;-).",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e6d4e748",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1788,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-02T17:14:31Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

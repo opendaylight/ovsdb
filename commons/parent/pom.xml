@@ -110,6 +110,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.mdsal.model</groupId>
+        <artifactId>mdsal-model-artifacts</artifactId>
+        <version>0.8.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>commons-collections</groupId>
         <artifactId>commons-collections</artifactId>
         <version>${commons.collection.version}</version>
@@ -542,7 +556,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </executions>
           <dependencies>
             <dependency>
-              <groupId>org.opendaylight.yangtools</groupId>
+              <groupId>org.opendaylight.mdsal</groupId>
               <artifactId>maven-sal-api-gen-plugin</artifactId>
               <version>${yangtools.version}</version>
               <type>jar</type>

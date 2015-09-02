@@ -55,7 +55,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
     .put(IpVersionV6.class,Integer.valueOf(6))
     .build();
 
-private static final ImmutableBiMap<Class<? extends Dhcpv6Base>,String> DHCPV6_MAP
+    private static final ImmutableBiMap<Class<? extends Dhcpv6Base>,String> DHCPV6_MAP
     = new ImmutableBiMap.Builder<Class<? extends Dhcpv6Base>,String>()
     .put(Dhcpv6Off.class,"off")
     .put(Dhcpv6Stateful.class,"dhcpv6-stateful")

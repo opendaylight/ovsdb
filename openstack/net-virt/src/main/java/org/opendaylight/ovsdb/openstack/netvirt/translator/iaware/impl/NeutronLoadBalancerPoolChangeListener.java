@@ -54,7 +54,6 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
         LOG.debug("Register listener for Neutron Load Balancer Pool model data changes");
         registration =
                 this.db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, this, AsyncDataBroker.DataChangeScope.ONE);
-
     }
 
     @Override
@@ -64,9 +63,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
 
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-            LOG.trace("Data changes : {}",changes);
-
-        LOG.trace("Data changes : {}",changes);
+        LOG.trace("Data changes : {}", changes);
 
         Object[] subscribers = NeutronIAwareUtil.getInstances(INeutronLoadBalancerPoolAware.class, this);
         createPool(changes, subscribers);
@@ -91,11 +88,10 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
         for (Entry<InstanceIdentifier<?>, DataObject> updatePool : changes.getUpdatedData().entrySet()) {
             NeutronLoadBalancerPool loadBalancerPool = fromMd((Pools)updatePool.getValue());
             for(Object entry: subscribers){
-                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware)entry;
+                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
                 subscriber.neutronLoadBalancerPoolUpdated(loadBalancerPool);
             }
         }
-
     }
     private void deletePool(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
@@ -103,7 +99,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
         for (InstanceIdentifier<?> deletedPoolPath : changes.getRemovedPaths()) {
             NeutronLoadBalancerPool loadBalancerPool = fromMd((Pools)changes.getOriginalData().get(deletedPoolPath));
             for(Object entry: subscribers){
-                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware)entry;
+                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
                 subscriber.neutronLoadBalancerPoolDeleted(loadBalancerPool);
             }
         }

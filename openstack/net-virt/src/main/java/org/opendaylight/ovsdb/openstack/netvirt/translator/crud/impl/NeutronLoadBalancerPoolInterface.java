@@ -160,9 +160,8 @@ public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<P
         }
         if (pools.getLoadBalancerPoolMembers() != null) {
             List<Uuid> listMember = new ArrayList<Uuid>();
-            for (NeutronLoadBalancerPoolMember laodBalancerPoolMember : pools.getLoadBalancerPoolMembers()) {
-                listMember.add(toUuid(laodBalancerPoolMember.getID()));
-
+            for (NeutronLoadBalancerPoolMember loadBalancerPoolMember : pools.getLoadBalancerPoolMembers()) {
+                listMember.add(toUuid(loadBalancerPoolMember.getID()));
             }
             poolsBuilder.setMembers(listMember);
         }

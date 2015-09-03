@@ -54,21 +54,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <!-- Surefire/Failsafe Arguments -->
     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
     <!-- OVSDB Component Versions -->
-    <openstack.netvirt.version>1.2.0-SNAPSHOT</openstack.netvirt.version>
-    <openstack.netvirt.providers.version>1.2.0-SNAPSHOT</openstack.netvirt.providers.version>
-    <ovsdb.features.version>1.2.0-SNAPSHOT</ovsdb.features.version>
-    <ovsdb.library.version>1.2.0-SNAPSHOT</ovsdb.library.version>
+    <openstack.netvirt.version>1.2.1-SNAPSHOT</openstack.netvirt.version>
+    <openstack.netvirt.providers.version>1.2.1-SNAPSHOT</openstack.netvirt.providers.version>
+    <ovsdb.features.version>1.2.1-SNAPSHOT</ovsdb.features.version>
+    <ovsdb.library.version>1.2.1-SNAPSHOT</ovsdb.library.version>
     <ovsdb.northbound.version>0.8.0-SNAPSHOT</ovsdb.northbound.version>
-    <ovsdb.plugin.version>1.2.0-SNAPSHOT</ovsdb.plugin.version>
-    <ovsdb.plugin.compatibility.layer.version>1.2.0-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
+    <ovsdb.plugin.version>1.2.1-SNAPSHOT</ovsdb.plugin.version>
+    <ovsdb.plugin.compatibility.layer.version>1.2.1-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
     <ovsdb.ovssfc.version>0.2.0-SNAPSHOT</ovsdb.ovssfc.version>
-    <ovsdb.utils.config.version>1.2.0-SNAPSHOT</ovsdb.utils.config.version>
-    <ovsdb.utils.mdsal.node.version>1.2.0-SNAPSHOT</ovsdb.utils.mdsal.node.version>
-    <ovsdb.utils.mdsal.openflow.version>1.2.0-SNAPSHOT</ovsdb.utils.mdsal.openflow.version>
-    <ovsdb.utils.servicehelper.version>1.2.0-SNAPSHOT</ovsdb.utils.servicehelper.version>
-    <plugin.shell.version>1.2.0-SNAPSHOT</plugin.shell.version>
-    <schema.hardwarevtep.version>1.2.0-SNAPSHOT</schema.hardwarevtep.version>
-    <schema.openvswitch.version>1.2.0-SNAPSHOT</schema.openvswitch.version>
+    <ovsdb.utils.config.version>1.2.1-SNAPSHOT</ovsdb.utils.config.version>
+    <ovsdb.utils.mdsal.node.version>1.2.1-SNAPSHOT</ovsdb.utils.mdsal.node.version>
+    <ovsdb.utils.mdsal.openflow.version>1.2.1-SNAPSHOT</ovsdb.utils.mdsal.openflow.version>
+    <ovsdb.utils.servicehelper.version>1.2.1-SNAPSHOT</ovsdb.utils.servicehelper.version>
+    <plugin.shell.version>1.2.1-SNAPSHOT</plugin.shell.version>
+    <schema.hardwarevtep.version>1.2.1-SNAPSHOT</schema.hardwarevtep.version>
+    <schema.openvswitch.version>1.2.1-SNAPSHOT</schema.openvswitch.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.distribution>false</skip.distribution>

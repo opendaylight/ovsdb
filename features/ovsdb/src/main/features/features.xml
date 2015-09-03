@@ -5,36 +5,14 @@
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.neutron/features-neutron/${networkconfig.neutron.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.0-SNAPSHOT/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.1-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/library-features/${ovsdb.library.version}/xml/features</repository>
 
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
            version='${project.version}'>
     <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
     <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
-  </feature>
-
-  <feature name="odl-ovsdb-library" description="OVSDB :: Library"
-           version='${ovsdb.library.version}'>
-    <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
-    <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
-    <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager.shell/${felix.dependencymanager.shell.version}</bundle>
-    <bundle>mvn:org.opendaylight.controller/dummy-console/1.3.0-SNAPSHOT</bundle>
-    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-    <bundle start="true">mvn:com.google.guava/guava/${guava.version}</bundle>
-    <bundle>wrap:mvn:io.netty/netty-buffer/${netty.version}</bundle>
-    <bundle>wrap:mvn:io.netty/netty-codec/${netty.version}</bundle>
-    <bundle>wrap:mvn:io.netty/netty-transport/${netty.version}</bundle>
-    <bundle>wrap:mvn:io.netty/netty-common/${netty.version}</bundle>
-    <bundle>wrap:mvn:io.netty/netty-handler/${netty.version}</bundle>
-    <bundle>wrap:mvn:io.netty/netty-codec-http/${netty.version}</bundle>
-    <bundle>mvn:io.netty/netty/${io.netty.version}</bundle>
-    <bundle>mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
-    <bundle>mvn:org.osgi/org.osgi.core/${osgi.core.version}</bundle>
-    <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/library/${ovsdb.library.version}</bundle>
   </feature>
 
   <feature name="odl-ovsdb-schema-openvswitch" description="OVSDB :: Schema :: Open_vSwitch"
@@ -55,6 +33,9 @@
     <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
     <feature version="${schema.openvswitch.version}">odl-ovsdb-schema-openvswitch</feature>
     <feature version="${schema.hardwarevtep.version}">odl-ovsdb-schema-hardwarevtep</feature>
+    <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/${felix.dependencymanager.version}</bundle>
+    <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager.shell/${felix.dependencymanager.shell.version}</bundle>
+    <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/plugin/${ovsdb.plugin.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/plugin-shell/${plugin.shell.version}</bundle>
   </feature>
@@ -64,7 +45,7 @@
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
     <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
-    <feature version="1.2.0-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
+    <feature version="1.2.1-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>

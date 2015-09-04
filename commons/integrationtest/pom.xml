@@ -752,7 +752,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
-        <version>${propertymavenplugin.version}</version>
         <executions>
           <execution>
             <goals>

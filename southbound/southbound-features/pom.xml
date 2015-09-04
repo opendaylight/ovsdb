@@ -43,6 +43,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </prerequisites>
   <properties>
     <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
+    <restconf.version>1.3.0-SNAPSHOT</restconf.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
   </properties>
   <dependencyManagement>
@@ -62,6 +63,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.netconf</groupId>
+        <artifactId>restconf-artifacts</artifactId>
+        <version>${restconf.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -78,7 +86,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <classifier>features</classifier>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>features-restconf</artifactId>
       <type>xml</type>
       <classifier>features</classifier>

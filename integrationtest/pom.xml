@@ -159,7 +159,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${failsafe.version}</version>
         <executions>
           <execution>
             <id>failsafe-integration-tests</id>

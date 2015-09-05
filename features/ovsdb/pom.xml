@@ -235,7 +235,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>features-openflowplugin</artifactId>
+      <artifactId>features-openflowplugin-li</artifactId>
       <version>${openflowplugin.version}</version>
       <classifier>features</classifier>
       <type>xml</type>

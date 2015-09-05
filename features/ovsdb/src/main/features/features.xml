@@ -3,7 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/${openflowplugin.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-li/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.neutron/features-neutron/${networkconfig.neutron.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.1-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
@@ -29,7 +29,7 @@
 
   <feature name="odl-ovsdb-plugin" description="OpenDaylight :: OVSDB :: Plugin"
            version='${ovsdb.plugin.version}'>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services-li</feature>
     <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
     <feature version="${schema.openvswitch.version}">odl-ovsdb-schema-openvswitch</feature>
     <feature version="${schema.hardwarevtep.version}">odl-ovsdb-schema-hardwarevtep</feature>
@@ -43,10 +43,10 @@
   <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization"
            version='${openstack.netvirt.version}'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model-li</feature>
     <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
     <feature version="1.2.1-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services-li</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>

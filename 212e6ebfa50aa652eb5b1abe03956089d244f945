@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_51af8c94",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-05T09:49:14Z",
+      "side": 1,
+      "message": "just change this feature to odl-openflowplugin-flow-services-li and it should be enough to bring in the openflowplugin new feature.",
+      "revId": "212e6ebfa50aa652eb5b1abe03956089d244f945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

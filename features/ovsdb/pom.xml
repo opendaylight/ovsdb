@@ -249,11 +249,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>library</artifactId>
-      <version>${ovsdb.library.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>openstack.net-virt</artifactId>
       <version>${openstack.netvirt.version}</version>
     </dependency>
@@ -325,6 +320,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>${project.groupId}</groupId>
       <artifactId>southbound-features</artifactId>
       <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>library-features</artifactId>
+      <version>${ovsdb.library.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>

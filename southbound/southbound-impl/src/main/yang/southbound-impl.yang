@@ -4,8 +4,9 @@ module southbound-impl {
     prefix "southbound-impl";
 
     import config { prefix config; revision-date 2013-04-05; }
-    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
-    import opendaylight-md-sal-dom {prefix dom; revision-date 2013-10-28;}
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28; }
+    import opendaylight-md-sal-dom { prefix dom; revision-date 2013-10-28; }
+    import library { prefix library; revision-date 2014-12-10; }
 
     description
         "Service definition for southbound project";
@@ -44,6 +45,14 @@ module southbound-impl {
                     refine type {
                         mandatory false;
                         config:required-identity dom:schema-service;
+                    }
+                }
+            }
+            container ovsdb-library {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity library:connection-service;
                     }
                 }
             }

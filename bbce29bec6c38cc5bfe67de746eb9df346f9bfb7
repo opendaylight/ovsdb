@@ -16,6 +16,24 @@
       "revId": "bbce29bec6c38cc5bfe67de746eb9df346f9bfb7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_ae7d56e9",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-09T07:28:46Z",
+      "side": 1,
+      "message": "And now it is (bug 4276).",
+      "parentUuid": "3a79b1b5_233c02e2",
+      "revId": "bbce29bec6c38cc5bfe67de746eb9df346f9bfb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

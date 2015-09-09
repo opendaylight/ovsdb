@@ -108,5 +108,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <artifactId>southbound-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>library</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

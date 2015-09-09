@@ -19,6 +19,11 @@ module library {
         config:java-name-prefix Library;
     }
 
+    identity connection-service {
+        base config:service-type;
+        config:java-class "org.opendaylight.ovsdb.lib.OvsdbConnection";
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case library {
             when "/config:modules/config:module/config:type = 'library'";

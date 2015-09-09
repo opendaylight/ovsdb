@@ -24,6 +24,8 @@ public class VirtualPort  {
     private IpAddress ipAddr;
     private String    macAddress;
     private Boolean   routerIntfFlag;
+    private String    dpId;
+    private Long      ofPort;
 
     // associated subnet
     private VirtualSubnet subnet = null;
@@ -115,6 +117,23 @@ public class VirtualPort  {
 
     public VirtualSubnet getSubnet() {
         return subnet;
+    }
+
+    public VirtualPort setDpId(String dpId) {
+        this.dpId = dpId;
+        return this;
+    }
+
+    public String getDpId() {
+        return dpId;
+    }
+
+    public void setOfPort(Long ofPort) {
+        this.ofPort = ofPort;
+    }
+
+    public Long getOfPort() {
+        return ofPort;
     }
 
     public void removeSelf() {

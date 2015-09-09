@@ -5,9 +5,11 @@
   <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.neutron/features-neutron/0.6.0-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/0.2.0-SNAPSHOT/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.0-SNAPSHOT/xml/features</repository>
   <feature name='odl-routemgr-plugin' description="Opendaylight :: Routemgr :: Plugin" version='${project.version}'>
     <feature version="0.2.0-SNAPSHOT">odl-openflowplugin-flow-services</feature>
     <feature version="0.6.0-SNAPSHOT">odl-neutron-transcriber</feature>
+    <feature version="1.2.0-SNAPSHOT">odl-ovsdb-southbound-impl</feature>
     <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/routemgr-impl/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/routemgr-api/${project.version}</bundle>

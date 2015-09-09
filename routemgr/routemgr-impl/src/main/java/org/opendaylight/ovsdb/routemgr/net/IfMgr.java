@@ -143,8 +143,16 @@ public class IfMgr  {
 
     public void addRouterIntf(Uuid portId, Uuid rtrId, Uuid snetId,
                               Uuid networkId, IpAddress fixedIp, String macAddress) {
+        VirtualPort intf = vintfs.get(portId);
+        if (intf == null) {
+            intf = new VirtualPort();
+            if (intf != null) {
+                vintfs.put(portId, intf);
+            }  else {
+                logger.error("Create rtr intf failed for :{}", portId);
+            }
+        }
 
-        VirtualPort intf = new VirtualPort();
         if (intf != null) {
             intf.setIntfUUID(portId)
                     .setNodeUUID(rtrId)
@@ -153,7 +161,6 @@ public class IfMgr  {
                     .setNetworkID(networkId)
                     .setMacAddress(macAddress)
                     .setRouterIntfFlag(true);
-            vintfs.put(portId, intf);
 
             VirtualRouter rtr = vrouters.get(rtrId);
             VirtualSubnet snet = vsubnets.get(snetId);
@@ -169,17 +176,22 @@ public class IfMgr  {
                 addUnprocessed(unprocessedRouterIntfs, rtrId, intf);
                 addUnprocessed(unprocessedSubnetIntfs, snetId, intf);
             }
-
-        } else {
-            logger.error("Create rtr intf failed for :{}", portId);
         }
         return;
     }
 
     public void addHostIntf(Uuid portId, Uuid hostId, Uuid snetId,
                             Uuid networkId, IpAddress fixedIp, String macAddress) {
+        VirtualPort intf = vintfs.get(portId);
+        if (intf == null) {
+            intf = new VirtualPort();
+            if (intf != null) {
+                vintfs.put(portId, intf);
+            }  else {
+                logger.error("Create host intf failed for :{}", portId);
+            }
+        }
 
-        VirtualPort intf = new VirtualPort();
         if (intf != null) {
             intf.setIntfUUID(portId)
                     .setNodeUUID(hostId)
@@ -188,7 +200,6 @@ public class IfMgr  {
                     .setNetworkID(networkId)
                     .setMacAddress(macAddress)
                     .setRouterIntfFlag(false);
-            vintfs.put(portId, intf);
 
             VirtualSubnet snet = vsubnets.get(snetId);
 
@@ -197,15 +208,30 @@ public class IfMgr  {
             } else {
                 addUnprocessed(unprocessedSubnetIntfs, snetId, intf);
             }
+        }
+        return;
+    }
 
-        } else {
-            logger.error("Create host intf failed for :{}", portId);
+    public void updateInterface(Uuid portId, String dpId, Long ofPort) {
+        VirtualPort intf = vintfs.get(portId);
+
+        if (intf == null) {
+            intf = new VirtualPort();
+            if (intf != null) {
+                vintfs.put(portId, intf);
+            }  else {
+                logger.error("updateInterface failed for :{}", portId);
+            }
+        }
+
+        if (intf != null) {
+            intf.setDpId(dpId)
+                    .setOfPort(ofPort);
         }
         return;
     }
 
     public void removePort(Uuid portId) {
-
         VirtualPort intf = vintfs.get(portId);
         if (intf != null) {
             intf.removeSelf();
@@ -214,6 +240,11 @@ public class IfMgr  {
         } else {
             logger.error("Delete intf failed for :{}", portId);
         }
+        return;
+    }
+
+    public void deleteInterface(Uuid interfaceUuid, String dpId) {
+        // Nothing to do for now
         return;
     }
 

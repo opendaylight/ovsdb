@@ -45,7 +45,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>concepts</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>yang-binding</artifactId>
     </dependency>
     <dependency>
@@ -53,7 +53,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>yang-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-inet-types</artifactId>
     </dependency>
     <dependency>
@@ -65,7 +65,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>model-flow-service</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>yang-ext</artifactId>
     </dependency>
     <!-- Controller Dependencies -->

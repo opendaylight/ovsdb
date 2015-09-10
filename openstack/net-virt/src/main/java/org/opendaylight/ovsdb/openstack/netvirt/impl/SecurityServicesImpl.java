@@ -109,6 +109,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 LOG.error("getDHCPServerPort: neutron port of {} is not found", neutronPortId);
                 return null;
             }
+            /* if the current port is a DHCP port, return the same*/
+            if (neutronPort.getDeviceOwner().contains("dhcp")) {
+                return neutronPort;
+            }
             /*Since all the fixed ip assigned to a port should be
              *from the same network, first port is sufficient.*/
             List<Neutron_IPs> fixedIps = neutronPort.getFixedIPs();

@@ -34,6 +34,10 @@ public class SouthboundUtil {
 
     private static InstanceIdentifierCodec instanceIdentifierCodec;
 
+    private SouthboundUtil() {
+        // Prevent instantiating a utility class
+    }
+
     public static void setInstanceIdentifierCodec(InstanceIdentifierCodec iidc) {
         instanceIdentifierCodec = iidc;
     }
@@ -68,10 +72,11 @@ public class SouthboundUtil {
                 Optional<Node> optional = nf.get();
                 if (optional != null && optional.isPresent()) {
                     OvsdbNodeAugmentation ovsdbNode = null;
-                    if (optional.get() instanceof Node) {
-                        ovsdbNode = optional.get().getAugmentation(OvsdbNodeAugmentation.class);
-                    } else if (optional.get() instanceof OvsdbNodeAugmentation) {
-                        ovsdbNode = (OvsdbNodeAugmentation) optional.get();
+                    Node node = optional.get();
+                    if (node instanceof OvsdbNodeAugmentation) {
+                        ovsdbNode = (OvsdbNodeAugmentation) node;
+                    } else if (node != null) {
+                        ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
                     }
                     if (ovsdbNode != null) {
                         return Optional.of(ovsdbNode);
@@ -110,15 +115,13 @@ public class SouthboundUtil {
         try {
             for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
                  ifaces.hasMoreElements();) {
-                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+                NetworkInterface iface = ifaces.nextElement();
 
                 for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress()) {
-                        if (inetAddr.isSiteLocalAddress()) {
-                            ipaddress = inetAddr.getHostAddress();
-                            break;
-                        }
+                    InetAddress inetAddr = inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
+                        ipaddress = inetAddr.getHostAddress();
+                        break;
                     }
                 }
             }

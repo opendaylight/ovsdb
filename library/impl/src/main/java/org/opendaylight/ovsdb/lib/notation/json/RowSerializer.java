@@ -15,15 +15,13 @@ import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class RowSerializer extends JsonSerializer<Row> {
     @Override
     public void serialize(Row row, JsonGenerator generator,
-        SerializerProvider provider) throws IOException,
-            JsonProcessingException {
+        SerializerProvider provider) throws IOException {
         generator.writeStartObject();
         Collection<Column> columns = row.getColumns();
         for (Column<?,?> column : columns) {

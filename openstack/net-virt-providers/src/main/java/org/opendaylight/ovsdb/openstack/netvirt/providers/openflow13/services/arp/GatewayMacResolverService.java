@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.Nullable;
-
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.openflowplugin.api.OFConstants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
@@ -30,7 +28,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -100,11 +97,11 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     private SalFlowService flowService;
     private final AtomicLong flowCookie = new AtomicLong();
     private final ConcurrentMap<Ipv4Address, ArpResolverMetadata> gatewayToArpMetadataMap =
-            new ConcurrentHashMap<Ipv4Address, ArpResolverMetadata>();
-    private final int ARP_WATCH_BROTHERS = 10;
-    private final int WAIT_CYCLES = 3;
-    private final int PER_CYCLE_WAIT_DURATION = 1000;
-    private final int REFRESH_INTERVAL = 10;
+            new ConcurrentHashMap<>();
+    private static final int ARP_WATCH_BROTHERS = 10;
+    private static final int WAIT_CYCLES = 3;
+    private static final int PER_CYCLE_WAIT_DURATION = 1000;
+    private static final int REFRESH_INTERVAL = 10;
     private final ListeningExecutorService arpWatcherWall = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(ARP_WATCH_BROTHERS));
     private final ScheduledExecutorService gatewayMacRefresherPool = Executors.newScheduledThreadPool(1);
     private final ScheduledExecutorService refreshRequester = Executors.newSingleThreadScheduledExecutor();
@@ -183,7 +180,6 @@ public class GatewayMacResolverService extends AbstractServiceInstance
      * @param sourceMacAddress Source Mac address for the ARP request packet
      * @param periodicRefresh Enable/Disable periodic refresh of the Gateway Mac address
      * NOTE:Periodic refresh is not supported yet.
-     * @param gatewayIp  Resolve MAC address of this Gateway Ip
      * @return Future object
      */
     @Override
@@ -305,13 +301,6 @@ public class GatewayMacResolverService extends AbstractServiceInstance
         });
     }
 
-    private static @Nullable Ipv4Address getIPv4Addresses(IpAddress ipAddress) {
-        if (ipAddress.getIpv4Address() == null) {
-            return null;
-        }
-        return ipAddress.getIpv4Address();
-    }
-
     private Flow createArpReplyToControllerFlow(final ArpMessageAddress senderAddress, final Ipv4Address ipForRequestedMac) {
         checkNotNull(senderAddress);
         checkNotNull(ipForRequestedMac);
@@ -330,11 +319,11 @@ public class GatewayMacResolverService extends AbstractServiceInstance
         arpFlow.setMatch(match);
         arpFlow.setInstructions(new InstructionsBuilder().setInstruction(
                 ImmutableList.of(SEND_TO_CONTROLLER_INSTRUCTION)).build());
-        arpFlow.setId(createFlowId(senderAddress, ipForRequestedMac));
+        arpFlow.setId(createFlowId(ipForRequestedMac));
         return arpFlow.build();
     }
 
-    private FlowId createFlowId(ArpMessageAddress senderAddress, Ipv4Address ipForRequestedMac) {
+    private FlowId createFlowId(Ipv4Address ipForRequestedMac) {
         String flowId = ARP_REPLY_TO_CONTROLLER_FLOW_NAME + "|" + ipForRequestedMac.getValue();
         return new FlowId(flowId);
     }

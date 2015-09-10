@@ -23,8 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class ColumnSchema<E extends TableSchema<E>, D> {
     String name;
     ColumnType type;
-    boolean ephemeral;
-    boolean mutable;
 
     public ColumnSchema(String name, ColumnType columnType) {
         this.name = name;
@@ -125,9 +123,8 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     /**
      * Validates the passed in value against the constraints set for this ColumnSchema
      * @param value
-     * @throws java.lang.RuntimeException (validation exception)
      */
-    public D validate(Object value)throws RuntimeException {
+    public D validate(Object value) {
         //todo(type check and validate based on constraints set)
         this.type.validate(value);
         return (D) value;
@@ -146,7 +143,7 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     }
 
     public Object getNormalizeData(D value) {
-        Object untypedValue = null;
+        Object untypedValue;
         if (value instanceof Set) {
             untypedValue = OvsdbSet.fromSet((Set) value);
         } else if (value instanceof Map) {

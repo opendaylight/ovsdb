@@ -201,18 +201,16 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                                                                                 Constants.EXTERNAL_ID_INTERFACE_ID);
                         if (null != portId) {
                             NeutronPort port = neutronPortCache.getPort(portId);
-                            if (null != port) {
-                                if (!(port.getID().equals(neutronPort.getID()))
-                                        && port.getDeviceOwner().contains("compute")) {
-                                    List<Neutron_IPs> portFixedIp = port.getFixedIPs();
-                                    if (null == portFixedIp || portFixedIp.isEmpty()) {
-                                        return false;
-                                    }
-                                    if (portFixedIp.iterator().next().getSubnetUUID()
-                                            .equals(neutronPort.getFixedIPs().iterator().next().getSubnetUUID())) {
-                                        LOG.trace("isLastPortinSubnet: Port is not the only port.");
-                                        return false;
-                                    }
+                            if (null != port && !(port.getID().equals(neutronPort.getID()))
+                                    && port.getDeviceOwner().contains("compute")) {
+                                List<Neutron_IPs> portFixedIp = port.getFixedIPs();
+                                if (null == portFixedIp || portFixedIp.isEmpty()) {
+                                    return false;
+                                }
+                                if (portFixedIp.iterator().next().getSubnetUUID()
+                                        .equals(neutronPort.getFixedIPs().iterator().next().getSubnetUUID())) {
+                                    LOG.trace("isLastPortinSubnet: Port is not the only port.");
+                                    return false;
                                 }
                             }
                         }
@@ -235,14 +233,13 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             for (TerminationPoint tp : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
-                if (null != ovsdbTerminationPointAugmentation) {
-                    if (!(ovsdbTerminationPointAugmentation.getName().equals(Constants.INTEGRATION_BRIDGE))
-                            && !(terminationPointAugmentation.getInterfaceUuid()
-                                    .equals(ovsdbTerminationPointAugmentation.getInterfaceUuid()))) {
-                        LOG.debug("isLastPortinBridge: it the last port in bridge {}",
-                                  terminationPointAugmentation.getName());
-                        return false;
-                    }
+                if (null != ovsdbTerminationPointAugmentation
+                        && !(ovsdbTerminationPointAugmentation.getName().equals(Constants.INTEGRATION_BRIDGE))
+                        && !(terminationPointAugmentation.getInterfaceUuid()
+                        .equals(ovsdbTerminationPointAugmentation.getInterfaceUuid()))) {
+                    LOG.debug("isLastPortinBridge: it the last port in bridge {}",
+                            terminationPointAugmentation.getName());
+                    return false;
                 }
             }
         }

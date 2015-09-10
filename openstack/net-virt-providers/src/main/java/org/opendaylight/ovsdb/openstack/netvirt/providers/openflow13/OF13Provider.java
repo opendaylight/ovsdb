@@ -1643,29 +1643,27 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 }
             }
             LOG.debug("createOutputGroupInstructions: addNew {}", addNew);
-            if (addNew) {
+            if (addNew && !buckets.getBucket().isEmpty()) {
                 /* the new output action is not in the bucket, add to bucket */
-                if (!buckets.getBucket().isEmpty()) {
-                    Bucket bucket = buckets.getBucket().get(0);
-                    List<Action> bucketActionList = Lists.newArrayList();
-                    bucketActionList.addAll(bucket.getAction());
-                    /* set order for new action and add to action list */
-                    ab.setOrder(bucketActionList.size());
-                    ab.setKey(new ActionKey(bucketActionList.size()));
-                    bucketActionList.add(ab.build());
+                Bucket bucket = buckets.getBucket().get(0);
+                List<Action> bucketActionList = Lists.newArrayList();
+                bucketActionList.addAll(bucket.getAction());
+                /* set order for new action and add to action list */
+                ab.setOrder(bucketActionList.size());
+                ab.setKey(new ActionKey(bucketActionList.size()));
+                bucketActionList.add(ab.build());
 
-                    /* set bucket and buckets list. Reset groupBuilder with new buckets.*/
-                    BucketsBuilder bucketsBuilder = new BucketsBuilder();
-                    List<Bucket> bucketList = Lists.newArrayList();
-                    BucketBuilder bucketBuilder = new BucketBuilder();
-                    bucketBuilder.setBucketId(new BucketId((long) 1));
-                    bucketBuilder.setKey(new BucketKey(new BucketId((long) 1)));
-                    bucketBuilder.setAction(bucketActionList);
-                    bucketList.add(bucketBuilder.build());
-                    bucketsBuilder.setBucket(bucketList);
-                    groupBuilder.setBuckets(bucketsBuilder.build());
-                    LOG.debug("createOutputGroupInstructions: bucketList {}", bucketList);
-                }
+                /* set bucket and buckets list. Reset groupBuilder with new buckets.*/
+                BucketsBuilder bucketsBuilder = new BucketsBuilder();
+                List<Bucket> bucketList = Lists.newArrayList();
+                BucketBuilder bucketBuilder = new BucketBuilder();
+                bucketBuilder.setBucketId(new BucketId((long) 1));
+                bucketBuilder.setKey(new BucketKey(new BucketId((long) 1)));
+                bucketBuilder.setAction(bucketActionList);
+                bucketList.add(bucketBuilder.build());
+                bucketsBuilder.setBucket(bucketList);
+                groupBuilder.setBuckets(bucketsBuilder.build());
+                LOG.debug("createOutputGroupInstructions: bucketList {}", bucketList);
             }
         } else {
             /* create group */

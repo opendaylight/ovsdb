@@ -117,21 +117,19 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
                 break;
             }
 
-            if (index - buf.readerIndex() >= maxFrameLength) {
-                /*
-                 * Changing this limit to being a warning, we do not wish to "break" in scale environment
-                 * and currently this limits the ovs of having only around 50 ports defined...
-                 * I do acknowledge the fast that this might be risky in case of huge amount of strings
-                 * in which the controller can crash with an OOM, however seems that we need a really huge
-                 * ovs to reach that limit.
-                 */
+            /*
+             * Changing this limit to being a warning, we do not wish to "break" in scale environment
+             * and currently this limits the ovs of having only around 50 ports defined...
+             * I do acknowledge the fast that this might be risky in case of huge amount of strings
+             * in which the controller can crash with an OOM, however seems that we need a really huge
+             * ovs to reach that limit.
+             */
 
-                //We do not want to issue a log message on every extent of the buffer
-                //hence logging only once
-                if (!maxFrameLimitWasReached) {
-                    maxFrameLimitWasReached = true;
-                    LOG.warn("***** OVSDB Frame limit of {} bytes has been reached! *****", this.maxFrameLength);
-                }
+            //We do not want to issue a log message on every extent of the buffer
+            //hence logging only once
+            if (index - buf.readerIndex() >= maxFrameLength && !maxFrameLimitWasReached) {
+                maxFrameLimitWasReached = true;
+                LOG.warn("***** OVSDB Frame limit of {} bytes has been reached! *****", this.maxFrameLength);
             }
         }
 

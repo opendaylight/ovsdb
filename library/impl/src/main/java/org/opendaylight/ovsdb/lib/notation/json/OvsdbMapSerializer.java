@@ -13,15 +13,13 @@ import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class OvsdbMapSerializer extends JsonSerializer<OvsdbMap<?,?>> {
     @Override
     public void serialize(OvsdbMap<?,?> map, JsonGenerator generator,
-        SerializerProvider provider) throws IOException,
-            JsonProcessingException {
+        SerializerProvider provider) throws IOException {
         generator.writeStartArray();
         generator.writeString("map");
         generator.writeStartArray();

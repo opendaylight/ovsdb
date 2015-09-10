@@ -83,7 +83,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
         return serviceRegistry.get(service);
     }
 
-    public void start() {
+    public final void start() {
         eventHandler.submit(new Runnable()  {
             @Override
             public void run() {
@@ -93,11 +93,8 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
                         LOG.info(">>>>> dequeue: {}", node);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            //LOG.info("pipeline: {} - {}", service, serviceInstance);
-                            if (serviceInstance != null) {
-                                if (southbound.getBridge(node) != null) {
-                                    serviceInstance.programDefaultPipelineRule(node);
-                                }
+                            if (serviceInstance != null && southbound.getBridge(node) != null) {
+                                serviceInstance.programDefaultPipelineRule(node);
                             }
                         }
                     }

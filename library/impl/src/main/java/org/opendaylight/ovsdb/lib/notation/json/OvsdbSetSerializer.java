@@ -14,15 +14,13 @@ import java.util.Set;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class OvsdbSetSerializer extends JsonSerializer<OvsdbSet<?>> {
     @Override
     public void serialize(OvsdbSet<?> set, JsonGenerator generator,
-        SerializerProvider provider) throws IOException,
-            JsonProcessingException {
+        SerializerProvider provider) throws IOException {
         generator.writeStartArray();
         generator.writeString("set");
         generator.writeStartArray();

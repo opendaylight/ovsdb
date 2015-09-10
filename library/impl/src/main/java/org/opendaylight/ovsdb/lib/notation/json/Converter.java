@@ -26,6 +26,10 @@ public class Converter {
     static SetDeser setDeser = new SetDeser();
     static UpdateNotificationDeser unDeser = new UpdateNotificationDeser();
 
+    private Converter() {
+        // Prevent instantiating a utility class
+    }
+
     public static class MapConverter extends StdConverter<JsonNode, OvsdbMap<Object, Object>> {
         @Override
         public OvsdbMap<Object, Object> convert(JsonNode value) {
@@ -49,30 +53,28 @@ public class Converter {
 
     static class MapDeser {
         public OvsdbMap<Object, Object> deserialize(JsonNode node) {
-            if (node.isArray()) {
-                if (node.size() == 2) {
-                    if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                        OvsdbMap<Object, Object> map = new OvsdbMap<Object, Object>();
-                        for (JsonNode pairNode : node.get(1)) {
-                            if (pairNode.isArray() && node.size() == 2) {
-                                Object key = atomDeser.deserialize(pairNode.get(0));
-                                Object value = atomDeser.deserialize(pairNode.get(1));
-                                map.put(key, value);
-                            }
+            if (node.isArray() && node.size() == 2) {
+                if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
+                    OvsdbMap<Object, Object> map = new OvsdbMap<>();
+                    for (JsonNode pairNode : node.get(1)) {
+                        if (pairNode.isArray() && node.size() == 2) {
+                            Object key = atomDeser.deserialize(pairNode.get(0));
+                            Object value = atomDeser.deserialize(pairNode.get(1));
+                            map.put(key, value);
                         }
-                        return map;
-                    } else if (node.size() == 0) {
-                        return null;
                     }
+                    return map;
+                } else if (node.size() == 0) {
+                    return null;
                 }
             }
-            throw new RuntimeException("not a map type");
+            throw new IllegalArgumentException("not a map type");
         }
     }
 
     static class SetDeser {
         public OvsdbSet<Object> deserialize(JsonNode node) {
-            OvsdbSet<Object> set = new OvsdbSet<Object>();
+            OvsdbSet<Object> set = new OvsdbSet<>();
             if (node.isArray()) {
                 if (node.size() == 2) {
                     if (node.get(0).isTextual() && "set".equals(node.get(0).asText())) {
@@ -97,16 +99,14 @@ public class Converter {
     static class UpdateNotificationDeser {
         public UpdateNotification deserialize(JsonNode node) {
             UpdateNotification un = new UpdateNotification();
-            if (node.isArray()) {
-                if (node.size() == 2) {
-                    un.setContext(node.get(0).asText());
-                    un.setUpdates(node.get(1));
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    TableUpdates updates = objectMapper.convertValue(node.get(1), TableUpdates.class);
-                    un.setUpdate(updates);
-                    return un;
-                }
+            if (node.isArray() && node.size() == 2) {
+                un.setContext(node.get(0).asText());
+                un.setUpdates(node.get(1));
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                TableUpdates updates = objectMapper.convertValue(node.get(1), TableUpdates.class);
+                un.setUpdate(updates);
+                return un;
             }
             return null;
         }
@@ -132,13 +132,12 @@ public class Converter {
                 }
             }
 
-            if (node.isArray() && node.get(0).isTextual()) {
-                if ("uuid".equals(node.get(0).asText()) || "named-uuid".equals(node.get(0).asText())) {
-                    return new UUID(node.get(1).asText());
-                }
+            if (node.isArray() && node.get(0).isTextual()
+                    && ("uuid".equals(node.get(0).asText()) || "named-uuid".equals(node.get(0).asText()))) {
+                return new UUID(node.get(1).asText());
             }
 
-            throw new RuntimeException("not an atom node");
+            throw new IllegalArgumentException("not an atom node");
         }
     }
 }

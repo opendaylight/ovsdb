@@ -16,12 +16,14 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class OvsdbRow {
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbRow.class);
     private static final String PARENTUUID = "parent_uuid";
     private static final String PARENTTABLE = "parent_table";
     private static final String PARENTCOLUMN = "parent_column";
@@ -70,21 +72,21 @@ public class OvsdbRow {
         if (rowNode == null) {
             return null;
         }
-        for(Iterator<String> fieldNames = rowNode.fieldNames(); fieldNames.hasNext();) {
+        Iterator<String> fieldNames = rowNode.fieldNames();
+        if (fieldNames.hasNext()) {
             String tableName = fieldNames.next();
-            Row<GenericTableSchema> row = null;
             try {
-                row = getRow(client, dbName, tableName, rowNode.get(tableName));
+                Row<GenericTableSchema> row = getRow(client, dbName, tableName, rowNode.get(tableName));
+                return new OvsdbRow(parentTable, parentUuid, parentColumn, tableName, row);
             } catch (InterruptedException | ExecutionException | IOException e) {
-                e.printStackTrace();
+                LOG.error("Error retrieving the row for {}", tableName, e);
                 return null;
             }
-            return new OvsdbRow(parentTable, parentUuid, parentColumn, tableName, row);
         }
         return null;
     }
 
-    public static Row<GenericTableSchema> getRow(OvsdbClient client, String dbName, String tableName, JsonNode rowJson) throws InterruptedException, ExecutionException, JsonParseException, IOException {
+    public static Row<GenericTableSchema> getRow(OvsdbClient client, String dbName, String tableName, JsonNode rowJson) throws InterruptedException, ExecutionException, IOException {
         DatabaseSchema dbSchema = client.getSchema(dbName).get();
         GenericTableSchema schema = dbSchema.table(tableName, GenericTableSchema.class);
         return schema.createRow((ObjectNode)rowJson);

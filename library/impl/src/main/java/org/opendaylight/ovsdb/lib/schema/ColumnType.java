@@ -164,8 +164,8 @@ public abstract class ColumnType {
         public AtomicColumnType() {
         }
 
-        public AtomicColumnType(BaseType baseType1) {
-            super(baseType1);
+        public AtomicColumnType(BaseType baseType) {
+            super(baseType);
         }
 
         @Override
@@ -173,11 +173,11 @@ public abstract class ColumnType {
             if (json.isObject() && json.has("value")) {
                 return null;
             }
-            BaseType baseType = BaseType.fromJson(json, "key");
+            BaseType jsonBaseType = BaseType.fromJson(json, "key");
 
-            if (baseType != null) {
+            if (jsonBaseType != null) {
 
-                AtomicColumnType atomicColumnType = new AtomicColumnType(baseType);
+                AtomicColumnType atomicColumnType = new AtomicColumnType(jsonBaseType);
 
                 JsonNode node;
                 if ((node = json.get("min")) != null) {
@@ -247,10 +247,10 @@ public abstract class ColumnType {
             if (json.isValueNode() || !json.has("value")) {
                 return null;
             }
-            BaseType keyType = BaseType.fromJson(json, "key");
+            BaseType jsonKeyType = BaseType.fromJson(json, "key");
             BaseType valueType = BaseType.fromJson(json, "value");
 
-            KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(keyType, valueType);
+            KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(jsonKeyType, valueType);
             JsonNode node;
             if ((node = json.get("min")) != null) {
                 keyValueColumnType.setMin(node.asLong());
@@ -269,21 +269,19 @@ public abstract class ColumnType {
 
         @Override
         public Object valueFromJson(JsonNode node) {
-            if (node.isArray()) {
-                if (node.size() == 2) {
-                    if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                        OvsdbMap<Object, Object> map = new OvsdbMap<>();
-                        for (JsonNode pairNode : node.get(1)) {
-                            if (pairNode.isArray() && node.size() == 2) {
-                                Object key = getKeyType().toValue(pairNode.get(0));
-                                Object value = getBaseType().toValue(pairNode.get(1));
-                                map.put(key, value);
-                            }
+            if (node.isArray() && node.size() == 2) {
+                if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
+                    OvsdbMap<Object, Object> map = new OvsdbMap<>();
+                    for (JsonNode pairNode : node.get(1)) {
+                        if (pairNode.isArray() && node.size() == 2) {
+                            Object key = getKeyType().toValue(pairNode.get(0));
+                            Object value = getBaseType().toValue(pairNode.get(1));
+                            map.put(key, value);
                         }
-                        return map;
-                    } else if (node.size() == 0) {
-                        return null;
                     }
+                    return map;
+                } else if (node.size() == 0) {
+                    return null;
                 }
             }
             return null;

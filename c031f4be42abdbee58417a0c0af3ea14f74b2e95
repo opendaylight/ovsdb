@@ -16,6 +16,24 @@
       "revId": "c031f4be42abdbee58417a0c0af3ea14f74b2e95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_834aacc3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-10T16:17:39Z",
+      "side": 1,
+      "message": "With config injection you need a way for the module factory to inject the dependencies; this just seemed like the most straightforward and safe way.\n\nYou can also use an empty constructor and setter, I just prefer passing dependencies to the constructor because it ensures consistent state and makes it easier to inject mocks for tests...\n\nAs you say the library is designed for multiple users, and using this type of initialisation doesn\u0027t preclude that.",
+      "parentUuid": "3a79b1b5_43b814c8",
+      "revId": "c031f4be42abdbee58417a0c0af3ea14f74b2e95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

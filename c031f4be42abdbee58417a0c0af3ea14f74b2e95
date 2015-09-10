@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_43b814c8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-10T15:42:35Z",
+      "side": 1,
+      "message": "can more than one bundle include the libary and use it? And wold they use this type of code here?\n\nI know the library allows multiple users but wasn\u0027t sure what is required in the user bundles.",
+      "revId": "c031f4be42abdbee58417a0c0af3ea14f74b2e95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

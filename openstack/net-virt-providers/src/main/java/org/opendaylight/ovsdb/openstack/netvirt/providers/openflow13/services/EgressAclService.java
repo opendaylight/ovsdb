@@ -99,6 +99,11 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                              portSecurityRule,vmIp.getIpAddress(), write,
                                              Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                                 break;
+                            case MatchUtils.ICMP:
+                                egressAclIcmp(dpid, segmentationId, attachedMac,
+                                               portSecurityRule, vmIp.getIpAddress(),write,
+                                               Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                break;
                             default:
                                 LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
                                 break;
@@ -115,6 +120,10 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     case MatchUtils.UDP:
                         egressAclUdp(dpid, segmentationId, attachedMac,
                                      portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                        break;
+                    case MatchUtils.ICMP:
+                        egressAclIcmp(dpid, segmentationId, attachedMac,
+                                       portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                         break;
                     default:
                         LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
@@ -360,6 +369,43 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
 
     }
+
+    /**
+     * Creates a egress match with src macaddress. If dest address is specified
+     * destination specific match will be created. Otherwise a match with a
+     * CIDR will be created.
+     * @param dpidLong the dpid
+     * @param segmentationId the segmentation id
+     * @param srcMac the source mac address.
+     * @param portSecurityRule the security rule in the SG
+     * @param dstAddress the source IP address
+     * @param write add or delete
+     * @param protoPortMatchPriority the protocol match priority
+     */
+    private void egressAclIcmp(Long dpidLong, String segmentationId, String srcMac,
+                               NeutronSecurityRule portSecurityRule, String dstAddress,
+                               boolean write, Integer protoPortMatchPriority) {
+        MatchBuilder matchBuilder = new MatchBuilder();
+        String flowId = "Egress_ICMP" + segmentationId + "_" + srcMac + "_";
+        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
+                                                    portSecurityRule.getSecurityRulePortMin().shortValue(),
+                                                    portSecurityRule.getSecurityRulePortMax().shortValue());
+        if (null != dstAddress) {
+            flowId = flowId + dstAddress;
+            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+                    MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
+        } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+            flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+                    new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+        }
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+
+    }
+
     /**
      * Creates a egress match with src macaddress. If dest address is specified
      * destination specific match will be created. Otherwise a match with a

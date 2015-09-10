@@ -94,6 +94,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                 ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule,vmIp.getIpAddress(),
                                               write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                                 break;
+                            case MatchUtils.ICMP:
+                                ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, vmIp.getIpAddress(),
+                                               write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                break;
                             default:
                                 LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
                                 break;
@@ -110,6 +114,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                     case MatchUtils.UDP:
                         ingressAclUdp(dpid, segmentationId, attachedMac,
                                       portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                        break;
+                    case MatchUtils.ICMP:
+                        ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, null,
+                                       write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                         break;
                     default:
                         LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
@@ -371,6 +379,45 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowId = flowId + "_Permit_";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
 
+    }
+
+    /**
+     * Creates a ingress match to the dst macaddress. If src address is specified
+     * source specific match will be created. Otherwise a match with a CIDR will
+     * be created.
+     * @param dpidLong the dpid
+     * @param segmentationId the segmentation id
+     * @param dstMac the destination mac address.
+     * @param portSecurityRule the security rule in the SG
+     * @param srcAddress the destination IP address
+     * @param write add or delete
+     * @param protoPortMatchPriority the protocol match priority
+     */
+    private void ingressAclIcmp(Long dpidLong, String segmentationId, String dstMac,
+                                NeutronSecurityRule portSecurityRule, String srcAddress,
+                                boolean write, Integer protoPortMatchPriority) {
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        FlowBuilder flowBuilder = new FlowBuilder();
+        String flowId = "ingressAclICMP" + segmentationId + "_" + dstMac;
+        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+        matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
+                        portSecurityRule.getSecurityRulePortMin().shortValue(),
+                        portSecurityRule.getSecurityRulePortMax().shortValue());
+        if (null != srcAddress) {
+            flowId = flowId + srcAddress;
+            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
+                    MatchUtils.iPv4PrefixFromIPv4Address(srcAddress), null);
+
+        } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+            flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
+                    new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()),null);
+        }
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        flowId = flowId + "_Permit_";
+        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
 
     public void ingressACLTcpSyn(Long dpidLong, String segmentationId, String attachedMac, boolean write,

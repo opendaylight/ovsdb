@@ -417,6 +417,76 @@ public class IngressAclServiceTest {
     }
 
     /**
+     *  Test ICMP add with code, type and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddIcmp1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+
+        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(1)).submit();
+        verify(commitFuture, times(1)).get();
+    }
+
+    /**
+     *  Test ICMP remove with code, type and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveIcmp1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+
+        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+
+        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(1)).submit();
+        verify(commitFuture, times(1)).get();
+    }
+
+    /**
+     *  Test ICMP add with code, type and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddIcmp2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+
+        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(2)).submit();
+        verify(commitFuture, times(2)).get();
+    }
+
+    /**
+     *  Test ICMP remove with code, type and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveIcmp2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+
+        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+
+        verify(writeTransaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(2)).submit();
+        verify(commitFuture, times(2)).get();
+    }
+
+    /**
      *  Test IPv4 invalid ether type test case.
      */
     @Test

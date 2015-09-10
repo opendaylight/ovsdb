@@ -80,6 +80,7 @@ public class MatchUtils {
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
+    public static final String ICMP = "icmp";
 
     /**
      * Create Ingress Port Match dpidLong, inPort

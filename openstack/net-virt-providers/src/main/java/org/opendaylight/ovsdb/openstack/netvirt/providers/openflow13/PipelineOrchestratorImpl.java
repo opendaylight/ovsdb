@@ -8,18 +8,17 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -27,6 +26,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListener, PipelineOrchestrator {
     private static final Logger LOG = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
@@ -81,28 +83,18 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
         return serviceRegistry.get(service);
     }
 
-    public void start() {
+    public final void start() {
         eventHandler.submit(new Runnable()  {
             @Override
             public void run() {
                 try {
                     while (true) {
                         Node node = queue.take();
-                        /*
-                         * Since we are hooking on OpendaylightInventoryListener and as observed in
-                         * Bug 1997 multiple Threads trying to write to a same table at the same time
-                         * causes programming issues. Hence delaying the programming by a second to
-                         * avoid the clash. This hack/workaround should be removed once Bug 1997 is resolved.
-                         */
                         LOG.info(">>>>> dequeue: {}", node);
-                        Thread.sleep(1000);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            //LOG.info("pipeline: {} - {}", service, serviceInstance);
-                            if (serviceInstance != null) {
-                                if (southbound.getBridge(node) != null) {
-                                    serviceInstance.programDefaultPipelineRule(node);
-                                }
+                            if (serviceInstance != null && southbound.getBridge(node) != null) {
+                                serviceInstance.programDefaultPipelineRule(node);
                             }
                         }
                     }

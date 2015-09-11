@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
@@ -127,19 +126,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             Preconditions.checkNotNull(portNameExt);
 
             if (southbound.isBridgeOnOvsdbNode(ovsdbNode, brExt)) {
-                //this would look better if used a method like isNetworkPatchCreated()
-                if (isPortOnBridge(bridgeNode, portNameInt)) {
-                    Node extBridgeNode = southbound.readBridgeNode(ovsdbNode, brExt);
-                    if (isPortOnBridge(extBridgeNode, portNameExt)) {
-                        ready = true;
-                    } else {
-                        LOG.trace("isNodeL3Ready: node: {}, {} missing",
-                                bridgeNode, portNameExt);
-                    }
-                } else {
-                    LOG.trace("isNodeL3Ready: node: {}, {} missing",
-                            bridgeNode, portNameInt);
-                }
+                ready = isNetworkPatchCreated(bridgeNode, southbound.readBridgeNode(ovsdbNode, brExt));
             } else {
                 LOG.trace("isNodeL3Ready: node: {}, {} missing",
                         bridgeNode, brExt);
@@ -261,7 +248,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Returns true if a patch port exists between the Integration Bridge and Network Bridge
      */
-    private boolean isNetworkPatchCreated(Node node, Node intBridge, Node netBridge) {
+    private boolean isNetworkPatchCreated(Node intBridge, Node netBridge) {
         Preconditions.checkNotNull(configurationService);
 
         boolean isPatchCreated = false;
@@ -280,7 +267,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Creates the Integration Bridge
      */
-    private boolean createIntegrationBridge(Node ovsdbNode) throws Exception {
+    private boolean createIntegrationBridge(Node ovsdbNode) {
         Preconditions.checkNotNull(configurationService);
 
         if (!addBridge(ovsdbNode, configurationService.getIntegrationBridgeName())) {
@@ -290,7 +277,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return true;
     }
 
-    private boolean createExternalBridge(Node ovsdbNode) throws Exception {
+    private boolean createExternalBridge(Node ovsdbNode) {
         Preconditions.checkNotNull(configurationService);
 
         if (!addBridge(ovsdbNode, configurationService.getExternalBridgeName())) {
@@ -355,7 +342,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 Interface br-int
                     type: internal
      */
-    private boolean createBridges(Node bridgeNode, Node ovsdbNode, NeutronNetwork network) throws Exception {
+    private boolean createBridges(Node bridgeNode, Node ovsdbNode, NeutronNetwork network) {
         Preconditions.checkNotNull(configurationService);
         Preconditions.checkNotNull(networkingProviderManager);
 
@@ -408,7 +395,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Add a Port to a Bridge
      */
-    private boolean addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
+    private boolean addPortToBridge (Node node, String bridgeName, String portName) {
         boolean rv = true;
 
         if (southbound.extractTerminationPointAugmentation(node, portName) == null) {
@@ -432,7 +419,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Add a Patch Port to a Bridge
      */
-    private boolean addPatchPort (Node node, String bridgeName, String portName, String peerPortName) throws Exception {
+    private boolean addPatchPort (Node node, String bridgeName, String portName, String peerPortName) {
         boolean rv = true;
 
         if (southbound.extractTerminationPointAugmentation(node, portName) == null) {
@@ -456,7 +443,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Add Bridge to a Node
      */
-    private boolean addBridge(Node ovsdbNode, String bridgeName) throws Exception {
+    private boolean addBridge(Node ovsdbNode, String bridgeName) {
         boolean rv = true;
         if ((!southbound.isBridgeOnOvsdbNode(ovsdbNode, bridgeName)) ||
                 (southbound.getBridgeFromConfig(ovsdbNode, bridgeName) == null)) {
@@ -466,13 +453,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     private String getControllerIPAddress() {
-        InetAddress controllerIP = null;
-
         String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
         if (addressString != null) {
             try {
-                controllerIP = InetAddress.getByName(addressString);
-                if (controllerIP != null) {
+                if (InetAddress.getByName(addressString) != null) {
                     return addressString;
                 }
             } catch (UnknownHostException e) {
@@ -483,8 +467,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         addressString = ConfigProperties.getProperty(this.getClass(), "of.address");
         if (addressString != null) {
             try {
-                controllerIP = InetAddress.getByName(addressString);
-                if (controllerIP != null) {
+                if (InetAddress.getByName(addressString) != null) {
                     return addressString;
                 }
             } catch (UnknownHostException e) {

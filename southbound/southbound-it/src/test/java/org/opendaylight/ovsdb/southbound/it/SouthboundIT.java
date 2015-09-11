@@ -9,15 +9,19 @@ package org.opendaylight.ovsdb.southbound.it;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.ObjectArrays;
 import com.google.common.collect.Sets;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
@@ -97,6 +102,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -125,12 +131,42 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static Boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
 
+    // TODO Constants copied frmo AbstractConfigTestBase, need to be removed (see TODO below)
+    private static final String PAX_EXAM_UNPACK_DIRECTORY = "target/exam";
+    private static final String KARAF_DEBUG_PORT = "5005";
+    private static final String KARAF_DEBUG_PROP = "karaf.debug";
+    private static final String KEEP_UNPACK_DIRECTORY_PROP = "karaf.keep.unpack";
+
     @Inject
     private BundleContext bundleContext;
 
     @Configuration
     public Option[] config() {
-        return super.config();
+        // TODO Figure out how to use the parent Karaf setup, then just use super.config()
+        Option[] options = new Option[] {
+                when(Boolean.getBoolean(KARAF_DEBUG_PROP))
+                        .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
+                karafDistributionConfiguration().frameworkUrl(getKarafDistro())
+                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
+                        .useDeployFolder(false),
+                when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+                // Works only if we don't specify the feature repo and name
+                getLoggingOption()};
+        Option[] propertyOptions = getPropertiesOptions();
+        Option[] combinedOptions = new Option[options.length + propertyOptions.length];
+        System.arraycopy(options, 0, combinedOptions, 0, options.length);
+        System.arraycopy(propertyOptions, 0, combinedOptions, options.length, propertyOptions.length);
+        return combinedOptions;
+    }
+
+    @Override
+    public String getKarafDistro() {
+        return maven()
+                .groupId("org.opendaylight.ovsdb")
+                .artifactId("southbound-karaf")
+                .versionAsInProject()
+                .type("zip")
+                .getURL();
     }
 
     @Override
@@ -165,24 +201,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Override
-    public Option[] getFeaturesOptions() {
-        return new Option[]{};
-    }
-
-    @Override
-    public Option[] getLoggingOptions() {
-        Option[] options = new Option[] {
+    public Option getLoggingOption() {
+        return composite(
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.TRACE.name())
-        };
-
-        options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
-        return options;
+                        LogLevelOption.LogLevel.TRACE.name()),
+                super.getLoggingOption());
     }
 
-    @Override
-    public Option[] getPropertiesOptions() {
+    private Option[] getPropertiesOptions() {
         Properties props = new Properties(System.getProperties());
         String addressStr = props.getProperty(SouthboundITConstants.SERVER_IPADDRESS,
                 SouthboundITConstants.DEFAULT_SERVER_IPADDRESS);
@@ -206,8 +233,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Before
-    public void setUp() throws InterruptedException {
-        if (setup == true) {
+    @Override
+    public void setup() throws InterruptedException {
+        if (setup) {
             LOG.info("Skipping setUp, already initialized");
             return;
         }

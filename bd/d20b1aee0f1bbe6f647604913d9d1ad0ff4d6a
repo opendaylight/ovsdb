@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Fri, 11 Sep 2015 15:44:00 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/26749
+Project: ovsdb
+Branch: refs/heads/topic/routermanager

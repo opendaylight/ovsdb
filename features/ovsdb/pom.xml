@@ -233,6 +233,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
+     <dependency>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>dummyprovider</artifactId>
+      <version>${networkconfig.neutron.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>features-openflowplugin</artifactId>

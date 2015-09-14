@@ -51,7 +51,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundlescanner.implementation.version>0.6.0-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.6.0-SNAPSHOT</bundlescanner.version>
     <clustering.services_implementation.version>0.6.0-SNAPSHOT</clustering.services_implementation.version>
-    <commons.httpclient.version>0.3.0-SNAPSHOT</commons.httpclient.version>
     <configuration.implementation.version>0.6.0-SNAPSHOT</configuration.implementation.version>
     <configuration.version>0.6.0-SNAPSHOT</configuration.version>
     <connectionmanager.version>0.3.0-SNAPSHOT</connectionmanager.version>
@@ -64,7 +63,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <hosttracker.implementation.version>0.7.0-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.6.0-SNAPSHOT</hosttracker.northbound.version>
     <logging.bridge.version>0.6.0-SNAPSHOT</logging.bridge.version>
-    <protocol_plugins.stub.version>0.6.0-SNAPSHOT</protocol_plugins.stub.version>
     <routing.dijkstra_implementation.version>0.6.0-SNAPSHOT</routing.dijkstra_implementation.version>
     <sal.implementation.version>0.6.0-SNAPSHOT</sal.implementation.version>
     <security.version>0.6.0-SNAPSHOT</security.version>
@@ -436,11 +434,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>commons.httpclient</artifactId>
-      <version>${commons.httpclient.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.northbound</artifactId>
       <version>${northbound.commons.version}</version>
     </dependency>
@@ -467,11 +460,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
-      <version>${containermanager.it.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>containermanager.it.implementation</artifactId>
       <version>${containermanager.it.version}</version>
     </dependency>
     <dependency>
@@ -518,11 +506,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>logging.bridge</artifactId>
       <version>${logging.bridge.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>protocol_plugins.stub</artifactId>
-      <version>${protocol_plugins.stub.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

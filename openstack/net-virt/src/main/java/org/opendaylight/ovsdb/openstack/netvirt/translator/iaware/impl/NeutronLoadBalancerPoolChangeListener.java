@@ -8,18 +8,29 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl;
 
-import com.google.common.collect.ImmutableBiMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.*;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer_SessionPersistence;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_ID;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronLoadBalancerPoolAware;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Pool;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pool.Pools;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolHttp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolHttps;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolIcmp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolTcp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Pools;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pools.Pool;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pools.pool.members.Member;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150325.Neutron;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -27,9 +38,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
+import com.google.common.collect.ImmutableBiMap;
 
 public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NeutronLoadBalancerPoolChangeListener.class);
@@ -47,10 +56,10 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
 
     public NeutronLoadBalancerPoolChangeListener(DataBroker db){
         this.db = db;
-        InstanceIdentifier<Pools> path = InstanceIdentifier
+        InstanceIdentifier<Pool> path = InstanceIdentifier
                 .create(Neutron.class)
-                .child(Pool.class)
-                .child(Pools.class);
+                .child(Pools.class)
+                .child(Pool.class);
         LOG.debug("Register listener for Neutron Load Balancer Pool model data changes");
         registration =
                 this.db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, this, AsyncDataBroker.DataChangeScope.ONE);
@@ -75,7 +84,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newPool : changes.getCreatedData().entrySet()) {
-            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pools) newPool.getValue());
+            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool) newPool.getValue());
             for (Object entry : subscribers) {
                 INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
                 subscriber.neutronLoadBalancerPoolCreated(loadBalancerPool);
@@ -86,7 +95,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updatePool : changes.getUpdatedData().entrySet()) {
-            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pools)updatePool.getValue());
+            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool)updatePool.getValue());
             for(Object entry: subscribers){
                 INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
                 subscriber.neutronLoadBalancerPoolUpdated(loadBalancerPool);
@@ -97,7 +106,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedPoolPath : changes.getRemovedPaths()) {
-            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pools)changes.getOriginalData().get(deletedPoolPath));
+            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool)changes.getOriginalData().get(deletedPoolPath));
             for(Object entry: subscribers){
                 INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
                 subscriber.neutronLoadBalancerPoolDeleted(loadBalancerPool);
@@ -110,7 +119,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
      * in the original location, this method is called extractFields.
      * We will be utilizing similar code from other classes from the same package of neutron project.
      */
-    private NeutronLoadBalancerPool fromMd(Pools pool) {
+    private NeutronLoadBalancerPool fromMd(Pool pool) {
         NeutronLoadBalancerPool result = new NeutronLoadBalancerPool();
 
         result.setID(pool.getUuid().getValue());
@@ -121,11 +130,8 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
         result.setLoadBalancerPoolLbAlgorithm(pool.getLbAlgorithm());
 
         // TODO: setNeutronLoadBalancerPoolHealthMonitorID is a list? Fill in, when its needed.
-        if (pool.getHealthmonitorIds() != null) {
-            for (Uuid monitorId : pool.getHealthmonitorIds()) {
-                result.setNeutronLoadBalancerPoolHealthMonitorID(monitorId.getValue());
-                break;
-            }
+        if (pool.getHealthmonitorId() != null) {
+        	result.setNeutronLoadBalancerPoolHealthMonitorID(pool.getHealthmonitorId().getValue());
         }
 
         result.setLoadBalancerPoolAdminStateIsUp(pool.isAdminStateUp());
@@ -147,11 +153,11 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
 
         List<NeutronLoadBalancerPoolMember> loadBalancerPoolMembers = new ArrayList();
         if (pool.getMembers() != null) {
-            for (Uuid memberUuid : pool.getMembers()) {
-                NeutronLoadBalancerPoolMember member = new NeutronLoadBalancerPoolMember();
+            for (Member member : pool.getMembers().getMember()) {
+                NeutronLoadBalancerPoolMember neutronMember = new NeutronLoadBalancerPoolMember();
 
-                member.setPoolID(pool.getUuid().getValue());
-                member.setPoolMemberID(memberUuid.getValue());
+                neutronMember.setPoolID(pool.getUuid().getValue());
+                neutronMember.setPoolMemberID(member.getUuid().getValue());
 
                 // TODO: locate and populate remainder attributes, when its needed
                 // member.setPoolMemberAddress(xxx);
@@ -161,7 +167,7 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
                 // member.setPoolMemberTenantID(xxx);
                 // member.setPoolMemberWeight(xxx);
 
-                loadBalancerPoolMembers.add(member);
+                loadBalancerPoolMembers.add(neutronMember);
             }
         }
         result.setLoadBalancerPoolMembers(loadBalancerPoolMembers);

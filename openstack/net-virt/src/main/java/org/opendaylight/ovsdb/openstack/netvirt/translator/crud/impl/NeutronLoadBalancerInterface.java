@@ -20,9 +20,9 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Loadbalancer;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.loadbalancer.Loadbalancers;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.loadbalancer.LoadbalancersBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Loadbalancers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.loadbalancers.Loadbalancer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.loadbalancers.LoadbalancerBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150325.Neutron;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * No need to worry about the write/update related methods here. OVSDB net-virt will use these CRUD Interface
  * only for reading. We will cleanup these interface/methods later.
  */
-public class NeutronLoadBalancerInterface extends AbstractNeutronInterface<Loadbalancers, NeutronLoadBalancer> implements INeutronLoadBalancerCRUD {
+public class NeutronLoadBalancerInterface extends AbstractNeutronInterface<Loadbalancer, NeutronLoadBalancer> implements INeutronLoadBalancerCRUD {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronLoadBalancerInterface.class);
     private ConcurrentMap<String, NeutronLoadBalancer> loadBalancerDB  = new ConcurrentHashMap<String, NeutronLoadBalancer>();
 
@@ -106,23 +106,23 @@ public class NeutronLoadBalancerInterface extends AbstractNeutronInterface<Loadb
     }
 
     @Override
-    protected Loadbalancers toMd(String uuid) {
-        LoadbalancersBuilder loadBalancersBuilder = new LoadbalancersBuilder();
+    protected Loadbalancer toMd(String uuid) {
+        LoadbalancerBuilder loadBalancersBuilder = new LoadbalancerBuilder();
         loadBalancersBuilder.setUuid(toUuid(uuid));
         return loadBalancersBuilder.build();
     }
 
     @Override
-    protected InstanceIdentifier<Loadbalancers> createInstanceIdentifier(
-            Loadbalancers loadBalancers) {
+    protected InstanceIdentifier<Loadbalancer> createInstanceIdentifier(
+            Loadbalancer loadBalancer) {
         return InstanceIdentifier.create(Neutron.class)
-                .child(Loadbalancer.class)
-                .child(Loadbalancers.class, loadBalancers.getKey());
+                .child(Loadbalancers.class)
+                .child(Loadbalancer.class, loadBalancer.getKey());
     }
 
     @Override
-    protected Loadbalancers toMd(NeutronLoadBalancer loadBalancer) {
-        LoadbalancersBuilder loadBalancersBuilder = new LoadbalancersBuilder();
+    protected Loadbalancer toMd(NeutronLoadBalancer loadBalancer) {
+        LoadbalancerBuilder loadBalancersBuilder = new LoadbalancerBuilder();
         loadBalancersBuilder.setAdminStateUp(loadBalancer.getLoadBalancerAdminStateUp());
         if (loadBalancer.getLoadBalancerDescription() != null) {
             loadBalancersBuilder.setDescr(loadBalancer.getLoadBalancerDescription());

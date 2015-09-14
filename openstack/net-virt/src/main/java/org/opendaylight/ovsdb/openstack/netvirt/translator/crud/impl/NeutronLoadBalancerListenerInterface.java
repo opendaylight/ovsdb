@@ -13,7 +13,7 @@ import java.util.List;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerListenerCRUD;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.listener.Listeners;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Listeners;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;

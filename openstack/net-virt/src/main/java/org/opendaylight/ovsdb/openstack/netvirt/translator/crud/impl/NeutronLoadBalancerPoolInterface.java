@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer_SessionPersistence;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_ID;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
@@ -27,9 +26,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolHttp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolHttps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolTcp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Pool;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pool.Pools;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pool.PoolsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.Pools;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pools.Pool;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.lbaas.attributes.pools.PoolBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.lbaasv2.rev141002.pool.attributes.SessionPersistenceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150325.Neutron;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -46,7 +45,7 @@ import com.google.common.collect.ImmutableBiMap;
  * only for reading. We will cleanup these interface/methods later.
  */
 
-public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<Pools, NeutronLoadBalancerPool> implements INeutronLoadBalancerPoolCRUD {
+public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<Pool, NeutronLoadBalancerPool> implements INeutronLoadBalancerPoolCRUD {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronLoadBalancerPoolInterface.class);
     private ConcurrentMap<String, NeutronLoadBalancerPool> loadBalancerPoolDB = new ConcurrentHashMap<String, NeutronLoadBalancerPool>();
 
@@ -123,72 +122,65 @@ public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<P
     }
 
     @Override
-    protected Pools toMd(String uuid) {
-        PoolsBuilder poolsBuilder = new PoolsBuilder();
+    protected Pool toMd(String uuid) {
+        PoolBuilder poolsBuilder = new PoolBuilder();
         poolsBuilder.setUuid(toUuid(uuid));
         return poolsBuilder.build();
     }
 
     @Override
-    protected InstanceIdentifier<Pools> createInstanceIdentifier(Pools pools) {
+    protected InstanceIdentifier<Pool> createInstanceIdentifier(Pool pools) {
         return InstanceIdentifier.create(Neutron.class)
-                .child(Pool.class)
-                .child(Pools.class, pools.getKey());
+                .child(Pools.class)
+                .child(Pool.class, pools.getKey());
     }
 
     @Override
-    protected Pools toMd(NeutronLoadBalancerPool pools) {
-        PoolsBuilder poolsBuilder = new PoolsBuilder();
-        poolsBuilder.setAdminStateUp(pools.getLoadBalancerPoolAdminIsStateIsUp());
-        if (pools.getLoadBalancerPoolDescription() != null) {
-            poolsBuilder.setDescr(pools.getLoadBalancerPoolDescription());
+    protected Pool toMd(NeutronLoadBalancerPool pool) {
+        PoolBuilder poolBuilder = new PoolBuilder();
+        poolBuilder.setAdminStateUp(pool.getLoadBalancerPoolAdminIsStateIsUp());
+        if (pool.getLoadBalancerPoolDescription() != null) {
+            poolBuilder.setDescr(pool.getLoadBalancerPoolDescription());
         }
-        if (pools.getNeutronLoadBalancerPoolHealthMonitorID() != null) {
-            List<Uuid> listHealthMonitor = new ArrayList<Uuid>();
-            listHealthMonitor.add(toUuid(pools.getNeutronLoadBalancerPoolHealthMonitorID()));
-            poolsBuilder.setHealthmonitorIds(listHealthMonitor);
+        if (pool.getNeutronLoadBalancerPoolHealthMonitorID() != null) {
+            poolBuilder.setHealthmonitorId(toUuid(pool.getNeutronLoadBalancerPoolHealthMonitorID()));
         }
-        if (pools.getLoadBalancerPoolLbAlgorithm() != null) {
-            poolsBuilder.setLbAlgorithm(pools.getLoadBalancerPoolLbAlgorithm());
+        if (pool.getLoadBalancerPoolLbAlgorithm() != null) {
+            poolBuilder.setLbAlgorithm(pool.getLoadBalancerPoolLbAlgorithm());
         }
-        if (pools.getLoadBalancerPoolListeners() != null) {
+        if (pool.getLoadBalancerPoolListeners() != null) {
             List<Uuid> listListener = new ArrayList<Uuid>();
-            for (Neutron_ID neutron_id : pools.getLoadBalancerPoolListeners()) {
+            for (Neutron_ID neutron_id : pool.getLoadBalancerPoolListeners()) {
                 listListener.add(toUuid(neutron_id.getID()));
             }
-            poolsBuilder.setListeners(listListener);
+            poolBuilder.setListeners(listListener);
         }
-        if (pools.getLoadBalancerPoolMembers() != null) {
-            List<Uuid> listMember = new ArrayList<Uuid>();
-            for (NeutronLoadBalancerPoolMember loadBalancerPoolMember : pools.getLoadBalancerPoolMembers()) {
-                listMember.add(toUuid(loadBalancerPoolMember.getID()));
-            }
-            poolsBuilder.setMembers(listMember);
+        // because members are another container, we don't want to copy
+        // it over, so just skip it here
+        if (pool.getLoadBalancerPoolName() != null) {
+            poolBuilder.setName(pool.getLoadBalancerPoolName());
         }
-        if (pools.getLoadBalancerPoolName() != null) {
-            poolsBuilder.setName(pools.getLoadBalancerPoolName());
-        }
-        if (pools.getLoadBalancerPoolProtocol() != null) {
+        if (pool.getLoadBalancerPoolProtocol() != null) {
             ImmutableBiMap<String, Class<? extends ProtocolBase>> mapper =
                 PROTOCOL_MAP.inverse();
-            poolsBuilder.setProtocol((Class<? extends ProtocolBase>) mapper.get(pools.getLoadBalancerPoolProtocol()));
+            poolBuilder.setProtocol((Class<? extends ProtocolBase>) mapper.get(pool.getLoadBalancerPoolProtocol()));
         }
-        if (pools.getLoadBalancerPoolSessionPersistence() != null) {
-            NeutronLoadBalancer_SessionPersistence sessionPersistence = pools.getLoadBalancerPoolSessionPersistence();
+        if (pool.getLoadBalancerPoolSessionPersistence() != null) {
+            NeutronLoadBalancer_SessionPersistence sessionPersistence = pool.getLoadBalancerPoolSessionPersistence();
             SessionPersistenceBuilder sessionPersistenceBuilder = new SessionPersistenceBuilder();
             sessionPersistenceBuilder.setCookieName(sessionPersistence.getCookieName());
             sessionPersistenceBuilder.setType(sessionPersistence.getType());
-            poolsBuilder.setSessionPersistence(sessionPersistenceBuilder.build());
+            poolBuilder.setSessionPersistence(sessionPersistenceBuilder.build());
         }
-        if (pools.getLoadBalancerPoolTenantID() != null) {
-            poolsBuilder.setTenantId(toUuid(pools.getLoadBalancerPoolTenantID()));
+        if (pool.getLoadBalancerPoolTenantID() != null) {
+            poolBuilder.setTenantId(toUuid(pool.getLoadBalancerPoolTenantID()));
         }
-        if (pools.getID() != null) {
-            poolsBuilder.setUuid(toUuid(pools.getID()));
+        if (pool.getID() != null) {
+            poolBuilder.setUuid(toUuid(pool.getID()));
         } else {
             LOGGER.warn("Attempting to write neutron load balancer pool without UUID");
         }
-        return poolsBuilder.build();
+        return poolBuilder.build();
     }
 
     public static void registerNewInterface(BundleContext context,

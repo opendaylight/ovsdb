@@ -93,24 +93,27 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newSubnet : changes.getCreatedData().entrySet()) {
-            NeutronSubnet subnet = fromMd((Subnet)newSubnet.getValue());
-            for(Object entry: subscribers){
-                INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
-                subscriber.neutronSubnetCreated(subnet);
-            }
+        	if(newSubnet instanceof Subnet){
+                NeutronSubnet subnet = fromMd((Subnet)newSubnet.getValue());
+                for(Object entry: subscribers){
+                    INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
+                    subscriber.neutronSubnetCreated(subnet);
+                }
+        	}
         }
-
     }
 
     private void updateSubnet(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateSubnet : changes.getUpdatedData().entrySet()) {
-            NeutronSubnet subnet = fromMd((Subnet)updateSubnet.getValue());
-            for(Object entry: subscribers){
-                INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
-                subscriber.neutronSubnetUpdated(subnet);
-            }
+        	if(updateSubnet instanceof Subnet){
+                NeutronSubnet subnet = fromMd((Subnet)updateSubnet.getValue());
+                for(Object entry: subscribers){
+                    INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
+                    subscriber.neutronSubnetUpdated(subnet);
+                }
+        	}
         }
     }
 
@@ -118,11 +121,13 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedSubnetPath : changes.getRemovedPaths()) {
-            NeutronSubnet subnet = fromMd((Subnet)changes.getOriginalData().get(deletedSubnetPath));
-            for(Object entry: subscribers){
-                INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
-                subscriber.neutronSubnetDeleted(subnet);
-            }
+        	if(deletedSubnetPath.getTargetType().equals(Subnet.class)){
+                NeutronSubnet subnet = fromMd((Subnet)changes.getOriginalData().get(deletedSubnetPath));
+                for(Object entry: subscribers){
+                    INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
+                    subscriber.neutronSubnetDeleted(subnet);
+                }
+        	}
         }
     }
 

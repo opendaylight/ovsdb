@@ -84,33 +84,39 @@ public class NeutronLoadBalancerPoolChangeListener implements DataChangeListener
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newPool : changes.getCreatedData().entrySet()) {
-            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool) newPool.getValue());
-            for (Object entry : subscribers) {
-                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
-                subscriber.neutronLoadBalancerPoolCreated(loadBalancerPool);
-            }
+        	if(newPool instanceof Pool){
+                NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool) newPool.getValue());
+                for (Object entry : subscribers) {
+                    INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
+                    subscriber.neutronLoadBalancerPoolCreated(loadBalancerPool);
+                }
+        	}
         }
     }
     private void updatePool(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updatePool : changes.getUpdatedData().entrySet()) {
-            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool)updatePool.getValue());
-            for(Object entry: subscribers){
-                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
-                subscriber.neutronLoadBalancerPoolUpdated(loadBalancerPool);
-            }
+        	if(updatePool instanceof Pool){
+                NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool)updatePool.getValue());
+                for(Object entry: subscribers){
+                    INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
+                    subscriber.neutronLoadBalancerPoolUpdated(loadBalancerPool);
+                }
+        	}
         }
     }
     private void deletePool(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedPoolPath : changes.getRemovedPaths()) {
-            NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool)changes.getOriginalData().get(deletedPoolPath));
-            for(Object entry: subscribers){
-                INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
-                subscriber.neutronLoadBalancerPoolDeleted(loadBalancerPool);
-            }
+        	if(deletedPoolPath.getTargetType().equals(Pool.class)){
+                NeutronLoadBalancerPool loadBalancerPool = fromMd((Pool)changes.getOriginalData().get(deletedPoolPath));
+                for(Object entry: subscribers){
+                    INeutronLoadBalancerPoolAware subscriber = (INeutronLoadBalancerPoolAware) entry;
+                    subscriber.neutronLoadBalancerPoolDeleted(loadBalancerPool);
+                }
+        	}
         }
     }
 

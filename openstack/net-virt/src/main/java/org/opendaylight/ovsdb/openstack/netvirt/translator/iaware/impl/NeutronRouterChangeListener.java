@@ -67,11 +67,13 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newRouter : changes.getCreatedData().entrySet()) {
-            NeutronRouter router = fromMd((Router)newRouter.getValue());
-            for(Object entry: subscribers){
-                INeutronRouterAware subscriber = (INeutronRouterAware)entry;
-                subscriber.neutronRouterCreated(router);
-            }
+        	if(newRouter instanceof Router){
+                NeutronRouter router = fromMd((Router)newRouter.getValue());
+                for(Object entry: subscribers){
+                    INeutronRouterAware subscriber = (INeutronRouterAware)entry;
+                    subscriber.neutronRouterCreated(router);
+                }
+        	}
         }
 
     }
@@ -80,11 +82,13 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateRouter : changes.getUpdatedData().entrySet()) {
-            NeutronRouter router = fromMd((Router)updateRouter.getValue());
-            for(Object entry: subscribers){
-                INeutronRouterAware subscriber = (INeutronRouterAware)entry;
-                subscriber.neutronRouterUpdated(router);
-            }
+        	if(updateRouter instanceof Router){
+                NeutronRouter router = fromMd((Router)updateRouter.getValue());
+                for(Object entry: subscribers){
+                    INeutronRouterAware subscriber = (INeutronRouterAware)entry;
+                    subscriber.neutronRouterUpdated(router);
+                }
+        	}
         }
     }
 
@@ -92,11 +96,13 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedRouterPath : changes.getRemovedPaths()) {
-            NeutronRouter router = fromMd((Router)changes.getOriginalData().get(deletedRouterPath));
-            for(Object entry: subscribers){
-                INeutronRouterAware subscriber = (INeutronRouterAware)entry;
-                subscriber.neutronRouterDeleted(router);
-            }
+        	if(deletedRouterPath.getTargetType().equals(Router.class)){
+                NeutronRouter router = fromMd((Router)changes.getOriginalData().get(deletedRouterPath));
+                for(Object entry: subscribers){
+                    INeutronRouterAware subscriber = (INeutronRouterAware)entry;
+                    subscriber.neutronRouterDeleted(router);
+                }
+        	}
         }
     }
 

@@ -58,24 +58,27 @@ public class NeutronFloatingIPChangeListener implements DataChangeListener, Auto
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newFloatingIP : changes.getCreatedData().entrySet()) {
-            NeutronFloatingIP floatingip= fromMd((Floatingip)newFloatingIP.getValue());
-            for(Object entry: subscribers){
-                INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
-                subscriber.neutronFloatingIPCreated(floatingip);
-            }
+        	if(newFloatingIP instanceof Floatingip){
+                NeutronFloatingIP floatingip= fromMd((Floatingip)newFloatingIP.getValue());
+                for(Object entry: subscribers){
+                    INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
+                    subscriber.neutronFloatingIPCreated(floatingip);
+                }
+        	}
         }
-
     }
 
     private void updateFloatingIP(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateFloatingIP : changes.getUpdatedData().entrySet()) {
-            NeutronFloatingIP floatingip = fromMd((Floatingip)updateFloatingIP.getValue());
-            for(Object entry: subscribers){
-                INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
-                subscriber.neutronFloatingIPUpdated(floatingip);
-            }
+        	if(updateFloatingIP instanceof Floatingip){
+                NeutronFloatingIP floatingip = fromMd((Floatingip)updateFloatingIP.getValue());
+                for(Object entry: subscribers){
+                    INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
+                    subscriber.neutronFloatingIPUpdated(floatingip);
+                }
+        	}
         }
     }
 
@@ -83,11 +86,13 @@ public class NeutronFloatingIPChangeListener implements DataChangeListener, Auto
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedFloatingIPPath : changes.getRemovedPaths()) {
-            NeutronFloatingIP floatingip = fromMd((Floatingip)changes.getOriginalData().get(deletedFloatingIPPath));
-            for(Object entry: subscribers){
-                INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
-                subscriber.neutronFloatingIPDeleted(floatingip);
-            }
+        	if(deletedFloatingIPPath.getTargetType().equals(Floatingip.class)){
+                NeutronFloatingIP floatingip = fromMd((Floatingip)changes.getOriginalData().get(deletedFloatingIPPath));
+                for(Object entry: subscribers){
+                    INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
+                    subscriber.neutronFloatingIPDeleted(floatingip);
+                }
+        	}
         }
     }
 

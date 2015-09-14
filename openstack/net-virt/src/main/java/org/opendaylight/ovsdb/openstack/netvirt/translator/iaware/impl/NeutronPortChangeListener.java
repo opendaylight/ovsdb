@@ -75,24 +75,27 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newPort : changes.getCreatedData().entrySet()) {
-            NeutronPort port = fromMd((Port)newPort.getValue());
-            for(Object entry: subscribers){
-                INeutronPortAware subscriber = (INeutronPortAware)entry;
-                subscriber.neutronPortCreated(port);
-            }
+        	if(newPort instanceof Port){
+                NeutronPort port = fromMd((Port)newPort.getValue());
+                for(Object entry: subscribers){
+                    INeutronPortAware subscriber = (INeutronPortAware)entry;
+                    subscriber.neutronPortCreated(port);
+                }
+        	}
         }
-
     }
 
     private void updatePort(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updatePort : changes.getUpdatedData().entrySet()) {
-            NeutronPort port = fromMd((Port)updatePort.getValue());
-            for(Object entry: subscribers){
-                INeutronPortAware subscriber = (INeutronPortAware)entry;
-                subscriber.neutronPortUpdated(port);
-            }
+        	if(updatePort instanceof Port){
+                NeutronPort port = fromMd((Port)updatePort.getValue());
+                for(Object entry: subscribers){
+                    INeutronPortAware subscriber = (INeutronPortAware)entry;
+                    subscriber.neutronPortUpdated(port);
+                }
+        	}
         }
     }
 
@@ -100,11 +103,13 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedPortPath : changes.getRemovedPaths()) {
-            NeutronPort port = fromMd((Port)changes.getOriginalData().get(deletedPortPath));
-            for(Object entry: subscribers){
-                INeutronPortAware subscriber = (INeutronPortAware)entry;
-                subscriber.neutronPortDeleted(port);
-            }
+        	if(deletedPortPath.getTargetType().equals(Port.class)){
+                NeutronPort port = fromMd((Port)changes.getOriginalData().get(deletedPortPath));
+                for(Object entry: subscribers){
+                    INeutronPortAware subscriber = (INeutronPortAware)entry;
+                    subscriber.neutronPortDeleted(port);
+                }
+        	}
         }
     }
 

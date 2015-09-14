@@ -80,24 +80,27 @@ public class NeutronNetworkChangeListener implements DataChangeListener, AutoClo
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newNetwork : changes.getCreatedData().entrySet()) {
-            NeutronNetwork network = fromMd((Network)newNetwork.getValue());
-            for(Object entry: subscribers){
-                INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
-                subscriber.neutronNetworkCreated(network);
-            }
+        	if(newNetwork instanceof Network){
+                NeutronNetwork network = fromMd((Network)newNetwork.getValue());
+                for(Object entry: subscribers){
+                    INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
+                    subscriber.neutronNetworkCreated(network);
+                }
+        	}
         }
-
     }
 
     private void updateNetwork(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateNetwork : changes.getUpdatedData().entrySet()) {
-            NeutronNetwork network = fromMd((Network)updateNetwork.getValue());
-            for(Object entry: subscribers){
-                INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
-                subscriber.neutronNetworkUpdated(network);
-            }
+        	if(updateNetwork instanceof Network){
+                NeutronNetwork network = fromMd((Network)updateNetwork.getValue());
+                for(Object entry: subscribers){
+                    INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
+                    subscriber.neutronNetworkUpdated(network);
+                }
+        	}
         }
     }
 
@@ -105,11 +108,13 @@ public class NeutronNetworkChangeListener implements DataChangeListener, AutoClo
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (InstanceIdentifier<?> deletedNetworkPath : changes.getRemovedPaths()) {
-            NeutronNetwork network = fromMd((Network)changes.getOriginalData().get(deletedNetworkPath));
-            for(Object entry: subscribers){
-                INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
-                subscriber.neutronNetworkDeleted(network);
-            }
+        	if(deletedNetworkPath.getTargetType().equals(Network.class)){
+                NeutronNetwork network = fromMd((Network)changes.getOriginalData().get(deletedNetworkPath));
+                for(Object entry: subscribers){
+                    INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
+                    subscriber.neutronNetworkDeleted(network);
+                }
+        	}
         }
     }
 

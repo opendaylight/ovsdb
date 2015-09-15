@@ -220,7 +220,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public NodeKey getNodeKey() {
-        return getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
+        return getInstanceIdentifier().firstKeyOf(Node.class);
     }
 
     public NodeId getNodeId() {

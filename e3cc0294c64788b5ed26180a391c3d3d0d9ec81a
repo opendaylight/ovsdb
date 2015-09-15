@@ -256,6 +256,24 @@
       "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_d685b5ad",
+        "filename": "hwvtepsouthbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-15T10:25:48Z",
+      "side": 1,
+      "message": "nope, it\u0027s points to the parent repo where the code is. Hwvtep southbound plugin code will be hosted in ovsdb.git repo, so please refer to that.",
+      "parentUuid": "3a79b1b5_abd1dd58",
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

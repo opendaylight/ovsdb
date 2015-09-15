@@ -58,7 +58,7 @@ public class NeutronFloatingIPChangeListener implements DataChangeListener, Auto
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newFloatingIP : changes.getCreatedData().entrySet()) {
-        	if(newFloatingIP instanceof Floatingip){
+        	if(newFloatingIP.getValue() instanceof Floatingip){
                 NeutronFloatingIP floatingip= fromMd((Floatingip)newFloatingIP.getValue());
                 for(Object entry: subscribers){
                     INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;
@@ -72,7 +72,7 @@ public class NeutronFloatingIPChangeListener implements DataChangeListener, Auto
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateFloatingIP : changes.getUpdatedData().entrySet()) {
-        	if(updateFloatingIP instanceof Floatingip){
+        	if(updateFloatingIP.getValue() instanceof Floatingip){
                 NeutronFloatingIP floatingip = fromMd((Floatingip)updateFloatingIP.getValue());
                 for(Object entry: subscribers){
                     INeutronFloatingIPAware subscriber = (INeutronFloatingIPAware)entry;

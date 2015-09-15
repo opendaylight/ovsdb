@@ -67,7 +67,7 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newRouter : changes.getCreatedData().entrySet()) {
-        	if(newRouter instanceof Router){
+        	if(newRouter.getValue() instanceof Router){
                 NeutronRouter router = fromMd((Router)newRouter.getValue());
                 for(Object entry: subscribers){
                     INeutronRouterAware subscriber = (INeutronRouterAware)entry;
@@ -82,7 +82,7 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateRouter : changes.getUpdatedData().entrySet()) {
-        	if(updateRouter instanceof Router){
+        	if(updateRouter.getValue() instanceof Router){
                 NeutronRouter router = fromMd((Router)updateRouter.getValue());
                 for(Object entry: subscribers){
                     INeutronRouterAware subscriber = (INeutronRouterAware)entry;

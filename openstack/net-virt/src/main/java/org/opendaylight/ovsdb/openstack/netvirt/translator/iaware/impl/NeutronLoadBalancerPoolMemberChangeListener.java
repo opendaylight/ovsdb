@@ -69,7 +69,7 @@ public class NeutronLoadBalancerPoolMemberChangeListener implements DataChangeLi
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newPoolMember : changes.getCreatedData().entrySet()) {
-        	if(newPoolMember instanceof Member){
+        	if(newPoolMember.getValue() instanceof Member){
                 NeutronLoadBalancerPoolMember neutronLBPoolMember = fromMd(newPoolMember.getKey(), (Member) newPoolMember.getValue());
                 for (Object entry : subscribers) {
                     INeutronLoadBalancerPoolMemberAware subscriber = (INeutronLoadBalancerPoolMemberAware) entry;
@@ -82,7 +82,7 @@ public class NeutronLoadBalancerPoolMemberChangeListener implements DataChangeLi
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updatePoolMember : changes.getUpdatedData().entrySet()) {
-        	if(updatePoolMember instanceof Member){
+        	if(updatePoolMember.getValue() instanceof Member){
                 NeutronLoadBalancerPoolMember neutronLBPoolMember =
                         fromMd(updatePoolMember.getKey(), (Member) updatePoolMember.getValue());
                 for(Object entry: subscribers){

@@ -93,7 +93,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newSubnet : changes.getCreatedData().entrySet()) {
-        	if(newSubnet instanceof Subnet){
+        	if(newSubnet.getValue() instanceof Subnet){
                 NeutronSubnet subnet = fromMd((Subnet)newSubnet.getValue());
                 for(Object entry: subscribers){
                     INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;
@@ -107,7 +107,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateSubnet : changes.getUpdatedData().entrySet()) {
-        	if(updateSubnet instanceof Subnet){
+        	if(updateSubnet.getValue() instanceof Subnet){
                 NeutronSubnet subnet = fromMd((Subnet)updateSubnet.getValue());
                 for(Object entry: subscribers){
                     INeutronSubnetAware subscriber = (INeutronSubnetAware)entry;

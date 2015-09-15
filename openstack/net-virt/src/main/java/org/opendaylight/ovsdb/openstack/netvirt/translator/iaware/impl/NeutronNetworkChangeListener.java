@@ -80,7 +80,7 @@ public class NeutronNetworkChangeListener implements DataChangeListener, AutoClo
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newNetwork : changes.getCreatedData().entrySet()) {
-        	if(newNetwork instanceof Network){
+        	if(newNetwork.getValue() instanceof Network){
                 NeutronNetwork network = fromMd((Network)newNetwork.getValue());
                 for(Object entry: subscribers){
                     INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;
@@ -94,7 +94,7 @@ public class NeutronNetworkChangeListener implements DataChangeListener, AutoClo
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updateNetwork : changes.getUpdatedData().entrySet()) {
-        	if(updateNetwork instanceof Network){
+        	if(updateNetwork.getValue() instanceof Network){
                 NeutronNetwork network = fromMd((Network)updateNetwork.getValue());
                 for(Object entry: subscribers){
                     INeutronNetworkAware subscriber = (INeutronNetworkAware)entry;

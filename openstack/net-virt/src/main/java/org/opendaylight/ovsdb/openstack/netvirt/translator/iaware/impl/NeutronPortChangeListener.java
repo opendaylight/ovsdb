@@ -75,7 +75,7 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> newPort : changes.getCreatedData().entrySet()) {
-        	if(newPort instanceof Port){
+        	if(newPort.getValue() instanceof Port){
                 NeutronPort port = fromMd((Port)newPort.getValue());
                 for(Object entry: subscribers){
                     INeutronPortAware subscriber = (INeutronPortAware)entry;
@@ -89,7 +89,7 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
         for (Entry<InstanceIdentifier<?>, DataObject> updatePort : changes.getUpdatedData().entrySet()) {
-        	if(updatePort instanceof Port){
+        	if(updatePort.getValue() instanceof Port){
                 NeutronPort port = fromMd((Port)updatePort.getValue());
                 for(Object entry: subscribers){
                     INeutronPortAware subscriber = (INeutronPortAware)entry;

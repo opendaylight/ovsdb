@@ -200,16 +200,6 @@ public class NeutronRouterInterface extends  AbstractNeutronInterface<Router, Ne
         return routerBuilder.build();
     }
 
-    public static void registerNewInterface(BundleContext context,
-                                            ProviderContext providerContext,
-                                            List<ServiceRegistration<?>> registrations) {
-        NeutronRouterInterface neutronRouterInterface = new NeutronRouterInterface(providerContext);
-        ServiceRegistration<INeutronRouterCRUD> neutronRouterInterfaceRegistration = context.registerService(INeutronRouterCRUD.class, neutronRouterInterface, null);
-        if(neutronRouterInterfaceRegistration != null) {
-            registrations.add(neutronRouterInterfaceRegistration);
-        }
-    }
-
     public NeutronRouter fromMd(Router router) {
         NeutronRouter result = new NeutronRouter();
         result.setID(String.valueOf(router.getUuid().getValue()));
@@ -261,4 +251,14 @@ public class NeutronRouterInterface extends  AbstractNeutronInterface<Router, Ne
         }
         return result;
     }
+    
+    public static void registerNewInterface(BundleContext context,
+            ProviderContext providerContext,
+            List<ServiceRegistration<?>> registrations) {
+    	NeutronRouterInterface neutronRouterInterface = new NeutronRouterInterface(providerContext);
+    	ServiceRegistration<INeutronRouterCRUD> neutronRouterInterfaceRegistration = context.registerService(INeutronRouterCRUD.class, neutronRouterInterface, null);
+    	if(neutronRouterInterfaceRegistration != null) {
+    		registrations.add(neutronRouterInterfaceRegistration);
+    	}
+	}
 }

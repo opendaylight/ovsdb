@@ -34,6 +34,24 @@
       "revId": "79f4100fc2d4aa9ba8feabc843070037e4b25cee",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_314c339e",
+        "filename": "southbound/southbound-impl/src/main/config/default-config.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-15T13:32:37Z",
+      "side": 1,
+      "message": "but this code is from southbound plugin code, why archtype is modifying this file?",
+      "parentUuid": "3a79b1b5_b1de036c",
+      "revId": "79f4100fc2d4aa9ba8feabc843070037e4b25cee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -67,13 +67,14 @@ public class ArpSender {
         checkNotNull(nodeIid);
         // node connector representing all physical ports on node
         NodeConnectorKey nodeConnectorKey = new NodeConnectorKey(createNodeConnectorId(OFPP_ALL,
-                nodeIid.firstKeyOf(Node.class).getId()));
+                nodeIid.firstKeyOf(Node.class, NodeKey.class).getId()));
         InstanceIdentifier<NodeConnector> egressNc = nodeIid.child(NodeConnector.class, nodeConnectorKey);
         return sendArp(senderAddress, tpa, egressNc);
     }
 
     private NodeConnectorId createNodeConnectorId(String connectorId, NodeId nodeId) {
-        return new NodeConnectorId(nodeId.getValue() + ":" + connectorId);
+        StringBuilder stringId = new StringBuilder(nodeId.getValue()).append(":").append(connectorId);
+        return new NodeConnectorId(stringId.toString());
     }
 
     /**

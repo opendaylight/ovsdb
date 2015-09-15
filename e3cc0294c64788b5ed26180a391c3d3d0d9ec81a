@@ -274,6 +274,24 @@
       "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_317bd3f6",
+        "filename": "hwvtepsouthbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-09-15T13:13:16Z",
+      "side": 1,
+      "message": "It is already fixed in patchset2. Can\u0027t you see the change in latest?",
+      "parentUuid": "3a79b1b5_d685b5ad",
+      "revId": "e3cc0294c64788b5ed26180a391c3d3d0d9ec81a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

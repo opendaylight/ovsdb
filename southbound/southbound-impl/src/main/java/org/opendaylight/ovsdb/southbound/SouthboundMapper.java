@@ -61,7 +61,7 @@ public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
 
     private static NodeId createNodeId(OvsdbConnectionInstance client) {
-        NodeKey key = client.getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
+        NodeKey key = client.getInstanceIdentifier().firstKeyOf(Node.class);
         return key.getNodeId();
 
     }
@@ -137,7 +137,7 @@ public class SouthboundMapper {
     }
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = iid.firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 
@@ -210,7 +210,7 @@ public class SouthboundMapper {
     }
 
     public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
-        Set<String> protocols = new HashSet<String>();
+        Set<String> protocols = new HashSet<>();
         if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
             for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
@@ -335,7 +335,7 @@ public class SouthboundMapper {
 
     public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
-        Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
+        Map<UUID,Controller> controllerMap = new HashMap<>();
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
             for (ControllerEntry controllerEntry : controllerEntries) {
                 String controllerNamedUUID = "Controller_" + getRandomUUID();

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_16ed6d8b",
+        "filename": "southbound/southbound-impl/src/main/config/default-config.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-15T10:25:39Z",
+      "side": 1,
+      "message": "just curious, although it\u0027s commented out, but why southbound-impl revision is changed?",
+      "revId": "79f4100fc2d4aa9ba8feabc843070037e4b25cee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

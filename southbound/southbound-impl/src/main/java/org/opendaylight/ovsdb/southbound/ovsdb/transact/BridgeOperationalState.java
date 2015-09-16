@@ -78,7 +78,7 @@ public class BridgeOperationalState {
         if (iid != null) {
             Optional<Node> nodeOptional = getBridgeNode(iid);
             if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
-                TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class);
+                TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class, TerminationPointKey.class);
                 if (key != null) {
                     for (TerminationPoint tp:nodeOptional.get().getTerminationPoint()) {
                         if (tp.getKey().equals(key)) {
@@ -103,7 +103,7 @@ public class BridgeOperationalState {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional.isPresent() && ovsdbBridgeOptional.get().getControllerEntry() != null) {
-                ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class);
+                ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class, ControllerEntryKey.class);
                 if (key != null) {
                     for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {
                         if (entry.getKey().equals(key)) {
@@ -120,7 +120,7 @@ public class BridgeOperationalState {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional.isPresent() && ovsdbBridgeOptional.get().getProtocolEntry() != null) {
-                ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class);
+                ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class, ProtocolEntryKey.class);
                 if (key != null) {
                     for (ProtocolEntry entry: ovsdbBridgeOptional.get().getProtocolEntry()) {
                         if (entry.getKey().equals(key)) {

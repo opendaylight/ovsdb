@@ -96,21 +96,23 @@ public class MdsalHelper {
 
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class);
+        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
         return nodeKey.getNodeId();
     }
 
     public static InstanceIdentifier<Topology> createInstanceIdentifier() {
-        return InstanceIdentifier
+        InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID));
+        return path;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        return InstanceIdentifier
+        InstanceIdentifier<Node> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
+        return nodePath;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeKey ovsdbNodeKey, String bridgeName) {

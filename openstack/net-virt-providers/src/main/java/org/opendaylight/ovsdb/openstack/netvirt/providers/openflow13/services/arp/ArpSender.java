@@ -73,8 +73,7 @@ public class ArpSender {
     }
 
     private NodeConnectorId createNodeConnectorId(String connectorId, NodeId nodeId) {
-        StringBuilder stringId = new StringBuilder(nodeId.getValue()).append(":").append(connectorId);
-        return new NodeConnectorId(stringId.toString());
+        return new NodeConnectorId(nodeId.getValue() + ":" + connectorId);
     }
 
     /**

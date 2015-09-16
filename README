@@ -164,13 +164,16 @@ Running The Integration Tests
 To run the integration tests locally the following components are required:
 
  - Docker
- - Fig
+ - Fig or Docker Compose
 
 To install docker, follow the installation guide for your platform:
    http://docs.docker.com/installation/
 
 To install fig:
    http://www.fig.sh/install.html
+
+To install Docker Compose:
+   http://docs.docker.com/compose/install/
 
 To run the integration tests:
 
@@ -186,6 +189,8 @@ To run the integration tests:
     fig stop
 
 On Linux you'll generally need to run fig as root (sudo fig ...).
+
+If you're using Docker Compose, replace "fig" above with "docker-compose" and ignore the warnings.
 
 Skipping unit tests and karaf tests
 ====================

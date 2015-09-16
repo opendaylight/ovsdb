@@ -110,8 +110,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
-        List<InstanceIdentifier<BridgeOtherConfigs>> result =
-                new ArrayList<InstanceIdentifier<BridgeOtherConfigs>>();
+        List<InstanceIdentifier<BridgeOtherConfigs>> result = new ArrayList<>();
 
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
 
@@ -135,8 +134,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
-        List<InstanceIdentifier<BridgeExternalIds>> result =
-                new ArrayList<InstanceIdentifier<BridgeExternalIds>>();
+        List<InstanceIdentifier<BridgeExternalIds>> result = new ArrayList<>();
 
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
 
@@ -160,8 +158,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
-        List<InstanceIdentifier<ProtocolEntry>> result =
-                new ArrayList<InstanceIdentifier<ProtocolEntry>>();
+        List<InstanceIdentifier<ProtocolEntry>> result = new ArrayList<>();
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
 
         try {
@@ -192,7 +189,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
 
         OvsdbNodeAugmentationBuilder ovsdbConnectionAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
-        List<ManagedNodeEntry> managedBridges = new ArrayList<ManagedNodeEntry>();
+        List<ManagedNodeEntry> managedBridges = new ArrayList<>();
         InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
                 bridge);
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
@@ -258,7 +255,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 .getOtherConfigColumn().getData();
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
             Set<String> otherConfigKeys = otherConfigs.keySet();
-            List<BridgeOtherConfigs> otherConfigList = new ArrayList<BridgeOtherConfigs>();
+            List<BridgeOtherConfigs> otherConfigList = new ArrayList<>();
             String otherConfigValue;
             for (String otherConfigKey : otherConfigKeys) {
                 otherConfigValue = otherConfigs.get(otherConfigKey);
@@ -279,7 +276,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 .getData();
         if (externalIds != null && !externalIds.isEmpty()) {
             Set<String> externalIdKeys = externalIds.keySet();
-            List<BridgeExternalIds> externalIdsList = new ArrayList<BridgeExternalIds>();
+            List<BridgeExternalIds> externalIdsList = new ArrayList<>();
             String externalIdValue;
             for (String externalIdKey : externalIdKeys) {
                 externalIdValue = externalIds.get(externalIdKey);

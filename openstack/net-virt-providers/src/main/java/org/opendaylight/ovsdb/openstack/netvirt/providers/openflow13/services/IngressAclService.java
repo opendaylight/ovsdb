@@ -61,6 +61,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                        List<Neutron_IPs> srcAddressList, boolean write) {
 
         LOG.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);
+        if (securityGroup == null || securityGroup.getSecurityRules() == null) {
+            return;
+        }
+
         List<NeutronSecurityRule> portSecurityList = securityGroup.getSecurityRules();
         /* Iterate over the Port Security Rules in the Port Security Group bound to the port*/
         for (NeutronSecurityRule portSecurityRule : portSecurityList) {

@@ -202,7 +202,9 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
             result.setSecurityGroups(groups);
         }
         result.setStatus(port.getStatus());
-        result.setTenantID(String.valueOf(port.getTenantId().getValue()).replace("-",""));
+        if (port.getTenantId() != null) {
+            result.setTenantID(String.valueOf(port.getTenantId().getValue()).replace("-", ""));
+        }
         result.setPortUUID(String.valueOf(port.getUuid().getValue()));
         addExtensions(port, result);
         return result;

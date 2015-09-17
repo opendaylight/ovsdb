@@ -67,6 +67,10 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                        List<Neutron_IPs> srcAddressList, boolean write) {
 
         LOG.trace("programPortSecurityAcl: neutronSecurityGroup: {} ", securityGroup);
+        if (securityGroup == null || securityGroup.getSecurityRules() == null) {
+            return;
+        }
+
         List<NeutronSecurityRule> portSecurityList = securityGroup.getSecurityRules();
         /* Iterate over the Port Security Rules in the Port Security Group bound to the port*/
         for (NeutronSecurityRule portSecurityRule : portSecurityList) {

@@ -335,8 +335,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private boolean addOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
+        InstanceIdentifier<Node> iid = createInstanceIdentifier(connectionInfo);
+        // Check that the node doesn't already exist (we don't support connecting twice)
+        Assert.assertNull("The OVSDB node has already been added",
+                mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, iid));
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
-                createInstanceIdentifier(connectionInfo),
+                iid,
                 createNode(connectionInfo));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;

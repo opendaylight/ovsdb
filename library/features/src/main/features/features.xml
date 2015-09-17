@@ -10,21 +10,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 <features name="odl-ovsdb-library-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-  <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
   <feature name='odl-ovsdb-library' version='${project.version}' description='OpenDaylight :: library'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-    <bundle>mvn:org.opendaylight.ovsdb/library/${project.version}</bundle>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
     <!-- Test only (move to another feature) -->
-    <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${project.version}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/{{VERSION}}</bundle>
     <!-- Test only ends -->
-    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-    <configfile finalname="${configfile.directory}/library.xml">mvn:org.opendaylight.ovsdb/library/${project.version}/xml/config</configfile>
+    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>
+    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-core/{{VERSION}}</bundle>
+    <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-databind/{{VERSION}}</bundle>
+    <configfile finalname="${configfile.directory}/library.xml">mvn:org.opendaylight.ovsdb/library/{{VERSION}}/xml/config</configfile>
   </feature>
 </features>

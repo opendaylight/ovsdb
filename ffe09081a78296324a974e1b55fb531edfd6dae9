@@ -22,6 +22,30 @@
       "revId": "ffe09081a78296324a974e1b55fb531edfd6dae9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_7c55984e",
+        "filename": "library/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-17T16:31:37Z",
+      "side": 1,
+      "message": "Until all the MD-SAL patches are merged (including the upstream mdsal and controller patches), we can\u0027t use 2.0.0-SNAPSHOT for all the mdsal dependencies; so mdsal.version stays at 1.3.0-SNAPSHOT for now, and introducing a new variable for 2.0.0-SNAPSHOT (temporarily) feels a bit artificial.\n\nOnce everything\u0027s ready I\u0027ll submit a patch to centralise the versions properly ;-).",
+      "parentUuid": "3a79b1b5_dc870cd6",
+      "range": {
+        "startLine": 37,
+        "startChar": 20,
+        "endLine": 37,
+        "endChar": 21
+      },
+      "revId": "ffe09081a78296324a974e1b55fb531edfd6dae9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -35,8 +35,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-    Map<ConnectionInfo,OvsdbConnectionInstance> clients
-        = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+    private Map<ConnectionInfo, OvsdbConnectionInstance> clients =
+            new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
 
     private DataBroker db;
@@ -71,6 +71,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.info("OVSDB Disconnect from {}:{}",client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
+        
         txInvoker.invoke(new OvsdbNodeRemoveCommand(getConnectionInstance(key),null,null));
         clients.remove(key);
         LOG.trace("OvsdbConnectionManager: disconnected exit");

@@ -73,9 +73,9 @@ public class OvsdbConnectionInstanceTest {
     public void setUp() throws Exception {
         ovsdbConnectionInstance = PowerMockito.mock(OvsdbConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
         MemberModifier.field(OvsdbConnectionInstance.class, "txInvoker").set(ovsdbConnectionInstance, txInvoker);
-        MemberModifier.field(OvsdbConnectionInstance.class, "key").set(ovsdbConnectionInstance, key);
         MemberModifier.field(OvsdbConnectionInstance.class, "connectionInfo").set(ovsdbConnectionInstance, key);
         MemberModifier.field(OvsdbConnectionInstance.class, "instanceIdentifier").set(ovsdbConnectionInstance, instanceIdentifier);
+        MemberModifier.field(OvsdbConnectionInstance.class, "hasDeviceOwnership").set(ovsdbConnectionInstance, false);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -288,7 +288,7 @@ public class OvsdbConnectionInstanceTest {
 
         //test setMDConnectionInfo()
         ovsdbConnectionInstance.setMDConnectionInfo(key);
-        assertEquals("Error, incorrect ConnectionInfo", key, Whitebox.getInternalState(ovsdbConnectionInstance, "key"));
+        assertEquals("Error, incorrect ConnectionInfo", key, Whitebox.getInternalState(ovsdbConnectionInstance, "connectionInfo"));
 
         //test getInstanceIdentifier()
         assertEquals("Error, incorrect instanceIdentifier", instanceIdentifier, ovsdbConnectionInstance.getInstanceIdentifier());

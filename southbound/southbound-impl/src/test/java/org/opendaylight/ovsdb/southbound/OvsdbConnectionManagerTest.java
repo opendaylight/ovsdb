@@ -86,6 +86,9 @@ public class OvsdbConnectionManagerTest {
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
         when(ovsdbConnectionManager.getInstanceIdentifier(key)).thenReturn(iid);
 
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", ConnectionInfo.class));
+        when(ovsdbConnectionManager.getConnectionInstance(key)).thenReturn(null);
+
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "putConnectionInstance", ConnectionInfo.class, OvsdbConnectionInstance.class));
         doNothing().when(client).createTransactInvokers();
         PowerMockito.whenNew(OvsdbConnectionInstance.class).

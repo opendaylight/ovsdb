@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_bc19657b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:58:45Z",
+      "side": 1,
+      "message": "nitpick: break this line up... its too long.",
+      "range": {
+        "startLine": 9,
+        "startChar": 31,
+        "endLine": 9,
+        "endChar": 37
+      },
+      "revId": "fac823bfe35013c0b94e8a632592b0d21f2f77d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_5c2611bc",
+        "filename": "utils/mdsal/src/main/java/org/opendaylight/ovsdb/utils/mdsal/Mdsal.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:58:45Z",
+      "side": 1,
+      "message": "question: should we be using chained transactions?\nI\u0027m a bit confused on when to use \u0027regular\u0027 transactions\nvs the \u0027chainned\u0027 variant.",
+      "range": {
+        "startLine": 47,
+        "startChar": 14,
+        "endLine": 47,
+        "endChar": 30
+      },
+      "revId": "fac823bfe35013c0b94e8a632592b0d21f2f77d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_5cfff101",
+        "filename": "openstack/netvirtmodel/api/src/main/yang/netvirt-classifier.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:53:01Z",
+      "side": 1,
+      "message": "add a container called sffs to warp sff:\n\ncontainer sffs {\n    list sff {\n      ....\n    }\n}",
+      "range": {
+        "startLine": 26,
+        "startChar": 17,
+        "endLine": 26,
+        "endChar": 20
+      },
+      "revId": "3d74aa39c52445b6a96909856ee951ec790ed78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_1c09792c",
+        "filename": "openstack/netvirtmodel/api/src/main/yang/packet-fields.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:53:01Z",
+      "side": 1,
+      "message": "nitpick: empty line",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 20
+      },
+      "revId": "3d74aa39c52445b6a96909856ee951ec790ed78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_3c0eb535",
+        "filename": "openstack/netvirtmodel/api/src/main/yang/packet-fields.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:53:01Z",
+      "side": 1,
+      "message": "nitpick: space",
+      "range": {
+        "startLine": 32,
+        "startChar": 9,
+        "endLine": 32,
+        "endChar": 16
+      },
+      "revId": "3d74aa39c52445b6a96909856ee951ec790ed78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_dc122158",
+        "filename": "openstack/netvirtmodel/api/src/main/yang/packet-fields.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:53:01Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 43,
+        "startChar": 9,
+        "endLine": 43,
+        "endChar": 16
+      },
+      "revId": "3d74aa39c52445b6a96909856ee951ec790ed78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_fc0fdd2c",
+        "filename": "openstack/netvirtmodel/api/src/main/yang/packet-fields.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-21T19:53:01Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 112,
+        "startChar": 58,
+        "endLine": 112,
+        "endChar": 59
+      },
+      "revId": "3d74aa39c52445b6a96909856ee951ec790ed78e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

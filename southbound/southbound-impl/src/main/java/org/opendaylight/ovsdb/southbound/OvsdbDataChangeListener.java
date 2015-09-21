@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -34,7 +35,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 
-public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseable {
+public class OvsdbDataChangeListener implements ClusteredDataChangeListener, AutoCloseable {
 
     private ListenerRegistration<DataChangeListener> registration;
     private OvsdbConnectionManager cm;

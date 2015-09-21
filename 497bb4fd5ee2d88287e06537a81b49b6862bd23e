@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_9c9ee962",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-21T22:04:43Z",
+      "side": 1,
+      "message": "i think we should rename it to haveDeviceOwnership.",
+      "revId": "497bb4fd5ee2d88287e06537a81b49b6862bd23e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

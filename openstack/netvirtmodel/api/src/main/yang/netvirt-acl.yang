@@ -1,0 +1,21 @@
+module netvirt-acl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:acl";
+    prefix "acl";
+
+    import ietf-acl { prefix ietf-acl;}
+    import yang-ext { prefix ext; }
+
+    revision "2015-08-31" {
+        description "Initial revision of netvirt extensions to ietf-acl model";
+    }
+
+    // TODO: Add choice for Neutron and add fields there instead of at the root of matches
+    augment "/ietf-acl:access-lists/ietf-acl:access-list/ietf-acl:access-list-entries" +
+            "/ietf-acl:access-list-entry/ietf-acl:matches" {
+        description "Neutron network uuid";
+        leaf network-uuid {
+            type string;
+        }
+    }
+}

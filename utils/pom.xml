@@ -52,5 +52,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>mdsal-node</module>
     <module>mdsal-openflow</module>
     <module>servicehelper</module>
+    <module>mdsal</module>
   </modules>
 </project>

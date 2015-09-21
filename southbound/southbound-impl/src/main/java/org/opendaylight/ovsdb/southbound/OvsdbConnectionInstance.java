@@ -54,15 +54,16 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
-    private ConnectionInfo key;
+    // private ConnectionInfo key;
     private InstanceIdentifier<Node> instanceIdentifier;
+    private volatile boolean haveClusterOwnership = false;
 
     OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker,
             InstanceIdentifier<Node> iid) {
         this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
-        this.key = key;
+        // this.key = key;
         this.instanceIdentifier = iid;
     }
 
@@ -233,5 +234,19 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
+    }
+
+    public Boolean hasOvsdbClient(OvsdbClient otherClient) {
+        return client.equals(otherClient);
+    }
+
+    public Boolean getHaveClusterOwnership() {
+        return Boolean.valueOf(haveClusterOwnership);
+    }
+
+    public void setHaveClusterOwnership(Boolean haveClusterOwnership) {
+        if (haveClusterOwnership != null) {
+            this.haveClusterOwnership = haveClusterOwnership.booleanValue();
+        }
     }
 }

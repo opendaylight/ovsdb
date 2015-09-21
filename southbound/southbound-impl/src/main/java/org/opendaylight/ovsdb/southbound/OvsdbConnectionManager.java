@@ -59,11 +59,26 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
-        OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker,
+        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(key);
+        if (ovsdbConnectionInstance != null) {
+            if (ovsdbConnectionInstance.hasOvsdbClient(externalClient)) {
+                LOG.warn("OVSDB Connection Instance {} already exists for client {}", key, externalClient);
+                return ovsdbConnectionInstance;
+            }
+            LOG.warn("OVSDB Connection Instance {} being replaced with client {}", key, externalClient);
+            ovsdbConnectionInstance.disconnect();
+
+            // FIXME (FF) Placeholder: Unregister Cluster Onwership for ConnectionInfo
+            // Because the ovsdbConnectionInstance is about to be completely replaced!
+        }
+        OvsdbConnectionInstance ovsdbConnectionInstance2 = new OvsdbConnectionInstance(key, externalClient, txInvoker,
                 getInstanceIdentifier(key));
-        putConnectionInstance(key, client);
-        client.createTransactInvokers();
-        return client;
+        putConnectionInstance(key, ovsdbConnectionInstance2);
+        ovsdbConnectionInstance2.createTransactInvokers();
+
+        // FIXME (FF) Placeholder: Register Cluster Onwership for ConnectionInfo
+
+        return ovsdbConnectionInstance2;
     }
 
     @Override
@@ -100,6 +115,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbClient client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {
             client.disconnect();
+            // FIXME (FF) Placeholder: Unregister Cluster Onwership for ConnectionInfo
             removeInstanceIdentifier(ovsdbNode.getConnectionInfo());
         }
     }
@@ -200,5 +216,20 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public OvsdbClient getClient(Node node) {
         return getConnectionInstance(node);
+    }
+
+    public Boolean getHaveClusterOwnership(ConnectionInfo connectionInfo) {
+        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(connectionInfo);
+        if (ovsdbConnectionInstance == null) {
+            return null;
+        }
+        return ovsdbConnectionInstance.getHaveClusterOwnership();
+    }
+
+    public void setHaveClusterOwnership(ConnectionInfo connectionInfo, Boolean haveClusterOwnership) {
+        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(connectionInfo);
+        if (ovsdbConnectionInstance != null) {
+            ovsdbConnectionInstance.setHaveClusterOwnership(haveClusterOwnership);
+        }
     }
 }

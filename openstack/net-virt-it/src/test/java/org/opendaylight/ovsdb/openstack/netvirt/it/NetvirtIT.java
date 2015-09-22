@@ -132,12 +132,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     @Override
     public String getModuleName() {
-        return "openstack.net-virt-providers";
+        return "netvirt-providers-impl";
     }
 
     @Override
     public String getInstanceName() {
-        return "net-virt-providers-default";
+        return "netvirt-providers-default";
     }
 
     @Override

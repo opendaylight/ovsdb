@@ -1,0 +1,37 @@
+module netvirtsfc-classifier {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirtsfc:classifier";
+    prefix "classifier";
+
+    import ietf-inet-types { prefix inet;}
+    import ietf-yang-types { prefix yang;}
+
+    revision "2015-08-31" {
+        description "Initial revision of netvirtsfc classifier model";
+    }
+
+    container classifiers {
+        description "Classifier container which represents the ACL being applied,
+                     attachment point and the associated chain";
+
+        list classifier {
+            description "A list of SFC classifiers";
+            key "name";
+            leaf name {
+                type string;
+            }
+            leaf acl {
+                type string;
+            }
+            container sffs {
+                list sff {
+                    description "The classifier will be attached to these SFFs";
+                    key "name";
+                    leaf name {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+}

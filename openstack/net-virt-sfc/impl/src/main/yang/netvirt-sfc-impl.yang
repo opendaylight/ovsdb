@@ -1,0 +1,35 @@
+module netvirt-sfc-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:sfc:impl";
+    prefix "netvirt-sfc-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+
+    description
+        "Service definition for netvirt sfc project";
+
+    revision "2015-08-31" {
+        description
+            "Initial revision";
+    }
+
+    identity netvirt-sfc-impl {
+        base config:module-type;
+        config:java-name-prefix NetvirtSfcImpl;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netvirtsfc-impl {
+            when "/config:modules/config:module/config:type = 'netvirt-sfc-impl'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}

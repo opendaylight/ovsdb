@@ -744,7 +744,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
         Manager manager = getClient().createTypedRowWrapper(Manager.class);
         manager.setInactivityProbe(Sets.newHashSet(8192L));
         manager.setMaxBackoff(Sets.newHashSet(4094L));
-        manager.setTarget(Sets.newHashSet("172.16.50.50:6640"));
+        manager.setTarget("tcp:172.16.50.50:6640");
         manager.setExternalIds(externalIds);
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())

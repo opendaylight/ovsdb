@@ -28,6 +28,8 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+
 /**
  * OvsdbInventoryServiceImpl is the implementation for {@link OvsdbInventoryService}
  *
@@ -62,6 +64,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     @Override
     public void providersReady() {
         ovsdbDataChangeListener.start();
+        initializeNeutronModelsDataChangeListeners(dataBroker);
         initializeNetvirtTopology();
     }
 
@@ -84,5 +87,11 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         if (! mdsalUtils.put(LogicalDatastoreType.OPERATIONAL, path, tpb.build())) {
             LOG.error("Error initializing netvirt topology");
         }
+    }
+
+    private void initializeNeutronModelsDataChangeListeners(
+                                                            DataBroker db) {
+
+        new NeutronSecurityChangeListener(db,Executors.newFixedThreadPool(1));
     }
 }

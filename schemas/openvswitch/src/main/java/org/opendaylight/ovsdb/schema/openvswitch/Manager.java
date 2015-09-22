@@ -26,10 +26,10 @@ import java.util.Set;
 public interface Manager extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn (name="target", method= MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    Column<GenericTableSchema, Set<String>> getTargetColumn();
+    Column<GenericTableSchema, String> getTargetColumn();
 
     @TypedColumn (name="target", method= MethodType.SETDATA, fromVersion = "1.0.0")
-    void setTarget(Set<String> target) ;
+    void setTarget(String target) ;
 
     @TypedColumn (name = "is_connected", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
     Column<GenericTableSchema, Boolean> getIsConnectedColumn();

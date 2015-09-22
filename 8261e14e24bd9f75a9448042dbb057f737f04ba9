@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_6d8f9924",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-22T12:36:30Z",
+      "side": 1,
+      "message": "good point. I renamed the variable but failed to rename the function.",
+      "parentUuid": "1a76adc5_dc25410b",
+      "range": {
+        "startLine": 220,
+        "startChar": 74,
+        "endLine": 220,
+        "endChar": 75
+      },
+      "revId": "8261e14e24bd9f75a9448042dbb057f737f04ba9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_fc227d00",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-21T23:25:15Z",
       "side": 1,
       "message": "Why return null?",
+      "range": {
+        "startLine": 223,
+        "startChar": 23,
+        "endLine": 223,
+        "endChar": 24
+      },
+      "revId": "8261e14e24bd9f75a9448042dbb057f737f04ba9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4d9e5d58",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-22T12:36:30Z",
+      "side": 1,
+      "message": "I wanted a way of distinguishing between connection instance not there vs not set. But I think that is just\nmore burden on the caller; so returning false is a nicer\nreturn. Let me fix that.",
+      "parentUuid": "1a76adc5_fc227d00",
       "range": {
         "startLine": 223,
         "startChar": 23,

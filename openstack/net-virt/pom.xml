@@ -205,6 +205,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.opendaylight.neutron</groupId>
+        <artifactId>model</artifactId>
+        <version>${networkconfig.neutron.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

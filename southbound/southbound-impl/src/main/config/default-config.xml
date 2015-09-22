@@ -30,6 +30,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-normalized-node-serializer</type>
             <name>runtime-mapping-singleton</name>
           </binding-normalized-node-serializer>
+          <ovsdb-library>
+            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:library:impl">impl:library</type>
+            <name>ovsdb-library</name>
+          </ovsdb-library>
         </module>
       </modules>
     </data>

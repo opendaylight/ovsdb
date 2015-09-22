@@ -16,6 +16,24 @@
       "revId": "5d4ddf79326a94dfc841dcf6357a5c4d5ce98435",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_9f3c9695",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-22T19:40:42Z",
+      "side": 1,
+      "message": "ack! after talking to you at the hangout that makes more\nsense. I will work on that next.",
+      "parentUuid": "1a76adc5_bfbdd204",
+      "revId": "5d4ddf79326a94dfc841dcf6357a5c4d5ce98435",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_bfbdd204",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-22T19:37:05Z",
+      "side": 1,
+      "message": "We need to do the ownership registration at the first place in connected() method. And once we get the callback, we should go ahead with populating the cache with ConnectionInstance, because we don\u0027t want any connection in the cache before we decide whether this instance is owner of the device or not.",
+      "revId": "5d4ddf79326a94dfc841dcf6357a5c4d5ce98435",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

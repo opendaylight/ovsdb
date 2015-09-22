@@ -24,6 +24,8 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
     public OvsdbOperationalCommandAggregator(OvsdbConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {
         commands.add(new OpenVSwitchUpdateCommand(key, updates, dbSchema));
+        commands.add(new OvsdbManagersUpdateCommand(key, updates,  dbSchema));
+        commands.add(new OvsdbManagersRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbBridgeUpdateCommand(key, updates,  dbSchema));
         commands.add(new OvsdbBridgeRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbControllerUpdateCommand(key, updates,  dbSchema));

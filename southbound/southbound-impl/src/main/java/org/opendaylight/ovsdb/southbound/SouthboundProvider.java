@@ -59,7 +59,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("SouthboundProvider Session Initiated");
         db = session.getSALService(DataBroker.class);
         this.txInvoker = new TransactionInvokerImpl(db);
-        cm = new OvsdbConnectionManager(db,txInvoker);
+        cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService);
         ovsdbDataChangeListener = new OvsdbDataChangeListener(db,cm);
 //        ovsdbNodeListener = new OvsdbNodeDataChangeListener(db, cm);
 //        ovsdbManagedNodeListener = new OvsdbManagedNodeDataChangeListener(db, cm);

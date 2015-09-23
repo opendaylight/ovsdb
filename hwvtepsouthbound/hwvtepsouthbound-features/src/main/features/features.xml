@@ -12,10 +12,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/${mdsal.model.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
   <feature name='odl-ovsdb-hwvtepsouthbound-api' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: api'>
-    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-api/${project.version}</bundle>
   </feature>
   <feature name='odl-ovsdb-hwvtepsouthbound' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound'>

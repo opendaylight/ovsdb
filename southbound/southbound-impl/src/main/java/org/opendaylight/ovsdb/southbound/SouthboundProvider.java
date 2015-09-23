@@ -57,9 +57,12 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
 
 
     public SouthboundProvider(
-            EntityOwnershipService entityOwnershipServiceDependency) {
+            EntityOwnershipService entityOwnershipServiceDependency,
+            OvsdbConnection ovsdbConnection) {
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
+        this.ovsdbConnection = ovsdbConnection;
+        LOG.info("SouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
     }
 
     @Override
@@ -83,11 +86,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
             if (ownershipStateOpt.isPresent()) {
                 EntityOwnershipState ownershipState = ownershipStateOpt.get();
                 if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    if (ovsdbConnection == null) {
-                        ovsdbConnection = new OvsdbConnectionService();
-                        ovsdbConnection.registerConnectionListener(cm);
-                        ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
-                    }
+                    ovsdbConnection.registerConnectionListener(cm);
+                    ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
                 }
             }
         } catch (CandidateAlreadyRegisteredException e) {

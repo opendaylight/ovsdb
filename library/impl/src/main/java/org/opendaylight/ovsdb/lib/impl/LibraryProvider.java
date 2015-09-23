@@ -7,16 +7,23 @@
  */
 package org.opendaylight.ovsdb.lib.impl;
 
+import java.net.InetAddress;
+import java.util.Collection;
+
+import javax.net.ssl.SSLContext;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.ovsdb.lib.ConfigActivator;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LibraryProvider implements BindingAwareProvider, AutoCloseable {
+public class LibraryProvider implements BindingAwareProvider, AutoCloseable, OvsdbConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibraryProvider.class);
     private final BundleContext bundleContext;
@@ -33,12 +40,12 @@ public class LibraryProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("LibraryProvider Session Initiated");
         dataBroker = providerContext.getSALService(DataBroker.class);
         LOG.info("LibraryProvider: onSessionInitiated dataBroker: {}", dataBroker);
-        this.activator = new ConfigActivator(providerContext);
+        /*this.activator = new ConfigActivator(providerContext);
         try {
             activator.start(bundleContext);
         } catch (Exception e) {
             LOG.warn("Failed to start LibraryProvider: ", e);
-        }
+        }*/
     }
 
     @Override
@@ -49,4 +56,44 @@ public class LibraryProvider implements BindingAwareProvider, AutoCloseable {
         }
     }
 
+    @Override
+    public OvsdbClient connect(InetAddress address, int port) {
+        return OvsdbConnectionService.getService().connect(address, port);
+    }
+
+    @Override
+    public OvsdbClient connectWithSsl(
+            InetAddress address, int port, SSLContext sslContext) {
+        return OvsdbConnectionService.getService().connectWithSsl(address, port, sslContext);
+    }
+
+    @Override
+    public void disconnect(OvsdbClient client) {
+        OvsdbConnectionService.getService().disconnect(client);
+    }
+
+    @Override
+    public boolean startOvsdbManager(int ovsdbListenPort) {
+        return OvsdbConnectionService.getService().startOvsdbManager(ovsdbListenPort);
+    }
+
+    @Override
+    public boolean startOvsdbManagerWithSsl(int ovsdbListenPort, SSLContext sslContext) {
+        return OvsdbConnectionService.getService().startOvsdbManagerWithSsl(ovsdbListenPort, sslContext);
+    }
+
+    @Override
+    public void registerConnectionListener(OvsdbConnectionListener listener) {
+        OvsdbConnectionService.getService().registerConnectionListener(listener);
+    }
+
+    @Override
+    public void unregisterConnectionListener(OvsdbConnectionListener listener) {
+        OvsdbConnectionService.getService().unregisterConnectionListener(listener);
+    }
+
+    @Override
+    public Collection<OvsdbClient> getConnections() {
+        return OvsdbConnectionService.getService().getConnections();
+    }
 }

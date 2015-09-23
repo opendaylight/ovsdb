@@ -59,4 +59,9 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         return iid;
     }
 
+    public InstanceIdentifier<?> bindingDeserializer(YangInstanceIdentifier yangIID){
+        InstanceIdentifier<?> iid = bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
+        return iid;
+    }
+
 }

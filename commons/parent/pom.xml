@@ -80,7 +80,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <!-- ODL Dependency Versions -->
-    <clustering.services.version>0.7.0-SNAPSHOT</clustering.services.version>
     <containermanager.version>0.7.0-SNAPSHOT</containermanager.version>
     <controller.config.version>0.4.0-SNAPSHOT</controller.config.version>
     <forwardingrulesmanager.version>0.8.0-SNAPSHOT</forwardingrulesmanager.version>
@@ -152,11 +151,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-api</artifactId>
         <version>${controller.config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>clustering.services</artifactId>
-        <version>${clustering.services.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>

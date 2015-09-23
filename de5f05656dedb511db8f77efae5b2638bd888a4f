@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_951797a3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-23T15:40:57Z",
+      "side": 1,
+      "message": "We need to take this piece out to some other method and call it from connected() method before .Or we can call connectedButCallBackNotRegistered()but should not do putConnectionInstance(key, ovsdbConnectionInstance2); Once we will have OvsdbConnectionInstance, we can use the iid from OvsdbConnectionInstance for creating the Entity.",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 100,
+        "endChar": 9
+      },
+      "revId": "de5f05656dedb511db8f77efae5b2638bd888a4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_957eb7e3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-23T15:40:57Z",
+      "side": 1,
+      "message": "we can keep this in connectedButCallBacksNotRegistered(), because i think it\u0027s not going to any hard, because if this instance is not an owner of the device, it\u0027s not going to get any data to process.",
+      "range": {
+        "startLine": 279,
+        "startChar": 12,
+        "endLine": 279,
+        "endChar": 61
+      },
+      "revId": "de5f05656dedb511db8f77efae5b2638bd888a4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_35448373",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-23T15:40:57Z",
+      "side": 1,
+      "message": "YangInstanceIdentifier entityId \u003d YangInstanceIdentifier.builder().node(NetworkTopology.QNAME).node(topology).nodeWithKey(topology, \"ovsdb:1\").node(node).nodeWithKey(node, \"node-id\").\n\n\u003cnode-id\u003e you can get from ConnectionInstance.getInstanceIdentifier().getNodeId().getValue();",
+      "revId": "de5f05656dedb511db8f77efae5b2638bd888a4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_50090d2b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-23T15:40:57Z",
+      "side": 1,
+      "message": "I added following patch https://git.opendaylight.org/gerrit/#/c/27360/\n\nthat gives you method to convert YangInstanceIdentifier to InstanceIdentifier. Once you get hold of InstanceIdentifier, you can use that to get the ConnectionInstance.",
+      "revId": "de5f05656dedb511db8f77efae5b2638bd888a4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

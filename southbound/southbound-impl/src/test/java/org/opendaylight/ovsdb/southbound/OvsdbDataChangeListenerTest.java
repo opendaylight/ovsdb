@@ -146,11 +146,13 @@ public class OvsdbDataChangeListenerTest {
         Whitebox.invokeMethod(ovsdbDataChangeListener, "connect", changes);
         verify(cm).disconnect(any(OvsdbNodeAugmentation.class));
 
-        //test init
-        ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
-        when(ovsdbNode.getConnectionInfo()).thenReturn(connectionInfo);
-        Whitebox.invokeMethod(ovsdbDataChangeListener, "init", changes);
-        verify(cm).init(any(ConnectionInfo.class));
+        // test init
+        /**
+         * ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
+         * when(ovsdbNode.getConnectionInfo()).thenReturn(connectionInfo);
+         * Whitebox.invokeMethod(ovsdbDataChangeListener, "init", changes);
+         * verify(cm).init(any(ConnectionInfo.class));
+         */
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

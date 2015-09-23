@@ -42,6 +42,10 @@ public class SouthboundUtil {
         instanceIdentifierCodec = iidc;
     }
 
+    public static InstanceIdentifierCodec getInstanceIdentifierCodec() {
+        return instanceIdentifierCodec;
+    }
+
     public static String serializeInstanceIdentifier(InstanceIdentifier<?> iid) {
         return instanceIdentifierCodec.serialize(iid);
     }

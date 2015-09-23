@@ -127,6 +127,8 @@ public class OvsdbConnectionManagerTest {
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", ConnectionInfo.class));
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbConnectionManager.getConnectionInstance(any(ConnectionInfo.class))).thenReturn(ovsdbConnectionInstance);
+
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "removeInstanceIdentifier", ConnectionInfo.class));
         ovsdbConnectionManager.disconnect(ovsdbNode);
         verify((OvsdbClient)ovsdbConnectionInstance).disconnect();
     }

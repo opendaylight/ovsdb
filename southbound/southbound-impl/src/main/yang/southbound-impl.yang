@@ -7,6 +7,7 @@ module southbound-impl {
     import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
     import opendaylight-md-sal-dom {prefix dom; revision-date 2013-10-28;}
     import opendaylight-entity-ownership-service {prefix eos; revision-date 2015-08-10;}
+    import library { prefix library; revision-date 2014-12-10; }
 
     description
         "Service definition for southbound project";
@@ -53,6 +54,14 @@ module southbound-impl {
                     refine type {
                         mandatory true;
                         config:required-identity eos:entity-ownership-service;
+                    }
+                }
+            }
+            container connection-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity library:connection-service;
                     }
                 }
             }

@@ -14,7 +14,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -45,7 +44,13 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
 //    private OvsdbTerminationPointDataChangeListener ovsdbTerminationPointListener;
     private TransactionInvoker txInvoker;
     private OvsdbDataChangeListener ovsdbDataChangeListener;
+    OvsdbConnection ovsdbConnection;
 
+
+    public SouthboundProvider(OvsdbConnection ovsdbConnection) {
+        this.ovsdbConnection = ovsdbConnection;
+        LOG.info("SouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
+    }
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
@@ -59,7 +64,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
 //        ovsdbTerminationPointListener = new OvsdbTerminationPointDataChangeListener(db, cm);
         initializeOvsdbTopology(LogicalDatastoreType.OPERATIONAL);
         initializeOvsdbTopology(LogicalDatastoreType.CONFIGURATION);
-        OvsdbConnection ovsdbConnection = new OvsdbConnectionService();
+        //OvsdbConnection ovsdbConnection = new OvsdbConnectionService();
         ovsdbConnection.registerConnectionListener(cm);
         ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
     }

@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,23 +41,43 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
             if (ovsdbNodeOptional.isPresent()) {
                 Node ovsdbNode = ovsdbNodeOptional.get();
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                if (ovsdbNodeAugmentation != null) {
-                    if (ovsdbNodeAugmentation.getManagedNodeEntry() != null) {
-                        for (ManagedNodeEntry managedNode : ovsdbNodeAugmentation.getManagedNodeEntry()) {
-                            transaction.delete(LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                if (checkIfOnlyConnectedManager(ovsdbNodeAugmentation)) {
+                    if (ovsdbNodeAugmentation != null) {
+                        if (ovsdbNodeAugmentation.getManagedNodeEntry() != null) {
+                            for (ManagedNodeEntry managedNode : ovsdbNodeAugmentation.getManagedNodeEntry()) {
+                                transaction.delete(
+                                        LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                            }
+                        } else {
+                            LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
                         }
                     } else {
-                        LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
+                        LOG.warn("{} had no OvsdbNodeAugmentation", ovsdbNode.getNodeId().getValue());
                     }
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL,
+                            getOvsdbConnectionInstance().getInstanceIdentifier());
                 } else {
-                    LOG.warn("{} had no OvsdbNodeAugmentation", ovsdbNode.getNodeId().getValue());
+                    LOG.debug("Other southbound plugin instances in cluster are connected to the device,"
+                            + " not deleting OvsdbNode form data store.");
                 }
-                transaction.delete(LogicalDatastoreType.OPERATIONAL,
-                        getOvsdbConnectionInstance().getInstanceIdentifier());
             }
         } catch (Exception e) {
             LOG.warn("Failure to delete ovsdbNode {}",e);
         }
     }
 
+    private boolean checkIfOnlyConnectedManager(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
+        if (ovsdbNodeAugmentation != null) {
+            int connectedManager = 0;
+            for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
+                if (manager.isIsConnected()) {
+                    connectedManager++;
+                    if (connectedManager > 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

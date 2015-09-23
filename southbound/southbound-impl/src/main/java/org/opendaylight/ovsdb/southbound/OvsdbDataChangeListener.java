@@ -94,7 +94,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         // Finally disconnect if we need to
         disconnect(changes);
 
-        init(changes);
+ //       init(changes);
 
         LOG.trace("onDataChanged: exit");
     }
@@ -163,7 +163,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             }
         }
     }
-
+/*
     private void init(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
@@ -174,7 +174,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         }
 
     }
-
+*/
     public Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> connectionInstancesFromChanges(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =

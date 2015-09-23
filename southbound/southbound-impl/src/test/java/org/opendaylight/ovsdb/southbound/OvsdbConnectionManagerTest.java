@@ -128,7 +128,6 @@ public class OvsdbConnectionManagerTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbConnectionManager.getConnectionInstance(any(ConnectionInfo.class))).thenReturn(ovsdbConnectionInstance);
 
-        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "removeInstanceIdentifier", ConnectionInfo.class));
         ovsdbConnectionManager.disconnect(ovsdbNode);
         verify((OvsdbClient)ovsdbConnectionInstance).disconnect();
     }
@@ -199,6 +198,11 @@ public class OvsdbConnectionManagerTest {
 
         //Test getInstanceIdentifier()
         assertEquals("Error returning correct InstanceIdentifier object",iid , ovsdbConnectionManager.getInstanceIdentifier(key));
+
+        //Test removeInstanceIdentifier()
+        Whitebox.invokeMethod(ovsdbConnectionManager, "removeInstanceIdentifier", key);
+        Map<ConnectionInfo,OvsdbConnectionInstance> testRemoveIids = Whitebox.getInternalState(ovsdbConnectionManager, "instanceIdentifiers");
+        assertEquals("Error, size of the hashmap is incorrect", 0, testRemoveIids.size());
     }
 
     @Test

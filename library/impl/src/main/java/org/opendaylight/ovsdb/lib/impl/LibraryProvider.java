@@ -33,12 +33,12 @@ public class LibraryProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("LibraryProvider Session Initiated");
         dataBroker = providerContext.getSALService(DataBroker.class);
         LOG.info("LibraryProvider: onSessionInitiated dataBroker: {}", dataBroker);
-        this.activator = new ConfigActivator(providerContext);
+        /*this.activator = new ConfigActivator(providerContext);
         try {
             activator.start(bundleContext);
         } catch (Exception e) {
             LOG.warn("Failed to start LibraryProvider: ", e);
-        }
+        }*/
     }
 
     @Override

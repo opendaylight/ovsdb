@@ -31,7 +31,8 @@ public class SouthboundImplModule extends org.opendaylight.yang.gen.v1.urn.opend
     public java.lang.AutoCloseable createInstance() {
         SouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(getSchemaServiceDependency(),
                 getBindingNormalizedNodeSerializerDependency()));
-        SouthboundProvider provider = new SouthboundProvider(getClusteringEntityOwnershipServiceDependency());
+        SouthboundProvider provider = new SouthboundProvider(getClusteringEntityOwnershipServiceDependency(),
+                getLibraryConnectionServiceDependency());
         getBrokerDependency().registerProvider(provider);
         return provider;
     }

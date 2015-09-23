@@ -129,7 +129,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     private static final String FORMAT_STR = "%s_%s_%d";
-    public static final int NUM_THREADS = 4;
+    public static final int NUM_THREADS = 1;
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;

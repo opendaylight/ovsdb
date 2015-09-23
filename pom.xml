@@ -61,7 +61,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>northbound</module>
     <module>openstack</module>
     <module>ovsdb-artifacts</module>
-    <module>plugin-shell</module>
     <module>schemas</module>
     <module>utils</module>
     <module>ovsdb-ui</module>

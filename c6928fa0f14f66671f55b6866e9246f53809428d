@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_90ffa501",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/InstanceIdentifierCodec.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-09-23T15:40:22Z",
+      "side": 1,
+      "message": "Is this needed? Seems there is no user and users could directly use BindingNormalizedNodeSerializer",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 5
+      },
+      "revId": "c6928fa0f14f66671f55b6866e9246f53809428d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

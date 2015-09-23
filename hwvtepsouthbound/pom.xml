@@ -26,10 +26,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modules>
     <module>hwvtepsouthbound-api</module>
     <module>hwvtepsouthbound-impl</module>
+    <!-- 
     <module>hwvtepsouthbound-karaf</module>
+     -->
     <module>hwvtepsouthbound-features</module>
     <module>hwvtepsouthbound-artifacts</module>
+    <!-- 
     <module>hwvtepsouthbound-it</module>
+     -->
   </modules>
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
   <build>

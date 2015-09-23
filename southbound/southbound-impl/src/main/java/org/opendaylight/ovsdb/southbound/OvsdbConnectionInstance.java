@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -47,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import javax.annotation.Nonnull;
+
 public class OvsdbConnectionInstance implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
     private OvsdbClient client;
@@ -57,6 +60,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     // private ConnectionInfo key;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
+    private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
 
     OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker,
             InstanceIdentifier<Node> iid) {
@@ -247,6 +251,17 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     public void setHasDeviceOwnership(Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
             this.hasDeviceOwnership = hasDeviceOwnership.booleanValue();
+        }
+    }
+
+    public void setDeviceOwnershipCandidateRegistration(@Nonnull EntityOwnershipCandidateRegistration registration) {
+        this.deviceOwnershipCandidateRegistration = registration;
+    }
+
+    public void closeDeviceOwnershipCandidateRegistration() {
+        if (deviceOwnershipCandidateRegistration != null) {
+            this.deviceOwnershipCandidateRegistration.close();
+            setHasDeviceOwnership(Boolean.FALSE);
         }
     }
 }

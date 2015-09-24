@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_21c76547",
+        "filename": "openstack/net-virt-sfc/api/src/main/yang/netvirt-acl.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-24T16:32:21Z",
+      "side": 1,
+      "message": "do you want to define augment-identifier here ?",
+      "revId": "1257b9269f689b29acde46a73c60e0a8a0b6edd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c1c31137",
+        "filename": "openstack/net-virt-sfc/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-24T16:32:21Z",
+      "side": 1,
+      "message": "you can probably get rid of this dependency?",
+      "revId": "1257b9269f689b29acde46a73c60e0a8a0b6edd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

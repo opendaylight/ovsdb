@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_8188b923",
+        "filename": "utils/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-09-24T15:57:06Z",
+      "side": 1,
+      "message": "It should be mdsal-utils",
+      "revId": "37a1ad02e6ad12a45e1e737d1a612c07eb1a8f18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

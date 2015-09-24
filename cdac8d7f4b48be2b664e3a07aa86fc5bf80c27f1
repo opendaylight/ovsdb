@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_61031d74",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-09-24T17:27:14Z",
+      "side": 1,
+      "message": "s/for done/done",
+      "range": {
+        "startLine": 85,
+        "startChar": 69,
+        "endLine": 85,
+        "endChar": 71
+      },
+      "revId": "cdac8d7f4b48be2b664e3a07aa86fc5bf80c27f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_e1ee4db4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-09-24T17:27:14Z",
+      "side": 1,
+      "message": "s/already taken place/already exists",
+      "range": {
+        "startLine": 87,
+        "startChar": 83,
+        "endLine": 87,
+        "endChar": 85
+      },
+      "revId": "cdac8d7f4b48be2b664e3a07aa86fc5bf80c27f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -45,6 +45,29 @@
       "revId": "fac823bfe35013c0b94e8a632592b0d21f2f77d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_066d9f32",
+        "filename": "utils/mdsal/src/test/java/org/opendaylight/ovsdb/utils/mdsal/MdsalTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-09-24T12:21:52Z",
+      "side": 1,
+      "message": "you might want to leverage this test class: https://github.com/opendaylight/ovsdb/blob/master/openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/MdsalUtilsTest.java",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "fac823bfe35013c0b94e8a632592b0d21f2f77d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

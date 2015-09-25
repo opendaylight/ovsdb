@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_9926e9b9",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-25T18:23:28Z",
+      "side": 1,
+      "message": "agree, should keep this as close to the schema as possible",
+      "parentUuid": "1a76adc5_b9040516",
+      "range": {
+        "startLine": 482,
+        "startChar": 17,
+        "endLine": 482,
+        "endChar": 26
+      },
+      "revId": "db78e0252f74a12a7fd66c68188a050e31301931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_1913b95d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 2

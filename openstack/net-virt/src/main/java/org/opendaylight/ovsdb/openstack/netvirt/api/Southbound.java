@@ -35,7 +35,7 @@ public interface Southbound {
     boolean isBridgeOnOvsdbNode(Node node, String bridgeName);
     String getOvsdbNodeUUID(Node node);
     String getOsdbNodeExternalIdsValue(OvsdbNodeAugmentation ovsdbNodeAugmentation, String key);
-    boolean addBridge(Node ovsdbNode, String bridgeName, String target);
+    boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr);
     boolean deleteBridge(Node ovsdbNode);
     OvsdbBridgeAugmentation readBridge(Node node, String name);
     Node readBridgeNode(Node node, String name);

@@ -64,19 +64,6 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.trace("onDataChanged: {}", changes);
-        for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
-            // TODO validate we have the correct kind of InstanceIdentifier
-            if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
-                ConnectionInfo key = ovsdbNode.getConnectionInfo();
-                InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
-                if ( iid != null) {
-                    LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
-                              + "to same device, hence dropping the request {}", key, ovsdbNode);
-                    return;
-                }
-            }
-        }
         // Connect first if we have to:
         connect(changes);
 
@@ -149,11 +136,19 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             // TODO validate we have the correct kind of InstanceIdentifier
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                try {
-                    cm.connect((InstanceIdentifier<Node>) created.getKey(),
-                            (OvsdbNodeAugmentation) created.getValue());
-                } catch (UnknownHostException e) {
-                    LOG.warn("Failed to connect to ovsdbNode", e);
+                OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
+                ConnectionInfo key = ovsdbNode.getConnectionInfo();
+                InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                if ( iid != null) {
+                    LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
+                              + "to same device, hence dropping the request {}", key, ovsdbNode);
+                } else {
+                    try {
+                        cm.connect((InstanceIdentifier<Node>) created.getKey(),
+                                (OvsdbNodeAugmentation) created.getValue());
+                    } catch (UnknownHostException e) {
+                        LOG.warn("Failed to connect to ovsdbNode", e);
+                    }
                 }
             }
         }

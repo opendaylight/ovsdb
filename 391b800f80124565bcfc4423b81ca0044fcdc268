@@ -1,0 +1,170 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_ebdaa716",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/BridgeConfigurationManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "remove whitespace at end of a few lines below",
+      "range": {
+        "startLine": 122,
+        "startChar": 3,
+        "endLine": 122,
+        "endChar": 5
+      },
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4bce3b5c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/BridgeConfigurationManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "us the lowercase form, br-ex",
+      "range": {
+        "startLine": 123,
+        "startChar": 16,
+        "endLine": 123,
+        "endChar": 17
+      },
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0bd8431c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/BridgeConfigurationManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "use the {@link Node} form. I realize other places in this file are not using it but we will clean those up in a later commit",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 13
+      },
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ebf14796",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/BridgeConfigurationManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "use the same name as the field in the method, extNetwork. May even just rename the field to externalNetwork since this is the API and makes it more readable.",
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4b3cfb2f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "the default is \"physnet1:eth1\", which likely won\u0027t work for br-ex.",
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0b4603c0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "should we add external in the debug to differentiate it from the physical interface lookup on br-int?",
+      "range": {
+        "startLine": 236,
+        "startChar": 34,
+        "endLine": 236,
+        "endChar": 35
+      },
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb17aba2",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "please remove whitespace tabs",
+      "range": {
+        "startLine": 438,
+        "startChar": 0,
+        "endLine": 438,
+        "endChar": 10
+      },
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb656b46",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-25T12:53:06Z",
+      "side": 1,
+      "message": "I would move this processing up into the earlier section which is already in the isL3ForwardingEnabled block. \n\nThere is no need to check if the port is already on the bridge. And you can simply just write it to mdsal since writing the same data is a noop. That means you can simply getExternalBridgeName and addPortToBridge to look just like the phyNetName code block",
+      "revId": "391b800f80124565bcfc4423b81ca0044fcdc268",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -165,10 +165,10 @@ public class SouthboundImpl implements Southbound {
         return value;
     }
 
-    public boolean addBridge(Node ovsdbNode, String bridgeName, String target) {
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr) {
         boolean result = false;
 
-        LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
+        LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -177,7 +177,7 @@ public class SouthboundImpl implements Southbound {
             NodeId bridgeNodeId = MdsalHelper.createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(target));
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(controllersStr));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
@@ -262,10 +262,10 @@ public class SouthboundImpl implements Southbound {
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private void setControllerForBridge(Node ovsdbNode, String bridgeName, String targetString) {
+    private void setControllersForBridge(Node ovsdbNode, String bridgeName, List<String> controllersString) {
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
-            for (ControllerEntry controllerEntry: createControllerEntries(targetString)) {
+            for (ControllerEntry controllerEntry : createControllerEntries(controllersString)) {
                 InstanceIdentifier<ControllerEntry> iid =
                         MdsalHelper.createInstanceIdentifier(ovsdbNode.getKey(), bridgeName)
                                 .augmentation(OvsdbBridgeAugmentation.class)
@@ -277,11 +277,15 @@ public class SouthboundImpl implements Southbound {
         }
     }
 
-    private List<ControllerEntry> createControllerEntries(String targetString) {
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
-        ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
-        controllerEntryBuilder.setTarget(new Uri(targetString));
-        controllerEntries.add(controllerEntryBuilder.build());
+    private List<ControllerEntry> createControllerEntries(List<String> controllersStr) {
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
+        if (controllersStr != null) {
+            for (String controllerStr : controllersStr) {
+                ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
+                controllerEntryBuilder.setTarget(new Uri(controllerStr));
+                controllerEntries.add(controllerEntryBuilder.build());
+            }
+        }
         return controllerEntries;
     }
 

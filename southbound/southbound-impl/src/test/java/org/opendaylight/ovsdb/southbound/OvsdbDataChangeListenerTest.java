@@ -86,16 +86,6 @@ public class OvsdbDataChangeListenerTest {
         MemberModifier.suppress(MemberMatcher.method(OvsdbDataChangeListener.class, "disconnect", AsyncDataChangeEvent.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbDataChangeListener.class, "init", AsyncDataChangeEvent.class));
 
-        //iid not null case
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(cm.getInstanceIdentifier(any(ConnectionInfo.class))).thenReturn(iid);
-
-        ovsdbDataChangeListener.onDataChanged(changes);
-        verify(changes).getCreatedData();
-        verify(ovsdbNode).getConnectionInfo();
-        verify(cm).getInstanceIdentifier(any(ConnectionInfo.class));
-        PowerMockito.verifyPrivate(ovsdbDataChangeListener, times(0)).invoke("connect", any(AsyncDataChangeEvent.class));
-
         //iid null case
         when(cm.getInstanceIdentifier(any(ConnectionInfo.class))).thenReturn(null);
         ovsdbDataChangeListener.onDataChanged(changes);

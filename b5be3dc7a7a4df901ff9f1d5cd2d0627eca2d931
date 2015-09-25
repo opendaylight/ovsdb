@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_396a351b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-25T22:40:16Z",
+      "side": 1,
+      "message": "we should get rid of this condition, because if switch is connected to the controller, there must be a manager entry present in OvsdbNodeAugmentation. If not we should throw an exception.",
+      "revId": "b5be3dc7a7a4df901ff9f1d5cd2d0627eca2d931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

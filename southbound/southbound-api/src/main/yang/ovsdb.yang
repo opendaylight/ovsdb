@@ -470,7 +470,7 @@ module ovsdb {
                 type string;
             }
          }
-         
+
          list manager-entry {
             description "Node managers info";
             config false;
@@ -479,8 +479,11 @@ module ovsdb {
                 description "Uri that user set to connect to the controller";
                 type inet:uri;
             }
-            leaf is-connected {
+            leaf connected {
                 type boolean;
+            }
+            leaf number_of_connections {
+                type uint32;
             }
         }
      }

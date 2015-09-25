@@ -58,7 +58,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>karaf</module>
     <!-- OVSDB Components -->
     <module>southbound</module>
-    <module>northbound</module>
     <module>openstack</module>
     <module>ovsdb-artifacts</module>
     <module>schemas</module>

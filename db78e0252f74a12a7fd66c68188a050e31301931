@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_994d8975",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-25T18:55:08Z",
+      "side": 1,
+      "message": "Yang generate weird method name for this attribute like isIsConnected() and setIsConnected(), so i changed it to connected, so that it generate some sane name.",
+      "parentUuid": "1a76adc5_9926e9b9",
+      "range": {
+        "startLine": 482,
+        "startChar": 17,
+        "endLine": 482,
+        "endChar": 26
+      },
+      "revId": "db78e0252f74a12a7fd66c68188a050e31301931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_1913b95d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 2
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_b952c511",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-25T18:55:08Z",
+      "side": 1,
+      "message": "This is the string that comes from the switch as a part attributes from status column of manager tablee, against which we need to match, to get the number of connections.",
+      "parentUuid": "1a76adc5_1913b95d",
+      "range": {
+        "startLine": 67,
+        "startChar": 53,
+        "endLine": 67,
+        "endChar": 66
+      },
+      "revId": "db78e0252f74a12a7fd66c68188a050e31301931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_99ffc901",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbManagersRemovedCommand.java",
         "patchSetId": 2
@@ -83,6 +131,30 @@
       "writtenOn": "2015-09-25T18:17:51Z",
       "side": 1,
       "message": "would a more generic method be better: like isManagerPresent(manager, updatedManagerRows)?\n\nAlso change name of removedManager to just manager",
+      "range": {
+        "startLine": 97,
+        "startChar": 20,
+        "endLine": 97,
+        "endChar": 62
+      },
+      "revId": "db78e0252f74a12a7fd66c68188a050e31301931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_19417939",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbManagersRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-09-25T18:55:08Z",
+      "side": 1,
+      "message": "good suggestion, will fix it in my next patch.",
+      "parentUuid": "1a76adc5_99ffc901",
       "range": {
         "startLine": 97,
         "startChar": 20,

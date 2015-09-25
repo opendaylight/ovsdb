@@ -75,11 +75,6 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                               + "to same device, hence dropping the request {}", key, ovsdbNode);
                     return;
                 }
-                if (!cm.getHasDeviceOwnership(key)) {
-                    LOG.warn("Not the owner of device {}. Cannot make updates, "
-                            + "hence dropping the request {}", key, ovsdbNode);
-                    return;
-                }
             }
         }
         // Connect first if we have to:

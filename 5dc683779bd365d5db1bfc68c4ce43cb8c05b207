@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_aee91d1c",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-09-25T15:02:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_a6f7cff4",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_a6ceefb2",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-02T17:14:31Z",
       "side": 1,
       "message": "It might be worth sharing a single executor across all tests and using invokeAll() to avoid blowing the system up if things go badly wrong.",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_eee63544",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1047,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-09-25T15:02:19Z",
+      "side": 1,
+      "message": "I don\u0027t quite get how this helps?  Each test case is run serially, so only one ExecutorService instance is active at a time.  Instantiating an ExecutorService per test case is cleaner, and allows for better tracking of which Runnables are still incomplete for a particular test case.",
+      "parentUuid": "3a79b1b5_a6ceefb2",
       "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_8ecf81b0",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1075,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-09-25T15:02:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_66d9b782",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_46defb6e",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-02T17:14:31Z",
       "side": 1,
       "message": "LOG.info() maybe?",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4ec1697f",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-09-25T15:02:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_46defb6e",
       "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -115,6 +187,24 @@
       "writtenOn": "2015-09-02T17:14:31Z",
       "side": 1,
       "message": "There\u0027s a certain pattern here ;-).",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0ebb710f",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1752,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-09-25T15:02:19Z",
+      "side": 1,
+      "message": "Yes, the unfortunate design choice for OVSDB Southbound to avoid YANG augmentations led to this proliferation of \"dumb\" code.",
+      "parentUuid": "3a79b1b5_c6d1ab58",
       "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

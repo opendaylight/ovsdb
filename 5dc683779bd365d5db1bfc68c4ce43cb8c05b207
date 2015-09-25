@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_ce8d7933",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1047,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-25T15:10:03Z",
+      "side": 1,
+      "message": "The scenario I was thinking of was if the tests timed out and the threads were left running, so you\u0027d end up with more threads running than expected since the next test might start and spawn its threads. I\u0027m used to ::invokeAll() doing all the tracking for me but that\u0027s personal preference...",
+      "parentUuid": "1a76adc5_eee63544",
+      "revId": "5dc683779bd365d5db1bfc68c4ce43cb8c05b207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_66d9b782",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 1

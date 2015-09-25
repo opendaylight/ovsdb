@@ -1,0 +1,8 @@
+Code-Review+1: Flavio Fernandes <ffernand@redhat.com>
+Code-Review+2: Anil Vishnoi <vishnoianil@gmail.com>
+Verified+1: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-by: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-at: Fri, 25 Sep 2015 23:49:14 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/27483
+Project: ovsdb
+Branch: refs/heads/topic/master/clustering

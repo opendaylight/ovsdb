@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSecurityGroupCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSecurityRuleCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.NeutronCRUDInterfaces;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.DirectionBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.DirectionEgress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.DirectionIngress;
@@ -186,7 +187,8 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
             answer.setSecurityRemoteGroupID(rule.getRemoteGroupId().getValue());
         }
         if (rule.getRemoteIpPrefix() != null) {
-            answer.setSecurityRuleRemoteIpPrefix(rule.getRemoteIpPrefix());
+            answer.setSecurityRuleRemoteIpPrefix(rule.getRemoteIpPrefix().getIpv4Prefix() != null?
+                    rule.getRemoteIpPrefix().getIpv4Prefix().getValue():rule.getRemoteIpPrefix().getIpv6Prefix().getValue());
         }
         if (rule.getProtocol() != null) {
             answer.setSecurityRuleProtocol(PROTOCOL_MAP.get(rule.getProtocol()));
@@ -225,7 +227,7 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
             securityRuleBuilder.setRemoteGroupId(toUuid(securityRule.getSecurityRemoteGroupID()));
         }
         if (securityRule.getSecurityRuleRemoteIpPrefix() != null) {
-            securityRuleBuilder.setRemoteIpPrefix(securityRule.getSecurityRuleRemoteIpPrefix());
+            securityRuleBuilder.setRemoteIpPrefix(new IpPrefix(securityRule.getSecurityRuleRemoteIpPrefix().toCharArray()));
         }
         if (securityRule.getSecurityRuleProtocol() != null) {
             ImmutableBiMap<String, Class<? extends ProtocolBase>> mapper =

@@ -152,7 +152,8 @@ public class NeutronSecurityRuleDataChangeListener implements DataChangeListener
             answer.setSecurityRemoteGroupID(rule.getRemoteGroupId().getValue());
         }
         if (rule.getRemoteIpPrefix() != null) {
-            answer.setSecurityRuleRemoteIpPrefix(rule.getRemoteIpPrefix());
+            answer.setSecurityRuleRemoteIpPrefix(rule.getRemoteIpPrefix().getIpv4Prefix()!= null?
+                    rule.getRemoteIpPrefix().getIpv4Prefix().getValue():rule.getRemoteIpPrefix().getIpv6Prefix().getValue());
         }
         if (rule.getProtocol() != null) {
             answer.setSecurityRuleProtocol(PROTOCOL_MAP.get(rule.getProtocol()));

@@ -45,7 +45,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
 
   <properties>
-    <dummy-console.version>1.3.0-SNAPSHOT</dummy-console.version>
     <odl.karaf.base.version>1.6.0-SNAPSHOT</odl.karaf.base.version>
     <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
     <io.netty.version>3.8.0.Final</io.netty.version>
@@ -222,11 +221,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>3.3.100.v20120522-1822</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>dummy-console</artifactId>
-      <version>${dummy-console.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.neutron</groupId>
       <artifactId>features-neutron</artifactId>
       <version>${networkconfig.neutron.version}</version>
@@ -270,21 +264,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${openstack.netvirt.providers.version}</version>
       <type>xml</type>
       <classifier>config</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>plugin</artifactId>
-      <version>${ovsdb.plugin.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb-plugin-compatibility-layer</artifactId>
-      <version>${ovsdb.plugin.compatibility.layer.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>plugin-shell</artifactId>
-      <version>${plugin.shell.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

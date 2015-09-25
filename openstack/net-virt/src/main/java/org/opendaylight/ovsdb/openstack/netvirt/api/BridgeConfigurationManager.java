@@ -119,4 +119,13 @@ public interface BridgeConfigurationManager {
      * @return a List in the format {eth1, eth2} given bridge_mappings=physnet1:eth1,physnet2:eth2
      */
     List<String> getAllPhysicalInterfaceNames(Node node);
+   /*
+     * Return Br-ex interface configured in the bridge mapping.
+     * Return Null if br-ex is not configured.  
+     * @param node
+     * @param physicalNetwork
+     * @return the interface as a string 
+   */
+     String getExternalInterfaceName (Node node, String extNetwork);
+
 }

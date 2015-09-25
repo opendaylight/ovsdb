@@ -211,6 +211,40 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return isCreated;
     }
 
+
+
+    @Override
+    public String getExternalInterfaceName (Node node, String extNetwork) {
+        String phyIf = null;
+        String providerMaps = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
+                configurationService.getProviderMappingsKey());
+        if (providerMaps == null) {
+            providerMaps = configurationService.getDefaultProviderMapping();
+        }
+
+        if (providerMaps != null) {
+            for (String map : providerMaps.split(",")) {
+                String[] pair = map.split(":");
+                if (pair[0].equals(extNetwork)) {
+                    phyIf = pair[1];
+                    break;
+                }
+            }
+        }
+
+        if (phyIf == null) {
+            LOGGER.error("Physical interface not found for Node: {}, Network {}",
+                    node, extNetwork);
+        }
+        else {
+            LOGGER.info("Physical interface found for Node: {}, Network {} is {}",node,extNetwork,phyIf);
+        }
+
+        return phyIf;
+    }
+
+
+
     @Override
     public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
         String phyIf = null;
@@ -400,8 +434,23 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 return false;
             }
         }
-
-        LOGGER.debug("createBridges: node: {}, status: success", bridgeNode);
+        if (configurationService.isL3ForwardingEnabled()) {
+       	  final String brExt = configurationService.getExternalBridgeName();
+       	  Node extBridgeNode = southbound.readBridgeNode(ovsdbNode, brExt);
+       	  String phyNetName = getExternalInterfaceName(extBridgeNode, brExt);
+	  if ( phyNetName != null) {	
+            if (!isPortOnBridge(extBridgeNode, phyNetName)) {
+            	// add the Port to the Bridge
+               	LOGGER.info("Ext Bridge missing interface: node: {}", extBridgeNode);
+               	if (!addPortToBridge(extBridgeNode, brExt, phyNetName)) {
+                  LOGGER.error("Add Port {} to Bridge {} failed", phyNetName, brExt);
+                  return false;
+               	}	
+        	LOGGER.info("Add Port {} to Ext Bridge {} success", phyNetName, brExt);
+            }	
+	  }
+	} // End BrEx Port addition
+        LOGGER.info("createBridges: node: {}, status: success", bridgeNode);
         return true;
     }
 

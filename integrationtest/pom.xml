@@ -13,9 +13,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>commons.integrationtest</artifactId>
+    <artifactId>commons</artifactId>
     <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../commons/integrationtest</relativePath>
+    <relativePath>../commons/parent</relativePath>
   </parent>
 
   <artifactId>integrationtest</artifactId>
@@ -45,109 +45,29 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <dependencies>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-it</artifactId>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.ops4j.pax.exam</groupId>
-          <artifactId>pax-exam-container-native</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-inventory</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-spi</artifactId>
-      <!-- Should be in a parent POM -->
-      <version>4.4.0</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Cache surefire in Maven Local repo for offline builds -->
-    <dependency>
-      <groupId>org.apache.maven.surefire</groupId>
-      <artifactId>surefire-junit4</artifactId>
-      <version>${maven.surefire.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.surefire</groupId>
-      <artifactId>surefire-junit47</artifactId>
-      <version>${maven.surefire.version}</version>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>library</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>${lifecycle.mapping.version}</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.servicemix.tooling</groupId>
-                    <artifactId>depends-maven-plugin</artifactId>
-                    <versionRange>[0,)</versionRange>
-                    <goals>
-                      <goal>generate-depends-file</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore/>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>maven-paxexam-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-config</id>
-            <goals>
-              <goal>generate-depends-file</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.servicemix.tooling</groupId>
-        <artifactId>depends-maven-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <id>generate-depends-file</id>
-            <goals>
-              <goal>generate-depends-file</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -177,30 +97,4 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>default</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.ops4j.pax.exam</groupId>
-          <artifactId>pax-exam-container-native</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>karafit</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.ops4j.pax.exam</groupId>
-          <artifactId>pax-exam-container-karaf</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 </project>

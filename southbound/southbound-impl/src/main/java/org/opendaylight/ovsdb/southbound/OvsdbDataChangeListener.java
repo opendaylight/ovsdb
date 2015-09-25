@@ -41,6 +41,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     private OvsdbConnectionManager cm;
     private DataBroker db;
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataChangeListener.class);
+    private boolean isDeviceOwner = false;
 
     OvsdbDataChangeListener(DataBroker db, OvsdbConnectionManager cm) {
         LOG.info("Registering OvsdbNodeDataChangeListener");
@@ -64,20 +65,23 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.trace("onDataChanged: {}", changes);
+        isDeviceOwner = false;
+
         // Connect first if we have to:
         connect(changes);
 
         // Second update connections if we have to
         updateConnections(changes);
 
-        // Then handle updates to the actual data
-        updateData(changes);
+        if (isDeviceOwner) {
+            // Then handle updates to the actual data
+            updateData(changes);
 
-        // Finally disconnect if we need to
-        disconnect(changes);
+            // Finally disconnect if we need to
+            disconnect(changes);
 
-        init(changes);
-
+            init(changes);
+        }
         LOG.trace("onDataChanged: exit");
     }
 
@@ -114,6 +118,11 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             if (updated.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation value = (OvsdbNodeAugmentation) updated.getValue();
+                if (!cm.getHasDeviceOwnership(value.getConnectionInfo())) {
+                    LOG.warn("Not the owner of device {}. Cannot make updates, "
+                            + "hence dropping the request {}", value.getConnectionInfo(), value);
+                    return;
+                }
                 OvsdbClient client = cm.getClient(value.getConnectionInfo());
                 if (client == null) {
                     for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
@@ -121,6 +130,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                             try {
                                 cm.disconnect((OvsdbNodeAugmentation) original.getValue());
                                 cm.connect((InstanceIdentifier<Node>) original.getKey(),value);
+                                isDeviceOwner = true;
                             } catch (UnknownHostException e) {
                                 LOG.warn("Failed to disconnect to ovsdbNode", e);
                             }
@@ -138,6 +148,11 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
                 ConnectionInfo key = ovsdbNode.getConnectionInfo();
+                if (!cm.getHasDeviceOwnership(key)) {
+                    LOG.warn("Not the owner of device {}. Cannot make updates, "
+                            + "hence dropping the request {}", key, ovsdbNode);
+                    return;
+                }
                 InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
                 if ( iid != null) {
                     LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
@@ -146,6 +161,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                     try {
                         cm.connect((InstanceIdentifier<Node>) created.getKey(),
                                 (OvsdbNodeAugmentation) created.getValue());
+                        isDeviceOwner = true;
                     } catch (UnknownHostException e) {
                         LOG.warn("Failed to connect to ovsdbNode", e);
                     }

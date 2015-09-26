@@ -25,6 +25,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
+import org.opendaylight.ovsdb.schema.openvswitch.Manager;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
@@ -36,12 +38,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -210,7 +215,7 @@ public class SouthboundMapper {
     }
 
     public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
-        Set<String> protocols = new HashSet<String>();
+        Set<String> protocols = new HashSet<>();
         if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
             for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
@@ -335,7 +340,7 @@ public class SouthboundMapper {
 
     public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
-        Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
+        Map<UUID,Controller> controllerMap = new HashMap<>();
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
             for (ControllerEntry controllerEntry : controllerEntries) {
                 String controllerNamedUUID = "Controller_" + getRandomUUID();
@@ -365,4 +370,76 @@ public class SouthboundMapper {
         connectionInfoBuilder.setRemotePort(connectionInfo.getRemotePort());
         return connectionInfoBuilder.build();
     }
+
+    /**
+     * Create the {@link ManagerEntry} list given an OVSDB {@link OpenVSwitch}
+     * and {@link Manager} rows.
+     *
+     * @param ovsdbNode the {@link OpenVSwitch} to update
+     * @param updatedManagerRows the list of {@link Manager} managers with updates
+     * @return list of {@link ManagerEntry} entries
+     */
+    public static List<ManagerEntry> createManagerEntries(OpenVSwitch ovsdbNode,
+                                                                Map<UUID, Manager> updatedManagerRows) {
+
+        LOG.debug("createManagerEntries OpenVSwitch: {}\n, updatedManagerRows: {}",
+                ovsdbNode, updatedManagerRows);
+        final Set<UUID> managerUUIDs = ovsdbNode.getManagerOptionsColumn().getData();
+        final List<ManagerEntry> managerEntries = new ArrayList<ManagerEntry>();
+        for (UUID managerUUID : managerUUIDs ) {
+            final Manager manager = updatedManagerRows.get(managerUUID);
+            addManagerEntries(managerEntries, manager);
+        }
+        LOG.debug("managerEntries: {}", managerEntries);
+        return managerEntries;
+    }
+
+    /**
+     * Create the {@link ManagerEntry} list given an MDSAL {@link Node} ovsdbNode
+     * and {@link Manager} rows.
+     *
+     * @param ovsdbNode the {@link Node} to update
+     * @param updatedManagerRows the list of {@link Manager} managers with updates
+     * @return list of {@link ManagerEntry} entries
+     */
+    public static List<ManagerEntry> createManagerEntries(Node ovsdbNode,
+                                                                Map<Uri, Manager> updatedManagerRows) {
+
+        LOG.debug("createManagerEntries based on OVSDB Node: {}\n, updatedManagerRows: {}",
+                ovsdbNode, updatedManagerRows);
+        final List<ManagerEntry> managerEntriesCreated = new ArrayList<ManagerEntry>();
+        final OvsdbNodeAugmentation ovsdbNodeAugmentation =
+                ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        if (ovsdbNodeAugmentation == null) {
+            return managerEntriesCreated;
+        }
+
+        final List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
+        if (managerEntries != null) {
+            for (ManagerEntry managerEntry : managerEntries) {
+                final Manager manager = updatedManagerRows.get(managerEntry.getTarget());
+                addManagerEntries(managerEntriesCreated, manager);
+            }
+        }
+        LOG.debug("managerEntries: {}", managerEntriesCreated);
+        return managerEntriesCreated;
+    }
+
+    /**
+     * Add the OVSDB {@link Manager} updates to the MDSAL {@link ManagerEntry} list.
+     *
+     * @param managerEntries the list of {@link ManagerEntry} to update
+     * @param manager the updated OVSDB {@link Manager}
+     */
+    public static void addManagerEntries(List<ManagerEntry> managerEntries,
+                                            final Manager manager) {
+
+        if (manager != null && manager.getTargetColumn() != null) {
+            final String targetString = (String)manager.getTargetColumn().getData();
+            managerEntries.add(new ManagerEntryBuilder()
+                    .setTarget(new Uri(targetString))
+                    .setIsConnected(manager.getIsConnectedColumn().getData()).build());
+        }
+    }
+
 }

@@ -1,0 +1,9 @@
+module hwvtepsouthbound {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:hwvtepsouthbound";
+    prefix "hwvtepsouthbound";
+
+    revision "2015-09-01" {
+        description "Initial revision of hwvtepsouthbound model";
+    }
+}

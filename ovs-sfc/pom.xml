@@ -124,7 +124,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>concepts</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>yang-binding</artifactId>
     </dependency>
     <dependency>
@@ -132,11 +132,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>yang-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-inet-types</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
     <dependency>
@@ -150,7 +150,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${bundle.plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -197,7 +196,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <version>${controller.config.version}</version>
           </dependency>
           <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
+            <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
             <version>${yangtools.version}</version>
           </dependency>

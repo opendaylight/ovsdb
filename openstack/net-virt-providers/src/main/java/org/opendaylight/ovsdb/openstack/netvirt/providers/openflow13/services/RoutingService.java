@@ -88,7 +88,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
             // TODO: implement ipv6 case
             LOG.debug("ipv6 address is not implemented yet. address {}",
                       address);
-            new Status(StatusCode.NOTIMPLEMENTED);
+            return new Status(StatusCode.NOTIMPLEMENTED);
         }
         final String prefixString = address.getHostAddress() + "/" + mask;
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));

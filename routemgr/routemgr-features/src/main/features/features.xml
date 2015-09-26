@@ -2,21 +2,27 @@
 <features name="odl-ovsdb-routemgr-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+<!--
   <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+-->
   <repository>mvn:org.opendaylight.neutron/features-neutron/0.6.0-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/0.2.0-SNAPSHOT/xml/features</repository>
-  <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.0-SNAPSHOT/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.1-SNAPSHOT/xml/features</repository>
   <feature name='odl-routemgr-plugin' description="Opendaylight :: Routemgr :: Plugin" version='${project.version}'>
     <feature version="0.2.0-SNAPSHOT">odl-openflowplugin-flow-services</feature>
     <feature version="0.6.0-SNAPSHOT">odl-neutron-transcriber</feature>
-    <feature version="1.2.0-SNAPSHOT">odl-ovsdb-southbound-impl</feature>
+    <feature version="1.2.1-SNAPSHOT">odl-ovsdb-southbound-impl</feature>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/routemgr-impl/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/routemgr-api/${project.version}</bundle>
     <configfile finalname="etc/opendaylight/karaf/97-routemgrmain.xml">mvn:org.opendaylight.ovsdb/routemgr-config/${project.version}/xml/config</configfile>
   </feature>
+<!--
   <feature name='odl-routemgr-rest' description="Opendaylight :: Routemgr :: Plugin :: Rest" version='${project.version}'>
     <feature version="${project.version}">odl-routemgr-plugin</feature>
     <feature version="${mdsal.version}">odl-restconf</feature>
   </feature>
+-->
 </features>

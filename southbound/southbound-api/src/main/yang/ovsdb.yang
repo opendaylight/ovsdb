@@ -343,7 +343,10 @@ module ovsdb {
     }
 
     grouping ovsdb-node-attributes {
-        description "";
+        description "Plugin will not allow multiple connections to the same device.
+        If an application attempts to make more than one connection to the device by
+        putting multiple entries in the config data store, then it is the responsibility
+        of the application to clean the config data store";
         container connection-info{
             uses ovsdb-connection-info-attributes;
         }
@@ -467,7 +470,19 @@ module ovsdb {
                 type string;
             }
          }
-
+         
+         list manager-entry {
+            description "Node managers info";
+            config false;
+            key "target";
+            leaf target {
+                description "Uri that user set to connect to the controller";
+                type inet:uri;
+            }
+            leaf is-connected {
+                type boolean;
+            }
+        }
      }
 
     identity interface-type-base {

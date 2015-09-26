@@ -82,11 +82,10 @@ public class SouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        InstanceIdentifier<Node> nodePath = InstanceIdentifier
+        return InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
-        return nodePath;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
@@ -128,8 +127,7 @@ public class SouthboundMapper {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
                 + new String(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
-        NodeId nodeId = new NodeId(uri);
-        return nodeId;
+        return new NodeId(uri);
     }
 
     public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
@@ -154,7 +152,7 @@ public class SouthboundMapper {
     }
 
     public static String createDatapathType(OvsdbBridgeAugmentation mdsalbridge) {
-        String datapathtype = new String(SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class));
+        String datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
 
         if (mdsalbridge.getDatapathType() != null) {
             if (SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()) != null) {

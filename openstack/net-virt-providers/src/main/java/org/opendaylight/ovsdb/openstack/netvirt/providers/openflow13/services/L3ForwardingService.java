@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -33,12 +34,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 public class L3ForwardingService extends AbstractServiceInstance implements L3ForwardingProvider, ConfigInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(L3ForwardingService.class);
+
     public L3ForwardingService() {
         super(Service.L3_FORWARDING);
     }
@@ -59,6 +64,14 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
         InstructionsBuilder isb = new InstructionsBuilder();
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
+
+        if (ipAddress instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 case
+            LOG.debug("ipv6 address is not implemented yet. dpid {} segmentationId {} ipAddress {} macAddress {} Action {}",
+                      dpid, segmentationId, ipAddress, macAddress, action);
+            return new Status(StatusCode.NOTIMPLEMENTED);
+        }
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));

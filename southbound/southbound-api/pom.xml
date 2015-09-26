@@ -8,7 +8,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>org.opendaylight.yangtools</groupId>
+    <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
     <version>0.8.0-SNAPSHOT</version>
     <relativePath/>
@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>southbound-api</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
@@ -40,25 +40,45 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.mdsal.model</groupId>
+        <artifactId>mdsal-model-artifacts</artifactId>
+        <version>0.8.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-topology</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>yang-ext</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-inet-types</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-yang-types-20130715</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
     <dependency>

@@ -648,7 +648,6 @@ public class NeutronL3AdapterTest {
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowForNetworkFromExternal", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programIpRewriteExclusionStage1", any(Node.class), anyLong(), anyString(), anyString(), eq(Action.DELETE));
-        assertEquals("Error, did not remove the RouterMac", networkIdToRouterMacCacheSize, networkIdToRouterMacCache.size() +1);
         assertEquals("Error, did not remove the RouterIP", networkIdToRouterIpListCacheSize, networkIdToRouterIpListCache.size() +1);
         assertEquals("Error, did not remove the RouterInterface", subnetIdToRouterInterfaceCacheSize, subnetIdToRouterInterfaceCache.size() +1);
     }

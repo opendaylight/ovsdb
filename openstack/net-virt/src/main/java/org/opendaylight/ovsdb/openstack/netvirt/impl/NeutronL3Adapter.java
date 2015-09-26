@@ -273,6 +273,7 @@ public class NeutronL3Adapter implements ConfigInterface {
                 }
             }
             this.updateL3ForNeutronPort(neutronPort, currPortShouldBeDeleted);
+            this.cleanupRouterCache(neutronPort, currPortShouldBeDeleted);
         }
     }
 
@@ -733,7 +734,6 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Keep cache for finding router's mac from network uuid -- remove
         //
         if (isDelete) {
-            networkIdToRouterMacCache.remove(neutronNetwork.getNetworkUUID());
             networkIdToRouterIpListCache.remove(neutronNetwork.getNetworkUUID());
             subnetIdToRouterInterfaceCache.remove(subnet.getSubnetUUID());
         }
@@ -1197,6 +1197,18 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
         return null;
     }
+
+     private void cleanupRouterCache(final NeutronPort neutronPort, final boolean isDelete){
+             /*
+              *  Fix for 4277
+              *  Remove the mac cache only after deleting the neutron
+              *  port l3 flows.
+              */
+             if((isDelete) && (neutronPort != null) &&
+                             (networkIdToRouterMacCache != null)){
+                     networkIdToRouterMacCache.remove(neutronPort.getNetworkUUID());
+             }
+     }
 
     public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){
 

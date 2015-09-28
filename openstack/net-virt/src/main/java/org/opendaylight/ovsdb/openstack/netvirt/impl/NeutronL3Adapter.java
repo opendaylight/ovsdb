@@ -1289,6 +1289,21 @@ public class NeutronL3Adapter implements ConfigInterface {
          }
      }
 
+     private void cleanupRouterCache(final NeutronRouter_Interface neutronRouterInterface) {
+         /*
+          *  Fix for 4277
+          *  Remove the router cache only after deleting the neutron
+          *  port l3 flows.
+          */
+         final NeutronPort neutronPort = neutronPortCache.getPort(neutronRouterInterface.getPortUUID());
+
+         if (neutronPort != null) {
+             networkIdToRouterMacCache.remove(neutronPort.getNetworkUUID());
+             networkIdToRouterIpListCache.remove(neutronPort.getNetworkUUID());
+             subnetIdToRouterInterfaceCache.remove(neutronRouterInterface.getSubnetUUID());
+         }
+     }
+
     public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){
 
         Preconditions.checkNotNull(node);

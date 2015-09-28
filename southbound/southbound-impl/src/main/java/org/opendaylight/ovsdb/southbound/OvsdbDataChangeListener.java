@@ -100,6 +100,12 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         Set<InstanceIdentifier<?>> iiD = changes.getRemovedPaths();
         for (InstanceIdentifier instanceIdentifier : iiD) {
             if (originalDataObject.get(instanceIdentifier) instanceof OvsdbNodeAugmentation) {
+                if (!cm.getHasDeviceOwnership(((OvsdbNodeAugmentation)originalDataObject.get(instanceIdentifier)).
+                        getConnectionInfo())) {
+                    LOG.warn("Not the owner of device {}. Cannot make updates, "
+                            + "hence dropping the request",originalDataObject.get(instanceIdentifier));
+                    continue;
+                }
                 try {
                     cm.disconnect((OvsdbNodeAugmentation) originalDataObject.get(instanceIdentifier));
                 } catch (UnknownHostException e) {
@@ -114,6 +120,11 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             if (updated.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation value = (OvsdbNodeAugmentation) updated.getValue();
+                if (!cm.getHasDeviceOwnership(value.getConnectionInfo())) {
+                    LOG.warn("Not the owner of device {}. Cannot make updates, "
+                            + "hence dropping the request", value.getConnectionInfo());
+                    continue;
+                }
                 OvsdbClient client = cm.getClient(value.getConnectionInfo());
                 if (client == null) {
                     for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
@@ -138,6 +149,11 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
                 ConnectionInfo key = ovsdbNode.getConnectionInfo();
+                if (!cm.getHasDeviceOwnership(key)) {
+                    LOG.warn("Not the owner of device {}. Cannot make updates, "
+                            + "hence dropping the request", key);
+                    continue;
+                }
                 InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
                 if ( iid != null) {
                     LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
@@ -203,11 +219,11 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                         }
                     }
                 }
-                if (client != null) {
+                if (client != null && cm.getHasDeviceOwnership(client.getMDConnectionInfo())) {
                     LOG.debug("Found client for {}", created.getValue());
                     result.put((InstanceIdentifier<Node>) created.getKey(), client);
                 } else {
-                    LOG.debug("Did not find client for {}",created.getValue());
+                    LOG.debug("Did not find client with device owrnership for {}",created.getValue());
                 }
             }
         }

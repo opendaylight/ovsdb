@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_4e964496",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-28T12:08:56Z",
+      "side": 1,
+      "message": "nitpick: fix spaces at the end of line",
+      "range": {
+        "startLine": 1093,
+        "startChar": 31,
+        "endLine": 1093,
+        "endChar": 49
+      },
+      "revId": "70db1bdd0eefda6f28a6646d64495b4d8030c128",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6e9300a4",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1104,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-28T12:08:56Z",
+      "side": 1,
+      "message": "So, we are handling it in the case below to make ping work.",
+      "range": {
+        "startLine": 1104,
+        "startChar": 35,
+        "endLine": 1104,
+        "endChar": 103
+      },
+      "revId": "70db1bdd0eefda6f28a6646d64495b4d8030c128",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_8e7c5c74",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-28T12:08:56Z",
+      "side": 1,
+      "message": "rename",
+      "range": {
+        "startLine": 53,
+        "startChar": 17,
+        "endLine": 53,
+        "endChar": 35
+      },
+      "revId": "70db1bdd0eefda6f28a6646d64495b4d8030c128",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ee871060",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-09-28T12:08:56Z",
+      "side": 1,
+      "message": "rename this function to getNeutronPortFromDhcpIntf()\nMy reasoning here is that \u0027is...\u0027 should return boolean.",
+      "range": {
+        "startLine": 137,
+        "startChar": 23,
+        "endLine": 137,
+        "endChar": 41
+      },
+      "revId": "70db1bdd0eefda6f28a6646d64495b4d8030c128",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

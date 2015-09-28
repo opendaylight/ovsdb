@@ -149,6 +149,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
       <!-- Needed if you use versionAsInProject() -->
@@ -165,19 +169,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </execution>
         </executions>
       </plugin>
-      <!--<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <configLocation>
-            ${project.basedir}/../../commons/parent/src/main/resources/ovsdb_checks.xml
-          </configLocation>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <failsOnError>true</failsOnError>
-          <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
-          <excludes>**/yang/</excludes>
-        </configuration>
-      </plugin>-->
     </plugins>
   </build>
   <profiles>

@@ -121,14 +121,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
+        <!-- simply removing the config below means the defaults from odlparent are used. -->
+        <!-- if you want errors on, then just keep the failsOnError:true part from below. -->
+        <!--<configuration>
           <configLocation>
             ${project.basedir}/../../commons/parent/src/main/resources/ovsdb_checks.xml
           </configLocation>
           <failsOnError>true</failsOnError>
           <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
           <excludes>**/yang/</excludes>
-        </configuration>
+        </configuration>-->
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>

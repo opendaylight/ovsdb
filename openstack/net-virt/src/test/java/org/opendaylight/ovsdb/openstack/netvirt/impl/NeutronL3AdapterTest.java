@@ -63,7 +63,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -947,7 +947,7 @@ public class NeutronL3AdapterTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, neutronL3Adapter)).thenReturn(nodeCacheManager);
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, neutronL3Adapter)).thenReturn(southbound);
 
-        neutronL3Adapter.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        neutronL3Adapter.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("tenantNetworkManager"), tenantNetworkManager);
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);

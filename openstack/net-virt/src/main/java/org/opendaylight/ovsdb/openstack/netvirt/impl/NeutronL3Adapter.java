@@ -34,7 +34,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1334,7 +1333,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         tenantNetworkManager =
                 (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
         configurationService =

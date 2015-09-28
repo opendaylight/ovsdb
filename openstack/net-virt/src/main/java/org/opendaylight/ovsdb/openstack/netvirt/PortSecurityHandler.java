@@ -16,7 +16,6 @@ import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,11 +132,10 @@ public class PortSecurityHandler extends AbstractHandler
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(INeutronSecurityGroupAware.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
     }
 
     @Override

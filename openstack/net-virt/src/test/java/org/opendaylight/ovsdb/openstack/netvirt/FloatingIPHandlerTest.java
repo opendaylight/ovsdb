@@ -26,7 +26,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -85,7 +84,7 @@ public class FloatingIPHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, floatingHandler)).thenReturn(eventDispatcher);
         PowerMockito.when(ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, floatingHandler)).thenReturn(neutronL3Adapter);
 
-        floatingHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        floatingHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", floatingHandler.eventDispatcher, eventDispatcher);
         assertEquals("Error, did not return the correct object", getNeutronL3Adapter(), neutronL3Adapter);

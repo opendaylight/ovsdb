@@ -274,6 +274,13 @@ public class NeutronL3Adapter implements ConfigInterface {
             }
             this.updateL3ForNeutronPort(neutronPort, currPortShouldBeDeleted);
         }
+
+        if (isDelete) {
+            /*
+             *  Bug 4277: Remove the router interface cache only after deleting the neutron port l3 flows.
+             */
+            this.cleanupRouterCache(neutronRouterInterface);
+        }
     }
 
     public void handleNeutronFloatingIPEvent(final NeutronFloatingIP neutronFloatingIP,
@@ -647,7 +654,6 @@ public class NeutronL3Adapter implements ConfigInterface {
                                               neutronNetworkCache.getNetwork(subnet.getNetworkUUID()) : null;
         final String destinationSegmentationId = neutronNetwork != null ?
                                                  neutronNetwork.getProviderSegmentationID() : null;
-        final String gatewayIp = subnet != null ? subnet.getGatewayIP() : null;
         final Boolean isExternal = neutronNetwork != null ? neutronNetwork.getRouterExternal() : Boolean.TRUE;
         final String cidr = subnet != null ? subnet.getCidr() : null;
         final int mask = getMaskLenFromCidr(cidr);
@@ -730,13 +736,7 @@ public class NeutronL3Adapter implements ConfigInterface {
             }
         }
 
-        // Keep cache for finding router's mac from network uuid -- remove
-        //
-        if (isDelete) {
-            networkIdToRouterMacCache.remove(neutronNetwork.getNetworkUUID());
-            networkIdToRouterIpListCache.remove(neutronNetwork.getNetworkUUID());
-            subnetIdToRouterInterfaceCache.remove(subnet.getSubnetUUID());
-        }
+        // Keep cache for finding router's mac from network uuid -- NOTE: remove is done later, via cleanupRouterCache()
     }
 
     private void programFlowForNetworkFromExternal(final Node node,
@@ -1197,6 +1197,21 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
         return null;
     }
+
+     private void cleanupRouterCache(final NeutronRouter_Interface neutronRouterInterface) {
+         /*
+          *  Fix for 4277
+          *  Remove the router cache only after deleting the neutron
+          *  port l3 flows.
+          */
+         final NeutronPort neutronPort = neutronPortCache.getPort(neutronRouterInterface.getPortUUID());
+
+         if (neutronPort != null) {
+             networkIdToRouterMacCache.remove(neutronPort.getNetworkUUID());
+             networkIdToRouterIpListCache.remove(neutronPort.getNetworkUUID());
+             subnetIdToRouterInterfaceCache.remove(neutronRouterInterface.getSubnetUUID());
+         }
+     }
 
     public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){
 

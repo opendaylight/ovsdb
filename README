@@ -3,7 +3,6 @@ DIRECTORY ORGANIZATION
 
 - commons
   +-- parent : Contains Parent pom.xml for all the ovsdb modules.
-  +-- integrationtest : Contains the parent pom.xml for all the integrationtest needs.
 
 - distribution : Builds a working controller distribution based on the controller + ovsdb modules and other
                  dependant modules such as openflowplugin
@@ -11,8 +10,6 @@ DIRECTORY ORGANIZATION
   +-- opendaylight-karaf : karaf-based distribution
 
 - features : This folder contains all the Karaf related files.
-
-- integrationtest : Contains all the PAX-Exam based integrationTests that covers IT for all the modules.
 
 - library : Contains Schema-independent library that is a reference implementation for RFC 7047.
             This module doesn't depend on any of the Opendaylight components.

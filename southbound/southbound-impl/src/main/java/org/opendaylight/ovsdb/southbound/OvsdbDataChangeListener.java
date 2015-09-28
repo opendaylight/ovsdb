@@ -205,7 +205,25 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                 }
                 if (client != null) {
                     LOG.debug("Found client for {}", created.getValue());
-                    result.put((InstanceIdentifier<Node>) created.getKey(), client);
+                    /*
+                     * As of now data change sets are processed by single thread, so we can assume that device will
+                     * be connected and ownership will be decided before sending any instructions down to the device.
+                     * Note:Processing order in onDataChange() method should not change. If processing is changed to
+                     * use multiple thread, we might need to take care of corner cases, where ownership is not decided
+                     * but transaction are ready to go to switch. In that scenario, either we need to queue those task
+                     * till ownership is decided for that specific device.
+                     * Given that each DataChangeNotification is notified through separate thread, so we are already
+                     * multi threaded and i don't see any need to further parallelism per DataChange
+                     * notifications processing.
+                     */
+                    if ( cm.getHasDeviceOwnership(client.getMDConnectionInfo())) {
+                        LOG.debug("*this* instance of southbound plugin is an "
+                                + "owner of the device {}",created.getValue());
+                        result.put((InstanceIdentifier<Node>) created.getKey(), client);
+                    } else {
+                        LOG.debug("*this* instance of southbound plugin is not an "
+                                + "owner of the device {}",created.getValue());
+                    }
                 } else {
                     LOG.debug("Did not find client for {}",created.getValue());
                 }

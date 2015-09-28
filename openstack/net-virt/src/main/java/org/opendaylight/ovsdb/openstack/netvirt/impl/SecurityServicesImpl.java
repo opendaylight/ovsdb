@@ -134,6 +134,32 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
+    public boolean getNeutronPortFromDhcpIntf(
+            OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            LOG.error("getNeutronPortFromDhcpIntf: neutron port is null");
+            return false;
+        }
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(
+                terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return false;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPort == null) {
+            LOG.error("getNeutronPortFromDhcpIntf: neutron port of {} is not found", neutronPortId);
+            return false;
+        }
+        /* if the current port is a DHCP port, return true*/
+        if (neutronPort.getDeviceOwner().contains("dhcp")) {
+            LOG.trace("getNeutronPortFromDhcpIntf: neutronPort is a dhcp port", neutronPort );
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isComputePort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
             LOG.error("neutron port is null");

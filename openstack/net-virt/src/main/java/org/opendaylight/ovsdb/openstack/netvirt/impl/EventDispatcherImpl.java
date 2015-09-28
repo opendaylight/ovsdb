@@ -101,8 +101,10 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         Object handlerTypeObject = ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY);
         if (!(handlerTypeObject instanceof AbstractEvent.HandlerType)){
+            // The exception should give us a stacktrace
             logger.error("Abstract handler reg failed to provide a valid handler type: {} ref: {} handler: {}",
-                    handlerTypeObject, ref.getClass().getName(), handler.getClass().getName());
+                    handlerTypeObject, ref.getClass().getName(), handler.getClass().getName(),
+                    new IllegalArgumentException("Missing handler type"));
             return;
         }
         AbstractEvent.HandlerType handlerType = (AbstractEvent.HandlerType) handlerTypeObject;

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.neutron.spi.*;
@@ -69,21 +71,21 @@ public class ConfigActivator implements BundleActivator {
         Dictionary<String, Object> networkHandlerProperties = new Hashtable<>();
         networkHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_NETWORK);
         final NetworkHandler networkHandler = new NetworkHandler();
-        registerService(context,
+        ServiceRegistration networkHandlerRegistration = registerService(context,
                 new String[]{INeutronNetworkAware.class.getName(), AbstractHandler.class.getName()},
                 networkHandlerProperties, networkHandler);
 
         Dictionary<String, Object> subnetHandlerProperties = new Hashtable<>();
         subnetHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_SUBNET);
         SubnetHandler subnetHandler = new SubnetHandler();
-        registerService(context,
+        ServiceRegistration subnetHandlerRegistration = registerService(context,
                 new String[] {INeutronSubnetAware.class.getName(), AbstractHandler.class.getName()},
                 subnetHandlerProperties, subnetHandler);
 
         Dictionary<String, Object> portHandlerProperties = new Hashtable<>();
         portHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_PORT);
         PortHandler portHandler = new PortHandler();
-        registerService(context,
+        ServiceRegistration portHandlerRegistration = registerService(context,
                 new String[]{INeutronPortAware.class.getName(), AbstractHandler.class.getName()},
                 portHandlerProperties, portHandler);
 
@@ -172,16 +174,16 @@ public class ConfigActivator implements BundleActivator {
         Dictionary<String, Object> nodeCacheManagerProperties = new Hashtable<>();
         nodeCacheManagerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NODE);
         NodeCacheManagerImpl nodeCacheManager = new NodeCacheManagerImpl();
-        registerService(context,
+        ServiceRegistration nodeCacheManagerRegistration = registerService(context,
                 new String[]{NodeCacheManager.class.getName(), AbstractHandler.class.getName()},
                 nodeCacheManagerProperties, nodeCacheManager);
 
         OvsdbInventoryServiceImpl ovsdbInventoryService = new OvsdbInventoryServiceImpl(providerContext);
-        registerService(context,
+        ServiceRegistration ovsdbInventoryServiceRegistration = registerService(context,
                 new String[] {OvsdbInventoryService.class.getName()}, null, ovsdbInventoryService);
 
-        ovsdbInventoryService.setDependencies(context, null);
-        nodeCacheManager.setDependencies(context, null);
+        ovsdbInventoryService.setDependencies(context, ovsdbInventoryServiceRegistration.getReference());
+        nodeCacheManager.setDependencies(context, nodeCacheManagerRegistration.getReference());
         openstackRouter.setDependencies(context, null);
         neutronL3Adapter.setDependencies(context, null);
         eventDispatcher.setDependencies(context, null);
@@ -194,9 +196,9 @@ public class ConfigActivator implements BundleActivator {
         lBaaSHandler.setDependencies(context, null);
         southboundHandler.setDependencies(context, null);
         routerHandler.setDependencies(context, null);
-        portHandler.setDependencies(context, null);
-        subnetHandler.setDependencies(context, null);
-        networkHandler.setDependencies(context, null);
+        portHandler.setDependencies(context, portHandlerRegistration.getReference());
+        subnetHandler.setDependencies(context, subnetHandlerRegistration.getReference());
+        networkHandler.setDependencies(context, networkHandlerRegistration.getReference());
         floatingIPHandler.setDependencies(context, null);
         vlanConfigurationCache.setDependencies(context, null);
         tenantNetworkManager.setDependencies(context, null);
@@ -447,6 +449,8 @@ public class ConfigActivator implements BundleActivator {
         ServiceRegistration<?> serviceRegistration = bundleContext.registerService(interfaces, impl, properties);
         if (serviceRegistration != null) {
             registrations.add(serviceRegistration);
+        } else {
+            LOG.warn("Service registration for {} failed to return a ServiceRegistration instance", impl.getClass());
         }
         return serviceRegistration;
     }

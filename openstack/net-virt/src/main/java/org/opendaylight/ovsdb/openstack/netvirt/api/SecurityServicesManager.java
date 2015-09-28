@@ -44,6 +44,14 @@ public interface SecurityServicesManager {
      */
     NeutronPort getDhcpServerPort(OvsdbTerminationPointAugmentation intf);
 
+     /**
+      * Check if the given interface corresponds to a DHCP server port.
+      *
+      * @param intf the intf
+      * @return the DHCP port
+      */
+     NeutronPort isDhcpPortOnlyIntf(OvsdbTerminationPointAugmentation intf);
+
     /**
      * Is the port a compute port.
      *

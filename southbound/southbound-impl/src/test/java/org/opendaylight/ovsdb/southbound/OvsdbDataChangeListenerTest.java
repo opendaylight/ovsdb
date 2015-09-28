@@ -212,6 +212,7 @@ public class OvsdbDataChangeListenerTest {
         when(cm.getConnectionInstance(any(OvsdbBridgeAugmentation.class))).thenReturn(client);
         OvsdbBridgeAugmentation bridge = mock(OvsdbBridgeAugmentation.class);
         when(node.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(bridge);
+        when(cm.getHasDeviceOwnership(any(ConnectionInfo.class))).thenReturn(true);
         assertEquals("Error returning correct Map", testResultMap, ovsdbDataChangeListener.connectionInstancesFromMap(map));
         verify(cm).getConnectionInstance(any(OvsdbBridgeAugmentation.class));
 

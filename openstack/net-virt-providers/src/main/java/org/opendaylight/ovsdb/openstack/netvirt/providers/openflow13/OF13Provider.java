@@ -1043,6 +1043,62 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             LOG.warn("programLocalRules: No DCHP port seen in  network of {}", intf);
         }
     }
+
+    /*
+     * The function is for the new compute node joining the existing network.
+     * When a new VM is instantiated in the new compute node, neutron port add
+     * event is generated. This event is processed only for that node. So,
+     * loop through all the ports of the same network and install unicast mac
+     * flow for the VM's created on the TEP of the destination node in src node.
+     * This function will be executed even for any new VM creation in an existing
+     * network. If a cache is maintained to optimize the below flow addition, it will
+     * work only for one unstack and restack. For the next unstack and restack,
+     * it will not work since the cache would have been already deleted.
+     */
+    private void programTunnelRulesInNewNode(NeutronNetwork network,
+                                             String networkType, String segmentationId,
+                                             InetAddress src, InetAddress dst,
+                                             Node srcBridgeNode, Node dstBridgeNode,
+                                             OvsdbTerminationPointAugmentation intf){
+        try {
+            long localPort = southbound.getOFPort(intf);
+            if(localPort != 0)
+            {
+                LOG.debug("Interface update details {}", intf);
+
+                /*
+                 * When a network is added and the TEP destination is not present in a
+                 * node C1, tunnelin and broadcast rules will not be programmed, since
+                 * OF port is not created. So, when a new node C2 joins and create a new
+                 * VM, the tunnelin and broadcast rule will not be present in C1.
+                 * So, handling it in the case below to make ping work.
+                 */
+                if(securityServicesManager.getNeutronPortFromDhcpIntf(intf) == false){
+                    programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, true);
+                }
+
+                /*
+                 * FIX for 4208 - loop through all the ports and add the VM's
+                 * unicast mac rule of the destination node in the source node.
+                 * When a new node is added, it needs to configure the VM unicast mac
+                 * flow rules which were created before it was joined to an existing
+                 * network.
+                 */
+                List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(dstBridgeNode);
+                for (OvsdbTerminationPointAugmentation port : ports) {
+                    if(network == tenantNetworkManager.getTenantNetwork(port)){
+                        programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, port, false);
+                    }
+                    else{
+                        LOG.trace("Port {} is not part of network {}", port, network);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Exception during handlingNeutron network add", e);
+        }
+    }
+
     @Override
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
@@ -1059,7 +1115,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             programVlanRules(network, srcNode, intf);
         } else if (isTunnel(networkType)){
 
-            boolean sourceTunnelStatus;
+            boolean sourceTunnelStatus = false;
             boolean destTunnelStatus = false;
             for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
@@ -1079,6 +1135,8 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                     }
                     if (destTunnelStatus) {
                         programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
+                        programTunnelRulesInNewNode(network, networkType, segmentationId, src, dst,
+                                                    srcBridgeNode, dstBridgeNode, intf);
                     }
                 } else {
                     LOG.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. "

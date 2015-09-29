@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_e7cc1338",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1083,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-29T11:07:14Z",
+      "side": 1,
+      "message": "Move this block to a method. This method here is already growing pretty large so this will help keep it readable.",
+      "revId": "d8f272cc757e0256a6f06cbc3a78e035087f7fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c7c79711",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1100,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-29T11:07:14Z",
+      "side": 1,
+      "message": "whitespace... few more lines also",
+      "revId": "d8f272cc757e0256a6f06cbc3a78e035087f7fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_274bebb1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-29T11:07:14Z",
+      "side": 1,
+      "message": "Return the DHCP neutron port",
+      "revId": "d8f272cc757e0256a6f06cbc3a78e035087f7fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_074eefc1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-29T11:07:14Z",
+      "side": 1,
+      "message": "This looks like a chatty log since this method is called within a loop for every single port. Could we get by without it?",
+      "revId": "d8f272cc757e0256a6f06cbc3a78e035087f7fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6751e361",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-09-29T11:07:14Z",
+      "side": 1,
+      "message": "why warn for this? This is the success path right?",
+      "range": {
+        "startLine": 158,
+        "startChar": 0,
+        "endLine": 158,
+        "endChar": 12
+      },
+      "revId": "d8f272cc757e0256a6f06cbc3a78e035087f7fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -56,8 +56,8 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
      */
     @Override
     public int canCreateNetwork(NeutronNetwork network) {
-        if (network.isShared()) {
-            logger.error(" Network shared attribute not supported ");
+        if (network.isShared() && !network.getRouterExternal()) {
+            logger.error("Shared attribute is only supported on external networks");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
@@ -90,8 +90,8 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     @Override
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
-        if (delta.isShared()) {
-            logger.error(" Network shared attribute not supported ");
+        if (delta.isShared() && !delta.getRouterExternal()) {
+            logger.error("Shared attribute is only supported for external networks");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 

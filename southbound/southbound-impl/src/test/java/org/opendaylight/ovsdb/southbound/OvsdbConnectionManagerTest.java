@@ -53,7 +53,7 @@ public class OvsdbConnectionManagerTest {
     @Mock private EntityOwnershipService entityOwnershipService;
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
-    private Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> candidateConnectionIidMap;
+    private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
 
     @Mock private InstanceIdentifier<Node> iid;
 
@@ -63,7 +63,7 @@ public class OvsdbConnectionManagerTest {
         MemberModifier.field(OvsdbConnectionManager.class, "db").set(ovsdbConnectionManager, db);
         MemberModifier.field(OvsdbConnectionManager.class, "txInvoker").set(ovsdbConnectionManager, txInvoker);
         MemberModifier.field(OvsdbConnectionManager.class, "entityOwnershipService").set(ovsdbConnectionManager, entityOwnershipService);
-        candidateConnectionIidMap = new ConcurrentHashMap<>();
+        entityConnectionMap = new ConcurrentHashMap<>();
     }
     @Test
     public void testConnected() throws Exception {
@@ -76,10 +76,11 @@ public class OvsdbConnectionManagerTest {
         //TODO: Write unit tests for EntityOwnershipService
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
         when(client.getInstanceIdentifier()).thenReturn(iid);
-        MemberModifier.field(OvsdbConnectionManager.class, "candidateConnectionIidMap").set(ovsdbConnectionManager, candidateConnectionIidMap);
+        MemberModifier.field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnectionManager, entityConnectionMap);
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getEntityFromConnectionInstance", OvsdbConnectionInstance.class));
-        when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(mock(EntityOwnershipCandidateRegistration.class));
 
+        //TODO: Write unit tests for entity ownership service related code.
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership", OvsdbConnectionInstance.class));
         ovsdbConnectionManager.connected(externalClient);
     }
 
@@ -135,11 +136,9 @@ public class OvsdbConnectionManagerTest {
         doNothing().when(txInvoker).invoke(any(TransactionCommand.class));
 
         when(SouthboundMapper.suppressLocalIpPort(any(ConnectionInfo.class))).thenReturn(key);
-        //TODO: Write unit tests for EntityOwnershipService
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(iid);
-        MemberModifier.field(OvsdbConnectionManager.class, "candidateConnectionIidMap").set(ovsdbConnectionManager, candidateConnectionIidMap);
 
+      //TODO: Write unit tests for EntityOwnershipService
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "unregisterEntityForOwnership", OvsdbConnectionInstance.class));
         ovsdbConnectionManager.disconnected(client);
         Map<ConnectionInfo,OvsdbConnectionInstance> testClients = Whitebox.getInternalState(ovsdbConnectionManager, "clients");
         assertEquals("Error, size of the hashmap is incorrect", 0, testClients.size());
@@ -156,10 +155,8 @@ public class OvsdbConnectionManagerTest {
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "removeInstanceIdentifier", ConnectionInfo.class));
 
-        //TODO: Write unit tests for EntityOwnershipService
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(iid);
-        MemberModifier.field(OvsdbConnectionManager.class, "candidateConnectionIidMap").set(ovsdbConnectionManager, candidateConnectionIidMap);
+        //TODO: Write unit tests for entity ownership service related code.
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "unregisterEntityForOwnership", OvsdbConnectionInstance.class));
         ovsdbConnectionManager.disconnect(ovsdbNode);
         verify((OvsdbClient)ovsdbConnectionInstance).disconnect();
     }
@@ -294,9 +291,10 @@ public class OvsdbConnectionManagerTest {
 
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(iid);
-        MemberModifier.field(OvsdbConnectionManager.class, "candidateConnectionIidMap").set(ovsdbConnectionManager, candidateConnectionIidMap);
+        MemberModifier.field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnectionManager, entityConnectionMap);
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getEntityFromConnectionInstance", OvsdbConnectionInstance.class));
-        when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(mock(EntityOwnershipCandidateRegistration.class));
+        //TODO: Write unit tests for entity ownership service related code.
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership", OvsdbConnectionInstance.class));
         assertEquals("ERROR", client, ovsdbConnectionManager.connect(PowerMockito.mock(InstanceIdentifier.class), ovsdbNode));
     }
 }

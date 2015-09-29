@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Tue, 29 Sep 2015 17:31:08 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/27602
+Project: ovsdb
+Branch: refs/heads/topic/lithium/clustering

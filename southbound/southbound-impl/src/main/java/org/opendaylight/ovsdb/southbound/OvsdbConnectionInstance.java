@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
@@ -60,6 +61,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     // private ConnectionInfo key;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
+    private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
 
     OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker,
@@ -238,6 +240,14 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
+    }
+
+    public Entity getConnectedEntity() {
+        return this.connectedEntity;
+    }
+
+    public void setConnectedEntity(Entity entity ) {
+        this.connectedEntity = entity;
     }
 
     public Boolean hasOvsdbClient(OvsdbClient otherClient) {

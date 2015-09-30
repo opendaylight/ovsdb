@@ -41,7 +41,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
   <properties>
-    <skip.integrationtest>true</skip.integrationtest>
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
     <root.directory>${env.PWD}</root.directory>
     <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
@@ -268,12 +267,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </build>
   <profiles>
     <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <skipITs>true</skipITs>
+      </properties>
+    </profile>
+    <profile>
       <id>integrationtest</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
-        <skip.integrationtest>false</skip.integrationtest>
+        <skipITs>false</skipITs>
       </properties>
     </profile>
   </profiles>

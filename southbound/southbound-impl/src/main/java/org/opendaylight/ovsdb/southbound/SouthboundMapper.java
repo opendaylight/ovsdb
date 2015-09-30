@@ -64,6 +64,7 @@ import com.google.common.collect.ImmutableBiMap;
 
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
+    private static final String N_CONNECTIONS_STR = "n_connections";
 
     private static NodeId createNodeId(OvsdbConnectionInstance client) {
         NodeKey key = client.getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
@@ -435,10 +436,23 @@ public class SouthboundMapper {
                                             final Manager manager) {
 
         if (manager != null && manager.getTargetColumn() != null) {
+            long numberOfConnections = 0;
             final String targetString = (String)manager.getTargetColumn().getData();
+
+            final Map<String, String> statusAttributeMap = manager.getStatusColumn().getData();
+            if (statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
+                String numberOfConnectionValueStr = statusAttributeMap.get(N_CONNECTIONS_STR);
+                numberOfConnections = Integer.parseInt(numberOfConnectionValueStr);
+            } else {
+                final boolean isConnected = manager.getIsConnectedColumn().getData();
+                if (isConnected) {
+                    numberOfConnections = 1;
+                }
+            }
             managerEntries.add(new ManagerEntryBuilder()
                     .setTarget(new Uri(targetString))
-                    .setIsConnected(manager.getIsConnectedColumn().getData()).build());
+                    .setNumberOfConnections(numberOfConnections)
+                    .setConnected(manager.getIsConnectedColumn().getData()).build());
         }
     }
 

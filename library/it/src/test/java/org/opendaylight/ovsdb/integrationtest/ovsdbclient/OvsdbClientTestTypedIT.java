@@ -12,20 +12,23 @@ package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
-import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.it.LibraryIntegrationTestBase;
+import org.opendaylight.ovsdb.lib.it.LibraryIntegrationTestUtils;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -34,12 +37,13 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerSuite;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
-
-public class OvsdbClientTestITTyped extends OvsdbTestBase {
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerSuite.class)
+public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
 
     OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
@@ -86,12 +90,13 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
         Assert.assertNotNull(dbNames);
         boolean hasOpenVswitchSchema = false;
         for(String dbName : dbNames) {
-           if (dbName.equals(OPEN_VSWITCH_SCHEMA)) {
+           if (dbName.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA)) {
                 hasOpenVswitchSchema = true;
                 break;
            }
         }
-        Assert.assertTrue(OPEN_VSWITCH_SCHEMA+" schema is not supported by the switch", hasOpenVswitchSchema);
+        Assert.assertTrue(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA
+                + " schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
     @Before
@@ -99,9 +104,9 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
         if (ovs != null) {
             return;
         }
-        ovs = this.getTestConnection();
+        ovs = LibraryIntegrationTestUtils.getTestConnection(this);
         testGetDBs();
-        dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA).get();
+        dbSchema = ovs.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA).get();
     }
 
     @After
@@ -122,22 +127,6 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
 
         List<OperationResult> operationResults = results.get();
         System.out.println("Delete operation results = " + operationResults);
-        OvsdbConnectionService.getService().disconnect(ovs);
-    }
-
-    @Override
-    public void update(Object node, UpdateNotification upadateNotification) {
-        // TODO Auto-generated method stub
-
-    }
-    @Override
-    public void locked(Object node, List<String> ids) {
-        // TODO Auto-generated method stub
-
-    }
-    @Override
-    public void stolen(Object node, List<String> ids) {
-        // TODO Auto-generated method stub
-
+        ovs.disconnect();
     }
 }

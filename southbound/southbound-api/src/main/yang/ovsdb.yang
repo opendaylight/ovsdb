@@ -572,6 +572,11 @@ module ovsdb {
         base interface-type-base;
     }
 
+    identity interface-type-eth_nsh {
+        description "Interface type for eth_nsh interfaces";
+        base interface-type-base;
+    }
+
     identity qos-type-base {
         description "the base identity for qos";
     }

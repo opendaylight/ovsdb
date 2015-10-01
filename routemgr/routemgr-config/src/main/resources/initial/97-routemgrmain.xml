@@ -50,5 +50,6 @@
 
     <required-capabilities>
       <capability>urn:opendaylight:params:xml:ns:yang:routemgr:impl?module=routemgr-impl&amp;revision=2014-12-10</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
     </required-capabilities>
 </snapshot>

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import org.opendaylight.ovsdb.routemgr.net.PktHandler;
 import org.opendaylight.ovsdb.routemgr.net.NetDataListener;
+import org.opendaylight.ovsdb.routemgr.net.IPv6RtrFlow;
 
 public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.routemgr.impl.rev141210.AbstractRoutemgrImplModule {
 
@@ -45,6 +46,8 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
         DataBroker dataService = getDataBrokerDependency();
         RpcProviderRegistry rpcRegistryDependency = getRpcRegistryDependency();
         SalFlowService salFlowService = rpcRegistryDependency.getRpcService(SalFlowService.class);
+
+        IPv6RtrFlow.setSalFlow (salFlowService);
 
         netDataListener = new NetDataListener (dataService);
         netDataListener.registerDataChangeListener();

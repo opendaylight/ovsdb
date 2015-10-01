@@ -38,12 +38,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         return db;
     }
 
-    //private DataBroker db;
     private static DataBroker db;
     private OvsdbConnectionManager cm;
-//    private OvsdbNodeDataChangeListener ovsdbNodeListener;
-//    private OvsdbManagedNodeDataChangeListener ovsdbManagedNodeListener;
-//    private OvsdbTerminationPointDataChangeListener ovsdbTerminationPointListener;
     private TransactionInvoker txInvoker;
     private OvsdbDataChangeListener ovsdbDataChangeListener;
     private EntityOwnershipService entityOwnershipService;
@@ -61,9 +57,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService);
         ovsdbDataChangeListener = new OvsdbDataChangeListener(db,cm);
-//        ovsdbNodeListener = new OvsdbNodeDataChangeListener(db, cm);
-//        ovsdbManagedNodeListener = new OvsdbManagedNodeDataChangeListener(db, cm);
-//        ovsdbTerminationPointListener = new OvsdbTerminationPointDataChangeListener(db, cm);
+
         initializeOvsdbTopology(LogicalDatastoreType.OPERATIONAL);
         initializeOvsdbTopology(LogicalDatastoreType.CONFIGURATION);
         OvsdbConnection ovsdbConnection = new OvsdbConnectionService();
@@ -76,17 +70,14 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("SouthboundProvider Closed");
         cm.close();
         ovsdbDataChangeListener.close();
-//        ovsdbNodeListener.close();
-//        ovsdbManagedNodeListener.close();
-//        ovsdbTerminationPointListener.close();
     }
 
     private void initializeOvsdbTopology(LogicalDatastoreType type) {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        initializeTopology(type);
         ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        initializeTopology(transaction,type);
         CheckedFuture<Optional<Topology>, ReadFailedException> ovsdbTp = transaction.read(type, path);
         try {
             if (!ovsdbTp.get().isPresent()) {
@@ -102,13 +93,17 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         }
     }
 
-    private void initializeTopology(ReadWriteTransaction transaction, LogicalDatastoreType type) {
+    private void initializeTopology(LogicalDatastoreType type) {
+        ReadWriteTransaction transaction = db.newReadWriteTransaction();
         InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
         CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
         try {
             if (!topology.get().isPresent()) {
                 NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
                 transaction.put(type,path,ntb.build());
+                transaction.submit();
+            } else {
+                transaction.cancel();
             }
         } catch (Exception e) {
             LOG.error("Error initializing ovsdb topology {}",e);

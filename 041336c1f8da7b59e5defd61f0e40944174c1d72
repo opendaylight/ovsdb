@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_268e842f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-01T14:42:25Z",
+      "side": 1,
+      "message": "this should not be using router interface instead of neutron port.",
+      "range": {
+        "startLine": 276,
+        "startChar": 36,
+        "endLine": 276,
+        "endChar": 47
+      },
+      "revId": "041336c1f8da7b59e5defd61f0e40944174c1d72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_e6872c0e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1201,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-01T14:42:25Z",
+      "side": 1,
+      "message": "i think this function should handle all caches, instead of just networkIdToRouterMacCache. That way they will be always in sync.",
+      "range": {
+        "startLine": 1201,
+        "startChar": 18,
+        "endLine": 1201,
+        "endChar": 36
+      },
+      "revId": "041336c1f8da7b59e5defd61f0e40944174c1d72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_669c7c6a",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3AdapterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-01T14:42:25Z",
+      "side": 0,
+      "message": "it is a shame to have this cahe changed at a different place in the code; will propose a way where they are all updated together.",
+      "range": {
+        "startLine": 651,
+        "startChar": 60,
+        "endLine": 651,
+        "endChar": 89
+      },
+      "revId": "781c88f3506d15a00bce9486f29aa03eb8cab77b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

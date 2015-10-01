@@ -1,0 +1,313 @@
+module hwvtep {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovsdb:hwvtep";
+    prefix "hwvtepsb";
+
+    import network-topology {prefix "topo"; revision-date "2013-10-21"; }
+    import yang-ext { prefix "ext"; }
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
+    import opendaylight-l2-types { prefix ethertype; revision-date "2013-08-27";}
+
+    revision "2015-09-01" {
+        description "1st revision of southbound model for hwvtep";
+    }
+
+    typedef hwvtep-physical-switch-ref {
+        description "A reference to a hwvtep based physical switch";
+        type instance-identifier;
+    }
+
+    typedef hwvtep-logical-switch-ref {
+        description "A reference to a logical switch in hwvtep based switches";
+        type instance-identifier;
+    }
+
+    typedef hwvtep-physical-locator-ref {
+        description "A reference to an endpoint to which logical switch traffic may be encapsulated and forwarded";
+        type instance-identifier;
+    }
+
+    typedef hwvtep-physical-locator-set-ref {
+        description "A reference to a set of endpoints to which logical switch traffic may be encapsulated and forwarded via replication";
+        type instance-identifier;
+    }
+
+    typedef hwvtep-global-ref {
+        description "A reference to an hwvtep global node";
+        type instance-identifier;
+    }
+
+    typedef hwvtep-node-name {
+        type string;
+    }
+
+    grouping hwvtep-node-identification {
+        leaf hwvtep-node-name {
+            description "The name of the node";
+            type hwvtep-node-name;
+        }
+        leaf hwvtep-node-description {
+            description "The description of the node";
+            type string;
+        }
+    }
+
+    grouping hwvtep-mac-table-generic-attributes {
+        leaf mac-entry-key {
+            description "MAC address entry";
+            type string;
+        }
+        leaf logical-switch-ref {
+            description "The logical switch to which this mapping applies";
+            type hwvtep-logical-switch-ref;
+        }
+    }
+
+    grouping hwvtep-ucast-mac-table-attributes {
+        description "Unicast mac table attributes";
+        leaf ipaddr {
+            description "Optional IP address associated with the mac";
+            type inet:ip-address;
+        }
+        leaf locator-ref {
+            description "Reference to the physical locator to reach this entry";
+            type hwvtep-physical-locator-ref;
+        }
+    }
+
+    grouping hwvtep-mcast-mac-table-attributes {
+        leaf locator-set-ref {
+            description "Reference to a set of physical locators used for replication";
+            type hwvtep-physical-locator-set-ref;
+        }
+    }
+
+    grouping hwvtep-tunnel-attributes {
+        leaf local-locator-ref {
+            description "Reference to the physical locator to reach this entry";
+            type hwvtep-physical-locator-ref;
+        }
+        leaf remote-locator-ref {
+            description "Reference to the physical locator to reach this entry";
+            type hwvtep-physical-locator-ref;
+        }
+        leaf bfd-config-local {
+            type string;
+        }
+        leaf bfd-config-remote {
+            type string;
+        }
+        leaf bfd-params {
+            type string;
+        }
+    }
+
+    grouping hwvtep-physical-switch-attributes {
+        container physical-switch-id {
+            uses hwvtep-node-identification;
+        }
+        list management-ips {
+            key "management-ips-key";
+            leaf management-ips-key {
+               description "Management IP address of the switch";
+               type inet:ip-address;
+            }
+        }
+        leaf managed-by {
+            description "The hwvtep global node to which this physical switch belongs to";
+            type hwvtep-global-ref;
+        }
+        list tunnel-ips {
+            key "tunnel-ips-key";
+            leaf tunnel-ips-key {
+               description "Management IP address of the switch";
+               type inet:ip-address;
+            }
+        }
+        list tunnels {
+            uses hwvtep-tunnel-attributes ;
+        }
+        list ucast-macs-local {
+            key "mac-entry-key";
+            uses hwvtep-mac-table-generic-attributes;
+            uses hwvtep-ucast-mac-table-attributes;
+        }
+        list ucast-macs-remote {
+            key "mac-entry-key";
+            uses hwvtep-mac-table-generic-attributes;
+            uses hwvtep-ucast-mac-table-attributes;
+        }
+        list mcast-macs-local {
+            key "mac-entry-key";
+            uses hwvtep-mac-table-generic-attributes;
+            uses hwvtep-mcast-mac-table-attributes;
+        }
+        list mcast-macs-remote {
+            key "mac-entry-key";
+            uses hwvtep-mac-table-generic-attributes;
+            uses hwvtep-mcast-mac-table-attributes;
+        }
+    }
+
+    grouping hwvtep-connection-info-attributes {
+        leaf remote-ip {
+            type inet:ip-address;
+            description "Hwvtep Connection Remote IP";
+        }
+        leaf remote-port {
+            type inet:port-number;
+            description "Hwvtep Connection Remote Port Number";
+        }
+        leaf local-ip {
+            type inet:ip-address;
+            description "Hwvtep Connection Local IP";
+        }
+        leaf local-port {
+            type inet:port-number;
+            description "Hwvtep Connection Local Port Number IP";
+        }
+    }
+
+    grouping hwvtep-global-attributes {
+        description "global node for the hwvtep";
+        container connection-info {
+            uses hwvtep-connection-info-attributes;
+        }
+        list managers {
+            description "";
+            key "target";
+            leaf target {
+                description "Uri indicating connection method to the Manager";
+                type inet:uri;
+            }
+            leaf manager-uuid {
+                description "The unique identifier of the manager";
+                type yang:uuid;
+            }
+            leaf is-connected {
+                type boolean;
+            }
+            list manager-other-configs {
+                description "Key-value pairs for configuring rarely used features.
+                    other_config : dscp : optional string
+                    contains an integer, in the range 0 - 63. DSCP value to be used when establishing a connection to the switch. Default value of 48 if none specified.";
+                key "other-config-key";
+                leaf other-config-key {
+                    description "other-config name/key";
+                    type string;
+                }
+                leaf other-config-value {
+                    description "other-config value";
+                    type string;
+                }
+            }
+        }
+        list switches {
+            key "switch-ref";
+            leaf switch-ref {
+                type hwvtep-physical-switch-ref;
+            }
+        }
+    }
+
+    identity encapsulation-type-base {
+        description "Base Encapsulation type";
+    }
+
+    identity encapsulation-type-vxlan-over-ipv4 {
+        base encapsulation-type-base;
+        description "Encapsulation type vxlan-over-ipv4";
+    }
+
+    typedef encapsulation-type {
+        type identityref {
+            base encapsulation-type-base;
+        }
+        description "This type is used to refer to an Encapsulation Type.";
+    }
+
+    grouping hwvtep-physical-locator-attributes {
+        leaf encapsulation-type {
+            type encapsulation-type;
+            description "Encapsulation type used by this locator";
+        }
+        leaf dst-ip {
+            type inet:ip-address;
+            description "IP address of the locator";
+        }
+    }
+
+    grouping hwvtep-physical-locator-set-attributes {
+        list locators-ref {
+            leaf locator-ref {
+                type hwvtep-physical-locator-ref;
+            }
+        }
+    }
+
+    grouping hwvtep-logical-switch-attributes {
+        uses hwvtep-node-identification;
+        leaf hwvtep-logical-switch-external-id {
+            description "A unique identifier of the logical switch";
+            type yang:uuid;
+        }
+        leaf tunnel-key {
+            description "Per Logical Switch tunnel key";
+            type string;
+        }
+    }
+
+    grouping hwvtep-physical-port-attributes {
+        container physical-port-id {
+            uses hwvtep-node-identification;
+        }
+        list vlan-bindings {
+            description "A map of vlan ID to logical switch pairs";
+            key "vlan-id-key";
+            leaf vlan-id-key {
+                description "vlan ids in the range 0 - 4095";
+                type ethertype:vlan-id;
+            }
+            leaf logical-switch {
+                description "Reference to logical switch for the vlan";
+                type hwvtep-logical-switch-ref;
+            }
+        }
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for physical switch nodes managed by hwvtep";
+        ext:augment-identifier "physical-switch-augmentation";
+        uses hwvtep-physical-switch-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augment topology node for a hwvtep node";
+        ext:augment-identifier "hwvtep-global-augmentation";
+        uses hwvtep-global-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for logical switches for a hwvtep node";
+        ext:augment-identifier "hwvtep-logical-switch-augmentation";
+        uses hwvtep-logical-switch-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for physical locator set for a hwvtep node";
+        ext:augment-identifier "hwvtep-physical-locator-set-augmentation";
+        uses hwvtep-physical-locator-set-attributes;
+    }
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augment topology node termination-point for a hwvtep physical-locator";
+        ext:augment-identifier "hwvtep-physical-locator-augmentation";
+        uses hwvtep-physical-locator-attributes;
+    }
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augment topology node termination-point for a hwvtep physical-port";
+        ext:augment-identifier "hwvtep-physical-port-augmentation";
+        uses hwvtep-physical-port-attributes;
+    }
+
+}

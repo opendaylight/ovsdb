@@ -7,35 +7,45 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+
+import javax.annotation.Nonnull;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Select;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -44,8 +54,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
-
-import javax.annotation.Nonnull;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     private Map<ConnectionInfo, OvsdbConnectionInstance> clients =
@@ -285,10 +293,28 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
-        LOG.info("handleOwnershipChanged: {} instance: {}", ownershipChange, ovsdbConnectionInstance);
+        LOG.info("handleOwnershipChanged: {} event received for device {}",
+                ownershipChange, ovsdbConnectionInstance != null ? ovsdbConnectionInstance.getConnectionInfo()
+                        : "THAT'S NOT REGISTERED BY THIS SOUTHBOUND PLUGIN INSTANCE");
 
         if (ovsdbConnectionInstance == null) {
-            LOG.warn("handleOwnershipChanged: found no connection instance for {}", ownershipChange.getEntity());
+            if (ownershipChange.isOwner()) {
+                LOG.warn("handleOwnershipChanged: found no connection instance for {}", ownershipChange.getEntity());
+            } else {
+                // EntityOwnershipService sends notification to all the nodes, irrespective of whether
+                // that instance registered for the device ownership or not. It is to make sure that
+                // If all the controller instance that was connected to the device are down, so the
+                // running instance can clear up the operational data store even though it was not
+                // connected to the device.
+                LOG.debug("handleOwnershipChanged: found no connection instance for {}", ownershipChange.getEntity());
+            }
+
+            // If entity has no owner, clean up the operational data store (it's possible because owner controller
+            // might went down abruptly and didn't get a chance to clean up the operational data store.
+            if (!ownershipChange.hasOwner()) {
+                LOG.debug("{} has no onwer, cleaning up the operational data store", ownershipChange.getEntity());
+                cleanEntityOperationalData(ownershipChange.getEntity());
+            }
             return;
         }
         //Connection detail need to be cached, irrespective of ownership result.
@@ -303,7 +329,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         ovsdbConnectionInstance.setHasDeviceOwnership(ownershipChange.isOwner());
         // You were not an owner, but now you are
         if (ownershipChange.isOwner()) {
-            LOG.info("handleOwnershipChanged: connection instance for {} is owner",
+            LOG.info("handleOwnershipChanged: *this* southbound plugin instance is owner of device {}",
                     ovsdbConnectionInstance.getConnectionInfo());
 
             //*this* instance of southbound plugin is owner of the device,
@@ -317,33 +343,79 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //it will go through the re-registration process. We need to implement this condition
             //when clustering service implement a ownership grant strategy which can revoke the
             //device ownership for load balancing the devices across the instances.
-            //Once this condition occure, we should unregister the callbacks.
-            LOG.error("handleOwnershipChanged: connection instance for {} is no longer the owner",
+            //Once this condition occur, we should unregister the callback.
+            LOG.error("handleOwnershipChanged: *this* southbound plugin instance is no longer the owner of device {}",
                     ovsdbConnectionInstance.getNodeId().getValue());
         }
     }
 
+    private void cleanEntityOperationalData(Entity entity) {
+
+        InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) SouthboundUtil
+                .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
+
+        final ReadWriteTransaction transaction = db.newReadWriteTransaction();
+        Optional<Node> node = SouthboundUtil.readNode(transaction, nodeIid);
+        if (node.isPresent()) {
+            SouthboundUtil.deleteNode(transaction, nodeIid);
+        }
+    }
+
+    private OpenVSwitch getOpenVswitchTableEntry(OvsdbConnectionInstance connectionInstance) {
+        DatabaseSchema dbSchema = null;
+        OpenVSwitch openVSwitchRow = null;
+        try {
+            dbSchema = connectionInstance.getSchema(OvsdbSchemaContants.databaseName).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Not able to fetch schema for database {} from device {}",
+                    OvsdbSchemaContants.databaseName,connectionInstance.getConnectionInfo(),e);
+        }
+        if (dbSchema != null) {
+            GenericTableSchema openVSwitchSchema = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
+
+            List<String> openVSwitchTableColumn = new ArrayList<String>();
+            openVSwitchTableColumn.addAll(openVSwitchSchema.getColumns());
+            Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
+            selectOperation.setColumns(openVSwitchTableColumn);;
+
+            ArrayList<Operation> operations = new ArrayList<Operation>();
+            operations.add(selectOperation);
+            operations.add(op.comment("Fetching Open_VSwitch table rows"));
+            List<OperationResult> results = null;
+            try {
+                results = connectionInstance.transact(dbSchema, operations).get();
+                if (results != null ) {
+                    OperationResult selectResult = results.get(0);
+                    openVSwitchRow = TyperUtils.getTypedRowWrapper(
+                            dbSchema,OpenVSwitch.class,selectResult.getRows().get(0));
+
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.warn("Not able to fetch OpenVswitch table row from device {}",
+                        connectionInstance.getConnectionInfo(),e);
+            }
+        }
+        return openVSwitchRow;
+    }
     private Entity getEntityFromConnectionInstance(@Nonnull OvsdbConnectionInstance ovsdbConnectionInstance) {
         YangInstanceIdentifier entityId = null;
         InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();;
         if ( iid == null ) {
             /* Switch initiated connection won't have iid, till it gets OpenVSwitch
-             * table update and update callback is always registered after ownership
-             * grant.
+             * table update but update callback is always registered after ownership
+             * is granted. So we are explicitly fetch the row here to get the iid.
              */
-            String nodeId = "ovsdb://"
-                        + ovsdbConnectionInstance.getConnectionInfo().getRemoteAddress().getHostAddress()
-                        + ":" + ovsdbConnectionInstance.getConnectionInfo().getRemotePort();
-            iid = InstanceIdentifier
-                    .create(NetworkTopology.class)
-                    .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                    .child(Node.class,new NodeKey(new NodeId(nodeId)));
-            LOG.debug("InstanceIdentifier {} generated for device "
+            OpenVSwitch openvswitchRow = getOpenVswitchTableEntry(ovsdbConnectionInstance);
+            iid = SouthboundMapper.getInstanceIdentifier(openvswitchRow);
+            LOG.info("InstanceIdentifier {} generated for device "
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
 
         }
         entityId = SouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
-        return new Entity(ENTITY_TYPE, entityId);
+        Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
+        LOG.debug("Entity {} created for device connection {}",
+                deviceEntity, ovsdbConnectionInstance.getConnectionInfo());
+        return deviceEntity;
     }
 
     private OvsdbConnectionInstance getConnectionInstanceFromEntity(Entity entity) {

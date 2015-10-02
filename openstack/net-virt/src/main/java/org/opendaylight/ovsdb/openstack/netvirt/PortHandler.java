@@ -185,8 +185,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(INeutronPortAware.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
     }
 
     @Override

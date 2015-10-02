@@ -582,6 +582,7 @@ public class NeutronL3AdapterTest {
         NeutronPort neutronPort = mock(NeutronPort.class);
         when(neutronPort.getMacAddress()).thenReturn(MAC_ADDRESS);
         when(neutronPort.getFixedIPs()).thenReturn(ips);
+        when(neutronPort.getNetworkUUID()).thenReturn(UUID);
         NeutronSubnet neutronSubnet = mock(NeutronSubnet.class);
         when(neutronSubnet.getNetworkUUID()).thenReturn(UUID);
         when(neutronSubnet.getGatewayIP()).thenReturn(IP);
@@ -590,6 +591,7 @@ public class NeutronL3AdapterTest {
         when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
         when(neutronNetwork.getRouterExternal()).thenReturn(false); //might change that to true
         when(neutronNetwork.getNetworkUUID()).thenReturn(UUID);
+        NeutronRouter neutronRouter = mock(NeutronRouter.class);
 
         Node node = mock(Node.class);
         List<Node> nodes = new ArrayList<Node>();
@@ -604,6 +606,7 @@ public class NeutronL3AdapterTest {
         // init instance variables
         INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
         PowerMockito.when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
+        PowerMockito.when(neutronPortCache.getAllPorts()).thenReturn(new ArrayList<NeutronPort>());
         INeutronSubnetCRUD neutronSubnetCache = mock(INeutronSubnetCRUD.class);
         PowerMockito.when(neutronSubnetCache.getSubnet(anyString())).thenReturn(neutronSubnet);
         INeutronNetworkCRUD neutronNetworkCache = mock(INeutronNetworkCRUD.class);
@@ -637,14 +640,16 @@ public class NeutronL3AdapterTest {
 
         networkIdToRouterMacCache.put(UUID, MAC_ADDRESS);
         networkIdToRouterIpListCache.put(UUID, ips);
+        subnetIdToRouterInterfaceCache.put(UUID, intf);
         networkIdToRouterMacCacheSize = networkIdToRouterMacCache.size();
         networkIdToRouterIpListCacheSize = networkIdToRouterIpListCache.size();
         subnetIdToRouterInterfaceCacheSize = subnetIdToRouterInterfaceCache.size();
 
-        Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForNeutronRouterInterface", intf, true);
+        Whitebox.invokeMethod(neutronL3Adapter, "handleNeutronRouterInterfaceEvent", neutronRouter, intf, Action.DELETE);
 
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForNeutronRouterInterface", intf, true);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("getDpidForIntegrationBridge", any(Node.class));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForNeutronRouterInterfacePair", any(Node.class), anyLong(), any(NeutronRouter_Interface.class), any(NeutronRouter_Interface.class), any(NeutronNetwork.class), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE), anyBoolean());
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("programFlowsForNeutronRouterInterfacePair", any(Node.class), anyLong(), any(NeutronRouter_Interface.class), any(NeutronRouter_Interface.class), any(NeutronNetwork.class), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE), anyBoolean());
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowForNetworkFromExternal", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programIpRewriteExclusionStage1", any(Node.class), anyLong(), anyString(), anyString(), eq(Action.DELETE));

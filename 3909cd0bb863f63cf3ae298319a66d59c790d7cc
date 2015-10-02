@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_c00e9334",
+        "filename": "routemgr/routemgr-impl/src/main/java/org/opendaylight/ovsdb/routemgr/net/OvsdbDataListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-02T00:55:38Z",
+      "side": 1,
+      "message": "private IPv6RtrFlow ipv6RtrFlow;",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 15
+      },
+      "revId": "3909cd0bb863f63cf3ae298319a66d59c790d7cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6013ff5c",
+        "filename": "routemgr/routemgr-impl/src/main/java/org/opendaylight/ovsdb/routemgr/net/OvsdbDataListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-02T00:55:38Z",
+      "side": 1,
+      "message": "this.ipv6RtrFlow         \u003d new IPv6RtrFlow();",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 19
+      },
+      "revId": "3909cd0bb863f63cf3ae298319a66d59c790d7cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_80109b4f",
+        "filename": "routemgr/routemgr-impl/src/main/java/org/opendaylight/ovsdb/routemgr/net/OvsdbDataListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-02T00:55:38Z",
+      "side": 1,
+      "message": "why not use primitive \u0027int\u0027 ?",
+      "range": {
+        "startLine": 128,
+        "startChar": 24,
+        "endLine": 128,
+        "endChar": 31
+      },
+      "revId": "3909cd0bb863f63cf3ae298319a66d59c790d7cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_201d0767",
+        "filename": "routemgr/routemgr-impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/routemgr/impl/rev141210/RoutemgrImplModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-02T00:55:38Z",
+      "side": 1,
+      "message": "this should be a generated change based on a yang file?\ni do not see the changes in .yang...",
+      "revId": "3909cd0bb863f63cf3ae298319a66d59c790d7cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

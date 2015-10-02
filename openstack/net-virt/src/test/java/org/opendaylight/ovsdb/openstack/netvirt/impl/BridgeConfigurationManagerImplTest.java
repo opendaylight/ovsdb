@@ -44,7 +44,7 @@ import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -339,7 +339,7 @@ public class BridgeConfigurationManagerImplTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, bridgeConfigurationManagerImpl)).thenReturn(networkingProviderManager);
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, bridgeConfigurationManagerImpl)).thenReturn(southbound);
 
-        bridgeConfigurationManagerImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        bridgeConfigurationManagerImpl.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
         assertEquals("Error, did not return the correct object", getField("networkingProviderManager"), networkingProviderManager);

@@ -14,7 +14,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,8 +98,10 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         Object handlerTypeObject = ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY);
         if (!(handlerTypeObject instanceof AbstractEvent.HandlerType)){
+            // The exception should give us a stacktrace
             LOG.error("Abstract handler reg failed to provide a valid handler type: {} ref: {} handler: {}",
-                    handlerTypeObject, ref.getClass().getName(), handler.getClass().getName());
+                    handlerTypeObject, ref.getClass().getName(), handler.getClass().getName(),
+                    new IllegalArgumentException("Missing handler type"));
             return;
         }
         AbstractEvent.HandlerType handlerType = (AbstractEvent.HandlerType) handlerTypeObject;
@@ -141,7 +142,7 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {}
+    public void setDependencies(ServiceReference serviceReference) {}
 
     @Override
     public void setDependencies(Object impl) {}

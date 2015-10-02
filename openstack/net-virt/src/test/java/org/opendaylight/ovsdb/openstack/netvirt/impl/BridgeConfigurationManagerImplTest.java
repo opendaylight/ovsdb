@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_MOCKS;
@@ -222,7 +223,7 @@ public class BridgeConfigurationManagerImplTest {
         PowerMockito.mockStatic(ConfigProperties.class);
         when(ConfigProperties.getProperty(any(Class.class), anyString())).thenReturn(ADDRESS);
 
-        when(southbound.addBridge(any(Node.class), anyString(), anyString())).thenReturn(true);
+        when(southbound.addBridge(any(Node.class), anyString(), anyList())).thenReturn(true);
         when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
 
         bridgeConfigurationManagerImpl.prepareNode(node);

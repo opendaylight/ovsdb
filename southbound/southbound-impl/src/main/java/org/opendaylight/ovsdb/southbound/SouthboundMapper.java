@@ -456,4 +456,23 @@ public class SouthboundMapper {
         }
     }
 
+    public static InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
+        InstanceIdentifier<Node> iid = null;
+        if (ovs.getExternalIdsColumn() != null
+                && ovs.getExternalIdsColumn().getData() != null
+                && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+        } else {
+            String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
+                    + ovs.getUuid().toString();
+            NodeId nodeId = new NodeId(new Uri(nodeString));
+            NodeKey nodeKey = new NodeKey(nodeId);
+            iid = InstanceIdentifier.builder(NetworkTopology.class)
+                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                    .child(Node.class,nodeKey)
+                    .build();
+        }
+        return iid;
+    }
 }

@@ -96,8 +96,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(INeutronSubnetAware.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
     }
 
     @Override

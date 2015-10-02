@@ -33,7 +33,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -551,7 +550,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         configurationService =
                 (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
         networkingProviderManager =

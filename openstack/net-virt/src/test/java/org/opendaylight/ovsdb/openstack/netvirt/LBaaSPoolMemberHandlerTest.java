@@ -46,7 +46,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -220,7 +220,7 @@ public class LBaaSPoolMemberHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(LoadBalancerProvider.class, lBaaSPoolMemberHandler)).thenReturn(loadBalancerProvider);
         PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, lBaaSPoolMemberHandler)).thenReturn(nodeCacheManager);
 
-        lBaaSPoolMemberHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        lBaaSPoolMemberHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", lBaaSPoolMemberHandler.eventDispatcher, eventDispatcher);
         assertEquals("Error, did not return the correct object", getField("loadBalancerProvider"), loadBalancerProvider);

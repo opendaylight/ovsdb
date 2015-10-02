@@ -46,7 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -254,7 +253,7 @@ public class SouthboundHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, southboundHandler)).thenReturn(eventDispatcher);
         PowerMockito.when(ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, southboundHandler)).thenReturn(ovsdbInventoryService);
 
-        southboundHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        southboundHandler.setDependencies(mock(ServiceReference.class));
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
         assertEquals("Error, did not return the correct object", getField("networkingProviderManager"), networkingProviderManager);
         assertEquals("Error, did not return the correct object", getField("tenantNetworkManager"), tenantNetworkManager);

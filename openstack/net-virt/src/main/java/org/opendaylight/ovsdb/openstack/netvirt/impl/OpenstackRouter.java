@@ -13,7 +13,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 
 import java.net.InetAddress;
 import java.util.UUID;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -83,7 +83,7 @@ public class OpenstackRouter implements MultiTenantAwareRouter, ConfigInterface 
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
 
     }
 

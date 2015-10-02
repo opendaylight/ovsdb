@@ -24,8 +24,10 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -118,7 +120,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void disconnected(OvsdbClient client) {
-        LOG.info("OVSDB Disconnected from {}:{}",client.getConnectionInfo().getRemoteAddress(),
+        LOG.info("OVSDB Disconnected from {}:{}. Cleaning up the operational data store"
+                ,client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(key);
@@ -184,11 +187,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 */
     @Override
     public void close() throws Exception {
+        if (ovsdbDeviceEntityOwnershipListener != null) {
+            ovsdbDeviceEntityOwnershipListener.close();
+        }
+
         for (OvsdbClient client: clients.values()) {
             client.disconnect();
-        }
-        if (ovsdbDeviceEntityOwnershipListener != null) {
-            // TODO: ovsdbDeviceEntityOwnershipListener.close();
         }
     }
 
@@ -314,6 +318,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             // might went down abruptly and didn't get a chance to clean up the operational data store.
             if (!ownershipChange.hasOwner()) {
                 LOG.debug("{} has no onwer, cleaning up the operational data store", ownershipChange.getEntity());
+                // Below code might look weird but it's required. We want to give first opportunity to the
+                // previous owner of the device to clean up the operational data store if there is no owner now.
+                // That way we will avoid lot of nasty md-sal exceptions because of concurrent delete.
+                if (ownershipChange.wasOwner()) {
+                    cleanEntityOperationalData(ownershipChange.getEntity());
+                }
+                // If first cleanEntityOperationalData() was called, this call will be no-op.
                 cleanEntityOperationalData(ownershipChange.getEntity());
             }
             return;
@@ -429,7 +440,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         entityConnectionMap.put(candidateEntity, ovsdbConnectionInstance);
         ovsdbConnectionInstance.setConnectedEntity(candidateEntity);
         try {
-            entityOwnershipService.registerCandidate(candidateEntity);
+            EntityOwnershipCandidateRegistration registration =
+                    entityOwnershipService.registerCandidate(candidateEntity);
+            ovsdbConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("OVSDB entity {} is registred for ownership.", candidateEntity);
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for {} ownership", candidateEntity, e);
@@ -444,12 +457,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private OvsdbConnectionManager cm;
+        private EntityOwnershipListenerRegistration listenerRegistration;
 
         OvsdbDeviceEntityOwnershipListener(OvsdbConnectionManager cm, EntityOwnershipService entityOwnershipService) {
             this.cm = cm;
-            entityOwnershipService.registerListener(ENTITY_TYPE, this);
+            listenerRegistration = entityOwnershipService.registerListener(ENTITY_TYPE, this);
         }
-
+        public void close() {
+            listenerRegistration.close();
+        }
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             cm.handleOwnershipChanged(ownershipChange);

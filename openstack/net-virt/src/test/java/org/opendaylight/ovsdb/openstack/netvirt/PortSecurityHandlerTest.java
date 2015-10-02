@@ -26,7 +26,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -101,7 +100,7 @@ public class PortSecurityHandlerTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, portSecurityHandler)).thenReturn(eventDispatcher);
 
-        portSecurityHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        portSecurityHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", portSecurityHandler.eventDispatcher, eventDispatcher);
     }

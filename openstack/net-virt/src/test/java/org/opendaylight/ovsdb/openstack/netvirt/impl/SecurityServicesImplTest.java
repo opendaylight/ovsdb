@@ -29,7 +29,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -90,7 +90,7 @@ public class SecurityServicesImplTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, securityServicesImpl)).thenReturn(southbound);
 
-        securityServicesImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        securityServicesImpl.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
     }

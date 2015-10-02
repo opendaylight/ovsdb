@@ -13,6 +13,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.*;
@@ -61,9 +62,8 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
-    private List<ServiceRegistration<?>> registrations = new ArrayList<>();
-    private List<Object> services = new ArrayList<>();
     private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<ServiceRegistration<?>>();
+    private List<Pair<Object, ServiceRegistration>> servicesAndRegistrations = new ArrayList<>();
     private ProviderContext providerContext;
 
     public ConfigActivator(ProviderContext providerContext) {
@@ -170,10 +170,18 @@ public class ConfigActivator implements BundleActivator {
                 new String[] {OvsdbInventoryService.class.getName()}, null, ovsdbInventoryService);
 
         // Call .setDependencies() starting with the last service registered
-        for (int i = services.size() - 1; i >= 0; i--) {
-            Object service = services.get(i);
+        for (int i = servicesAndRegistrations.size() - 1; i >= 0; i--) {
+            Pair<Object, ServiceRegistration> serviceAndRegistration = servicesAndRegistrations.get(i);
+            Object service = serviceAndRegistration.getLeft();
+            ServiceRegistration<?> serviceRegistration = serviceAndRegistration.getRight();
+            LOG.info("Setting dependencies on service {}/{}, {}", i, servicesAndRegistrations.size(),
+                    service.getClass());
             if (service instanceof ConfigInterface) {
-                ((ConfigInterface) service).setDependencies(context, null);
+                ((ConfigInterface) service).setDependencies(
+                        serviceRegistration != null ? serviceRegistration.getReference() : null);
+                LOG.info("Dependencies set");
+            } else {
+                LOG.warn("Service isn't a ConfigInterface");
             }
         }
 
@@ -197,7 +205,7 @@ public class ConfigActivator implements BundleActivator {
         trackService(context, GatewayMacResolver.class, neutronL3Adapter);
 
         // We no longer need to track the services, avoid keeping references around
-        services.clear();
+        servicesAndRegistrations.clear();
     }
 
     private void registerCRUDServiceProviders(BundleContext context,
@@ -266,11 +274,11 @@ public class ConfigActivator implements BundleActivator {
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,
                                                    Dictionary<String, Object> properties, Object impl) {
-        services.add(impl);
-        ServiceRegistration<?> serviceRegistration = bundleContext.registerService(interfaces, impl, properties);
-        if (serviceRegistration != null) {
-            registrations.add(serviceRegistration);
+        ServiceRegistration serviceRegistration = bundleContext.registerService(interfaces, impl, properties);
+        if (serviceRegistration == null) {
+            LOG.warn("Service registration for {} failed to return a ServiceRegistration instance", impl.getClass());
         }
+        servicesAndRegistrations.add(Pair.of(impl, serviceRegistration));
         return serviceRegistration;
     }
 }

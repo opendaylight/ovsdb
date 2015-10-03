@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -158,10 +159,20 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // Works only if we don't specify the feature repo and name
                 getLoggingOption()};
         Option[] propertyOptions = getPropertiesOptions();
-        Option[] combinedOptions = new Option[options.length + propertyOptions.length];
+        Option[] otherOptions = getOtherOptions();
+        Option[] combinedOptions = new Option[options.length + propertyOptions.length + otherOptions.length];
         System.arraycopy(options, 0, combinedOptions, 0, options.length);
         System.arraycopy(propertyOptions, 0, combinedOptions, options.length, propertyOptions.length);
+        System.arraycopy(otherOptions, 0, combinedOptions, options.length + propertyOptions.length,
+                otherOptions.length);
         return combinedOptions;
+    }
+
+    private Option[] getOtherOptions() {
+        return new Option[] {
+                vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
+                keepRuntimeFolder()
+        };
     }
 
     @Override

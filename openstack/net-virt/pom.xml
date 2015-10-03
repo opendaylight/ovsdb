@@ -49,9 +49,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <ovsdb.utils.config.version>1.2.1-SNAPSHOT</ovsdb.utils.config.version>
     <ovsdb.utils.servicehelper.version>1.2.1-SNAPSHOT</ovsdb.utils.servicehelper.version>
     <powermock.version>1.5.2</powermock.version>
-    <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
-    <root.directory>${env.PWD}</root.directory>
-    <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <sonar.jacoco.itReportPath>../net-virt-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
   <dependencyManagement>
@@ -229,79 +227,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <!-- Specific to generate mapping between tests and covered code -->
-          <!--<argLine>${jacoco.agent.it.arg}</argLine>-->
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.sonar.java.jacoco.JUnitListener</value>
-            </property>
-          </properties>
-          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
-          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!-- Specific to generate mapping between tests and covered code -->
-          <!--<argLine>${jacoco.agent.ut.arg}</argLine>-->
           <properties>
             <property>
               <name>listener</name>
               <value>org.sonar.java.jacoco.JUnitListener</value>
             </property>
           </properties>
-          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
-          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>prepare-ut-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.reportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>prepare-it-agent</id>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <append>true</append>
-              <destFile>${sonar.jacoco.itReportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.reportPath}</dataFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report-integration</id>
-            <goals>
-              <goal>report-integration</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
-  </project>
+</project>

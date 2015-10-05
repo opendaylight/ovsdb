@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_cc7c8523",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/RoutingService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-05T21:28:25Z",
+      "side": 1,
+      "message": "nice catch!\nCan you please break this line into 2? it is a bit hard to read. Maybe something like this is better on the eye:\n\nSubnetUtils subnetUtils \u003d new SubnetUtils(address.getHostAddress() + \"/\" + mask);\n\nfinal String prefixString \u003d subnetUtilsInfo.getInfo().getNetworkAddress() + \"/\" + mask;",
+      "range": {
+        "startLine": 94,
+        "startChar": 37,
+        "endLine": 94,
+        "endChar": 40
+      },
+      "revId": "86c5ca5cf4abb93b0992e1657a96a912c8b7713d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

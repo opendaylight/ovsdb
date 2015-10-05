@@ -18,14 +18,13 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRunti
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +101,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -123,11 +123,10 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class SouthboundIT extends AbstractMdsalTestBase {
-    private static final String EXPECTED_VALUES_KEY = "ExpectedValuesKey";
-    private static final String INPUT_VALUES_KEY = "InputValuesKey";
     private static final String NETDEV_DP_TYPE = "netdev";
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
+    private static final String FORMAT_STR = "%s_%s_%d";
     public static final int NUM_THREADS = 4;
     private static String addressStr;
     private static String portStr;
@@ -355,7 +354,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class,
-                        createNodeKey(connectionInfo.getRemoteIp(),connectionInfo.getRemotePort()));
+                        createNodeKey(connectionInfo.getRemoteIp(), connectionInfo.getRemotePort()));
     }
 
     private Node getOvsdbNode(final ConnectionInfo connectionInfo) {
@@ -862,167 +861,264 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
-    /*
-     * Generates the test cases involved in testing PortExternalIds.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT port external_ids, or EXPECTED port external_ids
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setPortExternalIds()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getPortExternalIds()</code>
-     */
-    private Map<String, Map<String, List<PortExternalIds>>> generatePortExternalIdsTestCases() {
-        Map<String, Map<String, List<PortExternalIds>>> testMap = new HashMap<>();
+    private interface KeyValueBuilder<T> {
+        T build(String testName, String key, String value);
+        T[] build(String testName, int count, String key, String value);
+        void reset();
+    }
 
-        final String PORT_EXTERNAL_ID_KEY = "PortExternalIdKey";
-        final String PORT_EXTERNAL_ID_VALUE = "PortExternalIdValue";
-        final String FORMAT_STR = "%s_%s_%d";
+    private static abstract class BaseKeyValueBuilder<T> implements KeyValueBuilder<T> {
+        private int counter = 0;
+        private final Class<T> builtClass;
+
+        protected abstract Builder<T> builder();
+
+        protected abstract void setKey(Builder<T> builder, String key);
+
+        protected abstract void setValue(Builder<T> builder, String value);
+
+        @SuppressWarnings("unchecked")
+        private BaseKeyValueBuilder() {
+            builtClass = (Class<T>) this.getClass().getSuperclass().getTypeParameters()[0].getClass();
+        }
+
+        @Override
+        public T build(String testName, String key, String value) {
+            Builder<T> builder = builder();
+            this.counter++;
+            if (key != null) {
+                setKey(builder, String.format(FORMAT_STR, testName, key, this.counter));
+            }
+            if (value != null) {
+                setValue(builder, String.format(FORMAT_STR, testName, value, this.counter));
+            }
+            return builder.build();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public T[] build(String testName, int count, String key, String value) {
+            T[] instances = (T[]) Array.newInstance(builtClass, count);
+            for (int idx = 0; idx < count; idx++) {
+                instances[idx] = build(testName, key, value);
+            }
+            return instances;
+        }
+
+        @Override
+        public void reset() {
+            this.counter = 0;
+        }
+    }
+
+    private static class SouthboundPortExternalIdsBuilder extends BaseKeyValueBuilder<PortExternalIds> {
+        @Override
+        protected Builder<PortExternalIds> builder() {
+            return new PortExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<PortExternalIds> builder, String key) {
+            ((PortExternalIdsBuilder) builder).setExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<PortExternalIds> builder, String value) {
+            ((PortExternalIdsBuilder) builder).setExternalIdValue(value);
+        }
+    }
+
+    private static class SouthboundInterfaceExternalIdsBuilder extends BaseKeyValueBuilder<InterfaceExternalIds> {
+        @Override
+        protected Builder<InterfaceExternalIds> builder() {
+            return new InterfaceExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<InterfaceExternalIds> builder, String key) {
+            ((InterfaceExternalIdsBuilder) builder).setExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<InterfaceExternalIds> builder, String value) {
+            ((InterfaceExternalIdsBuilder) builder).setExternalIdValue(value);
+        }
+    }
+
+    private static class SouthboundOptionsBuilder extends BaseKeyValueBuilder<Options> {
+        @Override
+        protected Builder<Options> builder() {
+            return new OptionsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<Options> builder, String key) {
+            ((OptionsBuilder) builder).setOption(key);
+        }
+
+        @Override
+        protected void setValue(Builder<Options> builder, String value) {
+            ((OptionsBuilder) builder).setValue(value);
+        }
+    }
+
+    private static class SouthboundInterfaceOtherConfigsBuilder extends BaseKeyValueBuilder<InterfaceOtherConfigs> {
+        @Override
+        protected Builder<InterfaceOtherConfigs> builder() {
+            return new InterfaceOtherConfigsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<InterfaceOtherConfigs> builder, String key) {
+            ((InterfaceOtherConfigsBuilder) builder).setOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<InterfaceOtherConfigs> builder, String value) {
+            ((InterfaceOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        }
+    }
+
+    private static class SouthboundPortOtherConfigsBuilder extends BaseKeyValueBuilder<PortOtherConfigs> {
+        @Override
+        protected Builder<PortOtherConfigs> builder() {
+            return new PortOtherConfigsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<PortOtherConfigs> builder, String key) {
+            ((PortOtherConfigsBuilder) builder).setOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<PortOtherConfigs> builder, String value) {
+            ((PortOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        }
+    }
+
+    private static class SouthboundBridgeOtherConfigsBuilder extends BaseKeyValueBuilder<BridgeOtherConfigs> {
+        @Override
+        protected Builder<BridgeOtherConfigs> builder() {
+            return new BridgeOtherConfigsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<BridgeOtherConfigs> builder, String key) {
+            ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<BridgeOtherConfigs> builder, String value) {
+            ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigValue(value);
+        }
+    }
+
+    private static class SouthboundBridgeExternalIdsBuilder extends BaseKeyValueBuilder<BridgeExternalIds> {
+        @Override
+        protected Builder<BridgeExternalIds> builder() {
+            return new BridgeExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<BridgeExternalIds> builder, String key) {
+            ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<BridgeExternalIds> builder, String value) {
+            ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdValue(value);
+        }
+    }
+
+    /*
+     * Generates the test cases involved in testing key-value-based data.  See inline comments for descriptions of
+     * the particular cases considered.
+     */
+    private static <T> List<SouthboundTestCase<T>> generateKeyValueTestCases(
+            KeyValueBuilder<T> builder, String idKey, String idValue) {
+        List<SouthboundTestCase<T>> testCases = new ArrayList<>();
+
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
         final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
-        // Test Case 1:  TestOneExternalId
+        // Test Case 1:  TestOne
         // Test Type:    Positive
-        // Description:  Create a termination point with one PortExternalIds
-        // Expected:     A port is created with the single external_ids specified below
-        final String testOneExternalIdName = "TestOneExternalId";
-        int externalIdCounter = 0;
-        List<PortExternalIds> oneExternalId = Lists.newArrayList(
-                (new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()));
-        Map<String,List<PortExternalIds>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
-        testCase.put(INPUT_VALUES_KEY, oneExternalId);
-        testMap.put(testOneExternalIdName, testCase);
+        // Description:  Create a termination point with one value
+        // Expected:     A port is created with the single value specified below
+        final String testOneName = "TestOne";
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testOneName)
+                .input(builder.build(testOneName, idKey, idValue))
+                .expectInputAsOutput()
+                .build());
+        builder.reset();
 
-        // Test Case 2:  TestFiveExternalId
+        // Test Case 2:  TestFive
         // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) PortExternalIds
-        // Expected:     A port is created with the five external_ids specified below
-        final String testFiveExternalIdName = "TestFiveExternalId";
-        externalIdCounter = 0;
-        List<PortExternalIds> fiveExternalId = Lists.newArrayList(
-                (new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
-        testCase.put(INPUT_VALUES_KEY, fiveExternalId);
-        testMap.put(testFiveExternalIdName, testCase);
+        // Description:  Create a termination point with multiple (five) values
+        // Expected:     A port is created with the five values specified below
+        final String testFiveName = "TestFive";
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testFiveName)
+                .input(builder.build(testFiveName, 5, idKey, idValue))
+                .expectInputAsOutput()
+                .build());
+        builder.reset();
 
-        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
+        // Test Case 3:  TestOneGoodOneMalformedValue
         // Test Type:    Negative
         // Description:
-        //     One perfectly fine PortExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_PortExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_PortExternalIdValue_1)
-        //     and one malformed PortExternalId which only has key specified
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
+        //     One perfectly fine input
+        //        (TestOneGoodOneMalformedValue_GoodKey_1,
+        //        TestOneGoodOneMalformedValue_GoodValue_1)
+        //     and one malformed input which only has key specified
+        //        (TestOneGoodOneMalformedValue_NoValueForKey_2,
         //        UNSPECIFIED)
-        // Expected:     A port is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
-                "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        externalIdCounter = 0;
-        PortExternalIds oneGood = new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                        GOOD_KEY, ++externalIdCounter))
-                .setExternalIdValue(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdValueName,
-                        GOOD_VALUE, externalIdCounter))
-                .build();
-        PortExternalIds oneBad = new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
-                .build();
-        List<PortExternalIds> oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        List<PortExternalIds> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodExternalIdOneMalformedExternalIdValueName, testCase);
+        // Expected:     A port is created without any values
+        final String testOneGoodOneMalformedValueName = "TestOneGoodOneMalformedValue";
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testOneGoodOneMalformedValueName)
+                .input(
+                        builder.build(testOneGoodOneMalformedValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodOneMalformedValueName, NO_VALUE_FOR_KEY, null)
+                )
+                .expect()
+                .build());
+        builder.reset();
 
-        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
+        // Test Case 4:  TestOneGoodOneMalformedKey
         // Test Type:    Negative
         // Description:
-        //     One perfectly fine PortExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_PortExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_PortExternalIdValue_1)
-        //     and one malformed PortExternalId which only has key specified
+        //     One perfectly fine input
+        //        (TestOneGoodOneMalformedKey_GoodKey_1,
+        //        TestOneGoodOneMalformedKey_GoodValue_1)
+        //     and one malformed input which only has value specified
         //        (UNSPECIFIED,
-        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
-        // Expected:     A port is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
-                "TestOneGoodExternalIdOneMalformedExternalIdKey";
-        externalIdCounter = 0;
-        oneGood = new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                        GOOD_KEY, ++externalIdCounter))
-                .setExternalIdValue(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                        GOOD_VALUE, externalIdCounter))
-                .build();
-        oneBad = new PortExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodExternalIdOneMalformedExternalIdKeyName, testCase);
+        //        TestOneGoodOneMalformedKey_NoKeyForValue_2)
+        // Expected:     A port is created without any values
+        final String testOneGoodOneMalformedKeyName = "TestOneGoodOneMalformedKey";
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testOneGoodOneMalformedKeyName)
+                .input(
+                        builder.build(testOneGoodOneMalformedKeyName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodOneMalformedKeyName, null, NO_KEY_FOR_VALUE)
+                )
+                .expect()
+                .build());
+        builder.reset();
 
-        return testMap;
+        return testCases;
     }
 
     /*
-     * @see <code>SouthboundIT.testCRUDPortExternalIds()</code>
-     * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
+     * Generates the test cases involved in testing PortExternalIds.  See inline comments for descriptions of
+     * the particular cases considered.
      */
-    private void assertExpectedPortExternalIdsExist( List<PortExternalIds> expected,
-                                                     List<PortExternalIds> test ) {
-
-        if (expected != null) {
-            for (PortExternalIds expectedExternalId : expected) {
-                Assert.assertTrue(test.contains(expectedExternalId));
-            }
-        }
+    private List<SouthboundTestCase<PortExternalIds>> generatePortExternalIdsTestCases() {
+        return generateKeyValueTestCases(new SouthboundPortExternalIdsBuilder(), "PortExternalIdKey",
+                "PortExternalIdValue");
     }
 
     /*
@@ -1044,45 +1140,26 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // updateFromTestCases represent the original test case value.
         // updateToTestCases represent the new value after the update has been
         // performed.
-        Map<String, Map<String, List<PortExternalIds>>> updateFromTestCases =
-                generatePortExternalIdsTestCases();
-        Map<String, Map<String, List<PortExternalIds>>> updateToTestCases =
-                generatePortExternalIdsTestCases();
-        Map<String, List<PortExternalIds>> updateFromTestCase;
-        List<PortExternalIds> updateFromInputExternalIds;
-        List<PortExternalIds> updateFromExpectedExternalIds;
-        Map<String, List<PortExternalIds>> updateToTestCase;
-        List<PortExternalIds> updateToInputExternalIds;
-        List<PortExternalIds> updateToExpectedExternalIds;
+        List<SouthboundTestCase<PortExternalIds>> updateFromTestCases = generatePortExternalIdsTestCases();
+        List<SouthboundTestCase<PortExternalIds>> updateToTestCases = generatePortExternalIdsTestCases();
         String testBridgeName;
         String testPortName;
 
         int counter = 1;
         // multihreads the test using NUM_THREADS
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(
-                    updateFromTestCaseKey);
-            updateFromInputExternalIds = updateFromTestCase.get(
-                    INPUT_VALUES_KEY);
-            updateFromExpectedExternalIds = updateFromTestCase.get(
-                    EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s_%d",
-                        TEST_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<PortExternalIds> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<PortExternalIds> toTestCase : updateToTestCases) {
+                testPortName = testBridgeName = String.format(FORMAT_STR,
+                        TEST_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputExternalIds = updateToTestCase.get(
-                        INPUT_VALUES_KEY);
-                updateToExpectedExternalIds = updateToTestCase.get(
-                        EXPECTED_VALUES_KEY);
                 TestCRUDTerminationPointPortExternalIdsRunnable testRunnable =
                         new TestCRUDTerminationPointPortExternalIdsRunnable(
                                 connectionInfo, testBridgeName, testPortName,
-                                updateFromInputExternalIds,
-                                updateFromExpectedExternalIds,
-                                updateToInputExternalIds,
-                                updateToExpectedExternalIds);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -1150,13 +1227,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             List<PortExternalIds> updateFromConfigurationExternalIds =
                     updateFromConfigurationTerminationPointAugmentation
                             .getPortExternalIds();
-            assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromConfigurationExternalIds);
+            Assert.assertTrue(updateFromConfigurationExternalIds.containsAll(updateFromExpectedExternalIds));
             OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation =
                     getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
                             LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
             List<PortExternalIds> updateFromOperationalExternalIds = updateFromOperationalTerminationPointAugmenation
                     .getPortExternalIds();
-            assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromOperationalExternalIds);
+            Assert.assertTrue(updateFromOperationalExternalIds.containsAll(updateFromExpectedExternalIds));
 
             // UPDATE:  update the external_ids
             testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
@@ -1185,16 +1262,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
             List<PortExternalIds> updateToConfigurationExternalIds = updateToConfigurationTerminationPointAugmentation
                     .getPortExternalIds();
-            assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
-            assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToConfigurationExternalIds);
+            Assert.assertTrue(updateToConfigurationExternalIds.containsAll(updateToExpectedExternalIds));
+            Assert.assertTrue(updateToConfigurationExternalIds.containsAll(updateFromExpectedExternalIds));
             OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
                     getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
                             LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
             List<PortExternalIds> updateToOperationalExternalIds =
                     updateToOperationalTerminationPointAugmentation.getPortExternalIds();
             if (updateFromExpectedExternalIds != null) {
-                assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
-                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToOperationalExternalIds);
+                Assert.assertTrue(updateToOperationalExternalIds.containsAll(updateToExpectedExternalIds));
+                Assert.assertTrue(updateToOperationalExternalIds.containsAll(updateFromExpectedExternalIds));
             }
 
             // DELETE
@@ -1217,142 +1294,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *     EXPECTED is the List we expect to receive after calling
      *              <code>TerminationPointAugmentationBuilder.getInterfaceExternalIds()</code>
      */
-    private Map<String, Map<String, List<InterfaceExternalIds>>> generateInterfaceExternalIdsTestCases() {
-        Map<String, Map<String, List<InterfaceExternalIds>>> testMap = new HashMap<>();
-
-        final String INTERFACE_EXTERNAL_ID_KEY = "IntExternalIdKey";
-        final String INTERFACE_EXTERNAL_ID_VALUE = "IntExternalIdValue";
-        final String FORMAT_STR = "%s_%s_%d";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
-
-        // Test Case 1:  TestOneExternalId
-        // Test Type:    Positive
-        // Description:  Create a termination point with one InterfaceExternalIds
-        // Expected:     A termination point is created with the single external_ids specified below
-        final String testOneExternalIdName = "TestOneExternalId";
-        int externalIdCounter = 0;
-        List<InterfaceExternalIds> oneExternalId = Lists.newArrayList(
-                (new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()));
-        Map<String,List<InterfaceExternalIds>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
-        testCase.put(INPUT_VALUES_KEY, oneExternalId);
-        testMap.put(testOneExternalIdName, testCase);
-
-        // Test Case 2:  TestFiveExternalId
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) InterfaceExternalIds
-        // Expected:     A termination point is created with the five external_ids specified below
-        final String testFiveExternalIdName = "TestFiveExternalId";
-        externalIdCounter = 0;
-        List<InterfaceExternalIds> fiveExternalId = Lists.newArrayList(
-                (new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
-        testCase.put(INPUT_VALUES_KEY, fiveExternalId);
-        testMap.put(testFiveExternalIdName, testCase);
-
-        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_IntExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_IntExternalIdValue_1)
-        //     and one malformed PortExternalId which only has key specified
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
-                "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        externalIdCounter = 0;
-        InterfaceExternalIds oneGood = new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                        GOOD_KEY, ++externalIdCounter))
-                .setExternalIdValue(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdValueName,
-                        GOOD_VALUE, externalIdCounter))
-                .build();
-        InterfaceExternalIds oneBad = new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
-                .build();
-        List<InterfaceExternalIds> oneGoodOneBadInput = Lists.newArrayList(
-                oneGood, oneBad);
-        List<InterfaceExternalIds> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodExternalIdOneMalformedExternalIdValueName, testCase);
-
-        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_IntExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_IntExternalIdValue_1)
-        //     and one malformed BridgeExternalId which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
-                "TestOneGoodExternalIdOneMalformedExternalIdKey";
-        externalIdCounter = 0;
-        oneGood = new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                        GOOD_KEY, ++externalIdCounter))
-                .setExternalIdValue(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                        GOOD_VALUE, externalIdCounter))
-                .build();
-        oneBad = new InterfaceExternalIdsBuilder()
-                .setExternalIdKey(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(
-                oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodExternalIdOneMalformedExternalIdKeyName, testCase);
-
-        return testMap;
+    private static List<SouthboundTestCase<InterfaceExternalIds>> generateInterfaceExternalIdsTestCases() {
+        return generateKeyValueTestCases(new SouthboundInterfaceExternalIdsBuilder(), "IntExternalIdKey",
+                "IntExternalIdValue");
     }
 
     /*
@@ -1383,40 +1327,26 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        Map<String, Map<String, List<InterfaceExternalIds>>> updateFromTestCases =
-                generateInterfaceExternalIdsTestCases();
-        Map<String, Map<String, List<InterfaceExternalIds>>> updateToTestCases =
-                generateInterfaceExternalIdsTestCases();
-        Map<String, List<InterfaceExternalIds>> updateFromTestCase;
-        List<InterfaceExternalIds> updateFromInputExternalIds;
-        List<InterfaceExternalIds> updateFromExpectedExternalIds;
-        Map<String, List<InterfaceExternalIds>> updateToTestCase;
-        List<InterfaceExternalIds> updateToInputExternalIds;
-        List<InterfaceExternalIds> updateToExpectedExternalIds;
+        List<SouthboundTestCase<InterfaceExternalIds>> updateFromTestCases = generateInterfaceExternalIdsTestCases();
+        List<SouthboundTestCase<InterfaceExternalIds>> updateToTestCases = generateInterfaceExternalIdsTestCases();
         String testBridgeName;
         String testPortName;
 
         int counter = 1;
         // multihreads the test using NUM_THREADS
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputExternalIds = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedExternalIds = updateFromTestCase.get(EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<InterfaceExternalIds> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<InterfaceExternalIds> toTestCase : updateToTestCases) {
+                testPortName = testBridgeName = String.format(FORMAT_STR,
+                        TEST_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputExternalIds = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedExternalIds = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
                 TestCRUDTerminationPointInterfaceExternalIdsRunnable testRunnable =
                         new TestCRUDTerminationPointInterfaceExternalIdsRunnable(
                                 connectionInfo, testBridgeName, testPortName,
-                                updateFromInputExternalIds,
-                                updateFromExpectedExternalIds,
-                                updateToInputExternalIds,
-                                updateToExpectedExternalIds);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -1548,150 +1478,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     /*
      * Generates the test cases involved in testing TP Options.  See inline comments for descriptions of
      * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT TP Options, or EXPECTED TP Options
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setOptions()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getOptions()</code>
      */
-    private Map<String, Map<String, List<Options>>> generateTerminationPointOptionsTestCases() {
-        Map<String, Map<String, List<Options>>> testMap = new HashMap<>();
-
-        final String TP_OPTIONS_KEY = "TPOptionsKey";
-        final String TP_OPTIONS_VALUE = "TPOptionsValue";
-        final String FORMAT_STR = "%s_%s_%d";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
-
-        // Test Case 1:  TestOneOptions
-        // Test Type:    Positive
-        // Description:  Create a termination point with one Options
-        // Expected:     A termination point is created with the single Options specified below
-        final String testOneOptionsName = "TestOneOptions";
-        int optionsCounter = 0;
-        List<Options> oneOptions = Lists.newArrayList(
-                (new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testOneOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testOneOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build()));
-        Map<String,List<Options>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneOptions);
-        testCase.put(INPUT_VALUES_KEY, oneOptions);
-        testMap.put(testOneOptionsName, testCase);
-
-        // Test Case 2:  TestFiveOptions
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) Options
-        // Expected:     A termination point is created with the five options specified below
-        final String testFiveOptionsName = "TestFiveOptions";
-        optionsCounter = 0;
-        List<Options> fiveOptions = Lists.newArrayList(
-                (new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build()),
-                (new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build()),
-                (new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build()),
-                (new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build()),
-                (new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fiveOptions);
-        testCase.put(INPUT_VALUES_KEY, fiveOptions);
-        testMap.put(testFiveOptionsName, testCase);
-
-        // Test Case 3:  TestOneGoodOptionsOneMalformedOptionsValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine Options
-        //        (TestOneGoodOptionsOneMalformedOptionsValue_OptionsKey_1,
-        //        TestOneGoodOptionsOneMalformedOptions_OptionsValue_1)
-        //     and one malformed Options which only has key specified
-        //        (TestOneGoodOptionsOneMalformedOptionsValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any options
-        final String testOneGoodOptionsOneMalformedOptionsValueName =
-                "TestOneGoodOptionsOneMalformedOptionsValue";
-        optionsCounter = 0;
-        Options oneGood = new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsValueName,
-                        GOOD_KEY, ++optionsCounter))
-                .setValue(String.format(FORMAT_STR,
-                        testOneGoodOptionsOneMalformedOptionsValueName,
-                        GOOD_VALUE, optionsCounter))
-                .build();
-        Options oneBad = new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR,
-                        testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY, ++optionsCounter))
-                .build();
-        List<Options> oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        List<Options> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodOptionsOneMalformedOptionsValueName, testCase);
-
-        // Test Case 4:  TestOneGoodOptionsOneMalformedOptionsKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine Options
-        //        (TestOneGoodOptionsOneMalformedOptionsValue_OptionsKey_1,
-        //        TestOneGoodOptionsOneMalformedOptions_OptionsValue_1)
-        //     and one malformed Options which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodOptionsOneMalformedOptionsKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any options
-        final String testOneGoodOptionsOneMalformedOptionsKeyName =
-                "TestOneGoodOptionsOneMalformedOptionsKey";
-        optionsCounter = 0;
-        oneGood = new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsKeyName,
-                        GOOD_KEY, ++optionsCounter))
-                .setValue(String.format(FORMAT_STR,
-                        testOneGoodOptionsOneMalformedOptionsKeyName,
-                        GOOD_VALUE, optionsCounter))
-                .build();
-        oneBad = new OptionsBuilder()
-                .setOption(String.format(FORMAT_STR,
-                        testOneGoodOptionsOneMalformedOptionsKeyName, NO_KEY_FOR_VALUE, ++optionsCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodOptionsOneMalformedOptionsKeyName, testCase);
-
-        return testMap;
+    private List<SouthboundTestCase<Options>> generateTerminationPointOptionsTestCases() {
+        return generateKeyValueTestCases(new SouthboundOptionsBuilder(), "TOPOptionsKey", "TPOptionsValue");
     }
 
     /*
@@ -1722,39 +1511,25 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        Map<String, Map<String, List<Options>>> updateFromTestCases =
-                generateTerminationPointOptionsTestCases();
-        Map<String, Map<String, List<Options>>> updateToTestCases =
-                generateTerminationPointOptionsTestCases();
-        Map<String, List<Options>> updateFromTestCase;
-        List<Options> updateFromInputOptions;
-        List<Options> updateFromExpectedOptions;
-        Map<String, List<Options>> updateToTestCase;
-        List<Options> updateToInputOptions;
-        List<Options> updateToExpectedOptions;
+        List<SouthboundTestCase<Options>> updateFromTestCases = generateTerminationPointOptionsTestCases();
+        List<SouthboundTestCase<Options>> updateToTestCases = generateTerminationPointOptionsTestCases();
         String testBridgeName;
         String testPortName;
 
         int counter = 1;
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputOptions = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedOptions = updateFromTestCase.get(EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<Options> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<Options> toTestCase : updateToTestCases) {
+                testPortName = testBridgeName = String.format(FORMAT_STR,
+                        TEST_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputOptions = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedOptions = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
                 TestCRUDTerminationPointOptionsRunnable testRunnable =
                         new TestCRUDTerminationPointOptionsRunnable(
                                 connectionInfo, testBridgeName, testPortName,
-                                updateFromInputOptions,
-                                updateFromExpectedOptions,
-                                updateToInputOptions,
-                                updateToExpectedOptions);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -1887,144 +1662,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *     EXPECTED is the List we expect to receive after calling
      *              <code>TerminationPointAugmentationBuilder.getInterfaceOtherConfigs()</code>
      */
-    private Map<String, Map<String, List<InterfaceOtherConfigs>>> generateInterfaceOtherConfigsTestCases() {
-        Map<String, Map<String, List<InterfaceOtherConfigs>>> testMap = new HashMap<>();
-
-        final String INT_OTHER_CONFIGS_KEY = "IntOtherConfigsKey";
-        final String INT_OTHER_CONFIGS_VALUE = "IntOtherConfigsValue";
-        final String FORMAT_STR = "%s_%s_%d";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
-
-        // Test Case 1:  TestOneOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create an interface with one other_Configs
-        // Expected:     An interface is created with the single other_configs specified below
-        final String testOneOtherConfigsName = "TestOneInterfaceOtherConfigs";
-        int otherConfigsCounter = 0;
-        List<InterfaceOtherConfigs> oneOtherConfigs = Lists.newArrayList(
-                (new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()));
-        Map<String,List<InterfaceOtherConfigs>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneOtherConfigs);
-        testCase.put(INPUT_VALUES_KEY, oneOtherConfigs);
-        testMap.put(testOneOtherConfigsName, testCase);
-
-        // Test Case 2:  TestFiveInterfaceOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) InterfaceOtherConfigs
-        // Expected:     A termination point is created with the five InterfaceOtherConfigs specified below
-        final String testFiveInterfaceOtherConfigsName = "TestFiveInterfaceOtherConfigs";
-        otherConfigsCounter = 0;
-        List<InterfaceOtherConfigs> fiveInterfaceOtherConfigs = Lists.newArrayList(
-                (new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fiveInterfaceOtherConfigs);
-        testCase.put(INPUT_VALUES_KEY, fiveInterfaceOtherConfigs);
-        testMap.put(testFiveInterfaceOtherConfigsName, testCase);
-
-        // Test Case 3:  TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceOtherConfigs
-        //        (TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue_InterfaceOtherConfigsKey_1,
-        //        TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigs_InterfaceOtherConfigsValue_1)
-        //     and one malformed InterfaceOtherConfigs which only has key specified
-        //        (TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any InterfaceOtherConfigs
-        final String testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName =
-                "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue";
-        otherConfigsCounter = 0;
-        InterfaceOtherConfigs oneGood = new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                        GOOD_KEY, ++otherConfigsCounter))
-                .setOtherConfigValue(String.format(FORMAT_STR,
-                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                        GOOD_VALUE, otherConfigsCounter))
-                .build();
-        InterfaceOtherConfigs oneBad = new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName, NO_VALUE_FOR_KEY,
-                        ++otherConfigsCounter))
-                .build();
-        List<InterfaceOtherConfigs> oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        List<InterfaceOtherConfigs> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName, testCase);
-
-        // Test Case 4:  TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceOtherConfigs
-        //        (TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue_InterfaceOtherConfigsKey_1,
-        //        TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigs_InterfaceOtherConfigsValue_1)
-        //     and one malformed InterfaceOtherConfigs which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any InterfaceOtherConfigs
-        final String testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName =
-                "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey";
-        otherConfigsCounter = 0;
-        oneGood = new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                        GOOD_KEY, ++otherConfigsCounter))
-                .setOtherConfigValue(String.format(FORMAT_STR,
-                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                        GOOD_VALUE, otherConfigsCounter))
-                .build();
-        oneBad = new InterfaceOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName, NO_KEY_FOR_VALUE,
-                        ++otherConfigsCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName, testCase);
-
-        return testMap;
+    private List<SouthboundTestCase<InterfaceOtherConfigs>> generateInterfaceOtherConfigsTestCases() {
+        return generateKeyValueTestCases(new SouthboundInterfaceOtherConfigsBuilder(), "IntOtherConfigsKey",
+                "IntOtherConfigsValue");
     }
 
     /*
@@ -2055,39 +1695,25 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        Map<String, Map<String, List<InterfaceOtherConfigs>>> updateFromTestCases =
-                generateInterfaceOtherConfigsTestCases();
-        Map<String, Map<String, List<InterfaceOtherConfigs>>> updateToTestCases =
-                generateInterfaceOtherConfigsTestCases();
-        Map<String, List<InterfaceOtherConfigs>> updateFromTestCase;
-        List<InterfaceOtherConfigs> updateFromInputOtherConfigs;
-        List<InterfaceOtherConfigs> updateFromExpectedOtherConfigs;
-        Map<String, List<InterfaceOtherConfigs>> updateToTestCase;
-        List<InterfaceOtherConfigs> updateToInputOtherConfigs;
-        List<InterfaceOtherConfigs> updateToExpectedOtherConfigs;
+        List<SouthboundTestCase<InterfaceOtherConfigs>> updateFromTestCases = generateInterfaceOtherConfigsTestCases();
+        List<SouthboundTestCase<InterfaceOtherConfigs>> updateToTestCases = generateInterfaceOtherConfigsTestCases();
         String testBridgeName;
         String testPortName;
 
         int counter = 1;
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputOtherConfigs = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedOtherConfigs = updateFromTestCase.get(EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<InterfaceOtherConfigs> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<InterfaceOtherConfigs> toTestCase : updateToTestCases) {
+                testPortName = testBridgeName = String.format(FORMAT_STR,
+                        TEST_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputOtherConfigs = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedOtherConfigs = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
                 TestCRUDTerminationPointInterfaceOtherConfigsRunnable testRunnable =
                         new TestCRUDTerminationPointInterfaceOtherConfigsRunnable(
                                 connectionInfo, testBridgeName, testPortName,
-                                updateFromInputOtherConfigs,
-                                updateFromExpectedOtherConfigs,
-                                updateToInputOtherConfigs,
-                                updateToExpectedOtherConfigs);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -2228,154 +1854,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     /*
      * Generates the test cases involved in testing Port other_configs.  See inline comments for descriptions of
      * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT port other_configs, or EXPECTED port other_configs
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setPortOtherConfigs()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getPortOtherConfigs()</code>
      */
-    private Map<String, Map<String, List<PortOtherConfigs>>> generatePortOtherConfigsTestCases() {
-        Map<String, Map<String, List<PortOtherConfigs>>> testMap = new HashMap<>();
-
-        final String PORT_OTHER_CONFIGS_KEY = "PortOtherConfigsKey";
-        final String PORT_OTHER_CONFIGS_VALUE = "PortOtherConfigsValue";
-        final String FORMAT_STR = "%s_%s_%d";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
-
-        // Test Case 1:  TestOneOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create an port with one other_Configs
-        // Expected:     A port is created with the single other_configs specified below
-        final String testOneOtherConfigsName = "TestOnePortOtherConfigs";
-        int otherConfigsCounter = 0;
-        List<PortOtherConfigs> oneOtherConfigs = Lists.newArrayList(
-                (new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()));
-        Map<String,List<PortOtherConfigs>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneOtherConfigs);
-        testCase.put(INPUT_VALUES_KEY, oneOtherConfigs);
-        testMap.put(testOneOtherConfigsName, testCase);
-
-        // Test Case 2:  TestFivePortOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) PortOtherConfigs
-        // Expected:     A termination point is created with the five PortOtherConfigs specified below
-        final String testFivePortOtherConfigsName = "TestFivePortOtherConfigs";
-        otherConfigsCounter = 0;
-        List<PortOtherConfigs> fivePortOtherConfigs = Lists.newArrayList(
-                (new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()),
-                (new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fivePortOtherConfigs);
-        testCase.put(INPUT_VALUES_KEY, fivePortOtherConfigs);
-        testMap.put(testFivePortOtherConfigsName, testCase);
-
-        // Test Case 3:  TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine PortOtherConfigs
-        //        (TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue_PortOtherConfigsKey_1,
-        //        TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigs_PortOtherConfigsValue_1)
-        //     and one malformed PortOtherConfigs which only has key specified
-        //        (TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any PortOtherConfigs
-        final String testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName =
-                "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue";
-        otherConfigsCounter = 0;
-        PortOtherConfigs oneGood = new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                        GOOD_KEY, ++otherConfigsCounter))
-                .setOtherConfigValue(String.format(FORMAT_STR,
-                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                        GOOD_VALUE, otherConfigsCounter))
-                .build();
-        PortOtherConfigs oneBad = new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName, NO_VALUE_FOR_KEY,
-                        ++otherConfigsCounter))
-                .build();
-        List<PortOtherConfigs> oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        List<PortOtherConfigs> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName, testCase);
-
-        // Test Case 4:  TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine PortOtherConfigs
-        //        (TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue_PortOtherConfigsKey_1,
-        //        TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigs_PortOtherConfigsValue_1)
-        //     and one malformed PortOtherConfigs which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any PortOtherConfigs
-        final String testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName =
-                "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey";
-        otherConfigsCounter = 0;
-        oneGood = new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                        GOOD_KEY, ++otherConfigsCounter))
-                .setOtherConfigValue(String.format(FORMAT_STR,
-                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                        GOOD_VALUE, otherConfigsCounter))
-                .build();
-        oneBad = new PortOtherConfigsBuilder()
-                .setOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName, NO_KEY_FOR_VALUE,
-                        ++otherConfigsCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName, testCase);
-
-        return testMap;
+    private List<SouthboundTestCase<PortOtherConfigs>> generatePortOtherConfigsTestCases() {
+        return generateKeyValueTestCases(new SouthboundPortOtherConfigsBuilder(), "PortOtherConfigsKey",
+                "PortOtherConfigsValue");
     }
 
     /*
@@ -2406,10 +1888,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        Map<String, Map<String, List<PortOtherConfigs>>> updateFromTestCases =
-                generatePortOtherConfigsTestCases();
-        Map<String, Map<String, List<PortOtherConfigs>>> updateToTestCases =
-                generatePortOtherConfigsTestCases();
+        List<SouthboundTestCase<PortOtherConfigs>> updateFromTestCases = generatePortOtherConfigsTestCases();
+        List<SouthboundTestCase<PortOtherConfigs>> updateToTestCases = generatePortOtherConfigsTestCases();
         Map<String, List<PortOtherConfigs>> updateFromTestCase;
         List<PortOtherConfigs> updateFromInputOtherConfigs;
         List<PortOtherConfigs> updateFromExpectedOtherConfigs;
@@ -2421,24 +1901,18 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         int counter = 1;
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputOtherConfigs = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedOtherConfigs = updateFromTestCase.get(EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testPortName = testBridgeName = String.format("%s_%s_%d", TEST_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<PortOtherConfigs> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<PortOtherConfigs> toTestCase : updateToTestCases) {
+                testPortName = testBridgeName = String.format(FORMAT_STR,
+                        TEST_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputOtherConfigs = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedOtherConfigs = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
                 TestCRUDTerminationPointPortOtherConfigsRunnable testRunnable =
                         new TestCRUDTerminationPointPortOtherConfigsRunnable(
                                 connectionInfo, testBridgeName, testPortName,
-                                updateFromInputOtherConfigs,
-                                updateFromExpectedOtherConfigs,
-                                updateToInputOtherConfigs,
-                                updateToExpectedOtherConfigs);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -2864,148 +2338,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     /*
      * Generates the test cases involved in testing BridgeOtherConfigs.  See inline comments for descriptions of
      * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT bridge other_configs, or EXPECTED bridge other_configs
-     *     INPUT is the List we use when calling BridgeAugmentationBuilder.setBridgeOtherConfigs()
-     *     EXPECTED is the List we expect to receive after calling BridgeAugmentationBuilder.getBridgeOtherConfigs()
      */
-    private Map<String, Map<String, List<BridgeOtherConfigs>>> generateBridgeOtherConfigsTestCases() {
-        Map<String, Map<String, List<BridgeOtherConfigs>>> testMap = new HashMap<>();
-
-        final String BRIDGE_OTHER_CONFIGS_KEY = "BridgeOtherConfigKey";
-        final String BRIDGE_OTHER_CONFIGS_VALUE = "BridgeOtherConfigValue";
-        final String FORMAT_STR = "%s_%s_%d";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
-
-        // Test Case 1:  TestOneOtherConfig
-        // Test Type:    Positive
-        // Description:  Create a bridge with one other_config
-        // Expected:     A bridge is created with the single other_config specified below
-        final String testOneOtherConfigName = "TestOneOtherConfig";
-        int otherConfigCounter = 0;
-        List<BridgeOtherConfigs> oneOtherConfig = Lists.newArrayList(
-                (new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build()));
-        Map<String,List<BridgeOtherConfigs>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneOtherConfig);
-        testCase.put(INPUT_VALUES_KEY, oneOtherConfig);
-        testMap.put(testOneOtherConfigName, testCase);
-
-        // Test Case 2:  TestFiveOtherConfig
-        // Test Type:    Positive
-        // Description:  Create a bridge with multiple (five) other_configs
-        // Expected:     A bridge is created with the five other_configs specified below
-        final String testFiveOtherConfigName = "TestFiveOtherConfig";
-        otherConfigCounter = 0;
-        List<BridgeOtherConfigs> fiveOtherConfig = Lists.newArrayList(
-                (new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build()),
-                (new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build()),
-                (new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build()),
-                (new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build()),
-                (new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fiveOtherConfig);
-        testCase.put(INPUT_VALUES_KEY, fiveOtherConfig);
-        testMap.put(testFiveOtherConfigName, testCase);
-
-        // Test Case 3:  TestOneGoodOtherConfigOneMalformedOtherConfigValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeOtherConfig
-        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_BridgeOtherConfigKey_1,
-        //        TestOneGoodOtherConfigOneMalformedOtherConfig_BridgeOtherConfigValue_1)
-        //     and one malformed BridgeOtherConfig which only has key specified
-        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A bridge is created without any other_config
-        final String testOneGoodOtherConfigOneMalformedOtherConfigValueName =
-                "TestOneGoodOtherConfigOneMalformedOtherConfigValue";
-        otherConfigCounter = 0;
-        BridgeOtherConfigs oneGood = new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodOtherConfigOneMalformedOtherConfigValueName, GOOD_KEY, ++otherConfigCounter))
-                .setBridgeOtherConfigValue(String.format(FORMAT_STR,
-                        testOneGoodOtherConfigOneMalformedOtherConfigValueName,
-                        GOOD_VALUE, otherConfigCounter))
-                .build();
-        BridgeOtherConfigs oneBad = new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY, ++otherConfigCounter))
-                .build();
-        List<BridgeOtherConfigs> oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        List<BridgeOtherConfigs> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodOtherConfigOneMalformedOtherConfigValueName, testCase);
-
-        // Test Case 4:  TestOneGoodOtherConfigOneMalformedOtherConfigKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeOtherConfig
-        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_BridgeOtherConfigKey_1,
-        //        TestOneGoodOtherConfigOneMalformedOtherConfig_BridgeOtherConfigValue_1)
-        //     and one malformed BridgeOtherConfig which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodOtherConfigOneMalformedOtherConfigKey_NoKeyForValue_2)
-        // Expected:     A bridge is created without any other_config
-        final String testOneGoodOtherConfigOneMalformedOtherConfigKeyName =
-                "TestOneGoodOtherConfigOneMalformedOtherConfigIdKey";
-        otherConfigCounter = 0;
-        oneGood = new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
-                        GOOD_KEY, ++otherConfigCounter))
-                .setBridgeOtherConfigValue(String.format(FORMAT_STR,
-                        testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
-                        GOOD_VALUE, otherConfigCounter))
-                .build();
-        oneBad = new BridgeOtherConfigsBuilder()
-                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                        testOneGoodOtherConfigOneMalformedOtherConfigKeyName, NO_KEY_FOR_VALUE, ++otherConfigCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodOtherConfigOneMalformedOtherConfigKeyName, testCase);
-
-        return testMap;
+    private List<SouthboundTestCase<BridgeOtherConfigs>> generateBridgeOtherConfigsTestCases() {
+        return generateKeyValueTestCases(new SouthboundBridgeOtherConfigsBuilder(), "BridgeOtherConfigsKey",
+                "BridgeOtherConfigsValue");
     }
 
     /*
@@ -3032,36 +2368,23 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        Map<String, Map<String, List<BridgeOtherConfigs>>> updateFromTestCases = generateBridgeOtherConfigsTestCases();
-        Map<String, Map<String, List<BridgeOtherConfigs>>> updateToTestCases = generateBridgeOtherConfigsTestCases();
-        Map<String, List<BridgeOtherConfigs>> updateFromTestCase;
-        Map<String, List<BridgeOtherConfigs>> updateToTestCase;
-        List<BridgeOtherConfigs> updateFromInputOtherConfigs;
-        List<BridgeOtherConfigs> updateFromExpectedOtherConfigs;
-        List<BridgeOtherConfigs> updateToInputOtherConfigs;
-        List<BridgeOtherConfigs> updateToExpectedOtherConfigs;
+        List<SouthboundTestCase<BridgeOtherConfigs>> updateFromTestCases = generateBridgeOtherConfigsTestCases();
+        List<SouthboundTestCase<BridgeOtherConfigs>> updateToTestCases = generateBridgeOtherConfigsTestCases();
         String testBridgeName;
 
         int counter = 1;
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputOtherConfigs = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedOtherConfigs = updateFromTestCase.get(EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testBridgeName = String.format("%s_%s_%d", TEST_BRIDGE_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<BridgeOtherConfigs> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<BridgeOtherConfigs> toTestCase : updateToTestCases) {
+                testBridgeName = String.format(FORMAT_STR, TEST_BRIDGE_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputOtherConfigs = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedOtherConfigs = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
                 TestCRUDBridgeOtherConfigsRunnable testRunnable =
                         new TestCRUDBridgeOtherConfigsRunnable(
                                 connectionInfo, testBridgeName,
-                                updateFromInputOtherConfigs,
-                                updateFromExpectedOtherConfigs,
-                                updateToInputOtherConfigs,
-                                updateToExpectedOtherConfigs);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -3162,147 +2485,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     /*
      * Generates the test cases involved in testing BridgeExternalIds.  See inline comments for descriptions of
      * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT bridge external ids, or EXPECTED bridge external ids
-     *     INPUT is the List we use when calling BridgeAugmentationBuilder.setBridgeExternalIds()
-     *     EXPECTED is the List we expect to receive after calling BridgeAugmentationBuilder.getBridgeExternalIds()
      */
-    private Map<String, Map<String, List<BridgeExternalIds>>> generateBridgeExternalIdsTestCases() {
-        Map<String, Map<String, List<BridgeExternalIds>>> testMap = new HashMap<>();
-
-        final String BRIDGE_EXTERNAL_ID_KEY = "BridgeExternalIdKey";
-        final String BRIDGE_EXTERNAL_ID_VALUE = "BridgeExternalIdValue";
-        final String FORMAT_STR = "%s_%s_%d";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
-
-        // Test Case 1:  TestOneExternalId
-        // Test Type:    Positive
-        // Description:  Create a bridge with one BridgeExternalIds
-        // Expected:     A bridge is created with the single external_ids specified below
-        final String testOneExternalIdName = "TestOneExternalId";
-        int externalIdCounter = 0;
-        List<BridgeExternalIds> oneExternalId = Lists.newArrayList(
-                (new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()));
-        Map<String,List<BridgeExternalIds>> testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
-        testCase.put(INPUT_VALUES_KEY, oneExternalId);
-        testMap.put(testOneExternalIdName, testCase);
-
-        // Test Case 2:  TestFiveExternalId
-        // Test Type:    Positive
-        // Description:  Create a bridge with multiple (five) BridgeExternalIds
-        // Expected:     A bridge is created with the five external_ids specified below
-        final String testFiveExternalIdName = "TestFiveExternalId";
-        externalIdCounter = 0;
-        List<BridgeExternalIds> fiveExternalId = Lists.newArrayList(
-                (new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()),
-                (new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build()));
-        testCase = Maps.newHashMap();
-        testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
-        testCase.put(INPUT_VALUES_KEY, fiveExternalId);
-        testMap.put(testFiveExternalIdName, testCase);
-
-        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_BridgeExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_BridgeExternalIdValue_1)
-        //     and one malformed BridgeExternalId which only has key specified
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A bridge is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
-                "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        externalIdCounter = 0;
-        BridgeExternalIds oneGood = new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                        GOOD_KEY, ++externalIdCounter))
-                .setBridgeExternalIdValue(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdValueName,
-                        GOOD_VALUE, externalIdCounter))
-                .build();
-        BridgeExternalIds oneBad = new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
-                .build();
-        List<BridgeExternalIds> oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        List<BridgeExternalIds> oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodExternalIdOneMalformedExternalIdValueName, testCase);
-
-        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_BridgeExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_BridgeExternalIdValue_1)
-        //     and one malformed BridgeExternalId which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
-        // Expected:     A bridge is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
-                "TestOneGoodExternalIdOneMalformedExternalIdKey";
-        externalIdCounter = 0;
-        oneGood = new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                        GOOD_KEY, ++externalIdCounter))
-                .setBridgeExternalIdValue(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                        GOOD_VALUE, externalIdCounter))
-                .build();
-        oneBad = new BridgeExternalIdsBuilder()
-                .setBridgeExternalIdKey(String.format(FORMAT_STR,
-                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
-                .build();
-        oneGoodOneBadInput = Lists.newArrayList(oneGood, oneBad);
-        oneGoodOneBadExpected = null;
-        testCase = Maps.newHashMap();
-        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
-        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
-        testMap.put(testOneGoodExternalIdOneMalformedExternalIdKeyName, testCase);
-        return testMap;
+    private List<SouthboundTestCase<BridgeExternalIds>> generateBridgeExternalIdsTestCases() {
+        return generateKeyValueTestCases(new SouthboundBridgeExternalIdsBuilder(), "BridgeExternalIdsKey",
+                "BridgeExternalIdsValue");
     }
 
     /*
@@ -3329,8 +2515,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        Map<String, Map<String, List<BridgeExternalIds>>> updateFromTestCases = generateBridgeExternalIdsTestCases();
-        Map<String, Map<String, List<BridgeExternalIds>>> updateToTestCases = generateBridgeExternalIdsTestCases();
+        List<SouthboundTestCase<BridgeExternalIds>> updateFromTestCases = generateBridgeExternalIdsTestCases();
+        List<SouthboundTestCase<BridgeExternalIds>> updateToTestCases = generateBridgeExternalIdsTestCases();
         Map<String, List<BridgeExternalIds>> updateFromTestCase;
         List<BridgeExternalIds> updateFromInputExternalIds;
         List<BridgeExternalIds> updateFromExpectedExternalIds;
@@ -3341,24 +2527,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         int counter = 1;
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
-            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
-            updateFromInputExternalIds = updateFromTestCase.get(INPUT_VALUES_KEY);
-            updateFromExpectedExternalIds = updateFromTestCase.get(EXPECTED_VALUES_KEY);
-            for (String testCaseKey : updateToTestCases.keySet()) {
-                testBridgeName = String.format("%s_%s_%d", TEST_BRIDGE_PREFIX, testCaseKey, counter);
+        for (SouthboundTestCase<BridgeExternalIds> fromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<BridgeExternalIds> toTestCase : updateToTestCases) {
+                testBridgeName = String.format(FORMAT_STR, TEST_BRIDGE_PREFIX, toTestCase.name, counter);
                 counter += 1;
-                updateToTestCase = updateToTestCases.get(testCaseKey);
-                updateToInputExternalIds = updateToTestCase.get(INPUT_VALUES_KEY);
-                updateToExpectedExternalIds = updateToTestCase.get(EXPECTED_VALUES_KEY);
-
                 TestCRUDBridgeExternalIdsRunnable testRunnable =
                         new TestCRUDBridgeExternalIdsRunnable(
                                 connectionInfo, testBridgeName,
-                                updateFromInputExternalIds,
-                                updateFromExpectedExternalIds,
-                                updateToInputExternalIds,
-                                updateToExpectedExternalIds);
+                                fromTestCase.inputValues,
+                                fromTestCase.expectedValues,
+                                toTestCase.inputValues,
+                                toTestCase.expectedValues);
                 executor.submit(testRunnable);
             }
         }
@@ -3455,7 +2634,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     public static NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
-        return createManagedNodeId(key.getRemoteIp(),key.getRemotePort(),bridgeName);
+        return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), bridgeName);
     }
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
@@ -3490,5 +2669,55 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
         NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
         return nodeKey.getNodeId();
+    }
+
+    private static class SouthboundTestCase<T> {
+        private final String name;
+        private final List<T> inputValues;
+        private final List<T> expectedValues;
+
+        public SouthboundTestCase(
+                String name, List<T> inputValues, List<T> expectedValues) {
+            this.name = name;
+            this.inputValues = inputValues;
+            this.expectedValues = expectedValues;
+        }
+    }
+
+    private static class SouthboundTestCaseBuilder<T> {
+        private String name;
+        private List<T> inputValues;
+        private List<T> expectedValues;
+
+        public SouthboundTestCaseBuilder() {
+            // Nothing to do
+        }
+
+        public SouthboundTestCaseBuilder<T> name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        @SafeVarargs
+        public final SouthboundTestCaseBuilder<T> input(T... inputValues) {
+            this.inputValues = Lists.newArrayList(inputValues);
+            return this;
+        }
+
+        @SafeVarargs
+        public final SouthboundTestCaseBuilder<T> expect(T... expectedValues) {
+            this.expectedValues = Lists.newArrayList(expectedValues);
+            return this;
+        }
+
+        public SouthboundTestCaseBuilder<T> expectInputAsOutput() {
+            this.expectedValues = this.inputValues;
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public SouthboundTestCase<T> build() {
+            return new SouthboundTestCase<>(name, inputValues, expectedValues);
+        }
     }
 }

@@ -18,4 +18,13 @@ module netvirt-sfc-acl {
             type string;
         }
     }
+
+    // TODO: Add choice for Neutron and add fields there instead of at the root of matches
+    augment "/ietf-acl:access-lists/ietf-acl:access-list/ietf-acl:access-list-entries" +
+            "/ietf-acl:access-list-entry/ietf-acl:actions" {
+        description "Redirect traffic to SFC identified by SFC Path ID";
+        leaf redirect-sfc {
+            type string;
+        }
+    }
 }

@@ -50,13 +50,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * Neutron L3 Adapter implements a hub-like adapter for the various Neutron events. Based on
  * these events, the abstract router callbacks can be generated to the multi-tenant aware router,
  * as well as the multi-tenant router forwarding provider.
  */
-public class NeutronL3Adapter implements ConfigInterface {
+public class NeutronL3Adapter implements ConfigInterface, NodeCacheListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronL3Adapter.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -318,6 +320,38 @@ public class NeutronL3Adapter implements ConfigInterface {
 
             programFlowsForFloatingIPArpDelete(neutronFloatingIP.getID()); // must be last, as it updates floatIpDataMapCache
         }
+    }
+
+     /**
+      * Notification about an OpenFlow Node Addition/Deletion
+      *
+      * @param node the {@link Node Node} of interest in the notification
+      * @param action the {@link Action}
+      * @see NodeCacheListener#notifyNode
+      */
+     @Override
+     public void notifyNode (Node node, Action action) {
+             LOGGER.trace("notifyNode: action: {}, Node <{}>", action, node);
+             String nodeString = node.getNodeId().getValue();
+             if(action == Action.DELETE){
+                 LOGGER.trace("Node is {}", nodeString);
+                 this.cleanupNeutronCache(l3ForwardingCache, nodeString);
+                 this.cleanupNeutronCache(staticArpEntryCache, nodeString);
+                 this.cleanupNeutronCache(routerInterfacesCache, nodeString);
+                 //Add other cache clean up here
+             }
+     }
+
+     private void cleanupNeutronCache(Set<String> l3Cache, String nodeString){
+         Collection<String> removeL3Cache = new LinkedList<String>(l3Cache);
+
+         for(String cacheKey : l3Cache){
+             if(cacheKey.contains(nodeString)){
+                 LOGGER.debug("Deleting the cache {}",cacheKey);
+                 removeL3Cache.add(cacheKey);
+             }
+         }
+         l3Cache.removeAll(removeL3Cache);
     }
 
     private void programFlowsForFloatingIPInbound(final NeutronFloatingIP neutronFloatingIP, final Action action) {
@@ -1294,6 +1328,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (L3ForwardingProvider) ServiceHelper.getGlobalInstance(L3ForwardingProvider.class, this);
         nodeCacheManager =
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        nodeCacheManager.cacheListenerAdded(
+                 bundleContext.getServiceReference(NeutronL3Adapter.class.getName()), this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         gatewayMacResolver =

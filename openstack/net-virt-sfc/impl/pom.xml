@@ -26,6 +26,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <utils.version>1.2.0-SNAPSHOT</utils.version>
   </properties>
 
   <dependencies>
@@ -50,6 +51,45 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.codehaus.sonar-plugins.java</groupId>
       <artifactId>sonar-jacoco-listeners</artifactId>
       <version>${sonar-jacoco-listeners.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- MDSAL Infra Dependencies -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.mdsal-utils</artifactId>
+      <version>${utils.version}</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

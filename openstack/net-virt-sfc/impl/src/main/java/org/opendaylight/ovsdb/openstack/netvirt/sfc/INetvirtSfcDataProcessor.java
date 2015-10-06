@@ -5,12 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
-/**
- * @author Arun Yerra
- *
- */
+package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -19,10 +15,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * netvirt-sfc-dcl processor
  * org.opendaylight.ovsdb.openstack.netvirt.sfc
- *
- * Created: Oct 05, 2015
  */
-public interface INetvirtSfcDataProcessor <D extends DataObject> extends AutoCloseable, DataTreeChangeListener<D> {
+public interface INetvirtSfcDataProcessor<D extends DataObject> extends AutoCloseable, DataTreeChangeListener<D> {
 
     /**
      * Method removes DataObject which is identified by InstanceIdentifier.
@@ -33,8 +27,8 @@ public interface INetvirtSfcDataProcessor <D extends DataObject> extends AutoClo
     void remove(InstanceIdentifier<D> identifier, D del);
 
     /**
-     * Method updates the original DataObject to the update DataObject
-     * Both are identified by same InstanceIdentifier
+     * Method updates the original DataObject to the update DataObject.
+     * Both are identified by same InstanceIdentifier.
      *
      * @param identifier - the whole path to DataObject
      * @param original - original DataObject (for update)

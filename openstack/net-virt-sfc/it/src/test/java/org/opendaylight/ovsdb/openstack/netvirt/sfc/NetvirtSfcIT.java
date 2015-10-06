@@ -9,12 +9,15 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
@@ -52,6 +55,24 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     @Override
     public String getFeatureName() {
         return "odl-ovsdb-sfc-ui";
+    }
+
+    @Configuration
+    @Override
+    public Option[] config() {
+            Option[] parentOptions = super.config();
+            Option[] otherOptions = getOtherOptions();
+            Option[] options = new Option[parentOptions.length + otherOptions.length];
+            System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
+            System.arraycopy(otherOptions, 0, options, parentOptions.length, otherOptions.length);
+            return options;
+        }
+
+    private Option[] getOtherOptions() {
+        return new Option[] {
+                vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
+                keepRuntimeFolder()
+        };
     }
 
     @Override

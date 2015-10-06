@@ -11,7 +11,9 @@ package org.opendaylight.ovsdb.lib.it;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
+import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.ops4j.pax.exam.Configuration;
@@ -53,10 +55,20 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     public Option[] config() {
         Option[] parentOptions = super.config();
         Option[] propertiesOptions = getPropertiesOptions();
-        Option[] options = new Option[parentOptions.length + propertiesOptions.length];
+        Option[] otherOptions = getOtherOptions();
+        Option[] options = new Option[parentOptions.length + propertiesOptions.length + otherOptions.length];
         System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
         System.arraycopy(propertiesOptions, 0, options, parentOptions.length, propertiesOptions.length);
+        System.arraycopy(otherOptions, 0, options, parentOptions.length + propertiesOptions.length,
+                otherOptions.length);
         return options;
+    }
+
+    private Option[] getOtherOptions() {
+        return new Option[] {
+                vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
+                keepRuntimeFolder()
+        };
     }
 
     public Option[] getPropertiesOptions() {

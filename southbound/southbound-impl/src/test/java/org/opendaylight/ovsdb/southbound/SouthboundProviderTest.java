@@ -1,6 +1,7 @@
 package org.opendaylight.ovsdb.southbound;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -14,11 +15,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -45,7 +49,9 @@ public class SouthboundProviderTest {
     @Mock private TransactionInvoker txInvoker;
     @Mock private OvsdbDataChangeListener ovsdbDataChangeListener;
     @Mock private SouthboundProvider southboundProvider;
-
+    @Mock private EntityOwnershipService entityOwnershipService;
+    @Mock private EntityOwnershipCandidateRegistration registration;
+    @Mock private EntityOwnershipListener entityOwnershipListener;
 
     @Before
     public void setUp() throws Exception {
@@ -53,6 +59,8 @@ public class SouthboundProviderTest {
         MemberModifier.field(SouthboundProvider.class, "cm").set(southboundProvider, cm);
         MemberModifier.field(SouthboundProvider.class, "ovsdbDataChangeListener").set(southboundProvider, ovsdbDataChangeListener);
         MemberModifier.field(SouthboundProvider.class, "db").set(southboundProvider, db);
+        MemberModifier.field(SouthboundProvider.class, "entityOwnershipService").set(southboundProvider, entityOwnershipService);
+        MemberModifier.field(SouthboundProvider.class, "registration").set(southboundProvider, registration);
     }
 
     @Test
@@ -61,30 +69,16 @@ public class SouthboundProviderTest {
         when(session.getSALService(DataBroker.class)).thenReturn(db);
         TransactionInvokerImpl transactionInvokerImpl = mock(TransactionInvokerImpl.class);
         PowerMockito.whenNew(TransactionInvokerImpl.class).withArguments(any(DataBroker.class)).thenReturn(transactionInvokerImpl);
-        PowerMockito.whenNew(OvsdbConnectionManager.class).withArguments(any(DataBroker.class), any(TransactionInvoker.class)).thenReturn(cm);
+        PowerMockito.whenNew(OvsdbConnectionManager.class).withArguments(any(DataBroker.class), any(TransactionInvoker.class), any(EntityOwnershipService.class)).thenReturn(cm);
         PowerMockito.whenNew(OvsdbDataChangeListener.class).withArguments(any(DataBroker.class), any(OvsdbConnectionManager.class)).thenReturn(ovsdbDataChangeListener);
 
-        //suppress calls to initializeOvsdbTopology()
-        MemberModifier.suppress(MemberMatcher.method(SouthboundProvider.class, "initializeOvsdbTopology", LogicalDatastoreType.class));
+        when(entityOwnershipService.registerListener(anyString(), any(EntityOwnershipListener.class))).thenReturn(mock(EntityOwnershipListenerRegistration.class));
+        when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(registration);
 
-        OvsdbConnection ovsdbConnection = mock(OvsdbConnectionService.class);
-        PowerMockito.whenNew(OvsdbConnectionService.class).withNoArguments().thenReturn((OvsdbConnectionService) ovsdbConnection);
-        doNothing().when(ovsdbConnection).registerConnectionListener(cm);
-        when(ovsdbConnection.startOvsdbManager(any(Integer.class))).thenReturn(true);
         southboundProvider.onSessionInitiated(session);
 
-        verify(ovsdbConnection).registerConnectionListener(any(OvsdbConnectionManager.class));
-        verify(ovsdbConnection).startOvsdbManager(any(Integer.class));
-        PowerMockito.verifyPrivate(southboundProvider, times(2)).invoke("initializeOvsdbTopology", any(LogicalDatastoreType.class));
-    }
-
-    @Test
-    public void testClose() throws Exception {
-        doNothing().when(cm).close();
-        doNothing().when(ovsdbDataChangeListener).close();
-        southboundProvider.close();
-        verify(cm).close();
-        verify(ovsdbDataChangeListener).close();
+        verify(entityOwnershipService, times(2)).registerListener(anyString(), any(EntityOwnershipListener.class));
+        verify(entityOwnershipService).registerCandidate(any(Entity.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -96,6 +90,7 @@ public class SouthboundProviderTest {
 
         CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = mock(CheckedFuture.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        when(db.newReadWriteTransaction()).thenReturn(transaction);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(topology);
 
         Optional<NetworkTopology> optNetTopo = mock(Optional.class);
@@ -106,9 +101,10 @@ public class SouthboundProviderTest {
         NetworkTopology networkTopology = mock(NetworkTopology.class);
         when(ntb.build()).thenReturn(networkTopology);
         doNothing().when(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(NetworkTopology.class));
+        when(transaction.submit()).thenReturn(mock(CheckedFuture.class));
 
         LogicalDatastoreType type = PowerMockito.mock(LogicalDatastoreType.class);
-        Whitebox.invokeMethod(southboundProvider, "initializeTopology", transaction, type);
+        Whitebox.invokeMethod(southboundProvider, "initializeTopology", type);
         verify(ntb).build();
     }
 
@@ -119,7 +115,7 @@ public class SouthboundProviderTest {
         when(db.newReadWriteTransaction()).thenReturn(transaction);
 
         //suppress calls to initializeTopology()
-        MemberModifier.suppress(MemberMatcher.method(SouthboundProvider.class, "initializeTopology", ReadWriteTransaction.class, LogicalDatastoreType.class));
+        MemberModifier.suppress(MemberMatcher.method(SouthboundProvider.class, "initializeTopology", LogicalDatastoreType.class));
 
         CheckedFuture<Optional<Topology>, ReadFailedException> ovsdbTp = mock(CheckedFuture.class);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(ovsdbTp);
@@ -138,7 +134,7 @@ public class SouthboundProviderTest {
 
         LogicalDatastoreType type = PowerMockito.mock(LogicalDatastoreType.class);
         Whitebox.invokeMethod(southboundProvider, "initializeOvsdbTopology", type);
-        PowerMockito.verifyPrivate(southboundProvider).invoke("initializeTopology", any(ReadWriteTransaction.class), any(LogicalDatastoreType.class));
+        PowerMockito.verifyPrivate(southboundProvider).invoke("initializeTopology", any(LogicalDatastoreType.class));
         verify(tpb).setTopologyId(any(TopologyId.class));
         verify(tpb).build();
 
@@ -146,6 +142,6 @@ public class SouthboundProviderTest {
         when(optTopo.isPresent()).thenReturn(false);
         when(transaction.cancel()).thenReturn(true);
         Whitebox.invokeMethod(southboundProvider, "initializeOvsdbTopology", type);
-        PowerMockito.verifyPrivate(southboundProvider, times(2)).invoke("initializeTopology", any(ReadWriteTransaction.class), any(LogicalDatastoreType.class));
+        PowerMockito.verifyPrivate(southboundProvider, times(2)).invoke("initializeTopology", any(LogicalDatastoreType.class));
     }
 }

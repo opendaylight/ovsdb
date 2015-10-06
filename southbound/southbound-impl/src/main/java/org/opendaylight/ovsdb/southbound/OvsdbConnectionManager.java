@@ -29,6 +29,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -443,6 +444,22 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     entityOwnershipService.registerCandidate(candidateEntity);
             ovsdbConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("OVSDB entity {} is registred for ownership.", candidateEntity);
+
+            //If entity already has owner, it won't get notification from EntityOwnershipService
+            //so cache the connection instances.
+            Optional<EntityOwnershipState> ownershipStateOpt =
+                    entityOwnershipService.getOwnershipState(candidateEntity);
+            if (ownershipStateOpt.isPresent()) {
+                EntityOwnershipState ownershipState = ownershipStateOpt.get();
+                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
+                    if (getConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo()) != null) {
+                        LOG.info("OVSDB entity {} is already owned by other southbound plugin "
+                                + "instance, so *this* instance is NOT an OWNER of the device",
+                                ovsdbConnectionInstance.getConnectionInfo());
+                        putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(),ovsdbConnectionInstance);
+                    }
+                }
+            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for {} ownership", candidateEntity, e);
         }

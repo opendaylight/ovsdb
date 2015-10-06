@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_b8ce1f82",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2015-10-06T21:58:45Z",
+      "side": 1,
+      "message": "could it be a simple boolean KnownMac?",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_9817a3ed",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2015-10-06T21:58:45Z",
+      "side": 1,
+      "message": "this.state and this.gatewayMacAddress?",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_f8dd7743",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2015-10-06T21:58:45Z",
+      "side": 1,
+      "message": "this.state?",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_d8e43b0f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2015-10-06T21:58:45Z",
+      "side": 1,
+      "message": "looks like unrelated sytle cleanups",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_58c02b50",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2015-10-06T21:58:45Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_d8cbdb70",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2015-10-06T21:58:45Z",
+      "side": 1,
+      "message": "Similar code in metadata, trivial helper method useful?",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

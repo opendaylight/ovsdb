@@ -17,6 +17,7 @@ import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.NetUtils;
 import org.opendaylight.controller.liblldp.PacketException;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -69,7 +70,7 @@ public class ArpSender {
         NodeConnectorKey nodeConnectorKey = new NodeConnectorKey(createNodeConnectorId(OFPP_ALL,
                 nodeIid.firstKeyOf(Node.class, NodeKey.class).getId()));
         InstanceIdentifier<NodeConnector> egressNc = nodeIid.child(NodeConnector.class, nodeConnectorKey);
-        return sendArp(senderAddress, tpa, egressNc);
+        return sendArp(senderAddress, tpa, null, egressNc);
     }
 
     private NodeConnectorId createNodeConnectorId(String connectorId, NodeId nodeId) {
@@ -82,15 +83,15 @@ public class ArpSender {
      * @param senderAddress the addresses used in sender part of ARP packet
      * @param tpa the target protocol address, in this case IPv4 address for which MAC should be
      *        discovered
-     * @param egressNc the path to node connector from where the ARP packet will be sent
-     * @return future result about success of packet-out
+     * @param arpRequestDestMacAddress the destination MAC address to be used in the ARP packet or null if not known.
+     * @param egressNc the path to node connector from where the ARP packet will be sent  @return future result about success of packet-out
      */
     public ListenableFuture<RpcResult<Void>> sendArp(ArpMessageAddress senderAddress, Ipv4Address tpa,
-            InstanceIdentifier<NodeConnector> egressNc) {
+                                                     MacAddress arpRequestDestMacAddress, InstanceIdentifier<NodeConnector> egressNc) {
         checkNotNull(senderAddress);
         checkNotNull(tpa);
         checkNotNull(egressNc);
-        final Ethernet arpFrame = createArpFrame(senderAddress, tpa);
+        final Ethernet arpFrame = createArpFrame(senderAddress, tpa, arpRequestDestMacAddress);
         byte[] arpFrameAsBytes;
         try {
             arpFrameAsBytes = arpFrame.serialize();
@@ -113,10 +114,15 @@ public class ArpSender {
         return JdkFutureAdapters.listenInPoolThread(futureTransmitPacketResult);
     }
 
-    private Ethernet createArpFrame(ArpMessageAddress senderAddress, Ipv4Address tpa) {
+    private Ethernet createArpFrame(ArpMessageAddress senderAddress, Ipv4Address tpa, MacAddress arpRequestDestMacAddress) {
         byte[] senderMac = ArpUtils.macToBytes(senderAddress.getHardwareAddress());
         byte[] senderIp = ArpUtils.ipToBytes(senderAddress.getProtocolAddress());
-        byte[] targetMac = NetUtils.getBroadcastMACAddr();
+        byte[] targetMac;
+        if (arpRequestDestMacAddress != null) {
+            targetMac = ArpUtils.macToBytes(arpRequestDestMacAddress);
+        } else {
+            targetMac = NetUtils.getBroadcastMACAddr();
+        }
         byte[] targetIp = ArpUtils.ipToBytes(tpa);
         Ethernet arpFrame = new Ethernet().setSourceMACAddress(senderMac)
             .setDestinationMACAddress(targetMac)

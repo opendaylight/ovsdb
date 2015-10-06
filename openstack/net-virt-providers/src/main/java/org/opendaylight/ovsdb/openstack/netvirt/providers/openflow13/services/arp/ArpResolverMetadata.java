@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp;
 
+import org.opendaylight.controller.liblldp.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
@@ -26,6 +27,9 @@ public final class ArpResolverMetadata {
     private final boolean periodicRefresh;
     private RemoveFlowInput flowToRemove;
     private MacAddress gatewayMacAddress;
+    private boolean gatewayMacAddressResolved;
+    private int numberOfOutstandingArpRequests;
+    private static final int MAX_OUTSTANDING_ARP_REQUESTS = 2;
 
     public ArpResolverMetadata(final Long externalNetworkBridgeDpid,
             final Ipv4Address gatewayIpAddress, final Ipv4Address arpRequestSourceIp,
@@ -35,6 +39,9 @@ public final class ArpResolverMetadata {
         this.arpRequestSourceIp = arpRequestSourceIp;
         this.arpRequestSourceMacAddress = arpRequestMacAddress;
         this.periodicRefresh = periodicRefresh;
+        this.gatewayMacAddress = null;
+        this.gatewayMacAddressResolved = false;
+        this.numberOfOutstandingArpRequests = 0;
     }
 
     public RemoveFlowInput getFlowToRemove() {
@@ -53,6 +60,12 @@ public final class ArpResolverMetadata {
         return gatewayMacAddress;
     }
     public void setGatewayMacAddress(MacAddress gatewayMacAddress) {
+        if (gatewayMacAddress != null) {
+            gatewayMacAddressResolved = true;
+            numberOfOutstandingArpRequests = 0;
+        } else {
+            gatewayMacAddressResolved = false;
+        }
         this.gatewayMacAddress = gatewayMacAddress;
     }
 
@@ -62,8 +75,24 @@ public final class ArpResolverMetadata {
     public Ipv4Address getArpRequestSourceIp() {
         return arpRequestSourceIp;
     }
-    public MacAddress getArpRequestMacAddress() {
+    public MacAddress getArpRequestSourceMacAddress() {
         return arpRequestSourceMacAddress;
+    }
+
+    public MacAddress getArpRequestDestMacAddress() {
+        MacAddress returnMac;
+
+        numberOfOutstandingArpRequests++;
+
+        if (numberOfOutstandingArpRequests > MAX_OUTSTANDING_ARP_REQUESTS) {
+            gatewayMacAddressResolved = false;
+        }
+
+        if (gatewayMacAddressResolved) {
+            return gatewayMacAddress;
+        } else {
+            return ArpUtils.bytesToMac(NetUtils.getBroadcastMACAddr());
+        }
     }
 
     @Override

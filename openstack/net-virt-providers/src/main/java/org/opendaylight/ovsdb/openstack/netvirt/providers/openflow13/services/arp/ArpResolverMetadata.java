@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp;
 
+import org.opendaylight.controller.liblldp.NetUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
@@ -26,6 +27,17 @@ public final class ArpResolverMetadata {
     private final boolean periodicRefresh;
     private RemoveFlowInput flowToRemove;
     private MacAddress gatewayMacAddress;
+    private States state;
+
+    private enum States {
+        UNKNOWN,
+        KNOWN
+    }
+    private enum Actions {
+        RESET,
+        SEND_REQUEST,
+        RECEIVE_RESPONSE
+    }
 
     public ArpResolverMetadata(final Long externalNetworkBridgeDpid,
             final Ipv4Address gatewayIpAddress, final Ipv4Address arpRequestSourceIp,
@@ -35,6 +47,8 @@ public final class ArpResolverMetadata {
         this.arpRequestSourceIp = arpRequestSourceIp;
         this.arpRequestSourceMacAddress = arpRequestMacAddress;
         this.periodicRefresh = periodicRefresh;
+        this.gatewayMacAddress = null;
+        this.state = States.UNKNOWN;
     }
 
     public RemoveFlowInput getFlowToRemove() {
@@ -53,6 +67,11 @@ public final class ArpResolverMetadata {
         return gatewayMacAddress;
     }
     public void setGatewayMacAddress(MacAddress gatewayMacAddress) {
+        if (gatewayMacAddress != null) {
+            runStateMachine(Actions.RECEIVE_RESPONSE);
+        } else {
+            runStateMachine(Actions.RESET);
+        }
         this.gatewayMacAddress = gatewayMacAddress;
     }
 
@@ -62,8 +81,59 @@ public final class ArpResolverMetadata {
     public Ipv4Address getArpRequestSourceIp() {
         return arpRequestSourceIp;
     }
-    public MacAddress getArpRequestMacAddress() {
+    public MacAddress getArpRequestSourceMacAddress() {
         return arpRequestSourceMacAddress;
+    }
+    public MacAddress getArpRequestDestMacAddress() {
+        MacAddress returnMac;
+        if ((state == States.KNOWN) && (gatewayMacAddress != null)) {
+            returnMac = gatewayMacAddress;
+        } else {
+            returnMac = ArpUtils.bytesToMac(NetUtils.getBroadcastMACAddr());
+        }
+        runStateMachine(Actions.SEND_REQUEST);
+        return returnMac;
+    }
+
+    /* The ArpResolver state machine keeps track of whether we have received a reply for the last arp request. If we
+     * have, the state becomes KNOWN, and the next request will use the unicast MAC DA to cut down on broadcast traffic.
+     * Otherwise, the next ARP request will use the broadcast MAC. */
+    private void runStateMachine(Actions action) {
+        switch(state) {
+            case UNKNOWN:
+                switch(action) {
+                    case RESET:
+                    case SEND_REQUEST:
+                        /* No change. */
+                        break;
+                    case RECEIVE_RESPONSE:
+                        state = States.KNOWN;
+                        break;
+                    default:
+                        /* Shouldn't happen, but remain UNKNOWN if it does. */
+                        break;
+                }
+                break;
+            case KNOWN:
+                switch(action) {
+                    case RESET:
+                    case SEND_REQUEST:
+                        state = States.UNKNOWN;
+                        break;
+                    case RECEIVE_RESPONSE:
+                        /* No change. */
+                        break;
+                    default:
+                        /* Shouldn't happen, but go to UNKNOWN if it does. */
+                        state = States.UNKNOWN;
+                        break;
+                }
+                break;
+            default:
+                /* Shouldn't happen, but go to UNKNOWN if it does. */
+                state = States.UNKNOWN;
+                break;
+        }
     }
 
     @Override
@@ -91,12 +161,15 @@ public final class ArpResolverMetadata {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ArpResolverMetadata other = (ArpResolverMetadata) obj;
         if (arpRequestSourceMacAddress == null) {
             if (other.arpRequestSourceMacAddress != null)
@@ -112,16 +185,18 @@ public final class ArpResolverMetadata {
             if (other.externalNetworkBridgeDpid != null)
                 return false;
         } else if (!externalNetworkBridgeDpid
-                .equals(other.externalNetworkBridgeDpid))
+                .equals(other.externalNetworkBridgeDpid)) {
             return false;
+        }
         if (gatewayIpAddress == null) {
             if (other.gatewayIpAddress != null)
                 return false;
-        } else if (!gatewayIpAddress.equals(other.gatewayIpAddress))
+        } else if (!gatewayIpAddress.equals(other.gatewayIpAddress)) {
             return false;
-        if (periodicRefresh != other.periodicRefresh)
+        }
+        if (periodicRefresh != other.periodicRefresh) {
             return false;
+        }
         return true;
     }
-
 }

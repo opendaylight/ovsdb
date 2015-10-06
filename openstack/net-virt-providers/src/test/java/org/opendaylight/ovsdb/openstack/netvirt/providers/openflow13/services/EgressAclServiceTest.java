@@ -10,9 +10,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,15 +19,14 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.internal.matchers.Equality;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -38,29 +34,29 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4Match;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link EgressAclService}
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")
 public class EgressAclServiceTest {
 
     @InjectMocks private EgressAclService egressAclService = new EgressAclService();
-    @Spy private EgressAclService egressAclServiceSpy;
-    @Spy private MatchUtils matchUtil;
+    private EgressAclService egressAclServiceSpy;
 
     @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
@@ -86,10 +82,27 @@ public class EgressAclServiceTest {
     private static final String DEST_IP_1_WITH_MASK = "192.169.0.1/32";
     private static final String DEST_IP_2_WITH_MASK = "192.169.0.2/32";
     private static final String SECURITY_GROUP_UUID = "85cc3048-abc3-43cc-89b3-377341426ac5";
+    private static final String SEGMENT_ID = "2";
+    private static final Long DP_ID_LONG = (long) 1554;
+    private static final Long LOCAL_PORT = (long) 124;
+    private static FlowBuilder flowBuilder;
+    private static NodeBuilder nodeBuilder;
+
+    private static Answer<Object> answer() {
+        return new Answer<Object>() {
+            @Override
+            public CheckedFuture<Void, TransactionCommitFailedException> answer(InvocationOnMock invocation)
+                    throws Throwable {
+                flowBuilder = (FlowBuilder) invocation.getArguments()[0];
+                nodeBuilder = (NodeBuilder) invocation.getArguments()[1];
+                return null;
+            }
+        };
+    }
 
     @Before
     public void setUp() {
-        egressAclServiceSpy = Mockito.spy(egressAclService);
+        egressAclServiceSpy = PowerMockito.spy(egressAclService);
 
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
@@ -441,15 +454,25 @@ public class EgressAclServiceTest {
     @Test
     public void testProgramPortSecurityACLRuleAddIcmp1() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(10);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(10);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(egressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        egressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+        egressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
 
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(10, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(10, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetSource().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        Assert.assertEquals("Egress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +
+                            "_" + type + "_" + code + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
     }
 
     /**
@@ -458,15 +481,25 @@ public class EgressAclServiceTest {
     @Test
     public void testProgramPortSecurityACLRuleRemoveIcmp1() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(egressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        egressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+        egressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
 
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(20, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(20, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetSource().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        Assert.assertEquals("Egress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +
+                            "_" + type + "_" + code + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
     }
 
     /**
@@ -475,16 +508,34 @@ public class EgressAclServiceTest {
     @Test
     public void testProgramPortSecurityACLRuleAddIcmp2() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(30);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(30);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(egressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        egressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+        egressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
 
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(30, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(30, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetSource().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        String expectedFlowId1 = "Egress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Egress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if(actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        };
     }
 
     /**
@@ -493,16 +544,33 @@ public class EgressAclServiceTest {
     @Test
     public void testProgramPortSecurityACLRuleRemoveIcmp2() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(40);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(40);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(egressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        egressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+        egressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
 
-        verify(writeTransaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(40, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(40, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetSource().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        String expectedFlowId1 = "Egress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Egress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if(actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
     }
 
     /**

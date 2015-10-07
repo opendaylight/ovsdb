@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_d86afb19",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-10-07T00:45:57Z",
+      "side": 1,
+      "message": "I like the code without the this. this seems like noise most of the time.",
+      "parentUuid": "1a76adc5_9817a3ed",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_f8dd7743",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
         "patchSetId": 1
@@ -81,6 +99,40 @@
       "writtenOn": "2015-10-06T21:58:45Z",
       "side": 1,
       "message": "same here",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_5866eb52",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-10-07T00:45:57Z",
+      "side": 1,
+      "message": "checkstyle will complain if these lines are over 120 chars",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_3861af39",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-10-07T00:45:57Z",
+      "side": 1,
+      "message": "this code is already readable without needing the comments",
       "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

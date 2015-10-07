@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_a3d8341e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-07T11:00:42Z",
+      "side": 1,
+      "message": "I am wondering whether this cleanup() method should be called by the *Handler code e.g LBaasHandler. All these handler should listen to node add/remove event and then ask the cleanup from NeutronL3Adapter or anyone who is implementing the service, rather then service implementer do the cleanup internally without letting them know. Also *Handler call can probably have better context on what needs to cleaned up.  Although with the existing implementation, it would be mere refactoring, but i feel architecturally that would be better options. Flavio/Sam, what\u0027s your thoughts?",
+      "revId": "c8a5ad8765eb9e29d200411f14306491a28c3595",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

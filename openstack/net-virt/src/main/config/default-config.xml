@@ -16,6 +16,10 @@
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>
           </broker>
+          <clustering-entity-ownership-service>
+            <type xmlns:ns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:entity-ownership-service">ns:entity-ownership-service</type>
+            <name>entity-ownership-service</name>
+          </clustering-entity-ownership-service>
         </module>
       </modules>
     </data>

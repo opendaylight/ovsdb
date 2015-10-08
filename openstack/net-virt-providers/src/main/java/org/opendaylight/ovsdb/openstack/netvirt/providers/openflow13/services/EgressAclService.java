@@ -52,6 +52,8 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private static final int DHCP_SOURCE_PORT = 67;
     private static final int DHCP_DESTINATION_PORT = 68;
     private static final String HOST_MASK = "/32";
+    private static final int PORT_RANGE_MIN = 1;
+    private static final int PORT_RANGE_MAX = 65535;
 
     public EgressAclService() {
         super(Service.EGRESS_ACL);
@@ -348,13 +350,22 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                               NeutronSecurityRule portSecurityRule, String dstAddress,
                               boolean write, Integer protoPortMatchPriority) {
         MatchBuilder matchBuilder = new MatchBuilder();
-        String flowId = "Egress_Custom_Tcp" + segmentationId + "_" + srcMac + "_";
+        String flowId = "Egress_TCP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+
+        /* Custom TCP Match */
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
-            flowId = flowId + portSecurityRule.getSecurityRulePortMin();
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0,
                                                      portSecurityRule.getSecurityRulePortMin());
         } else {
+            /* All TCP Match */
+            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+                    && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
+                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
+            }
             /*TODO TCP PortRange Match*/
 
         }
@@ -370,7 +381,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()));
         }
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
@@ -433,13 +444,22 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                               boolean write, Integer protoPortMatchPriority) {
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        String flowId = "Eress_UDP" + segmentationId + "_" + srcMac + "_";
+        String flowId = "Egress_UDP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+
+        /* Custom UDP Match */
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
-            flowId = flowId + portSecurityRule.getSecurityRulePortMin();
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0,
                                                      portSecurityRule.getSecurityRulePortMin());
         } else {
+            /* All UDP Match */
+            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+                    && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
+                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
+            }
             /*TODO UDP PortRange Match*/
 
         }
@@ -455,7 +475,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()));
         }
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_b7794531",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-08T22:29:13Z",
+      "side": 1,
+      "message": "it feels wrong for this counter to be incremented here.\nthe get function should not alter the internal state.\ncan\u0027t this counter be bumped when arp packet is sent instead?\n\ni think you can create a function to explicitly bump\nthis counter, if needed.",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 38
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_17def911",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-08T22:29:13Z",
+      "side": 1,
+      "message": "to my point earlier. this log will cause counter to bump, which is really not the intention, right?",
+      "range": {
+        "startLine": 163,
+        "startChar": 132,
+        "endLine": 163,
+        "endChar": 161
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

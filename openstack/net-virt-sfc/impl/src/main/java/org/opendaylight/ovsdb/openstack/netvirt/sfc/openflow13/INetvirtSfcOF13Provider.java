@@ -1,20 +1,20 @@
 /*
- * Copyright (c) 2013, 2015 Dell, Inc. and others. All rights reserved.
+ * Copyright (c) 2015 Dell, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 
-/**
- * @author Arun Yerra
- *
- */
+package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 
+/**
+ * Open vSwitch OpenFlow 1.3 Networking Provider for Netvirt SFC
+ * @author Arun Yerra
+ */
 public interface INetvirtSfcOF13Provider {
 
     /**

@@ -21,12 +21,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt-sfc-impl</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <properties>
     <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-    <utils.version>1.2.0-SNAPSHOT</utils.version>
   </properties>
 
   <dependencies>
@@ -35,11 +34,47 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>openstack.net-virt-sfc-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <!-- Testing Dependencies -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.mdsal-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>concepts</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -53,49 +88,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${sonar-jacoco-listeners.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <!-- MDSAL Infra Dependencies -->
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-broker-impl</artifactId>
-      <scope>test</scope>
-      <type>test-jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>utils.mdsal-utils</artifactId>
-      <version>${utils.version}</version>
-      <type>bundle</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-broker-impl</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <propertyExpansion>checkstyle.checker.severity=error</propertyExpansion>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt-sfc-features</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
@@ -29,7 +29,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <restconf.version>1.3.0-SNAPSHOT</restconf.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
     <dlux.version>0.3.0-SNAPSHOT</dlux.version>
-    <utils.version>1.2.0-SNAPSHOT</utils.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
   </properties>
   <dependencyManagement>
@@ -107,6 +106,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>openstack.net-virt-sfc-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>utils.mdsal-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

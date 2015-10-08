@@ -5,23 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
-/**
- * @author Arun Yerra
- *
- */
-
 import com.google.common.base.Preconditions;
-import java.util.concurrent.Callable;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.INetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListKey;
@@ -31,15 +23,25 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev1410
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Data tree listener for AccessList.
+ */
 public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcAclListener.class);
     private ListenerRegistration<NetvirtSfcAclListener> listenerRegistration;
     private MdsalUtils dbutils;
 
-    public NetvirtSfcAclListener (final INetvirtSfcOF13Provider provider, final DataBroker db) {
+    /**
+     * {@link NetvirtSfcAclListener} constructor.
+     * @param provider OpenFlow 1.3 Provider
+     * @param db MdSal {@link DataBroker}
+     */
+    public NetvirtSfcAclListener(final INetvirtSfcOF13Provider provider, final DataBroker db) {
         super(provider, AccessList.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
 
@@ -48,7 +50,8 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
     }
 
     private void registrationListener(final DataBroker db) {
-        final DataTreeIdentifier<AccessList> treeId = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getIetfAclIid());
+        final DataTreeIdentifier<AccessList> treeId =
+                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getIetfAclIid());
         try {
             LOG.info("Registering Data Change Listener for Netvirt AccesList configuration.");
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
@@ -79,18 +82,17 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
         String aclName = removeDataObj.getAclName();
 
         Classifiers classifiers = dbutils.read(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
-        if(classifiers != null) {
-            for(Classifier classifier : classifiers.getClassifier()) {
-                if(classifier.getAcl().equalsIgnoreCase(aclName)) {
-                    if(classifier.getSffs() != null) {
-                        for(Sff sff : classifier.getSffs().getSff()) {
+        if (classifiers != null) {
+            for (Classifier classifier : classifiers.getClassifier()) {
+                if (classifier.getAcl().equalsIgnoreCase(aclName)) {
+                    if (classifier.getSffs() != null) {
+                        for (Sff sff : classifier.getSffs().getSff()) {
                             provider.removeClassifierRules(sff, removeDataObj);
                         }
                     }
                 }
             }
         }
-        return;
     }
 
     @Override
@@ -105,30 +107,36 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
         String aclName = addDataObj.getAclName();
         LOG.debug("Adding accesslist = {}", identifier);
         Classifiers classifiers = dbutils.read(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
-        if(classifiers != null) {
-            for(Classifier classifier : classifiers.getClassifier()) {
-                if(classifier.getAcl().equalsIgnoreCase(aclName)) {
-                    if(classifier.getSffs() != null) {
-                        for(Sff sff : classifier.getSffs().getSff()) {
+        if (classifiers != null) {
+            for (Classifier classifier : classifiers.getClassifier()) {
+                if (classifier.getAcl().equalsIgnoreCase(aclName)) {
+                    if (classifier.getSffs() != null) {
+                        for (Sff sff : classifier.getSffs().getSff()) {
                             provider.addClassifierRules(sff, addDataObj);
                         }
                     }
                 }
             }
         }
-        return;
     }
 
-    private InstanceIdentifier<Classifiers> getClassifierIid () {
+    private InstanceIdentifier<Classifiers> getClassifierIid() {
         return InstanceIdentifier.create(Classifiers.class);
     }
 
-    public InstanceIdentifier<AccessList> getIetfAclIid () {
+    public InstanceIdentifier<AccessList> getIetfAclIid() {
         return InstanceIdentifier.create(AccessLists.class).child(AccessList.class);
     }
 
-    public InstanceIdentifier<AccessListEntry> getIetfAclEntryIid (String aclName, String ruleName) {
-        return InstanceIdentifier.create(AccessLists.class).child(AccessList.class, new AccessListKey(aclName)).
-                child(AccessListEntries.class).child(AccessListEntry.class, new AccessListEntryKey(ruleName));
+    /**
+     * Create an {@link AccessListEntry} {@link InstanceIdentifier}.
+     * @param aclName is the name of the ACL
+     * @param ruleName is the name of the rule
+     * @return the {@link AccessListEntry} {@link InstanceIdentifier}
+     */
+    public InstanceIdentifier<AccessListEntry> getIetfAclEntryIid(String aclName, String ruleName) {
+        return InstanceIdentifier.create(AccessLists.class).child(AccessList.class,
+                new AccessListKey(aclName)).child(AccessListEntries.class).child(AccessListEntry.class,
+                new AccessListEntryKey(ruleName));
     }
 }

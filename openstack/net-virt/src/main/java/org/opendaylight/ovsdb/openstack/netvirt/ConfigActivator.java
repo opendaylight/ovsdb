@@ -203,6 +203,8 @@ public class ConfigActivator implements BundleActivator {
         trackService(context, RoutingProvider.class, neutronL3Adapter);
         trackService(context, L3ForwardingProvider.class, neutronL3Adapter);
         trackService(context, GatewayMacResolver.class, neutronL3Adapter);
+        trackService(context, IngressAclProvider.class, securityServices);
+        trackService(context, EgressAclProvider.class, securityServices);
 
         // We no longer need to track the services, avoid keeping references around
         servicesAndRegistrations.clear();

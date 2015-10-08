@@ -79,7 +79,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
              * http://docs.openstack.org/api/openstack-network/2.0/content/security_groups.html
              *
              */
-            if (portSecurityRule.getSecurityRuleEthertype().equals("IPv4")
+            if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
                     && portSecurityRule.getSecurityRuleDirection().equals("egress")) {
                 LOG.debug("programPortSecurityAcl: Acl Rule matching IPv4 and ingress is: {} ", portSecurityRule);
                 if (null == portSecurityRule.getSecurityRuleProtocol()) {
@@ -93,44 +93,44 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     if (null != remoteSrcAddressList) {
                         for (Neutron_IPs vmIp :remoteSrcAddressList ) {
                             switch (portSecurityRule.getSecurityRuleProtocol()) {
-                            case MatchUtils.TCP:
-                                egressAclTcp(dpid, segmentationId, attachedMac,
-                                             portSecurityRule,vmIp.getIpAddress(), write,
-                                             Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            case MatchUtils.UDP:
-                                egressAclUdp(dpid, segmentationId, attachedMac,
-                                             portSecurityRule,vmIp.getIpAddress(), write,
-                                             Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            case MatchUtils.ICMP:
-                                egressAclIcmp(dpid, segmentationId, attachedMac,
-                                               portSecurityRule, vmIp.getIpAddress(),write,
-                                               Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            default:
-                                LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
-                                break;
+                                case MatchUtils.TCP:
+                                    egressAclTcp(dpid, segmentationId, attachedMac,
+                                                 portSecurityRule,vmIp.getIpAddress(), write,
+                                                 Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                case MatchUtils.UDP:
+                                    egressAclUdp(dpid, segmentationId, attachedMac,
+                                                 portSecurityRule,vmIp.getIpAddress(), write,
+                                                 Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                case MatchUtils.ICMP:
+                                    egressAclIcmp(dpid, segmentationId, attachedMac,
+                                                   portSecurityRule, vmIp.getIpAddress(),write,
+                                                   Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                default:
+                                    LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
+                                    break;
                             }
                         }
                     }
                 } else {
                     //CIDR is selected
                     switch (portSecurityRule.getSecurityRuleProtocol()) {
-                    case MatchUtils.TCP:
-                        egressAclTcp(dpid, segmentationId, attachedMac,
-                                     portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    case MatchUtils.UDP:
-                        egressAclUdp(dpid, segmentationId, attachedMac,
-                                     portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    case MatchUtils.ICMP:
-                        egressAclIcmp(dpid, segmentationId, attachedMac,
-                                       portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    default:
-                        LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
+                        case MatchUtils.TCP:
+                            egressAclTcp(dpid, segmentationId, attachedMac,
+                                         portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        case MatchUtils.UDP:
+                            egressAclUdp(dpid, segmentationId, attachedMac,
+                                         portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        case MatchUtils.ICMP:
+                            egressAclIcmp(dpid, segmentationId, attachedMac,
+                                           portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        default:
+                            LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
                     }
                 }
             }
@@ -390,7 +390,9 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                NeutronSecurityRule portSecurityRule, String dstAddress,
                                boolean write, Integer protoPortMatchPriority) {
         MatchBuilder matchBuilder = new MatchBuilder();
-        String flowId = "Egress_ICMP" + segmentationId + "_" + srcMac + "_";
+        String flowId = "Egress_ICMP_" + segmentationId + "_" + srcMac + "_"
+                    + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
         matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
                                                     portSecurityRule.getSecurityRulePortMin().shortValue(),
@@ -404,6 +406,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
                     new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
         }
+        flowId = flowId + "_Permit";
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);

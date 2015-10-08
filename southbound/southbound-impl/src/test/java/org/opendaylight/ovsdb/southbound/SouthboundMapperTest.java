@@ -71,32 +71,28 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdenti
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 @PrepareForTest({SouthboundMapper.class, InstanceIdentifier.class, Inet4Address.class,  Inet6Address.class, SouthboundUtil.class, SouthboundConstants.class, TyperUtils.class})
 @RunWith(PowerMockRunner.class)
 public class SouthboundMapperTest {
+
 
     @Before
     public void setUp() {
         PowerMockito.mockStatic(SouthboundMapper.class, Mockito.CALLS_REAL_METHODS);
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation" })
-    @Test //TO-DO StackOverflow Error
-    public void testCreateNodeIdAndCreateManagedNodeId() throws Exception {
-        OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
-        NodeKey key = mock(NodeKey.class);
-        InstanceIdentifier<Node> iidNode = PowerMockito.mock(InstanceIdentifier.class);
-        when(client.getInstanceIdentifier()).thenReturn(iidNode);
-        PowerMockito.when(iidNode.firstKeyOf(Node.class, NodeKey.class)).thenReturn(key);
-        NodeId nodeId = mock(NodeId.class);
-        when(key.getNodeId()).thenReturn(nodeId);
+    @Test
+    public void testCreateNodeId() throws Exception {
+        PowerMockito.mockStatic(SouthboundMapper.class, Mockito.RETURNS_MOCKS);
+        assertTrue("Returned value is not an NodeId", Whitebox.invokeMethod(SouthboundMapper.class, "createNodeId", null) instanceof NodeId);
+    }
 
-        //Test createNodeId()
-        //assertEquals(nodeId, org.powermock.reflect.Whitebox.invokeMethod(SouthboundMapper.class, "createNodeId", client));
-
-        //Test createManagedNodeId()
-        //assertEquals("Incorrect nodeId received", nodeId, SouthboundMapper.createManagedNodeId(iidNode));
+    @Test
+    public void testCreateManagedNodeId() throws Exception {
+        PowerMockito.mockStatic(SouthboundMapper.class, Mockito.RETURNS_MOCKS);
+        assertTrue("Returned value is not an NodeId", SouthboundMapper.createManagedNodeId(null) instanceof NodeId);
     }
 
     @Test

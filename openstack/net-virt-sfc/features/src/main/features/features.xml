@@ -23,7 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-sfc-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-impl/${project.version}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/${utils.version}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/${project.version}</bundle>
     <configfile finalname="${configfile.directory}/openstack.net-virt-sfc.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-impl/${project.version}/xml/config</configfile>
   </feature>
   <feature name='odl-ovsdb-sfc-rest' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: REST'>

@@ -90,41 +90,41 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                     if (null != remoteSrcAddressList) {
                         for (Neutron_IPs vmIp :remoteSrcAddressList ) {
                             switch (portSecurityRule.getSecurityRuleProtocol()) {
-                            case MatchUtils.TCP:
-                                ingressAclTcp(dpid, segmentationId, attachedMac, portSecurityRule,vmIp.getIpAddress(),
-                                              write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            case MatchUtils.UDP:
-                                ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule,vmIp.getIpAddress(),
-                                              write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            case MatchUtils.ICMP:
-                                ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, vmIp.getIpAddress(),
-                                               write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            default:
-                                LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
-                                break;
+                                case MatchUtils.TCP:
+                                    ingressAclTcp(dpid, segmentationId, attachedMac, portSecurityRule,
+                                                vmIp.getIpAddress(),write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                case MatchUtils.UDP:
+                                    ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule,
+                                                vmIp.getIpAddress(), write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                case MatchUtils.ICMP:
+                                    ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule,
+                                                vmIp.getIpAddress(), write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                default:
+                                    LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
+                                    break;
                             }
                         }
                     }
                 } else {
                     //CIDR is selected
                     switch (portSecurityRule.getSecurityRuleProtocol()) {
-                    case MatchUtils.TCP:
-                        ingressAclTcp(dpid, segmentationId, attachedMac,
-                                      portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    case MatchUtils.UDP:
-                        ingressAclUdp(dpid, segmentationId, attachedMac,
-                                      portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    case MatchUtils.ICMP:
-                        ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, null,
-                                       write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    default:
-                        LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
+                        case MatchUtils.TCP:
+                            ingressAclTcp(dpid, segmentationId, attachedMac,
+                                          portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        case MatchUtils.UDP:
+                            ingressAclUdp(dpid, segmentationId, attachedMac,
+                                          portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        case MatchUtils.ICMP:
+                            ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, null,
+                                           write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        default:
+                            LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
                     }
                 }
 
@@ -403,7 +403,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "ingressAclICMP" + segmentationId + "_" + dstMac;
+        String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_"
+                    + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";;
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
         matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
                         portSecurityRule.getSecurityRulePortMin().shortValue(),
@@ -420,7 +422,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
 

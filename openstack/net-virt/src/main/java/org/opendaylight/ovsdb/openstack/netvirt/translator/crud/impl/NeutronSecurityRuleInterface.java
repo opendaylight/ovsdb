@@ -27,10 +27,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.EthertypeV4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.EthertypeV6;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolHttp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolHttps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolIcmp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolIcmpV6;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolTcp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev160807.ProtocolUdp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150325.Neutron;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.secgroups.rev141002.security.rules.attributes.SecurityRules;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.secgroups.rev141002.security.rules.attributes.security.rules.SecurityRule;
@@ -49,22 +49,22 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronSecurityRuleInterface.class);
 
     private static final ImmutableBiMap<Class<? extends DirectionBase>,String> DIRECTION_MAP
-            = new ImmutableBiMap.Builder<Class<? extends DirectionBase>,String>()
-            .put(DirectionEgress.class,"egress")
-            .put(DirectionIngress.class,"ingress")
-            .build();
+    = new ImmutableBiMap.Builder<Class<? extends DirectionBase>,String>()
+    .put(DirectionEgress.class,"egress")
+    .put(DirectionIngress.class,"ingress")
+    .build();
     private static final ImmutableBiMap<Class<? extends ProtocolBase>,String> PROTOCOL_MAP
-            = new ImmutableBiMap.Builder<Class<? extends ProtocolBase>,String>()
-            .put(ProtocolHttp.class,"HTTP")
-            .put(ProtocolHttps.class,"HTTPS")
-            .put(ProtocolIcmp.class,"ICMP")
-            .put(ProtocolTcp.class,"TCP")
-            .build();
+    = new ImmutableBiMap.Builder<Class<? extends ProtocolBase>,String>()
+    .put(ProtocolIcmp.class,"icmp")
+    .put(ProtocolTcp.class,"tcp")
+    .put(ProtocolUdp.class,"udp")
+    .put(ProtocolIcmpV6.class,"icmpv6")
+    .build();
     private static final ImmutableBiMap<Class<? extends EthertypeBase>,String> ETHERTYPE_MAP
-            = new ImmutableBiMap.Builder<Class<? extends EthertypeBase>,String>()
-            .put(EthertypeV4.class,"v4")
-            .put(EthertypeV6.class,"v6")
-            .build();
+    = new ImmutableBiMap.Builder<Class<? extends EthertypeBase>,String>()
+    .put(EthertypeV4.class,"IPv4")
+    .put(EthertypeV6.class,"IPv6")
+    .build();
 
     NeutronSecurityRuleInterface(ProviderContext providerContext) {
         super(providerContext);

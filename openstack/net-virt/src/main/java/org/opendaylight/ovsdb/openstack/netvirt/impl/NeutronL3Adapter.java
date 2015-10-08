@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
@@ -43,6 +44,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +72,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private volatile ArpProvider arpProvider;
     private volatile RoutingProvider routingProvider;
     private volatile GatewayMacResolver gatewayMacResolver;
+    private volatile SecurityServicesManager securityServicesManager;
 
     private class FloatIpData {
         // br-int of node where floating ip is associated with tenant port
@@ -197,6 +200,8 @@ public class NeutronL3Adapter implements ConfigInterface {
      */
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOG.debug("Neutron port {} event : {}", action, neutronPort.toString());
+
+        this.processSecurityGroupUpdate(neutronPort);
         if (!this.enabled) {
             return;
         }
@@ -655,6 +660,50 @@ public class NeutronL3Adapter implements ConfigInterface {
                 }
             }
         }
+    }
+
+    private void processSecurityGroupUpdate(NeutronPort neutronPort) {
+        LOG.trace("processSecurityGroupUpdate:" + neutronPort);
+        /**
+         * Get updated data and original data for the the changed. Identify the security groups that got
+         * added and removed and call the appropriate providers for updating the flows.
+         */
+        try {
+            NeutronPort originalPort = neutronPort.getOriginalPort();
+            if (null == originalPort) {
+                LOG.debug("processSecurityGroupUpdate: originalport is empty");
+                return;
+            }
+            List<NeutronSecurityGroup> addedGroup = getsecurityGroupChanged(neutronPort,
+                                                                            neutronPort.getOriginalPort());
+            List<NeutronSecurityGroup> deletedGroup = getsecurityGroupChanged(neutronPort.getOriginalPort(),
+                                                                              neutronPort);
+
+            if (null != addedGroup && !addedGroup.isEmpty()) {
+                securityServicesManager.syncSecurityGroup(neutronPort,addedGroup,true);
+            }
+            if (null != deletedGroup && !deletedGroup.isEmpty()) {
+                securityServicesManager.syncSecurityGroup(neutronPort,deletedGroup,false);
+            }
+
+        } catch (Exception e) {
+            LOG.error("Exception in processSecurityGroupUpdate", e);
+        }
+    }
+
+    private List<NeutronSecurityGroup> getsecurityGroupChanged(NeutronPort port1, NeutronPort port2) {
+        LOG.trace("getsecurityGroupChanged:" + "Port1:" + port1 + "Port2" + port2);
+        ArrayList<NeutronSecurityGroup> list1 = new ArrayList<NeutronSecurityGroup>(port1.getSecurityGroups());
+        ArrayList<NeutronSecurityGroup> list2 = new ArrayList<NeutronSecurityGroup>(port2.getSecurityGroups());
+        for (Iterator<NeutronSecurityGroup> iterator = list1.iterator(); iterator.hasNext();) {
+            NeutronSecurityGroup securityGroup1 = iterator.next();
+            for (NeutronSecurityGroup securityGroup2 :list2) {
+                if (securityGroup1.getID().equals(securityGroup2.getID())) {
+                    iterator.remove();
+                }
+            }
+        }
+        return list1;
     }
 
     private void programL3ForwardingStage1(Node node, Long dpid, String providerSegmentationId,
@@ -1370,6 +1419,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         gatewayMacResolver =
                 (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
+        securityServicesManager =
+                (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
         initL3AdapterMembers();
     }
 

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_3c375a01",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T21:52:10Z",
+      "side": 1,
+      "message": "Yes.  I originally envisioned more than 2 states, but as is, a boolean will suffice.",
+      "parentUuid": "1a76adc5_b8ce1f82",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_9817a3ed",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
         "patchSetId": 1
@@ -48,6 +66,24 @@
       "side": 1,
       "message": "I like the code without the this. this seems like noise most of the time.",
       "parentUuid": "1a76adc5_9817a3ed",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_fc400258",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T21:52:10Z",
+      "side": 1,
+      "message": "I left the this\u0027s out except where needed.",
+      "parentUuid": "1a76adc5_d86afb19",
       "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -88,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_015ebbe6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T21:52:10Z",
+      "side": 1,
+      "message": "The missing brackets were flagged by Sonar, so I added them.  I\u0027ll undo this and check in the sonar fixes separately.",
+      "parentUuid": "1a76adc5_d8e43b0f",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_58c02b50",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
         "patchSetId": 1
@@ -122,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_7c03920f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T21:52:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_5866eb52",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_3861af39",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
         "patchSetId": 1
@@ -139,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_f70edd33",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T21:52:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_3861af39",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_d8cbdb70",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
         "patchSetId": 1
@@ -150,6 +240,24 @@
       "writtenOn": "2015-10-06T21:58:45Z",
       "side": 1,
       "message": "Similar code in metadata, trivial helper method useful?",
+      "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_372c5599",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpSender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T21:52:10Z",
+      "side": 1,
+      "message": "It\u0027s similar, but different, so I left this as is.",
+      "parentUuid": "1a76adc5_d8cbdb70",
       "revId": "f6fe463e573217b1ce369e2b8bfe78351a780e5b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

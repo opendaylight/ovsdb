@@ -8,8 +8,10 @@
 package org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -88,14 +90,16 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
     private void updatePort(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Object[] subscribers) {
+        Map<String, NeutronPort> originalPortMap = getChangedPorts(changes.getOriginalData());
         for (Entry<InstanceIdentifier<?>, DataObject> updatePort : changes.getUpdatedData().entrySet()) {
-        	if(updatePort.getValue() instanceof Port){
+            if (updatePort.getValue() instanceof Port) {
                 NeutronPort port = fromMd((Port)updatePort.getValue());
-                for(Object entry: subscribers){
+                port.setOriginalPort(originalPortMap.get(port.getID()));
+                for (Object entry: subscribers) {
                     INeutronPortAware subscriber = (INeutronPortAware)entry;
                     subscriber.neutronPortUpdated(port);
                 }
-        	}
+            }
         }
     }
 
@@ -192,6 +196,18 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
         }
         result.setBindingvifType(binding.getVifType());
         result.setBindingvnicType(binding.getVnicType());
+    }
+
+    private  Map<String,NeutronPort> getChangedPorts(Map<InstanceIdentifier<?>, DataObject> changedData) {
+        LOG.trace("getChangedPorts:" + changedData);
+        Map<String,NeutronPort> portMap = new HashMap<String,NeutronPort>();
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> changed : changedData.entrySet()) {
+            if (changed.getValue() instanceof Port) {
+                NeutronPort port = fromMd((Port)changed.getValue());
+                portMap.put(port.getID(), port);
+            }
+        }
+        return portMap;
     }
 
     @Override

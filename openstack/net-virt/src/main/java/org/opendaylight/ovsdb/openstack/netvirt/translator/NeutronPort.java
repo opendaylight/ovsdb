@@ -83,6 +83,8 @@ public class NeutronPort implements Serializable, INeutronObject {
     @XmlElement (name = "extra_dhcp_opts")
     List<NeutronPort_ExtraDHCPOption> extraDHCPOptions;
 
+    NeutronPort originalPort;
+
     public NeutronPort() {
     }
 
@@ -215,21 +217,30 @@ public class NeutronPort implements Serializable, INeutronObject {
       this.bindinghostID = bindinghostID;
     }
 
-  public String getBindingvnicType() {
-    return bindingvnicType;
-  }
+    public String getBindingvnicType() {
+        return bindingvnicType;
+    }
 
-  public void setBindingvnicType(String bindingvnicType) {
-    this.bindingvnicType = bindingvnicType;
-  }
+    public void setBindingvnicType(String bindingvnicType) {
+        this.bindingvnicType = bindingvnicType;
+    }
 
-  public String getBindingvifType() {
-    return bindingvifType;
-  }
+    public String getBindingvifType() {
+        return bindingvifType;
+    }
 
-  public void setBindingvifType(String bindingvifType) {
-    this.bindingvifType = bindingvifType;
-  }
+    public void setBindingvifType(String bindingvifType) {
+        this.bindingvifType = bindingvifType;
+    }
+
+    public NeutronPort getOriginalPort() {
+        return originalPort;
+    }
+
+
+    public void setOriginalPort(NeutronPort originalPort) {
+        this.originalPort = originalPort;
+    }
 
     /**
      * This method copies selected fields from the object and returns them

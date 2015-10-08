@@ -45,6 +45,30 @@
       "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_f73a5d35",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-08T22:34:01Z",
+      "side": 1,
+      "message": "nope, sorry. it would if you called\n\"getArpRequestDestMacAddress()\" tho. ;)",
+      "parentUuid": "1a76adc5_17def911",
+      "range": {
+        "startLine": 163,
+        "startChar": 132,
+        "endLine": 163,
+        "endChar": 161
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

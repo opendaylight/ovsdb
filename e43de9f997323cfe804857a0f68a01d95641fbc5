@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_e6f39508",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-08T18:16:54Z",
+      "side": 1,
+      "message": "{} -- do we need this ?",
+      "revId": "e43de9f997323cfe804857a0f68a01d95641fbc5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

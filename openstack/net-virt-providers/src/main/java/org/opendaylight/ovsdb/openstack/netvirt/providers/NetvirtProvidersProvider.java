@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -29,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NetvirtProvidersProvider implements BindingAwareProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtProvidersProvider.class);
-    private static final String ENTITY_TYPE = "ovsdb-netvirt-provider";
 
     private BundleContext bundleContext = null;
     private static DataBroker dataBroker = null;
@@ -53,6 +54,10 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         return providerContext;
     }
 
+    public boolean getHasProviderEntityOwnership() {
+        return hasProviderEntityOwnership.get();
+    }
+
     @Override
     public void close() throws Exception {
         if (providerEntityListener != null) {
@@ -73,7 +78,6 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
             LOG.warn("Failed to start Netvirt: ", e);
         }
         providerEntityListener = new ProviderEntityListener(this, entityOwnershipService);
-
     }
 
     private void handleOwnershipChange(EntityOwnershipChange ownershipChange) {
@@ -94,15 +98,17 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         ProviderEntityListener(NetvirtProvidersProvider provider,
                                EntityOwnershipService entityOwnershipService) {
             this.provider = provider;
-            this.listenerRegistration = entityOwnershipService.registerListener(ENTITY_TYPE, this);
+            this.listenerRegistration =
+                    entityOwnershipService.registerListener(Constants.NETVIRT_OWNER_ENTITY_TYPE, this);
 
             //register instance entity to get the ownership of the netvirt provider
-            Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
+            Entity instanceEntity = new Entity(
+                    Constants.NETVIRT_OWNER_ENTITY_TYPE, Constants.NETVIRT_OWNER_ENTITY_TYPE);
             try {
                 this.candidateRegistration = entityOwnershipService.registerCandidate(instanceEntity);
             } catch (CandidateAlreadyRegisteredException e) {
                 LOG.warn("OVSDB Netvirt Provider instance entity {} was already "
-                        + "registered for {} ownership", instanceEntity, e);
+                        + "registered for ownership", instanceEntity, e);
             }
         }
 

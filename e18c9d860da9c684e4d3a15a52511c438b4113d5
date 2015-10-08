@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_f749fd8b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-08T23:43:03Z",
+      "side": 1,
+      "message": "getArpRequestDestMacAddress() is only called when building the ARP  request packet.  This is why I put the increment here.\n\nNote that this is different from the getGatewayMacAddress() method which is called when you just want to know the MAC address of the gateway.\n\nI could create a method to explicitly bump the counter, but then we\u0027d call it at exactly the same point as we call getArpRequestDestMacAddress().\n\nWhat do you think?",
+      "parentUuid": "1a76adc5_b7794531",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 38
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_17def911",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 2

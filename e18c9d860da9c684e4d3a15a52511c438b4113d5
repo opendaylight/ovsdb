@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a76adc5_240d003f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-09T18:08:37Z",
+      "side": 1,
+      "message": "remove this line (83); variable is not used.",
+      "range": {
+        "startLine": 83,
+        "startChar": 19,
+        "endLine": 83,
+        "endChar": 28
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_b7794531",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
         "patchSetId": 2
@@ -85,6 +108,30 @@
       "side": 1,
       "message": "How about getDestMacForArpRequestPacket()?\n\nThis method decides whether to use the broadcast MAC or the unicast MAC for ARP request packets based on whether one of the last MAX_OUTSTANDING_ARP_REQUESTS requests has been answered.  It\u0027s bumping a counter, but I\u0027m not sure the caller needs to know how it\u0027s making the decision.  However, I could also add a comment for the method to clarify this if you think it would help.\n\nIf so, I\u0027d rename the getArpRequestSourceMacAddress() and getArpRequestSourceIp() similarly.",
       "parentUuid": "1a76adc5_7b5b972e",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 38
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_44083c2d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-09T18:08:37Z",
+      "side": 1,
+      "message": "yeah, I think that works.",
+      "parentUuid": "1a76adc5_01d796ee",
       "range": {
         "startLine": 85,
         "startChar": 8,

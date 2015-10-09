@@ -8,11 +8,14 @@
 
 package org.opendaylight.ovsdb.utils.southbound.utils;
 
+import com.google.common.collect.ImmutableBiMap;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
+import java.util.List;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -20,10 +23,21 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -165,48 +179,12 @@ public class SouthboundUtils {
         return true;
     }
 
-    public String getLocalControllerHostIpAddress() {
-        String ipaddress = null;
-        try {
-            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
-                 ifaces.hasMoreElements();) {
-                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
-
-                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress()) {
-                        if (inetAddr.isSiteLocalAddress()) {
-                            ipaddress = inetAddr.getHostAddress();
-                            break;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn("Exception while fetching local host ip address ",e);
-        }
-        return ipaddress;
-    }
-
-    public String getControllerTarget(Node ovsdbNode) {
-        String target = null;
-        String ipAddr = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-        ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-        LOG.info("connectionInfo: {}", connectionInfo);
-        if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-            ipAddr = new String(connectionInfo.getLocalIp().getValue());
-        }
-        if (ipAddr == null) {
-            ipAddr = getLocalControllerHostIpAddress();
-        }
-
-        if (ipAddr != null) {
-            target = OPENFLOW_CONNECTION_PROTOCOL + ":"
-                    + ipAddr + ":" + DEFAULT_OPENFLOW_PORT;
-        }
-
-        return target;
+    public List<ControllerEntry> createControllerEntry(String controllerTarget) {
+        List<ControllerEntry> controllerEntriesList = new ArrayList<>();
+        controllerEntriesList.add(new ControllerEntryBuilder()
+                .setTarget(new Uri(controllerTarget))
+                .build());
+        return controllerEntriesList;
     }
 
     /**
@@ -265,5 +243,83 @@ public class SouthboundUtils {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public List<ProtocolEntry> createMdsalProtocols() {
+        List<ProtocolEntry> protocolList = new ArrayList<>();
+        ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
+                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+        protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
+        return protocolList;
+    }
+
+    /*
+     * base method for adding test bridges.  Other helper methods used to create bridges should utilize this method.
+     *
+     * @param connectionInfo
+     * @param bridgeIid if passed null, one is created
+     * @param bridgeName cannot be null
+     * @param bridgeNodeId if passed null, one is created based on <code>bridgeIid</code>
+     * @param setProtocolEntries toggles whether default protocol entries are set for the bridge
+     * @param failMode toggles whether default fail mode is set for the bridge
+     * @param setManagedBy toggles whether to setManagedBy for the bridge
+     * @param dpType if passed null, this parameter is ignored
+     * @param externalIds if passed null, this parameter is ignored
+     * @param otherConfig if passed null, this parameter is ignored
+     * @return success of bridge addition
+     * @throws InterruptedException
+     */
+    public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
+                              final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                              final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                              final Class<? extends DatapathTypeBase> dpType,
+                              final List<BridgeExternalIds> externalIds,
+                              final List<ControllerEntry> controllerEntries,
+                              final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
+
+        NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+        if (bridgeIid == null) {
+            bridgeIid = createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
+        }
+        if (bridgeNodeId == null) {
+            bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+        }
+        bridgeNodeBuilder.setNodeId(bridgeNodeId);
+        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+        ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
+        if (setProtocolEntries) {
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
+        }
+        if (failMode != null) {
+            ovsdbBridgeAugmentationBuilder.setFailMode(failMode);
+        }
+        if (setManagedBy) {
+            setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
+        }
+        if (dpType != null) {
+            ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
+        }
+        if (externalIds != null) {
+            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIds);
+        }
+        if (controllerEntries != null) {
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(controllerEntries);
+        }
+        if (otherConfigs != null) {
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
+        }
+        bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+        LOG.debug("Built with the intent to store bridge data {}",
+                ovsdbBridgeAugmentationBuilder.toString());
+        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                bridgeIid, bridgeNodeBuilder.build());
+        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+        return result;
+    }
+
+    private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                              final ConnectionInfo connectionInfo) {
+        InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 }

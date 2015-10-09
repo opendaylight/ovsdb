@@ -53,5 +53,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>mdsal-openflow</module>
     <module>servicehelper</module>
     <module>mdsal-utils</module>
+    <module>southbound-utils</module>
   </modules>
 </project>

@@ -11,6 +11,8 @@ package org.opendaylight.ovsdb.routemgr.net;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 
+import java.lang.Integer;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -43,8 +45,13 @@ public class OvsdbDataListener implements DataChangeListener {
     // Interface Manager
     private IfMgr ifMgr;
 
+    private HashMap<String, Integer> processedNodes;
+    private IPv6RtrFlow ipv6RtrFlow;
+
     public OvsdbDataListener(DataBroker dataBroker) {
-        this.dataService = dataBroker;
+        this.dataService    = dataBroker;
+        this.processedNodes = new HashMap<>();
+        this.ipv6RtrFlow    = new IPv6RtrFlow();
     }
 
     public void registerDataChangeListener() {
@@ -118,6 +125,14 @@ public class OvsdbDataListener implements DataChangeListener {
                     if (intf.getOfport() != null) {
                         ofPort = intf.getOfport();
                         ifMgr.updateInterface(interfaceUuid, dpId, ofPort);
+                        Integer refCnt = (Integer) processedNodes.get(dpId);
+                        if (refCnt == null) {
+                            refCnt = new Integer(1);
+                            processedNodes.put(dpId, refCnt);
+                            ipv6RtrFlow.addIcmpv6Flow2Controller(dpId);
+                        } else {
+                            refCnt++;
+                        }
                     }
                 }
             }
@@ -153,6 +168,16 @@ public class OvsdbDataListener implements DataChangeListener {
                 if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
                     dpId = tpParentNode.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
                     ifMgr.deleteInterface(interfaceUuid, dpId);
+                    Integer refCnt = (Integer) processedNodes.get(dpId);
+                    if (refCnt == null) {
+                        LOG.error("refCnt isn't present for dpId={} ", dpId);
+                    } else {
+                        refCnt--;
+                        if (refCnt == 0) {
+                            ipv6RtrFlow.removeIcmpv6Flow2Controller(dpId);
+                            processedNodes.remove(dpId);
+                        }
+                    }
                 }
             }
         }

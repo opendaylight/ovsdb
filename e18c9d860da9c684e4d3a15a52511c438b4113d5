@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_01d796ee",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-10-09T12:46:44Z",
+      "side": 1,
+      "message": "How about getDestMacForArpRequestPacket()?\n\nThis method decides whether to use the broadcast MAC or the unicast MAC for ARP request packets based on whether one of the last MAX_OUTSTANDING_ARP_REQUESTS requests has been answered.  It\u0027s bumping a counter, but I\u0027m not sure the caller needs to know how it\u0027s making the decision.  However, I could also add a comment for the method to clarify this if you think it would help.\n\nIf so, I\u0027d rename the getArpRequestSourceMacAddress() and getArpRequestSourceIp() similarly.",
+      "parentUuid": "1a76adc5_7b5b972e",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 38
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_17def911",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 2

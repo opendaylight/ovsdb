@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_7b5b972e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-10-09T00:12:44Z",
+      "side": 1,
+      "message": "I think if we want to keep it in a single function, we should rename it to something that better indicates what it does. I\u0027m bad with names, but maybe something like:\n\nbumpCounterAndGetArpRequestDestMacAddress() \n\notherwise, it\u0027s fine to me.",
+      "parentUuid": "1a76adc5_f749fd8b",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 38
+      },
+      "revId": "e18c9d860da9c684e4d3a15a52511c438b4113d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_17def911",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 2

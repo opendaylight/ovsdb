@@ -27,7 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <karaf.distro.groupId>org.opendaylight.ovsdb</karaf.distro.groupId>
     <karaf.distro.artifactId>openstack.net-virt-sfc-karaf</karaf.distro.artifactId>
-    <karaf.distro.version>1.0.0-SNAPSHOT</karaf.distro.version>
+    <karaf.distro.version>${project.version}</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
   </properties>
 
@@ -53,6 +53,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>${project.groupId}</groupId>
       <artifactId>utils.mdsal-utils</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>utils.southbound-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>concepts</artifactId>
     </dependency>
     <dependency>
       <groupId>org.codehaus.sonar-plugins.java</groupId>

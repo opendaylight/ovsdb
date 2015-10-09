@@ -11,12 +11,15 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,10 +29,10 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
-//import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessListsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListBuilder;
@@ -44,7 +47,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.SffBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.Sfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yangtools.concepts.Builder;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import org.ops4j.pax.exam.Configuration;
@@ -66,6 +71,16 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static SfcUtils sfcUtils = new SfcUtils();
     private static MdsalUtils mdsalUtils;
     private static AtomicBoolean setup = new AtomicBoolean(false);
+    private static SouthboundUtils southboundUtils;
+    private static String addressStr;
+    private static String portStr;
+    private static String connectionType;
+    public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
+    public static final String SERVER_PORT = "ovsdbserver.port";
+    public static final String CONNECTION_TYPE = "ovsdbserver.connection";
+    public static final String CONNECTION_TYPE_ACTIVE = "active";
+    public static final String CONNECTION_TYPE_PASSIVE = "passive";
+    public static final String DEFAULT_SERVER_PORT = "6640";
 
     @Override
     public String getModuleName() {
@@ -95,18 +110,27 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     @Configuration
     @Override
     public Option[] config() {
-            Option[] parentOptions = super.config();
-            Option[] otherOptions = getOtherOptions();
-            Option[] options = new Option[parentOptions.length + otherOptions.length];
-            System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
-            System.arraycopy(otherOptions, 0, options, parentOptions.length, otherOptions.length);
-            return options;
-        }
+        Option[] parentOptions = super.config();
+        Option[] propertiesOptions = getPropertiesOptions();
+        Option[] otherOptions = getOtherOptions();
+        Option[] options = new Option[parentOptions.length + propertiesOptions.length + otherOptions.length];
+        System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
+        System.arraycopy(propertiesOptions, 0, options, parentOptions.length, propertiesOptions.length);
+        System.arraycopy(otherOptions, 0, options, parentOptions.length + propertiesOptions.length,
+                otherOptions.length);
+        return options;
+    }
 
     private Option[] getOtherOptions() {
         return new Option[] {
                 vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
                 keepRuntimeFolder()
+        };
+    }
+
+    public Option[] getPropertiesOptions() {
+        return new Option[] {
+                propagateSystemProperties(SERVER_IPADDRESS, SERVER_PORT, CONNECTION_TYPE),
         };
     }
 
@@ -117,6 +141,26 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 LogLevel.INFO.name());
         option = composite(option, super.getLoggingOption());
         return option;
+    }
+
+    protected String usage() {
+        return "Integration Test needs a valid connection configuration as follows :\n"
+                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
+                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
+    }
+
+    private void getProperties() {
+        Properties props = System.getProperties();
+        addressStr = props.getProperty(SERVER_IPADDRESS);
+        portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
+        connectionType = props.getProperty(CONNECTION_TYPE, "active");
+        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}",
+                connectionType, addressStr, portStr);
+        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
+            if (addressStr == null) {
+                fail(usage());
+            }
+        }
     }
 
     @Before
@@ -136,6 +180,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         DataBroker dataBroker = getDatabroker(getProviderContext());
         mdsalUtils = new MdsalUtils(dataBroker);
         assertNotNull("mdsalUtils should not be null", mdsalUtils);
+        southboundUtils = new SouthboundUtils(mdsalUtils);
+        getProperties();
         setup.set(true);
     }
 
@@ -190,15 +236,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAcl() {
-        AccessListsBuilder accessListsBuilder = setAccessLists();
-        InstanceIdentifier<AccessLists> path = InstanceIdentifier.create(AccessLists.class);
-        assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, path, accessListsBuilder.build()));
-        AccessLists accessLists = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
-        assertNotNull("AccessLists should not be null", accessLists);
-        assertTrue("Failed to remove AccessLists", mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, path));
-        accessLists = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
-        assertNull("AccessLists should be null", accessLists);
+    public void testAccessLists() {
+        testModel(setAccessLists(), AccessLists.class);
     }
 
     private ClassifiersBuilder setClassifiers() {
@@ -213,26 +252,36 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testClassifier() {
-        ClassifiersBuilder classifiersBuilder = setClassifiers();
-        InstanceIdentifier<Classifiers> path = InstanceIdentifier.create(Classifiers.class);
-        assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, path, classifiersBuilder.build()));
-        Classifiers classifiers = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
-        assertNotNull("Classifiers should not be null", classifiers);
-        assertTrue("Failed to remove Classifiers", mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, path));
-        classifiers = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
-        assertNull("Classifiers should be null", classifiers);
+    public void testClassifiers() {
+        testModel(setClassifiers(), Classifiers.class);
+    }
+
+    private SfcBuilder setSfc() {
+        SfcBuilder sfcBuilder = sfcUtils.createSfc(new SfcBuilder(), "sfc");
+        return sfcBuilder;
     }
 
     @Test
     public void testSfc() {
-        SfcBuilder sfcBuilder = sfcUtils.createSfc(new SfcBuilder(), "sfc");
-        InstanceIdentifier<Sfc> path = InstanceIdentifier.create(Sfc.class);
-        assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, path, sfcBuilder.build()));
-        Sfc sfc = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
-        assertNotNull("SfcUtils should not be null", sfc);
-        assertTrue("Failed to remove Sfc", mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, path));
-        sfc = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
-        assertNull("Sfc should be null", sfc);
+        testModel(setSfc(), Sfc.class);
+    }
+
+    private <T extends DataObject> void testModel(Builder<T> builder, Class<T> clazz) {
+        InstanceIdentifier<T> path = InstanceIdentifier.create(clazz);
+        assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, path, builder.build()));
+        T result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
+        assertNotNull(clazz.getSimpleName() + " should not be null", result);
+        assertTrue("Failed to remove " + clazz.getSimpleName(),
+                mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, path));
+        result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
+        assertNull(clazz.getSimpleName() + " should be null", result);
+    }
+
+    @Test
+    public void testDoIt() throws InterruptedException {
+        ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
+        southboundUtils.connectOvsdbNode(connectionInfo);
+        Thread.sleep(1000);
+        southboundUtils.disconnectOvsdbNode(connectionInfo);
     }
 }

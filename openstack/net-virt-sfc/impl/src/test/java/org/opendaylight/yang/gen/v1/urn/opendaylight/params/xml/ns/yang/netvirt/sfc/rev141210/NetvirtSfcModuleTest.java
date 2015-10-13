@@ -14,6 +14,7 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NetvirtSfcProvider;
+import org.osgi.framework.BundleContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 
 import javax.management.ObjectName;
@@ -45,7 +46,6 @@ public class NetvirtSfcModuleTest {
 
         // create instance of module with injected mocks
         NetvirtSfcModule module = new NetvirtSfcModule(mock(ModuleIdentifier.class), dependencyResolver);
-        //module.setDataBroker(mock(ObjectName.class));
         // getInstance calls resolveInstance to get the broker dependency and then calls createInstance
         AutoCloseable closeable = module.getInstance();
         ((NetvirtSfcProvider)closeable).onSessionInitiated(session);

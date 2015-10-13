@@ -25,6 +25,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <properties>
     <karaf.localFeature>odl-ovsdb-sfc-test</karaf.localFeature>
   </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>openstack.net-virt-sfc-artifacts</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <!-- scope is compile so all features (there is only one) are installed

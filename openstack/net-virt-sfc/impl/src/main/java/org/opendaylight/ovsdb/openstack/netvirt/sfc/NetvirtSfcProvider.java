@@ -36,7 +36,10 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("NetvirtSfcProvider Session Initiated");
         dataBroker = session.getSALService(DataBroker.class);
 
-        provider = new NetvirtSfcOF13Provider(this.dataBroker);
+        // Initialize the OF flow processor for SFC classifier rules.
+        provider = new NetvirtSfcOF13Provider(this.dataBroker, this.bundleContext);
+
+        // Initialize the Data Change Listeners.
         aclListener = new NetvirtSfcAclListener(provider, this.dataBroker);
         classfierListener = new NetvirtSfcClassifierListener(provider, this.dataBroker);
     }

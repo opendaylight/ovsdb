@@ -22,6 +22,30 @@
       "revId": "fd44e6a875c671a068162f9e8a013d6b6759b8c4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_dad41c49",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-13T11:16:39Z",
+      "side": 1,
+      "message": "For controller initiated connection we should overwrite the value every time we connect, because we write the node-id that user used to dump the data in the data store, if we reuse the old data from data store, there is a possibility that you end up with two different node-id in config and operational data store and it will break the functionality. This is the same code i am re-using that is used to update the node.",
+      "parentUuid": "1a76adc5_3ade706e",
+      "range": {
+        "startLine": 178,
+        "startChar": 12,
+        "endLine": 178,
+        "endChar": 35
+      },
+      "revId": "fd44e6a875c671a068162f9e8a013d6b6759b8c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

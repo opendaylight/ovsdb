@@ -157,6 +157,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.info("ITDBG: Connect 2: iid: {}", iid);
             putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
             OvsdbConnectionInstance ovsdbConnectionInstance = connectedButCallBacksNotRegistered(client);
+            ovsdbConnectionInstance.setOvsdbNodeAugmentation(ovsdbNode);
 
             // Register Cluster Ownership for ConnectionInfo
             registerEntityForOwnership(ovsdbConnectionInstance);

@@ -115,6 +115,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
         ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
                 getInstanceIdentifier(key));
+        LOG.info("ITDBG: connectedButCallBacksNotRegistered 1: key: {}", key);
+        putConnectionInstance(key, ovsdbConnectionInstance);
+        ovsdbConnectionInstance.setHasDeviceOwnership(true);
+        LOG.info("ITDBG: connectedButCallBacksNotRegistered 2");
         ovsdbConnectionInstance.createTransactInvokers();
         return ovsdbConnectionInstance;
     }
@@ -143,12 +147,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO handle case where we already have a connection
         // TODO use transaction chains to handle ordering issues between disconnected
         // TODO and connected when writing to the operational store
+        LOG.info("ITDBG: Connect: iid: {}", iid);
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
                 ovsdbNode.getConnectionInfo().getRemotePort().getValue());
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         if (client != null) {
+            LOG.info("ITDBG: Connect 2: iid: {}", iid);
             putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
             OvsdbConnectionInstance ovsdbConnectionInstance = connectedButCallBacksNotRegistered(client);
 
@@ -200,6 +206,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private void putConnectionInstance(ConnectionInfo key,OvsdbConnectionInstance instance) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         clients.put(connectionInfo, instance);
+        LOG.info("ITDBG: putConnectionInstance:\nconnectionInfo: {}\ninstance: {}", connectionInfo, instance);
     }
 
     private void removeConnectionInstance(ConnectionInfo key) {
@@ -336,6 +343,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         if (ownershipChange.isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
             LOG.debug("handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",
                     ovsdbConnectionInstance.getConnectionInfo(), ovsdbConnectionInstance.getHasDeviceOwnership());
+            ovsdbConnectionInstance.registerCallbacks();
             return;
         }
 

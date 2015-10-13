@@ -87,6 +87,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             nodeBuilder.setNodeId(getNodeId(openVSwitch));
             nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
                     ovsdbNodeBuilder.build());
+            LOG.info("ITDBG: execute:\nnodePath: {}\nnodeBuilder: {}", nodePath, nodeBuilder.build());
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
                     nodeBuilder.build());
         }
@@ -254,6 +255,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> iid =
                    (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
             getOvsdbConnectionInstance().setInstanceIdentifier(iid);
+            LOG.info("ITDBG: getInstanceIdentifier 1: iid: {}", iid);
         } else {
             String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
                     + ovs.getUuid().toString();
@@ -264,6 +266,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                     .child(Node.class,nodeKey)
                     .build();
             getOvsdbConnectionInstance().setInstanceIdentifier(iid);
+            LOG.info("ITDBG: getInstanceIdentifier 2: iid: {}", iid);
         }
         return getOvsdbConnectionInstance().getInstanceIdentifier();
     }

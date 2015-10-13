@@ -91,15 +91,18 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
 
     private void updateData(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        LOG.info("updateData enter: changes: {}", changes);
         for (Entry<InstanceIdentifier<Node>, OvsdbConnectionInstance> connectionInstanceEntry :
                 connectionInstancesFromChanges(changes).entrySet()) {
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getValue();
+            LOG.info("updateData: connectionInfo: {}", connectionInstance.getConnectionInfo());
             connectionInstance.transact(new TransactCommandAggregator(
                     new BridgeOperationalState(db, changes),
                     new DataChangesManagedByOvsdbNodeEvent(
                             connectionInstance.getInstanceIdentifier(),
                             changes)));
         }
+        LOG.info("updateData exit");
     }
 
     private void disconnect(

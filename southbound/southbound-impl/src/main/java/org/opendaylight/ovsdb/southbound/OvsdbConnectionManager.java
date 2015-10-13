@@ -150,6 +150,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         if (client != null) {
             putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
             OvsdbConnectionInstance ovsdbConnectionInstance = connectedButCallBacksNotRegistered(client);
+            ovsdbConnectionInstance.setOvsdbNodeAugmentation(ovsdbNode);
 
             // Register Cluster Ownership for ConnectionInfo
             registerEntityForOwnership(ovsdbConnectionInstance);

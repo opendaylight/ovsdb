@@ -516,6 +516,15 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                         if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
                             controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
                                     + ":" + tokens[1] + ":" + getControllerOFPort());
+                        } else if (tokens[0].equalsIgnoreCase("ptcp")) {
+                            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+                                controllerIpStr = new String(connectionInfo.getLocalIp().getValue());
+                                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
+                            } else {
+                                LOG.warn("Ovsdb Node does not contain connection info: {}", node);
+                            }
                         } else {
                             LOG.trace("Skipping manager entry {} for node {}",
                                     managerEntry.getTarget(), node.getNodeId().getValue());

@@ -15,5 +15,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/${project.version}</bundle>
     <feature version='${project.version}'>odl-ovsdb-southbound-impl-ui</feature>
+    <feature version='${project.version}'>odl-ovsdb-sfc-ui</feature>
   </feature>
 </features>

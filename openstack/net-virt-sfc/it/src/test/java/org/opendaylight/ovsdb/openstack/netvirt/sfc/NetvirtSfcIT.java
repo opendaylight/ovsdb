@@ -105,7 +105,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.ovsdb")
-                .artifactId("openstack.net-virt-sfc-features")
+                .artifactId("openstack.net-virt-sfc-features-test")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
@@ -113,7 +113,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-ovsdb-sfc-ui";
+        return "odl-ovsdb-sfc-test";
     }
 
     @Configuration

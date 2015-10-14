@@ -196,7 +196,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     private ProviderContext getProviderContext() {
         ProviderContext providerContext = null;
-        for (int i=0; i < 20; i++) {
+        for (int i=0; i < 60; i++) {
             providerContext = getSession();
             if (providerContext != null) {
                 break;

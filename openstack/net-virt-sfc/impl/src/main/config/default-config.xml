@@ -10,6 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <required-capabilities>
     <capability>urn:opendaylight:params:xml:ns:yang:netvirt:sfc?module=netvirt-sfc&amp;revision=2014-12-10</capability>
     <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:southbound:impl?module=southbound-impl&amp;revision=2014-12-10</capability>
   </required-capabilities>
   <configuration>
 

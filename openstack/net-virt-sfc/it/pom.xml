@@ -53,15 +53,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>${project.groupId}</groupId>
       <artifactId>utils.mdsal-utils</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>utils.southbound-utils</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>concepts</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.sonar-plugins.java</groupId>
@@ -78,11 +81,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
+        <!--<configuration>
           <excludes>
             <exclude>**/NetvirtSfcIT.java</exclude>
           </excludes>
-        </configuration>
+        </configuration>-->
       </plugin>
     </plugins>
   </build>

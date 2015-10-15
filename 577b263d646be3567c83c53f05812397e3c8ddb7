@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_589b95c9",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalStateTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-10-15T13:50:04Z",
+      "side": 1,
+      "message": "Could you make your test more concrete: I mean have a test function per function in the BridgeOperationalState. Or for each of those functions make sure it either return Optional.absent() or Optional\u003cTYPE TO BE RETURNED BY THE FUNCTION\u003e",
+      "range": {
+        "startLine": 30,
+        "startChar": 13,
+        "endLine": 30,
+        "endChar": 39
+      },
+      "revId": "577b263d646be3567c83c53f05812397e3c8ddb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

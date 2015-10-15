@@ -47,6 +47,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
     private static final Logger LOG = LoggerFactory.getLogger(IngressAclService.class);
     private volatile SecurityServicesManager securityServicesManager;
+    private static final int PORT_RANGE_MIN = 1;
+    private static final int PORT_RANGE_MAX = 65535;
 
     public IngressAclService() {
         super(Service.INGRESS_ACL);
@@ -91,41 +93,41 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                     if (null != remoteSrcAddressList) {
                         for (Neutron_IPs vmIp :remoteSrcAddressList ) {
                             switch (portSecurityRule.getSecurityRuleProtocol()) {
-                            case MatchUtils.TCP:
-                                ingressAclTcp(dpid, segmentationId, attachedMac, portSecurityRule,vmIp.getIpAddress(),
-                                              write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            case MatchUtils.UDP:
-                                ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule,vmIp.getIpAddress(),
-                                              write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            case MatchUtils.ICMP:
-                                ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, vmIp.getIpAddress(),
-                                               write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                break;
-                            default:
-                                LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
-                                break;
+                                case MatchUtils.TCP:
+                                    ingressAclTcp(dpid, segmentationId, attachedMac, portSecurityRule,
+                                                vmIp.getIpAddress(),write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                case MatchUtils.UDP:
+                                    ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule,
+                                                vmIp.getIpAddress(), write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                case MatchUtils.ICMP:
+                                    ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule,
+                                                vmIp.getIpAddress(), write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                                    break;
+                                default:
+                                    LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
+                                    break;
                             }
                         }
                     }
                 } else {
                     //CIDR is selected
                     switch (portSecurityRule.getSecurityRuleProtocol()) {
-                    case MatchUtils.TCP:
-                        ingressAclTcp(dpid, segmentationId, attachedMac,
-                                      portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    case MatchUtils.UDP:
-                        ingressAclUdp(dpid, segmentationId, attachedMac,
-                                      portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    case MatchUtils.ICMP:
-                        ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, null,
-                                       write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                        break;
-                    default:
-                        LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
+                        case MatchUtils.TCP:
+                            ingressAclTcp(dpid, segmentationId, attachedMac,
+                                          portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        case MatchUtils.UDP:
+                            ingressAclUdp(dpid, segmentationId, attachedMac,
+                                          portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        case MatchUtils.ICMP:
+                            ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, null,
+                                           write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            break;
+                        default:
+                            LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
                     }
                 }
 
@@ -313,13 +315,22 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "Ingress_Custom_Tcp" + segmentationId + "_" + dstMac + "_";
+        String flowId = "Ingress_TCP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+
+        /* Custom TCP Match*/
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
-            flowId = flowId + portSecurityRule.getSecurityRulePortMin();
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0,
                                                     portSecurityRule.getSecurityRulePortMin());
         } else {
+            /* All TCP Match */
+            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+                    && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
+                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
+            }
             /*TODO TCP PortRange Match*/
 
         }
@@ -337,7 +348,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
 
     }
@@ -358,13 +369,22 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                               NeutronSecurityRule portSecurityRule, String srcAddress,
                               boolean write, Integer protoPortMatchPriority ) {
         MatchBuilder matchBuilder = new MatchBuilder();
-        String flowId = "ingressAclUDP" + segmentationId + "_" + dstMac + "_";
+        String flowId = "Ingress_UDP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+
+        /* Custom UDP Match */
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
-            flowId = flowId + portSecurityRule.getSecurityRulePortMin();
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0,
                                                     portSecurityRule.getSecurityRulePortMin());
         } else {
+            /* All UDP Match */
+            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+                    && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
+                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
+            }
             /*TODO TCP PortRange Match*/
 
         }
@@ -381,7 +401,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
 
     }
@@ -404,7 +424,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "ingressAclICMP" + segmentationId + "_" + dstMac;
+        String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_"
+                    + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";;
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
         matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
                         portSecurityRule.getSecurityRulePortMin().shortValue(),
@@ -421,7 +443,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
 

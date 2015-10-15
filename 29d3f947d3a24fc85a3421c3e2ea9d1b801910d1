@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_3baa4bd5",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalStateTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-10-15T17:43:46Z",
+      "side": 1,
+      "message": "could you define 2 different assert thus having 2 tests: \none that will return Optional.absent()\none that will return Optional\u003cOvsdbBridgeAugmentation\u003e\n\nSame for other tests",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 93
+      },
+      "revId": "29d3f947d3a24fc85a3421c3e2ea9d1b801910d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

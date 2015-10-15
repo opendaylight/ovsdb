@@ -17,36 +17,4 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetvirtSfcModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev141210.AbstractNetvirtSfcModuleFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcModuleFactory.class);
-
-    @Override
-    public Module createModule(String instanceName,
-                               DependencyResolver dependencyResolver,
-                               DynamicMBeanWithInstance old, BundleContext bundleContext)
-            throws Exception {
-        Module module =  super.createModule(instanceName, dependencyResolver, old, bundleContext);
-        LOG.info("Created NetvirtSfcModule1= {}!!", (module instanceof NetvirtSfcModule));
-        setModuleBundleContext(bundleContext, module);
-        return module;
-    }
-
-    @Override
-    public Module createModule(String instanceName,
-                               DependencyResolver dependencyResolver, BundleContext bundleContext) {
-        Module module = super.createModule(instanceName, dependencyResolver, bundleContext);
-        LOG.info("Created NetvirtSfcModule2= {}!!", (module instanceof NetvirtSfcModule));
-        setModuleBundleContext(bundleContext, module);
-        return module;
-    }
-
-    private void setModuleBundleContext(BundleContext bundleContext,
-                                        Module module) {
-        if (module instanceof NetvirtSfcModule) {
-            LOG.info("Setting Bundle Context for NetvirtSfcModule!!");
-            ((NetvirtSfcModule)module).setBundleContext(bundleContext);
-        } else {
-            LOG.warn("Module is of type {} expected type {}",
-                    module.getClass(), NetvirtSfcModule.class);
-        }
-    }
 }

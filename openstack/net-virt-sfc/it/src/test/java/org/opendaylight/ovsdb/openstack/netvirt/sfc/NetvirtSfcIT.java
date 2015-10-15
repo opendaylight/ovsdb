@@ -181,6 +181,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         }
 
         try {
+            Thread.sleep(1000);
             super.setup();
         } catch (Exception e) {
             e.printStackTrace();

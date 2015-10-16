@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_2cb44ff1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-16T08:59:14Z",
+      "side": 1,
+      "message": "i think we should rename this getDpidOfIntegrationBridge(Node)",
+      "revId": "6380f7393d6974de911a1ee31589fae5aa6b9395",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_4cb0b3f4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/translator/iaware/impl/NeutronPortChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-16T08:59:14Z",
+      "side": 1,
+      "message": "please change it as follows \nNeutronPort originalPort \u003d originalPortMap.get(port.getID());\nif(originalPort !\u003d null) {\nport.setOriginalPort(originalPort);\n}else {\nLOG.warn (\"Original Port data is missing\");\n}",
+      "revId": "6380f7393d6974de911a1ee31589fae5aa6b9395",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_ec940746",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/translator/iaware/impl/NeutronPortChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-16T08:59:14Z",
+      "side": 1,
+      "message": "please do the charity and remove this tab. :)",
+      "revId": "6380f7393d6974de911a1ee31589fae5aa6b9395",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

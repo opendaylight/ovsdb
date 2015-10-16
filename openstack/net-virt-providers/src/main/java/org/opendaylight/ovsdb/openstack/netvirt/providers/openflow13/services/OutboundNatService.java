@@ -10,6 +10,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.Inet6Address;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
@@ -44,8 +46,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import com.google.common.collect.Lists;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OutboundNatService extends AbstractServiceInstance implements OutboundNatProvider, ConfigInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(OutboundNatService.class);
+
     public OutboundNatService() {
         super(Service.OUTBOUND_NAT);
     }
@@ -164,6 +170,20 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
         InstructionBuilder ib;
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        String ipAddress = excludedCidr.substring(0, excludedCidr.indexOf("/"));
+        InetAddress inetAddress;
+        try {
+            inetAddress = InetAddress.getByName(ipAddress);
+        } catch (UnknownHostException e) {
+            return new Status(StatusCode.BADREQUEST);
+        }
+        if (inetAddress instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 cidr case
+            LOG.debug("ipv6 cidr is not implemented yet. cidr {}",
+                      excludedCidr);
+            return new Status(StatusCode.NOTIMPLEMENTED);
+        }
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(excludedCidr));
 
         // Goto Next Table

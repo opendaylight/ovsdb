@@ -32,10 +32,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
     </scm>
     <dependencies>
-        <dependency>
-            <groupId>org.opendaylight.dlux</groupId>
-            <artifactId>loader</artifactId>
-            <version>${dlux.loader.version}</version>
+      <dependency>
+        <groupId>org.opendaylight.dlux</groupId>
+          <artifactId>loader</artifactId>
+          <version>${dlux.version}</version>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.ovsdb</groupId>

@@ -11,9 +11,9 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.NeutronSecurityRule;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
@@ -46,6 +46,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
     private static final Logger LOG = LoggerFactory.getLogger(IngressAclService.class);
     private volatile SecurityServicesManager securityServicesManager;
+    private static final int PORT_RANGE_MIN = 1;
+    private static final int PORT_RANGE_MAX = 65535;
 
     public IngressAclService() {
         super(Service.INGRESS_ACL);
@@ -312,13 +314,22 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "Ingress_Custom_Tcp" + segmentationId + "_" + dstMac + "_";
+        String flowId = "Ingress_TCP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+
+        /* Custom TCP Match*/
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
-            flowId = flowId + portSecurityRule.getSecurityRulePortMin();
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0,
                                                     portSecurityRule.getSecurityRulePortMin());
         } else {
+            /* All TCP Match */
+            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+                    && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
+                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
+            }
             /*TODO TCP PortRange Match*/
 
         }
@@ -336,7 +347,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
 
     }
@@ -357,13 +368,22 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                               NeutronSecurityRule portSecurityRule, String srcAddress,
                               boolean write, Integer protoPortMatchPriority ) {
         MatchBuilder matchBuilder = new MatchBuilder();
-        String flowId = "ingressAclUDP" + segmentationId + "_" + dstMac + "_";
+        String flowId = "Ingress_UDP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+
+        /* Custom UDP Match */
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
-            flowId = flowId + portSecurityRule.getSecurityRulePortMin();
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0,
                                                     portSecurityRule.getSecurityRulePortMin());
         } else {
+            /* All UDP Match */
+            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+                    && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
+                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
+            }
             /*TODO TCP PortRange Match*/
 
         }
@@ -380,7 +400,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        flowId = flowId + "_Permit_";
+        flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
 
     }

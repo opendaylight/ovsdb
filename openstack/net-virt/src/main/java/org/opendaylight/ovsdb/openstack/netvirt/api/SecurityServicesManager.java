@@ -8,13 +8,13 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import java.util.List;
-
-import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+
+import java.util.List;
 
 /**
  * Open vSwitch isolates Tenant Networks using VLANs on the Integration Bridge.
@@ -42,6 +42,14 @@ public interface SecurityServicesManager {
      * @return the dhcp server port
      */
     NeutronPort getDhcpServerPort(OvsdbTerminationPointAugmentation intf);
+
+    /**
+      * Check if the given interface corresponds to a DHCP server port.
+      *
+      * @param intf the intf
+      * @return Return the DHCP neutron port
+      */
+    NeutronPort getNeutronPortFromDhcpIntf(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is the port a compute port.
@@ -81,4 +89,11 @@ public interface SecurityServicesManager {
      */
     List<Neutron_IPs> getVmListForSecurityGroup(List<Neutron_IPs> srcAddressList,
                                                 String securityGroupUuid);
+    /**
+     * Add or remove the security groups rules from the port.
+     * @param port the neutron port.
+     * @param securityGroup the security group associated with the port.
+     * @param write whether to add/delete flow.
+     */
+    void syncSecurityGroup(NeutronPort port, List<NeutronSecurityGroup> securityGroup, boolean write);
 }

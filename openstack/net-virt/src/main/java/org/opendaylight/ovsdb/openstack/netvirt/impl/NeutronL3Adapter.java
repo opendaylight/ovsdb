@@ -10,16 +10,17 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.INeutronPortCRUD;
-import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.neutron.spi.NeutronFloatingIP;
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.NeutronRouter;
-import org.opendaylight.neutron.spi.NeutronRouter_Interface;
-import org.opendaylight.neutron.spi.NeutronSubnet;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -43,6 +44,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +72,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private volatile ArpProvider arpProvider;
     private volatile RoutingProvider routingProvider;
     private volatile GatewayMacResolver gatewayMacResolver;
+    private volatile SecurityServicesManager securityServicesManager;
 
     private class FloatIpData {
         // br-int of node where floating ip is associated with tenant port
@@ -197,6 +200,8 @@ public class NeutronL3Adapter implements ConfigInterface {
      */
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOG.debug("Neutron port {} event : {}", action, neutronPort.toString());
+
+        this.processSecurityGroupUpdate(neutronPort);
         if (!this.enabled) {
             return;
         }
@@ -326,7 +331,7 @@ public class NeutronL3Adapter implements ConfigInterface {
      * way around) on OpenFlow Table 100.
      *
      * @param actionIn the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
-     * @param neutronFloatingIP An {@link org.opendaylight.neutron.spi.NeutronFloatingIP} instance of NeutronFloatingIP object.
+     * @param neutronFloatingIP An {@link org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP} instance of NeutronFloatingIP object.
      */
     public void handleNeutronFloatingIPEvent(final NeutronFloatingIP neutronFloatingIP,
                                              Action actionIn) {
@@ -529,7 +534,7 @@ public class NeutronL3Adapter implements ConfigInterface {
      * Process the event.
      *
      * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
-     * @param neutronNetwork An {@link org.opendaylight.neutron.spi.NeutronNetwork} instance of NeutronFloatingIP object.
+     * @param neutronNetwork An {@link org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork} instance of NeutronFloatingIP object.
      */
     public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         LOG.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
@@ -544,7 +549,7 @@ public class NeutronL3Adapter implements ConfigInterface {
      * @param bridgeNode An instance of Node object.
      * @param intf An {@link org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105
      * .OvsdbTerminationPointAugmentation} instance of OvsdbTerminationPointAugmentation object.
-     * @param neutronNetwork An {@link org.opendaylight.neutron.spi.NeutronNetwork} instance of NeutronNetwork
+     * @param neutronNetwork An {@link org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork} instance of NeutronNetwork
      * object.
      * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
      */
@@ -655,6 +660,50 @@ public class NeutronL3Adapter implements ConfigInterface {
                 }
             }
         }
+    }
+
+    private void processSecurityGroupUpdate(NeutronPort neutronPort) {
+        LOG.trace("processSecurityGroupUpdate:" + neutronPort);
+        /**
+         * Get updated data and original data for the the changed. Identify the security groups that got
+         * added and removed and call the appropriate providers for updating the flows.
+         */
+        try {
+            NeutronPort originalPort = neutronPort.getOriginalPort();
+            if (null == originalPort) {
+                LOG.debug("processSecurityGroupUpdate: originalport is empty");
+                return;
+            }
+            List<NeutronSecurityGroup> addedGroup = getsecurityGroupChanged(neutronPort,
+                                                                            neutronPort.getOriginalPort());
+            List<NeutronSecurityGroup> deletedGroup = getsecurityGroupChanged(neutronPort.getOriginalPort(),
+                                                                              neutronPort);
+
+            if (null != addedGroup && !addedGroup.isEmpty()) {
+                securityServicesManager.syncSecurityGroup(neutronPort,addedGroup,true);
+            }
+            if (null != deletedGroup && !deletedGroup.isEmpty()) {
+                securityServicesManager.syncSecurityGroup(neutronPort,deletedGroup,false);
+            }
+
+        } catch (Exception e) {
+            LOG.error("Exception in processSecurityGroupUpdate", e);
+        }
+    }
+
+    private List<NeutronSecurityGroup> getsecurityGroupChanged(NeutronPort port1, NeutronPort port2) {
+        LOG.trace("getsecurityGroupChanged:" + "Port1:" + port1 + "Port2" + port2);
+        ArrayList<NeutronSecurityGroup> list1 = new ArrayList<NeutronSecurityGroup>(port1.getSecurityGroups());
+        ArrayList<NeutronSecurityGroup> list2 = new ArrayList<NeutronSecurityGroup>(port2.getSecurityGroups());
+        for (Iterator<NeutronSecurityGroup> iterator = list1.iterator(); iterator.hasNext();) {
+            NeutronSecurityGroup securityGroup1 = iterator.next();
+            for (NeutronSecurityGroup securityGroup2 :list2) {
+                if (securityGroup1.getID().equals(securityGroup2.getID())) {
+                    iterator.remove();
+                }
+            }
+        }
+        return list1;
     }
 
     private void programL3ForwardingStage1(Node node, Long dpid, String providerSegmentationId,
@@ -1370,6 +1419,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         gatewayMacResolver =
                 (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
+        securityServicesManager =
+                (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
         initL3AdapterMembers();
     }
 

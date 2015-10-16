@@ -19,26 +19,17 @@ import org.slf4j.LoggerFactory;
 
 public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcProvider.class);
-    private DataBroker dataBroker = null;
-    private BundleContext bundleContext = null;
     private NetvirtSfcAclListener aclListener;
-
     private NetvirtSfcClassifierListener classfierListener;
-    private INetvirtSfcOF13Provider provider;
-
-    public NetvirtSfcProvider(BundleContext bundleContext) {
-        LOG.info("NetvirtProvider: bundleContext: {}", bundleContext);
-        this.bundleContext = bundleContext;
-    }
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
         LOG.info("NetvirtSfcProvider Session Initiated");
-        dataBroker = session.getSALService(DataBroker.class);
+        DataBroker dataBroker = session.getSALService(DataBroker.class);
 
-        provider = new NetvirtSfcOF13Provider(this.dataBroker);
-        aclListener = new NetvirtSfcAclListener(provider, this.dataBroker);
-        classfierListener = new NetvirtSfcClassifierListener(provider, this.dataBroker);
+        INetvirtSfcOF13Provider provider = new NetvirtSfcOF13Provider(dataBroker);
+        aclListener = new NetvirtSfcAclListener(provider, dataBroker);
+        classfierListener = new NetvirtSfcClassifierListener(provider, dataBroker);
     }
 
     @Override

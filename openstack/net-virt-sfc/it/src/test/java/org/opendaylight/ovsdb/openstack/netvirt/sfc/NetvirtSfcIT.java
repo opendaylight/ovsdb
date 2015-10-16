@@ -5,18 +5,61 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessListsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.AccessListEntriesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.ActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.MatchesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.ClassifierBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.SffsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.SffBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.Sfc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Builder;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -31,6 +74,22 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerClass.class)
 public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcIT.class);
+    private static AclUtils aclUtils = new AclUtils();
+    private static ClassifierUtils classifierUtils = new ClassifierUtils();
+    private static SfcUtils sfcUtils = new SfcUtils();
+    private static MdsalUtils mdsalUtils;
+    private static AtomicBoolean setup = new AtomicBoolean(false);
+    private static SouthboundUtils southboundUtils;
+    private static String addressStr;
+    private static String portStr;
+    private static String connectionType;
+    public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
+    public static final String SERVER_PORT = "ovsdbserver.port";
+    public static final String CONNECTION_TYPE = "ovsdbserver.connection";
+    public static final String CONNECTION_TYPE_ACTIVE = "active";
+    public static final String CONNECTION_TYPE_PASSIVE = "passive";
+    public static final String DEFAULT_SERVER_PORT = "6640";
+    public static final String BRIDGE_NAME = "brtest";
 
     @Override
     public String getModuleName() {
@@ -46,7 +105,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.ovsdb")
-                .artifactId("openstack.net-virt-sfc-features")
+                .artifactId("openstack.net-virt-sfc-features-test")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
@@ -54,24 +113,33 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-ovsdb-sfc-ui";
+        return "odl-ovsdb-sfc-test";
     }
 
     @Configuration
     @Override
     public Option[] config() {
-            Option[] parentOptions = super.config();
-            Option[] otherOptions = getOtherOptions();
-            Option[] options = new Option[parentOptions.length + otherOptions.length];
-            System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
-            System.arraycopy(otherOptions, 0, options, parentOptions.length, otherOptions.length);
-            return options;
-        }
+        Option[] parentOptions = super.config();
+        Option[] propertiesOptions = getPropertiesOptions();
+        Option[] otherOptions = getOtherOptions();
+        Option[] options = new Option[parentOptions.length + propertiesOptions.length + otherOptions.length];
+        System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
+        System.arraycopy(propertiesOptions, 0, options, parentOptions.length, propertiesOptions.length);
+        System.arraycopy(otherOptions, 0, options, parentOptions.length + propertiesOptions.length,
+                otherOptions.length);
+        return options;
+    }
 
     private Option[] getOtherOptions() {
         return new Option[] {
                 vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
                 keepRuntimeFolder()
+        };
+    }
+
+    public Option[] getPropertiesOptions() {
+        return new Option[] {
+                propagateSystemProperties(SERVER_IPADDRESS, SERVER_PORT, CONNECTION_TYPE),
         };
     }
 
@@ -84,8 +152,170 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         return option;
     }
 
+    protected String usage() {
+        return "Integration Test needs a valid connection configuration as follows :\n"
+                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
+                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
+    }
+
+    private void getProperties() {
+        Properties props = System.getProperties();
+        addressStr = props.getProperty(SERVER_IPADDRESS);
+        portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
+        connectionType = props.getProperty(CONNECTION_TYPE, "active");
+        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}",
+                connectionType, addressStr, portStr);
+        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
+            if (addressStr == null) {
+                fail(usage());
+            }
+        }
+    }
+
+    @Before
+    @Override
+    public void setup() {
+        if (setup.get()) {
+            LOG.info("Skipping setUp, already initialized");
+            return;
+        }
+
+        try {
+            Thread.sleep(1000);
+            super.setup();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        DataBroker dataBroker = getDatabroker(getProviderContext());
+        mdsalUtils = new MdsalUtils(dataBroker);
+        assertNotNull("mdsalUtils should not be null", mdsalUtils);
+        southboundUtils = new SouthboundUtils(mdsalUtils);
+        getProperties();
+        setup.set(true);
+    }
+
+    private ProviderContext getProviderContext() {
+        ProviderContext providerContext = null;
+        for (int i=0; i < 60; i++) {
+            providerContext = getSession();
+            if (providerContext != null) {
+                break;
+            } else {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        assertNotNull("providercontext should not be null", providerContext);
+        /* One more second to let the provider finish initialization */
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return providerContext;
+    }
+
+    private DataBroker getDatabroker(ProviderContext providerContext) {
+        DataBroker dataBroker = providerContext.getSALService(DataBroker.class);
+        assertNotNull("dataBroker should not be null", dataBroker);
+        return dataBroker;
+    }
+
     @Test
-    public void testnetvirtsfcFeatureLoad() {
-        Assert.assertTrue(true);
+    public void testNetvirtSfcFeatureLoad() {
+        assertTrue(true);
+    }
+
+    private AccessListsBuilder setAccessLists () {
+        MatchesBuilder matchesBuilder = aclUtils.createMatches(new MatchesBuilder(), 80);
+        ActionsBuilder actionsBuilder = aclUtils.createActions(new ActionsBuilder(), Boolean.TRUE);
+        AccessListEntryBuilder accessListEntryBuilder = aclUtils.createAccessListEntryBuilder(
+                new AccessListEntryBuilder(), "http", matchesBuilder, actionsBuilder);
+        AccessListEntriesBuilder accessListEntriesBuilder = aclUtils.createAccessListEntries(
+                new AccessListEntriesBuilder(), accessListEntryBuilder);
+        AccessListBuilder accessListBuilder = aclUtils.createAccessList(new AccessListBuilder(),
+                "http", accessListEntriesBuilder);
+        AccessListsBuilder accessListsBuilder = aclUtils.createAccessLists(new AccessListsBuilder(),
+                accessListBuilder);
+        LOG.info("AccessLists: {}", accessListsBuilder.build());
+        return accessListsBuilder;
+    }
+
+    @Test
+    public void testAccessLists() {
+        testModel(setAccessLists(), AccessLists.class);
+    }
+
+    private ClassifiersBuilder setClassifiers() {
+        SffBuilder sffBuilder = classifierUtils.createSff(new SffBuilder(), "sffname");
+        SffsBuilder sffsBuilder = classifierUtils.createSffs(new SffsBuilder(), sffBuilder);
+        ClassifierBuilder classifierBuilder = classifierUtils.createClassifier(new ClassifierBuilder(),
+                "classifierName", "aclName", sffsBuilder);
+        ClassifiersBuilder classifiersBuilder = classifierUtils.createClassifiers(new ClassifiersBuilder(),
+                classifierBuilder);
+        LOG.info("Classifiers: {}", classifiersBuilder.build());
+        return classifiersBuilder;
+    }
+
+    @Test
+    public void testClassifiers() {
+        testModel(setClassifiers(), Classifiers.class);
+    }
+
+    private SfcBuilder setSfc() {
+        SfcBuilder sfcBuilder = sfcUtils.createSfc(new SfcBuilder(), "sfc");
+        return sfcBuilder;
+    }
+
+    @Test
+    public void testSfc() {
+        testModel(setSfc(), Sfc.class);
+    }
+
+    private <T extends DataObject> void testModel(Builder<T> builder, Class<T> clazz) {
+        InstanceIdentifier<T> path = InstanceIdentifier.create(clazz);
+        assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, path, builder.build()));
+        T result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
+        assertNotNull(clazz.getSimpleName() + " should not be null", result);
+        assertTrue("Failed to remove " + clazz.getSimpleName(),
+                mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, path));
+        result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
+        assertNull(clazz.getSimpleName() + " should be null", result);
+    }
+
+    @Test
+    public void testDoIt() throws InterruptedException {
+        ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
+        Node ovsdbNode = southboundUtils.connectOvsdbNode(connectionInfo);
+
+        String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
+        assertNotNull("Failed to get controller target", controllerTarget);
+        List<ControllerEntry> setControllerEntry = southboundUtils.createControllerEntry(controllerTarget);
+        Uri setUri = new Uri(controllerTarget);
+        Assert.assertTrue(southboundUtils.addBridge(connectionInfo, null, BRIDGE_NAME, null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
+                setControllerEntry, null));
+        OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, BRIDGE_NAME);
+        Assert.assertNotNull("bridge was not found: " + BRIDGE_NAME,  bridge);
+        Assert.assertNotNull("ControllerEntry was not found: " + setControllerEntry.iterator().next(),
+                bridge.getControllerEntry());
+        List<ControllerEntry> getControllerEntries = bridge.getControllerEntry();
+        for (ControllerEntry entry : getControllerEntries) {
+            if (entry.getTarget() != null) {
+                Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
+            }
+        }
+
+        /* TODO: add code to write to mdsal to exercise the sfc dataChangeListener */
+        /* allow some time to let the impl code do it's work to push flows */
+        /* or just comment out below lines and just manually verify on the bridges and reset them */
+        Thread.sleep(10000);
+
+        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, BRIDGE_NAME));
+        southboundUtils.disconnectOvsdbNode(connectionInfo);
     }
 }

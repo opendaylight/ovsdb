@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import java.util.List;
 
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 
 /**
  *  This interface allows egress Port Security flows to be written to devices.

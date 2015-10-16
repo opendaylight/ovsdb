@@ -411,8 +411,8 @@ public class SouthboundImpl implements Southbound {
     /**
      * Method read ports from bridge node. Method will check if the provided node
      * has the ports details, if not, it will read from Operational data store.
-     * @param node
-     * @return
+     * @param node Target bridge to getch termination points from.
+     * @return List of termination points on the given bridge
      */
     public List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node) {
         List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(node);

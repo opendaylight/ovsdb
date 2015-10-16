@@ -19,8 +19,10 @@ import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +33,8 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
@@ -40,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev1410
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.ActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.MatchesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.ClassifierBuilder;
@@ -47,7 +52,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.SffBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.Sfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -81,6 +89,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public static final String CONNECTION_TYPE_ACTIVE = "active";
     public static final String CONNECTION_TYPE_PASSIVE = "passive";
     public static final String DEFAULT_SERVER_PORT = "6640";
+    public static final String BRIDGE_NAME = "brtest";
 
     @Override
     public String getModuleName() {
@@ -96,7 +105,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.ovsdb")
-                .artifactId("openstack.net-virt-sfc-features")
+                .artifactId("openstack.net-virt-sfc-features-test")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
@@ -104,7 +113,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-ovsdb-sfc-ui";
+        return "odl-ovsdb-sfc-test";
     }
 
     @Configuration
@@ -172,6 +181,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         }
 
         try {
+            Thread.sleep(1000);
             super.setup();
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,7 +197,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     private ProviderContext getProviderContext() {
         ProviderContext providerContext = null;
-        for (int i=0; i < 20; i++) {
+        for (int i=0; i < 60; i++) {
             providerContext = getSession();
             if (providerContext != null) {
                 break;
@@ -280,8 +290,32 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     @Test
     public void testDoIt() throws InterruptedException {
         ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
-        southboundUtils.connectOvsdbNode(connectionInfo);
-        Thread.sleep(1000);
+        Node ovsdbNode = southboundUtils.connectOvsdbNode(connectionInfo);
+
+        String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
+        assertNotNull("Failed to get controller target", controllerTarget);
+        List<ControllerEntry> setControllerEntry = southboundUtils.createControllerEntry(controllerTarget);
+        Uri setUri = new Uri(controllerTarget);
+        Assert.assertTrue(southboundUtils.addBridge(connectionInfo, null, BRIDGE_NAME, null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
+                setControllerEntry, null));
+        OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, BRIDGE_NAME);
+        Assert.assertNotNull("bridge was not found: " + BRIDGE_NAME,  bridge);
+        Assert.assertNotNull("ControllerEntry was not found: " + setControllerEntry.iterator().next(),
+                bridge.getControllerEntry());
+        List<ControllerEntry> getControllerEntries = bridge.getControllerEntry();
+        for (ControllerEntry entry : getControllerEntries) {
+            if (entry.getTarget() != null) {
+                Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
+            }
+        }
+
+        /* TODO: add code to write to mdsal to exercise the sfc dataChangeListener */
+        /* allow some time to let the impl code do it's work to push flows */
+        /* or just comment out below lines and just manually verify on the bridges and reset them */
+        Thread.sleep(10000);
+
+        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, BRIDGE_NAME));
         southboundUtils.disconnectOvsdbNode(connectionInfo);
     }
 }

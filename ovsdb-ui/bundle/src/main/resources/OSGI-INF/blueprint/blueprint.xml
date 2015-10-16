@@ -12,7 +12,9 @@
         <property name="angularJs" value="app.ovsdb"/>
         <property name="cssDependencies">
             <list>
-                <value>src/app/ovsdb/ovsdb.css</value>
+                <value>src/app/ovsdb/css/select2.min.css</value>
+                <value>src/app/ovsdb/css/toggle-switch.css</value>
+                <value>src/app/ovsdb/css/ovsdb.css</value>
             </list>
         </property>
     </bean>

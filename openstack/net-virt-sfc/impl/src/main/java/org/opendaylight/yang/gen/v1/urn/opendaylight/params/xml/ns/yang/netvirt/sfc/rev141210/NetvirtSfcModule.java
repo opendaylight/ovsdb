@@ -8,7 +8,6 @@ import org.osgi.framework.BundleContext;
 public class NetvirtSfcModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev141210.AbstractNetvirtSfcModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcModule.class);
-    private BundleContext bundleContext = null;
 
     public NetvirtSfcModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -26,13 +25,8 @@ public class NetvirtSfcModule extends org.opendaylight.yang.gen.v1.urn.opendayli
     @Override
     public java.lang.AutoCloseable createInstance() {
         LOG.info("Netvirt SFC module initialization.");
-        //final NetvirtSfcProvider sfcProvider = new NetvirtSfcProvider(getDataBrokerDependency());
-        final NetvirtSfcProvider sfcProvider = new NetvirtSfcProvider(bundleContext);
+        NetvirtSfcProvider sfcProvider = new NetvirtSfcProvider();
         getBrokerDependency().registerProvider(sfcProvider);
         return sfcProvider;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 }

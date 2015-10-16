@@ -22,6 +22,47 @@
       "revId": "44f1e0960283f1a63f08104c0b2992f41d988ef3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_39f3300c",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 575,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-16T16:31:22Z",
+      "side": 1,
+      "message": "i would suggest to remove eth as well, until and unless it has any significance in type or there are multiple type of nsh interfaces.",
+      "parentUuid": "fad0f9df_8c521b12",
+      "range": {
+        "startLine": 575,
+        "startChar": 28,
+        "endLine": 575,
+        "endChar": 35
+      },
+      "revId": "44f1e0960283f1a63f08104c0b2992f41d988ef3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_59f874e5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-16T16:31:22Z",
+      "side": 1,
+      "message": "please fix this here as well.",
+      "revId": "44f1e0960283f1a63f08104c0b2992f41d988ef3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

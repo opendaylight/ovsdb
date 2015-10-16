@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_8c521b12",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 575,
+      "author": {
+        "id": 3225
+      },
+      "writtenOn": "2015-10-16T07:13:39Z",
+      "side": 1,
+      "message": "it\u0027s better to remove the underscore or use dash instead.",
+      "range": {
+        "startLine": 575,
+        "startChar": 28,
+        "endLine": 575,
+        "endChar": 35
+      },
+      "revId": "44f1e0960283f1a63f08104c0b2992f41d988ef3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

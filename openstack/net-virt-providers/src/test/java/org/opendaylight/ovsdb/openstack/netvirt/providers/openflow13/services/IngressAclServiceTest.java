@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -41,20 +44,29 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * Unit test fort {@link IngressAclService}
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")
 public class IngressAclServiceTest {
 
     @InjectMocks private IngressAclService ingressAclService = new IngressAclService();
-    @Spy private IngressAclService ingressAclServiceSpy;
+    private IngressAclService ingressAclServiceSpy;
 
     @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
@@ -80,10 +92,29 @@ public class IngressAclServiceTest {
     private static final String DEST_IP_1 = "192.169.0.1";
     private static final String DEST_IP_2 = "192.169.0.2";
     private static final String SECURITY_GROUP_UUID = "85cc3048-abc3-43cc-89b3-377341426ac5";
+    private static final String SEGMENT_ID = "2";
+    private static final Long DP_ID_LONG = (long) 1554;
+    private static final Long LOCAL_PORT = (long) 124;
+    private static final int PORT_RANGE_MIN = 1;
+    private static final int PORT_RANGE_MAX = 65535;
+    private static FlowBuilder flowBuilder;
+    private static NodeBuilder nodeBuilder;
+
+    private static Answer<Object> answer() {
+        return new Answer<Object>() {
+            @Override
+            public CheckedFuture<Void, TransactionCommitFailedException> answer(InvocationOnMock invocation)
+                    throws Throwable {
+                flowBuilder = (FlowBuilder) invocation.getArguments()[0];
+                nodeBuilder = (NodeBuilder) invocation.getArguments()[1];
+                return null;
+            }
+        };
+    }
 
     @Before
     public void setUp() {
-        ingressAclServiceSpy = Mockito.spy(ingressAclService);
+        ingressAclServiceSpy = PowerMockito.spy(ingressAclService);
 
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
@@ -282,15 +313,25 @@ public class IngressAclServiceTest {
     @Test
     public void testProgramPortSecurityACLRuleAddTcp1() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
 
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        TcpMatch layer4Match = (TcpMatch) match.getLayer4Match();
+        Assert.assertEquals(20, layer4Match.getTcpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        Assert.assertEquals("Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +
+                            "_" + port + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
     }
 
     /**
@@ -299,15 +340,25 @@ public class IngressAclServiceTest {
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcp1() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(15);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(15);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
 
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        TcpMatch layer4Match = (TcpMatch) match.getLayer4Match();
+        Assert.assertEquals(15, layer4Match.getTcpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        Assert.assertEquals("Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +
+                            "_" + port + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
     }
 
     /**
@@ -320,12 +371,29 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
 
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        TcpMatch layer4Match = (TcpMatch) match.getLayer4Match();
+        Assert.assertEquals(50, layer4Match.getTcpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        String expectedFlowId1 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_1 +
+                "_Permit";
+        String expectedFlowId2 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_2 +
+                "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
     }
 
     /**
@@ -338,12 +406,143 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
 
-        verify(writeTransaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        TcpMatch layer4Match = (TcpMatch) match.getLayer4Match();
+        Assert.assertEquals(50, layer4Match.getTcpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        String expectedFlowId1 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_1 +
+                "_Permit";
+        String expectedFlowId2 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_2 +
+                "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
+    }
+
+
+    /**
+     *  Test TCP add with port (All TCP) and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddTcpAll1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        Assert.assertEquals("Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + PORT_RANGE_MIN + "_" +
+                            PORT_RANGE_MAX + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
+    }
+
+    /**
+     *  Test TCP remove with port (All TCP) and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveTcpAll1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        Assert.assertEquals("Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + PORT_RANGE_MIN + "_" +
+                            PORT_RANGE_MAX + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
+    }
+
+    /**
+     *  Test TCP add with port (All TCP) and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddTcpAll2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        String expectedFlowId1 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + PORT_RANGE_MIN + "_" +
+                            PORT_RANGE_MAX + "_" + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + PORT_RANGE_MIN + "_" +
+                PORT_RANGE_MAX + "_" + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
+    }
+
+    /**
+     *  Test TCP remove with port (All TCP) and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveTcpAll2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof TcpMatch);
+        TcpMatch layer4Match = (TcpMatch) match.getLayer4Match();
+        String expectedFlowId1 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + PORT_RANGE_MIN + "_" +
+                                PORT_RANGE_MAX + "_" + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Ingress_TCP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + PORT_RANGE_MIN + "_" +
+                                PORT_RANGE_MAX + "_" + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
     }
 
     /**
@@ -355,16 +554,26 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
 
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        UdpMatch layer4Match = (UdpMatch) match.getLayer4Match();
+        Assert.assertEquals(50, layer4Match.getUdpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        Assert.assertEquals("Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +
+                            "_" + port + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
     }
 
     /**
-     *  Test UDP add with port no and CIDR selected.
+     *  Test UDP remove with port no and CIDR selected.
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdp1() throws Exception {
@@ -372,12 +581,22 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
 
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        UdpMatch layer4Match = (UdpMatch) match.getLayer4Match();
+        Assert.assertEquals(50, layer4Match.getUdpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        Assert.assertEquals("Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +
+                            "_" + port + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
     }
 
     /**
@@ -390,16 +609,33 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,true);
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
 
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        UdpMatch layer4Match = (UdpMatch) match.getLayer4Match();
+        Assert.assertEquals(50, layer4Match.getUdpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        String expectedFlowId1 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_1 +
+                "_Permit";
+        String expectedFlowId2 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_2 +
+                "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
     }
 
     /**
-     *  Test UDP add with port no and remote SG selected.
+     *  Test UDP remove with port no and remote SG selected.
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdp2() throws Exception {
@@ -408,12 +644,263 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
 
-        ingressAclServiceSpy.programPortSecurityAcl(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,neutronSrcIpList,false);
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
 
-        verify(writeTransaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        UdpMatch layer4Match = (UdpMatch) match.getLayer4Match();
+        Assert.assertEquals(50, layer4Match.getUdpDestinationPort().getValue().intValue());
+        int port = portSecurityRule.getSecurityRulePortMin();
+        String expectedFlowId1 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_1 +
+                "_Permit";
+        String expectedFlowId2 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + port + "_" + DEST_IP_2 +
+                "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
+    }
+
+    /**
+     *  Test UDP add with ports (All UDP) and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddUdpAll1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        Assert.assertEquals("Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + PORT_RANGE_MIN  + "_" +
+                            PORT_RANGE_MAX + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
+    }
+
+    /**
+     *  Test UDP remove with ports (All UDP) and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveUdpAll1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        Assert.assertEquals("Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + PORT_RANGE_MIN  + "_" +
+                PORT_RANGE_MAX + "_0.0.0.0/24_Permit", flowBuilder.getFlowName());
+    }
+
+    /**
+     *  Test UDP add with ports (All UDP) and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddUdpAll2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, true);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        String expectedFlowId1 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + PORT_RANGE_MIN + "_" +
+                        PORT_RANGE_MAX + "_" + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + PORT_RANGE_MIN + "_" +
+                PORT_RANGE_MAX + "_" + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
+    }
+
+    /**
+     *  Test UDP remove with ports (All UDP) and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveUdpAll2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID, MAC_ADDRESS, LOCAL_PORT, securityGroup,
+                                                   neutronSrcIpList, false);
+
+        Match match = flowBuilder.getMatch();
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+
+        Assert.assertTrue(match.getLayer4Match() instanceof UdpMatch);
+        String expectedFlowId1 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + PORT_RANGE_MIN + "_" +
+                        PORT_RANGE_MAX + "_" + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Ingress_UDP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + PORT_RANGE_MIN + "_" +
+                PORT_RANGE_MAX + "_" + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if (actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
+    }
+
+    /**
+     *  Test ICMP add with code, type and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddIcmp1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(10);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(10);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID,
+                                                    MAC_ADDRESS, LOCAL_PORT, securityGroup, neutronSrcIpList, true);
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(10, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(10, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        Assert.assertEquals("Ingress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + type + "_" + code
+                            + "_0.0.0.0/24_Permit",
+                            flowBuilder.getFlowName());
+    }
+
+    /**
+     *  Test ICMP remove with code, type and CIDR selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveIcmp1() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
+        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID,
+                                                    MAC_ADDRESS, LOCAL_PORT, securityGroup, neutronSrcIpList, false);
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(20, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(20, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        Assert.assertEquals("Ingress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS + "_" + type + "_" + code
+                            + "_0.0.0.0/24_Permit",
+                            flowBuilder.getFlowName());
+    }
+
+    /**
+     *  Test ICMP add with code, type and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleAddIcmp2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(30);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(30);
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer()).when(ingressAclServiceSpy, "writeFlow", any(FlowBuilder.class),
+                                             any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID,
+                                                    MAC_ADDRESS, LOCAL_PORT, securityGroup, neutronSrcIpList, true);
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match =match.getIcmpv4Match();
+        Assert.assertEquals(30, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(30, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        String expectedFlowId1 = "Ingress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Ingress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if(actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
+    }
+
+    /**
+     *  Test ICMP remove with code, type and remote SG selected.
+     */
+    @Test
+    public void testProgramPortSecurityACLRuleRemoveIcmp2() throws Exception {
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(40);
+        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(40);
+        when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
+        PowerMockito.doAnswer(answer())
+        .when(ingressAclServiceSpy, "removeFlow", any(FlowBuilder.class), any(NodeBuilder.class));
+
+        ingressAclServiceSpy.programPortSecurityAcl(DP_ID_LONG, SEGMENT_ID,
+                                                    MAC_ADDRESS, LOCAL_PORT, securityGroup, neutronSrcIpList, false);
+        Match match = flowBuilder.getMatch();
+        Icmpv4Match icmpv4Match = match.getIcmpv4Match();
+        Assert.assertEquals(40, icmpv4Match.getIcmpv4Type().shortValue());
+        Assert.assertEquals(40, icmpv4Match.getIcmpv4Code().shortValue());
+        EthernetMatch ethMatch = match.getEthernetMatch();
+        Assert.assertEquals(MAC_ADDRESS, ethMatch.getEthernetDestination().getAddress().getValue());
+        Short type = portSecurityRule.getSecurityRulePortMin().shortValue();
+        Short code = portSecurityRule.getSecurityRulePortMax().shortValue();
+        String expectedFlowId1 = "Ingress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_1 + "_Permit";
+        String expectedFlowId2 = "Ingress_ICMP_" + SEGMENT_ID + "_" + MAC_ADDRESS +"_" + type + "_" + code + "_"
+                                + DEST_IP_2 + "_Permit";
+        String actualFlowId = flowBuilder.getFlowName();
+        if(actualFlowId.equals(expectedFlowId1) || actualFlowId.equals(expectedFlowId2)) {
+            Assert.assertTrue(true);
+        } else {
+            Assert.assertTrue(false);
+        }
     }
 
     /**

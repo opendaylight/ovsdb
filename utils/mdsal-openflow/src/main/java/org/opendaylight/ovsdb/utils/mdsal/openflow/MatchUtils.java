@@ -81,6 +81,7 @@ public class MatchUtils {
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
+    public static final String ICMP = "icmp";
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -194,18 +195,12 @@ public class MatchUtils {
     /**
      * Match ICMP code and type
      *
-     * @param matchBuilder MatchBuilder Object without a match yet
+     * @param matchBuilder MatchBuilder Object
      * @param type         short representing an ICMP type
      * @param code         short representing an ICMP code
      * @return matchBuilder Map MatchBuilder Object with a match
      */
     public static MatchBuilder createICMPv4Match(MatchBuilder matchBuilder, short type, short code) {
-
-        EthernetMatchBuilder eth = new EthernetMatchBuilder();
-        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
-        ethTypeBuilder.setType(new EtherType(0x0800L));
-        eth.setEthernetType(ethTypeBuilder.build());
-        matchBuilder.setEthernetMatch(eth.build());
 
         // Build the IPv4 Match requied per OVS Syntax
         IpMatchBuilder ipmatch = new IpMatchBuilder();

@@ -11,9 +11,9 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.NeutronSecurityRule;
-import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;

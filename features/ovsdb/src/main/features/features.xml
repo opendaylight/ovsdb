@@ -38,6 +38,7 @@
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
+    <bundle>mvn:org.opendaylight.neutron/dummyprovider/${networkconfig.neutron.version}</bundle>
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/${project.version}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${project.version}/xml/config</configfile>
   </feature>

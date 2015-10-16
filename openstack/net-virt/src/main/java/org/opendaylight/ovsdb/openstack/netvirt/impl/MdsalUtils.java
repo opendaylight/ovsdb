@@ -61,7 +61,7 @@ public class MdsalUtils {
      *
      * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
      * @param path {@link InstanceIdentifier} for path to read
-     * @param <D> the data object type
+     * @param data object of type D
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
@@ -84,7 +84,7 @@ public class MdsalUtils {
      *
      * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
      * @param path {@link InstanceIdentifier} for path to read
-     * @param <D> the data object type
+     * @param data object of type D
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(

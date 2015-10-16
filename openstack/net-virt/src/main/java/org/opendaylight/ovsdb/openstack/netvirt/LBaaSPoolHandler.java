@@ -12,14 +12,14 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
-import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
-import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolAware;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.INeutronPortCRUD;
-import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.neutron.spi.NeutronLoadBalancer;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronLoadBalancerPoolAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
@@ -194,6 +194,8 @@ public class LBaaSPoolHandler extends AbstractHandler
     /**
      * Useful utility for extracting the loadbalancer instance. With
      * each LB pool, we allow multiple VIP and LB to be instantiated.
+     * @param neutronLBPool Neutron load balancer pool object
+     * @return list of loadbalancer configuration of pool members
      */
     public List<LoadBalancerConfiguration> extractLBConfiguration(NeutronLoadBalancerPool neutronLBPool) {
         String poolProtocol = neutronLBPool.getLoadBalancerPoolProtocol();

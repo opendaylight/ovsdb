@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;

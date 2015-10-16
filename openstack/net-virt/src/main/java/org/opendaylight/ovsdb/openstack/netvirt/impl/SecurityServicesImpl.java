@@ -324,7 +324,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 LOG.debug("programVlanRules: No AttachedMac seen in {}", intf);
                 return;
             }
-            long dpid = getIntegrationBridgeOfDpid(node);
+            long dpid = getDpidOfIntegrationBridge(node);
             List<Neutron_IPs> srcAddressList = securityServicesManager.getIpAddressList(node, intf);
             for (NeutronSecurityGroup securityGroupInPort:securityGroupList) {
                 ingressAclProvider.programPortSecurityAcl(dpid, segmentationId, attachedMac, localPort,
@@ -335,8 +335,8 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         }
     }
 
-    private long getIntegrationBridgeOfDpid(Node node) {
-        LOG.trace("getIntegrationBridgeOfDpid:" + node);
+    private long getDpidOfIntegrationBridge(Node node) {
+        LOG.trace("getDpidOfIntegrationBridge:" + node);
         long dpid = 0L;
         if (southbound.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
             dpid = getDpid(node);

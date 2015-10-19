@@ -74,14 +74,28 @@
         },
         {
             "collectionId": "bc172f70-35df-2cdf-50a4-8ad09b8f17a2",
-            "data": "http://localhost:8181/restconf/config/ietf-acl:access-lists\n{\n    \"access-lists\": {\n        \"access-list\": [\n            {\n                \"acl-name\": \"http-acl\",\n                \"access-list-entries\": {\n                    \"access-list-entry\": [\n                        {\n                            \"rule-name\": \"http-rule\",\n                            \"matches\": {\n                                \"destination-port-range\": {\n                                    \"lower-port\": \"80\",\n                                    \"upper-port\": \"80\"\n                                }\n                            },\n                            \"actions\": {\n                                \"netvirt-sfc-acl:redirect-sfc\": \"acl\"\n                            }\n                        }\n                    ]\n                }\n            }\n        ]\n    }\n}",
+            "data": "{\n    \"service-functions\": {\n        \"service-function\": [\n            {\n                \"name\": \"firewall-72\",\n                \"ip-mgmt-address\": \"192.168.50.72\",\n                \"type\": \"service-function-type:firewall\",\n                \"nsh-aware\": \"true\",\n                \"sf-data-plane-locator\": [\n                    {\n                        \"name\": \"2\",\n                        \"port\": 6633,\n                        \"ip\": \"192.168.50.72\",\n                        \"transport\": \"service-locator:vxlan-gpe\",\n                        \"service-function-forwarder\": \"SFF1\"\n                    }\n                ]\n            },\n            {\n                \"name\": \"dpi-74\",\n                \"ip-mgmt-address\": \"192.168.50.74\",\n                \"type\": \"service-function-type:dpi\",\n                \"nsh-aware\": \"true\",\n                \"sf-data-plane-locator\": [\n                    {\n                        \"name\": \"3\",\n                        \"port\": 6633,\n                        \"ip\": \"192.168.50.74\",\n                        \"transport\": \"service-locator:vxlan-gpe\",\n                        \"service-function-forwarder\": \"SFF2\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+            "dataMode": "raw",
+            "description": "",
+            "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
+            "id": "bf4f1148-5192-fd7d-3026-5a11668db75d",
+            "method": "PUT",
+            "name": "service-functions",
+            "time": 1445035552080,
+            "timestamp": 0,
+            "url": "http://localhost:8181//restconf/config/service-function:service-functions",
+            "version": 2
+        },
+        {
+            "collectionId": "bc172f70-35df-2cdf-50a4-8ad09b8f17a2",
+            "data": "{\n    \"access-lists\": {\n        \"access-list\": [\n            {\n                \"acl-name\": \"http-acl\",\n                \"access-list-entries\": {\n                    \"access-list-entry\": [\n                        {\n                            \"rule-name\": \"http-rule\",\n                            \"matches\": {\n                                \"destination-port-range\": {\n                                    \"lower-port\": \"80\",\n                                    \"upper-port\": \"80\"\n                                }\n                            },\n                            \"actions\": {\n                                \"netvirt-sfc-acl:redirect-sfc\": \"acl\"\n                            }\n                        }\n                    ]\n                }\n            }\n        ]\n    }\n}",
             "dataMode": "raw",
             "description": "",
             "headers": "Content-Type: application/json\n",
             "id": "c3d5a025-23c6-af23-dce1-9edca74cd65c",
             "method": "PUT",
             "name": "Acl - redirect-sfc",
-            "responses": [],
+            "time": 1445027841460,
             "timestamp": 0,
             "url": "http://localhost:8181/restconf/config/ietf-acl:access-lists",
             "version": 2
@@ -98,6 +112,20 @@
             "responses": [],
             "timestamp": 0,
             "url": "http://localhost:8181/restconf/config/netvirt-sfc:sfc/",
+            "version": 2
+        },
+        {
+            "collectionId": "bc172f70-35df-2cdf-50a4-8ad09b8f17a2",
+            "data": "{\n    \"service-functions\": {\n        \"service-function\": [\n            {\n                \"name\": \"firewall-72\",\n                \"ip-mgmt-address\": \"192.168.50.72\",\n                \"type\": \"service-function-type:firewall\",\n                \"nsh-aware\": \"true\",\n                \"sf-data-plane-locator\": [\n                    {\n                        \"name\": \"2\",\n                        \"port\": 6633,\n                        \"ip\": \"192.168.50.72\",\n                        \"transport\": \"service-locator:vxlan-gpe\",\n                        \"service-function-forwarder\": \"SFF1\"\n                    }\n                ]\n            },\n            {\n                \"name\": \"dpi-74\",\n                \"ip-mgmt-address\": \"192.168.50.74\",\n                \"type\": \"service-function-type:dpi\",\n                \"nsh-aware\": \"true\",\n                \"sf-data-plane-locator\": [\n                    {\n                        \"name\": \"3\",\n                        \"port\": 6633,\n                        \"ip\": \"192.168.50.74\",\n                        \"transport\": \"service-locator:vxlan-gpe\",\n                        \"service-function-forwarder\": \"SFF2\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+            "dataMode": "raw",
+            "description": "",
+            "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
+            "id": "fff50fa7-aa2d-71a4-db49-4ea10b82937e",
+            "method": "GET",
+            "name": "service-functions",
+            "responses": [],
+            "timestamp": 0,
+            "url": "http://localhost:8181/restconf/config/service-function:service-functions",
             "version": 2
         }
     ],

@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -77,7 +78,18 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
         try {
+            Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
+            if (ownershipStateOpt.isPresent()) {
+                EntityOwnershipState ownershipState = ownershipStateOpt.get();
+                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
+                    if (ovsdbConnection == null) {
+                        ovsdbConnection = new OvsdbConnectionService();
+                        ovsdbConnection.registerConnectionListener(cm);
+                        ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+                    }
+                }
+            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB Southbound Provider instance entity {} was already "
                     + "registered for {} ownership", instanceEntity, e);

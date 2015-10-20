@@ -14,12 +14,12 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.INetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListKey;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.AccessListEntries;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntry;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntryKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.AccessListEntries;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Data tree listener for AccessList.
  */
-public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> {
+public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcAclListener.class);
     private ListenerRegistration<NetvirtSfcAclListener> listenerRegistration;
     private MdsalUtils dbutils;
@@ -42,7 +42,7 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
      * @param db MdSal {@link DataBroker}
      */
     public NetvirtSfcAclListener(final INetvirtSfcOF13Provider provider, final DataBroker db) {
-        super(provider, AccessList.class);
+        super(provider, Acl.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
 
         dbutils = new MdsalUtils(db);
@@ -50,10 +50,10 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
     }
 
     private void registrationListener(final DataBroker db) {
-        final DataTreeIdentifier<AccessList> treeId =
+        final DataTreeIdentifier<Acl> treeId =
                 new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getIetfAclIid());
         try {
-            LOG.info("Registering Data Change Listener for Netvirt AccesList configuration.");
+            LOG.info("Registering Data Change Listener for NetvirtSfc AccesList configuration.");
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
             LOG.warn("Netvirt AccesList DataChange listener registration fail!");
@@ -76,8 +76,8 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
     }
 
     @Override
-    public void remove(final InstanceIdentifier<AccessList> identifier,
-                       final AccessList removeDataObj) {
+    public void remove(final InstanceIdentifier<Acl> identifier,
+                       final Acl removeDataObj) {
         Preconditions.checkNotNull(removeDataObj, "Removed object can not be null!");
         String aclName = removeDataObj.getAclName();
 
@@ -96,13 +96,13 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
     }
 
     @Override
-    public void update(final InstanceIdentifier<AccessList> identifier,
-                       final AccessList original, final AccessList update) {
+    public void update(final InstanceIdentifier<Acl> identifier,
+                       final Acl original, final Acl update) {
     }
 
     @Override
-    public void add(final InstanceIdentifier<AccessList> identifier,
-                    final AccessList addDataObj) {
+    public void add(final InstanceIdentifier<Acl> identifier,
+                    final Acl addDataObj) {
         Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
         String aclName = addDataObj.getAclName();
         LOG.debug("Adding accesslist = {}", identifier);
@@ -124,19 +124,19 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<AccessList> 
         return InstanceIdentifier.create(Classifiers.class);
     }
 
-    public InstanceIdentifier<AccessList> getIetfAclIid() {
-        return InstanceIdentifier.create(AccessLists.class).child(AccessList.class);
+    public InstanceIdentifier<Acl> getIetfAclIid() {
+        return InstanceIdentifier.create(AccessLists.class).child(Acl.class);
     }
 
     /**
-     * Create an {@link AccessListEntry} {@link InstanceIdentifier}.
+     * Create an {@link Ace} {@link InstanceIdentifier}.
      * @param aclName is the name of the ACL
      * @param ruleName is the name of the rule
-     * @return the {@link AccessListEntry} {@link InstanceIdentifier}
+     * @return the {@link Ace} {@link InstanceIdentifier}
      */
-    public InstanceIdentifier<AccessListEntry> getIetfAclEntryIid(String aclName, String ruleName) {
-        return InstanceIdentifier.create(AccessLists.class).child(AccessList.class,
-                new AccessListKey(aclName)).child(AccessListEntries.class).child(AccessListEntry.class,
-                new AccessListEntryKey(ruleName));
+    public InstanceIdentifier<Ace> getIetfAclEntryIid(String aclName, String ruleName) {
+        return InstanceIdentifier.create(AccessLists.class).child(Acl.class,
+                new AclKey(aclName)).child(AccessListEntries.class).child(Ace.class,
+                new AceKey(ruleName));
     }
 }

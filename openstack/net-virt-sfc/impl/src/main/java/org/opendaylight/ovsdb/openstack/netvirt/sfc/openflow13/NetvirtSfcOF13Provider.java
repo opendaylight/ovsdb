@@ -28,15 +28,15 @@ import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.sfc.provider.api.SfcProviderServiceForwarderAPI;
 import org.opendaylight.sfc.sfc_ovs.provider.SfcOvsUtil;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntry;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.Actions;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.Matches;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.actions.packet.handling.Deny;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.actions.packet.handling.Permit;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.matches.ace.type.AceEth;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.matches.ace.type.AceIp;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Actions;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Matches;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.actions.packet.handling.Deny;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.actions.packet.handling.Permit;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceEth;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceIp;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -87,7 +87,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
     }
 
     @Override
-    public void addClassifierRules(Sff sff, AccessList acl) {
+    public void addClassifierRules(Sff sff, Acl acl) {
         Preconditions.checkNotNull(sff, "Input service function forwarder cannot be NULL!");
         Preconditions.checkNotNull(acl, "Input accesslist cannot be NULL!");
 
@@ -128,15 +128,15 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
         LOG.debug("Processing the Classifier rules on Node={}", datapathId);
         if (datapathId != null) {
             // Program the OF flow on the corresponding open flow node.
-            Iterator<AccessListEntry> itr = acl.getAccessListEntries().getAccessListEntry().iterator();
+            Iterator<Ace> itr = acl.getAccessListEntries().getAce().iterator();
             while (itr.hasNext()) {
-                AccessListEntry entry = itr.next();
+                Ace entry = itr.next();
                 programOFRules(entry, datapathId, true);
             }
         }
     }
 
-    private void programOFRules(AccessListEntry entry, String datapathId, boolean write) {
+    private void programOFRules(Ace entry, String datapathId, boolean write) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + datapathId));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
@@ -207,10 +207,10 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
             AceIp aceIp = (AceIp)matches.getAceType();
             if (aceIp.getAceIpVersion() instanceof AceIpv4) {
                 AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
-                MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Address());
-                MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Address());
-                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getIpProtocol());
-                MatchUtils.addLayer4Match(matchBuilder, aceIp.getIpProtocol().intValue(),
+                MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Network());
+                MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
+                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
+                MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(),
                         aceIp.getSourcePortRange().getLowerPort().getValue().intValue(),
                         aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
             }
@@ -226,7 +226,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
     }
 
     @Override
-    public void removeClassifierRules(Sff sff, AccessList acl) {
+    public void removeClassifierRules(Sff sff, Acl acl) {
         // TODO Auto-generated method stub
 
     }

@@ -14,9 +14,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.INetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
@@ -51,7 +51,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         final DataTreeIdentifier<Classifier> treeId =
                 new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
         try {
-            LOG.info("Registering Data Change Listener for Netvirt Classifier configuration.");
+            LOG.info("Registering Data Change Listener for NetvirtSfc Classifier configuration.");
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
             LOG.warn("Netvirt Classifier DataChange listener registration fail!");
@@ -79,7 +79,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         Preconditions.checkNotNull(removeDataObj, "Added object can not be null!");
         String aclName = removeDataObj.getAcl();
         // Read the ACL information from data store and make sure it exists.
-        AccessList acl = dbutils.read(LogicalDatastoreType.CONFIGURATION,getIetfAclIid(aclName));
+        Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
         if (acl == null) {
             LOG.debug("IETF ACL with name ={} is not yet configured. skip this operation", aclName);
             return;
@@ -108,7 +108,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
         String aclName = addDataObj.getAcl();
         // Read the ACL information from data store and make sure it exists.
-        AccessList acl = dbutils.read(LogicalDatastoreType.CONFIGURATION,getIetfAclIid(aclName));
+        Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION,getIetfAclIid(aclName));
         if (acl == null) {
             LOG.debug("IETF ACL with name ={} is not yet configured. skip this operation", aclName);
             return;
@@ -128,7 +128,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         return InstanceIdentifier.create(Classifiers.class).child(Classifier.class);
     }
 
-    private InstanceIdentifier<AccessList> getIetfAclIid(String aclName) {
-        return InstanceIdentifier.create(AccessLists.class).child(AccessList.class, new AccessListKey(aclName));
+    private InstanceIdentifier<Acl> getIetfAclIid(String aclName) {
+        return InstanceIdentifier.create(AccessLists.class).child(Acl.class, new AclKey(aclName));
     }
 }

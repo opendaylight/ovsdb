@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_0d72a27c",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "Will this always have length of at least 1?  Is the first value always the \"builtClass\"?",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_03d111fb",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "These should be final.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_23ce955b",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "This should be final.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c3da2917",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 920,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "should be a constant.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_43fe396d",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "These should be final.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_63033d74",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "Why do you reset after each?  Isn\u0027t the point to keep incrementing the counter for each test case.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a317e5a2",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1433,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "Why did you get rid of all of the java doc?  I think its helpful to have some explanation.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_0326f116",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2180,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-10-20T12:07:15Z",
+      "side": 1,
+      "message": "should be final.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -36,17 +35,17 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
-import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessLists;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessListsBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.AccessListEntriesBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.ActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.MatchesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessListsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.AccessListEntriesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.ActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.MatchesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
@@ -274,11 +273,11 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private AccessListsBuilder setAccessLists () {
         MatchesBuilder matchesBuilder = aclUtils.createMatches(new MatchesBuilder(), 80);
         ActionsBuilder actionsBuilder = aclUtils.createActions(new ActionsBuilder(), Boolean.TRUE);
-        AccessListEntryBuilder accessListEntryBuilder = aclUtils.createAccessListEntryBuilder(
-                new AccessListEntryBuilder(), "http", matchesBuilder, actionsBuilder);
+        AceBuilder accessListEntryBuilder = aclUtils.createAccessListEntryBuilder(
+                new AceBuilder(), "http", matchesBuilder, actionsBuilder);
         AccessListEntriesBuilder accessListEntriesBuilder = aclUtils.createAccessListEntries(
                 new AccessListEntriesBuilder(), accessListEntryBuilder);
-        AccessListBuilder accessListBuilder = aclUtils.createAccessList(new AccessListBuilder(),
+        AclBuilder accessListBuilder = aclUtils.createAccessList(new AclBuilder(),
                 "http", accessListEntriesBuilder);
         AccessListsBuilder accessListsBuilder = aclUtils.createAccessLists(new AccessListsBuilder(),
                 accessListBuilder);

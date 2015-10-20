@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 
 /**
@@ -24,7 +24,7 @@ public interface INetvirtSfcOF13Provider {
      * @param sff - Service Function Forwarder
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
-    public void addClassifierRules(Sff sff, AccessList acl);
+    public void addClassifierRules(Sff sff, Acl acl);
 
     /**
      * Method removes the OF rules corresponding to rules within ACL
@@ -33,5 +33,5 @@ public interface INetvirtSfcOF13Provider {
      * @param sff - Service Function Forwarder
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
-    public void removeClassifierRules(Sff sff, AccessList acl);
+    public void removeClassifierRules(Sff sff, Acl acl);
 }

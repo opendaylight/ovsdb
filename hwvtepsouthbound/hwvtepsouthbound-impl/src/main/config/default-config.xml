@@ -23,6 +23,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>
           </broker>
+          <schema-service>
+            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+            <name>yang-schema-service</name>
+          </schema-service>
+          <binding-normalized-node-serializer>
+            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-normalized-node-serializer</type>
+            <name>runtime-mapping-singleton</name>
+          </binding-normalized-node-serializer>
+          <clustering-entity-ownership-service>
+             <type xmlns:ns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:entity-ownership-service">ns:entity-ownership-service</type>
+             <name>entity-ownership-service</name>
+          </clustering-entity-ownership-service>
         </module>
       </modules>
     </data>

@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -83,17 +84,25 @@ public interface SecurityServicesManager {
     List<Neutron_IPs> getIpAddressList(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Get the list of vm belonging to a security group.
-     * @param srcAddressList the address list of the connected vm.
+     * @param portUuid the uuid of the port.
      * @param securityGroupUuid the UUID of the remote security group.
      * @return the list of all vm belonging to the security group UUID passed.
      */
-    List<Neutron_IPs> getVmListForSecurityGroup(List<Neutron_IPs> srcAddressList,
+    List<Neutron_IPs> getVmListForSecurityGroup(String portUuid,
                                                 String securityGroupUuid);
     /**
-     * Add or remove the security groups rules from the port.
+     * Add or remove the security groups  from the port.
      * @param port the neutron port.
      * @param securityGroup the security group associated with the port.
      * @param write whether to add/delete flow.
      */
     void syncSecurityGroup(NeutronPort port, List<NeutronSecurityGroup> securityGroup, boolean write);
+    /**
+     * Add or remove individual security  rules from the port.
+     * @param port the neutron port.
+     * @param securityRule the security group associated with the port.
+     * @param vmIp The list of remote vm ips.
+     * @param write whether to add/delete flow.
+     */
+    void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write);
 }

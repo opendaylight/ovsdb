@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_a39a8512",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "The array of type parameters corresponds to the declared type parameters, so as long as we keep \u003cT\u003e only then this is safe.",
+      "parentUuid": "fad0f9df_0d72a27c",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_03d111fb",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-20T12:07:15Z",
       "side": 1,
       "message": "These should be final.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_43b6398c",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_03d111fb",
       "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_63bb3d73",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_23ce955b",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_c3da2917",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-20T12:07:15Z",
       "side": 1,
       "message": "should be a constant.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_23ad3532",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 920,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_c3da2917",
       "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_c3a9c925",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "I\u0027ll make the classes final instead, there\u0027s no reason to extend the concrete builders.",
+      "parentUuid": "fad0f9df_43fe396d",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_63033d74",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-20T12:07:15Z",
       "side": 1,
       "message": "Why do you reset after each?  Isn\u0027t the point to keep incrementing the counter for each test case.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_436dd903",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "The original code reset the counter in between each set of ids (externalIdCounter \u003d 0, e.g. line 923 in the original code). The tests should work without a reset, it would be safer to do it that way but I wanted to stick to the original behaviour as closely as possible...",
+      "parentUuid": "fad0f9df_63033d74",
       "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_be4a9e53",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1433,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "The docs no longer matched the reality; I thought their main point was to document the map, which became clearer (to me...) with the specific data structure. I\u0027ll document the new data structures properly!",
+      "parentUuid": "fad0f9df_a317e5a2",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_0326f116",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2015-10-20T12:07:15Z",
       "side": 1,
       "message": "should be final.",
+      "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_e32bad92",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2180,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-10-20T12:54:24Z",
+      "side": 1,
+      "message": "I\u0027ll make the whole class final, as I should have done (since I intended the instances to be immutable).",
+      "parentUuid": "fad0f9df_0326f116",
       "revId": "a7bd0f7718d2c9f0b4fc1394ed61be1c96a97b1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

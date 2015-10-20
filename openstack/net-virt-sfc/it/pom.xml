@@ -80,12 +80,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
       <plugin>
-        <artifactId>maven-failsafe-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
+          <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <!--<configuration>
           <excludes>
             <exclude>**/NetvirtSfcIT.java</exclude>
           </excludes>
-        </configuration>
+        </configuration>-->
       </plugin>
     </plugins>
   </build>

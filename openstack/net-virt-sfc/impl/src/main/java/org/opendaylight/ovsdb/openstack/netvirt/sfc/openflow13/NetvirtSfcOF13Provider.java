@@ -131,12 +131,12 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
             Iterator<Ace> itr = acl.getAccessListEntries().getAce().iterator();
             while (itr.hasNext()) {
                 Ace entry = itr.next();
-                programOFRules(entry, datapathId, true);
+                programOfRules(entry, datapathId, true);
             }
         }
     }
 
-    private void programOFRules(Ace entry, String datapathId, boolean write) {
+    private void programOfRules(Ace entry, String datapathId, boolean write) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + datapathId));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));

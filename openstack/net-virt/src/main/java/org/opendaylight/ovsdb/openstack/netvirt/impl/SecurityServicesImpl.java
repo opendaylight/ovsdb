@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
@@ -43,7 +44,6 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     private volatile ConfigurationService configurationService;
     private volatile IngressAclProvider ingressAclProvider;
     private volatile EgressAclProvider egressAclProvider;
-    private volatile SecurityServicesManager securityServicesManager;
 
     @Override
     public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
@@ -301,7 +301,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
-    public List<Neutron_IPs> getVmListForSecurityGroup(List<Neutron_IPs> srcAddressList, String securityGroupUuid) {
+    public List<Neutron_IPs> getVmListForSecurityGroup(String portUuid, String securityGroupUuid) {
         List<Neutron_IPs> vmListForSecurityGroup = new ArrayList<Neutron_IPs>();
         /*For every port check whether security grouplist contains the current
          * security group.*/
@@ -312,11 +312,13 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                             + "compute port belongs to {}", neutronPort.getID(), neutronPort.getDeviceOwner());
                     continue;
                 }
+                if (portUuid.equals(neutronPort.getID())) {
+                    continue;
+                }
                 List<NeutronSecurityGroup> securityGroups = neutronPort.getSecurityGroups();
                 if (null != securityGroups) {
                     for (NeutronSecurityGroup securityGroup:securityGroups) {
-                        if (securityGroup.getSecurityGroupUUID().equals(securityGroupUuid)
-                                && !neutronPort.getFixedIPs().containsAll(srcAddressList)) {
+                        if (securityGroup.getSecurityGroupUUID().equals(securityGroupUuid)) {
                             LOG.debug("getVMListForSecurityGroup : adding ports with ips {} "
                                     + "compute port", neutronPort.getFixedIPs());
                             vmListForSecurityGroup.addAll(neutronPort.getFixedIPs());
@@ -349,12 +351,41 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return;
             }
             long dpid = getDpidOfIntegrationBridge(node);
-            List<Neutron_IPs> srcAddressList = securityServicesManager.getIpAddressList(node, intf);
+            String neutronPortId = southbound.getInterfaceExternalIdsValue(intf,
+                                                                           Constants.EXTERNAL_ID_INTERFACE_ID);
             for (NeutronSecurityGroup securityGroupInPort:securityGroupList) {
-                ingressAclProvider.programPortSecurityAcl(dpid, segmentationId, attachedMac, localPort,
-                                                          securityGroupInPort, srcAddressList, write);
-                egressAclProvider.programPortSecurityAcl(dpid, segmentationId, attachedMac, localPort,
-                                                         securityGroupInPort, srcAddressList, write);
+                ingressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
+                                                          securityGroupInPort, neutronPortId, write);
+                egressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
+                                                         securityGroupInPort, neutronPortId, write);
+            }
+        }
+    }
+
+    @Override
+    public void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write) {
+        LOG.trace("syncSecurityGroup:" + securityRule + " Write:" + Boolean.valueOf(write));
+        if (null != port && null != port.getSecurityGroups()) {
+            Node node = getNode(port);
+            NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            String segmentationId = neutronNetwork.getProviderSegmentationID();
+            OvsdbTerminationPointAugmentation intf = getInterface(node, port);
+            long localPort = southbound.getOFPort(intf);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                LOG.debug("programVlanRules: No AttachedMac seen in {}", intf);
+                return;
+            }
+            long dpid = getDpidOfIntegrationBridge(node);
+            if ("IPv4".equals(securityRule.getSecurityRuleEthertype())
+                    && "ingress".equals(securityRule.getSecurityRuleDirection())) {
+
+                ingressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                                                           securityRule, vmIp, write);
+            } else if (securityRule.getSecurityRuleEthertype().equals("IPv4")
+                    && securityRule.getSecurityRuleDirection().equals("egress")) {
+                egressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                                                          securityRule, vmIp, write);
             }
         }
     }
@@ -424,8 +455,6 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         configurationService =
                 (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
-        securityServicesManager =
-                (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
     }
 
     @Override

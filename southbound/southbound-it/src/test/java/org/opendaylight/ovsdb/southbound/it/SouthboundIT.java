@@ -129,7 +129,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final String FORMAT_STR = "%s_%s_%d";
     public static final int NUM_THREADS = 4;
     private static String addressStr;
-    private static String portStr;
+    private static int portNumber;
     private static String connectionType;
     private static Boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
@@ -263,11 +263,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
-        portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);
+        String portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);
+        try {
+            portNumber = Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            fail("Invalid port number " + portStr + System.lineSeparator() + usage());
+        }
         connectionType = bundleContext.getProperty(SouthboundITConstants.CONNECTION_TYPE);
 
         LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}",
-                connectionType, addressStr, portStr);
+                connectionType, addressStr, portNumber);
         if (connectionType.equalsIgnoreCase(SouthboundITConstants.CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
@@ -292,25 +297,23 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
+    private ConnectionInfo getConnectionInfo(final String addressStr, final int portNumber) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(addressStr);
         } catch (UnknownHostException e) {
-            fail("Could not allocate InetAddress: " + e);
+            fail("Could not resolve " + addressStr + ": " + e);
         }
 
         IpAddress address = SouthboundMapper.createIpAddress(inetAddress);
-        PortNumber port = new PortNumber(Integer.parseInt(portStr));
+        PortNumber port = new PortNumber(portNumber);
 
-        LOG.info("connectionInfo: {}", new ConnectionInfoBuilder()
-                .setRemoteIp(address)
-                .setRemotePort(port)
-                .build());
-        return new ConnectionInfoBuilder()
+        final ConnectionInfo connectionInfo = new ConnectionInfoBuilder()
                 .setRemoteIp(address)
                 .setRemotePort(port)
                 .build();
+        LOG.info("connectionInfo: {}", connectionInfo);
+        return connectionInfo;
     }
 
     private String connectionInfoToString(final ConnectionInfo connectionInfo) {
@@ -397,14 +400,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
     public void testDpdkSwitch() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         List<DatapathTypeEntry> datapathTypeEntries = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)
                 .getDatapathTypeEntry();
@@ -463,7 +466,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testOvsdbNodeOvsVersion() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
@@ -473,7 +476,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testOpenVSwitchOtherConfig() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
@@ -495,7 +498,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testOvsdbBridgeControllerInfo() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
         assertNotNull("Failed to get controller target", controllerTarget);
@@ -734,7 +737,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testAddDeleteBridge() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
@@ -776,7 +779,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRDTerminationPointOfPort() throws InterruptedException {
         final Long OFPORT_EXPECTED = 45002L;
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // CREATE
@@ -824,7 +827,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final Long OFPORT_EXPECTED = 45008L;
         final Long OFPORT_INPUT = 45008L;
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // CREATE
@@ -1145,7 +1148,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         final String TEST_PREFIX = "CRUDTPPortExternalIds";
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // updateFromTestCases represent the original test case value.
@@ -1378,7 +1381,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRUDTerminationPointInterfaceExternalIds() throws InterruptedException, ExecutionException {
         final String TEST_PREFIX = "CRUDTPInterfaceExternalIds";
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
@@ -1440,7 +1443,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRUDTerminationPointOptions() throws InterruptedException {
         final String TEST_PREFIX = "CRUDTPOptions";
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
@@ -1502,7 +1505,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRUDTerminationPointInterfaceOtherConfigs() throws InterruptedException {
         final String TEST_PREFIX = "CRUDTPInterfaceOtherConfigs";
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
@@ -1564,7 +1567,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRUDTerminationPointPortOtherConfigs() throws InterruptedException {
         final String TEST_PREFIX = "CRUDTPPortOtherConfigs";
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
@@ -1613,7 +1616,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final Integer CREATED_VLAN_ID = 4000;
         final Integer UPDATED_VLAN_ID = 4001;
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
 
         // CREATE
@@ -1688,7 +1691,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDTerminationPointVlanModes() throws InterruptedException {
         final VlanMode UPDATED_VLAN_MODE = VlanMode.Access;
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
         VlanMode []vlanModes = VlanMode.values();
         for (VlanMode vlanMode : vlanModes) {
@@ -1797,7 +1800,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDTerminationPointVlanTrunks() throws InterruptedException {
         final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Sets.newHashSet(2011));
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
         Iterable<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
@@ -1874,7 +1877,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testGetOvsdbNodes() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
         InstanceIdentifier<Topology> topologyPath = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -1926,7 +1929,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDBridgeOtherConfigs() throws InterruptedException {
         final String TEST_BRIDGE_PREFIX = "CRUDBridgeOtherConfigs";
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
@@ -2073,7 +2076,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDBridgeExternalIds() throws InterruptedException {
         final String TEST_BRIDGE_PREFIX = "CRUDBridgeExternalIds";
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.

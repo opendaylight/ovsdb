@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -52,6 +53,7 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
     private EntityOwnershipService entityOwnershipService;
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
+    private HwvtepDataChangeListener hwvtepDTListener;
 
     public HwvtepSouthboundProvider(
             EntityOwnershipService entityOwnershipServiceDependency) {
@@ -65,7 +67,7 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
         db = session.getSALService(DataBroker.class);
         txInvoker = new TransactionInvokerImpl(db);
         cm = new HwvtepConnectionManager(db, txInvoker, entityOwnershipService);
-        //TODO: Add DataChange Listener
+        hwvtepDTListener = new HwvtepDataChangeListener(db, cm);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -75,7 +77,18 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
         try {
+            Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
+            if (ownershipStateOpt.isPresent()) {
+                EntityOwnershipState ownershipState = ownershipStateOpt.get();
+                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
+                    if (ovsdbConnection == null) {
+                        ovsdbConnection = new OvsdbConnectionService();
+                        ovsdbConnection.registerConnectionListener(cm);
+                        ovsdbConnection.startOvsdbManager(HwvtepSouthboundConstants.DEFAULT_OVSDB_PORT);
+                    }
+                }
+            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("HWVTEP Southbound Provider instance entity {} was already "
                     + "registered for {} ownership", instanceEntity, e);
@@ -96,6 +109,10 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
         if(providerOwnershipChangeListener != null) {
             providerOwnershipChangeListener.close();
             providerOwnershipChangeListener = null;
+        }
+        if(hwvtepDTListener != null) {
+            hwvtepDTListener.close();
+            hwvtepDTListener = null;
         }
     }
 

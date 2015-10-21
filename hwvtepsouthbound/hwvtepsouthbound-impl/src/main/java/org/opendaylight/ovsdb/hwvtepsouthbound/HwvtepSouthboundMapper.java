@@ -11,6 +11,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
@@ -104,6 +106,16 @@ public class HwvtepSouthboundMapper {
         connectionInfoBuilder.setRemoteIp(connectionInfo.getRemoteIp());
         connectionInfoBuilder.setRemotePort(connectionInfo.getRemotePort());
         return connectionInfoBuilder.build();
+    }
+
+    public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
+        if (ip.getIpv4Address() != null) {
+            return InetAddress.getByName(ip.getIpv4Address().getValue());
+        } else if (ip.getIpv6Address() != null) {
+            return InetAddress.getByName(ip.getIpv6Address().getValue());
+        } else {
+            throw new UnknownHostException("IP Address has no value");
+        }
     }
 
     public static InstanceIdentifier<Node> getInstanceIdentifier(Global global) {

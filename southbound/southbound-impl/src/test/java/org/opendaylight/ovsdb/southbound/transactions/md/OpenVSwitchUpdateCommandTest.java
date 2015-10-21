@@ -300,6 +300,7 @@ public class OpenVSwitchUpdateCommandTest {
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getDatapathTypesColumn()).thenReturn(column );
         Set<String> set = new HashSet<String>();
+        set.add("netdev");
         set.add("system");
         when(column.getData()).thenReturn(set);
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -309,7 +310,6 @@ public class OpenVSwitchUpdateCommandTest {
                 return (Class<? extends DatapathTypeBase>) DatapathTypeSystem.class;
             }
         });
-
         DatapathTypeEntry dpEntry = mock(DatapathTypeEntry.class);
         DatapathTypeEntryBuilder datapathTypeEntryBuilder = mock(DatapathTypeEntryBuilder.class);
         PowerMockito.whenNew(DatapathTypeEntryBuilder.class).withNoArguments().thenReturn(datapathTypeEntryBuilder);
@@ -319,7 +319,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(ovsdbNodeBuilder.setDatapathTypeEntry(any(List.class))).thenReturn(ovsdbNodeBuilder);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setDataPathTypes", ovsdbNodeBuilder, openVSwitch);
         verify(openVSwitch).getDatapathTypesColumn();
-        verify(datapathTypeEntryBuilder).setDatapathType(DatapathTypeSystem.class);
+        verify(datapathTypeEntryBuilder,times(2)).setDatapathType(DatapathTypeSystem.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -337,5 +337,7 @@ public class OpenVSwitchUpdateCommandTest {
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setVersion", ovsdbNodeBuilder, openVSwitch);
         verify(ovsdbNodeBuilder).setOvsVersion(anyString());
         verify(openVSwitch).getOvsVersionColumn();
+
+
     }
 }

@@ -23,6 +23,8 @@ import com.google.common.collect.Sets;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -877,21 +879,37 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         void reset();
     }
 
+    /**
+     * Find the real type arguments for the given class (in its hierarchy), with at least {@code nb} arguments.
+     *
+     * @param clazz The class to start with.
+     * @param nb The minimum number of type arguments.
+     * @param <T> The type of the starting class.
+     * @return The matching type arguments (a {@link RuntimeException} is thrown if none match).
+     */
+    private static <T> Type[] findTypeArguments(final Class<T> clazz, final int nb) {
+        if (clazz == null || clazz.getSuperclass() == null) {
+            throw new RuntimeException("Missing type parameters");
+        }
+        Type superClassType = clazz.getGenericSuperclass();
+        if (superClassType instanceof ParameterizedType && ((ParameterizedType) superClassType)
+                .getActualTypeArguments().length >= nb) {
+            return ((ParameterizedType) superClassType).getActualTypeArguments();
+        }
+        return findTypeArguments(clazz.getSuperclass(), nb);
+    }
+
     private abstract static class BaseKeyValueBuilder<T> implements KeyValueBuilder<T> {
         private static final int COUNTER_START = 0;
         private int counter = COUNTER_START;
-        private final Class<T> builtClass;
+        @SuppressWarnings("unchecked")
+        private final Class<T> builtClass = (Class<T>) findTypeArguments(getClass(), 1)[0];
 
         protected abstract Builder<T> builder();
 
         protected abstract void setKey(Builder<T> builder, String key);
 
         protected abstract void setValue(Builder<T> builder, String value);
-
-        @SuppressWarnings("unchecked")
-        private BaseKeyValueBuilder() {
-            builtClass = (Class<T>) this.getClass().getSuperclass().getTypeParameters()[0].getClass();
-        }
 
         @Override
         public final T build(final String testName, final String key, final String value) {
@@ -911,7 +929,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public final T[] build(final String testName, final int count, final String key, final String value) {
             final T[] instances = (T[]) Array.newInstance(builtClass, count);
             for (int idx = 0; idx < count; idx++) {
-                instances[idx] = build(testName, key, value);
+                try {
+                    instances[idx] = build(testName, key, value);
+                } catch (ArrayStoreException e) {
+                    LOG.error("Error storing a value; we think we're managing {}", builtClass, e);
+                    throw e;
+                }
             }
             return instances;
         }

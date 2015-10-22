@@ -27,6 +27,7 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.sfc.provider.api.SfcProviderServiceForwarderAPI;
 import org.opendaylight.sfc.sfc_ovs.provider.SfcOvsUtil;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SffName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
@@ -93,7 +94,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
 
         // Validate if any service function forwarder exists by the name, using SFC provider APIs.
         ServiceFunctionForwarder serviceForwarder =
-                SfcProviderServiceForwarderAPI.readServiceFunctionForwarder(sff.getName());
+                SfcProviderServiceForwarderAPI.readServiceFunctionForwarder(new SffName(sff.getName()));
         if (serviceForwarder == null) {
             LOG.debug("Service Function Forwarder = {} not yet configured. Skip processing !!", sff.getName());
             return;

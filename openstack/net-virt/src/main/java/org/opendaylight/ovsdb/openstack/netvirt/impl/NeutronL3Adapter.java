@@ -108,6 +108,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private String externalRouterMac;
     private Boolean enabled = false;
     private Southbound southbound;
+    private List<NeutronPort> portCleanupCache;
     private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
@@ -146,6 +147,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         } else {
             LOGGER.debug("OVSDB L3 forwarding is disabled");
         }
+        this.portCleanupCache = new ArrayList<>();
     }
 
     //
@@ -1264,6 +1266,49 @@ public class NeutronL3Adapter implements ConfigInterface {
         }else{
             LOGGER.warn("Neutron network not found for router interface {}",gatewayPort);
         }
+    }
+
+
+    public void storePortinCleanupCache(NeutronPort port)
+    {
+        try {
+            this.portCleanupCache.add(port);
+            LOGGER.trace("Insert  NeutronPort found {}", port.getPortUUID());
+        }catch(Exception e) {
+            LOGGER.warn(" storePortinCleanupCache Failed in exception ", e);
+
+        }
+    }
+
+
+
+    public void removePortFromCleanupCache(NeutronPort port)
+    {
+        try {
+            LOGGER.trace("Remove  NeutronPort in CleanupCache {}", port.getPortUUID());
+            this.portCleanupCache.remove(port);
+        }catch(Exception e){
+            LOGGER.warn(" removePortFromCleanupCache Failed in exception ", e);
+        }
+
+    }
+
+    public NeutronPort getPortinCleanupCache(String portid)
+    {
+        LOGGER.trace("Inside getPortinCleanupCache {}", portid);
+        try {
+            for (NeutronPort neutronPort : this.portCleanupCache) {
+                if (neutronPort.getPortUUID().equals(portid)) {
+                    LOGGER.trace("Matching NeutronPort found {}", portid);
+                    return neutronPort;
+                }
+            }
+            LOGGER.trace(" NeutronPort not found in CleanupCache");
+        }catch (Exception e){
+            LOGGER.warn(" getPortinCleanupCache Failed in exception ", e);
+        }
+        return null;
+
     }
 
     /**

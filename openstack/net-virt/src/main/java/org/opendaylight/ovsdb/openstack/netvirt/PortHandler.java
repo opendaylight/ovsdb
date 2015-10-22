@@ -107,6 +107,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
      */
     @Override
     public int canDeletePort(NeutronPort port) {
+        neutronL3Adapter.storePortinCleanupCache(port);
         return HttpURLConnection.HTTP_OK;
     }
 

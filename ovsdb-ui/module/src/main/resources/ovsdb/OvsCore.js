@@ -24,7 +24,7 @@ define(['underscore'], function (_) {
         }
       },
       nodes: {
-        get: function() {
+        get: function () {
           return _.extend({}, this._bridgeNodes, this._ovsdbNodes);
         }
       },
@@ -58,10 +58,10 @@ define(['underscore'], function (_) {
     Topology.prototype.updateLink = function () {
       _.each(this._links, (function (link, key) {
         if (link instanceof Link) {
-          srcNode = _.filter(this._bridgeNodes, function(node) {
+          srcNode = _.filter(this._bridgeNodes, function (node) {
             return node.getFLowName() === link.srcNodeId;
           });
-          destNode = _.filter(this._bridgeNodes, function(node) {
+          destNode = _.filter(this._bridgeNodes, function (node) {
             return node.getFLowName() === link.destNodeId;
           });
           link.srcNodeId = srcNode[0].nodeId;
@@ -85,22 +85,37 @@ define(['underscore'], function (_) {
       this.ovsVersion = ovsVersion;
     }
 
-    OvsNode.prototype.showIpAdress = function() {
+    OvsNode.prototype.showIpAdress = function () {
       return this.otherLocalIp;
     };
 
-    OvsNode.prototype.pretty = function() {
+    OvsNode.prototype.pretty = function () {
       return {
-        'tabs' : ['Info'],
-        'containts' : [ {
-          'hasHeader' : false,
-          'headers' : [],
-          'datas' : [
-            { key: 'ID', value: this.nodeId},
-            { key: 'InetMgr', value: this.inetMgr},
-            { key: 'InetNode', value: this.inetNode},
-            { key: 'Local IP', value: this.otherLocalIp},
-            { key: 'OVS Version', value: this.ovsVersion}
+        'tabs': ['Info'],
+        'containts': [{
+          'hasHeader': false,
+          'headers': [],
+          'datas': [
+            {
+              key: 'ID',
+              value: this.nodeId
+            },
+            {
+              key: 'InetMgr',
+              value: this.inetMgr
+            },
+            {
+              key: 'InetNode',
+              value: this.inetNode
+            },
+            {
+              key: 'Local IP',
+              value: this.otherLocalIp
+            },
+            {
+              key: 'OVS Version',
+              value: this.ovsVersion
+            }
           ]
         }]
       };
@@ -140,60 +155,90 @@ define(['underscore'], function (_) {
 
     BridgeNode.prototype.addTerminationPoint = function (tp) {
       this._tpList.push(tp);
-      this._tpList.sort(function(tp1, tp2) {
+      this._tpList.sort(function (tp1, tp2) {
         return tp1.ofPort - tp2.ofPort;
       });
     };
 
-    BridgeNode.prototype.addFlowTableInfo = function(flowTable) {
+    BridgeNode.prototype.addFlowTableInfo = function (flowTable) {
       this.flowTable.push(flowTable);
-      this.flowTable.sort(function(ft1, ft2) {
+      this.flowTable.sort(function (ft1, ft2) {
         return ft1.key - ft2.key;
       });
     };
 
-    BridgeNode.prototype.pretty = function() {
+    BridgeNode.prototype.pretty = function () {
       return {
-        'tabs' : [
+        'tabs': [
           'Basic Info',
           'Ports',
           'Flow Info',
           'Flow Tables'
         ],
-        'containts' : [
+        'containts': [
           {
-            'hasHeader' : false,
-            'headers' : [],
-            'datas' : [
-              { key: 'ID', value: this.nodeId},
-              { key: 'Name', value: this.name},
-              { key: 'OpenFlow Name', value: this.getFLowName()},
-              { key: 'Controller Target', value: this.controllerTarget},
-              { key: 'Controller Connected', value: this.controllerConnected}
+            'hasHeader': false,
+            'headers': [],
+            'datas': [
+              {
+                key: 'ID',
+                value: this.nodeId
+              },
+              {
+                key: 'Name',
+                value: this.name
+              },
+              {
+                key: 'OpenFlow Name',
+                value: this.getFLowName()
+              },
+              {
+                key: 'Controller Target',
+                value: this.controllerTarget
+              },
+              {
+                key: 'Controller Connected',
+                value: this.controllerConnected
+              }
             ]
           },
           {
-            'hasHeader' : true,
-            'header' : ['Of Port', 'Name', 'Mac', 'IFace Id',],
-            'datas' : this._tpList.map(function(s) {
+            'hasHeader': true,
+            'header': ['Of Port', 'Name', 'Mac', 'IFace Id', ],
+            'datas': this._tpList.map(function (s) {
               return [s.ofPort, s.name, s.mac, s.ifaceId];
             })
           },
           {
-              'hasHeader' : false,
-              'headers' : [],
-              'datas': [
-                {key : 'Manufacturer', value: this.flowInfo.manufacturer},
-                {key : 'Hardware', value: this.flowInfo.hardware},
-                {key : 'Software', value: this.flowInfo.software},
-                {key : 'Feature', value: this.flowInfo.features},
-                {key : 'Ip', value: this.flowInfo.ip}
+            'hasHeader': false,
+            'headers': [],
+            'datas': [
+              {
+                key: 'Manufacturer',
+                value: this.flowInfo.manufacturer
+              },
+              {
+                key: 'Hardware',
+                value: this.flowInfo.hardware
+              },
+              {
+                key: 'Software',
+                value: this.flowInfo.software
+              },
+              {
+                key: 'Feature',
+                value: this.flowInfo.features
+              },
+              {
+                key: 'Ip',
+                value: this.flowInfo.ip
+              }
               ]
           },
           {
-            'hasHeader' : true,
-            'headers' : ['Table Id', 'Value'],
-            'datas' :this.flowTable.map(function(t) {
+            'hasHeader': true,
+            'headers': ['Table Id', 'Value'],
+            'datas': this.flowTable.map(function (t) {
               return [t.key, t.value];
             })
           }
@@ -215,12 +260,24 @@ define(['underscore'], function (_) {
     return TerminationPoint;
   })();
 
-  var BaseLink = (function() {
+  var Tunnel = (function () {
+    function Tunnel(name, ofPort, tpType, mac, ifaceId, localIp, remoteIp) {
+      TerminationPoint.call(this, name, ofPort, tpType, mac, ifaceId);
+      this.localIp = localIp;
+      this.remoteIp = remoteIp;
+    }
+    Tunnel.prototype = Object.create(TerminationPoint.prototype);
+    Tunnel.prototype.constructor = Tunnel;
+
+    return Tunnel;
+  })();
+
+  var BaseLink = (function () {
     function BaseLink(linkId, srcNodeId, destNodeId, linkType, styles) {
       this.linkId = linkId;
       this.srcNodeId = srcNodeId;
       this.destNodeId = destNodeId;
-      this.linkType  = linkType;
+      this.linkType = linkType;
 
       // styling
       styles = _.extend({}, styles);
@@ -250,7 +307,7 @@ define(['underscore'], function (_) {
     return Link;
   })();
 
-  var TunnelLink = (function() {
+  var TunnelLink = (function () {
     function TunnelLink(linkId, srcNodeId, destNodeId, linkType, color) {
       var opt = {
         color: 'green',
@@ -266,7 +323,7 @@ define(['underscore'], function (_) {
     return TunnelLink;
   })();
 
-  var BridgeOvsLink = (function() {
+  var BridgeOvsLink = (function () {
     function BridgeOvsLink(linkId, srcNodeId, destNodeId, linkType, color) {
       var opt = {
         color: 'gray',
@@ -281,43 +338,43 @@ define(['underscore'], function (_) {
     return BridgeOvsLink;
   })();
 
-  var Util = (function() {
-    var Maths = (function() {
+  var Util = (function () {
+    var Maths = (function () {
       function Maths() {
 
       }
       // random function in javascript use timespan only
-      Maths.Random = function(nseed) {
-        var constant = Math.pow(2, 13)+1,
+      Maths.Random = function (nseed) {
+        var constant = Math.pow(2, 13) + 1,
           prime = 1987,
           maximum = 1000;
 
-          if (nseed) {
-            seed = nseed;
+        if (nseed) {
+          seed = nseed;
+        }
+
+        return {
+          next: function (min, max) {
+            seed *= constant;
+            seed += prime;
+
+            return min && max ? min + seed % maximum / maximum * (max - min) : seed % maximum / maximum;
           }
-
-          return {
-            next : function(min, max) {
-              seed *= constant;
-              seed += prime;
-
-              return min && max ? min+seed%maximum/maximum*(max-min) : seed%maximum/maximum;
-            }
-          };
+        };
       };
       return Maths;
     })();
 
-    var String = (function() {
+    var String = (function () {
 
       function String() {
 
       }
-      String.Format = function() {
+      String.Format = function () {
         var s = arguments[0];
         for (var i = 0; i < arguments.length - 1; i++) {
-            var reg = new RegExp("\\{" + i + "\\}", "gm");
-            s = s.replace(reg, arguments[i + 1]);
+          var reg = new RegExp("\\{" + i + "\\}", "gm");
+          s = s.replace(reg, arguments[i + 1]);
         }
         return s;
       };
@@ -331,9 +388,9 @@ define(['underscore'], function (_) {
     };
   })();
 
-  var Neutron = (function() {
+  var Neutron = (function () {
 
-    var SubNet = (function() {
+    var SubNet = (function () {
       function SubNet(id, networkId, name, ipVersion, cidr, gatewayIp, tenantId) {
         this.id = id;
         this.networkId = networkId;
@@ -346,7 +403,7 @@ define(['underscore'], function (_) {
       return SubNet;
     })();
 
-    var Network = (function() {
+    var Network = (function () {
       function Network(id, name, shared, status, external, tenantId) {
         this.id = id;
         this.ip = '';
@@ -360,52 +417,72 @@ define(['underscore'], function (_) {
         this.routers = [];
       }
 
-      Network.prototype.addSubNets = function(subnets) {
-        if(subnets) {
+      Network.prototype.addSubNets = function (subnets) {
+        if (subnets) {
           if (_.isArray(subnets)) {
             var i = 0;
             for (; i < subnets.length; ++i) {
               this.subnets.push(subnets[i]);
             }
-          }
-          else {
+          } else {
             this.subnets.push(subnet);
           }
         }
       };
 
-      Network.prototype.asSubnet = function(subnet) {
-        return _.every(subnet, function(sub) {
-          return _.some(this.subnets, function(s) {
+      Network.prototype.asSubnet = function (subnet) {
+        return _.every(subnet, function (sub) {
+          return _.some(this.subnets, function (s) {
             return s.id === sub;
           });
         }.bind(this));
       };
 
-      Network.prototype.pretty = function() {
+      Network.prototype.pretty = function () {
         return {
-          'tabs' : [
+          'tabs': [
             'Info',
             'Subnets'
           ],
-          'containts' : [
+          'containts': [
             {
-              'hasHeader' : false,
+              'hasHeader': false,
               'headers': [],
-              'datas' : [
-                {key : 'ID', value: this.id},
-                {key : 'Ip', value: this.ip},
-                {key : 'Name', value: this.name},
-                {key : 'Shared', value: this.shared},
-                {key : 'Status', value: this.status},
-                {key : 'External', value: this.external},
-                {key : 'Tenant Id', value: this.tenantId}
+              'datas': [
+                {
+                  key: 'ID',
+                  value: this.id
+                },
+                {
+                  key: 'Ip',
+                  value: this.ip
+                },
+                {
+                  key: 'Name',
+                  value: this.name
+                },
+                {
+                  key: 'Shared',
+                  value: this.shared
+                },
+                {
+                  key: 'Status',
+                  value: this.status
+                },
+                {
+                  key: 'External',
+                  value: this.external
+                },
+                {
+                  key: 'Tenant Id',
+                  value: this.tenantId
+                }
               ]
             },
             {
-              'hasHeader' : true,
-              'header' : ['ID', 'Name', 'Ip Version', 'Ip', 'Gateway Ip'],
-              'datas' : this.subnets.map(function(s) {
+              'hasHeader': true,
+              'header': ['ID', 'Name', 'Ip Version', 'Ip', 'Gateway Ip'],
+              'datas': this.subnets.map(function (s) {
                 return [s.id, s.name, s.ipVersion, s.cidr, s.gatewayIp];
               })
             }
@@ -416,7 +493,7 @@ define(['underscore'], function (_) {
       return Network;
     })();
 
-    var Port = (function() {
+    var Port = (function () {
       function Port(id, networkId, name, tenantId, deviceId, deviceOwner, fixed_ips, mac) {
         this.id = id;
         this.networkId = networkId;
@@ -428,21 +505,39 @@ define(['underscore'], function (_) {
         this.mac = mac;
       }
 
-      Port.prototype.pretty = function() {
+      Port.prototype.pretty = function () {
         return [
-          { key: 'ID', value : this.id },
-          { key: 'Name', value: name },
-          { key: 'Tenant Id', value : this.tenantId },
-          { key: 'Device Id', value : this.deviceId },
-          { key: 'Device Owner', value : this.deviceOwner },
-          { key: 'MAC', value : this.mac }
+          {
+            key: 'ID',
+            value: this.id
+          },
+          {
+            key: 'Name',
+            value: name
+          },
+          {
+            key: 'Tenant Id',
+            value: this.tenantId
+          },
+          {
+            key: 'Device Id',
+            value: this.deviceId
+          },
+          {
+            key: 'Device Owner',
+            value: this.deviceOwner
+          },
+          {
+            key: 'MAC',
+            value: this.mac
+          }
         ];
       };
 
       return Port;
     })();
 
-    var Router = (function() {
+    var Router = (function () {
       function Router(id, name, status, tenantId, externalGateway) {
         this.id = id;
         this.name = name;
@@ -452,27 +547,39 @@ define(['underscore'], function (_) {
         this.externalGateway = externalGateway;
       }
 
-      Router.prototype.pretty = function() {
+      Router.prototype.pretty = function () {
         return {
-          'tabs' : [
+          'tabs': [
             'Info',
             'Interfaces'
           ],
-          'containts' : [
+          'containts': [
             {
-              'hasHeader' : false,
+              'hasHeader': false,
               'headers': [],
-              'datas' : [
-                { key: 'ID', value: this.id},
-                { key: 'Name', value: this.name},
-                { key: 'status', value: this.status},
-                { key: 'Tenant ID', value: this.tenantId}
+              'datas': [
+                {
+                  key: 'ID',
+                  value: this.id
+                },
+                {
+                  key: 'Name',
+                  value: this.name
+                },
+                {
+                  key: 'status',
+                  value: this.status
+                },
+                {
+                  key: 'Tenant ID',
+                  value: this.tenantId
+                }
               ]
             },
             {
-              'hasHeader' : true,
-              'header' : ['ID', 'Type', 'Mac Address', 'Ip', 'Tenant Id'],
-              'datas' : this.interfaces.map(function(s) {
+              'hasHeader': true,
+              'header': ['ID', 'Type', 'Mac Address', 'Ip', 'Tenant Id'],
+              'datas': this.interfaces.map(function (s) {
                 return [s.id, s.type, s.mac, s.ip.ip_address, s.tenantId];
               })
             }
@@ -483,7 +590,7 @@ define(['underscore'], function (_) {
       return Router;
     })();
 
-    var Instance = (function() {
+    var Instance = (function () {
       function Instance(id, networkId, name, ip, mac, deviceOwner, tenantId, topoInfo) {
         this.id = id;
         this.networkId = networkId;
@@ -496,39 +603,63 @@ define(['underscore'], function (_) {
         this.floatingIp = {};
       }
 
-      Instance.prototype.extractFloatingIps = function(floatingIps) {
+      Instance.prototype.extractFloatingIps = function (floatingIps) {
         var ctx = this;
-        this.floatingIp = _.find(floatingIps, function(fIp) {
+        this.floatingIp = _.find(floatingIps, function (fIp) {
           return fIp.tenantId === ctx.tenantId &&
             fIp.fixedIp === ctx.ip;
         });
       };
 
-      Instance.prototype.pretty = function() {
+      Instance.prototype.pretty = function () {
         return {
-          'tabs' : [
+          'tabs': [
             'Info',
             'Ports'
           ],
-          'containts' : [
+          'containts': [
             {
-              'hasHeader' : false,
+              'hasHeader': false,
               'headers': [],
-              'datas' : [
-                { key: 'ID', value: this.id},
-                { key: "Network Id", value : this.networkId},
-                { key: 'Name', value: this.name},
-                { key: 'Ip', value: this.ip},
-                { key: 'Floating Ip', value: (this.floatingIp) ? this.floatingIp.ip : 'Not found' },
-                { key: 'MAC', value: this.mac},
-                { key: 'Type', value: this.type},
-                { key: 'Tenant ID', value: this.tenantId}
+              'datas': [
+                {
+                  key: 'ID',
+                  value: this.id
+                },
+                {
+                  key: "Network Id",
+                  value: this.networkId
+                },
+                {
+                  key: 'Name',
+                  value: this.name
+                },
+                {
+                  key: 'Ip',
+                  value: this.ip
+                },
+                {
+                  key: 'Floating Ip',
+                  value: (this.floatingIp) ? this.floatingIp.ip : 'Not found'
+                },
+                {
+                  key: 'MAC',
+                  value: this.mac
+                },
+                {
+                  key: 'Type',
+                  value: this.type
+                },
+                {
+                  key: 'Tenant ID',
+                  value: this.tenantId
+                }
               ]
             },
             {
-              'hasHeader' : true,
-              'header' : ['Name', 'Of Port', 'Mac', 'Flow', 'Ovsdb Node', 'Ovsdb Node IP'],
-              'datas' : this.topoInfo.map(function(s) {
+              'hasHeader': true,
+              'header': ['Name', 'Of Port', 'Mac', 'Flow', 'Ovsdb Node', 'Ovsdb Node IP'],
+              'datas': this.topoInfo.map(function (s) {
                 return [s.name, s.ofPort, s.mac, s.bridge.getFLowName(), s.ovsNode.nodeId, s.ovsNode.showIpAdress()];
               })
             }
@@ -539,7 +670,7 @@ define(['underscore'], function (_) {
       return Instance;
     })();
 
-    var FloatingIp =(function() {
+    var FloatingIp = (function () {
       function FloatingIp(id, networkId, portId, fixedIp, floatingIp, tentantId, status) {
         this.id = id;
         this.networkId = networkId;
@@ -568,11 +699,12 @@ define(['underscore'], function (_) {
     BridgeNode: BridgeNode,
     TerminationPoint: TerminationPoint,
     Topology: Topology,
+    Tunnel: Tunnel,
     BaseLink: BaseLink,
     Link: Link,
     TunnelLink: TunnelLink,
-    BridgeOvsLink:BridgeOvsLink,
-    Util:Util,
+    BridgeOvsLink: BridgeOvsLink,
+    Util: Util,
     Neutron: Neutron
   };
 });

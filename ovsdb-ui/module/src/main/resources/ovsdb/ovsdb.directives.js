@@ -5,22 +5,22 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'app/ovsdb/LogicalGraph','app/ovsdb/OvsCore', 'underscore', 'jquery', 'jquery-ui'], function (ovsdb, d3, Graph, LogicalGraph, OvsCore, _, $) {
+define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'app/ovsdb/LogicalGraph', 'app/ovsdb/OvsCore', 'underscore', 'jquery', 'jquery-ui'], function (ovsdb, d3, Graph, LogicalGraph, OvsCore, _, $) {
   'use strict';
 
-  ovsdb.register.directive('logicalGraph', function() {
+  ovsdb.register.directive('logicalGraph', function () {
     return {
       restrict: 'EA',
       scope: false,
-      link : function (scope, elem, attr) {
+      link: function (scope, elem, attr) {
         var lgraph = null,
-        tabCreated = false,
-        width = scope.canvasWidth, //ele[0].clientWidth,
-        height = scope.canvasHeight;
+          tabCreated = false,
+          width = scope.canvasWidth, //ele[0].clientWidth,
+          height = scope.canvasHeight;
 
         scope.lDialogData = {};
 
-        scope.lgraphIsReadyPromise.then(function(ltopo) {
+        scope.lgraphIsReadyPromise.then(function (ltopo) {
           if (!lgraph) {
             lgraph = new LogicalGraph(elem[0], width, height);
           }
@@ -29,7 +29,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'ap
 
           lgraph.start();
 
-          lgraph.onClick = function(e, d) {
+          lgraph.onClick = function (e) {
             var dialogId = '#lDialog';
             scope.lDialogData = d.pretty();
             scope.$apply();
@@ -38,26 +38,28 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'ap
               $(dialogId).tabs();
               $(dialogId).draggable({
                 containment: 'parent',
-                cancel:'.window_content'
+                cancel: '.window_content'
               });
               tabCreated = true;
             } else {
               $(dialogId).tabs('refresh');
             }
 
-            var $dia = $(dialogId);
-            $dia.css('left', e.left + 30);
-            $dia.css('top', e.top + 35);
+            var $dia = $(dialogId),
+              left = $dia.css('left'),
+              top = $dia.css('top') || e.top + 35;
+            $dia.css('left', left !== 'auto' ? left : 10);
+            $dia.css('top', top !== 'auto' ? top : 10);
             $dia.show();
 
           };
 
-          lgraph.dblClick = function(d) {
+          lgraph.dblClick = function (d) {
             scope.goToPhysicalView(d);
           };
         });
-        scope.hideLogicalDialog = function() {
-            $('#lDialog').tabs("option", "active", 0)
+        scope.hideLogicalDialog = function () {
+          $('#lDialog').tabs("option", "active", 0)
             .hide();
         };
         elem.on('$destroy', function () {
@@ -136,13 +138,15 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'ap
             });
 
             links.style("stroke", function (o) {
-                return ((o.source.index == d.index || o.target.index == d.index) && o.linkType != 'tunnel')  ? "blue" : o.color;
+              return ((o.source.index == d.index || o.target.index == d.index) && o.linkType != 'tunnel') ? "blue" : o.color;
             });
           };
 
           graph.onNodeOut = function (d, nodes, links) {
             nodes.selectAll('.switch > rect').style("stroke", "black");
-            links.style("stroke", function(o) { return o.color; });
+            links.style("stroke", function (o) {
+              return o.color;
+            });
           };
 
           graph.onNodeClick = function (d, nodes, links, ctx) {
@@ -157,27 +161,27 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'ap
               $(dialogId).tabs();
               $(dialogId).draggable({
                 containment: 'parent',
-                cancel:'.window_content'
+                cancel: '.window_content'
               });
               tabCreated = true;
             } else {
               $(dialogId).tabs('refresh');
             }
 
-            $dia.css('left', /*e.left + */30);
-            $dia.css('top', /*e.top + */35);
+            $dia.css('left', /*e.left + */ 30);
+            $dia.css('top', /*e.top + */ 35);
             $dia.show();
           };
 
         });
 
-        ele.on('$destroy', function() {
+        ele.on('$destroy', function () {
           graph.freeDOM();
         });
 
-        scope.hidePhysicalDialog = function() {
+        scope.hidePhysicalDialog = function () {
           $('#pDialog').tabs("option", "active", 0)
-          .hide();
+            .hide();
         };
 
         scope.rotateGraph = function (value) {
@@ -187,30 +191,30 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/lib/d3.min', 'app/ovsdb/Graph', 'ap
           $('path.tunnel').toggle();
         };
 
-        scope.filterNode = function(nodeIds, tags, exclude) {
+        scope.filterNode = function (nodeIds, tags, exclude) {
           exclude = (exclude === null) ? true : exclude;
           var nodes = d3.selectAll(tags);
-          nodes.each(function(d) {
-              if (nodeIds.indexOf(d.node.nodeId) < 0) {
-                d.hidden = exclude;
-              } else {
-                d.hidden = !exclude;
-              }
-            });
-          nodes.transition().duration(200).style('opacity', function(d) {
-              return d.hidden ? '0.3' : '1';
+          nodes.each(function (d) {
+            if (nodeIds.indexOf(d.node.nodeId) < 0) {
+              d.hidden = exclude;
+            } else {
+              d.hidden = !exclude;
+            }
+          });
+          nodes.transition().duration(200).style('opacity', function (d) {
+            return d.hidden ? '0.3' : '1';
           });
 
         };
 
-        scope.filterLink = function() {
+        scope.filterLink = function () {
           var links = d3.selectAll(".tunnel, .link, .bridgeOvsLink");
 
-          links.each(function(d, i) {
+          links.each(function (d, i) {
             d.hidden = d.source.hidden || d.target.hidden;
           });
-          links.transition().duration(200).style('opacity', function(d) {
-              return d.hidden ? '0.3' : '1';
+          links.transition().duration(200).style('opacity', function (d) {
+            return d.hidden ? '0.3' : '1';
           });
         };
       }

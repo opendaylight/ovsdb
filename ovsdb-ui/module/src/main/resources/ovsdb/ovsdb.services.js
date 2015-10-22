@@ -5,23 +5,23 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/ovsdb.constant'], function(ovsdb, OvsCore, _) {
+define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/ovsdb.constant'], function (ovsdb, OvsCore, _) {
   'use strict';
 
-  ovsdb.register.factory('OvsdbRestangular', ['Restangular', 'ENV', function(Restangular, ENV) {
-    return Restangular.withConfig(function(RestangularConfig) {
+  ovsdb.register.factory('OvsdbRestangular', ['Restangular', 'ENV', function (Restangular, ENV) {
+    return Restangular.withConfig(function (RestangularConfig) {
       RestangularConfig.setBaseUrl(ENV.getBaseURL("MD_SAL"));
     });
   }]);
 
   // nbv2 support depricated in dlux
-  ovsdb.register.factory('NeutronRestangular', ['Restangular', function(Restangular) {
-    return Restangular.withConfig(function(RestangularConfig) {
+  ovsdb.register.factory('NeutronRestangular', ['Restangular', function (Restangular) {
+    return Restangular.withConfig(function (RestangularConfig) {
       RestangularConfig.setBaseUrl('http://localhost:8080/controller/nb/v2/neutron');
     });
   }]);
 
-  ovsdb.register.factory('CacheFactory', function($q) {
+  ovsdb.register.factory('CacheFactory', function ($q) {
     var svc = {},
       ovsCache = {};
     /*BUG : Using the persistant cache make the physical
@@ -29,26 +29,26 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
      * algorithm. The current behavior is to use the cache
      * only the pile up the datas.
      */
-    svc.obtainDataFromCache = function(key, fn, ctx) {
+    svc.obtainDataFromCache = function (key, fn, ctx) {
       var cacheDefer = $q.defer();
 
       if (angular.isUndefined(ovsCache[key])) {
-        fn.call(ctx, function(data) {
-            ovsCache[key] = {
-              obj : data,
-              timestamp : Date.now() + 2000//300000 // 5 mintues
-            };
-            cacheDefer.resolve(data);
+        fn.call(ctx, function (data) {
+          ovsCache[key] = {
+            obj: data,
+            timestamp: Date.now() + 2000 //300000 // 5 mintues
+          };
+          cacheDefer.resolve(data);
         });
       } else {
         var cacheObj = ovsCache[key];
-        if (cacheObj.timestamp < Date.now() ||  _.isEmpty(cacheObj.obj)) {
-          fn.call(ctx, function(data) {
-              ovsCache[key] = {
-                obj : data,
-                timestamp : Date.now() + 2000//300000 // 5 mintues
-              };
-              cacheDefer.resolve(data);
+        if (cacheObj.timestamp < Date.now() || _.isEmpty(cacheObj.obj)) {
+          fn.call(ctx, function (data) {
+            ovsCache[key] = {
+              obj: data,
+              timestamp: Date.now() + 2000 //300000 // 5 mintues
+            };
+            cacheDefer.resolve(data);
           });
         } else {
           cacheDefer.resolve(cacheObj.obj);
@@ -58,7 +58,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
       return cacheDefer.promise;
     };
 
-    svc.getCacheObj = function(key) {
+    svc.getCacheObj = function (key) {
       if (angular.isUndefined(ovsCache[key])) {
         ovsCache[key] = {};
       }
@@ -68,9 +68,9 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
     return svc;
   });
 
-  var TopologySvc = function(OvsdbRestangular, nodeIdentifier, ovsNodeKeys, bridgeNodeKeys, tpKeys, flowInfoKeys, linkIdentifier, $q, $http, CacheFactory) {
+  var TopologySvc = function (OvsdbRestangular, nodeIdentifier, ovsNodeKeys, bridgeNodeKeys, tpKeys, flowInfoKeys, linkIdentifier, OVSConstant, $q, $http, CacheFactory) {
     var svc = {
-      base: function(type) {
+      base: function (type) {
         return OvsdbRestangular.one('restconf').one(type);
       }
     };
@@ -91,7 +91,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
       }
 
       if (_.isArray(otherInfo)) {
-        _.each(otherInfo, function(value) {
+        _.each(otherInfo, function (value) {
           if (value[ovsNodeKeys.OTHER_CONFIG_KEY] === 'local_ip') {
             otherLocalIp = value[ovsNodeKeys.OTHER_CONFIG_VALUE];
           }
@@ -108,7 +108,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
         tp = node[bridgeNodeKeys.TP],
         controllerEntries = node[bridgeNodeKeys.CONTROLLER_ENTRY];
 
-      _.each(controllerEntries, function(value) {
+      _.each(controllerEntries, function (value) {
         controllerTarget = value[bridgeNodeKeys.TARGET];
         controllerEntries = value[bridgeNodeKeys.IS_CONNECTED];
         return false; // break the anonymus function
@@ -116,7 +116,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
 
       bridgeNode = new OvsCore.BridgeNode(node[bridgeNodeKeys.NODE_ID], node[bridgeNodeKeys.DATA_PATH], node[bridgeNodeKeys.BRIDGE_NAME], controllerTarget, controllerConnected);
 
-      _.each(tp, function(value) {
+      _.each(tp, function (value) {
         var tp = parseBridgeTP(value);
 
         if (tp.ofPort == '65534' && (tp.name === 'br-ex' || tp.name === 'br-int')) {
@@ -133,9 +133,10 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
     function parseBridgeTP(tp) {
       var mac = '',
         ifaceId = '',
-        extInfo = tp['ovsdb:port-external-ids'] || tp['ovsdb:interface-external-ids'];
+        extInfo = tp['ovsdb:port-external-ids'] || tp['ovsdb:interface-external-ids'],
+        type = tp[tpKeys.INTERFACE_TYPE];
 
-      _.each(extInfo, function(ext) {
+      _.each(extInfo, function (ext) {
         if (ext[tpKeys.EXTERNAL_KEY_ID] === tpKeys.ATTACHED_MAC) {
           mac = ext[tpKeys.EXTERNAL_KEY_VALUE];
         }
@@ -143,8 +144,23 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           ifaceId = ext[tpKeys.EXTERNAL_KEY_VALUE] || '';
         }
       });
+      if (type === OVSConstant.TP_TYPE.VXLAN) {
+        var localIp = null,
+          remoteIp = null;
+        _.each(tp['ovsdb:options'], function (option) {
+          switch (option.option) {
+            case 'local_ip':
+              localIp = option.value;
+              break;
+            case 'remote_ip':
+              remoteIp = option.value;
+              break;
+          }
+        });
+        return new OvsCore.Tunnel(tp[tpKeys.NAME], tp[tpKeys.OF_PORT], type, mac, ifaceId, localIp, remoteIp);
+      }
+      return new OvsCore.TerminationPoint(tp[tpKeys.NAME], tp[tpKeys.OF_PORT], type, mac, ifaceId);
 
-      return new OvsCore.TerminationPoint(tp[tpKeys.NAME], tp[tpKeys.OF_PORT], tp[tpKeys.INTERFACE_TYPE], mac, ifaceId);
     }
 
     function fetchTopology(cb) {
@@ -152,7 +168,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
       var netTopoDefer = this.base('operational').one('network-topology:network-topology').getList();
 
       // be sure all data are loaded
-      $q.all([invNodeDefer, netTopoDefer]).then(function(values) {
+      $q.all([invNodeDefer, netTopoDefer]).then(function (values) {
           var invNode = values[0],
             netTopo = values[1],
             index_hash = [],
@@ -173,13 +189,13 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
             nodes = invNode.nodes.node,
             topo = new OvsCore.Topology();
 
-          _.each(topologies, function(topology, topo_index) {
+          _.each(topologies, function (topology, topo_index) {
             if (!topology.hasOwnProperty('topology-id')) {
               throw new Error('Invalide JSON format, no topology-id for the topology [' + topo_index + ']');
             }
 
             // if there no node it will be an empty array so noop
-            (topology.node || []).forEach(function(node) {
+            (topology.node || []).forEach(function (node) {
               if (!node[nodeIdentifier.ID]) {
                 throw new Error('Unexpected node : undefined ' + nodeIdentifier.ID + ' key');
               }
@@ -195,7 +211,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
             });
 
             // if there no link it will be an empty array so noop
-            (topology.link || []).forEach(function(link) {
+            (topology.link || []).forEach(function (link) {
 
               var source = link[linkIdentifier.SRC]['source-node'],
                 dest = link[linkIdentifier.DEST]['dest-node'];
@@ -205,14 +221,14 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
 
           });
 
-          _.each(nodes, function(node, index) {
+          _.each(nodes, function (node, index) {
             if (!node.id) {
               return;
             }
 
             var bridgeId = node.id;
 
-            var bridgeNode = _.filter(topo.bridgeNodes, function(bridgeNode) {
+            var bridgeNode = _.filter(topo.bridgeNodes, function (bridgeNode) {
               return bridgeNode.getFLowName() === bridgeId;
             })[0];
 
@@ -224,10 +240,13 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
               bridgeNode.flowInfo.manufacturer = node[flowInfoKeys.MANUFACTURER];
               bridgeNode.flowInfo.ip = node[flowInfoKeys.IP];
 
-              _.each(node[flowInfoKeys.TABLE], function(entry) {
+              _.each(node[flowInfoKeys.TABLE], function (entry) {
                 if (!_.isUndefined(entry.id)) {
-                    _.each(entry.flow, function(flow) {
-                    bridgeNode.addFlowTableInfo({ key: flow.table_id, value: flow.id});
+                  _.each(entry.flow, function (flow) {
+                    bridgeNode.addFlowTableInfo({
+                      key: flow.table_id,
+                      value: flow.id
+                    });
                   });
                 }
               });
@@ -235,11 +254,11 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           });
 
           // show relation between ovsNode and switch with a link
-          _.each(topo.ovsdbNodes, function(node, index) {
-            var bridges = _.filter(topo.bridgeNodes, function(bnode) {
+          _.each(topo.ovsdbNodes, function (node, index) {
+            var bridges = _.filter(topo.bridgeNodes, function (bnode) {
               return bnode.nodeId.indexOf(node.nodeId) > -1;
             });
-            _.each(bridges, function(bridge) {
+            _.each(bridges, function (bridge) {
               var size = _.size(topo.links),
                 link = new OvsCore.BridgeOvsLink(++size, node.nodeId, bridge.nodeId);
               topo.registerLink(link);
@@ -249,19 +268,18 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           function findVxlan(bridgeNode) {
             var tunnels = [];
 
-            _.each(bridgeNode, function(node) {
-              var ovsdbNode = _.find(topo.ovsdbNodes, function(oNode) {
+            _.each(bridgeNode, function (node) {
+              var ovsdbNode = _.find(topo.ovsdbNodes, function (oNode) {
                 return node.nodeId.indexOf(oNode.nodeId) > -1;
               });
               if (!ovsdbNode) {
                 return false;
               }
-              _.each(node.tPs, function(tp, index) {
-                if (tp.name.indexOf('vxlan-') > -1) {
+              _.each(node.tPs, function (tp, index) {
+                if (tp instanceof OvsCore.Tunnel) {
                   tunnels.push({
-                    port : tp,
-                    bridge : node,
-                    ovsIp : ovsdbNode.otherLocalIp || ovsdbNode.inetMgr
+                    port: tp,
+                    bridge: node
                   });
                 }
               });
@@ -273,47 +291,50 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           // extract all tunnel paired with their bridge
           var tunnels = findVxlan(topo.bridgeNodes);
           // loop over all pairs
-          _.each(tunnels, function(tunnel, index) {
-            var currIp = tunnel.ovsIp,
-              destIp = tunnel.port.name.replace('vxlan-', ''),
-              linkedBridge = _.find(tunnels.slice(index), function(t) {
-                var vxlanIp =  t.port.name.replace('vxlan-', '');
-                return vxlanIp === currIp;
+          for (var index = 0; index < tunnels.length; ++index) {
+            var tunnel = tunnels[index],
+              currIp = tunnel.port.localIp,
+              destIp = tunnel.port.remoteIp,
+              pairIndex = 0,
+              linkedBridge = _.find(tunnels, function (t, i) {
+                pairIndex = i;
+                return t.port.remoteIp === currIp && t.port.localIp == destIp;
               });
 
-              if (linkedBridge) {
-                  topo.registerLink(new OvsCore.TunnelLink(tunnel.port.name + linkedBridge.port.name, tunnel.bridge.nodeId, linkedBridge.bridge.nodeId));
-              }
-          });
+            if (linkedBridge) {
+              tunnels.splice(pairIndex, 1);
+              topo.registerLink(new OvsCore.TunnelLink(tunnel.port.name + linkedBridge.port.name, tunnel.bridge.nodeId, linkedBridge.bridge.nodeId));
+            }
+          }
 
           topo.updateLink();
           cb(topo);
         },
-        function(err) {
+        function (err) {
           throw err;
         }
       );
     }
 
-    svc.getTopologies = function() {
+    svc.getTopologies = function () {
       return CacheFactory.obtainDataFromCache('topologies', fetchTopology, this);
     };
 
     return svc;
   };
-  TopologySvc.$inject = ['OvsdbRestangular', 'nodeIdentifier', 'ovsNodeKeys', 'bridgeNodeKeys', 'tpKeys', 'flowInfoKeys', 'linkIdentifier', '$q', '$http', 'CacheFactory'];
+  TopologySvc.$inject = ['OvsdbRestangular', 'nodeIdentifier', 'ovsNodeKeys', 'bridgeNodeKeys', 'tpKeys', 'flowInfoKeys', 'linkIdentifier', 'OVSConstant', '$q', '$http', 'CacheFactory'];
 
-  var NeutronSvc = function(NeutronRestangular, CacheFactory, $q, $http) {
+  var NeutronSvc = function (NeutronRestangular, CacheFactory, $q, $http) {
     var svc = {
-      base: function(type) {
-        return NeutronRestangular.one(type);
-      }
-    },
-    tenant_hash = {};
+        base: function (type) {
+          return NeutronRestangular.one(type);
+        }
+      },
+      tenant_hash = {};
 
     function fetchSubNetworks(cb) {
       var subnetskDefer = svc.base('subnets').getList();
-      subnetskDefer.then(function(data) {
+      subnetskDefer.then(function (data) {
         var subnets = data,
           subnetHash = {};
 
@@ -321,20 +342,20 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           throw new Error('Invalid format from neutron subnets');
         }
 
-        _.each(subnets.subnets, function(subnet) {
-            if (!subnetHash[subnet.network_id]) {
-              subnetHash[subnet.network_id] = [];
-            }
-            tenant_hash[subnet.tenant_id] = {};
-            subnetHash[subnet.network_id].push(new OvsCore.Neutron.SubNet(
-              subnet.id,
-              subnet.network_id,
-              subnet.name,
-              subnet.ip_version,
-              subnet.cidr,
-              subnet.gateway_ip,
-              subnet.tenant_id
-            ));
+        _.each(subnets.subnets, function (subnet) {
+          if (!subnetHash[subnet.network_id]) {
+            subnetHash[subnet.network_id] = [];
+          }
+          tenant_hash[subnet.tenant_id] = {};
+          subnetHash[subnet.network_id].push(new OvsCore.Neutron.SubNet(
+            subnet.id,
+            subnet.network_id,
+            subnet.name,
+            subnet.ip_version,
+            subnet.cidr,
+            subnet.gateway_ip,
+            subnet.tenant_id
+          ));
         });
         cb(subnetHash);
       });
@@ -344,7 +365,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
       var networkDefer = svc.base('networks').getList();
       var subnetskDefer = svc.getSubNets();
 
-      $q.all([subnetskDefer, networkDefer]).then(function(datas) {
+      $q.all([subnetskDefer, networkDefer]).then(function (datas) {
         var subnetsHash = datas[0],
           networks = datas[1],
           networkArray = [];
@@ -353,7 +374,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           throw new Error('Invalid format from neutron networks');
         }
 
-        _.each(networks.networks, function(network) {
+        _.each(networks.networks, function (network) {
           var net = new OvsCore.Neutron.Network(
             network.id,
             network.name,
@@ -366,29 +387,29 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           net.addSubNets(subnetsHash[net.id]);
           networkArray.push(net);
         });
-          cb(networkArray);
+        cb(networkArray);
       });
     }
 
     function fetchRouters(cb) {
       var routerDefer = svc.base('routers').getList();
-      routerDefer.then(function(data) {
+      routerDefer.then(function (data) {
         var routers = data.routers,
           routerArray = [];
 
         if (!routers) {
           throw new Error('Invalid format from neutron routers');
         }
-        _.each(routers, function(router) {
-            var id = router.id,
+        _.each(routers, function (router) {
+          var id = router.id,
             name = router.name,
             status = router.status,
             tenantId = router.tenant_id,
             extGateWayInfo = router.external_gateway_info;
-            tenant_hash[tenantId] = {};
-            routerArray.push(new OvsCore.Neutron.Router(
-              id, name, status, tenantId, extGateWayInfo
-            ));
+          tenant_hash[tenantId] = {};
+          routerArray.push(new OvsCore.Neutron.Router(
+            id, name, status, tenantId, extGateWayInfo
+          ));
         });
         cb(routerArray);
       });
@@ -396,14 +417,14 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
 
     function fetchPorts(cb) {
       var portDefer = svc.base('ports').getList();
-      portDefer.then(function(data){
+      portDefer.then(function (data) {
         var ports = data.ports,
           portArray = [];
 
         if (!ports) {
           throw new Error('Invalid format from neutron ports');
         }
-        _.each(ports, function(port) {
+        _.each(ports, function (port) {
           tenant_hash[port.tenant_id] = {};
           portArray.push(new OvsCore.Neutron.Port(
             port.id,
@@ -422,7 +443,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
 
     function fetchFloatingIps(cb) {
       var floatingIpDefer = svc.base('floatingips').getList();
-      floatingIpDefer.then(function(data) {
+      floatingIpDefer.then(function (data) {
         var floatingIps = data.floatingips,
           floatingIpArray = [];
 
@@ -430,7 +451,7 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
           throw new Error('Invalid format from neutron floatingIps');
         }
 
-        _.each(floatingIps, function(fIp) {
+        _.each(floatingIps, function (fIp) {
           tenant_hash[fIp.tenant_id] = {};
           floatingIpArray.push(new OvsCore.Neutron.FloatingIp(
             fIp.id,
@@ -447,27 +468,27 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
       });
     }
 
-    svc.getNetworks = function() {
-        return CacheFactory.obtainDataFromCache('networks', fetchNetworks, this);
+    svc.getNetworks = function () {
+      return CacheFactory.obtainDataFromCache('networks', fetchNetworks, this);
     };
 
-    svc.getSubNets = function() {
+    svc.getSubNets = function () {
       return CacheFactory.obtainDataFromCache('subnet', fetchSubNetworks, this);
     };
 
-    svc.getPorts = function() {
+    svc.getPorts = function () {
       return CacheFactory.obtainDataFromCache('ports', fetchPorts, this);
     };
 
-    svc.getRouters = function() {
+    svc.getRouters = function () {
       return CacheFactory.obtainDataFromCache('routers', fetchRouters, this);
     };
 
-    svc.getFloatingIps = function() {
+    svc.getFloatingIps = function () {
       return CacheFactory.obtainDataFromCache('floatingips', fetchFloatingIps, this);
     };
 
-    svc.getAllTenants = function() {
+    svc.getAllTenants = function () {
       return Object.keys(tenant_hash);
     };
 
@@ -475,11 +496,11 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
   };
   NeutronSvc.$inject = ['NeutronRestangular', 'CacheFactory', '$q', '$http'];
 
-  var OvsUtil = function(NeutronSvc, TopologySvc, CacheFactory, $q) {
+  var OvsUtil = function (NeutronSvc, TopologySvc, CacheFactory, $q) {
     var svc = {};
 
     function findOvsdbNodeForBridge(ovsdbNodes, bridge) {
-      return _.find(ovsdbNodes, function(node) {
+      return _.find(ovsdbNodes, function (node) {
         return bridge.nodeId.indexOf(node.nodeId) > -1;
       });
     }
@@ -493,41 +514,43 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
 
       $q.all([networksDefer, routersDefer, portsDefer, floatingDefer, netTopoDefer]).then(function (datas) {
         var networks = datas[0],
-         routers = datas[1],
-         ports = datas[2],
-         floatingIps = datas[3],
-         topo = datas[4];
+          routers = datas[1],
+          ports = datas[2],
+          floatingIps = datas[3],
+          topo = datas[4];
 
         // match ports with elements
-         _.each(ports, function(port) {
-           port.topoInfo = [];
-           // corelate port.topoInfo data with network topology termination point
-           _.each(topo.bridgeNodes, function(bridge) {
-             _.each(bridge.tPs, function(tp) {
-               if (tp.ifaceId === port.id) {
-                 port.topoInfo.push({
-                   name : tp.name,
-                   ofPort : tp.ofPort,
-                   mac : bridge.dpIp,
-                   bridge : bridge,
-                   ovsNode : findOvsdbNodeForBridge(topo.ovsdbNodes, bridge)
-                 });
-               }
-             });
-           });
+        _.each(ports, function (port) {
+          port.topoInfo = [];
+          // corelate port.topoInfo data with network topology termination point
+          _.each(topo.bridgeNodes, function (bridge) {
+            _.each(bridge.tPs, function (tp) {
+              if (tp.ifaceId === port.id) {
+                port.topoInfo.push({
+                  name: tp.name,
+                  ofPort: tp.ofPort,
+                  mac: bridge.dpIp,
+                  bridge: bridge,
+                  ovsNode: findOvsdbNodeForBridge(topo.ovsdbNodes, bridge)
+                });
+              }
+            });
+          });
 
-           switch(port.deviceOwner) {
-             case 'network:router_gateway':
-             case 'network:router_interface':
-              var router = _.find(routers, function(r) { return r.id === port.deviceId; });
+          switch (port.deviceOwner) {
+            case 'network:router_gateway':
+            case 'network:router_interface':
+              var router = _.find(routers, function (r) {
+                return r.id === port.deviceId;
+              });
               if (router) {
                 router.interfaces.push({
                   id: port.id,
-                  networkId : port.networkId,
-                  ip : port.fixed_ips[0],
-                  mac : port.mac,
+                  networkId: port.networkId,
+                  ip: port.fixed_ips[0],
+                  mac: port.mac,
                   type: port.deviceOwner.replace('network:', ''),
-                  tenantId : port.tenantId,
+                  tenantId: port.tenantId,
                   topoInfo: port.topoInfo
                 });
               }
@@ -535,62 +558,64 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
             case 'compute:None':
             case 'compute:nova':
             case 'network:dhcp':
-              var network = _.find(networks, function(n) { return n.id === port.networkId;}),
+              var network = _.find(networks, function (n) {
+                  return n.id === port.networkId;
+                }),
                 inst = null;
 
               if (network) {
-                inst = new OvsCore.Neutron.Instance(port.id,  port.networkId,
+                inst = new OvsCore.Neutron.Instance(port.id, port.networkId,
                   port.name, port.fixed_ips[0].ip_address, port.mac,
-                  port.deviceOwner, port.tenantId, port.topoInfo );
+                  port.deviceOwner, port.tenantId, port.topoInfo);
 
                 inst.extractFloatingIps(floatingIps);
                 network.instances.push(inst);
               }
               break;
-           }
+          }
 
-         });
+        });
 
-         // find all routers for a specific network
-         _.each(networks, function(network) {
-           network.routers = _.filter(routers, function(router) {
-             return network.id === router.externalGateway.network_id;
-           });
+        // find all routers for a specific network
+        _.each(networks, function (network) {
+          network.routers = _.filter(routers, function (router) {
+            return network.id === router.externalGateway.network_id;
+          });
 
-           // order instance by ip
-           network.instances.sort(function(a, b) {
-             var ipA = a.ip.slice(a.ip.lastIndexOf('.') + 1),
-               ipB = b.ip.slice(b.ip.lastIndexOf('.') + 1);
-               return ipA - ipB;
-           });
-         });
+          // order instance by ip
+          network.instances.sort(function (a, b) {
+            var ipA = a.ip.slice(a.ip.lastIndexOf('.') + 1),
+              ipB = b.ip.slice(b.ip.lastIndexOf('.') + 1);
+            return ipA - ipB;
+          });
+        });
 
-         cb(networks);
+        cb(networks);
       });
     }
 
-    svc.getLogicalTopology = function() {
+    svc.getLogicalTopology = function () {
       return CacheFactory.obtainDataFromCache('logicalTopology', pileUpTopologyData, this);
     };
 
-    svc.extractLogicalByTenant = function(tenantId, subSet) {
+    svc.extractLogicalByTenant = function (tenantId, subSet) {
       var lTopoDefer = svc.getLogicalTopology(),
         resultDefer = $q.defer();
-      lTopoDefer.then(function() {
+      lTopoDefer.then(function () {
         var ports = CacheFactory.getCacheObj('ports').obj,
-          filteredPorts = _.filter(ports, function(p) {
+          filteredPorts = _.filter(ports, function (p) {
             return p.tenantId === tenantId;
           });
 
         if (!_.isEmpty(filteredPorts)) {
           var bridgeHash = {};
-          _.each(filteredPorts, function(p) {
+          _.each(filteredPorts, function (p) {
             if (!_.isEmpty(p.topoInfo) && !bridgeHash[p.topoInfo[0].bridge.nodeId]) {
               bridgeHash[p.topoInfo[0].bridge.nodeId] = {};
             }
           });
           var ovsdbHash = {};
-          _.each(filteredPorts, function(p) {
+          _.each(filteredPorts, function (p) {
             if (!_.isEmpty(p.topoInfo) && !ovsdbHash[p.topoInfo[0].ovsNode.nodeId]) {
               ovsdbHash[p.topoInfo[0].ovsNode.nodeId] = {};
             }
@@ -604,15 +629,15 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
       return resultDefer.promise;
     };
 
-    svc.extractLogicalBySubnet = function(subnets, subSet) {
+    svc.extractLogicalBySubnet = function (subnets, subSet) {
       var lTopoDefer = svc.getLogicalTopology(),
         resultDefer = $q.defer();
-      lTopoDefer.then(function() {
+      lTopoDefer.then(function () {
         var ports = CacheFactory.getCacheObj('ports').obj,
           networks = CacheFactory.getCacheObj('networks').obj;
 
-        var filteredPorts = _.filter(ports, function(p) {
-          var net = _.find(networks, function(d) {
+        var filteredPorts = _.filter(ports, function (p) {
+          var net = _.find(networks, function (d) {
             return d.id === p.networkId;
           });
 
@@ -620,13 +645,13 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
         });
         if (!_.isEmpty(filteredPorts)) {
           var bridgeHash = {};
-          _.each(filteredPorts, function(p) {
+          _.each(filteredPorts, function (p) {
             if (!_.isEmpty(p.topoInfo) && !bridgeHash[p.topoInfo[0].bridge.nodeId]) {
               bridgeHash[p.topoInfo[0].bridge.nodeId] = {};
             }
           });
           var ovsdbHash = {};
-          _.each(filteredPorts, function(p) {
+          _.each(filteredPorts, function (p) {
             if (!_.isEmpty(p.topoInfo) && !ovsdbHash[p.topoInfo[0].ovsNode.nodeId]) {
               ovsdbHash[p.topoInfo[0].ovsNode.nodeId] = {};
             }

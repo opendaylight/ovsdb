@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -137,6 +139,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     private Boolean enabled = false;
     private Boolean flgDistributedARPEnabled = true;
     private Boolean isCachePopulationDone = false;
+    private Set<NeutronPort> portCleanupCache;
     private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
 
     private Southbound southbound;
@@ -179,6 +182,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         } else {
             LOG.debug("OVSDB L3 forwarding is disabled");
         }
+        this.portCleanupCache = new HashSet<>();
     }
 
     //
@@ -420,7 +424,9 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
      */
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOG.debug("Neutron port {} event : {}", action, neutronPort.toString());
-
+        if (action == Action.UPDATE) {
+            this.updatePortInCleanupCache(neutronPort, neutronPort.getOriginalPort());
+        }
         this.processSecurityGroupUpdate(neutronPort);
         if (!this.enabled) {
             return;
@@ -791,6 +797,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
             if (action != Action.DELETE && dpId != null && interfaceUuid != null) {
                 handleInterfaceEventAdd(neutronPortUuid, dpId, interfaceUuid);
+                storePortInCleanupCache(neutronPort);
             }
 
             handleNeutronPortEvent(neutronPort, action);
@@ -1508,6 +1515,33 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         }else{
             LOG.warn("Neutron network not found for router interface {}", gatewayPort);
         }
+    }
+
+
+    private void storePortInCleanupCache(NeutronPort port) {
+        this.portCleanupCache.add(port);
+    }
+
+
+    private void updatePortInCleanupCache(NeutronPort updatedPort,NeutronPort originalPort) {
+        removePortFromCleanupCache(originalPort);
+        storePortInCleanupCache(updatedPort);
+    }
+
+    public void removePortFromCleanupCache(NeutronPort port) {
+        this.portCleanupCache.remove(port);
+    }
+
+    public NeutronPort getPortFromCleanupCache(String portid) {
+        for (NeutronPort neutronPort : this.portCleanupCache) {
+            if (neutronPort.getPortUUID() != null ) {
+                if (neutronPort.getPortUUID().equals(portid)) {
+                    LOG.info("getPortFromCleanupCache: Matching NeutronPort found {}", portid);
+                    return neutronPort;
+                    }
+                }
+            }
+        return null;
     }
 
     /**

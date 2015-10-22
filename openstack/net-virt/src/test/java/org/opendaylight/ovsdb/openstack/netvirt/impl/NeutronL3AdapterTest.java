@@ -138,6 +138,7 @@ public class NeutronL3AdapterTest {
     @Test
     public void testHandleNeutronPortEvent() throws Exception {
         Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<>();
+        Set<NeutronPort> portCleanupCache = new HashSet<>();
         // Mock variables
         Neutron_IPs neutronIP = mock(Neutron_IPs.class);
         when(neutronIP.getSubnetUUID()).thenReturn(UUID);
@@ -151,6 +152,7 @@ public class NeutronL3AdapterTest {
         MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , mock(INeutronPortCRUD.class));
         subnetIdToRouterInterfaceCache.put(UUID, mock(NeutronRouter_Interface.class));
         MemberModifier.field(NeutronL3Adapter.class, "subnetIdToRouterInterfaceCache").set(neutronL3Adapter , subnetIdToRouterInterfaceCache);
+        MemberModifier.field(NeutronL3Adapter.class, "portCleanupCache").set(neutronL3Adapter , portCleanupCache);
 
         // Suppress the called to these functions
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "updateL3ForNeutronPort", NeutronPort.class, boolean.class));
@@ -431,6 +433,7 @@ public class NeutronL3AdapterTest {
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventAdd", String.class, Long.class, Uuid.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventDelete", OvsdbTerminationPointAugmentation.class, Long.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "storePortInCleanupCache", NeutronPort.class));
 
         PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(45L);
         Mockito.doNothing().when(neutronL3Adapter).handleNeutronPortEvent(any(NeutronPort.class), any(Action.class));

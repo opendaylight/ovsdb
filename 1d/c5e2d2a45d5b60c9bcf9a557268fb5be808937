@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Rashmi Pujar <rpujar@inocybe.com>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Thu, 22 Oct 2015 03:56:12 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/28607
+Project: ovsdb
+Branch: refs/heads/stable/lithium

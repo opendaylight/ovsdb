@@ -270,7 +270,19 @@ public class OpenVSwitchUpdateCommandTest {
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getIfaceTypesColumn()).thenReturn(column );
         Set<String> set = new HashSet<String>();
+        set.add("dpdk");
+        set.add("dpdkr");
+        set.add("dpdkvhostuser");
+        set.add("geneve");
+        set.add("gre");
         set.add("internal");
+        set.add("ipsec_gre");
+        set.add("lisp");
+        set.add("patch");
+        set.add("stt");
+        set.add("system");
+        set.add("tap");
+        set.add("vxlan");
         when(column.getData()).thenReturn(set);
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createInterfaceType(anyString())).thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
@@ -289,7 +301,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(ovsdbNodeBuilder.setInterfaceTypeEntry(any(List.class))).thenReturn(ovsdbNodeBuilder);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setInterfaceTypes", ovsdbNodeBuilder, openVSwitch);
         verify(openVSwitch).getIfaceTypesColumn();
-        verify(interfaceTypeEntryBuilder).setInterfaceType(InterfaceTypeInternal.class);
+        verify(interfaceTypeEntryBuilder,times(13)).setInterfaceType(InterfaceTypeInternal.class);
     }
 
     @SuppressWarnings("unchecked")

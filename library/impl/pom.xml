@@ -101,8 +101,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <configuration>
           <instructions>
             <Export-Package>
+              org.opendaylight.ovsdb.lib,
               org.opendaylight.ovsdb.lib.*,
-              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.library.impl.rev141210.*
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.library.impl.rev141210
             </Export-Package>
           </instructions>
         </configuration>

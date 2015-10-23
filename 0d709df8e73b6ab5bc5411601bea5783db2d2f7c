@@ -1,0 +1,146 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_aa0ece32",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "it should be getPortFromCleanupCache",
+      "range": {
+        "startLine": 180,
+        "startChar": 50,
+        "endLine": 180,
+        "endChar": 52
+      },
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_8a098a2e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "please push this brace with \"else\"",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_aa5c8e26",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1272,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "please rename it to storePortInCleanupCache (I capital) .. just for better readability.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_4a416238",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1273,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "please push the brace with method definition.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_6a3ea6ba",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1277,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "why are we catching exception, as far as i know, add don\u0027t throw any exception.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_0a4b5a5a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1290,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "why are we catching exception, as far as i know, remove don\u0027t throw any exception.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_2a489e5a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1296,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "rename the method to getPortFromCleanupCache().",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_ca74729e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1301,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T14:50:07Z",
+      "side": 1,
+      "message": "please do the explicit null check on getPortUUID() before doing equals on it and remove the try-catch block. I don\u0027t see why it will throw exception.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -28,6 +28,7 @@ import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.sfc.provider.api.SfcDataStoreAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderRenderedPathAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServiceForwarderAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServicePathAPI;
@@ -41,6 +42,8 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev1407
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePathKey;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.rendered.service.path.RenderedServicePathHop;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.SffOvsBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.ServiceFunctionForwarders;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPaths;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
@@ -77,7 +80,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
@@ -153,7 +158,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
         // If openflow Node Id is NULL, get all the bridge nodes using southbound apis and fetch
         // SFF with matching name. From this bridge name, get the openflow data path ID.
 
-        node = getNode(sff.getName());
+        node = getNode(serviceForwarder);
         if (node == null) {
             LOG.warn("Node doesn't exist for corresponding SFF={}", sff.getName());
             return;
@@ -461,17 +466,23 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
         }
     }
 
-    private Node getNode(String name) {
-        // TODO Auto-generated method stub
+    private Node getNode(ServiceFunctionForwarder sff) {
+        SffOvsBridgeAugmentation sffBridge = sff.getAugmentation(SffOvsBridgeAugmentation.class);
+        String brName = sffBridge.getOvsBridge().getBridgeName();
+
         final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (nodes.isEmpty()) {
-            LOG.debug("Noop with Classifier Creation on SFF={}. No Bridges configured YET!!", name);
+            LOG.debug("Noop with Classifier Creation on SFF={}. No Bridges configured YET!!", brName);
         } else {
             for (Node dstNode : nodes) {
-                LOG.debug("Processing Node={}, sff={}", dstNode.getNodeId().getValue(), name);
-                if (dstNode.getNodeId().getValue().equalsIgnoreCase(name)) {
-                    LOG.debug("Found matching OVSDB Bridge Name!!= {}", dstNode.getNodeId().getValue());
-                    return dstNode;
+                LOG.debug("Processing Node={}, sff={}/Bridge={}", dstNode.getNodeId().getValue(),
+                        sff.getName().getValue(), brName);
+                OvsdbBridgeAugmentation bridge = dstNode.getAugmentation(OvsdbBridgeAugmentation.class);
+                if (bridge != null) {
+                    if (bridge.getBridgeName().getValue().equalsIgnoreCase(brName)) {
+                        LOG.info("Found matching OVSDB Bridge Name!!= {}", dstNode.getNodeId().getValue());
+                        return dstNode;
+                    }
                 }
             }
         }

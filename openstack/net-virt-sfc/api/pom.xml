@@ -55,9 +55,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <configuration>
           <instructions>
             <Export-Package>
-              org.opendaylight.yang.gen.v1.*;
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105
             </Export-Package>
-            <!--<Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>-->
           </instructions>
         </configuration>
       </plugin>

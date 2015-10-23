@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_c7b6abdc",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T12:18:40Z",
+      "side": 1,
+      "message": "is it possible to read from data store rather then keeping local cache?",
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c7dd4b16",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T12:18:40Z",
+      "side": 1,
+      "message": "better to change it to Port?",
+      "range": {
+        "startLine": 55,
+        "startChar": 15,
+        "endLine": 55,
+        "endChar": 17
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_87e743e4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T12:18:40Z",
+      "side": 1,
+      "message": "please fix this",
+      "range": {
+        "startLine": 93,
+        "startChar": 22,
+        "endLine": 93,
+        "endChar": 36
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a7ecc7c8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T12:18:40Z",
+      "side": 1,
+      "message": "we should rename this to POrt",
+      "range": {
+        "startLine": 115,
+        "startChar": 24,
+        "endLine": 115,
+        "endChar": 26
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_47d15bfa",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T12:18:40Z",
+      "side": 1,
+      "message": "need to fix this as per refactor.",
+      "range": {
+        "startLine": 120,
+        "startChar": 22,
+        "endLine": 120,
+        "endChar": 38
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_27d8d71c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-10-23T12:18:40Z",
+      "side": 1,
+      "message": "Given that we can rebuild the case, can\u0027t we read the cached info from data store directly?",
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

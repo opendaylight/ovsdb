@@ -32,6 +32,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -78,7 +79,7 @@ public class SouthboundProviderTest {
         when(session.getSALService(DataBroker.class)).thenReturn(db);
         TransactionInvokerImpl transactionInvokerImpl = mock(TransactionInvokerImpl.class);
         PowerMockito.whenNew(TransactionInvokerImpl.class).withArguments(any(DataBroker.class)).thenReturn(transactionInvokerImpl);
-        PowerMockito.whenNew(OvsdbConnectionManager.class).withArguments(any(DataBroker.class), any(TransactionInvoker.class), any(EntityOwnershipService.class)).thenReturn(cm);
+        PowerMockito.whenNew(OvsdbConnectionManager.class).withArguments(any(DataBroker.class), any(TransactionInvoker.class), any(EntityOwnershipService.class), any(OvsdbConnection.class)).thenReturn(cm);
         PowerMockito.whenNew(OvsdbDataChangeListener.class).withArguments(any(DataBroker.class), any(OvsdbConnectionManager.class)).thenReturn(ovsdbDataChangeListener);
 
         when(entityOwnershipService.registerListener(anyString(), any(EntityOwnershipListener.class))).thenReturn(mock(EntityOwnershipListenerRegistration.class));

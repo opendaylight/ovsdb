@@ -33,8 +33,8 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
@@ -72,13 +72,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             new ConcurrentHashMap<>();
     private EntityOwnershipService entityOwnershipService;
     private OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
+    private OvsdbConnection ovsdbConnection;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,
-                                  EntityOwnershipService entityOwnershipService) {
+                                  EntityOwnershipService entityOwnershipService,
+                                  OvsdbConnection ovsdbConnection) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         this.ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
+        this.ovsdbConnection = ovsdbConnection;
     }
 
     @Override
@@ -144,7 +147,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO use transaction chains to handle ordering issues between disconnected
         // TODO and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
-        OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
+        OvsdbClient client = ovsdbConnection.connect(ip,
                 ovsdbNode.getConnectionInfo().getRemotePort().getValue());
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us

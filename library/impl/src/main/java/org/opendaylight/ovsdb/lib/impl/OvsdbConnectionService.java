@@ -74,7 +74,7 @@ import com.google.common.collect.Sets;
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
  * and a Singleton object in a non-OSGi environment.
  */
-public class OvsdbConnectionService implements OvsdbConnection {
+public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
     private static final int NUM_THREADS = 3;
 
@@ -388,5 +388,10 @@ public class OvsdbConnectionService implements OvsdbConnection {
     @Override
     public Collection<OvsdbClient> getConnections() {
         return connections.keySet();
+    }
+
+    @Override
+    public void close() throws Exception {
+        LOG.info("OvsdbConnectionService closed");
     }
 }

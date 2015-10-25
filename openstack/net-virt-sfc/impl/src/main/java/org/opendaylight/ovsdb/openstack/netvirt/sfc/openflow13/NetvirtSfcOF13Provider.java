@@ -11,11 +11,14 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.net.InetAddresses;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -54,6 +57,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceIp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
@@ -115,7 +119,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
     // TBD:: Remove these constants after integrating with openstack.
     //private static final String NETWORK_TYPE_VXLAN = "vxlan";
     private static final String NETWORK_SEGMENT_ID = "10";
-    private static final String LOCAL_TP_ID = "veth1-h35_2";
+    private static final String LOCAL_TP_ID = "vethl-h35_2";
     private static final String INTERFACE_TYPE_VXLAN_GPE = "vxlangpe";
     private static final String GPE_IFACE_ID = "sw1-vxlangpe-0";
 
@@ -243,9 +247,9 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
             }
 
             NshUtils header = new NshUtils();
-            header.setNshMetaC1(Long.getLong(getDestIp(match)).longValue());
-            header.setNshMetaC2(Long.getLong(NETWORK_SEGMENT_ID).longValue());
-            header.setNshNsp(rsp.getPathId().longValue());
+            header.setNshMetaC1(convertToLongIp(getDestIp(match)));
+            header.setNshMetaC2(Long.parseLong(NETWORK_SEGMENT_ID));
+            header.setNshNsp(rsp.getPathId());
 
             RenderedServicePathHop firstHop = pathHopList.get(0);
             header.setNshNsi(firstHop.getServiceIndex());
@@ -255,15 +259,15 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
             LOG.debug("The Nsh Header is ={}", header);
             OvsdbTerminationPointAugmentation localPort = getTerminationPoint(srcNode, LOCAL_TP_ID);
 
-            String attachedMac = southbound.getInterfaceExternalIdsValue(localPort, Constants.EXTERNAL_ID_VM_MAC);
+           /* String attachedMac = southbound.getInterfaceExternalIdsValue(localPort, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 LOG.warn("No AttachedMac seen in {}", localPort);
                 // return;
             }
-
-            LOG.debug("LocalPort ID={}, MAC={}", localPort.getName(), attachedMac);
+            */
+            LOG.debug("LocalPort ID={}, IP Address={}", localPort.getName(), getSourceIp(match));
             handleLocalInPort(southbound.getDataPathId(srcNode), TABLE_0_CLASSIFIER, TABLE_3_INGR_ACL,
-                    NETWORK_SEGMENT_ID, localPort.getOfport(), attachedMac, true);
+                    NETWORK_SEGMENT_ID, localPort.getOfport(), getSourceIp(match), true);
 
             // L2 Dst MAC forwarding flows.
             // L2 Flood Flows.
@@ -383,9 +387,9 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
      * ACTIONS=SET_FIELD:5->TUN_ID,GOTO_TABLE=1"
      */
     private void handleLocalInPort(long dpidLong, short writeTable, short goToTableId,
-            String segmentationId, Long inPort, String attachedMac,
+            String segmentationId, Long inPort, String sourceIp,
             boolean write) {
-        programLocalInPort(dpidLong, segmentationId, inPort, attachedMac, goToTableId, write);
+        programLocalInPort(dpidLong, segmentationId, inPort, sourceIp, goToTableId, write);
     }
 
     private String getDestIp(Matches match) {
@@ -393,14 +397,38 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
             AceIp aceIp = (AceIp)match.getAceType();
             if (aceIp.getAceIpVersion() instanceof AceIpv4) {
                 AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
-                return aceIpv4.getDestinationIpv4Network().getValue();
+                if (aceIpv4.getDestinationIpv4Network() != null) {
+                    String ipAddrPrefix = aceIpv4.getDestinationIpv4Network().getValue();
+                    String ipAddr = new StringTokenizer(ipAddrPrefix, "/").nextToken();
+                    return ipAddr;
+                }
             }
         }
         return null;
     }
 
+    private String getSourceIp(Matches match) {
+        if (match.getAceType() instanceof AceIp) {
+            AceIp aceIp = (AceIp)match.getAceType();
+            if (aceIp.getAceIpVersion() instanceof AceIpv4) {
+                AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
+                if (aceIpv4.getSourceIpv4Network() != null) {
+                    String ipAddrPrefix = aceIpv4.getSourceIpv4Network().getValue();
+                    String ipAddr = new StringTokenizer(ipAddrPrefix, "/").nextToken();
+                    return ipAddr;
+                }
+            }
+        }
+        return null;
+    }
+
+    private long convertToLongIp(String ipaddr) {
+        LOG.debug("Converting String={} to Long", ipaddr);
+        return InetAddresses.coerceToInteger(InetAddresses.forString(ipaddr));
+    }
+
     private void programLocalInPort(Long dpidLong, String segmentationId, Long inPort,
-                                    String attachedMac, short goToTableId, boolean write) {
+                                    String ipAddr, short goToTableId, boolean write) {
         String nodeName = OPENFLOW + dpidLong;
 
         MatchBuilder matchBuilder = new MatchBuilder();
@@ -411,8 +439,8 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
         //flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
         // TODO Broken In_Port Match
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
-
-        String flowId = "LocalMac_" + segmentationId + "_" + inPort + "_" + attachedMac;
+        flowBuilder.setMatch(MatchUtils.createSrcL3IPv4Match(matchBuilder, new Ipv4Prefix(ipAddr)).build());
+        String flowId = "LocalMac_" + segmentationId + "_" + inPort + "_" + ipAddr;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
@@ -533,6 +561,10 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
 
     private RenderedServicePath getRspforSfp(String sfpName) {
         RenderedServicePaths rsps = dbutils.read(LogicalDatastoreType.OPERATIONAL, this.getRspsId());
+        if (rsps == null) {
+            LOG.debug("RSP has not been configured yet for SFP={}", sfpName);
+            return null;
+        }
         for (RenderedServicePath rsp : rsps.getRenderedServicePath()) {
             if (rsp.getParentServiceFunctionPath() !=  null) {
                 if (rsp.getParentServiceFunctionPath().getValue().equalsIgnoreCase(sfpName)) {

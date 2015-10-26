@@ -1269,46 +1269,26 @@ public class NeutronL3Adapter implements ConfigInterface {
     }
 
 
-    public void storePortinCleanupCache(NeutronPort port)
-    {
-        try {
-            this.portCleanupCache.add(port);
-            LOGGER.trace("Insert  NeutronPort found {}", port.getPortUUID());
-        }catch(Exception e) {
-            LOGGER.warn(" storePortinCleanupCache Failed in exception ", e);
-
-        }
+    public void storePortInCleanupCache(NeutronPort port) {
+        this.portCleanupCache.add(port);
     }
 
 
 
-    public void removePortFromCleanupCache(NeutronPort port)
-    {
-        try {
-            LOGGER.trace("Remove  NeutronPort in CleanupCache {}", port.getPortUUID());
-            this.portCleanupCache.remove(port);
-        }catch(Exception e){
-            LOGGER.warn(" removePortFromCleanupCache Failed in exception ", e);
-        }
-
+    public void removePortFromCleanupCache(NeutronPort port) {
+        this.portCleanupCache.remove(port);
     }
 
-    public NeutronPort getPortinCleanupCache(String portid)
-    {
-        LOGGER.trace("Inside getPortinCleanupCache {}", portid);
-        try {
-            for (NeutronPort neutronPort : this.portCleanupCache) {
+    public NeutronPort getPortFromCleanupCache(String portid) {
+        for (NeutronPort neutronPort : this.portCleanupCache) {
+            if (neutronPort.getPortUUID() != null ) {
                 if (neutronPort.getPortUUID().equals(portid)) {
-                    LOGGER.trace("Matching NeutronPort found {}", portid);
+                    LOGGER.trace("getPortFromCleanupCache: Matching NeutronPort found {}", portid);
                     return neutronPort;
+                    }
                 }
             }
-            LOGGER.trace(" NeutronPort not found in CleanupCache");
-        }catch (Exception e){
-            LOGGER.warn(" getPortinCleanupCache Failed in exception ", e);
-        }
         return null;
-
     }
 
     /**

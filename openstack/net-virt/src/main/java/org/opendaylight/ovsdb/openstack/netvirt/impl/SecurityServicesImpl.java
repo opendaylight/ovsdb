@@ -109,7 +109,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
             }
             if (neutronPort == null ){
-                neutronPort = neutronL3Adapter.getPortinCleanupCache(neutronPortId);
+                neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
                 if (neutronPort == null)
                 {
                     LOG.info("getDHCPServerPort: neutron port of {} is not found", neutronPortId);
@@ -190,7 +190,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             if (neutronPort == null ){
                 LOG.trace("getNeutronPortFromCache: neutron port of {} search in cleanupcache", neutronPortId);
 
-                neutronPort = neutronL3Adapter.getPortinCleanupCache(neutronPortId);
+                neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
                 if (neutronPort == null)
                 {
                     LOG.info("getNeutronPortFromCache: neutron port of {} is not found", neutronPortId);

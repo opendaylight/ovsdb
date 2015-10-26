@@ -177,14 +177,12 @@ public class SouthboundHandler extends AbstractHandler
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
             LOGGER.trace("Clean up the NeutronPortCache for {} ", neutronPortId);
-            neutronPort = neutronL3Adapter.getPortinCleanupCache(neutronPortId);
+            neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
         }
         if (neutronPort != null) {
             LOGGER.trace("Clean up the NeutronPortCache ");
             neutronL3Adapter.removePortFromCleanupCache(neutronPort);
-        }
-        else
-        {
+        } else {
             LOGGER.trace("Nothing to Clean up in the NeutronPortCache ");
         }
 

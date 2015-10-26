@@ -77,6 +77,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
       <version>${powermock.version}</version>
@@ -102,8 +107,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Private-Package>!org.opendaylight.ovsdb.lib.osgi,org.opendaylight.ovsdb.lib.*,org.opendaylight.ovsdb.schema.openvswitch</Private-Package>
-            <Export-Package>org.opendaylight.ovsdb.southbound.*,org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southbound.impl.rev141210</Export-Package>
+            <Export-Package>
+              org.opendaylight.ovsdb.southbound.*,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southbound.impl.rev141210.*</Export-Package>
           </instructions>
         </configuration>
       </plugin>

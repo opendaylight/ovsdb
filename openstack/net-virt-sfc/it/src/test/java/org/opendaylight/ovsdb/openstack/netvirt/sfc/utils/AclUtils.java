@@ -10,18 +10,18 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.AccessListsBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessList;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.AccessListBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.AccessListEntriesBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntry;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.AccessListEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.ActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.MatchesBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.actions.packet.handling.PermitBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev141010.access.lists.access.list.access.list.entries.access.list.entry.matches.ace.type.AceIpBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessListsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.AccessListEntriesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.ActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.MatchesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.actions.packet.handling.PermitBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceIpBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.packet.fields.rev140625.acl.transport.header.fields.DestinationPortRangeBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.packet.fields.rev150611.acl.transport.header.fields.DestinationPortRangeBuilder;
 
 public class AclUtils {
     public MatchesBuilder createMatches (MatchesBuilder matchesBuilder, int destPort) {
@@ -45,10 +45,10 @@ public class AclUtils {
         return actionsBuilder;
     }
 
-    public AccessListEntryBuilder createAccessListEntryBuilder(AccessListEntryBuilder accessListEntryBuilder,
-                                                               String ruleName,
-                                                               MatchesBuilder matchesBuilder,
-                                                               ActionsBuilder actionsBuilder) {
+    public AceBuilder createAccessListEntryBuilder(AceBuilder accessListEntryBuilder,
+                                                   String ruleName,
+                                                   MatchesBuilder matchesBuilder,
+                                                   ActionsBuilder actionsBuilder) {
         accessListEntryBuilder.setRuleName(ruleName);
         accessListEntryBuilder.setMatches(matchesBuilder.build());
         accessListEntryBuilder.setActions(actionsBuilder.build());
@@ -57,16 +57,16 @@ public class AclUtils {
     }
 
     public AccessListEntriesBuilder createAccessListEntries(AccessListEntriesBuilder accessListEntriesBuilder,
-                                                            AccessListEntryBuilder accessListEntryBuilder) {
-        List<AccessListEntry> accessListEntriesList = new ArrayList<>();
+                                                            AceBuilder accessListEntryBuilder) {
+        List<Ace> accessListEntriesList = new ArrayList<>();
         accessListEntriesList.add(accessListEntryBuilder.build());
 
         return accessListEntriesBuilder;
     }
 
-    public AccessListBuilder createAccessList(AccessListBuilder accessListBuilder,
-                                              String aclName,
-                                              AccessListEntriesBuilder accessListEntriesBuilder) {
+    public AclBuilder createAccessList(AclBuilder accessListBuilder,
+                                       String aclName,
+                                       AccessListEntriesBuilder accessListEntriesBuilder) {
         accessListBuilder.setAclName(aclName);
         accessListBuilder.setAccessListEntries(accessListEntriesBuilder.build());
 
@@ -74,10 +74,10 @@ public class AclUtils {
     }
 
     public AccessListsBuilder createAccessLists(AccessListsBuilder accessListsBuilder,
-                                                AccessListBuilder accessListBuilder) {
-        List<AccessList> accessListList = new ArrayList<>();
+                                                AclBuilder accessListBuilder) {
+        List<Acl> accessListList = new ArrayList<>();
         accessListList.add(accessListBuilder.build());
-        accessListsBuilder.setAccessList(accessListList);
+        accessListsBuilder.setAcl(accessListList);
 
         return accessListsBuilder;
     }

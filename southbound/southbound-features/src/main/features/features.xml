@@ -14,6 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/${mdsal.model.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/library-features/${project.version}/xml/features</repository>
   <feature name='odl-ovsdb-southbound-api' version='${project.version}' description='OpenDaylight :: southbound :: api '>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-api/${project.version}</bundle>
@@ -22,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-southbound-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-impl/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/library/${project.version}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
@@ -34,6 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
     <configfile finalname="etc/opendaylight/karaf/southbound-impl-default-config.xml">mvn:org.opendaylight.ovsdb/southbound-impl/${project.version}/xml/config</configfile>
   </feature>
   <feature name='odl-ovsdb-southbound-impl-rest' version='${project.version}' description='OpenDaylight :: southbound :: impl :: REST '>

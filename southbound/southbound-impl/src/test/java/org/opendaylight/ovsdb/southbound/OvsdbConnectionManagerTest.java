@@ -59,6 +59,7 @@ public class OvsdbConnectionManagerTest {
     @Mock private DataBroker db;
     @Mock private TransactionInvoker txInvoker;
     @Mock private EntityOwnershipService entityOwnershipService;
+    @Mock private OvsdbConnection ovsdbConnection;
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
@@ -71,6 +72,8 @@ public class OvsdbConnectionManagerTest {
         MemberModifier.field(OvsdbConnectionManager.class, "db").set(ovsdbConnectionManager, db);
         MemberModifier.field(OvsdbConnectionManager.class, "txInvoker").set(ovsdbConnectionManager, txInvoker);
         MemberModifier.field(OvsdbConnectionManager.class, "entityOwnershipService").set(ovsdbConnectionManager, entityOwnershipService);
+        MemberModifier.field(OvsdbConnectionManager.class, "ovsdbConnection")
+                .set(ovsdbConnectionManager, ovsdbConnection);
         entityConnectionMap = new ConcurrentHashMap<>();
     }
     @Test
@@ -280,7 +283,6 @@ public class OvsdbConnectionManagerTest {
         when(SouthboundMapper.createInetAddress(any(IpAddress.class))).thenReturn(ip);
 
         OvsdbClient client = mock(OvsdbClient.class);
-        OvsdbConnection ovsdbConnection = mock(OvsdbConnection.class);
         PowerMockito.mockStatic(OvsdbConnectionService.class);
         when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
         PortNumber port = mock(PortNumber.class);

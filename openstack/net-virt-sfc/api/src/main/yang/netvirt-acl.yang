@@ -3,7 +3,7 @@ module netvirt-sfc-acl {
     namespace "urn:opendaylight:params:xml:ns:yang:netvirt:sfc:acl";
     prefix "acl";
 
-    import ietf-acl { prefix ietf-acl;}
+    import ietf-access-control-list { prefix ietf-acl;}
     import yang-ext { prefix ext; }
 
     revision "2015-01-05" {
@@ -11,8 +11,8 @@ module netvirt-sfc-acl {
     }
 
     // TODO: Add choice for Neutron and add fields there instead of at the root of matches
-    augment "/ietf-acl:access-lists/ietf-acl:access-list/ietf-acl:access-list-entries" +
-            "/ietf-acl:access-list-entry/ietf-acl:matches" {
+  //augment "/ietf-acl:access-lists/ietf-acl:access-list/ietf-acl:access-list-entries/ietf-acl:access-list-entry/ietf-acl:matches" {
+    augment "/ietf-acl:access-lists/ietf-acl:acl/ietf-acl:access-list-entries/ietf-acl:ace/ietf-acl:matches" {
         description "Neutron network uuid";
         leaf network-uuid {
             type string;
@@ -20,8 +20,7 @@ module netvirt-sfc-acl {
     }
 
     // TODO: Add choice for Neutron and add fields there instead of at the root of matches
-    augment "/ietf-acl:access-lists/ietf-acl:access-list/ietf-acl:access-list-entries" +
-            "/ietf-acl:access-list-entry/ietf-acl:actions" {
+    augment "/ietf-acl:access-lists/ietf-acl:acl/ietf-acl:access-list-entries/ietf-acl:ace/ietf-acl:actions" {
         description "Redirect traffic to SFC identified by SFC Path ID";
         leaf redirect-sfc {
             type string;

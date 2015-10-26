@@ -143,12 +143,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     @Override
     public String getModuleName() {
-        return "openstack.net-virt-providers";
+        return "netvirt-providers-impl";
     }
 
     @Override
     public String getInstanceName() {
-        return "net-virt-providers-default";
+        return "netvirt-providers-default";
     }
 
     @Override
@@ -177,14 +177,11 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return composite(
                 editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.DEBUG.name()),
+                        LogLevelOption.LogLevel.TRACE.name()),
                 editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.lib",
                         LogLevelOption.LogLevel.INFO.name()),
                 super.getLoggingOption());
-            /*editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                    "log4j.logger.org.opendaylight.ovsdb.openstack.net-virt",
-                    LogLevelOption.LogLevel.DEBUG.name())*/
     }
 
     private Option[] getPropertiesOptions() {

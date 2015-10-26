@@ -263,15 +263,9 @@ public class ConfigActivator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        LOG.info("Stop Translator CRUD service provides");
+        LOG.info("ConfigActivator stop");
         // ServiceTrackers and services are already released when bundle stops,
         // so we don't need to close the trackers or unregister the services
-        for (ServiceRegistration registration : translatorCRUDRegistrations) {
-            if (registration != null) {
-                registration.unregister();
-            }
-        }
-
     }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,

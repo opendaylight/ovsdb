@@ -60,9 +60,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
 
     @Override
     public void close() throws Exception {
-        if (providerEntityListener != null) {
-            providerEntityListener.close();
-        }
+        LOG.info("NetvirtProvidersProvider closed");
         activator.stop(bundleContext);
     }
 

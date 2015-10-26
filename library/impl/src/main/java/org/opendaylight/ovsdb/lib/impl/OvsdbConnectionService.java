@@ -149,6 +149,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Override
     public void registerConnectionListener(OvsdbConnectionListener listener) {
+        LOG.info("registerConnectionListener: registering {}", listener.getClass().getSimpleName());
         connectionListeners.add(listener);
     }
 
@@ -184,6 +185,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public synchronized boolean startOvsdbManager(final int ovsdbListenPort) {
         if (!singletonCreated) {
+            LOG.info("startOvsdbManager: Starting");
             new Thread() {
                 @Override
                 public void run() {

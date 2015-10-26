@@ -153,11 +153,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         } else {
             LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
         }
-        if (ovsdbConnection == null) {
-            ovsdbConnection = new OvsdbConnectionService();
-            ovsdbConnection.registerConnectionListener(cm);
-            ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
-        }
+        ovsdbConnection.registerConnectionListener(cm);
+        ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
     }
 
     private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

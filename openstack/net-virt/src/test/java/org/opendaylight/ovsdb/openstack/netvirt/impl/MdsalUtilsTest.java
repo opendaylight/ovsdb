@@ -25,11 +25,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtProvider;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberModifier;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -39,6 +46,7 @@ import com.google.common.util.concurrent.CheckedFuture;
  */
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
+@PrepareForTest(NetvirtProvider.class)
 public class MdsalUtilsTest {
 
     @InjectMocks private MdsalUtils mdsalUtils;
@@ -46,11 +54,17 @@ public class MdsalUtilsTest {
     @Mock private DataBroker databroker;
 
     @Test
-    public void testDelete() {
+    public void testDelete() throws IllegalArgumentException, IllegalAccessException {
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
         when(writeTransaction.submit()).thenReturn(future );
+
+        EntityOwnershipService eoService = mock (EntityOwnershipService.class);
+        EntityOwnershipState eoStatus = new EntityOwnershipState(true,true);
+        when(eoService.getOwnershipState(any(Entity.class))).thenReturn(Optional.of(eoStatus));
+        NetvirtProvider netvirtProvider = mock(NetvirtProvider.class);
+        MemberModifier.field(NetvirtProvider.class, "entityOwnershipService").set(netvirtProvider, eoService);
 
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class));
 
@@ -61,11 +75,17 @@ public class MdsalUtilsTest {
     }
 
     @Test
-    public void testMerge() {
+    public void testMerge() throws IllegalArgumentException, IllegalAccessException {
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
         when(writeTransaction.submit()).thenReturn(future );
+
+        EntityOwnershipService eoService = mock (EntityOwnershipService.class);
+        EntityOwnershipState eoStatus = new EntityOwnershipState(true,true);
+        when(eoService.getOwnershipState(any(Entity.class))).thenReturn(Optional.of(eoStatus));
+        NetvirtProvider netvirtProvider = mock(NetvirtProvider.class);
+        MemberModifier.field(NetvirtProvider.class, "entityOwnershipService").set(netvirtProvider, eoService);
 
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class), mock(DataObject.class));
 
@@ -76,11 +96,17 @@ public class MdsalUtilsTest {
     }
 
     @Test
-    public void testPut() {
+    public void testPut() throws IllegalArgumentException, IllegalAccessException {
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
         when(writeTransaction.submit()).thenReturn(future );
+
+        EntityOwnershipService eoService = mock (EntityOwnershipService.class);
+        EntityOwnershipState eoStatus = new EntityOwnershipState(true,true);
+        when(eoService.getOwnershipState(any(Entity.class))).thenReturn(Optional.of(eoStatus));
+        NetvirtProvider netvirtProvider = mock(NetvirtProvider.class);
+        MemberModifier.field(NetvirtProvider.class, "entityOwnershipService").set(netvirtProvider, eoService);
 
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class), mock(DataObject.class));
 

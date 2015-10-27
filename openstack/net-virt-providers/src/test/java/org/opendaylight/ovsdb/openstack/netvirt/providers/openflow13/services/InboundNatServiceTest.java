@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +32,12 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.support.membermodification.MemberModifier;
 
 import com.google.common.util.concurrent.CheckedFuture;
 
@@ -57,12 +60,16 @@ public class InboundNatServiceTest {
     private static final String HOST_ADDRESS_PREFIX = "127.0.0.1/32";
 
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalArgumentException, IllegalAccessException {
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
+
+        NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
+        MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));
+
     }
 
     /**

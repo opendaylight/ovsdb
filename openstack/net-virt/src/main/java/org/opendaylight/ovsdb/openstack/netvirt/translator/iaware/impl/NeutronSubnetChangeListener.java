@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableBiMap;
 
-public class NeutronSubnetChangeListener implements DataChangeListener, AutoCloseable{
+public class NeutronSubnetChangeListener implements ClusteredDataChangeListener, AutoCloseable{
     private static final Logger LOG = LoggerFactory.getLogger(NeutronSubnetChangeListener.class);
 
     private static final ImmutableBiMap<Class<? extends IpVersionBase>,Integer> IPV_MAP

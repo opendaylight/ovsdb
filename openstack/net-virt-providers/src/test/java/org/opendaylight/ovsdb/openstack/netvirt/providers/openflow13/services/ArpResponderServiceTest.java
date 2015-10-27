@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
@@ -37,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.support.membermodification.MemberModifier;
 
 import com.google.common.util.concurrent.CheckedFuture;
 

@@ -28,17 +28,17 @@ public class NetvirtProvider implements BindingAwareProvider, AutoCloseable {
     private BundleContext bundleContext = null;
     private static DataBroker dataBroker = null;
     private ConfigActivator activator;
-    private EntityOwnershipService entityOwnershipService = null;
-    private final Entity ownerInstanceEntity = new Entity(
+    private static EntityOwnershipService entityOwnershipService;
+    private static final Entity ownerInstanceEntity = new Entity(
             Constants.NETVIRT_OWNER_ENTITY_TYPE, Constants.NETVIRT_OWNER_ENTITY_TYPE);
 
-    public NetvirtProvider(BundleContext bundleContext, EntityOwnershipService entityOwnershipService) {
+    public NetvirtProvider(BundleContext bundleContext, EntityOwnershipService eos) {
         LOG.info("NetvirtProvider: bundleContext: {}", bundleContext);
         this.bundleContext = bundleContext;
-        this.entityOwnershipService = entityOwnershipService;
+        entityOwnershipService = eos;
     }
 
-    public boolean getHasProviderEntityOwnership() {
+    public static boolean isMasterProviderInstance() {
         if (entityOwnershipService != null) {
             Optional<EntityOwnershipState> state = entityOwnershipService.getOwnershipState(ownerInstanceEntity);
             return state.isPresent() && state.get().isOwner();

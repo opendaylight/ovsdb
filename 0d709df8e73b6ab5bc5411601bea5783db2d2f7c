@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_11a5ec03",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T09:17:35Z",
+      "side": 1,
+      "message": "In the case where SB event happens first and NB event later,the cache may not get cleaned. As when the former checks the cache it will be empty and latter will add the port to the cache.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_8a098a2e",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 1
@@ -138,6 +155,29 @@
       "writtenOn": "2015-10-23T14:50:07Z",
       "side": 1,
       "message": "please do the explicit null check on getPortUUID() before doing equals on it and remove the try-catch block. I don\u0027t see why it will throw exception.",
+      "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_f164e8e6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T09:17:35Z",
+      "side": 1,
+      "message": "Is this a unused method?",
+      "range": {
+        "startLine": 176,
+        "startChar": 23,
+        "endLine": 176,
+        "endChar": 46
+      },
       "revId": "0d709df8e73b6ab5bc5411601bea5783db2d2f7c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

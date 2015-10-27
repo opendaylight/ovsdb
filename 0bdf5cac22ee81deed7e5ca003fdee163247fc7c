@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_51fff401",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T07:25:57Z",
+      "side": 1,
+      "message": "To rebuild the cache we need to iterate through all the ports Security groups and security rules. It may not scale as the no of port increases. This cache is build in response to event from port DCL, So I think it should not cause any issue to clustering as well .",
+      "parentUuid": "fad0f9df_c7b6abdc",
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_c7dd4b16",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2015-10-23T12:18:40Z",
       "side": 1,
       "message": "better to change it to Port?",
+      "range": {
+        "startLine": 55,
+        "startChar": 15,
+        "endLine": 55,
+        "endChar": 17
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_71047815",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T07:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_c7dd4b16",
       "range": {
         "startLine": 55,
         "startChar": 15,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_11096c2c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T07:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_87e743e4",
+      "range": {
+        "startLine": 93,
+        "startChar": 22,
+        "endLine": 93,
+        "endChar": 36
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_a7ecc7c8",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
         "patchSetId": 1
@@ -76,6 +142,30 @@
       "writtenOn": "2015-10-23T12:18:40Z",
       "side": 1,
       "message": "we should rename this to POrt",
+      "range": {
+        "startLine": 115,
+        "startChar": 24,
+        "endLine": 115,
+        "endChar": 26
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_310ef035",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T07:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_a7ecc7c8",
       "range": {
         "startLine": 115,
         "startChar": 24,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_d1120458",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T07:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_47d15bfa",
+      "range": {
+        "startLine": 120,
+        "startChar": 22,
+        "endLine": 120,
+        "endChar": 38
+      },
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_27d8d71c",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
         "patchSetId": 1
@@ -122,6 +236,24 @@
       "writtenOn": "2015-10-23T12:18:40Z",
       "side": 1,
       "message": "Given that we can rebuild the case, can\u0027t we read the cached info from data store directly?",
+      "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_f10f082d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-10-27T07:25:57Z",
+      "side": 1,
+      "message": "Replied in the comment of EgressAclService.",
+      "parentUuid": "fad0f9df_27d8d71c",
       "revId": "0bdf5cac22ee81deed7e5ca003fdee163247fc7c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

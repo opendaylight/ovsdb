@@ -139,35 +139,39 @@ public abstract class AbstractServiceInstance {
     }
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
-                flowBuilder.build(), nodeBuilder.build());
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
-                nodeBuilder.build(), true /*createMissingParents*/);
-        modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
-                flowBuilder.build(), true /*createMissingParents*/);
+        if (NetvirtProvidersProvider.isMasterProviderInstance()) {
+            LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+                    flowBuilder.build(), nodeBuilder.build());
+            WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
+            modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
+                    nodeBuilder.build(), true /*createMissingParents*/);
+            modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
+                    flowBuilder.build(), true /*createMissingParents*/);
 
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            modification.cancel();
+            CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+            try {
+                commitFuture.get();  // TODO: Make it async (See bug 1362)
+                LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                modification.cancel();
+            }
         }
     }
 
     protected void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        modification.delete(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder));
+        if (NetvirtProvidersProvider.isMasterProviderInstance()) {
+            WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
+            modification.delete(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder));
 
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for deletion of Flow {}", flowBuilder.getFlowName());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            modification.cancel();
+            CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+            try {
+                commitFuture.get();  // TODO: Make it async (See bug 1362)
+                LOG.debug("Transaction success for deletion of Flow {}", flowBuilder.getFlowName());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                modification.cancel();
+            }
         }
     }
 

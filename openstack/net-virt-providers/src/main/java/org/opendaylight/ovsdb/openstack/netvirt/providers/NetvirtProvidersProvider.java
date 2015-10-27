@@ -36,14 +36,14 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
     private static DataBroker dataBroker = null;
     private ConfigActivator activator;
     private static ProviderContext providerContext = null;
-    private EntityOwnershipService entityOwnershipService;
+    private static EntityOwnershipService entityOwnershipService;
     private ProviderEntityListener providerEntityListener = null;
-    private AtomicBoolean hasProviderEntityOwnership = new AtomicBoolean(false);
+    private static AtomicBoolean hasProviderEntityOwnership = new AtomicBoolean(false);
 
-    public NetvirtProvidersProvider(BundleContext bundleContext, EntityOwnershipService entityOwnershipService) {
+    public NetvirtProvidersProvider(BundleContext bundleContext, EntityOwnershipService eos) {
         LOG.info("NetvirtProvidersProvider: bundleContext: {}", bundleContext);
         this.bundleContext = bundleContext;
-        this.entityOwnershipService = entityOwnershipService;
+        entityOwnershipService = eos;
     }
 
     public static DataBroker getDataBroker() {
@@ -54,7 +54,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         return providerContext;
     }
 
-    public boolean getHasProviderEntityOwnership() {
+    public static boolean isMasterProviderInstance() {
         return hasProviderEntityOwnership.get();
     }
 
@@ -62,6 +62,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
     public void close() throws Exception {
         LOG.info("NetvirtProvidersProvider closed");
         activator.stop(bundleContext);
+        providerEntityListener.close();
     }
 
     @Override
@@ -80,10 +81,10 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
 
     private void handleOwnershipChange(EntityOwnershipChange ownershipChange) {
         if (ownershipChange.isOwner()) {
-            LOG.info("*This* instance of OVSDB netvirt provider is set as a MASTER instance");
+            LOG.info("*This* instance of OVSDB netvirt provider is a MASTER instance");
             hasProviderEntityOwnership.set(true);
         } else {
-            LOG.info("*This* instance of OVSDB netvirt provider is set as a SLAVE instance");
+            LOG.info("*This* instance of OVSDB netvirt provider is a SLAVE instance");
             hasProviderEntityOwnership.set(false);
         }
     }

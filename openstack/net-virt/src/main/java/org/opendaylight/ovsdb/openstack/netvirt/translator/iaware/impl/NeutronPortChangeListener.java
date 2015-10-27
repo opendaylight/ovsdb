@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -44,7 +45,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronPortChangeListener implements DataChangeListener, AutoCloseable{
+public class NeutronPortChangeListener implements ClusteredDataChangeListener, AutoCloseable{
     private static final Logger LOG = LoggerFactory.getLogger(NeutronPortChangeListener.class);
 
     private ListenerRegistration<DataChangeListener> registration;

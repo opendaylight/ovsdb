@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl;
 
 import java.util.Map.Entry;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -25,7 +26,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronFloatingIPChangeListener implements DataChangeListener, AutoCloseable{
+public class NeutronFloatingIPChangeListener implements ClusteredDataChangeListener, AutoCloseable{
     private static final Logger LOG = LoggerFactory.getLogger(NeutronFloatingIPChangeListener.class);
 
     private ListenerRegistration<DataChangeListener> registration;

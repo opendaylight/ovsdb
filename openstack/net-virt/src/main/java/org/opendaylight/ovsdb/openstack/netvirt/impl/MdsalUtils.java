@@ -10,12 +10,14 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtProvider;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,17 +45,20 @@ public class MdsalUtils {
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
             final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", path, e);
+        if(NetvirtProvider.isMasterProviderInstance()){
+            boolean result = false;
+            final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+            transaction.delete(store, path);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            try {
+                future.checkedGet();
+                result = true;
+            } catch (TransactionCommitFailedException e) {
+                LOG.warn("Failed to delete {} ", path, e);
+            }
+            return result;
         }
-        return result;
+        return true;
     }
 
     /**
@@ -65,18 +70,21 @@ public class MdsalUtils {
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.merge(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to merge {} ", path, e);
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data) {
+        if(NetvirtProvider.isMasterProviderInstance()){
+            boolean result = false;
+            final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+            transaction.merge(logicalDatastoreType, path, data, true);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            try {
+                future.checkedGet();
+                result = true;
+            } catch (TransactionCommitFailedException e) {
+                LOG.warn("Failed to merge {} ", path, e);
+            }
+            return result;
         }
-        return result;
+        return true;
     }
 
     /**
@@ -88,18 +96,21 @@ public class MdsalUtils {
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to put {} ", path, e);
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data) {
+        if(NetvirtProvider.isMasterProviderInstance()){
+            boolean result = false;
+            final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+            transaction.put(logicalDatastoreType, path, data, true);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            try {
+                future.checkedGet();
+                result = true;
+            } catch (TransactionCommitFailedException e) {
+                LOG.warn("Failed to put {} ", path, e);
+            }
+            return result;
         }
-        return result;
+        return true;
     }
 
     /**

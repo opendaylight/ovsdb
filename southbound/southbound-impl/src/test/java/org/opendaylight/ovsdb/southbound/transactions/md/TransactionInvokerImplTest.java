@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,7 @@ public class TransactionInvokerImplTest {
     private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
         = new LinkedBlockingQueue<AsyncTransaction<?, ?>>(QUEUE_SIZE);
     @Mock private ExecutorService executor;
+    @Mock private AtomicBoolean runTask;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<ReadWriteTransaction,TransactionCommand>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<ReadWriteTransaction>();
@@ -200,6 +202,7 @@ public class TransactionInvokerImplTest {
     @Test
     public void testClose() throws Exception {
         MemberModifier.field(TransactionInvokerImpl.class, "executor").set(transactionInvokerImpl, executor);
+        MemberModifier.field(TransactionInvokerImpl.class, "runTask").set(transactionInvokerImpl, runTask);
         doNothing().when(executor).shutdown();
         transactionInvokerImpl.close();
         verify(executor).shutdown();

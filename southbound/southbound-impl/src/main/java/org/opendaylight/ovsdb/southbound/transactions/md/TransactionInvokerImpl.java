@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -46,6 +48,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<ReadWriteTransaction,TransactionCommand>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<ReadWriteTransaction>();
+    private final AtomicBoolean runTask = new AtomicBoolean( true );
 
     public TransactionInvokerImpl(DataBroker db) {
         this.db = db;
@@ -75,7 +78,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void run() {
-        while (true) {
+        while (runTask.get()) {
             forgetSuccessfulTransactions();
             try {
                 List<TransactionCommand> commands = extractCommands();
@@ -159,5 +162,9 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void close() throws Exception {
         this.executor.shutdown();
+        if (!this.executor.awaitTermination(1, TimeUnit.SECONDS)) {
+            runTask.set(false);
+            this.executor.shutdownNow();
+        }
     }
 }

@@ -105,9 +105,10 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
                     final Acl addDataObj) {
         Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
         String aclName = addDataObj.getAclName();
-        LOG.debug("Adding accesslist = {}", identifier);
+        LOG.debug("Adding accesslist iid = {}, dataObj = {}", identifier, addDataObj);
         Classifiers classifiers = dbutils.read(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
         if (classifiers != null) {
+            LOG.debug("add: Classifiers: {}", classifiers);
             for (Classifier classifier : classifiers.getClassifier()) {
                 if (classifier.getAcl().equalsIgnoreCase(aclName)) {
                     if (classifier.getSffs() != null) {
@@ -117,6 +118,8 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
                     }
                 }
             }
+        } else {
+            LOG.debug("add: No Classifiers found");
         }
     }
 

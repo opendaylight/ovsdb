@@ -19,6 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -107,6 +108,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
                     final Classifier addDataObj) {
         Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
         String aclName = addDataObj.getAcl();
+        LOG.debug("Adding classifier iid = {}, dataObj = {}", identifier, addDataObj);
         // Read the ACL information from data store and make sure it exists.
         Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION,getIetfAclIid(aclName));
         if (acl == null) {
@@ -114,12 +116,12 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
             return;
         }
 
-        if (addDataObj.getSffs() != null) {
-            for (Sff sff : addDataObj.getSffs().getSff()) {
+        if (addDataObj.getBridges() != null) {
+            for (Bridge bridge : addDataObj.getBridges().getBridge()) {
                 // Netvirt classifier binds an ACL with service function forwarder that is identified by SFF name.
                 // SFF validation can be done with SFC Provider APIs, as SFF is configured within SFC project.  
                 // Netvirt SFC provider will validate the SFF using SFC provider APIs.
-                provider.addClassifierRules(sff, acl);
+                provider.addClassifierRules(bridge, acl);
             }
         }
     }

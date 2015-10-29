@@ -317,6 +317,13 @@ public class SouthboundUtils {
         return result;
     }
 
+    public boolean addBridge(final ConnectionInfo connectionInfo, final String bridgeName)
+            throws InterruptedException {
+
+        return addBridge(connectionInfo, null, bridgeName, null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null, null);
+    }
+
     private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);

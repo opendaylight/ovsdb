@@ -88,11 +88,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <!--<configuration>
+        <configuration>
           <excludes>
             <exclude>**/NetvirtSfcIT.java</exclude>
           </excludes>
-        </configuration>-->
+        </configuration>
       </plugin>
     </plugins>
   </build>

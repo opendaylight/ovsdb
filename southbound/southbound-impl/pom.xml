@@ -108,6 +108,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <configuration>
           <instructions>
             <Export-Package>
+              org.opendaylight.ovsdb.southbound,
               org.opendaylight.ovsdb.southbound.*,
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southbound.impl.rev141210.*</Export-Package>
           </instructions>

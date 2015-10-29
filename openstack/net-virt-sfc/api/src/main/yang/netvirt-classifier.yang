@@ -32,6 +32,14 @@ module netvirt-sfc-classifier {
                     }
                 }
             }
+            container bridges {
+                list bridge {
+                    key "name";
+                    leaf name {
+                        type string;
+                    }
+                }
+            }
         }
     }
 }

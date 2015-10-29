@@ -108,6 +108,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
                     BigInteger.valueOf(REG_VALUE_FROM_LOCAL)));
             ab.setOrder(1);
             ab.setKey(new ActionKey(1));
+
             actionList.add(ab.build());
 
             ib.setOrder(0);

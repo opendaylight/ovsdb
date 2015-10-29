@@ -35,6 +35,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -159,7 +160,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                         LogLevel.INFO.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
-                        LogLevel.INFO.name()),
+                        LogLevel.TRACE.name()),
                 /*editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.TRACE.name()),*/
@@ -364,4 +365,58 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         Thread.sleep(1000);
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
     }
+
+    @Test
+    public void testDemo() throws InterruptedException {
+        for (DemoVm vm : demoVms){
+            ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(vm.ipAddr, vm.ipPort);
+            assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
+            Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
+            assertNotNull("node is not connected", ovsdbNode);
+            String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
+            assertNotNull("Failed to get controller target", controllerTarget);
+            List<ControllerEntry> setControllerEntry = southboundUtils.createControllerEntry(controllerTarget);
+            Uri setUri = new Uri(controllerTarget);
+            assertTrue(southboundUtils.addBridge(connectionInfo, null, vm.name, null, true,
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
+                    setControllerEntry, null));
+
+            for (int i = 0; i < 10; i++) {
+                OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, vm.name);
+                assertNotNull("bridge was not found: " + vm.name, bridge);
+                assertNotNull("ControllerEntry was not found: "
+                                + southboundUtils.createControllerEntry(controllerTarget),
+                        bridge.getControllerEntry());
+                List<ControllerEntry> getControllerEntries = bridge.getControllerEntry();
+                for (ControllerEntry entry : getControllerEntries) {
+                    if (entry.isIsConnected()) {
+                        assertTrue(entry.isIsConnected());
+                        break;
+                    }
+                }
+                Thread.sleep(1000);
+            }
+
+            assertTrue(southboundUtils.deleteBridge(connectionInfo, vm.name));
+            Thread.sleep(1000);
+            assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
+        }
+    }
+
+    private class DemoVm {
+        String name;
+        String ipAddr;
+        String ipPort;
+
+        DemoVm(String name, String ipAddr, String ipPort) {
+            this.name = name;
+            this.ipAddr = ipAddr;
+            this.ipPort = ipPort;
+        }
+    }
+
+    private DemoVm[] demoVms = {
+            new DemoVm("sw1", "192.168.50.70", "6640"),
+            //new DemoVm("sw2", "192.168.50.71", "6640"),
+    };
 }

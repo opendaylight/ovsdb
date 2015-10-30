@@ -64,13 +64,15 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
         ManagerEntry onlyConnectedManager = null;
         if (ovsdbNodeAugmentation != null) {
             int connectedManager = 0;
-            for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
-                if (manager.isConnected()) {
-                    connectedManager++;
-                    if (connectedManager > ONE_CONNECTED_MANAGER) {
-                        return false;
+            if (ovsdbNodeAugmentation.getManagerEntry() != null) {
+                for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
+                    if (manager.isConnected()) {
+                        connectedManager++;
+                        if (connectedManager > ONE_CONNECTED_MANAGER) {
+                            return false;
+                        }
+                        onlyConnectedManager = manager;
                     }
-                    onlyConnectedManager = manager;
                 }
             }
             if (connectedManager == 0) {

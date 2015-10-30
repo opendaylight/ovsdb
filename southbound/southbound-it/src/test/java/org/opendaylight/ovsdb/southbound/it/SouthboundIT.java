@@ -866,82 +866,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing PortExternalIds.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT port external_ids, or EXPECTED port external_ids
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setPortExternalIds()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getPortExternalIds()</code>
-     */
-    private List<SouthboundTestCase<PortExternalIds>> generatePortExternalIdsTestCases() {
-        List<SouthboundTestCase<PortExternalIds>> testCases = new ArrayList<>();
-
-        final String PORT_EXTERNAL_ID_KEY = "PortExternalIdKey";
-        final String PORT_EXTERNAL_ID_VALUE = "PortExternalIdValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<PortExternalIds> builder = new SouthboundPortExternalIdsBuilder();
-
-        // Test Case 1:  TestOneExternalId
-        // Test Type:    Positive
-        // Description:  Create a termination point with one PortExternalIds
-        // Expected:     A port is created with the single external_ids specified below
-        final String testOneExternalIdName = "TestOneExternalId";
-        testCases.add(SouthboundIT.<PortExternalIds>testCase()
-                .name(testOneExternalIdName)
-                .input(builder.build(testOneExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFiveExternalId
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) PortExternalIds
-        // Expected:     A port is created with the five external_ids specified below
-        final String testFiveExternalIdName = "TestFiveExternalId";
-        builder.reset();
-        testCases.add(SouthboundIT.<PortExternalIds>testCase()
-                .name(testFiveExternalIdName)
-                .input(
-                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine PortExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_PortExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_PortExternalIdValue_1)
-        //     and one malformed PortExternalId which only has key specified
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A port is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
-                "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<PortExternalIds>testCase()
-                .name(testOneGoodExternalIdOneMalformedExternalIdValueName)
-                .input(
-                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDPortExternalIds()</code>
      * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
      */
@@ -971,8 +895,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<PortExternalIds>> updateFromTestCases = generatePortExternalIdsTestCases();
-        List<SouthboundTestCase<PortExternalIds>> updateToTestCases = generatePortExternalIdsTestCases();
+        List<SouthboundTestCase<PortExternalIds>> updateFromTestCases =
+                generateKeyValueTestCases(new SouthboundPortExternalIdsBuilder(), "PortExternalIdsFrom");
+        List<SouthboundTestCase<PortExternalIds>> updateToTestCases =
+                generateKeyValueTestCases(new SouthboundPortExternalIdsBuilder(), "PortExternalIdsTo");
 
         for (SouthboundTestCase<PortExternalIds> updateFromTestCase : updateFromTestCases) {
             List<PortExternalIds> updateFromInputExternalIds = updateFromTestCase.inputValues;
@@ -1067,82 +993,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing InterfaceExternalIds.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT interface external_ids, or EXPECTED interface external_ids
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setInterfaceExternalIds()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getInterfaceExternalIds()</code>
-     */
-    private List<SouthboundTestCase<InterfaceExternalIds>> generateInterfaceExternalIdsTestCases() {
-        List<SouthboundTestCase<InterfaceExternalIds>> testCases = new ArrayList<>();
-
-        final String INTERFACE_EXTERNAL_ID_KEY = "IntExternalIdKey";
-        final String INTERFACE_EXTERNAL_ID_VALUE = "IntExternalIdValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<InterfaceExternalIds> builder = new SouthboundInterfaceExternalIdsBuilder();
-
-        // Test Case 1:  TestOneExternalId
-        // Test Type:    Positive
-        // Description:  Create a termination point with one InterfaceExternalIds
-        // Expected:     A termination point is created with the single external_ids specified below
-        final String testOneExternalIdName = "TestOneExternalId";
-        testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
-                .name(testOneExternalIdName)
-                .input(builder.build(testOneExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFiveExternalId
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) InterfaceExternalIds
-        // Expected:     A termination point is created with the five external_ids specified below
-        final String testFiveExternalIdName = "TestFiveExternalId";
-        builder.reset();
-        testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
-                .name(testFiveExternalIdName)
-                .input(
-                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_IntExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_IntExternalIdValue_1)
-        //     and one malformed PortExternalId which only has key specified
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
-                "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
-                .name(testOneGoodExternalIdOneMalformedExternalIdValueName)
-                .input(
-                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDInterfaceExternalIds()</code>
      * This is helper test method to compare a test "set" of InterfaceExternalIds against an expected "set"
      */
@@ -1171,8 +1021,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<InterfaceExternalIds>> updateFromTestCases = generateInterfaceExternalIdsTestCases();
-        List<SouthboundTestCase<InterfaceExternalIds>> updateToTestCases = generateInterfaceExternalIdsTestCases();
+        List<SouthboundTestCase<InterfaceExternalIds>> updateFromTestCases = generateKeyValueTestCases(
+                new SouthboundInterfaceExternalIdsBuilder(), "InterfaceExternalIdsFrom");
+        List<SouthboundTestCase<InterfaceExternalIds>> updateToTestCases = generateKeyValueTestCases(
+                new SouthboundInterfaceExternalIdsBuilder(), "InterfaceExternalIdsTo");
 
         for (SouthboundTestCase<InterfaceExternalIds> updateFromTestCase : updateFromTestCases) {
             List<InterfaceExternalIds> updateFromInputExternalIds = updateFromTestCase.inputValues;
@@ -1271,82 +1123,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing TP Options.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT TP Options, or EXPECTED TP Options
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setOptions()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getOptions()</code>
-     */
-    private List<SouthboundTestCase<Options>> generateTerminationPointOptionsTestCases() {
-        List<SouthboundTestCase<Options>> testCases = new ArrayList<>();
-
-        final String TP_OPTIONS_KEY = "TPOptionsKey";
-        final String TP_OPTIONS_VALUE = "TPOptionsValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<Options> builder = new SouthboundOptionsBuilder();
-
-        // Test Case 1:  TestOneOptions
-        // Test Type:    Positive
-        // Description:  Create a termination point with one Options
-        // Expected:     A termination point is created with the single Options specified below
-        final String testOneOptionsName = "TestOneOptions";
-        testCases.add(SouthboundIT.<Options>testCase()
-                .name(testOneOptionsName)
-                .input(builder.build(testOneOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFiveOptions
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) Options
-        // Expected:     A termination point is created with the five options specified below
-        final String testFiveOptionsName = "TestFiveOptions";
-        builder.reset();
-        testCases.add(SouthboundIT.<Options>testCase()
-                .name(testFiveOptionsName)
-                .input(
-                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
-                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
-                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
-                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
-                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodOptionsOneMalformedOptionsValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine Options
-        //        (TestOneGoodOptionsOneMalformedOptionsValue_OptionsKey_1,
-        //        TestOneGoodOptionsOneMalformedOptions_OptionsValue_1)
-        //     and one malformed Options which only has key specified
-        //        (TestOneGoodOptionsOneMalformedOptionsValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any options
-        final String testOneGoodOptionsOneMalformedOptionsValueName =
-                "TestOneGoodOptionsOneMalformedOptionsValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<Options>testCase()
-                .name(testOneGoodOptionsOneMalformedOptionsValueName)
-                .input(
-                        builder.build(testOneGoodOptionsOneMalformedOptionsValueName, GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDTerminationPointOptions()</code>
      * This is helper test method to compare a test "set" of Options against an expected "set"
      */
@@ -1375,8 +1151,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<Options>> updateFromTestCases = generateTerminationPointOptionsTestCases();
-        List<SouthboundTestCase<Options>> updateToTestCases = generateTerminationPointOptionsTestCases();
+        List<SouthboundTestCase<Options>> updateFromTestCases =
+                generateKeyValueTestCases(new SouthboundOptionsBuilder(), "OptionsFrom");
+        List<SouthboundTestCase<Options>> updateToTestCases = generateKeyValueTestCases(new SouthboundOptionsBuilder(),
+                "OptionsTo");
 
         for (SouthboundTestCase<Options> updateFromTestCase : updateFromTestCases) {
             List<Options> updateFromInputOptions = updateFromTestCase.inputValues;
@@ -1467,89 +1245,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing Interface other_configs.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT interface other_configs, or EXPECTED interface other_configs
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setInterfaceOtherConfigs()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getInterfaceOtherConfigs()</code>
-     */
-    private List<SouthboundTestCase<InterfaceOtherConfigs>> generateInterfaceOtherConfigsTestCases() {
-        List<SouthboundTestCase<InterfaceOtherConfigs>> testCases = new ArrayList<>();
-
-        final String INT_OTHER_CONFIGS_KEY = "IntOtherConfigsKey";
-        final String INT_OTHER_CONFIGS_VALUE = "IntOtherConfigsValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<InterfaceOtherConfigs> builder = new SouthboundInterfaceOtherConfigsBuilder();
-
-        // Test Case 1:  TestOneOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create an interface with one other_Configs
-        // Expected:     An interface is created with the single other_configs specified below
-        final String testOneOtherConfigsName = "TestOneInterfaceOtherConfigs";
-        testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
-                .name(testOneOtherConfigsName)
-                .input(builder.build(testOneOtherConfigsName, INT_OTHER_CONFIGS_KEY, INT_OTHER_CONFIGS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFiveInterfaceOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) InterfaceOtherConfigs
-        // Expected:     A termination point is created with the five InterfaceOtherConfigs specified below
-        final String testFiveInterfaceOtherConfigsName = "TestFiveInterfaceOtherConfigs";
-        builder.reset();
-        testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
-                .name(testFiveInterfaceOtherConfigsName)
-                .input(
-                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
-                                INT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
-                                INT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
-                                INT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
-                                INT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
-                                INT_OTHER_CONFIGS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceOtherConfigs
-        //        (TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue_InterfaceOtherConfigsKey_1,
-        //        TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigs_InterfaceOtherConfigsValue_1)
-        //     and one malformed InterfaceOtherConfigs which only has key specified
-        //        (TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any InterfaceOtherConfigs
-        final String testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName =
-                "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
-                .name(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName)
-                .input(
-                        builder.build(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                                GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                                NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDInterfaceOtherConfigs()</code>
      * This is helper test method to compare a test "set" of Options against an expected "set"
      */
@@ -1578,8 +1273,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<InterfaceOtherConfigs>> updateFromTestCases = generateInterfaceOtherConfigsTestCases();
-        List<SouthboundTestCase<InterfaceOtherConfigs>> updateToTestCases = generateInterfaceOtherConfigsTestCases();
+        List<SouthboundTestCase<InterfaceOtherConfigs>> updateFromTestCases =
+                generateKeyValueTestCases(new SouthboundInterfaceOtherConfigsBuilder(), "InterfaceOtherConfigsFrom");
+        List<SouthboundTestCase<InterfaceOtherConfigs>> updateToTestCases =
+                generateKeyValueTestCases(new SouthboundInterfaceOtherConfigsBuilder(), "InterfaceOtherConfigsTo");
 
         for (SouthboundTestCase<InterfaceOtherConfigs> updateFromTestCase : updateFromTestCases) {
             List<InterfaceOtherConfigs> updateFromInputOtherConfigs = updateFromTestCase.inputValues;
@@ -1676,84 +1373,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing Port other_configs.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT port other_configs, or EXPECTED port other_configs
-     *     INPUT    is the List we use when calling
-     *              <code>TerminationPointAugmentationBuilder.setPortOtherConfigs()</code>
-     *     EXPECTED is the List we expect to receive after calling
-     *              <code>TerminationPointAugmentationBuilder.getPortOtherConfigs()</code>
-     */
-    private List<SouthboundTestCase<PortOtherConfigs>> generatePortOtherConfigsTestCases() {
-        List<SouthboundTestCase<PortOtherConfigs>> testCases = new ArrayList<>();
-
-        final String PORT_OTHER_CONFIGS_KEY = "PortOtherConfigsKey";
-        final String PORT_OTHER_CONFIGS_VALUE = "PortOtherConfigsValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<PortOtherConfigs> builder = new SouthboundPortOtherConfigsBuilder();
-
-        // Test Case 1:  TestOneOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create an port with one other_Configs
-        // Expected:     A port is created with the single other_configs specified below
-        final String testOneOtherConfigsName = "TestOnePortOtherConfigs";
-        testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
-                .name(testOneOtherConfigsName)
-                .input(builder.build(testOneOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFivePortOtherConfigs
-        // Test Type:    Positive
-        // Description:  Create a termination point with multiple (five) PortOtherConfigs
-        // Expected:     A termination point is created with the five PortOtherConfigs specified below
-        final String testFivePortOtherConfigsName = "TestFivePortOtherConfigs";
-        builder.reset();
-        testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
-                .name(testFivePortOtherConfigsName)
-                .input(
-                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
-                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine PortOtherConfigs
-        //        (TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue_PortOtherConfigsKey_1,
-        //        TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigs_PortOtherConfigsValue_1)
-        //     and one malformed PortOtherConfigs which only has key specified
-        //        (TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A termination point is created without any PortOtherConfigs
-        final String testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName =
-                "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
-                .name(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName)
-                .input(
-                        builder.build(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName, GOOD_KEY,
-                                GOOD_VALUE),
-                        builder.build(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                                NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDPortOtherConfigs()</code>
      * This is helper test method to compare a test "set" of Options against an expected "set"
      */
@@ -1782,8 +1401,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<PortOtherConfigs>> updateFromTestCases = generatePortOtherConfigsTestCases();
-        List<SouthboundTestCase<PortOtherConfigs>> updateToTestCases = generatePortOtherConfigsTestCases();
+        List<SouthboundTestCase<PortOtherConfigs>> updateFromTestCases =
+                generateKeyValueTestCases(new SouthboundPortOtherConfigsBuilder(), "PortOtherConfigsFrom");
+        List<SouthboundTestCase<PortOtherConfigs>> updateToTestCases =
+                generateKeyValueTestCases(new SouthboundPortOtherConfigsBuilder(), "PortOtherConfigsTo");
 
         for (SouthboundTestCase<PortOtherConfigs> updateFromTestCase : updateFromTestCases) {
             List<PortOtherConfigs> updateFromInputOtherConfigs = updateFromTestCase.inputValues;
@@ -2152,80 +1773,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing BridgeOtherConfigs.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT bridge other_configs, or EXPECTED bridge other_configs
-     *     INPUT is the List we use when calling BridgeAugmentationBuilder.setBridgeOtherConfigs()
-     *     EXPECTED is the List we expect to receive after calling BridgeAugmentationBuilder.getBridgeOtherConfigs()
-     */
-    private List<SouthboundTestCase<BridgeOtherConfigs>> generateBridgeOtherConfigsTestCases() {
-        List<SouthboundTestCase<BridgeOtherConfigs>> testCases = new ArrayList<>();
-
-        final String BRIDGE_OTHER_CONFIGS_KEY = "BridgeOtherConfigKey";
-        final String BRIDGE_OTHER_CONFIGS_VALUE = "BridgeOtherConfigValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<BridgeOtherConfigs> builder = new SouthboundBridgeOtherConfigsBuilder();
-
-        // Test Case 1:  TestOneOtherConfig
-        // Test Type:    Positive
-        // Description:  Create a bridge with one other_config
-        // Expected:     A bridge is created with the single other_config specified below
-        final String testOneOtherConfigName = "TestOneOtherConfig";
-        testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
-                .name(testOneOtherConfigName)
-                .input(builder.build(testOneOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFiveOtherConfig
-        // Test Type:    Positive
-        // Description:  Create a bridge with multiple (five) other_configs
-        // Expected:     A bridge is created with the five other_configs specified below
-        final String testFiveOtherConfigName = "TestFiveOtherConfig";
-        builder.reset();
-        testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
-                .name(testFiveOtherConfigName)
-                .input(
-                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
-                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodOtherConfigOneMalformedOtherConfigValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeOtherConfig
-        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_BridgeOtherConfigKey_1,
-        //        TestOneGoodOtherConfigOneMalformedOtherConfig_BridgeOtherConfigValue_1)
-        //     and one malformed BridgeOtherConfig which only has key specified
-        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A bridge is created without any other_config
-        final String testOneGoodOtherConfigOneMalformedOtherConfigValueName =
-                "TestOneGoodOtherConfigOneMalformedOtherConfigValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
-                .name(testOneGoodOtherConfigOneMalformedOtherConfigValueName)
-                .input(
-                        builder.build(testOneGoodOtherConfigOneMalformedOtherConfigValueName, GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDBridgeOtherConfigs()</code>
      * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
      */
@@ -2249,8 +1796,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<BridgeOtherConfigs>> updateFromTestCases = generateBridgeOtherConfigsTestCases();
-        List<SouthboundTestCase<BridgeOtherConfigs>> updateToTestCases = generateBridgeOtherConfigsTestCases();
+        List<SouthboundTestCase<BridgeOtherConfigs>> updateFromTestCases =
+                generateKeyValueTestCases(new SouthboundBridgeOtherConfigsBuilder(), "BridgeOtherConfigsFrom");
+        List<SouthboundTestCase<BridgeOtherConfigs>> updateToTestCases = generateKeyValueTestCases(
+                new SouthboundBridgeOtherConfigsBuilder(), "BridgeOtherConfigsTo");
         for (SouthboundTestCase<BridgeOtherConfigs> updateFromTestCase : updateFromTestCases) {
             List<BridgeOtherConfigs> updateFromInputOtherConfigs = updateFromTestCase.inputValues;
             List<BridgeOtherConfigs> updateFromExpectedOtherConfigs = updateFromTestCase.expectedValues;
@@ -2315,80 +1864,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Generates the test cases involved in testing BridgeExternalIds.  See inline comments for descriptions of
-     * the particular cases considered.
-     *
-     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
-     * - testCaseName is a String
-     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
-     *     either corresponding INPUT bridge external ids, or EXPECTED bridge external ids
-     *     INPUT is the List we use when calling BridgeAugmentationBuilder.setBridgeExternalIds()
-     *     EXPECTED is the List we expect to receive after calling BridgeAugmentationBuilder.getBridgeExternalIds()
-     */
-    private List<SouthboundTestCase<BridgeExternalIds>> generateBridgeExternalIdsTestCases() {
-        List<SouthboundTestCase<BridgeExternalIds>> testCases = new ArrayList<>();
-
-        final String BRIDGE_EXTERNAL_ID_KEY = "BridgeExternalIdKey";
-        final String BRIDGE_EXTERNAL_ID_VALUE = "BridgeExternalIdValue";
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
-
-        KeyValueBuilder<BridgeExternalIds> builder = new SouthboundBridgeExternalIdsBuilder();
-
-        // Test Case 1:  TestOneExternalId
-        // Test Type:    Positive
-        // Description:  Create a bridge with one BridgeExternalIds
-        // Expected:     A bridge is created with the single external_ids specified below
-        final String testOneExternalIdName = "TestOneExternalId";
-        testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
-                .name(testOneExternalIdName)
-                .input(builder.build(testOneExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 2:  TestFiveExternalId
-        // Test Type:    Positive
-        // Description:  Create a bridge with multiple (five) BridgeExternalIds
-        // Expected:     A bridge is created with the five external_ids specified below
-        final String testFiveExternalIdName = "TestFiveExternalId";
-        builder.reset();
-        testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
-                .name(testFiveExternalIdName)
-                .input(
-                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
-                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE))
-                .expectInputAsOutput()
-                .build());
-
-        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_BridgeExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_BridgeExternalIdValue_1)
-        //     and one malformed BridgeExternalId which only has key specified
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A bridge is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
-                "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        builder.reset();
-        testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
-                .name(testOneGoodExternalIdOneMalformedExternalIdValueName)
-                .input(
-                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-
-        return testCases;
-    }
-
-    /*
      * @see <code>SouthboundIT.testCRUDBridgeExternalIds()</code>
      * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
      */
@@ -2412,8 +1887,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
-        List<SouthboundTestCase<BridgeExternalIds>> updateFromTestCases = generateBridgeExternalIdsTestCases();
-        List<SouthboundTestCase<BridgeExternalIds>> updateToTestCases = generateBridgeExternalIdsTestCases();
+        List<SouthboundTestCase<BridgeExternalIds>> updateFromTestCases = generateKeyValueTestCases(
+                new SouthboundBridgeExternalIdsBuilder(), "BridgeExternalIdsFrom");
+        List<SouthboundTestCase<BridgeExternalIds>> updateToTestCases = generateKeyValueTestCases(
+                new SouthboundBridgeExternalIdsBuilder(), "BridgeExternalIdsTo");
         for (SouthboundTestCase<BridgeExternalIds> updateFromTestCase : updateFromTestCases) {
             List<BridgeExternalIds> updateFromInputExternalIds = updateFromTestCase.inputValues;
             List<BridgeExternalIds> updateFromExpectedExternalIds = updateFromTestCase.expectedValues;
@@ -2588,18 +2065,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         /**
-         * Sets the expected output values.
-         *
-         * @param expectedValues The expected output values.
-         * @return The builder.
-         */
-        @SafeVarargs
-        public final SouthboundTestCaseBuilder<T> expect(final T... expectedValues) {
-            this.expectedValues = Lists.newArrayList(expectedValues);
-            return this;
-        }
-
-        /**
          * Indicates that the provided input values should be expected as output values.
          *
          * @return The builder.
@@ -2628,10 +2093,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public SouthboundTestCase<T> build() {
             return new SouthboundTestCase<>(name, inputValues, expectedValues);
         }
-    }
-
-    private static <T> SouthboundTestCaseBuilder<T> testCase() {
-        return new SouthboundTestCaseBuilder<>();
     }
 
     private abstract static class KeyValueBuilder<T> {
@@ -2778,5 +2239,72 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         protected void setValue(Builder<BridgeExternalIds> builder, String value) {
             ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdValue(value);
         }
+    }
+
+    /*
+     * Generates the test cases involved in testing key-value-based data.  See inline comments for descriptions of
+     * the particular cases considered.
+     */
+    private static <T> List<SouthboundTestCase<T>> generateKeyValueTestCases(
+            KeyValueBuilder<T> builder, String testName) {
+        List<SouthboundTestCase<T>> testCases = new ArrayList<>();
+
+        final String GOOD_KEY = "GoodKey";
+        final String GOOD_VALUE = "GoodValue";
+        final String NO_VALUE_FOR_KEY = "NoValueForKey";
+
+        final String idKey = testName + "Key";
+        final String idValue = testName + "Value";
+
+        // Test Case 1:  TestOne
+        // Test Type:    Positive
+        // Description:  Create a termination point with one value
+        // Expected:     A port is created with the single value specified below
+        final String testOneName = "TestOne" + testName;
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testOneName)
+                .input(builder.build(testOneName, idKey, idValue))
+                .expectInputAsOutput()
+                .build());
+
+        // Test Case 2:  TestFive
+        // Test Type:    Positive
+        // Description:  Create a termination point with multiple (five) values
+        // Expected:     A port is created with the five values specified below
+        final String testFiveName = "TestFive" + testName;
+        builder.reset();
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testFiveName)
+                .input(
+                        builder.build(testFiveName, idKey, idValue),
+                        builder.build(testFiveName, idKey, idValue),
+                        builder.build(testFiveName, idKey, idValue),
+                        builder.build(testFiveName, idKey, idValue),
+                        builder.build(testFiveName, idKey, idValue))
+                .expectInputAsOutput()
+                .build());
+
+        // Test Case 3:  TestOneGoodOneMalformedValue
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine input
+        //        (TestOneGoodOneMalformedValue_GoodKey_1,
+        //        TestOneGoodOneMalformedValue_GoodValue_1)
+        //     and one malformed input which only has key specified
+        //        (TestOneGoodOneMalformedValue_NoValueForKey_2,
+        //        UNSPECIFIED)
+        // Expected:     A port is created without any values
+        final String testOneGoodOneMalformedValueName = "TestOneGoodOneMalformedValue" + testName;
+        builder.reset();
+        testCases.add(new SouthboundTestCaseBuilder<T>()
+                .name(testOneGoodOneMalformedValueName)
+                .input(
+                        builder.build(testOneGoodOneMalformedValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodOneMalformedValueName, NO_VALUE_FOR_KEY, null))
+                .expectNoOutput()
+                .build());
+        builder.reset();
+
+        return testCases;
     }
 }

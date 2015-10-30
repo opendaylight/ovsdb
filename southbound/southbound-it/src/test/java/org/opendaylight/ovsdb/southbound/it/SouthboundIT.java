@@ -96,6 +96,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -886,20 +887,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<PortExternalIds> builder = new SouthboundPortExternalIdsBuilder();
+
         // Test Case 1:  TestOneExternalId
         // Test Type:    Positive
         // Description:  Create a termination point with one PortExternalIds
         // Expected:     A port is created with the single external_ids specified below
         final String testOneExternalIdName = "TestOneExternalId";
-        int externalIdCounter = 0;
         testCases.add(SouthboundIT.<PortExternalIds>testCase()
                 .name(testOneExternalIdName)
-                .input(new PortExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                                PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                                PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build())
+                .input(builder.build(testOneExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -908,40 +905,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a termination point with multiple (five) PortExternalIds
         // Expected:     A port is created with the five external_ids specified below
         final String testFiveExternalIdName = "TestFiveExternalId";
-        externalIdCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<PortExternalIds>testCase()
                 .name(testFiveExternalIdName)
                 .input(
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        PORT_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build())
+                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, PORT_EXTERNAL_ID_KEY, PORT_EXTERNAL_ID_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -957,23 +929,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A port is created without any external_ids
         final String testOneGoodExternalIdOneMalformedExternalIdValueName =
                 "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        externalIdCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<PortExternalIds>testCase()
                 .name(testOneGoodExternalIdOneMalformedExternalIdValueName)
                 .input(
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(
-                                        String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                                                GOOD_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdValueName,
-                                        GOOD_VALUE, externalIdCounter))
-                                .build(),
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY,
-                                        ++externalIdCounter))
-                                .build())
+                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -1127,20 +1088,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<InterfaceExternalIds> builder = new SouthboundInterfaceExternalIdsBuilder();
+
         // Test Case 1:  TestOneExternalId
         // Test Type:    Positive
         // Description:  Create a termination point with one InterfaceExternalIds
         // Expected:     A termination point is created with the single external_ids specified below
         final String testOneExternalIdName = "TestOneExternalId";
-        int externalIdCounter = 0;
         testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
                 .name(testOneExternalIdName)
-                .input(new InterfaceExternalIdsBuilder()
-                        .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                                INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                                INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build())
+                .input(builder.build(testOneExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1149,40 +1106,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a termination point with multiple (five) InterfaceExternalIds
         // Expected:     A termination point is created with the five external_ids specified below
         final String testFiveExternalIdName = "TestFiveExternalId";
-        externalIdCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
                 .name(testFiveExternalIdName)
                 .input(
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        INTERFACE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build())
+                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, INTERFACE_EXTERNAL_ID_KEY, INTERFACE_EXTERNAL_ID_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1198,23 +1130,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A termination point is created without any external_ids
         final String testOneGoodExternalIdOneMalformedExternalIdValueName =
                 "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        externalIdCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
                 .name(testOneGoodExternalIdOneMalformedExternalIdValueName)
                 .input(
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(
-                                        String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                                                GOOD_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdValueName,
-                                        GOOD_VALUE, externalIdCounter))
-                                .build(),
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY,
-                                        ++externalIdCounter))
-                                .build())
+                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -1371,20 +1292,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<Options> builder = new SouthboundOptionsBuilder();
+
         // Test Case 1:  TestOneOptions
         // Test Type:    Positive
         // Description:  Create a termination point with one Options
         // Expected:     A termination point is created with the single Options specified below
         final String testOneOptionsName = "TestOneOptions";
-        int optionsCounter = 0;
         testCases.add(SouthboundIT.<Options>testCase()
                 .name(testOneOptionsName)
-                .input(new OptionsBuilder()
-                        .setOption(String.format(FORMAT_STR, testOneOptionsName,
-                                TP_OPTIONS_KEY, ++optionsCounter))
-                        .setValue(String.format(FORMAT_STR, testOneOptionsName,
-                                TP_OPTIONS_VALUE, optionsCounter))
-                        .build())
+                .input(builder.build(testOneOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1393,40 +1310,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a termination point with multiple (five) Options
         // Expected:     A termination point is created with the five options specified below
         final String testFiveOptionsName = "TestFiveOptions";
-        optionsCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<Options>testCase()
                 .name(testFiveOptionsName)
                 .input(
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_VALUE, optionsCounter))
-                                .build(),
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_VALUE, optionsCounter))
-                                .build(),
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_VALUE, optionsCounter))
-                                .build(),
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_VALUE, optionsCounter))
-                                .build(),
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR, testFiveOptionsName,
-                                        TP_OPTIONS_VALUE, optionsCounter))
-                                .build())
+                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
+                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
+                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
+                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE),
+                        builder.build(testFiveOptionsName, TP_OPTIONS_KEY, TP_OPTIONS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1442,22 +1334,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A termination point is created without any options
         final String testOneGoodOptionsOneMalformedOptionsValueName =
                 "TestOneGoodOptionsOneMalformedOptionsValue";
-        optionsCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<Options>testCase()
                 .name(testOneGoodOptionsOneMalformedOptionsValueName)
                 .input(
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsValueName,
-                                        GOOD_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR,
-                                        testOneGoodOptionsOneMalformedOptionsValueName,
-                                        GOOD_VALUE, optionsCounter))
-                                .build(),
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR,
-                                        testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY,
-                                        ++optionsCounter))
-                                .build())
+                        builder.build(testOneGoodOptionsOneMalformedOptionsValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -1606,20 +1488,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<InterfaceOtherConfigs> builder = new SouthboundInterfaceOtherConfigsBuilder();
+
         // Test Case 1:  TestOneOtherConfigs
         // Test Type:    Positive
         // Description:  Create an interface with one other_Configs
         // Expected:     An interface is created with the single other_configs specified below
         final String testOneOtherConfigsName = "TestOneInterfaceOtherConfigs";
-        int otherConfigsCounter = 0;
         testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
                 .name(testOneOtherConfigsName)
-                .input(new InterfaceOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build())
+                .input(builder.build(testOneOtherConfigsName, INT_OTHER_CONFIGS_KEY, INT_OTHER_CONFIGS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1628,40 +1506,20 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a termination point with multiple (five) InterfaceOtherConfigs
         // Expected:     A termination point is created with the five InterfaceOtherConfigs specified below
         final String testFiveInterfaceOtherConfigsName = "TestFiveInterfaceOtherConfigs";
-        otherConfigsCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
                 .name(testFiveInterfaceOtherConfigsName)
                 .input(
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFiveInterfaceOtherConfigsName,
-                                        INT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build())
+                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
+                                INT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
+                                INT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
+                                INT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
+                                INT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveInterfaceOtherConfigsName, INT_OTHER_CONFIGS_KEY,
+                                INT_OTHER_CONFIGS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1677,24 +1535,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A termination point is created without any InterfaceOtherConfigs
         final String testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName =
                 "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue";
-        otherConfigsCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
                 .name(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName)
                 .input(
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                                        GOOD_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR,
-                                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                                        GOOD_VALUE, otherConfigsCounter))
-                                .build(),
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
-                                        NO_VALUE_FOR_KEY,
-                                        ++otherConfigsCounter))
-                                .build())
+                        builder.build(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
+                                GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
+                                NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -1849,20 +1697,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<PortOtherConfigs> builder = new SouthboundPortOtherConfigsBuilder();
+
         // Test Case 1:  TestOneOtherConfigs
         // Test Type:    Positive
         // Description:  Create an port with one other_Configs
         // Expected:     A port is created with the single other_configs specified below
         final String testOneOtherConfigsName = "TestOnePortOtherConfigs";
-        int otherConfigsCounter = 0;
         testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
                 .name(testOneOtherConfigsName)
-                .input(new PortOtherConfigsBuilder()
-                        .setOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                        .setOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigsName,
-                                PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                        .build())
+                .input(builder.build(testOneOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1871,40 +1715,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a termination point with multiple (five) PortOtherConfigs
         // Expected:     A termination point is created with the five PortOtherConfigs specified below
         final String testFivePortOtherConfigsName = "TestFivePortOtherConfigs";
-        otherConfigsCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
                 .name(testFivePortOtherConfigsName)
                 .input(
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build(),
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR, testFivePortOtherConfigsName,
-                                        PORT_OTHER_CONFIGS_VALUE, otherConfigsCounter))
-                                .build())
+                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE),
+                        builder.build(testFivePortOtherConfigsName, PORT_OTHER_CONFIGS_KEY, PORT_OTHER_CONFIGS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -1920,23 +1739,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A termination point is created without any PortOtherConfigs
         final String testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName =
                 "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue";
-        otherConfigsCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
                 .name(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName)
-                .input(new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                                        GOOD_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR,
-                                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                                        GOOD_VALUE, otherConfigsCounter))
-                                .build(),
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
-                                        NO_VALUE_FOR_KEY,
-                                        ++otherConfigsCounter))
-                                .build())
+                .input(
+                        builder.build(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName, GOOD_KEY,
+                                GOOD_VALUE),
+                        builder.build(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
+                                NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -2361,20 +2171,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<BridgeOtherConfigs> builder = new SouthboundBridgeOtherConfigsBuilder();
+
         // Test Case 1:  TestOneOtherConfig
         // Test Type:    Positive
         // Description:  Create a bridge with one other_config
         // Expected:     A bridge is created with the single other_config specified below
         final String testOneOtherConfigName = "TestOneOtherConfig";
-        int otherConfigCounter = 0;
         testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
                 .name(testOneOtherConfigName)
-                .input(new BridgeOtherConfigsBuilder()
-                        .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                        .setBridgeOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigName,
-                                BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                        .build())
+                .input(builder.build(testOneOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -2383,40 +2189,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a bridge with multiple (five) other_configs
         // Expected:     A bridge is created with the five other_configs specified below
         final String testFiveOtherConfigName = "TestFiveOtherConfig";
-        otherConfigCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
                 .name(testFiveOtherConfigName)
                 .input(
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                                .build(),
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                                .build(),
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                                .build(),
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                                .build(),
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
-                                        BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
-                                .build())
+                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE),
+                        builder.build(testFiveOtherConfigName, BRIDGE_OTHER_CONFIGS_KEY, BRIDGE_OTHER_CONFIGS_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -2432,23 +2213,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A bridge is created without any other_config
         final String testOneGoodOtherConfigOneMalformedOtherConfigValueName =
                 "TestOneGoodOtherConfigOneMalformedOtherConfigValue";
-        otherConfigCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
                 .name(testOneGoodOtherConfigOneMalformedOtherConfigValueName)
                 .input(
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodOtherConfigOneMalformedOtherConfigValueName,
-                                        GOOD_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR,
-                                        testOneGoodOtherConfigOneMalformedOtherConfigValueName,
-                                        GOOD_VALUE, otherConfigCounter))
-                                .build(),
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY,
-                                        ++otherConfigCounter))
-                                .build())
+                        builder.build(testOneGoodOtherConfigOneMalformedOtherConfigValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -2564,20 +2334,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
 
+        KeyValueBuilder<BridgeExternalIds> builder = new SouthboundBridgeExternalIdsBuilder();
+
         // Test Case 1:  TestOneExternalId
         // Test Type:    Positive
         // Description:  Create a bridge with one BridgeExternalIds
         // Expected:     A bridge is created with the single external_ids specified below
         final String testOneExternalIdName = "TestOneExternalId";
-        int externalIdCounter = 0;
         testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
                 .name(testOneExternalIdName)
-                .input(new BridgeExternalIdsBuilder()
-                        .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
-                                BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                        .setBridgeExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
-                                BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                        .build())
+                .input(builder.build(testOneExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -2586,40 +2352,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Description:  Create a bridge with multiple (five) BridgeExternalIds
         // Expected:     A bridge is created with the five external_ids specified below
         final String testFiveExternalIdName = "TestFiveExternalId";
-        externalIdCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
                 .name(testFiveExternalIdName)
                 .input(
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build(),
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
-                                        BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
-                                .build())
+                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE),
+                        builder.build(testFiveExternalIdName, BRIDGE_EXTERNAL_ID_KEY, BRIDGE_EXTERNAL_ID_VALUE))
                 .expectInputAsOutput()
                 .build());
 
@@ -2635,23 +2376,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Expected:     A bridge is created without any external_ids
         final String testOneGoodExternalIdOneMalformedExternalIdValueName =
                 "TestOneGoodExternalIdOneMalformedExternalIdValue";
-        externalIdCounter = 0;
+        builder.reset();
         testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
                 .name(testOneGoodExternalIdOneMalformedExternalIdValueName)
                 .input(
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(
-                                        String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
-                                                GOOD_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdValueName,
-                                        GOOD_VALUE, externalIdCounter))
-                                .build(),
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY,
-                                        ++externalIdCounter))
-                                .build())
+                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, GOOD_KEY, GOOD_VALUE),
+                        builder.build(testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, null))
                 .expectNoOutput()
                 .build());
 
@@ -2902,5 +2632,151 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static <T> SouthboundTestCaseBuilder<T> testCase() {
         return new SouthboundTestCaseBuilder<>();
+    }
+
+    private abstract static class KeyValueBuilder<T> {
+        private static final int COUNTER_START = 0;
+        private int counter = COUNTER_START;
+
+        protected abstract Builder<T> builder();
+
+        protected abstract void setKey(Builder<T> builder, String key);
+
+        protected abstract void setValue(Builder<T> builder, String value);
+
+        public final T build(final String testName, final String key, final String value) {
+            final Builder<T> builder = builder();
+            this.counter++;
+            if (key != null) {
+                setKey(builder, String.format(FORMAT_STR, testName, key, this.counter));
+            }
+            if (value != null) {
+                setValue(builder, String.format(FORMAT_STR, testName, value, this.counter));
+            }
+            return builder.build();
+        }
+
+        public final void reset() {
+            this.counter = COUNTER_START;
+        }
+    }
+
+    private static final class SouthboundPortExternalIdsBuilder extends KeyValueBuilder<PortExternalIds> {
+        @Override
+        protected Builder<PortExternalIds> builder() {
+            return new PortExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<PortExternalIds> builder, String key) {
+            ((PortExternalIdsBuilder) builder).setExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<PortExternalIds> builder, String value) {
+            ((PortExternalIdsBuilder) builder).setExternalIdValue(value);
+        }
+    }
+
+    private static final class SouthboundInterfaceExternalIdsBuilder extends KeyValueBuilder<InterfaceExternalIds> {
+        @Override
+        protected Builder<InterfaceExternalIds> builder() {
+            return new InterfaceExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<InterfaceExternalIds> builder, String key) {
+            ((InterfaceExternalIdsBuilder) builder).setExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<InterfaceExternalIds> builder, String value) {
+            ((InterfaceExternalIdsBuilder) builder).setExternalIdValue(value);
+        }
+    }
+
+    private static final class SouthboundOptionsBuilder extends KeyValueBuilder<Options> {
+        @Override
+        protected Builder<Options> builder() {
+            return new OptionsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<Options> builder, String key) {
+            ((OptionsBuilder) builder).setOption(key);
+        }
+
+        @Override
+        protected void setValue(Builder<Options> builder, String value) {
+            ((OptionsBuilder) builder).setValue(value);
+        }
+    }
+
+    private static final class SouthboundInterfaceOtherConfigsBuilder extends KeyValueBuilder<InterfaceOtherConfigs> {
+        @Override
+        protected Builder<InterfaceOtherConfigs> builder() {
+            return new InterfaceOtherConfigsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<InterfaceOtherConfigs> builder, String key) {
+            ((InterfaceOtherConfigsBuilder) builder).setOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<InterfaceOtherConfigs> builder, String value) {
+            ((InterfaceOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        }
+    }
+
+    private static final class SouthboundPortOtherConfigsBuilder extends KeyValueBuilder<PortOtherConfigs> {
+        @Override
+        protected Builder<PortOtherConfigs> builder() {
+            return new PortOtherConfigsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<PortOtherConfigs> builder, String key) {
+            ((PortOtherConfigsBuilder) builder).setOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<PortOtherConfigs> builder, String value) {
+            ((PortOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        }
+    }
+
+    private static final class SouthboundBridgeOtherConfigsBuilder extends KeyValueBuilder<BridgeOtherConfigs> {
+        @Override
+        protected Builder<BridgeOtherConfigs> builder() {
+            return new BridgeOtherConfigsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<BridgeOtherConfigs> builder, String key) {
+            ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<BridgeOtherConfigs> builder, String value) {
+            ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigValue(value);
+        }
+    }
+
+    private static final class SouthboundBridgeExternalIdsBuilder extends KeyValueBuilder<BridgeExternalIds> {
+        @Override
+        protected Builder<BridgeExternalIds> builder() {
+            return new BridgeExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<BridgeExternalIds> builder, String key) {
+            ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<BridgeExternalIds> builder, String value) {
+            ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdValue(value);
+        }
     }
 }

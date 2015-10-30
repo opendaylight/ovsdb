@@ -885,7 +885,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneExternalId
         // Test Type:    Positive
@@ -973,38 +972,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         new PortExternalIdsBuilder()
                                 .setExternalIdKey(String.format(FORMAT_STR,
                                         testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY,
-                                        ++externalIdCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine PortExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_PortExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_PortExternalIdValue_1)
-        //     and one malformed PortExternalId which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
-        // Expected:     A port is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
-                "TestOneGoodExternalIdOneMalformedExternalIdKey";
-        externalIdCounter = 0;
-        testCases.add(SouthboundIT.<PortExternalIds>testCase()
-                .name(testOneGoodExternalIdOneMalformedExternalIdKeyName)
-                .input(
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(
-                                        String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                                                GOOD_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                                        GOOD_VALUE, externalIdCounter))
-                                .build(),
-                        new PortExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE,
                                         ++externalIdCounter))
                                 .build())
                 .expectNoOutput()
@@ -1159,7 +1126,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneExternalId
         // Test Type:    Positive
@@ -1247,38 +1213,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         new InterfaceExternalIdsBuilder()
                                 .setExternalIdKey(String.format(FORMAT_STR,
                                         testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY,
-                                        ++externalIdCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_IntExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_IntExternalIdValue_1)
-        //     and one malformed BridgeExternalId which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
-                "TestOneGoodExternalIdOneMalformedExternalIdKey";
-        externalIdCounter = 0;
-        testCases.add(SouthboundIT.<InterfaceExternalIds>testCase()
-                .name(testOneGoodExternalIdOneMalformedExternalIdKeyName)
-                .input(
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(
-                                        String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                                                GOOD_KEY, ++externalIdCounter))
-                                .setExternalIdValue(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                                        GOOD_VALUE, externalIdCounter))
-                                .build(),
-                        new InterfaceExternalIdsBuilder()
-                                .setExternalIdKey(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE,
                                         ++externalIdCounter))
                                 .build())
                 .expectNoOutput()
@@ -1436,7 +1370,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneOptions
         // Test Type:    Positive
@@ -1523,37 +1456,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         new OptionsBuilder()
                                 .setOption(String.format(FORMAT_STR,
                                         testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY,
-                                        ++optionsCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodOptionsOneMalformedOptionsKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine Options
-        //        (TestOneGoodOptionsOneMalformedOptionsValue_OptionsKey_1,
-        //        TestOneGoodOptionsOneMalformedOptions_OptionsValue_1)
-        //     and one malformed Options which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodOptionsOneMalformedOptionsKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any options
-        final String testOneGoodOptionsOneMalformedOptionsKeyName =
-                "TestOneGoodOptionsOneMalformedOptionsKey";
-        optionsCounter = 0;
-        testCases.add(SouthboundIT.<Options>testCase()
-                .name(testOneGoodOptionsOneMalformedOptionsKeyName)
-                .input(
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsKeyName,
-                                        GOOD_KEY, ++optionsCounter))
-                                .setValue(String.format(FORMAT_STR,
-                                        testOneGoodOptionsOneMalformedOptionsKeyName,
-                                        GOOD_VALUE, optionsCounter))
-                                .build(),
-                        new OptionsBuilder()
-                                .setOption(String.format(FORMAT_STR,
-                                        testOneGoodOptionsOneMalformedOptionsKeyName, NO_KEY_FOR_VALUE,
                                         ++optionsCounter))
                                 .build())
                 .expectNoOutput()
@@ -1703,7 +1605,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneOtherConfigs
         // Test Type:    Positive
@@ -1792,39 +1693,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                                 .setOtherConfigKey(String.format(FORMAT_STR,
                                         testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValueName,
                                         NO_VALUE_FOR_KEY,
-                                        ++otherConfigsCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine InterfaceOtherConfigs
-        //        (TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsValue_InterfaceOtherConfigsKey_1,
-        //        TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigs_InterfaceOtherConfigsValue_1)
-        //     and one malformed InterfaceOtherConfigs which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any InterfaceOtherConfigs
-        final String testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName =
-                "TestOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKey";
-        otherConfigsCounter = 0;
-        testCases.add(SouthboundIT.<InterfaceOtherConfigs>testCase()
-                .name(testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName)
-                .input(
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                                        GOOD_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR,
-                                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                                        GOOD_VALUE, otherConfigsCounter))
-                                .build(),
-                        new InterfaceOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodInterfaceOtherConfigsOneMalformedInterfaceOtherConfigsKeyName,
-                                        NO_KEY_FOR_VALUE,
                                         ++otherConfigsCounter))
                                 .build())
                 .expectNoOutput()
@@ -1980,7 +1848,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneOtherConfigs
         // Test Type:    Positive
@@ -2068,39 +1935,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                                 .setOtherConfigKey(String.format(FORMAT_STR,
                                         testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValueName,
                                         NO_VALUE_FOR_KEY,
-                                        ++otherConfigsCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine PortOtherConfigs
-        //        (TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsValue_PortOtherConfigsKey_1,
-        //        TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigs_PortOtherConfigsValue_1)
-        //     and one malformed PortOtherConfigs which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey_NoKeyForValue_2)
-        // Expected:     A termination point is created without any PortOtherConfigs
-        final String testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName =
-                "TestOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKey";
-        otherConfigsCounter = 0;
-        testCases.add(SouthboundIT.<PortOtherConfigs>testCase()
-                .name(testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName)
-                .input(
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                                        GOOD_KEY, ++otherConfigsCounter))
-                                .setOtherConfigValue(String.format(FORMAT_STR,
-                                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                                        GOOD_VALUE, otherConfigsCounter))
-                                .build(),
-                        new PortOtherConfigsBuilder()
-                                .setOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodPortOtherConfigsOneMalformedPortOtherConfigsKeyName,
-                                        NO_KEY_FOR_VALUE,
                                         ++otherConfigsCounter))
                                 .build())
                 .expectNoOutput()
@@ -2526,7 +2360,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneOtherConfig
         // Test Type:    Positive
@@ -2614,38 +2447,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         new BridgeOtherConfigsBuilder()
                                 .setBridgeOtherConfigKey(String.format(FORMAT_STR,
                                         testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY,
-                                        ++otherConfigCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodOtherConfigOneMalformedOtherConfigKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeOtherConfig
-        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_BridgeOtherConfigKey_1,
-        //        TestOneGoodOtherConfigOneMalformedOtherConfig_BridgeOtherConfigValue_1)
-        //     and one malformed BridgeOtherConfig which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodOtherConfigOneMalformedOtherConfigKey_NoKeyForValue_2)
-        // Expected:     A bridge is created without any other_config
-        final String testOneGoodOtherConfigOneMalformedOtherConfigKeyName =
-                "TestOneGoodOtherConfigOneMalformedOtherConfigIdKey";
-        otherConfigCounter = 0;
-        testCases.add(SouthboundIT.<BridgeOtherConfigs>testCase()
-                .name(testOneGoodOtherConfigOneMalformedOtherConfigKeyName)
-                .input(
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(
-                                        String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
-                                                GOOD_KEY, ++otherConfigCounter))
-                                .setBridgeOtherConfigValue(String.format(FORMAT_STR,
-                                        testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
-                                        GOOD_VALUE, otherConfigCounter))
-                                .build(),
-                        new BridgeOtherConfigsBuilder()
-                                .setBridgeOtherConfigKey(String.format(FORMAT_STR,
-                                        testOneGoodOtherConfigOneMalformedOtherConfigKeyName, NO_KEY_FOR_VALUE,
                                         ++otherConfigCounter))
                                 .build())
                 .expectNoOutput()
@@ -2762,7 +2563,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final String GOOD_KEY = "GoodKey";
         final String GOOD_VALUE = "GoodValue";
         final String NO_VALUE_FOR_KEY = "NoValueForKey";
-        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
         // Test Case 1:  TestOneExternalId
         // Test Type:    Positive
@@ -2850,38 +2650,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         new BridgeExternalIdsBuilder()
                                 .setBridgeExternalIdKey(String.format(FORMAT_STR,
                                         testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY,
-                                        ++externalIdCounter))
-                                .build())
-                .expectNoOutput()
-                .build());
-
-        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine BridgeExternalId
-        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_BridgeExternalIdKey_1,
-        //        TestOneGoodExternalIdOneMalformedExternalId_BridgeExternalIdValue_1)
-        //     and one malformed BridgeExternalId which only has key specified
-        //        (UNSPECIFIED,
-        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
-        // Expected:     A bridge is created without any external_ids
-        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
-                "TestOneGoodExternalIdOneMalformedExternalIdKey";
-        externalIdCounter = 0;
-        testCases.add(SouthboundIT.<BridgeExternalIds>testCase()
-                .name(testOneGoodExternalIdOneMalformedExternalIdKeyName)
-                .input(
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(
-                                        String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                                                GOOD_KEY, ++externalIdCounter))
-                                .setBridgeExternalIdValue(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
-                                        GOOD_VALUE, externalIdCounter))
-                                .build(),
-                        new BridgeExternalIdsBuilder()
-                                .setBridgeExternalIdKey(String.format(FORMAT_STR,
-                                        testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE,
                                         ++externalIdCounter))
                                 .build())
                 .expectNoOutput()

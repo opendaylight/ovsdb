@@ -164,6 +164,19 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         return nodes;
     }
 
+    private void populateNodeCache() {
+        LOG.debug("populateNodeCache : Populating the node cache");
+        List<Node> nodes = southbound.readOvsdbTopologyNodes();
+        for(Node ovsdbNode : nodes) {
+            this.nodeCache.put(ovsdbNode.getNodeId(), ovsdbNode);
+        }
+        nodes = southbound.readOvsdbTopologyBridgeNodes();
+        for(Node bridgeNode : nodes) {
+            this.nodeCache.put(bridgeNode.getNodeId(), bridgeNode);
+        }
+        LOG.debug("populateNodeCache : Node cache population is done. Total nodes : {}",this.nodeCache.size());
+    }
+
     @Override
     public void setDependencies(ServiceReference serviceReference) {
         southbound =
@@ -171,6 +184,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(serviceReference, this);
+        populateNodeCache();
     }
 
     @Override

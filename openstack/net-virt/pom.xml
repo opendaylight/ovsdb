@@ -121,6 +121,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${ovsdb.utils.servicehelper.version}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>utils.mdsal-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-common</artifactId>
     </dependency>

@@ -967,6 +967,8 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testSetDependenciesObject() throws Exception{
+        MemberModifier.field(NeutronL3Adapter.class, "enabled").set(neutronL3Adapter , false);
+
         INeutronNetworkCRUD iNeutronNetworkCRUD = mock(INeutronNetworkCRUD.class);
         neutronL3Adapter.setDependencies(iNeutronNetworkCRUD);
         assertEquals("Error, did not return the correct object", getField("neutronNetworkCache"), iNeutronNetworkCRUD);
@@ -998,6 +1000,8 @@ public class NeutronL3AdapterTest {
         L3ForwardingProvider l3ForwardingProvider = mock(L3ForwardingProvider.class);
         neutronL3Adapter.setDependencies(l3ForwardingProvider);
         assertEquals("Error, did not return the correct object", getField("l3ForwardingProvider"), l3ForwardingProvider);
+
+        MemberModifier.field(NeutronL3Adapter.class, "enabled").set(neutronL3Adapter , true);
     }
 
     private Object getField(String fieldName) throws Exception {
@@ -1011,6 +1015,6 @@ public class NeutronL3AdapterTest {
         Class clazz = Whitebox.getInnerClassType(NeutronL3Adapter.class, "FloatIpData");
         Constructor [] constructors = clazz.getConstructors();
         Constructor c  = constructors[0];
-        return c.newInstance(new NeutronL3Adapter(), 415L, 415L, "a", "b", "c", "d", "e");
+        return c.newInstance(neutronL3Adapter, 415L, 415L, "a", "b", "c", "d", "e");
     }
 }

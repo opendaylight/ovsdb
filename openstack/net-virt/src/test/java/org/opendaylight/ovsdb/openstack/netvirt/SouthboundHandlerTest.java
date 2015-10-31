@@ -120,7 +120,7 @@ public class SouthboundHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
         southboundHandler.processEvent(ev);
-        verify(nodeCacheManager, times(1)).nodeAdded(any(Node.class));
+        verify(nodeCacheManager, times(1)).nodeUpdated(any(Node.class));
         Mockito.reset(nodeCacheManager);
 
         when(ev.getAction()).thenReturn(Action.DELETE);
@@ -144,7 +144,7 @@ public class SouthboundHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
         southboundHandler.processEvent(ev);
-        verify(nodeCacheManager, times(1)).nodeAdded(any(Node.class));
+        verify(nodeCacheManager, times(1)).nodeUpdated(any(Node.class));
         Mockito.reset(nodeCacheManager);
 
         Mockito.reset(nodeCacheManager);

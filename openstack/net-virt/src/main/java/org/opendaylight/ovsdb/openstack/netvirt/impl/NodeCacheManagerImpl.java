@@ -44,6 +44,12 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     @Override
     public void nodeAdded(Node node) {
         LOG.debug("nodeAdded: {}", node);
+        enqueueEvent(new NodeCacheManagerEvent(node, Action.ADD));
+    }
+
+    @Override
+    public void nodeUpdated(Node node) {
+        LOG.debug("nodeUpdated: {}", node);
         enqueueEvent(new NodeCacheManagerEvent(node, Action.UPDATE));
     }
 
@@ -53,28 +59,41 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         enqueueEvent(new NodeCacheManagerEvent(node, Action.DELETE));
     }
 
+    private void processNodeAdded(Node node) {
+        NodeId nodeId = node.getNodeId();
+        nodeCache.put(nodeId, node);
+
+        LOG.debug("processNodeAdded: {} Node type : {}, Event : ADD, Node : {}",
+                nodeCache.size(),
+                southbound.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
+                node);
+
+        for (NodeCacheListener handler : handlers.values()) {
+            try {
+                handler.notifyNode(node, Action.ADD);
+            } catch (Exception e) {
+                LOG.error("Failed notifying node add event", e);
+            }
+        }
+        LOG.debug("processNodeAdded returns");
+    }
+
     // TODO SB_MIGRATION
     // might need to break this into two different events
     // notifyOvsdbNode, notifyBridgeNode or just make sure the
     // classes implementing the interface check for ovsdbNode or bridgeNode
     private void processNodeUpdate(Node node) {
-        Action action = Action.UPDATE;
-
         NodeId nodeId = node.getNodeId();
-        if (nodeCache.get(nodeId) == null) {
-            action = Action.ADD;
-        }
         nodeCache.put(nodeId, node);
 
-        LOG.debug("processNodeUpdate: {} Node type {} {}: {}",
+        LOG.debug("processNodeUpdated: {} Node type : {}, Event : UPDATE, Node : {}",
                 nodeCache.size(),
                 southbound.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
-                action == Action.ADD ? "ADD" : "UPDATE",
                 node);
 
         for (NodeCacheListener handler : handlers.values()) {
             try {
-                handler.notifyNode(node, action);
+                handler.notifyNode(node, Action.UPDATE);
             } catch (Exception e) {
                 LOG.error("Failed notifying node add event", e);
             }
@@ -109,6 +128,9 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         NodeCacheManagerEvent ev = (NodeCacheManagerEvent) abstractEvent;
         LOG.debug("NodeCacheManagerImpl: dequeue: {}", ev);
         switch (ev.getAction()) {
+            case ADD:
+                processNodeAdded(ev.getNode());
+                break;
             case DELETE:
                 processNodeRemoved(ev.getNode());
                 break;
@@ -164,6 +186,19 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         return nodes;
     }
 
+    private void populateNodeCache() {
+        LOG.debug("populateNodeCache : Populating the node cache");
+        List<Node> nodes = southbound.readOvsdbTopologyNodes();
+        for(Node ovsdbNode : nodes) {
+            this.nodeCache.put(ovsdbNode.getNodeId(), ovsdbNode);
+        }
+        nodes = southbound.readOvsdbTopologyBridgeNodes();
+        for(Node bridgeNode : nodes) {
+            this.nodeCache.put(bridgeNode.getNodeId(), bridgeNode);
+        }
+        LOG.debug("populateNodeCache : Node cache population is done. Total nodes : {}",this.nodeCache.size());
+    }
+
     @Override
     public void setDependencies(ServiceReference serviceReference) {
         southbound =
@@ -171,6 +206,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(serviceReference, this);
+        populateNodeCache();
     }
 
     @Override

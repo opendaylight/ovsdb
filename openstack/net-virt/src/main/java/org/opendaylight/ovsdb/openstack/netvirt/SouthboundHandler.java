@@ -264,7 +264,7 @@ public class SouthboundHandler extends AbstractHandler
 
     private void processOvsdbNodeUpdate(Node node, OvsdbNodeAugmentation ovsdbNode) {
         LOG.info("processOvsdbNodeUpdate <{}> <{}>", node, ovsdbNode);
-        nodeCacheManager.nodeAdded(node);
+        nodeCacheManager.nodeUpdated(node);
     }
 
     private void processOvsdbNodeDelete(Node node, OvsdbNodeAugmentation ovsdbNode) {
@@ -350,7 +350,7 @@ public class SouthboundHandler extends AbstractHandler
         String datapathId = southbound.getDatapathId(bridge);
         // Having a datapathId means the ovsdb node has connected to ODL
         if (datapathId != null) {
-            nodeCacheManager.nodeAdded(node);
+            nodeCacheManager.nodeUpdated(node);
         } else {
             LOG.info("processBridgeUpdate datapathId not found");
         }

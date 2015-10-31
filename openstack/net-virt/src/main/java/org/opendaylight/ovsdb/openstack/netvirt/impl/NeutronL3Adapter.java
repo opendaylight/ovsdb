@@ -8,8 +8,36 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
@@ -18,38 +46,31 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interfa
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronIAwareUtil;
+import org.opendaylight.ovsdb.utils.mdsal.utils.NeutronModelsDataStoreHelper;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.Routers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.Router;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.router.Interfaces;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.ports.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Neutron L3 Adapter implements a hub-like adapter for the various Neutron events. Based on
@@ -66,6 +87,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;
+    private volatile INeutronFloatingIPCRUD neutronFloatingIpCache;
     private volatile L3ForwardingProvider l3ForwardingProvider;
     private volatile InboundNatProvider inboundNatProvider;
     private volatile OutboundNatProvider outboundNatProvider;
@@ -106,16 +128,22 @@ public class NeutronL3Adapter implements ConfigInterface {
     private Set<String> routerInterfacesCache;
     private Set<String> staticArpEntryCache;
     private Set<String> l3ForwardingCache;
+
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, List<Neutron_IPs>> networkIdToRouterIpListCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
+
     private Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache;
     private Map<String, FloatIpData> floatIpDataMapCache;
+
     private String externalRouterMac;
     private Boolean enabled = false;
     private Boolean flgDistributedARPEnabled = true;
-    private Southbound southbound;
+    private Boolean isCachePopulationDone = false;
     private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
+
+    private Southbound southbound;
+    private NeutronModelsDataStoreHelper neutronModelsDataStoreHelper;
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
     private static final String OWNER_ROUTER_INTERFACE_DISTRIBUTED = "network:router_interface_distributed";
@@ -123,8 +151,9 @@ public class NeutronL3Adapter implements ConfigInterface {
     private static final String OWNER_FLOATING_IP = "network:floatingip";
     private static final String DEFAULT_EXT_RTR_MAC = "00:00:5E:00:01:01";
 
-    public NeutronL3Adapter() {
+    public NeutronL3Adapter(NeutronModelsDataStoreHelper neutronHelper) {
         LOG.info(">>>>>> NeutronL3Adapter constructor {}", this.getClass());
+        this.neutronModelsDataStoreHelper = neutronHelper;
     }
 
     private void initL3AdapterMembers() {
@@ -161,9 +190,119 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
-    //
-    // Callbacks from OVSDB's northbound handlers
-    //
+
+    private void populateL3ForwardingCaches() {
+        if (!this.enabled) {
+            return;
+        }
+        if(this.isCachePopulationDone || this.neutronFloatingIpCache == null
+                || this.neutronPortCache == null ||this.neutronNetworkCache == null) {
+            return;
+        }
+        this.isCachePopulationDone = true;
+        LOG.debug("Populating NetVirt L3 caches from data store configuration");
+        Routers neutronRouters = this.neutronModelsDataStoreHelper.readAllNeutronRouters();
+        if(neutronRouters != null && neutronRouters.getRouter() != null) {
+            for( Router router : neutronRouters.getRouter()) {
+                List<Interfaces> interfaces = router.getInterfaces();
+                if(interfaces != null) {
+                    for( Interfaces routerInterface : interfaces) {
+                        Port neutronPort = this.neutronModelsDataStoreHelper.readNeutronPort(routerInterface.getPortId());
+                        if (neutronPort != null) {
+                            networkIdToRouterMacCache.put(neutronPort.getNetworkId().getValue()
+                                    , neutronPort.getMacAddress());
+
+                            networkIdToRouterIpListCache.put(neutronPort.getNetworkId().getValue(),
+                                    NeutronIAwareUtil.convertMDSalIpToNeutronIp(neutronPort.getFixedIps()));
+                            subnetIdToRouterInterfaceCache.put(routerInterface.getSubnetId().getValue(),
+                                    NeutronIAwareUtil.convertMDSalInterfaceToNeutronRouterInterface(routerInterface));
+                        }else {
+                            LOG.warn("L3 Cache Population :Neutron port associated to router interface {} "
+                                    + "don't existing in configuration data store",routerInterface);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        List<Node> bridges = this.southbound.readOvsdbTopologyBridgeNodes();
+        LOG.debug("L3 Cache Population : {} bridges present in ovsdb topology",bridges.size());
+        for(Node bridge : bridges) {
+            List<OvsdbTerminationPointAugmentation> interfaces = southbound.extractTerminationPointAugmentations(bridge);
+            if(interfaces != null && !interfaces.isEmpty()) {
+                LOG.debug("L3 Cache Population : {} termination point present on bridge {}", interfaces.size(), bridge.getNodeId());
+                for (OvsdbTerminationPointAugmentation intf : interfaces) {
+                    NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
+                    if(neutronPort != null) {
+                        Long dpId = getDpidForIntegrationBridge(bridge);
+                        Uuid interfaceUuid = intf.getInterfaceUuid();
+                        handleInterfaceEventAdd(neutronPort.getPortUUID(), dpId, interfaceUuid);
+                    }
+                }
+            }
+        }
+
+        List<NeutronFloatingIP> neutronFloatingIps = neutronFloatingIpCache.getAllFloatingIPs();
+        if(neutronFloatingIps != null && !neutronFloatingIps.isEmpty()) {
+            List<NeutronPort> neutronPorts = neutronPortCache.getAllPorts();
+            for (NeutronFloatingIP neutronFloatingIP : neutronFloatingIps) {
+                NeutronPort neutronPortForFloatIp = null;
+                for (NeutronPort neutronPort : neutronPorts) {
+                    if (neutronPort.getDeviceOwner().equals(OWNER_FLOATING_IP) &&
+                            neutronPort.getDeviceID().equals(neutronFloatingIP.getID())) {
+                        neutronPortForFloatIp = neutronPort;
+                        break;
+                    }
+                }
+
+                String neutronTenantPortUuid = neutronFloatingIP.getPortUUID();
+                Pair<Long, Uuid> nodeIfPair = neutronPortToDpIdCache.get(neutronTenantPortUuid);
+                String floatingIpMac = neutronPortForFloatIp == null ? null : neutronPortForFloatIp.getMacAddress();
+                String fixedIpAddress = neutronFloatingIP.getFixedIPAddress();
+                String floatingIpAddress = neutronFloatingIP.getFloatingIPAddress();
+
+                NeutronPort tenantNeutronPort = neutronPortCache.getPort(neutronTenantPortUuid);
+                NeutronNetwork tenantNeutronNetwork = tenantNeutronPort != null ?
+                        neutronNetworkCache.getNetwork(tenantNeutronPort.getNetworkUUID()) : null;
+                String providerSegmentationId = tenantNeutronNetwork != null ?
+                        tenantNeutronNetwork.getProviderSegmentationID() : null;
+                String neutronRouterMac = tenantNeutronNetwork != null ?
+                        networkIdToRouterMacCache.get(tenantNeutronNetwork.getID()) : null;
+
+                if (nodeIfPair == null || neutronTenantPortUuid == null ||
+                        providerSegmentationId == null || providerSegmentationId.isEmpty() ||
+                        floatingIpMac == null || floatingIpMac.isEmpty() ||
+                        neutronRouterMac == null || neutronRouterMac.isEmpty()) {
+                    LOG.debug("L3 Cache Population : Floating IP {}<->{}, incomplete floatPort {} tenantPortUuid {} seg {} mac {} rtrMac {}",
+                            fixedIpAddress,
+                            floatingIpAddress,
+                            neutronPortForFloatIp,
+                            neutronTenantPortUuid,
+                            providerSegmentationId,
+                            floatingIpMac,
+                            neutronRouterMac);
+
+                    continue;
+                }
+
+                // get ofport for patch port in br-int
+                final Long dpId = nodeIfPair.getLeft();
+                final Long ofPort = findOFPortForExtPatch(dpId);
+                if (ofPort == null) {
+                    LOG.warn("L3 Cache Population : Unable to locate OF port of patch port to connect floating ip to external bridge. dpid {}",
+                            dpId);
+                    continue;
+                }
+
+                final FloatIpData floatIpData = new FloatIpData(dpId, ofPort, providerSegmentationId, floatingIpMac,
+                        floatingIpAddress, fixedIpAddress, neutronRouterMac);
+                floatIpDataMapCache.put(neutronFloatingIP.getID(), floatIpData);
+            }
+        }
+        LOG.debug("NetVirt L3 caches population is done");
+
+    }
 
     /**
      * Invoked to configure the mac address for the external gateway in br-ex. ovsdb netvirt needs help in getting
@@ -1432,6 +1571,8 @@ public class NeutronL3Adapter implements ConfigInterface {
             neutronPortCache = (INeutronPortCRUD)impl;
         } else if (impl instanceof INeutronSubnetCRUD) {
             neutronSubnetCache = (INeutronSubnetCRUD)impl;
+        } else if (impl instanceof INeutronFloatingIPCRUD) {
+            neutronFloatingIpCache = (INeutronFloatingIPCRUD)impl;
         } else if (impl instanceof ArpProvider) {
             arpProvider = (ArpProvider)impl;
         } else if (impl instanceof InboundNatProvider) {
@@ -1445,5 +1586,6 @@ public class NeutronL3Adapter implements ConfigInterface {
         }else if (impl instanceof GatewayMacResolver) {
             gatewayMacResolver = (GatewayMacResolver)impl;
         }
+        populateL3ForwardingCaches();
     }
 }

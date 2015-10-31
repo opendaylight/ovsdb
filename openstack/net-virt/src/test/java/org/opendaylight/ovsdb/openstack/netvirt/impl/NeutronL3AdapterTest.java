@@ -1011,6 +1011,6 @@ public class NeutronL3AdapterTest {
         Class clazz = Whitebox.getInnerClassType(NeutronL3Adapter.class, "FloatIpData");
         Constructor [] constructors = clazz.getConstructors();
         Constructor c  = constructors[0];
-        return c.newInstance(new NeutronL3Adapter(), Long.valueOf(415), Long.valueOf(415), "a", "b", "c", "d", "e");
+        return c.newInstance(neutronL3Adapter, Long.valueOf(415), Long.valueOf(415), "a", "b", "c", "d", "e");
     }
 }

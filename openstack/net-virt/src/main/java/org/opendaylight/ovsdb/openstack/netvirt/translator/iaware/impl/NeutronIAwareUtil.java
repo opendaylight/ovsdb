@@ -8,6 +8,15 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.router.Interfaces;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.port.attributes.FixedIps;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.ports.Port;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -41,5 +50,32 @@ public class NeutronIAwareUtil {
         }
         return instances;
     }
+
+    public static List<Neutron_IPs> convertMDSalIpToNeutronIp(List<FixedIps> fixedIps) {
+        List<Neutron_IPs> ips = null;
+        if (fixedIps != null) {
+            ips = new ArrayList<Neutron_IPs>();
+            for (FixedIps mdIP : fixedIps) {
+                Neutron_IPs ip = new Neutron_IPs();
+                ip.setIpAddress(String.valueOf(mdIP.getIpAddress().getValue()));
+                ip.setSubnetUUID(mdIP.getSubnetId().getValue());
+                ips.add(ip);
+            }
+        }
+        return ips;
+    }
+
+    public static NeutronRouter_Interface convertMDSalInterfaceToNeutronRouterInterface(
+            Port routerInterface) {
+        NeutronRouter_Interface neutronInterface = new NeutronRouter_Interface();
+        String id = String.valueOf(routerInterface.getUuid().getValue());
+        neutronInterface.setID(id);
+        neutronInterface.setTenantID(routerInterface.getTenantId().getValue());
+        neutronInterface.setSubnetUUID(routerInterface.getFixedIps().get(0).getSubnetId().getValue());
+        neutronInterface.setPortUUID(routerInterface.getUuid().getValue());
+        return neutronInterface;
+    }
+
+
 
 }

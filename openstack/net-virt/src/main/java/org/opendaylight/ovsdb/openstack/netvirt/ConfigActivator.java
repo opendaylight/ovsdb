@@ -16,6 +16,8 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.*;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
@@ -51,6 +53,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecuri
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSubnetAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.*;
+import org.opendaylight.ovsdb.utils.mdsal.utils.NeutronModelsDataStoreHelper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -155,7 +158,8 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{EventDispatcher.class.getName()}, null, eventDispatcher);
 
-        final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter();
+        final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter(
+                new NeutronModelsDataStoreHelper(this.providerContext.getSALService(DataBroker.class)));
         registerService(context,
                 new String[]{NeutronL3Adapter.class.getName()}, null, neutronL3Adapter);
 
@@ -200,6 +204,7 @@ public class ConfigActivator implements BundleActivator {
                 securityServices, neutronL3Adapter);
         trackService(context, INeutronPortCRUD.class, tenantNetworkManager, lBaaSHandler, lBaaSPoolHandler,
                 lBaaSPoolMemberHandler, securityServices, neutronL3Adapter);
+        trackService(context, INeutronFloatingIPCRUD.class, neutronL3Adapter);
         trackService(context, INeutronLoadBalancerCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
         trackService(context, INeutronLoadBalancerPoolCRUD.class, lBaaSHandler, lBaaSPoolMemberHandler);
         trackService(context, LoadBalancerProvider.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);

@@ -519,10 +519,8 @@ public class NeutronL3AdapterTest {
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
     }
 
-    // either add or remove item in l3ForwardingCache
     @Test
     public void testProgramL3ForwardingStage1() throws Exception {
-        Set<String> l3ForwardingCache = new HashSet<>();
 
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn(ID);
@@ -533,22 +531,16 @@ public class NeutronL3AdapterTest {
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programL3ForwardingStage2", Node.class, Long.class, String.class, String.class, String.class, Action.class));
 
         // init instance variables
-        MemberModifier.field(NeutronL3Adapter.class, "l3ForwardingCache").set(neutronL3Adapter , l3ForwardingCache );
         PowerMockito.when(neutronL3Adapter, "programL3ForwardingStage2", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD)).thenReturn(new Status(StatusCode.SUCCESS));
         PowerMockito.when(neutronL3Adapter, "programL3ForwardingStage2", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE)).thenReturn(new Status(StatusCode.SUCCESS));
 
-        int temp = l3ForwardingCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programL3ForwardingStage1", node, Long.valueOf(45), SEG_ID, MAC_ADDRESS, IP, Action.ADD);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage2", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
-        assertEquals("Error, did not add the value", temp, l3ForwardingCache.size()-1);
 
-        l3ForwardingCache.add(node.getNodeId().getValue() + ":" + SEG_ID + ":" + IP);
-        temp = l3ForwardingCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programL3ForwardingStage1", node, Long.valueOf(45), SEG_ID, MAC_ADDRESS, IP, Action.DELETE);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage2", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
-        assertEquals("Error, did not delete the value", temp, l3ForwardingCache.size()+1);
     }
 
     @Test
@@ -715,7 +707,6 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testProgramRouterInterfaceStage1() throws Exception {
-        Set<String> routerInterfacesCache = new HashSet<>();
 
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn(ID);
@@ -724,24 +715,18 @@ public class NeutronL3AdapterTest {
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programRouterInterfaceStage2", Node.class, Long.class, String.class, String.class, String.class, String.class, int.class, Action.class));
 
-        MemberModifier.field(NeutronL3Adapter.class, "routerInterfacesCache").set(neutronL3Adapter , routerInterfacesCache);
         PowerMockito.when(neutronL3Adapter, "programRouterInterfaceStage2", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyString(), anyInt(), any(Action.class)).thenReturn(new Status(StatusCode.SUCCESS));
 
-        int t = routerInterfacesCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programRouterInterfaceStage1", node, Long.valueOf(12), SEG_ID, SEG_ID, MAC_ADDRESS, IP, 4, Action.ADD);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programRouterInterfaceStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyString(), anyInt(), eq(Action.ADD));
-        assertEquals("Error, did not add the interface", t, routerInterfacesCache.size() - 1);
 
-        t = routerInterfacesCache.size();
         Whitebox.invokeMethod(neutronL3Adapter, "programRouterInterfaceStage1", node, Long.valueOf(12), SEG_ID, SEG_ID, MAC_ADDRESS, IP, 4, Action.DELETE);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programRouterInterfaceStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE));
-        assertEquals("Error, did not delete the interface", t, routerInterfacesCache.size() + 1);
     }
 
-    // either add or remove routerInterfacesCache
     @Test
     public void testProgramRouterInterfaceStage2() throws Exception {
         NodeId nodeId = mock(NodeId.class);
@@ -759,28 +744,21 @@ public class NeutronL3AdapterTest {
 
     }
 
-    //either add or remove staticArpEntryCache
     @Test
     public void testProgramStaticArpStage1() throws Exception {
-        Set<String> staticArpEntryCache = new HashSet<>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage2", Long.class, String.class, String.class, String.class, Action.class));
 
-        MemberModifier.field(NeutronL3Adapter.class, "staticArpEntryCache").set(neutronL3Adapter , staticArpEntryCache);
         PowerMockito.when(neutronL3Adapter, "programStaticArpStage2", anyLong(), anyString(), anyString(), anyString(), any(Action.class)).thenReturn(new Status(StatusCode.SUCCESS));
 
-        int t = staticArpEntryCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage1", Long.valueOf(12), PORT_INT, MAC_ADDRESS, IP, Action.ADD);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage2", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
-        assertEquals("Error, did not add the static arp", t, staticArpEntryCache.size() - 1);
 
-        t = staticArpEntryCache.size();
         Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage1", Long.valueOf(12), PORT_INT, MAC_ADDRESS, IP, Action.DELETE);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage2", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
-        assertEquals("Error, did not delete the static arp", t, staticArpEntryCache.size() + 1);
     }
 
     @Test
@@ -794,28 +772,21 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, this not return the correct status code", new Status(StatusCode.SUCCESS), Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage2", Long.valueOf(45), PORT_INT, MAC_ADDRESS, IP, Action.ADD));
     }
 
-    // either add or remove inboundIpRewriteCache
     @Test
     public void testProgramInboundIpRewriteStage1() throws Exception {
-        Set<String> inboundIpRewriteCache = new HashSet<>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programInboundIpRewriteStage2", Long.class, Long.class, String.class, String.class, String.class, Action.class));
 
-        MemberModifier.field(NeutronL3Adapter.class, "inboundIpRewriteCache").set(neutronL3Adapter , inboundIpRewriteCache);
         PowerMockito.when(neutronL3Adapter, "programInboundIpRewriteStage2", anyLong(), anyLong(), anyString(), anyString(), anyString(), any(Action.class)).thenReturn(new Status(StatusCode.SUCCESS));
 
-        int t = inboundIpRewriteCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programInboundIpRewriteStage1", Long.valueOf(12), Long.valueOf(12), PORT_INT, MAC_ADDRESS, IP, Action.ADD);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programInboundIpRewriteStage2", anyLong(), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
-        assertEquals("Error, did not add the inboundIpRewrite", t, inboundIpRewriteCache.size() - 1);
 
-        t = inboundIpRewriteCache.size();
         Whitebox.invokeMethod(neutronL3Adapter, "programInboundIpRewriteStage1", Long.valueOf(12), Long.valueOf(12),PORT_INT, MAC_ADDRESS, IP, Action.DELETE);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programInboundIpRewriteStage2", anyLong(), anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
-        assertEquals("Error, did not delete the inboundIpRewrite", t, inboundIpRewriteCache.size() + 1);
     }
 
     @Test
@@ -829,10 +800,8 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, this not return the correct status code", new Status(StatusCode.SUCCESS), Whitebox.invokeMethod(neutronL3Adapter, "programInboundIpRewriteStage2", Long.valueOf(45), Long.valueOf(45), SEG_ID, MAC_ADDRESS, IP, Action.ADD));
     }
 
-    // either add or remove outboundIpRewriteExclusionCache
     @Test
     public void testProgramIpRewriteExclusionStage1() throws Exception {
-        Set<String> outboundIpRewriteExclusionCache = new HashSet<>();
 
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn(ID);
@@ -841,21 +810,16 @@ public class NeutronL3AdapterTest {
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programIpRewriteExclusionStage2", Node.class, Long.class, String.class, String.class, Action.class));
 
-        MemberModifier.field(NeutronL3Adapter.class, "outboundIpRewriteExclusionCache").set(neutronL3Adapter , outboundIpRewriteExclusionCache);
         PowerMockito.when(neutronL3Adapter, "programIpRewriteExclusionStage2", any(Node.class), anyLong(), anyString(), anyString(), any(Action.class)).thenReturn(new Status(StatusCode.SUCCESS));
 
-        int t = outboundIpRewriteExclusionCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programIpRewriteExclusionStage1", node, Long.valueOf(12), SEG_ID, CIDR, Action.ADD);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programIpRewriteExclusionStage2", any(Node.class), anyLong(), anyString(), anyString(), eq(Action.ADD));
-        assertEquals("Error, did not add the outboundIpRewriteExclusion", t, outboundIpRewriteExclusionCache.size() - 1);
 
-        t = outboundIpRewriteExclusionCache.size();
         Whitebox.invokeMethod(neutronL3Adapter, "programIpRewriteExclusionStage1", node, Long.valueOf(12), SEG_ID, CIDR, Action.DELETE);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programIpRewriteExclusionStage2", any(Node.class), anyLong(), anyString(), anyString(), eq(Action.DELETE));
-        assertEquals("Error, did not delete the outboundIpRewriteExclusion", t, outboundIpRewriteExclusionCache.size() + 1);
     }
 
     @Test
@@ -868,29 +832,22 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, this not return the correct status code", new Status(StatusCode.SUCCESS), Whitebox.invokeMethod(neutronL3Adapter, "programIpRewriteExclusionStage2", node, Long.valueOf(45), SEG_ID, CIDR, Action.ADD));
     }
 
-    // either add or remove outboundIpRewriteCache
     @SuppressWarnings("unchecked")
     @Test
     public void testProgramOutboundIpRewriteStage1() throws Exception{
-        Set<String> outboundIpRewriteCache = new HashSet<>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage2", floatingIpClass, Action.class));
 
-        MemberModifier.field(NeutronL3Adapter.class, "outboundIpRewriteCache").set(neutronL3Adapter , outboundIpRewriteCache);
         PowerMockito.when(neutronL3Adapter, "programOutboundIpRewriteStage2", any(floatingIpClass), any(Action.class)).thenReturn(new Status(StatusCode.SUCCESS));
 
-        int t = outboundIpRewriteCache.size();
 
         Whitebox.invokeMethod(neutronL3Adapter, "programOutboundIpRewriteStage1", floatingIpObject, Action.ADD);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programOutboundIpRewriteStage2", any(floatingIpClass), eq(Action.ADD));
-        assertEquals("Error, did not add the outbound ip", t, outboundIpRewriteCache.size() - 1);
 
-        t = outboundIpRewriteCache.size();
         Whitebox.invokeMethod(neutronL3Adapter, "programOutboundIpRewriteStage1", floatingIpObject, Action.DELETE);
 
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programOutboundIpRewriteStage2", any(floatingIpClass), eq(Action.DELETE));
-        assertEquals("Error, did not delete the outbound ip", t, outboundIpRewriteCache.size() + 1);
     }
 
     /*@Test

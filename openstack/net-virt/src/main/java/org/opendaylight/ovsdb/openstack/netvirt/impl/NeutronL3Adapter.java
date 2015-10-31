@@ -12,11 +12,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -121,13 +119,6 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
-    private Set<String> inboundIpRewriteCache;
-    private Set<String> outboundIpRewriteCache;
-    private Set<String> outboundIpRewriteExclusionCache;
-    private Set<String> routerInterfacesCache;
-    private Set<String> staticArpEntryCache;
-    private Set<String> l3ForwardingCache;
-
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, List<Neutron_IPs>> networkIdToRouterIpListCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
@@ -159,12 +150,6 @@ public class NeutronL3Adapter implements ConfigInterface {
         Preconditions.checkNotNull(configurationService);
 
         if (configurationService.isL3ForwardingEnabled()) {
-            this.inboundIpRewriteCache = new HashSet<>();
-            this.outboundIpRewriteCache = new HashSet<>();
-            this.outboundIpRewriteExclusionCache = new HashSet<>();
-            this.routerInterfacesCache = new HashSet<>();
-            this.staticArpEntryCache = new HashSet<>();
-            this.l3ForwardingCache = new HashSet<>();
             this.networkIdToRouterMacCache = new HashMap<>();
             this.networkIdToRouterIpListCache = new HashMap<>();
             this.subnetIdToRouterInterfaceCache = new HashMap<>();
@@ -847,33 +832,17 @@ public class NeutronL3Adapter implements ConfigInterface {
     private void programL3ForwardingStage1(Node node, Long dpid, String providerSegmentationId,
                                            String macAddress, String ipStr,
                                            Action actionForNode) {
-        // Based on the local cache, figure out whether programming needs to occur. To do this, we
-        // will look at desired action for node.
-
-        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + ipStr;
-        final boolean isProgrammed = l3ForwardingCache.contains(cacheKey);
-
-        if (actionForNode == Action.DELETE && !isProgrammed) {
-            LOG.trace("programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {} is already done",
+        if (actionForNode == Action.DELETE) {
+            LOG.trace("Deleting Flow : programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {}",
                          node.getNodeId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
-            return;
         }
-        if (actionForNode == Action.ADD && isProgrammed) {
-            LOG.trace("programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {} is already done",
+        if (actionForNode == Action.ADD) {
+            LOG.trace("Adding Flow : programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {}",
                     node.getNodeId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
-            return;
         }
 
-        Status status = this.programL3ForwardingStage2(node, dpid, providerSegmentationId,
+        this.programL3ForwardingStage2(node, dpid, providerSegmentationId,
                                                        macAddress, ipStr, actionForNode);
-        if (status.isSuccess()) {
-            // Update cache
-            if (actionForNode == Action.ADD) {
-                l3ForwardingCache.add(cacheKey);
-            } else {
-                l3ForwardingCache.remove(cacheKey);
-            }
-        }
     }
 
     private Status programL3ForwardingStage2(Node node, Long dpid, String providerSegmentationId,
@@ -1099,41 +1068,22 @@ public class NeutronL3Adapter implements ConfigInterface {
                                               String destinationSegmentationId,
                                               String macAddress, String ipStr, int mask,
                                               Action actionForNode) {
-        // Based on the local cache, figure out whether programming needs to occur. To do this, we
-        // will look at desired action for node.
-        //
-        final String cacheKey = node.getNodeId().getValue() + ":" +
-                                sourceSegmentationId + ":" + destinationSegmentationId + ":" +
-                                ipStr + "/" + Integer.toString(mask);
-        final boolean isProgrammed = routerInterfacesCache.contains(cacheKey);
-
-        if (actionForNode == Action.DELETE && !isProgrammed) {
-            LOG.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
-                         " action {} is already done",
+        if (actionForNode == Action.DELETE) {
+            LOG.trace("Deleting Flow : programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
+                         " action {}",
                          node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          macAddress, ipStr, mask, actionForNode);
             return;
         }
-        if (actionForNode == Action.ADD && isProgrammed) {
-            LOG.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
-                         " action {} is already done",
+        if (actionForNode == Action.ADD) {
+            LOG.trace("Adding Flow : programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
+                         " action {}",
                          node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          macAddress, ipStr, mask, actionForNode);
-            return;
         }
 
-        Status status = this.programRouterInterfaceStage2(node, dpid, sourceSegmentationId, destinationSegmentationId,
+        this.programRouterInterfaceStage2(node, dpid, sourceSegmentationId, destinationSegmentationId,
                                                           macAddress, ipStr, mask, actionForNode);
-        if (status.isSuccess()) {
-            // Update cache
-            if (actionForNode == Action.ADD) {
-                // TODO: multiTenantAwareRouter.addInterface(UUID.fromString(tenant), ...);
-                routerInterfacesCache.add(cacheKey);
-            } else {
-                // TODO: multiTenantAwareRouter.removeInterface(...);
-                routerInterfacesCache.remove(cacheKey);
-            }
-        }
     }
 
     private Status programRouterInterfaceStage2(Node node, Long dpid, String sourceSegmentationId,
@@ -1168,34 +1118,17 @@ public class NeutronL3Adapter implements ConfigInterface {
     private boolean programStaticArpStage1(Long dpid, String segOrOfPort,
                                            String macAddress, String ipStr,
                                            Action action) {
-        // Based on the local cache, figure out whether programming needs to occur. To do this, we
-        // will look at desired action for node.
-        //
-        final String cacheKey = dpid + ":" + segOrOfPort + ":" + ipStr;
-        final boolean isProgrammed = staticArpEntryCache.contains(cacheKey);
-
-        if (action == Action.DELETE && !isProgrammed) {
-            LOG.trace("programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {} is already done",
+        if (action == Action.DELETE ) {
+            LOG.trace("Deleting Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {}",
                     dpid, segOrOfPort, macAddress, ipStr, action);
-            return true;
         }
-        if (action == Action.ADD && isProgrammed) {
-            LOG.trace("programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {} is already done",
+        if (action == Action.ADD) {
+            LOG.trace("Adding Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {} is already done",
                     dpid, segOrOfPort, macAddress, ipStr, action);
-            return true;
         }
 
         Status status = this.programStaticArpStage2(dpid, segOrOfPort, macAddress, ipStr, action);
-        if (status.isSuccess()) {
-            // Update cache
-            if (action == Action.ADD) {
-                staticArpEntryCache.add(cacheKey);
-            } else {
-                staticArpEntryCache.remove(cacheKey);
-            }
-            return true;
-        }
-        return false;
+        return status.isSuccess();
     }
 
     private Status programStaticArpStage2(Long dpid,
@@ -1228,37 +1161,20 @@ public class NeutronL3Adapter implements ConfigInterface {
     private boolean programInboundIpRewriteStage1(Long dpid, Long inboundOFPort, String providerSegmentationId,
                                                   String matchAddress, String rewriteAddress,
                                                   Action action) {
-        // Based on the local cache, figure out whether programming needs to occur. To do this, we
-        // will look at desired action for node.
-        //
-        final String cacheKey = dpid + ":" + inboundOFPort + ":" + providerSegmentationId + ":" + matchAddress;
-        final boolean isProgrammed = inboundIpRewriteCache.contains(cacheKey);
-
-        if (action == Action.DELETE && !isProgrammed) {
-            LOG.trace("programInboundIpRewriteStage1 dpid {} OFPort {} seg {} matchAddress {} rewriteAddress {}" +
-                    " action {} is already done",
+        if (action == Action.DELETE ) {
+            LOG.trace("Deleting Flow : programInboundIpRewriteStage1 dpid {} OFPort {} seg {} matchAddress {} rewriteAddress {}" +
+                    " action {}",
                     dpid, inboundOFPort, providerSegmentationId, matchAddress, rewriteAddress, action);
-            return true;
         }
-        if (action == Action.ADD && isProgrammed) {
-            LOG.trace("programInboundIpRewriteStage1 dpid {} OFPort {} seg {} matchAddress {} rewriteAddress {}" +
-                    " action is already done",
+        if (action == Action.ADD ) {
+            LOG.trace("Adding Flow : programInboundIpRewriteStage1 dpid {} OFPort {} seg {} matchAddress {} rewriteAddress {}" +
+                    " action {}",
                     dpid, inboundOFPort, providerSegmentationId, matchAddress, rewriteAddress, action);
-            return true;
         }
 
         Status status = programInboundIpRewriteStage2(dpid, inboundOFPort, providerSegmentationId, matchAddress,
                 rewriteAddress, action);
-        if (status.isSuccess()) {
-            // Update cache
-            if (action == Action.ADD) {
-                inboundIpRewriteCache.add(cacheKey);
-            } else {
-                inboundIpRewriteCache.remove(cacheKey);
-            }
-            return true;
-        }
-        return false;
+        return status.isSuccess();
     }
 
     private Status programInboundIpRewriteStage2(Long dpid, Long inboundOFPort, String providerSegmentationId,
@@ -1293,33 +1209,16 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     private void programIpRewriteExclusionStage1(Node node, Long dpid, String providerSegmentationId, String cidr,
                                                  Action actionForRewriteExclusion) {
-        // Based on the local cache, figure out whether programming needs to occur. To do this, we
-        // will look at desired action for node.
-        //
-        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + cidr;
-        final boolean isProgrammed = outboundIpRewriteExclusionCache.contains(cacheKey);
-
-        if (actionForRewriteExclusion == Action.DELETE && !isProgrammed) {
-            LOG.trace("programIpRewriteExclusionStage1 node {} providerId {} cidr {} action {} is already done",
+        if (actionForRewriteExclusion == Action.DELETE ) {
+            LOG.trace("Deleting Flow : programIpRewriteExclusionStage1 node {} providerId {} cidr {} action {}",
                          node.getNodeId().getValue(), providerSegmentationId, cidr, actionForRewriteExclusion);
-            return;
         }
-        if (actionForRewriteExclusion == Action.ADD && isProgrammed) {
-            LOG.trace("programIpRewriteExclusionStage1 node {} providerId {} cidr {} action {} is already done",
+        if (actionForRewriteExclusion == Action.ADD) {
+            LOG.trace("Adding Flow : programIpRewriteExclusionStage1 node {} providerId {} cidr {} action {}",
                          node.getNodeId().getValue(), providerSegmentationId, cidr, actionForRewriteExclusion);
-            return;
         }
 
-        Status status = this.programIpRewriteExclusionStage2(node, dpid, providerSegmentationId, cidr,
-                                                             actionForRewriteExclusion);
-        if (status.isSuccess()) {
-            // Update cache
-            if (actionForRewriteExclusion == Action.ADD) {
-                    outboundIpRewriteExclusionCache.add(cacheKey);
-            } else {
-                    outboundIpRewriteExclusionCache.remove(cacheKey);
-            }
-        }
+        this.programIpRewriteExclusionStage2(node, dpid, providerSegmentationId, cidr,actionForRewriteExclusion);
     }
 
     private Status programIpRewriteExclusionStage2(Node node, Long dpid, String providerSegmentationId, String cidr,
@@ -1340,34 +1239,17 @@ public class NeutronL3Adapter implements ConfigInterface {
     }
 
     private void programOutboundIpRewriteStage1(FloatIpData fid, Action action) {
-        // Based on the local cache, figure out whether programming needs to occur. To do this, we
-        // will look at desired action for node.
-        //
-        final String cacheKey = fid.dpid + ":" + fid.segId + ":" + fid.fixedIpAddress;
-        final boolean isProgrammed = outboundIpRewriteCache.contains(cacheKey);
 
-        if (action == Action.DELETE && !isProgrammed) {
-            LOG.trace("programOutboundIpRewriteStage1 dpid {} seg {} fixedIpAddress {} floatIp {} action {} " +
-                         "is already done",
+        if (action == Action.DELETE) {
+            LOG.trace("Deleting Flow : programOutboundIpRewriteStage1 dpid {} seg {} fixedIpAddress {} floatIp {} action {} ",
                     fid.dpid, fid.segId, fid.fixedIpAddress, fid.floatingIpAddress, action);
-            return;
         }
-        if (action == Action.ADD && isProgrammed) {
-            LOG.trace("programOutboundIpRewriteStage1 dpid {} seg {} fixedIpAddress {} floatIp {} action {} " +
-                         "is already done",
+        if (action == Action.ADD) {
+            LOG.trace("Adding Flow : programOutboundIpRewriteStage1 dpid {} seg {} fixedIpAddress {} floatIp {} action {} " ,
                     fid.dpid, fid.segId, fid.fixedIpAddress, fid.floatingIpAddress, action);
-            return;
         }
 
-        Status status = this.programOutboundIpRewriteStage2(fid, action);
-        if (status.isSuccess()) {
-            // Update cache
-            if (action == Action.ADD) {
-                outboundIpRewriteCache.add(cacheKey);
-            } else {
-                outboundIpRewriteCache.remove(cacheKey);
-            }
-        }
+        this.programOutboundIpRewriteStage2(fid, action);
     }
 
     private Status programOutboundIpRewriteStage2(FloatIpData fid, Action action) {

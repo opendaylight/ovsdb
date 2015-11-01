@@ -110,7 +110,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         String aclName = addDataObj.getAcl();
         LOG.debug("Adding classifier iid = {}, dataObj = {}", identifier, addDataObj);
         // Read the ACL information from data store and make sure it exists.
-        Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION,getIetfAclIid(aclName));
+        Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
         if (acl == null) {
             LOG.debug("IETF ACL with name ={} is not yet configured. skip this operation", aclName);
             return;
@@ -118,9 +118,6 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
 
         if (addDataObj.getBridges() != null) {
             for (Bridge bridge : addDataObj.getBridges().getBridge()) {
-                // Netvirt classifier binds an ACL with service function forwarder that is identified by SFF name.
-                // SFF validation can be done with SFC Provider APIs, as SFF is configured within SFC project.  
-                // Netvirt SFC provider will validate the SFF using SFC provider APIs.
                 provider.addClassifierRules(bridge, acl);
             }
         }

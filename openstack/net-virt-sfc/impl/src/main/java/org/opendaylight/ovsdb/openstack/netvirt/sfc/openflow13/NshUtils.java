@@ -170,6 +170,10 @@ public class NshUtils {
         this.nshMetaC2 = nshMetaC2;
     }
 
+    public static Long convertIpAddressToLong(Ipv4Address ipv4Address) {
+        return (InetAddresses.coerceToInteger(InetAddresses.forString(ipv4Address.getValue()))) & 0xFFFFFFFFL;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -177,99 +181,5 @@ public class NshUtils {
     public String toString() {
         return "NshUtils [nshTunIpDst=" + nshTunIpDst + ", nshTunUdpPort=" + nshTunUdpPort + ", nshNsp=" + nshNsp
                 + ", nshNsi=" + nshNsi + ", nshMetaC1=" + nshMetaC1 + ", nshMetaC2=" + nshMetaC2 + "]";
-    }
-
-    /**
-     * This method loads the action into NX register.
-     *{@link NshUtils} Loading Register
-     * @param dstChoice destination
-     * @param value value
-     * @param endOffset Offset
-     * @param groupBucket Identifies the group
-     */
-    public static Action nxLoadRegAction(DstChoice dstChoice, BigInteger value, int endOffset, boolean groupBucket) {
-        NxRegLoad reg = new NxRegLoadBuilder().setDst(
-                new DstBuilder().setDstChoice(dstChoice)
-                    .setStart(Integer.valueOf(0))
-                    .setEnd(Integer.valueOf(endOffset))
-                    .build())
-            .setValue(value)
-            .build();
-        if (groupBucket) {
-            return new NxActionRegLoadNodesNodeGroupBucketsBucketActionsCaseBuilder().setNxRegLoad(reg).build();
-        } else {
-            return new NxActionRegLoadNodesNodeTableFlowApplyActionsCaseBuilder().setNxRegLoad(reg).build();
-        }
-    }
-
-    public static Action nxLoadRegAction(DstChoice dstChoice, BigInteger value) {
-        return nxLoadRegAction(dstChoice, value, 31, false);
-    }
-
-    public static Action nxLoadRegAction(Class<? extends NxmNxReg> reg, BigInteger value) {
-        return nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(reg).build(), value);
-    }
-
-    public static Action nxSetNsiAction(Short nsi) {
-        NxSetNsi newNsi = new NxSetNsiBuilder().setNsi(nsi).build();
-        return new NxActionSetNsiNodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNsi(newNsi).build();
-    }
-
-    public static Action nxSetNspAction(Long nsp) {
-        NxSetNsp newNsp = new NxSetNspBuilder().setNsp(nsp).build();
-        return new NxActionSetNspNodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNsp(newNsp).build();
-    }
-
-    public static Action nxLoadNshc1RegAction(Long value) {
-        NxSetNshc1 newNshc1 = new NxSetNshc1Builder().setNshc(value).build();
-        return new NxActionSetNshc1NodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNshc1(newNshc1).build();
-    }
-
-    public static Action nxLoadNshc2RegAction(Long value) {
-        NxSetNshc2 newNshc2 = new NxSetNshc2Builder().setNshc(value).build();
-        return new NxActionSetNshc2NodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNshc2(newNshc2).build();
-    }
-
-    public static Action nxLoadNshc3RegAction(Long value) {
-        NxSetNshc3 newNshc3 = new NxSetNshc3Builder().setNshc(value).build();
-        return new NxActionSetNshc3NodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNshc3(newNshc3).build();
-    }
-
-    public static Action nxLoadNshc4RegAction(Long value) {
-        NxSetNshc4 newNshc4 = new NxSetNshc4Builder().setNshc(value).build();
-        return new NxActionSetNshc4NodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNshc4(newNshc4).build();
-    }
-
-    /**
-     * This method loads Destination IPv4 address of Tunnel.
-     */
-    public static Action nxLoadTunIPv4Action(String ipAddress, boolean groupBucket) {
-        int ip = InetAddresses.coerceToInteger(InetAddresses.forString(ipAddress));
-        long ipl = ip & 0xffffffffL;
-        return nxLoadRegAction(new DstNxTunIpv4DstCaseBuilder().setNxTunIpv4Dst(Boolean.TRUE).build(),
-                BigInteger.valueOf(ipl), 31, groupBucket);
-    }
-
-    public static Action nxLoadTunIdAction(BigInteger tunnelId, boolean groupBucket) {
-        return nxLoadRegAction(new DstNxTunIdCaseBuilder().setNxTunId(Boolean.TRUE).build(), tunnelId, 31, groupBucket);
-    }
-
-    /**
-     * This method loads output port.
-     */
-    public static Action nxOutputRegAction(SrcChoice srcChoice) {
-        NxOutputReg reg = new NxOutputRegBuilder().setSrc(
-                new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension
-                    .nicira.action.rev140714.nx.action.output.reg.grouping.nx.output.reg
-                    .SrcBuilder().setSrcChoice(srcChoice)
-                    .setOfsNbits(Integer.valueOf(31))
-                    .build())
-            .setMaxLen(Integer.valueOf(0xffff))
-            .build();
-        return new NxActionOutputRegNodesNodeTableFlowApplyActionsCaseBuilder().setNxOutputReg(reg).build();
-    }
-
-    public static Action nxOutputRegAction(Class<? extends NxmNxReg> reg) {
-        return nxOutputRegAction(new SrcNxRegCaseBuilder().setNxReg(reg).build());
     }
 }

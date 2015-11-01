@@ -136,6 +136,13 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
+        final SecurityGroupCacheManger securityGroupCacheManger = new SecurityGroupCacheManagerImpl();
+        registerService(context,
+                        new String[]{SecurityGroupCacheManger.class.getName()}, null, securityGroupCacheManger);
+
+        registerService(context,
+                new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
+
         FWaasHandler fWaasHandler = new FWaasHandler();
         registerAbstractHandlerService(context,
                 new Class[] {INeutronFirewallAware.class, INeutronFirewallRuleAware.class, INeutronFirewallPolicyAware.class},

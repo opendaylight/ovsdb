@@ -15,10 +15,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/${mdsal.model.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/${project.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/${project.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.sfc/features-sfc/${sfc.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.sfc/features-sfc-ovs/${sfc.version}/xml/features</repository>
+  <!--<repository>mvn:org.opendaylight.sfc/features-sfc-ovs/${sfc.version}/xml/features</repository>-->
+  <repository>mvn:org.opendaylight.sfc/features-sfcofl2/${sfc.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <feature name='odl-ovsdb-sfc-api' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: api'>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
@@ -27,10 +29,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-ovsdb-sfc' version='${project.version}' description='OpenDaylight :: ovsdb-sfc'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+    <feature version='${openflowplugin.version}'>odl-openflowplugin-nxm-extensions</feature>
     <feature version='${project.version}'>odl-ovsdb-southbound-impl</feature>
     <feature version='${project.version}'>odl-ovsdb-openstack</feature>
     <feature version='${sfc.version}'>odl-sfc-core</feature>
-    <feature version='${sfc.version}'>odl-sfc-ovs</feature>
+    <!--<feature version='${sfc.version}'>odl-sfc-ovs</feature>-->
+    <feature version='${sfc.version}'>odl-sfcofl2</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version='${project.version}'>odl-ovsdb-sfc-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/${project.version}</bundle>

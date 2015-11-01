@@ -1,4 +1,4 @@
-define(['app/ovsdb/ovsdb.module'], function(ovsdb) {
+define(['app/ovsdb/ovsdb.module'], function (ovsdb) {
 
   ovsdb.register.constant('nodeIdentifier', {
     IP: 'ip',
@@ -61,4 +61,12 @@ define(['app/ovsdb/ovsdb.module'], function(ovsdb) {
     ID: 'link-id',
     DEST: 'destination'
   });
+
+  ovsdb.register.constant('OVSConstant', {
+    TP_TYPE: {
+      INTERNAL: 'ovsdb:interface-type-internal',
+      VXLAN: 'ovsdb:interface-type-vxlan'
+    }
+  })
+
 });

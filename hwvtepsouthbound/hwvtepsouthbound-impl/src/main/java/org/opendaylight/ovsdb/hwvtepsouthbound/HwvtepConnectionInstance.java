@@ -41,6 +41,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -63,6 +64,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
+    private HwvtepGlobalAugmentation initialCreatedData = null;
 
 
     HwvtepConnectionInstance (ConnectionInfo key,OvsdbClient client,
@@ -81,13 +83,17 @@ public class HwvtepConnectionInstance implements OvsdbClient{
 
     public void registerCallbacks() {
         if ( this.callback == null) {
+            if(this.initialCreatedData != null) {
+                this.updateConnectionAttributes();
+            }
+
             try {
                 List<String> databases = getDatabases().get();
                 this.callback = new HwvtepMonitorCallback(this,txInvoker);
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();
                     if (dbSchema != null) {
-                        monitorAllTables(database, dbSchema);
+                        monitorAllTables(database, dbSchema, HwvtepSchemaConstants.databaseName);
                     } else {
                         LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
                     }
@@ -115,11 +121,16 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         }
     }
 
-    private void monitorAllTables(String database, DatabaseSchema dbSchema) {
+    private void monitorAllTables(String database, DatabaseSchema dbSchema, String filter) {
+        if((filter != null) && (!dbSchema.getName().equals(filter))) {
+            LOG.debug("Not monitoring tables in {}, filter: {}", dbSchema.getName(), filter);
+            return;
+        }
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
+                LOG.debug("HwvtepSouthbound monitoring table {} in {}", tableName, dbSchema.getName());
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                 Set<String> columns = tableSchema.getColumns();
                 MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
@@ -132,6 +143,17 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         } else {
             LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }
+    }
+
+    private void updateConnectionAttributes() {
+        LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
+                    this.initialCreatedData.getConnectionInfo().getRemoteIp(),
+                    this.initialCreatedData.getConnectionInfo().getRemotePort());
+        /*
+         * TODO: Do we have anything to update?
+         * Hwvtep doesn't have other_config or external_ids like
+         * Open_vSwitch. What else will be needed?
+         */
     }
 
     public ListenableFuture<List<String>> getDatabases() {
@@ -269,5 +291,9 @@ public class HwvtepConnectionInstance implements OvsdbClient{
             this.deviceOwnershipCandidateRegistration.close();
             setHasDeviceOwnership(Boolean.FALSE);
         }
+    }
+
+    public void setHwvtepGlobalAugmentation(HwvtepGlobalAugmentation hwvtepGlobalData) {
+        this.initialCreatedData = hwvtepGlobalData;
     }
 }

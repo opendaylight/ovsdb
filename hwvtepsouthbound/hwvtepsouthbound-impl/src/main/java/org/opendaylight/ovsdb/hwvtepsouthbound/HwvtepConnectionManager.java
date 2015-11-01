@@ -10,6 +10,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
@@ -37,6 +40,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -84,7 +88,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     public void connected(@Nonnull final OvsdbClient client) {
         HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(client);
         registerEntityForOwnership(hwClient);
-        LOG.trace("connected client: {}", hwClient);
+        LOG.trace("connected client: {}", client);
     }
 
     @Override
@@ -104,6 +108,32 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
         }
         LOG.trace("disconnected client: {}", client);
+    }
+
+    public OvsdbClient connect(InstanceIdentifier<Node> iid, HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException {
+        InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
+        OvsdbClient client = OvsdbConnectionService.getService()
+                        .connect(ip, hwvtepGlobal.getConnectionInfo().getRemotePort().getValue());
+        if(client != null) {
+            putInstanceIdentifier(hwvtepGlobal.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
+            HwvtepConnectionInstance hwvtepConnectionInstance = connectedButCallBacksNotRegistered(client);
+            hwvtepConnectionInstance.setHwvtepGlobalAugmentation(hwvtepGlobal);
+
+            // Register Cluster Ownership for ConnectionInfo
+            registerEntityForOwnership(hwvtepConnectionInstance);
+        } else {
+            LOG.warn("Failed to connect to OVSDB node: {}", hwvtepGlobal.getConnectionInfo());
+        }
+        return client;
+    }
+    public void disconnect(HwvtepGlobalAugmentation ovsdbNode) throws UnknownHostException {
+        HwvtepConnectionInstance client = getConnectionInstance(ovsdbNode.getConnectionInfo());
+        if (client != null) {
+            client.disconnect();
+            // Unregister Cluster Ownership for ConnectionInfo
+            unregisterEntityForOwnership(client);
+            removeInstanceIdentifier(ovsdbNode.getConnectionInfo());
+        }
     }
 
     public HwvtepConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {
@@ -178,6 +208,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private void removeInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         instanceIdentifiers.remove(connectionInfo);
+    }
+
+    public OvsdbClient getClient(ConnectionInfo connectionInfo) {
+        return getConnectionInstance(connectionInfo);
     }
 
     private void registerEntityForOwnership(HwvtepConnectionInstance hwvtepConnectionInstance) {
@@ -255,7 +289,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     private Entity getEntityFromConnectionInstance(@Nonnull HwvtepConnectionInstance hwvtepConnectionInstance) {
         YangInstanceIdentifier entityId = null;
-        InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();;
+        InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();
         if ( iid == null ) {
             //TODO: Is Global the right one?
             Global hwvtepGlobalRow = getHwvtepGlobalTableEntry(hwvtepConnectionInstance);
@@ -296,7 +330,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             // If entity has no owner, clean up the operational data store (it's possible because owner controller
             // might went down abruptly and didn't get a chance to clean up the operational data store.
             if (!ownershipChange.hasOwner()) {
-                LOG.debug("{} has no onwer, cleaning up the operational data store", ownershipChange.getEntity());
+                LOG.debug("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
                 // Below code might look weird but it's required. We want to give first opportunity to the
                 // previous owner of the device to clean up the operational data store if there is no owner now.
                 // That way we will avoid lot of nasty md-sal exceptions because of concurrent delete.

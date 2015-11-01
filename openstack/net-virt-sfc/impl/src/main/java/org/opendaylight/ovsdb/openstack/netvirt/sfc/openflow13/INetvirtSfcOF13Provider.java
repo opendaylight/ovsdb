@@ -22,10 +22,9 @@ public interface INetvirtSfcOF13Provider {
      * Method installs the OF rules corresponding to rules within ACL
      * on a given Service Function Forwarder. DataObject which is identified by InstanceIdentifier.
      *
-     * @param sff - Service Function Forwarder
+     * @param bridge - Service Function Forwarder
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
-    public void addClassifierRules(Sff sff, Acl acl);
     public void addClassifierRules(Bridge bridge, Acl acl);
 
     /**

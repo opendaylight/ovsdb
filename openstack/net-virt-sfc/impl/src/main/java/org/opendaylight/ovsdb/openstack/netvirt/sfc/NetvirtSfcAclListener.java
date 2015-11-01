@@ -22,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -107,19 +108,20 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
         String aclName = addDataObj.getAclName();
         LOG.debug("Adding accesslist iid = {}, dataObj = {}", identifier, addDataObj);
         Classifiers classifiers = dbutils.read(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
-        if (classifiers != null) {
-            LOG.debug("add: Classifiers: {}", classifiers);
-            for (Classifier classifier : classifiers.getClassifier()) {
-                if (classifier.getAcl().equalsIgnoreCase(aclName)) {
-                    if (classifier.getSffs() != null) {
-                        for (Sff sff : classifier.getSffs().getSff()) {
-                            provider.addClassifierRules(sff, addDataObj);
-                        }
+        if (classifiers == null) {
+            LOG.debug("add: No Classifiers found");
+            return;
+        }
+
+        LOG.debug("add: Classifiers: {}", classifiers);
+        for (Classifier classifier : classifiers.getClassifier()) {
+            if (classifier.getAcl().equals(aclName)) {
+                if (classifier.getBridges() != null) {
+                    for (Bridge bridge : classifier.getBridges().getBridge()) {
+                        provider.addClassifierRules(bridge, addDataObj);
                     }
                 }
             }
-        } else {
-            LOG.debug("add: No Classifiers found");
         }
     }
 

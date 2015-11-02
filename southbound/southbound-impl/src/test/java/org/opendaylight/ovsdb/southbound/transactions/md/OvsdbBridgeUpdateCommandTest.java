@@ -82,7 +82,7 @@ import com.google.common.net.InetAddresses;
 @PrepareForTest({TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class, SouthboundMapper.class, InetAddresses.class, NumberUtils.class, NetworkInterface.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbBridgeUpdateCommandTest {
-    private Map<UUID,Bridge> updatedBridgeRows = new HashMap<UUID,Bridge>();;
+    private Map<UUID,Bridge> updatedBridgeRows = new HashMap<UUID,Bridge>();
     private Map<UUID, Bridge> oldBridgeRows = new HashMap<UUID,Bridge>();
     private OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand;
 

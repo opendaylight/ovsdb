@@ -858,7 +858,7 @@ public class EgressAclServiceTest {
             Assert.assertTrue(true);
         } else {
             Assert.assertTrue(false);
-        };
+        }
     }
 
     /**

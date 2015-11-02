@@ -87,7 +87,8 @@ public class SouthboundHandlerTest {
         when(southbound.readOvsdbTopologyNodes()).thenReturn(nodes);
 
         southboundHandlerSpy.triggerUpdates();
-        verify(southboundHandlerSpy, times(1)).ovsdbUpdate(any(Node.class), any(DataObject.class), any(OvsdbType.class), any(Action.class));;
+        verify(southboundHandlerSpy, times(1)).ovsdbUpdate(any(Node.class), any(DataObject.class), any(OvsdbType.class), any(Action.class));
+
     }
 
     @Test

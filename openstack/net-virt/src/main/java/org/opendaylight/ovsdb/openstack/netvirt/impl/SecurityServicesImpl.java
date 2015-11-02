@@ -338,7 +338,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
     @Override
     public void syncSecurityGroup(NeutronPort port, List<NeutronSecurityGroup> securityGroupList, boolean write) {
-        LOG.trace("syncSecurityGroup:" + securityGroupList + " Write:" + Boolean.valueOf(write));
+        LOG.trace("syncSecurityGroup:" + securityGroupList + " Write:" + write);
         if (null != port && null != port.getSecurityGroups()) {
             Node node = getNode(port);
             NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
@@ -364,7 +364,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
     @Override
     public void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write) {
-        LOG.trace("syncSecurityGroup:" + securityRule + " Write:" + Boolean.valueOf(write));
+        LOG.trace("syncSecurityGroup:" + securityRule + " Write:" + write);
         if (null != port && null != port.getSecurityGroups()) {
             Node node = getNode(port);
             NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());

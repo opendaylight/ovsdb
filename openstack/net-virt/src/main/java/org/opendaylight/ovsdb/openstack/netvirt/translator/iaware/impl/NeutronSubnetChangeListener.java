@@ -51,8 +51,8 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
 
     private static final ImmutableBiMap<Class<? extends IpVersionBase>,Integer> IPV_MAP
     = new ImmutableBiMap.Builder<Class<? extends IpVersionBase>,Integer>()
-    .put(IpVersionV4.class,Integer.valueOf(4))
-    .put(IpVersionV6.class,Integer.valueOf(6))
+    .put(IpVersionV4.class, 4)
+    .put(IpVersionV6.class, 6)
     .build();
 
     private static final ImmutableBiMap<Class<? extends Dhcpv6Base>,String> DHCPV6_MAP

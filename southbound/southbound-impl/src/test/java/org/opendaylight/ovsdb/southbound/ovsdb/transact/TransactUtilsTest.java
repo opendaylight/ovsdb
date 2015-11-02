@@ -189,7 +189,7 @@ public class TransactUtilsTest {
         when(operation.getTableSchema()).thenReturn(schema);
 
         List<Insert> inserts = TransactUtils.extractInsert(transaction, schema);
-        assertEquals((Insert)operation, inserts.get(0));
+        assertEquals(operation, inserts.get(0));
     }
 
     @SuppressWarnings("rawtypes")

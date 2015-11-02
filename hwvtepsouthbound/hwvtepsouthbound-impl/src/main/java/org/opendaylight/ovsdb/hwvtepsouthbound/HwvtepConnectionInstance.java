@@ -128,7 +128,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         }
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
-            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+            List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
                 LOG.debug("HwvtepSouthbound monitoring table {} in {}", tableName, dbSchema.getName());
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
@@ -173,13 +173,13 @@ public class HwvtepConnectionInstance implements OvsdbClient{
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                    List<MonitorRequest<E>> monitorRequests, MonitorCallBack callback) {
+                    List<MonitorRequest> monitorRequests, MonitorCallBack callback) {
         return client.monitor(schema, monitorRequests, callback);
     }
 
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                    List<MonitorRequest<E>> monitorRequests, MonitorHandle monitorHandle, MonitorCallBack callback) {
+                    List<MonitorRequest> monitorRequests, MonitorHandle monitorHandle, MonitorCallBack callback) {
         return null;
     }
 

@@ -135,7 +135,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private void monitorAllTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
-            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+            List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                 Set<String> columns = tableSchema.getColumns();
@@ -248,7 +248,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorCallBack callback) {
         return client.monitor(schema, monitorRequests, callback);
     }
@@ -334,7 +334,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorHandle monitorHandle, MonitorCallBack callback) {
         return null;
     }

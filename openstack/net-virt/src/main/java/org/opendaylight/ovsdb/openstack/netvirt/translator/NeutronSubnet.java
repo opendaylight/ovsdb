@@ -319,7 +319,7 @@ public class NeutronSubnet implements Serializable, INeutronObject {
                 int length = Integer.parseInt(parts[1]);
                 //TODO?: limit check on length
                 // convert to byte array
-                byte[] addrBytes = ((Inet6Address) InetAddress.getByName(parts[0])).getAddress();
+                byte[] addrBytes = InetAddress.getByName(parts[0]).getAddress();
                 int i;
                 for (i = length; i < IPV6_LENGTH; i++) {
                     if (((((int) addrBytes[i/IPV6_LENGTH_BYTES]) & IPV6_LSB_MASK) & (1 << (IPV6_BYTE_OFFSET-(i%IPV6_LENGTH_BYTES)))) != 0) {
@@ -430,8 +430,8 @@ public class NeutronSubnet implements Serializable, INeutronObject {
             String[] parts = cidr.split("/");
             try {
                 int length = Integer.parseInt(parts[1]);
-                byte[] cidrBytes = ((Inet6Address) InetAddress.getByName(parts[0])).getAddress();
-                byte[] ipBytes =  ((Inet6Address) InetAddress.getByName(ipAddress)).getAddress();
+                byte[] cidrBytes = InetAddress.getByName(parts[0]).getAddress();
+                byte[] ipBytes =  InetAddress.getByName(ipAddress).getAddress();
                 int i;
                 for (i = 0; i < length; i++) {
                     if (((((int) cidrBytes[i/IPV6_LENGTH_BYTES]) & IPV6_LSB_MASK) & (1 << (IPV6_BYTE_OFFSET-(i%IPV6_LENGTH_BYTES)))) !=

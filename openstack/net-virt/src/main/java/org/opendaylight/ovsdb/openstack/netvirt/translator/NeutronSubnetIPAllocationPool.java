@@ -138,7 +138,7 @@ public class NeutronSubnetIPAllocationPool implements Serializable {
             return BigInteger.ZERO;
         }
         try {
-            return new BigInteger(((Inet6Address) InetAddress.getByName(inputString)).getAddress());
+            return new BigInteger(InetAddress.getByName(inputString).getAddress());
         } catch (Exception e) {
             LOGGER.error("convertV6 error", e);
             return BigInteger.ZERO;

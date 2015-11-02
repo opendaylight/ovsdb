@@ -217,7 +217,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
         if (subnet.getIpVersion() != null) {
             ImmutableBiMap<Integer, Class<? extends IpVersionBase>> mapper =
                     IPV_MAP.inverse();
-            subnetBuilder.setIpVersion((Class<? extends IpVersionBase>) mapper.get(subnet
+            subnetBuilder.setIpVersion(mapper.get(subnet
                     .getIpVersion()));
         }
         if (subnet.getCidr() != null) {
@@ -231,12 +231,12 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
         if (subnet.getIpV6RaMode() != null) {
             ImmutableBiMap<String, Class<? extends Dhcpv6Base>> mapper =
                     DHCPV6_MAP.inverse();
-            subnetBuilder.setIpv6RaMode((Class<? extends Dhcpv6Base>) mapper.get(subnet.getIpV6RaMode()));
+            subnetBuilder.setIpv6RaMode(mapper.get(subnet.getIpV6RaMode()));
         }
         if (subnet.getIpV6AddressMode() != null) {
             ImmutableBiMap<String, Class<? extends Dhcpv6Base>> mapper =
                     DHCPV6_MAP.inverse();
-            subnetBuilder.setIpv6AddressMode((Class<? extends Dhcpv6Base>) mapper.get(subnet.getIpV6AddressMode()));
+            subnetBuilder.setIpv6AddressMode(mapper.get(subnet.getIpV6AddressMode()));
         }
         subnetBuilder.setEnableDhcp(subnet.getEnableDHCP());
         if (subnet.getAllocationPools() != null) {

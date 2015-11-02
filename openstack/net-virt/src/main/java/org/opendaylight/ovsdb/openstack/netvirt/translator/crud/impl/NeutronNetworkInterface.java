@@ -183,7 +183,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
         if (network.getProviderNetworkType() != null) {
             ImmutableBiMap<String, Class<? extends NetworkTypeBase>> mapper =
                 NETWORK_MAP.inverse();
-            providerExtensionBuilder.setNetworkType((Class<? extends NetworkTypeBase>) mapper.get(network.getProviderNetworkType()));
+            providerExtensionBuilder.setNetworkType(mapper.get(network.getProviderNetworkType()));
         }
         if (network.getSegments() != null) {
             List<Segments> segments = new ArrayList<>();
@@ -200,7 +200,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
                 if (segment.getProviderNetworkType() != null) {
                     ImmutableBiMap<String, Class<? extends NetworkTypeBase>> mapper =
                         NETWORK_MAP.inverse();
-                    segmentsBuilder.setNetworkType((Class<? extends NetworkTypeBase>) mapper.get(segment.getProviderNetworkType()));
+                    segmentsBuilder.setNetworkType(mapper.get(segment.getProviderNetworkType()));
                 }
                 segmentsBuilder.setSegmentationIndex(count);
                 segments.add(segmentsBuilder.build());

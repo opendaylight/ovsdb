@@ -294,7 +294,7 @@ public class SouthboundImpl implements Southbound {
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 MdsalHelper.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().
-                setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
+                setProtocol(mapper.get("OpenFlow13")).build());
         return protocolList;
     }
 

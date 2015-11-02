@@ -163,7 +163,7 @@ public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<P
         if (pool.getLoadBalancerPoolProtocol() != null) {
             ImmutableBiMap<String, Class<? extends ProtocolBase>> mapper =
                 PROTOCOL_MAP.inverse();
-            poolBuilder.setProtocol((Class<? extends ProtocolBase>) mapper.get(pool.getLoadBalancerPoolProtocol()));
+            poolBuilder.setProtocol(mapper.get(pool.getLoadBalancerPoolProtocol()));
         }
         if (pool.getLoadBalancerPoolSessionPersistence() != null) {
             NeutronLoadBalancer_SessionPersistence sessionPersistence = pool.getLoadBalancerPoolSessionPersistence();

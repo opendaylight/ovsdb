@@ -81,7 +81,7 @@ public class SouthboundHandlerTest {
         Node node = mock(Node.class);
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(mock(OvsdbNodeAugmentation.class));
 
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         when(southbound.readOvsdbTopologyNodes()).thenReturn(nodes);
 
@@ -219,7 +219,7 @@ public class SouthboundHandlerTest {
         when(ev.getType()).thenReturn(Type.OPENVSWITCH);
 
         when(ovsdbTerminationPointAugmentation.getName()).thenReturn("network");
-        List<TerminationPoint> terminationPoints = new ArrayList<TerminationPoint>();
+        List<TerminationPoint> terminationPoints = new ArrayList<>();
         terminationPoints.add(mock(TerminationPoint.class));
         when(southbound.extractTerminationPoints(any(Node.class))).thenReturn(terminationPoints);
 

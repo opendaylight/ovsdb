@@ -53,7 +53,7 @@ public class NeutronFloatingIPInterface extends AbstractNeutronInterface<Floatin
 
     @Override
     public List<NeutronFloatingIP> getAllFloatingIPs() {
-        Set<NeutronFloatingIP> allIPs = new HashSet<NeutronFloatingIP>();
+        Set<NeutronFloatingIP> allIPs = new HashSet<>();
         Floatingips fips = readMd(createInstanceIdentifier());
         if (fips != null) {
             for (Floatingip fip: fips.getFloatingip()) {
@@ -61,7 +61,7 @@ public class NeutronFloatingIPInterface extends AbstractNeutronInterface<Floatin
             }
         }
         LOGGER.debug("Exiting getAllFloatingIPs, Found {} FloatingIPs", allIPs.size());
-        List<NeutronFloatingIP> ans = new ArrayList<NeutronFloatingIP>();
+        List<NeutronFloatingIP> ans = new ArrayList<>();
         ans.addAll(allIPs);
         return ans;
     }

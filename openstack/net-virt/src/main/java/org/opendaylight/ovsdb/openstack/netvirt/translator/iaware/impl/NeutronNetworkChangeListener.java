@@ -129,7 +129,7 @@ public class NeutronNetworkChangeListener implements DataChangeListener, AutoClo
         result.setShared(network.isShared());
         result.setStatus(network.getStatus());
         if (network.getSubnets() != null) {
-            List<String> neutronSubnets = new ArrayList<String>();
+            List<String> neutronSubnets = new ArrayList<>();
             for( Uuid subnet : network.getSubnets()) {
                neutronSubnets.add(subnet.getValue());
             }
@@ -147,7 +147,7 @@ public class NeutronNetworkChangeListener implements DataChangeListener, AutoClo
         result.setProviderPhysicalNetwork(providerExtension.getPhysicalNetwork());
         result.setProviderSegmentationID(providerExtension.getSegmentationId());
         result.setProviderNetworkType(NETWORK_MAP.get(providerExtension.getNetworkType()));
-        List<NeutronNetwork_Segment> segments = new ArrayList<NeutronNetwork_Segment>();
+        List<NeutronNetwork_Segment> segments = new ArrayList<>();
         if (providerExtension.getSegments() != null) {
             for (Segments segment: providerExtension.getSegments()) {
                 NeutronNetwork_Segment neutronSegment = new NeutronNetwork_Segment();

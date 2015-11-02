@@ -52,7 +52,7 @@ public class NeutronSecurityGroup implements Serializable, INeutronObject {
     List<NeutronSecurityRule> neutronSecurityRule;
 
     public NeutronSecurityGroup() {
-        neutronSecurityRule = new ArrayList<NeutronSecurityRule>();
+        neutronSecurityRule = new ArrayList<>();
 
     }
 

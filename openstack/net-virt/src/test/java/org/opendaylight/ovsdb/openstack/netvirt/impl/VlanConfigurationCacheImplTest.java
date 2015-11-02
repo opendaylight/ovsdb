@@ -55,7 +55,7 @@ public class VlanConfigurationCacheImplTest {
     @Before
     public void setUp(){
         when(southbound.getOvsdbNodeUUID(any(Node.class))).thenReturn(NODE_UUID);
-        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<>();
         OvsdbTerminationPointAugmentation port = mock(OvsdbTerminationPointAugmentation.class);
         VlanId vlanId = mock(VlanId.class);
         when(vlanId.getValue()).thenReturn(VLAN_ID);

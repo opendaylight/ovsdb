@@ -89,7 +89,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
 
     @Override
     public List<NeutronSubnet> getAllSubnets() {
-        Set<NeutronSubnet> allSubnets = new HashSet<NeutronSubnet>();
+        Set<NeutronSubnet> allSubnets = new HashSet<>();
         Subnets subnets = readMd(createInstanceIdentifier());
         if (subnets != null) {
             for (Subnet subnet: subnets.getSubnet()) {
@@ -97,7 +97,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
             }
         }
         LOGGER.debug("Exiting getAllSubnets, Found {} OpenStackSubnets", allSubnets.size());
-        List<NeutronSubnet> ans = new ArrayList<NeutronSubnet>();
+        List<NeutronSubnet> ans = new ArrayList<>();
         ans.addAll(allSubnets);
         return ans;
     }
@@ -164,7 +164,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
         result.setIpV6AddressMode(DHCPV6_MAP.get(subnet.getIpv6AddressMode()));
         result.setEnableDHCP(subnet.isEnableDhcp());
         if (subnet.getAllocationPools() != null) {
-            List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<NeutronSubnetIPAllocationPool>();
+            List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<>();
             for (AllocationPools allocationPool : subnet.getAllocationPools()) {
                 NeutronSubnetIPAllocationPool pool = new NeutronSubnetIPAllocationPool();
                 pool.setPoolStart(allocationPool.getStart());
@@ -174,7 +174,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
             result.setAllocationPools(allocationPools);
         }
         if (subnet.getDnsNameservers() != null) {
-            List<String> dnsNameServers = new ArrayList<String>();
+            List<String> dnsNameServers = new ArrayList<>();
             for (IpAddress dnsNameServer : subnet.getDnsNameservers()) {
                 dnsNameServers.add(String.valueOf(dnsNameServer.getValue()));
             }
@@ -184,7 +184,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
 // read through the ports and put the ones in this subnet into the internal
 // myPorts object.
 // @deprecated and will be removed in Boron
-        Set<NeutronPort> allPorts = new HashSet<NeutronPort>();
+        Set<NeutronPort> allPorts = new HashSet<>();
         NeutronCRUDInterfaces interfaces = new NeutronCRUDInterfaces()
             .fetchINeutronPortCRUD(this);
         INeutronPortCRUD portIf = interfaces.getPortInterface();
@@ -197,7 +197,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
                 }
             }
         }
-        List<NeutronPort> ports = new ArrayList<NeutronPort>();
+        List<NeutronPort> ports = new ArrayList<>();
         ports.addAll(allPorts);
         result.setPorts(ports);
         return result;
@@ -240,7 +240,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
         }
         subnetBuilder.setEnableDhcp(subnet.getEnableDHCP());
         if (subnet.getAllocationPools() != null) {
-            List<AllocationPools> allocationPools = new ArrayList<AllocationPools>();
+            List<AllocationPools> allocationPools = new ArrayList<>();
             for (NeutronSubnetIPAllocationPool allocationPool : subnet
                     .getAllocationPools()) {
                 AllocationPoolsBuilder builder = new AllocationPoolsBuilder();
@@ -252,7 +252,7 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
             subnetBuilder.setAllocationPools(allocationPools);
         }
         if (subnet.getDnsNameservers() != null) {
-            List<IpAddress> dnsNameServers = new ArrayList<IpAddress>();
+            List<IpAddress> dnsNameServers = new ArrayList<>();
             for (String dnsNameServer : subnet.getDnsNameservers()) {
                 IpAddress ipAddress = new IpAddress(dnsNameServer.toCharArray());
                 dnsNameServers.add(ipAddress);

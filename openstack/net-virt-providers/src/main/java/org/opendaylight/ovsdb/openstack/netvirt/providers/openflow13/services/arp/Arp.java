@@ -61,7 +61,7 @@ public class Arp extends Packet {
 
     public Arp() {
         payload = null;
-        hdrFieldsMap = new HashMap<String, byte[]>(ARP_FIELDS_COUNT);
+        hdrFieldsMap = new HashMap<>(ARP_FIELDS_COUNT);
         setHardwareLength((short) 6); // MAC address length
         setProtocolLength((short) 4); // IPv4 address length
         setHardwareType(ETHERNET_HW_TYPE);

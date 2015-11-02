@@ -68,7 +68,7 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
         List<InstanceIdentifier<ControllerEntry>> result =
-                new ArrayList<InstanceIdentifier<ControllerEntry>>();
+                new ArrayList<>();
         Bridge oldBridgeNode = oldBridgeRows.get(bridge.getUuid());
 
         if (oldBridgeNode != null && oldBridgeNode.getControllerColumn() != null) {

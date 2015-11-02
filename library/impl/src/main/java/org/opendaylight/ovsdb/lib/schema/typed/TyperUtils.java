@@ -304,7 +304,7 @@ public class TyperUtils {
                 // When the row is null, that might indicate that the user maybe interested
                 // only in the ColumnSchema and not on the Data.
                 if (row == null) {
-                    return new Column<GenericTableSchema, Object>(columnSchema, null);
+                    return new Column<>(columnSchema, null);
                 }
                 return row.getColumn(columnSchema);
             }

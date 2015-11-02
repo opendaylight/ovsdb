@@ -46,7 +46,7 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
 
     private void registerListener(final DataBroker db) {
         final DataTreeIdentifier<Node> treeId =
-                        new DataTreeIdentifier<Node>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
+                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
         try {
             LOG.trace("Registering on path: {}", treeId);
             registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);

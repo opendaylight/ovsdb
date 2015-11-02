@@ -64,7 +64,7 @@ public class OvsdbBridgeRemovedCommandTest {
         when(ovsdbBridgeRemovedCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
 
         PowerMockito.mockStatic(TyperUtils.class);
-        Map<UUID, Bridge> map = new HashMap<UUID, Bridge>();
+        Map<UUID, Bridge> map = new HashMap<>();
         when(TyperUtils.extractRowsRemoved(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class))).thenReturn(map);
 
         ovsdbBridgeRemovedCommand.execute(transaction);

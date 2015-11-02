@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NeutronLoadBalancerInterface extends AbstractNeutronInterface<Loadbalancer, NeutronLoadBalancer> implements INeutronLoadBalancerCRUD {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronLoadBalancerInterface.class);
-    private ConcurrentMap<String, NeutronLoadBalancer> loadBalancerDB  = new ConcurrentHashMap<String, NeutronLoadBalancer>();
+    private ConcurrentMap<String, NeutronLoadBalancer> loadBalancerDB  = new ConcurrentHashMap<>();
 
 
     NeutronLoadBalancerInterface(ProviderContext providerContext) {
@@ -60,13 +60,13 @@ public class NeutronLoadBalancerInterface extends AbstractNeutronInterface<Loadb
 
     @Override
     public List<NeutronLoadBalancer> getAllNeutronLoadBalancers() {
-        Set<NeutronLoadBalancer> allLoadBalancers = new HashSet<NeutronLoadBalancer>();
+        Set<NeutronLoadBalancer> allLoadBalancers = new HashSet<>();
         for (Entry<String, NeutronLoadBalancer> entry : loadBalancerDB.entrySet()) {
             NeutronLoadBalancer loadBalancer = entry.getValue();
             allLoadBalancers.add(loadBalancer);
         }
         LOGGER.debug("Exiting getLoadBalancers, Found {} OpenStackLoadBalancer", allLoadBalancers.size());
-        List<NeutronLoadBalancer> ans = new ArrayList<NeutronLoadBalancer>();
+        List<NeutronLoadBalancer> ans = new ArrayList<>();
         ans.addAll(allLoadBalancers);
         return ans;
     }

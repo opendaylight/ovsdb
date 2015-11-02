@@ -86,7 +86,7 @@ public class OvsdbControllerUpdateCommandTest {
     @Test
     public void testExecute() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        updatedControllerRows = new HashMap<UUID, Controller>();
+        updatedControllerRows = new HashMap<>();
         updatedControllerRows.put(mock(UUID.class), mock(Controller.class));
         MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedControllerRows").set(ovsdbControllerUpdateCommand, updatedControllerRows);
         MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "updateController", ReadWriteTransaction.class, Map.class, Map.class));
@@ -97,7 +97,7 @@ public class OvsdbControllerUpdateCommandTest {
         PowerMockito.verifyPrivate(ovsdbControllerUpdateCommand).invoke("updateController", any(ReadWriteTransaction.class), any(Map.class));
 
         //updatedBridgeRows not null case
-        updatedBridgeRows = new HashMap<UUID, Bridge>();
+        updatedBridgeRows = new HashMap<>();
         updatedBridgeRows.put(mock(UUID.class), mock(Bridge.class));
         MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedBridgeRows").set(ovsdbControllerUpdateCommand, updatedBridgeRows);
     }
@@ -112,7 +112,7 @@ public class OvsdbControllerUpdateCommandTest {
         updatedBridgeRows.put(mock(UUID.class), bridge);
 
         PowerMockito.mockStatic(SouthboundMapper.class);
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
         controllerEntries.add(mock(ControllerEntry.class));
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class))).thenReturn(controllerEntries);
         Column<GenericTableSchema, String> column = mock(Column.class);

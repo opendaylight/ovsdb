@@ -131,7 +131,7 @@ public class SouthboundMapperTest {
         //when bridge is not empty
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(bridge.getExternalIdsColumn()).thenReturn(column);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
         when(column.getData()).thenReturn(map);
         PowerMockito.mockStatic(SouthboundUtil.class);
@@ -166,7 +166,7 @@ public class SouthboundMapperTest {
         //when controller is not empty
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(controller.getExternalIdsColumn()).thenReturn(column);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
         when(column.getData()).thenReturn(map);
         PowerMockito.mockStatic(SouthboundUtil.class);
@@ -218,7 +218,7 @@ public class SouthboundMapperTest {
 
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(bridge.getDatapathIdColumn()).thenReturn(column);
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add("dpid");
         when(column.getData()).thenReturn(set);
         assertNotNull(column.getData());
@@ -261,7 +261,7 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateOvsdbBridgeProtocols() {
         OvsdbBridgeAugmentation ovsdbBridgeNode = mock(OvsdbBridgeAugmentation.class);
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
         protocolList.add(protocolEntry);
         when(ovsdbBridgeNode.getProtocolEntry()).thenReturn(protocolList);
@@ -271,7 +271,7 @@ public class SouthboundMapperTest {
                 return (Class<? extends OvsdbBridgeProtocolBase>) OvsdbBridgeProtocolOpenflow10.class;
             }
         });
-        Set<String> protocols = new HashSet<String>();
+        Set<String> protocols = new HashSet<>();
         protocols.add("OpenFlow10");
         assertEquals(protocols, SouthboundMapper.createOvsdbBridgeProtocols(ovsdbBridgeNode));
     }
@@ -292,13 +292,13 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateMdsalProtocols() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Set<String> value = new HashSet<String>();
+        Set<String> value = new HashSet<>();
         value.add("OpenFlow10");
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(bridge.getProtocolsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(value);
 
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         ProtocolEntry protoEntry = mock(ProtocolEntry.class);
         ProtocolEntryBuilder protocolEntryBuilder = mock(ProtocolEntryBuilder.class);
         PowerMockito.whenNew(ProtocolEntryBuilder.class).withNoArguments().thenReturn(protocolEntryBuilder);
@@ -312,16 +312,16 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateControllerEntries() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Map<UUID, Controller> updatedControllerRows = new HashMap<UUID, Controller>();
+        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(bridge.getControllerColumn()).thenReturn(column);
-        Set<UUID> controllerUUIDs = new HashSet<UUID>();
+        Set<UUID> controllerUUIDs = new HashSet<>();
         UUID uuid = mock(UUID.class);
         controllerUUIDs.add(uuid);
         Controller controller = mock(Controller.class);
         updatedControllerRows.put(uuid, controller);
         when(column.getData()).thenReturn(controllerUUIDs);
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         controllerEntries.add(controllerEntry);
 
@@ -356,11 +356,11 @@ public class SouthboundMapperTest {
     public void testCreateOvsdbController() throws Exception {
         OvsdbBridgeAugmentation omn = mock(OvsdbBridgeAugmentation.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         controllerEntries.add(controllerEntry);
         when(omn.getControllerEntry()).thenReturn(controllerEntries);
-        Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
+        Map<UUID,Controller> controllerMap = new HashMap<>();
         PowerMockito.mockStatic(TyperUtils.class);
         Controller controller = mock(Controller.class);
         PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Controller.class))).thenReturn(controller);
@@ -412,8 +412,8 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateManagerEntries() throws Exception {
         OpenVSwitch ovsdbNode = mock(OpenVSwitch.class);
-        Map<UUID, Manager> updatedManagerRows = new HashMap<UUID, Manager>();
-        Set<UUID> managerUUIDs = new HashSet<UUID>();
+        Map<UUID, Manager> updatedManagerRows = new HashMap<>();
+        Set<UUID> managerUUIDs = new HashSet<>();
         UUID managerUUID = mock(UUID.class);
         Manager manager = mock(Manager.class);
         managerUUIDs.add(managerUUID);
@@ -421,7 +421,7 @@ public class SouthboundMapperTest {
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(ovsdbNode.getManagerOptionsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(managerUUIDs);
-        List<ManagerEntry> managerEntries = new ArrayList<ManagerEntry>();
+        List<ManagerEntry> managerEntries = new ArrayList<>();
         ManagerEntry managerEntry = mock(ManagerEntry.class);
         managerEntries.add(managerEntry);
 
@@ -432,7 +432,7 @@ public class SouthboundMapperTest {
 
         Column<GenericTableSchema, Map<String, String>> statusColumn = mock(Column.class);
         when(manager.getStatusColumn()).thenReturn(statusColumn);
-        Map<String, String> statusAttributeMap = new HashMap<String, String>();
+        Map<String, String> statusAttributeMap = new HashMap<>();
         when(statusColumn.getData()).thenReturn(statusAttributeMap);
         String numberOfConnectionValueStr = "999";
 
@@ -462,12 +462,12 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateManagerEntries1() throws Exception {
         Node ovsdbNode = mock(Node.class);
-        Map<Uri, Manager> updatedManagerRows = new HashMap<Uri, Manager>();
+        Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         Uri uri = mock(Uri.class);
         Manager manager = mock(Manager.class);
         updatedManagerRows.put(uri, manager);
 
-        List<ManagerEntry> managerEntriesCreated = new ArrayList<ManagerEntry>();
+        List<ManagerEntry> managerEntriesCreated = new ArrayList<>();
 
         //ovsdbNodeAugmentation is null
         when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(null);
@@ -477,7 +477,7 @@ public class SouthboundMapperTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        List<ManagerEntry> managerEntries = new ArrayList<ManagerEntry>();
+        List<ManagerEntry> managerEntries = new ArrayList<>();
         ManagerEntry managerEntry = mock(ManagerEntry.class);
         managerEntries.add(managerEntry);
         when(ovsdbNodeAugmentation.getManagerEntry()).thenReturn(managerEntries);
@@ -490,7 +490,7 @@ public class SouthboundMapperTest {
 
         Column<GenericTableSchema, Map<String, String>> statusColumn = mock(Column.class);
         when(manager.getStatusColumn()).thenReturn(statusColumn);
-        Map<String, String> statusAttributeMap = new HashMap<String, String>();
+        Map<String, String> statusAttributeMap = new HashMap<>();
         when(statusColumn.getData()).thenReturn(statusAttributeMap);
         String numberOfConnectionValueStr = "999";
 

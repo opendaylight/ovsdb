@@ -79,7 +79,7 @@ public class OvsdbDataChangeListenerTest {
     @Test
     public void testOnDataChanged() throws Exception {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<InstanceIdentifier<?>, DataObject>();
+        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
         InstanceIdentifier<?> iid1 = mock(InstanceIdentifier.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         map.put(iid1, ovsdbNode);
@@ -107,7 +107,7 @@ public class OvsdbDataChangeListenerTest {
     @Test
     public void testUpdateData() throws Exception {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> map = new HashMap<InstanceIdentifier<Node>, OvsdbConnectionInstance>();
+        Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> map = new HashMap<>();
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
         OvsdbConnectionInstance connectionInstance = mock(OvsdbConnectionInstance.class);
         map.put(iid, connectionInstance);
@@ -133,8 +133,8 @@ public class OvsdbDataChangeListenerTest {
     @Test
     public void testDisconnectAndConnectAndInit() throws Exception {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier<?>, DataObject> originalDataObject = new HashMap<InstanceIdentifier<?>, DataObject>();
-        Set<InstanceIdentifier<?>> iiD = new HashSet<InstanceIdentifier<?>>();
+        Map<InstanceIdentifier<?>, DataObject> originalDataObject = new HashMap<>();
+        Set<InstanceIdentifier<?>> iiD = new HashSet<>();
         InstanceIdentifier instanceIdentifier = mock(InstanceIdentifier.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         iiD.add(instanceIdentifier);
@@ -165,7 +165,7 @@ public class OvsdbDataChangeListenerTest {
     @Test
     public void testUpdateConnections() throws Exception {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<InstanceIdentifier<?>, DataObject>();
+        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
         InstanceIdentifier instanceIdentifier = mock(InstanceIdentifier.class);
         OvsdbNodeAugmentation value = mock(OvsdbNodeAugmentation.class);
         map.put(instanceIdentifier, value);
@@ -188,8 +188,8 @@ public class OvsdbDataChangeListenerTest {
     @Test
     public void testConnectionInstancesFromChanges() throws Exception {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> testResultMap = new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
-        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> map1 = new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
+        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> testResultMap = new HashMap<>();
+        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> map1 = new HashMap<>();
         InstanceIdentifier<Node> key1 = mock(InstanceIdentifier.class);
         OvsdbConnectionInstance value1 = mock(OvsdbConnectionInstance.class);
         map1.put(key1, value1);
@@ -207,13 +207,13 @@ public class OvsdbDataChangeListenerTest {
     @Test
     public void testConnectionInstancesFromMap() {
         reset(cm);
-        Map<InstanceIdentifier<?>,DataObject> map = new HashMap<InstanceIdentifier<?>,DataObject>();
+        Map<InstanceIdentifier<?>,DataObject> map = new HashMap<>();
         Node node = mock(Node.class);
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
         map.put(iid, node);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
 
-        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> testResultMap = new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
+        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> testResultMap = new HashMap<>();
         testResultMap.put(iid, client);
 
         //bridge and client not null case
@@ -236,7 +236,7 @@ public class OvsdbDataChangeListenerTest {
 
         //bridge null, ovsnode null, and client not null case
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(null);
-        List<TerminationPoint> terminationPoint = new ArrayList<TerminationPoint>();
+        List<TerminationPoint> terminationPoint = new ArrayList<>();
         terminationPoint.add(0, mock(TerminationPoint.class));
         when(node.getTerminationPoint()).thenReturn(terminationPoint);
         PowerMockito.mockStatic(SouthboundMapper.class);

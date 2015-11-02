@@ -274,7 +274,7 @@ public class NeutronPort implements Serializable, INeutronObject {
                 ans.setMacAddress(this.getMacAddress());
             }
             if ("fixed_ips".equals(field)) {
-                ans.setFixedIPs(new ArrayList<Neutron_IPs>(this.getFixedIPs()));
+                ans.setFixedIPs(new ArrayList<>(this.getFixedIPs()));
             }
             if ("device_id".equals(field)) {
                 ans.setDeviceID(this.getDeviceID());
@@ -286,7 +286,7 @@ public class NeutronPort implements Serializable, INeutronObject {
                 ans.setTenantID(this.getTenantID());
             }
             if ("security_groups".equals(field)) {
-                ans.setSecurityGroups(new ArrayList<NeutronSecurityGroup>(this.getSecurityGroups()));
+                ans.setSecurityGroups(new ArrayList<>(this.getSecurityGroups()));
             }
         }
         return ans;
@@ -298,7 +298,7 @@ public class NeutronPort implements Serializable, INeutronObject {
             status = "ACTIVE";
         }
         if (fixedIPs == null) {
-            fixedIPs = new ArrayList<Neutron_IPs>();
+            fixedIPs = new ArrayList<>();
         }
     }
 

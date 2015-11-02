@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
-    private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<ServiceRegistration<?>>();
+    private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<>();
     private List<Pair<Object, ServiceRegistration>> servicesAndRegistrations = new ArrayList<>();
     private ProviderContext providerContext;
 

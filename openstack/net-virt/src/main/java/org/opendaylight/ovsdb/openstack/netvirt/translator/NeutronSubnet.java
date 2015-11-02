@@ -94,7 +94,7 @@ public class NeutronSubnet implements Serializable, INeutronObject {
     List<NeutronPort> myPorts;
 
     public NeutronSubnet() {
-        myPorts = new ArrayList<NeutronPort>();
+        myPorts = new ArrayList<>();
     }
 
     // @deprecated - will be removed in Boron
@@ -241,17 +241,17 @@ public class NeutronSubnet implements Serializable, INeutronObject {
                 ans.setGatewayIP(this.getGatewayIP());
             }
             if (s.equals("dns_nameservers")) {
-                List<String> nsList = new ArrayList<String>();
+                List<String> nsList = new ArrayList<>();
                 nsList.addAll(this.getDnsNameservers());
                 ans.setDnsNameservers(nsList);
             }
             if (s.equals("allocation_pools")) {
-                List<NeutronSubnetIPAllocationPool> aPools = new ArrayList<NeutronSubnetIPAllocationPool>();
+                List<NeutronSubnetIPAllocationPool> aPools = new ArrayList<>();
                 aPools.addAll(this.getAllocationPools());
                 ans.setAllocationPools(aPools);
             }
             if (s.equals("host_routes")) {
-                List<NeutronSubnet_HostRoute> hRoutes = new ArrayList<NeutronSubnet_HostRoute>();
+                List<NeutronSubnet_HostRoute> hRoutes = new ArrayList<>();
                 hRoutes.addAll(this.getHostRoutes());
                 ans.setHostRoutes(hRoutes);
             }
@@ -278,7 +278,7 @@ public class NeutronSubnet implements Serializable, INeutronObject {
 
     // @deprecated - will be removed in Boron
     public List<NeutronPort> getPortsInSubnet(String ignore) {
-       List<NeutronPort> answer = new ArrayList<NeutronPort>();
+       List<NeutronPort> answer = new ArrayList<>();
        for (NeutronPort port : myPorts) {
            if (!port.getDeviceOwner().equalsIgnoreCase(ignore)) {
                 answer.add(port);
@@ -360,12 +360,12 @@ public class NeutronSubnet implements Serializable, INeutronObject {
         if (ipVersion == null) {
             ipVersion = IPV4_VERSION;
         }
-        dnsNameservers = new ArrayList<String>();
+        dnsNameservers = new ArrayList<>();
         if (hostRoutes == null) {
-            hostRoutes = new ArrayList<NeutronSubnet_HostRoute>();
+            hostRoutes = new ArrayList<>();
         }
         if (allocationPools == null) {
-            allocationPools = new ArrayList<NeutronSubnetIPAllocationPool>();
+            allocationPools = new ArrayList<>();
             if (ipVersion == IPV4_VERSION) {
                 try {
                     SubnetUtils util = new SubnetUtils(cidr);

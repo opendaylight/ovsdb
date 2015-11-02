@@ -60,14 +60,14 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     private Map<ConnectionInfo, OvsdbConnectionInstance> clients =
-            new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+            new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
     private static final String ENTITY_TYPE = "ovsdb";
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
-            new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
+            new ConcurrentHashMap<>();
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap =
             new ConcurrentHashMap<>();
     private EntityOwnershipService entityOwnershipService;
@@ -386,17 +386,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         if (dbSchema != null) {
             GenericTableSchema openVSwitchSchema = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
 
-            List<String> openVSwitchTableColumn = new ArrayList<String>();
+            List<String> openVSwitchTableColumn = new ArrayList<>();
             openVSwitchTableColumn.addAll(openVSwitchSchema.getColumns());
             Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
-            selectOperation.setColumns(openVSwitchTableColumn);;
+            selectOperation.setColumns(openVSwitchTableColumn);
 
-            ArrayList<Operation> operations = new ArrayList<Operation>();
+            List<Operation> operations = new ArrayList<>();
             operations.add(selectOperation);
             operations.add(op.comment("Fetching Open_VSwitch table rows"));
-            List<OperationResult> results = null;
             try {
-                results = connectionInstance.transact(dbSchema, operations).get();
+                List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
                 if (results != null ) {
                     OperationResult selectResult = results.get(0);
                     openVSwitchRow = TyperUtils.getTypedRowWrapper(
@@ -411,7 +410,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return openVSwitchRow;
     }
     private Entity getEntityFromConnectionInstance(@Nonnull OvsdbConnectionInstance ovsdbConnectionInstance) {
-        YangInstanceIdentifier entityId = null;
         InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();;
         if ( iid == null ) {
             /* Switch initiated connection won't have iid, till it gets OpenVSwitch
@@ -424,7 +422,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
 
         }
-        entityId = SouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
+        YangInstanceIdentifier entityId = SouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
         Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
         LOG.debug("Entity {} created for device connection {}",
                 deviceEntity, ovsdbConnectionInstance.getConnectionInfo());

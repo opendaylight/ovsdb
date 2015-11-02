@@ -27,7 +27,7 @@ public enum Service {
     short table;
     String description;
 
-    private Service (short table, String description)  {
+    Service(short table, String description)  {
         this.table = table;
         this.description = description;
     }

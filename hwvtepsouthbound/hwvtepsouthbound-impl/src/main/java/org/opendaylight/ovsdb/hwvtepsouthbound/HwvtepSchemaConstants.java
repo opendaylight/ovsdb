@@ -36,8 +36,9 @@ public class HwvtepSchemaConstants {
         private final String parentTableName;
         private final String columnNameInParentTable;
 
-        private HWVTEPSCHEMATABLES(final String tableName, final String parentTableName,
-                                  final String columnNameInParentTable) {
+        HWVTEPSCHEMATABLES(
+                final String tableName, final String parentTableName,
+                final String columnNameInParentTable) {
             this.tableName = tableName;
             this.parentTableName = parentTableName;
             this.columnNameInParentTable = columnNameInParentTable;

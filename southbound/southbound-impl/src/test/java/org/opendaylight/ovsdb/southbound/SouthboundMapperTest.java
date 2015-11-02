@@ -237,7 +237,7 @@ public class SouthboundMapperTest {
         when(mdsalbridge.getDatapathType()).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
             public Class<? extends DatapathTypeBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends DatapathTypeBase>) DatapathTypeNetdev.class;
+                return DatapathTypeNetdev.class;
             }
         });
         assertEquals("netdev", SouthboundMapper.createDatapathType(mdsalbridge));
@@ -245,7 +245,7 @@ public class SouthboundMapperTest {
         when(mdsalbridge.getDatapathType()).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
             public Class<? extends DatapathTypeBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends DatapathTypeBase>) DatapathTypeSystem.class;
+                return DatapathTypeSystem.class;
             }
         });
         assertEquals("system", SouthboundMapper.createDatapathType(mdsalbridge));
@@ -268,7 +268,7 @@ public class SouthboundMapperTest {
         when(protocolEntry.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
             public Class<? extends OvsdbBridgeProtocolBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends OvsdbBridgeProtocolBase>) OvsdbBridgeProtocolOpenflow10.class;
+                return OvsdbBridgeProtocolOpenflow10.class;
             }
         });
         Set<String> protocols = new HashSet<>();

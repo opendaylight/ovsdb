@@ -181,7 +181,7 @@ public class OvsdbConnectionInstanceTest {
         PowerMockito.mockStatic(MonitorRequestBuilder.class);
         when(MonitorRequestBuilder.builder(any(GenericTableSchema.class))).thenReturn(monitorBuilder);
         when(monitorBuilder.addColumn(anyString())).thenReturn(monitorBuilder);
-        MonitorRequest<GenericTableSchema> monitorReq = mock(MonitorRequest.class);
+        MonitorRequest monitorReq = mock(MonitorRequest.class);
         when(monitorBuilder.with(any(MonitorSelect.class))).thenReturn(monitorBuilder);
         when(monitorBuilder.build()).thenReturn(monitorReq);
 

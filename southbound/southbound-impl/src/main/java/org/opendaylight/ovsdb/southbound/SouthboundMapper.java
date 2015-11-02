@@ -255,7 +255,7 @@ public class SouthboundMapper {
             for (String protocol : protocols) {
                 if (protocol != null && mapper.get(protocol) != null) {
                     protocolList.add(new ProtocolEntryBuilder().
-                            setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get(protocol)).build());
+                            setProtocol(mapper.get(protocol)).build());
                 }
             }
         }
@@ -437,7 +437,7 @@ public class SouthboundMapper {
 
         if (manager != null && manager.getTargetColumn() != null) {
             long numberOfConnections = 0;
-            final String targetString = (String)manager.getTargetColumn().getData();
+            final String targetString = manager.getTargetColumn().getData();
 
             final Map<String, String> statusAttributeMap = manager.getStatusColumn().getData();
             if (statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {

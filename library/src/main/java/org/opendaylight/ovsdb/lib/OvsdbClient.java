@@ -69,7 +69,7 @@ public interface OvsdbClient {
      * @param callback receives the monitor response
      */
     <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                                                    List<MonitorRequest<E>> monitorRequests,
+                                                    List<MonitorRequest> monitorRequests,
                                                     MonitorCallBack callback);
 
     /**

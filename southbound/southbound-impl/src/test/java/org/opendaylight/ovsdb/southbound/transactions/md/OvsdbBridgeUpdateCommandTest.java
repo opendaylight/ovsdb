@@ -294,7 +294,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(SouthboundMapper.createDatapathType(anyString())).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
             public Class<? extends DatapathTypeBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends DatapathTypeBase>) DatapathTypeSystem.class;
+                return DatapathTypeSystem.class;
             }
         });
         when(ovsdbBridgeAugmentationBuilder.setDatapathType(any(Class.class))).thenReturn(ovsdbBridgeAugmentationBuilder);

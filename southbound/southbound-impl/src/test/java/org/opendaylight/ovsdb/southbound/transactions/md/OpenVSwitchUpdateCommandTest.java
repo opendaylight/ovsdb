@@ -288,7 +288,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(SouthboundMapper.createInterfaceType(anyString())).thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
             public Class<? extends InterfaceTypeBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends InterfaceTypeBase>) InterfaceTypeInternal.class;
+                return InterfaceTypeInternal.class;
             }
         });
 
@@ -319,7 +319,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(SouthboundMapper.createDatapathType(anyString())).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
             public Class<? extends DatapathTypeBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends DatapathTypeBase>) DatapathTypeSystem.class;
+                return DatapathTypeSystem.class;
             }
         });
         DatapathTypeEntry dpEntry = mock(DatapathTypeEntry.class);

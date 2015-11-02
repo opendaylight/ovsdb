@@ -226,7 +226,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
      *
      * @return MonitorRequest that includes all the Bridge Columns including _uuid
      */
-    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest<GenericTableSchema> getAllColumnsMonitorRequest (Class <T> klazz) {
+    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest (Class <T> klazz) {
         TypedBaseTable<GenericTableSchema> table = getClient().createTypedRowWrapper(klazz);
         GenericTableSchema tableSchema = table.getSchema();
         Set<String> columns = tableSchema.getColumns();
@@ -237,7 +237,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
         return bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public <T extends TableSchema<T>> MonitorRequest<T> getAllColumnsMonitorRequest (T tableSchema) {
+    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
         MonitorRequestBuilder<T> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
         for (String column : columns) {
@@ -254,7 +254,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
 
         assertNotNull(getDbSchema());
 
-        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = Lists.newArrayList();
         Set<String> tables = getDbSchema().getTables();
         assertNotNull("ovsdb tables should not be null", tables);
 

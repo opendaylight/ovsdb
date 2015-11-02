@@ -280,7 +280,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
             logger.warn("Database {} without any tables. Strange !", dbSchema.getName());
             return null;
         }
-        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = Lists.newArrayList();
         for (String tableName : tables) {
             GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
             monitorRequests.add(this.getAllColumnsMonitorRequest(tableSchema));
@@ -300,7 +300,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
      *
      * @return MonitorRequest that includes all the Bridge Columns including _uuid
      */
-    public <T extends TableSchema<T>> MonitorRequest<T> getAllColumnsMonitorRequest (T tableSchema) {
+    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
         MonitorRequestBuilder<T> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
         for (String column : columns) {

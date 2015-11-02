@@ -144,7 +144,7 @@ public class SouthboundUtils {
         try {
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Interrupted while waiting after adding OVSDB node {}", connectionInfoToString(connectionInfo), e);
         }
         return result;
     }
@@ -161,7 +161,8 @@ public class SouthboundUtils {
         try {
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Interrupted while waiting after deleting OVSDB node {}", connectionInfoToString(connectionInfo),
+                    e);
         }
         return result;
     }
@@ -240,7 +241,7 @@ public class SouthboundUtils {
         try {
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Interrupted while waiting after deleting bridge {}", bridgeName, e);
         }
         return result;
     }

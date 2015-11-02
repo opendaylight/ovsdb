@@ -36,7 +36,7 @@ import org.powermock.reflect.Whitebox;
 @RunWith(PowerMockRunner.class)
 public class TransactCommandAggregatorTest {
     private static final int NUMBER_OF_COMMANDS = 11;
-    private List<TransactCommand> commands = new ArrayList<TransactCommand>();
+    private List<TransactCommand> commands = new ArrayList<>();
     private TransactCommandAggregator transactCommandAggregator;
     @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     @Mock private BridgeOperationalState operationalState;

@@ -71,7 +71,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
 
     @Override
     public List<NeutronPort> getAllPorts() {
-        Set<NeutronPort> allPorts = new HashSet<NeutronPort>();
+        Set<NeutronPort> allPorts = new HashSet<>();
         Ports ports = readMd(createInstanceIdentifier());
         if (ports != null) {
             for (Port port : ports.getPort()) {
@@ -79,7 +79,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
             }
         }
         LOGGER.debug("Exiting getAllPorts, Found {} OpenStackPorts", allPorts.size());
-        List<NeutronPort> ans = new ArrayList<NeutronPort>();
+        List<NeutronPort> ans = new ArrayList<>();
         ans.addAll(allPorts);
         return ans;
     }
@@ -138,7 +138,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         PortBindingExtension binding = port.getAugmentation(PortBindingExtension.class);
         result.setBindinghostID(binding.getHostId());
         if (binding.getVifDetails() != null) {
-            List<NeutronPort_VIFDetail> details = new ArrayList<NeutronPort_VIFDetail>();
+            List<NeutronPort_VIFDetail> details = new ArrayList<>();
             for (VifDetails vifDetail : binding.getVifDetails()) {
                 NeutronPort_VIFDetail detail = new NeutronPort_VIFDetail();
                 detail.setPortFilter(vifDetail.isPortFilter());
@@ -155,7 +155,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         NeutronPort result = new NeutronPort();
         result.setAdminStateUp(port.isAdminStateUp());
         if (port.getAllowedAddressPairs() != null) {
-            List<NeutronPort_AllowedAddressPairs> pairs = new ArrayList<NeutronPort_AllowedAddressPairs>();
+            List<NeutronPort_AllowedAddressPairs> pairs = new ArrayList<>();
             for (AllowedAddressPairs mdPair : port.getAllowedAddressPairs()) {
                 NeutronPort_AllowedAddressPairs pair = new NeutronPort_AllowedAddressPairs();
                 pair.setIpAddress(mdPair.getIpAddress());
@@ -168,7 +168,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         result.setDeviceID(port.getDeviceId());
         result.setDeviceOwner(port.getDeviceOwner());
         if (port.getExtraDhcpOpts() != null) {
-            List<NeutronPort_ExtraDHCPOption> options = new ArrayList<NeutronPort_ExtraDHCPOption>();
+            List<NeutronPort_ExtraDHCPOption> options = new ArrayList<>();
             for (ExtraDhcpOpts opt : port.getExtraDhcpOpts()) {
                 NeutronPort_ExtraDHCPOption arg = new NeutronPort_ExtraDHCPOption();
                 arg.setName(opt.getOptName());
@@ -178,7 +178,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
             result.setExtraDHCPOptions(options);
         }
         if (port.getFixedIps() != null) {
-            List<Neutron_IPs> ips = new ArrayList<Neutron_IPs>();
+            List<Neutron_IPs> ips = new ArrayList<>();
             for (FixedIps mdIP : port.getFixedIps()) {
                 Neutron_IPs ip = new Neutron_IPs();
                 ip.setIpAddress(String.valueOf(mdIP.getIpAddress().getValue()));
@@ -191,13 +191,13 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         result.setName(port.getName());
         result.setNetworkUUID(String.valueOf(port.getNetworkId().getValue()));
         if (port.getSecurityGroups() != null) {
-            Set<NeutronSecurityGroup> allGroups = new HashSet<NeutronSecurityGroup>();
+            Set<NeutronSecurityGroup> allGroups = new HashSet<>();
             NeutronCRUDInterfaces interfaces = new NeutronCRUDInterfaces().fetchINeutronSecurityGroupCRUD(this);
             INeutronSecurityGroupCRUD sgIf = interfaces.getSecurityGroupInterface();
             for (Uuid sgUuid : port.getSecurityGroups()) {
                 allGroups.add(sgIf.getNeutronSecurityGroup(sgUuid.getValue()));
             }
-            List<NeutronSecurityGroup> groups = new ArrayList<NeutronSecurityGroup>();
+            List<NeutronSecurityGroup> groups = new ArrayList<>();
             groups.addAll(allGroups);
             result.setSecurityGroups(groups);
         }
@@ -217,7 +217,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
             bindingBuilder.setHostId(neutronPort.getBindinghostID());
         }
         if (neutronPort.getVIFDetail() != null) {
-            List<VifDetails> listVifDetail = new ArrayList<VifDetails>();
+            List<VifDetails> listVifDetail = new ArrayList<>();
             for (NeutronPort_VIFDetail detail: neutronPort.getVIFDetail()) {
                 VifDetailsBuilder vifDetailsBuilder = new VifDetailsBuilder();
                 if (detail.getPortFilter() != null) {
@@ -242,7 +242,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
                                     bindingBuilder.build());
         portBuilder.setAdminStateUp(neutronPort.isAdminStateUp());
         if(neutronPort.getAllowedAddressPairs() != null) {
-            List<AllowedAddressPairs> listAllowedAddressPairs = new ArrayList<AllowedAddressPairs>();
+            List<AllowedAddressPairs> listAllowedAddressPairs = new ArrayList<>();
             for (NeutronPort_AllowedAddressPairs allowedAddressPairs : neutronPort.getAllowedAddressPairs()) {
                     AllowedAddressPairsBuilder allowedAddressPairsBuilder = new AllowedAddressPairsBuilder();
                     allowedAddressPairsBuilder.setIpAddress(allowedAddressPairs.getIpAddress());
@@ -259,7 +259,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         portBuilder.setDeviceOwner(neutronPort.getDeviceOwner());
         }
         if (neutronPort.getExtraDHCPOptions() != null) {
-            List<ExtraDhcpOpts> listExtraDHCPOptions = new ArrayList<ExtraDhcpOpts>();
+            List<ExtraDhcpOpts> listExtraDHCPOptions = new ArrayList<>();
             for (NeutronPort_ExtraDHCPOption extraDHCPOption : neutronPort.getExtraDHCPOptions()) {
                 ExtraDhcpOptsBuilder extraDHCPOptsBuilder = new ExtraDhcpOptsBuilder();
                 extraDHCPOptsBuilder.setOptName(extraDHCPOption.getName());
@@ -269,7 +269,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
             portBuilder.setExtraDhcpOpts(listExtraDHCPOptions);
         }
         if (neutronPort.getFixedIPs() != null) {
-            List<FixedIps> listNeutronIPs = new ArrayList<FixedIps>();
+            List<FixedIps> listNeutronIPs = new ArrayList<>();
             for (Neutron_IPs neutron_IPs : neutronPort.getFixedIPs()) {
                 FixedIpsBuilder fixedIpsBuilder = new FixedIpsBuilder();
                 fixedIpsBuilder.setIpAddress(new IpAddress(neutron_IPs.getIpAddress().toCharArray()));
@@ -288,7 +288,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         portBuilder.setNetworkId(toUuid(neutronPort.getNetworkUUID()));
         }
         if (neutronPort.getSecurityGroups() != null) {
-            List<Uuid> listSecurityGroups = new ArrayList<Uuid>();
+            List<Uuid> listSecurityGroups = new ArrayList<>();
             for (NeutronSecurityGroup neutronSecurityGroup : neutronPort.getSecurityGroups()) {
                 listSecurityGroups.add(toUuid(neutronSecurityGroup.getID()));
             }

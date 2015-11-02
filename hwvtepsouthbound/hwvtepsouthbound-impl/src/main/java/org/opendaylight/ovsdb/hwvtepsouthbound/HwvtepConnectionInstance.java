@@ -107,7 +107,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
     public void createTransactInvokers() {
         if (transactInvokers == null) {
             try {
-                transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
+                transactInvokers = new HashMap<>();
                 List<String> databases = getDatabases().get();
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();

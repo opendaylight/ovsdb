@@ -147,7 +147,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
         result.setIpV6AddressMode(DHCPV6_MAP.get(subnet.getIpv6AddressMode()));
         result.setEnableDHCP(subnet.isEnableDhcp());
         if (subnet.getAllocationPools() != null) {
-            List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<NeutronSubnetIPAllocationPool>();
+            List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<>();
             for (AllocationPools allocationPool : subnet.getAllocationPools()) {
                 NeutronSubnetIPAllocationPool pool = new NeutronSubnetIPAllocationPool();
                 pool.setPoolStart(allocationPool.getStart());
@@ -157,7 +157,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
             result.setAllocationPools(allocationPools);
         }
         if (subnet.getDnsNameservers() != null) {
-            List<String> dnsNameServers = new ArrayList<String>();
+            List<String> dnsNameServers = new ArrayList<>();
             for (IpAddress dnsNameServer : subnet.getDnsNameservers()) {
                 dnsNameServers.add(String.valueOf(dnsNameServer.getValue()));
             }
@@ -167,7 +167,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
 
         // read through the ports and put the ones in this subnet into the internal
         // myPorts object.
-       Set<NeutronPort> allPorts = new HashSet<NeutronPort>();
+       Set<NeutronPort> allPorts = new HashSet<>();
         NeutronCRUDInterfaces interfaces = new NeutronCRUDInterfaces()
             .fetchINeutronPortCRUD(this);
         INeutronPortCRUD portIf = interfaces.getPortInterface();
@@ -180,7 +180,7 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
                 }
             }
         }
-        List<NeutronPort> ports = new ArrayList<NeutronPort>();
+        List<NeutronPort> ports = new ArrayList<>();
         ports.addAll(allPorts);
         result.setPorts(ports);
         return result;

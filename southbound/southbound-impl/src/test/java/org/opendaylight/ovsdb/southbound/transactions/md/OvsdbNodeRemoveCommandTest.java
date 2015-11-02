@@ -86,7 +86,7 @@ public class OvsdbNodeRemoveCommandTest {
 
         PowerMockito.doReturn(true).when(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", any(OvsdbNodeAugmentation.class));
 
-        List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<ManagedNodeEntry>();
+        List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<>();
         ManagedNodeEntry managedNode = mock(ManagedNodeEntry.class);
         listManagedNodeEntry.add(managedNode);
         when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(listManagedNodeEntry);
@@ -106,7 +106,7 @@ public class OvsdbNodeRemoveCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         ManagerEntry onlyConnectedManager= mock(ManagerEntry.class);
         ManagerEntry manager = mock(ManagerEntry.class);
-        List<ManagerEntry> listManagerEntry = new ArrayList<ManagerEntry>();
+        List<ManagerEntry> listManagerEntry = new ArrayList<>();
         listManagerEntry.add(manager);
 
         //case 1: connectedManager > ONE_CONNECTED_MANAGER

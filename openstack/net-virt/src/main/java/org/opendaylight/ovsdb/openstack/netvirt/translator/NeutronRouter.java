@@ -60,7 +60,7 @@ public class NeutronRouter implements Serializable, INeutronObject {
     Map<String, NeutronRouter_Interface> interfaces;
 
     public NeutronRouter() {
-        interfaces = new HashMap<String, NeutronRouter_Interface>();
+        interfaces = new HashMap<>();
     }
 
     public String getID() { return routerUUID; }

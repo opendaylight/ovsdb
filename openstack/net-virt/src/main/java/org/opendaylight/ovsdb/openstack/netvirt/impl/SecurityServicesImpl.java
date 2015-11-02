@@ -79,7 +79,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     @Override
     public List<NeutronSecurityGroup> getSecurityGroupInPortList(OvsdbTerminationPointAugmentation
                                                              terminationPointAugmentation) {
-        List<NeutronSecurityGroup> neutronSecurityGroups = new ArrayList<NeutronSecurityGroup>();
+        List<NeutronSecurityGroup> neutronSecurityGroups = new ArrayList<>();
         if (neutronPortCache == null) {
             LOG.error("neutron port is null");
             return neutronSecurityGroups;
@@ -302,7 +302,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
     @Override
     public List<Neutron_IPs> getVmListForSecurityGroup(String portUuid, String securityGroupUuid) {
-        List<Neutron_IPs> vmListForSecurityGroup = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> vmListForSecurityGroup = new ArrayList<>();
         /*For every port check whether security grouplist contains the current
          * security group.*/
         try {

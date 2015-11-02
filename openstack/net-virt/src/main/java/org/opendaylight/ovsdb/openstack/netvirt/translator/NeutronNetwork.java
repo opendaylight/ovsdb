@@ -81,7 +81,7 @@ public class NeutronNetwork implements Serializable, INeutronObject {
     }
 
     public void initDefaults() {
-        subnets = new ArrayList<String>();
+        subnets = new ArrayList<>();
         if (status == null) {
             status = "ACTIVE";
         }
@@ -253,7 +253,7 @@ public class NeutronNetwork implements Serializable, INeutronObject {
                 ans.setStatus(this.getStatus());
             }
             if (s.equals("subnets")) {
-                List<String> subnetList = new ArrayList<String>();
+                List<String> subnetList = new ArrayList<>();
                 subnetList.addAll(this.getSubnets());
                 ans.setSubnets(subnetList);
             }

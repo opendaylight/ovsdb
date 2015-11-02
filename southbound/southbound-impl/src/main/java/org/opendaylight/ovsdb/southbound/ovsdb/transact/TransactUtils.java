@@ -50,7 +50,7 @@ public class TransactUtils {
     public static Map<InstanceIdentifier<Node>,Node> extractNode(
             Map<InstanceIdentifier<?>, DataObject> changes) {
         Map<InstanceIdentifier<Node>,Node> result
-            = new HashMap<InstanceIdentifier<Node>,Node>();
+            = new HashMap<>();
         if (changes != null && changes.entrySet() != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (created.getValue() instanceof Node) {
@@ -99,7 +99,7 @@ public class TransactUtils {
 
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
-        Set<InstanceIdentifier<T>> result = new HashSet<InstanceIdentifier<T>>();
+        Set<InstanceIdentifier<T>> result = new HashSet<>();
         if (changes != null && changes.getRemovedPaths() != null) {
             for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
                 if (iid.getTargetType().equals(klazz)) {
@@ -121,7 +121,7 @@ public class TransactUtils {
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
-        Map<InstanceIdentifier<T>,T> result = new HashMap<InstanceIdentifier<T>,T>();
+        Map<InstanceIdentifier<T>,T> result = new HashMap<>();
         if (changes != null && changes.entrySet() != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
@@ -141,7 +141,7 @@ public class TransactUtils {
 
     public static List<Insert> extractInsert(TransactionBuilder transaction, GenericTableSchema schema) {
         List<Operation> operations = transaction.getOperations();
-        List<Insert> inserts = new ArrayList<Insert>();
+        List<Insert> inserts = new ArrayList<>();
         for (int count = 0;count < operations.size();count++) {
             Operation operation = operations.get(count);
             if (operation instanceof Insert && operation.getTableSchema().equals(schema)) {

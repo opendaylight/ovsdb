@@ -148,7 +148,7 @@ public class NeutronFirewallPolicy implements Serializable, INeutronObject {
                 ans.setFirewallPolicyIsShared(firewallPolicyIsShared);
             }
             if (s.equals("firewall_rules")) {
-                List<String> firewallRuleList = new ArrayList<String>();
+                List<String> firewallRuleList = new ArrayList<>();
                 firewallRuleList.addAll(this.getFirewallPolicyRules());
                 ans.setFirewallPolicyRules(firewallRuleList);
             }

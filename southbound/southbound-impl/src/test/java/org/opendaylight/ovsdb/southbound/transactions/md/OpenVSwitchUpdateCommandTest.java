@@ -87,12 +87,12 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testExecute() throws Exception {
         PowerMockito.mockStatic(TyperUtils.class);
-        Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = new HashMap<UUID, OpenVSwitch>();
+        Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         updatedOpenVSwitchRows.put(uuid, ovs);
         when(TyperUtils.extractRowsUpdated(eq(OpenVSwitch.class), any(TableUpdates.class), any(DatabaseSchema.class))).thenReturn(updatedOpenVSwitchRows);
-        Map<UUID, OpenVSwitch> deletedOpenVSwitchRows = new HashMap<UUID, OpenVSwitch>();
+        Map<UUID, OpenVSwitch> deletedOpenVSwitchRows = new HashMap<>();
         OpenVSwitch ovs1 = mock(OpenVSwitch.class);
 
         deletedOpenVSwitchRows.put(uuid, ovs1);
@@ -104,7 +104,7 @@ public class OpenVSwitchUpdateCommandTest {
 
         //Test getInstanceIdentifier(): case 1: ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) == true
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "iidString");
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(map);
@@ -164,7 +164,7 @@ public class OpenVSwitchUpdateCommandTest {
 
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(openVSwitch.getOtherConfigColumn()).thenReturn(column);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
         when(oldEntry.getOtherConfigColumn()).thenReturn(column);
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeOldConfigs", ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
@@ -179,7 +179,7 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testRemoveOldConfigs() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Map<String, String> oldOtherConfigs = new HashMap<String, String>();
+        Map<String, String> oldOtherConfigs = new HashMap<>();
         oldOtherConfigs.put("OpenvswitchOtherConfigsKey", "OpenvswitchOtherConfigsValue");
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
@@ -195,7 +195,7 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testSetNewOtherConfigs() throws Exception {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
-        Map<String, String> otherConfigs = new HashMap<String, String>();
+        Map<String, String> otherConfigs = new HashMap<>();
         otherConfigs.put("otherConfigKey", "otherConfigValue");
 
         OpenvswitchOtherConfigsBuilder openvswitchOtherConfigsBuilder = mock(OpenvswitchOtherConfigsBuilder.class);
@@ -221,7 +221,7 @@ public class OpenVSwitchUpdateCommandTest {
 
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(openVSwitch.getExternalIdsColumn()).thenReturn(column);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
         when(oldEntry.getExternalIdsColumn()).thenReturn(column);
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeExternalIds", ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
@@ -236,7 +236,7 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testRemoveExternalIds() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Map<String, String> oldExternalIds = new HashMap<String, String>();
+        Map<String, String> oldExternalIds = new HashMap<>();
         oldExternalIds.put("OpenvswitchExternalIdKey", "OpenvswitchExternalIdValue");
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
@@ -252,7 +252,7 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testSetNewExternalIds() throws Exception {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
-        Map<String, String> externalIds = new HashMap<String, String>();
+        Map<String, String> externalIds = new HashMap<>();
         externalIds.put("externalIdsKey", "externalIdsValue");
 
         OpenvswitchExternalIdsBuilder openvswitchExternalIdsBuilder = mock(OpenvswitchExternalIdsBuilder.class);
@@ -276,7 +276,7 @@ public class OpenVSwitchUpdateCommandTest {
 
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getIfaceTypesColumn()).thenReturn(column );
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add("dpdk");
         set.add("dpdkr");
         set.add("dpdkvhostuser");
@@ -318,7 +318,7 @@ public class OpenVSwitchUpdateCommandTest {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getDatapathTypesColumn()).thenReturn(column );
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add("netdev");
         set.add("system");
         when(column.getData()).thenReturn(set);
@@ -348,7 +348,7 @@ public class OpenVSwitchUpdateCommandTest {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getOvsVersionColumn()).thenReturn(column);
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add("v2.3.0");
         when(column.getData()).thenReturn(set);
         when(ovsdbNodeBuilder.setOvsVersion(anyString())).thenReturn(ovsdbNodeBuilder);

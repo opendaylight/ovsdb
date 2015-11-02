@@ -73,8 +73,8 @@ public class IngressAclServiceTest {
     @Mock private SecurityServicesManager securityServices;
     @Mock private SecurityGroupCacheManger securityGroupCacheManger;
 
-    private List<Neutron_IPs> neutronSrcIpList = new ArrayList<Neutron_IPs>();
-    private List<Neutron_IPs> neutronDestIpList = new ArrayList<Neutron_IPs>();
+    private List<Neutron_IPs> neutronSrcIpList = new ArrayList<>();
+    private List<Neutron_IPs> neutronDestIpList = new ArrayList<>();
     private Neutron_IPs neutron_ip_src;
     private Neutron_IPs neutron_ip_dest_1;
     private Neutron_IPs neutron_ip_dest_2;
@@ -122,7 +122,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRuleEthertype()).thenReturn("IPv4");
         when(portSecurityRule.getSecurityRuleDirection()).thenReturn("ingress");
 
-        List<NeutronSecurityRule> portSecurityList = new ArrayList<NeutronSecurityRule>();
+        List<NeutronSecurityRule> portSecurityList = new ArrayList<>();
         portSecurityList.add(portSecurityRule);
 
         neutron_ip_src = new Neutron_IPs();

@@ -94,7 +94,7 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
         INeutronSecurityGroupCRUD sgCrud = interfaces.getSecurityGroupInterface();
         NeutronSecurityGroup sg = sgCrud.getNeutronSecurityGroup(input.getSecurityRuleGroupID());
         if(sg != null && sg.getSecurityRules() != null) {
-            List<NeutronSecurityRule> toRemove = new ArrayList<NeutronSecurityRule>();
+            List<NeutronSecurityRule> toRemove = new ArrayList<>();
             for(NeutronSecurityRule sgr :sg.getSecurityRules()) {
                 if(sgr.getID() != null && sgr.getID().equals(input.getID())) {
                     toRemove.add(sgr);
@@ -124,7 +124,7 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
 
     @Override
     public List<NeutronSecurityRule> getAllNeutronSecurityRules() {
-        Set<NeutronSecurityRule> allSecurityRules = new HashSet<NeutronSecurityRule>();
+        Set<NeutronSecurityRule> allSecurityRules = new HashSet<>();
         SecurityRules rules = readMd(createInstanceIdentifier());
         if (rules != null) {
             for (SecurityRule rule: rules.getSecurityRule()) {
@@ -132,7 +132,7 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
             }
         }
         LOGGER.debug("Exiting getSecurityRule, Found {} OpenStackSecurityRule", allSecurityRules.size());
-        List<NeutronSecurityRule> ans = new ArrayList<NeutronSecurityRule>();
+        List<NeutronSecurityRule> ans = new ArrayList<>();
         ans.addAll(allSecurityRules);
         return ans;
     }

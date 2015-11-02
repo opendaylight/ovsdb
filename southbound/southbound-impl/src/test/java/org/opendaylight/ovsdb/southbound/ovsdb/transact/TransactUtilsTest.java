@@ -99,7 +99,7 @@ public class TransactUtilsTest {
         PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "extractUpdated", AsyncDataChangeEvent.class, Class.class));
         PowerMockito.when(TransactUtils.extractUpdated(any(AsyncDataChangeEvent.class),eq(DataObject.class))).thenReturn(result);
 
-        Map<InstanceIdentifier<DataObject>, DataObject> map = new HashMap<InstanceIdentifier<DataObject>, DataObject>();
+        Map<InstanceIdentifier<DataObject>, DataObject> map = new HashMap<>();
         InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
         DataObject db = mock(DataObject.class);
         map.put(iid, db);
@@ -121,7 +121,7 @@ public class TransactUtilsTest {
         PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "extractCreatedOrUpdated", AsyncDataChangeEvent.class, Class.class));
         PowerMockito.when(TransactUtils.extractCreatedOrUpdated(any(AsyncDataChangeEvent.class),eq(DataObject.class))).thenReturn(result);
 
-        Map<InstanceIdentifier<DataObject>, DataObject> map = new HashMap<InstanceIdentifier<DataObject>, DataObject>();
+        Map<InstanceIdentifier<DataObject>, DataObject> map = new HashMap<>();
         InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
         DataObject db = mock(DataObject.class);
         map.put(iid, db);
@@ -182,7 +182,7 @@ public class TransactUtilsTest {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         GenericTableSchema schema = mock(GenericTableSchema.class);
 
-        List<Operation> operations = new ArrayList<Operation>();
+        List<Operation> operations = new ArrayList<>();
         Operation operation = mock(Insert.class);
         operations.add(operation);
         when(transaction.getOperations()).thenReturn(operations);

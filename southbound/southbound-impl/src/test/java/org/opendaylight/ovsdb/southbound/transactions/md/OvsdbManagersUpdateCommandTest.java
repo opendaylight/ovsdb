@@ -82,13 +82,13 @@ public class OvsdbManagersUpdateCommandTest {
     @Test
     public void testExecute() throws Exception {
         ReadWriteTransaction transaction= mock(ReadWriteTransaction.class);
-        updatedManagerRows = new HashMap<UUID, Manager>();
+        updatedManagerRows = new HashMap<>();
         updatedManagerRows.put(mock(UUID.class), mock(Manager.class));
         MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedManagerRows").set(ovsdbManagersUpdateCommand, updatedManagerRows);
         Map<Uri, Manager> updatedManagerRowsWithUri = new HashMap<>();
         PowerMockito.doReturn(updatedManagerRowsWithUri).when(ovsdbManagersUpdateCommand, "getUriManagerMap", any(Map.class));
 
-        updatedOpenVSwitchRows = new HashMap<UUID, OpenVSwitch>();
+        updatedOpenVSwitchRows = new HashMap<>();
         updatedOpenVSwitchRows.put(mock(UUID.class), mock(OpenVSwitch.class));
         MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedOpenVSwitchRows").set(ovsdbManagersUpdateCommand, updatedOpenVSwitchRows);
 
@@ -110,7 +110,7 @@ public class OvsdbManagersUpdateCommandTest {
         updatedOpenVSwitchRows.put(mock(UUID.class), openVSwitch);
 
         PowerMockito.mockStatic(SouthboundMapper.class);
-        List<ManagerEntry> managerEntries = new ArrayList<ManagerEntry>();
+        List<ManagerEntry> managerEntries = new ArrayList<>();
         managerEntries.add(mock(ManagerEntry.class));
         when(SouthboundMapper.createManagerEntries(any(OpenVSwitch.class), any(Map.class))).thenReturn(managerEntries);
 
@@ -125,7 +125,7 @@ public class OvsdbManagersUpdateCommandTest {
     @Test
     public void testUpdateManagers1() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Map<Uri, Manager> updatedManagerRows = new HashMap<Uri, Manager>();
+        Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);

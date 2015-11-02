@@ -131,7 +131,7 @@ public class NeutronSecurityGroupDataChangeListener implements
             INeutronSecurityRuleCRUD srCrud = interfaces
                     .getSecurityRuleInterface();
 
-            List<NeutronSecurityRule> rules = new ArrayList<NeutronSecurityRule>();
+            List<NeutronSecurityRule> rules = new ArrayList<>();
             for (Uuid uuid : group.getSecurityRules()) {
                 rules.add(srCrud.getNeutronSecurityRule(uuid.getValue()));
             }

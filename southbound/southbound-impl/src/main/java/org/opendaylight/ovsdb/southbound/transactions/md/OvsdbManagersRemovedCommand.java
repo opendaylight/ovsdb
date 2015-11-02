@@ -69,7 +69,7 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         Preconditions.checkNotNull(openVSwitch);
 
         List<InstanceIdentifier<ManagerEntry>> result =
-                new ArrayList<InstanceIdentifier<ManagerEntry>>();
+                new ArrayList<>();
         OpenVSwitch oldOvsdbNode = oldOpenVSwitchRows.get(openVSwitch.getUuid());
 
         if (oldOvsdbNode != null && oldOvsdbNode.getManagerOptionsColumn() != null) {

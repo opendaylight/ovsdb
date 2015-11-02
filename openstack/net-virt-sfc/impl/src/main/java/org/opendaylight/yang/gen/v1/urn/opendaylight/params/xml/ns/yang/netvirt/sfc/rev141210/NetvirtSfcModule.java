@@ -3,7 +3,6 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NetvirtSfcProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.framework.BundleContext;
 
 public class NetvirtSfcModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev141210.AbstractNetvirtSfcModule {
 

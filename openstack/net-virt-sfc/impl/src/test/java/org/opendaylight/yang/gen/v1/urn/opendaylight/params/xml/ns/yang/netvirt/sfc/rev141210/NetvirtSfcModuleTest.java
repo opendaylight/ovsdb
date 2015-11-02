@@ -14,7 +14,6 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NetvirtSfcProvider;
-import org.osgi.framework.BundleContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 
 import javax.management.ObjectName;

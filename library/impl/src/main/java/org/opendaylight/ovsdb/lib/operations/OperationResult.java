@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.notation.Row;

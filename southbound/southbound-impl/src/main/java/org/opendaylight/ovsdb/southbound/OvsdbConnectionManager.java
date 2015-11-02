@@ -414,7 +414,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return openVSwitchRow;
     }
     private Entity getEntityFromConnectionInstance(@Nonnull OvsdbConnectionInstance ovsdbConnectionInstance) {
-        InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();;
+        InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();
         if ( iid == null ) {
             /* Switch initiated connection won't have iid, till it gets OpenVSwitch
              * table update but update callback is always registered after ownership

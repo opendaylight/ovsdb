@@ -314,7 +314,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_"
                 + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
-                + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";;
+                + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
         matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
                                                     portSecurityRule.getSecurityRulePortMin().shortValue(),

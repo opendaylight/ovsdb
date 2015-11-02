@@ -77,7 +77,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                         getOperationalState().getBridgeTerminationPoint(terminationPointIid);
                 if (!terminationPointOptional.isPresent()) {
                     // Configure interface
-                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
+                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();
                     Interface ovsInterface =
                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
                     createInterface(terminationPoint, ovsInterface);
@@ -326,7 +326,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
     public static void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<TerminationPoint> iid,
             String interfaceName) {
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-        port.setName(interfaceName);;
+        port.setName(interfaceName);
         port.setExternalIds(Collections.<String,String>emptyMap());
         Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction,
                 iid,

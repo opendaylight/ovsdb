@@ -64,15 +64,15 @@ public class SubnetHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.ADD);
         subnetHandler.processEvent(ev);
-        verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());;
+        verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());
 
         when(ev.getAction()).thenReturn(Action.DELETE);
         subnetHandler.processEvent(ev);
-        verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());;
+        verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
         subnetHandler.processEvent(ev);
-        verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());;
+        verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());
     }
 
     @Test

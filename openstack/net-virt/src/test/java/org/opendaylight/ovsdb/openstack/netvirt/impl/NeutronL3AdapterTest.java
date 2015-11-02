@@ -135,11 +135,11 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testHandleNeutronPortEvent() throws Exception {
-        Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<String, NeutronRouter_Interface>();
+        Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<>();
         // Mock variables
         Neutron_IPs neutronIP = mock(Neutron_IPs.class);
         when(neutronIP.getSubnetUUID()).thenReturn(UUID);
-        List<Neutron_IPs> list_neutronIP = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> list_neutronIP = new ArrayList<>();
         list_neutronIP.add(neutronIP);
         NeutronPort neutronPort = mock(NeutronPort.class);
         when(neutronPort.getDeviceOwner()).thenReturn(OWNER_ROUTER_INTERFACE);
@@ -182,7 +182,7 @@ public class NeutronL3AdapterTest {
         Neutron_IPs neutronIP = mock(Neutron_IPs.class);
         when(neutronIP.getSubnetUUID()).thenReturn(UUID);
         NeutronPort neutronPort = mock(NeutronPort.class);
-        List<Neutron_IPs> list_neutronIP = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> list_neutronIP = new ArrayList<>();
         list_neutronIP.add(neutronIP);
         when(neutronPort.getFixedIPs()).thenReturn(list_neutronIP);
         List<NeutronPort> list_neutronPort = new ArrayList<>();
@@ -304,8 +304,8 @@ public class NeutronL3AdapterTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testProgramFlowsForFloatingIPArpAdd() throws Exception {
-        Map<String, Pair> neutronPortToDpIdCache = new HashMap<String, Pair>();
-        Map<String, String> networkIdToRouterMacCache = new HashMap<String, String>();
+        Map<String, Pair> neutronPortToDpIdCache = new HashMap<>();
+        Map<String, String> networkIdToRouterMacCache = new HashMap<>();
         Map floatIpDataMapCache = new HashMap();
 
         NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
@@ -380,7 +380,7 @@ public class NeutronL3AdapterTest {
         ConfigurationService configurationService = mock(ConfigurationService.class);
         when(configurationService.getPatchPortName(any(Pair.class))).thenReturn(PORT_INT);
         MemberModifier.field(NeutronL3Adapter.class, "configurationService").set(neutronL3Adapter , configurationService);
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
         when(nodeCacheManager.getBridgeNodes()).thenReturn(nodes);
@@ -403,7 +403,7 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testHandleInterfaceEvent() throws Exception {
-        Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache = new HashMap<String, Pair<Long,Uuid>>();
+        Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache = new HashMap<>();
         // init instance variables
         TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
         MemberModifier.field(NeutronL3Adapter.class, "tenantNetworkManager").set(neutronL3Adapter , tenantNetworkManager);
@@ -444,7 +444,7 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testHandleInterfaceEventAdd() throws Exception {
-        Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache = new HashMap<String, Pair<Long,Uuid>>();
+        Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache = new HashMap<>();
         // init instance variables
         MemberModifier.field(NeutronL3Adapter.class, "neutronPortToDpIdCache").set(neutronL3Adapter , neutronPortToDpIdCache);
         int temp = neutronPortToDpIdCache.size();
@@ -457,7 +457,7 @@ public class NeutronL3AdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testHandleInterfaceEventDelete() throws Exception {
-        Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache = new HashMap<String, Pair<Long,Uuid>>();
+        Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache = new HashMap<>();
         OvsdbTerminationPointAugmentation intf = mock(OvsdbTerminationPointAugmentation.class);
         Uuid uuid = mock(Uuid.class);
         when(intf.getInterfaceUuid()).thenReturn(uuid );
@@ -476,11 +476,11 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testUpdateL3ForNeutronPort() throws Exception {
-        Map<String, String> networkIdToRouterMacCache = new HashMap<String, String>();
+        Map<String, String> networkIdToRouterMacCache = new HashMap<>();
 
         Neutron_IPs neutronIp = mock(Neutron_IPs.class);
         when(neutronIp.getIpAddress()).thenReturn(FIXED_IP_ADDRESS);
-        List<Neutron_IPs> neutronIps = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> neutronIps = new ArrayList<>();
         neutronIps.add(neutronIp);
         NeutronPort neutronPort = mock(NeutronPort.class);
         when(neutronPort.getNetworkUUID()).thenReturn(UUID);
@@ -488,7 +488,7 @@ public class NeutronL3AdapterTest {
         when(neutronPort.getFixedIPs()).thenReturn(neutronIps);
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
         when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         PowerMockito.doReturn(Long.valueOf(15)).when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class));
 
@@ -521,7 +521,7 @@ public class NeutronL3AdapterTest {
     // either add or remove item in l3ForwardingCache
     @Test
     public void testProgramL3ForwardingStage1() throws Exception {
-        Set<String> l3ForwardingCache = new HashSet<String>();
+        Set<String> l3ForwardingCache = new HashSet<>();
 
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn(ID);
@@ -568,16 +568,16 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testProgramFlowsForNeutronRouterInterface() throws Exception {
-        Map<String, String> networkIdToRouterMacCache = new HashMap<String, String>();
-        Map<String, List<Neutron_IPs>> networkIdToRouterIpListCache = new HashMap<String, List<Neutron_IPs>>();
-        Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<String, NeutronRouter_Interface>();
+        Map<String, String> networkIdToRouterMacCache = new HashMap<>();
+        Map<String, List<Neutron_IPs>> networkIdToRouterIpListCache = new HashMap<>();
+        Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<>();
 
         NeutronRouter_Interface intf = mock(NeutronRouter_Interface.class);
         when(intf.getPortUUID()).thenReturn(UUID);
         when(intf.getSubnetUUID()).thenReturn(UUID);
         Neutron_IPs neutronIp = mock(Neutron_IPs.class);
         when(neutronIp.getIpAddress()).thenReturn(FIXED_IP_ADDRESS);
-        List<Neutron_IPs> ips = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> ips = new ArrayList<>();
         ips.add(neutronIp);
         NeutronPort neutronPort = mock(NeutronPort.class);
         when(neutronPort.getMacAddress()).thenReturn(MAC_ADDRESS);
@@ -594,7 +594,7 @@ public class NeutronL3AdapterTest {
         NeutronRouter neutronRouter = mock(NeutronRouter.class);
 
         Node node = mock(Node.class);
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(node);
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
@@ -679,7 +679,7 @@ public class NeutronL3AdapterTest {
         when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
         Neutron_IPs ip = mock(Neutron_IPs.class);
         when(ip.getIpAddress()).thenReturn(IP);
-        List<Neutron_IPs> ips = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> ips = new ArrayList<>();
         ips.add(ip);
         ips.add(ip);
         ips.add(ip);
@@ -714,7 +714,7 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testProgramRouterInterfaceStage1() throws Exception {
-        Set<String> routerInterfacesCache = new HashSet<String>();
+        Set<String> routerInterfacesCache = new HashSet<>();
 
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn(ID);
@@ -761,7 +761,7 @@ public class NeutronL3AdapterTest {
     //either add or remove staticArpEntryCache
     @Test
     public void testProgramStaticArpStage1() throws Exception {
-        Set<String> staticArpEntryCache = new HashSet<String>();
+        Set<String> staticArpEntryCache = new HashSet<>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage2", Long.class, String.class, String.class, String.class, Action.class));
 
@@ -796,7 +796,7 @@ public class NeutronL3AdapterTest {
     // either add or remove inboundIpRewriteCache
     @Test
     public void testProgramInboundIpRewriteStage1() throws Exception {
-        Set<String> inboundIpRewriteCache = new HashSet<String>();
+        Set<String> inboundIpRewriteCache = new HashSet<>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programInboundIpRewriteStage2", Long.class, Long.class, String.class, String.class, String.class, Action.class));
 
@@ -831,7 +831,7 @@ public class NeutronL3AdapterTest {
     // either add or remove outboundIpRewriteExclusionCache
     @Test
     public void testProgramIpRewriteExclusionStage1() throws Exception {
-        Set<String> outboundIpRewriteExclusionCache = new HashSet<String>();
+        Set<String> outboundIpRewriteExclusionCache = new HashSet<>();
 
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn(ID);
@@ -871,7 +871,7 @@ public class NeutronL3AdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testProgramOutboundIpRewriteStage1() throws Exception{
-        HashSet<String> outboundIpRewriteCache = new HashSet<String>();
+        Set<String> outboundIpRewriteCache = new HashSet<>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage2", floatingIpClass, Action.class));
 

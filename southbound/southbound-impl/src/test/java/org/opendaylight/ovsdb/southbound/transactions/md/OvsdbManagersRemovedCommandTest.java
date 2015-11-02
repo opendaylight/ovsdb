@@ -69,7 +69,7 @@ public class OvsdbManagersRemovedCommandTest {
     @Test
     public void testExecute() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        updatedOpenVSwitchRows = new HashMap<UUID, OpenVSwitch>();
+        updatedOpenVSwitchRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         updatedOpenVSwitchRows.put(uuid, openVSwitch);
@@ -90,7 +90,7 @@ public class OvsdbManagersRemovedCommandTest {
     @Test
     public void testDeleteManagers() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        List<InstanceIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<InstanceIdentifier<ManagerEntry>>();
+        List<InstanceIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<>();
         managerEntryIids.add(mock(InstanceIdentifier.class));
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         Whitebox.invokeMethod(ovsdbManagersRemovedCommand, "deleteManagers", transaction, managerEntryIids);
@@ -105,12 +105,12 @@ public class OvsdbManagersRemovedCommandTest {
 
         UUID uuid = mock(UUID.class);
         OpenVSwitch oldOvsdbNode = mock(OpenVSwitch.class);
-        oldOpenVSwitchRows = new HashMap<UUID, OpenVSwitch>();
+        oldOpenVSwitchRows = new HashMap<>();
         oldOpenVSwitchRows.put(uuid, oldOvsdbNode);
         when(openVSwitch.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "oldOpenVSwitchRows").set(ovsdbManagersRemovedCommand, oldOpenVSwitchRows);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
-        Set<UUID> set = new HashSet<UUID>();
+        Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
         set.add(controllerUuid);
         when(column.getData()).thenReturn(set);
@@ -127,7 +127,7 @@ public class OvsdbManagersRemovedCommandTest {
     public void testCheckIfManagerPresentInUpdatedManagersList() throws Exception {
         Manager removedManager = mock(Manager.class);
         Manager updatedManager = mock(Manager.class);
-        updatedManagerRows = new HashMap<UUID, Manager>();
+        updatedManagerRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         updatedManagerRows.put(uuid, updatedManager);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedManagerRows").set(ovsdbManagersRemovedCommand, updatedManagerRows);

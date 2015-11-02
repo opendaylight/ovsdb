@@ -114,7 +114,7 @@ public class OvsdbConnectionInstanceTest {
         //callback null case
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , null);
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
-        List<String> databases = new ArrayList<String>();
+        List<String> databases = new ArrayList<>();
         databases.add("Open_vSwitch");
         databases.add("");
         doReturn(listenableFuture).when(ovsdbConnectionInstance).getDatabases();
@@ -142,7 +142,7 @@ public class OvsdbConnectionInstanceTest {
         //transactInvokers null case
         MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
-        List<String> databases = new ArrayList<String>();
+        List<String> databases = new ArrayList<>();
         databases.add("database1");
         databases.add("database2");
         doReturn(listenableFuture).when(ovsdbConnectionInstance).getDatabases();
@@ -165,7 +165,7 @@ public class OvsdbConnectionInstanceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testMonitorAllTables() throws Exception {
-        Set<String> tables = new HashSet<String>();
+        Set<String> tables = new HashSet<>();
         tables.add("tableName1");
         tables.add("tableName2");
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
@@ -173,7 +173,7 @@ public class OvsdbConnectionInstanceTest {
         GenericTableSchema tableSchema = mock(GenericTableSchema.class);
         when(dbSchema.table(anyString(), eq(GenericTableSchema.class))).thenReturn(tableSchema);
 
-        Set<String> columns = new HashSet<String>();
+        Set<String> columns = new HashSet<>();
         columns.add("columnName1");
         columns.add("columnName2");
         when(tableSchema.getColumns()).thenReturn(columns);

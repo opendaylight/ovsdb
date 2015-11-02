@@ -137,7 +137,7 @@ public class OvsdbConnectionManagerTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
 
-        clients = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+        clients = new ConcurrentHashMap<>();
         clients.put(key, ovsdbConnectionInstance);
         MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
 
@@ -190,7 +190,7 @@ public class OvsdbConnectionManagerTest {
         ConnectionInfo key2 = mock(ConnectionInfo.class);
         OvsdbConnectionInstance ovsdbConnectionInstance1 = mock(OvsdbConnectionInstance.class);
         OvsdbConnectionInstance ovsdbConnectionInstance2 = mock(OvsdbConnectionInstance.class);
-        clients = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+        clients = new ConcurrentHashMap<>();
         clients.put(key1, ovsdbConnectionInstance1);
         clients.put(key2, ovsdbConnectionInstance2);
         MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
@@ -207,7 +207,7 @@ public class OvsdbConnectionManagerTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
 
-        clients = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+        clients = new ConcurrentHashMap<>();
         MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
 
         //Test putConnectionInstance()
@@ -228,7 +228,7 @@ public class OvsdbConnectionManagerTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
 
-        instanceIdentifiers = new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
+        instanceIdentifiers = new ConcurrentHashMap<>();
         MemberModifier.field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnectionManager, instanceIdentifiers);
 
         //Test putInstanceIdentifier()

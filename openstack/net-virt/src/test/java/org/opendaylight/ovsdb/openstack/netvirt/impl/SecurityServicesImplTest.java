@@ -56,7 +56,7 @@ public class SecurityServicesImplTest {
     public void setUp(){
         NeutronPort neutronPort = mock(NeutronPort.class);
 
-        List<NeutronSecurityGroup> securityGroups = new ArrayList<NeutronSecurityGroup>();
+        List<NeutronSecurityGroup> securityGroups = new ArrayList<>();
         securityGroups.add(neutronSecurityGroup);
 
         when(neutronPort.getSecurityGroups()).thenReturn(securityGroups);

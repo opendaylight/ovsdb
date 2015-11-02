@@ -190,7 +190,7 @@ public class SouthboundMapper {
     }
 
     public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
-        Set<String> protocols = new HashSet<String>();
+        Set<String> protocols = new HashSet<>();
         if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
             for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {

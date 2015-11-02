@@ -248,7 +248,7 @@ public class SouthboundMapper {
         } catch (SchemaVersionMismatchException e) {
             LOG.warn("protocols not supported by this version of ovsdb", e);
         }
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         if (protocols != null && protocols.size() > 0) {
             ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                     SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
@@ -276,7 +276,7 @@ public class SouthboundMapper {
         LOG.debug("createControllerEntries Bridge: {}\n, updatedControllerRows: {}",
                 bridge, updatedControllerRows);
         final Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
-        final List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        final List<ControllerEntry> controllerEntries = new ArrayList<>();
         for (UUID controllerUUID : controllerUUIDs ) {
             final Controller controller = updatedControllerRows.get(controllerUUID);
             addControllerEntries(controllerEntries, controller);
@@ -298,7 +298,7 @@ public class SouthboundMapper {
 
         LOG.debug("createControllerEntries Bridge 2: {}\n, updatedControllerRows: {}",
                 bridgeNode, updatedControllerRows);
-        final List<ControllerEntry> controllerEntriesCreated = new ArrayList<ControllerEntry>();
+        final List<ControllerEntry> controllerEntriesCreated = new ArrayList<>();
         final OvsdbBridgeAugmentation ovsdbBridgeAugmentation =
                 bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation == null) {
@@ -386,7 +386,7 @@ public class SouthboundMapper {
         LOG.debug("createManagerEntries OpenVSwitch: {}\n, updatedManagerRows: {}",
                 ovsdbNode, updatedManagerRows);
         final Set<UUID> managerUUIDs = ovsdbNode.getManagerOptionsColumn().getData();
-        final List<ManagerEntry> managerEntries = new ArrayList<ManagerEntry>();
+        final List<ManagerEntry> managerEntries = new ArrayList<>();
         for (UUID managerUUID : managerUUIDs ) {
             final Manager manager = updatedManagerRows.get(managerUUID);
             addManagerEntries(managerEntries, manager);
@@ -408,7 +408,7 @@ public class SouthboundMapper {
 
         LOG.debug("createManagerEntries based on OVSDB Node: {}\n, updatedManagerRows: {}",
                 ovsdbNode, updatedManagerRows);
-        final List<ManagerEntry> managerEntriesCreated = new ArrayList<ManagerEntry>();
+        final List<ManagerEntry> managerEntriesCreated = new ArrayList<>();
         final OvsdbNodeAugmentation ovsdbNodeAugmentation =
                 ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         if (ovsdbNodeAugmentation == null) {

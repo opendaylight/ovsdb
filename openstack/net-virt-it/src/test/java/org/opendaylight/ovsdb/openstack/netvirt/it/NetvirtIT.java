@@ -400,7 +400,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     }
 
     private List<ProtocolEntry> createMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().

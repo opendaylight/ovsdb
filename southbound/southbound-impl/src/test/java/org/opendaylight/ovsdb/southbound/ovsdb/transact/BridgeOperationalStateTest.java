@@ -101,7 +101,7 @@ public class BridgeOperationalStateTest {
         Node node = mock(Node.class);
         Optional<Node> optNode = mock(Optional.class);
         TerminationPoint termPnt = mock(TerminationPoint.class);
-        List<TerminationPoint> termPntList = new ArrayList<TerminationPoint>();
+        List<TerminationPoint> termPntList = new ArrayList<>();
         termPntList.add(termPnt);
         TerminationPointKey termPntKey = mock(TerminationPointKey.class);
 

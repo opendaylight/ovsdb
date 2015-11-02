@@ -31,15 +31,15 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
     private DataBroker db;
-    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<TransactionCommand>(QUEUE_SIZE);
+    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
-        = new LinkedBlockingQueue<ReadWriteTransaction>(QUEUE_SIZE);
+        = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
-        = new LinkedBlockingQueue<AsyncTransaction<?, ?>>(QUEUE_SIZE);
+        = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private ExecutorService executor;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
-        = new HashMap<ReadWriteTransaction,TransactionCommand>();
-    private List<ReadWriteTransaction> pendingTransactions = new ArrayList<ReadWriteTransaction>();
+        = new HashMap<>();
+    private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
     private final AtomicBoolean runTask = new AtomicBoolean( true );
 
     public TransactionInvokerImpl(DataBroker db) {
@@ -98,7 +98,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     private List<TransactionCommand> extractResubmitCommands() {
         AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
-        List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
+        List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
             int index = pendingTransactions.lastIndexOf(transaction);
             List<ReadWriteTransaction> transactions =
@@ -114,8 +114,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private void resetTransactionQueue() {
         chain.close();
         chain = db.createTransactionChain(this);
-        pendingTransactions = new ArrayList<ReadWriteTransaction>();
-        transactionToCommand = new HashMap<ReadWriteTransaction,TransactionCommand>();
+        pendingTransactions = new ArrayList<>();
+        transactionToCommand = new HashMap<>();
         failedTransactionQueue.clear();
         successfulTransactionQueue.clear();
     }
@@ -133,7 +133,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     private List<TransactionCommand> extractCommandsFromQueue() throws InterruptedException {
-        List<TransactionCommand> result = new ArrayList<TransactionCommand>();
+        List<TransactionCommand> result = new ArrayList<>();
         TransactionCommand command = inputQueue.take();
         while (command != null) {
             result.add(command);

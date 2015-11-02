@@ -82,8 +82,8 @@ import com.google.common.net.InetAddresses;
 @PrepareForTest({TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class, SouthboundMapper.class, InetAddresses.class, NumberUtils.class, NetworkInterface.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbBridgeUpdateCommandTest {
-    private Map<UUID,Bridge> updatedBridgeRows = new HashMap<UUID,Bridge>();
-    private Map<UUID, Bridge> oldBridgeRows = new HashMap<UUID,Bridge>();
+    private Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
+    private Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
     private OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand;
 
     @Before
@@ -145,7 +145,7 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testDeleteEntries() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        List<InstanceIdentifier<DataObject>> entryIids = new ArrayList<InstanceIdentifier<DataObject>>();
+        List<InstanceIdentifier<DataObject>> entryIids = new ArrayList<>();
         InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
         entryIids.add(iid);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), (InstanceIdentifier<?>) any(List.class));
@@ -164,7 +164,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(bridge.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbBridgeUpdateCommand.class, "oldBridgeRows").set(ovsdbBridgeUpdateCommand, oldBridgeRows);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("key", "value");
         when(column.getData()).thenReturn(map);
 
@@ -185,7 +185,7 @@ public class OvsdbBridgeUpdateCommandTest {
 
         //test protocolEntriesToRemove()
         Column<GenericTableSchema, Set<String>> column1 = mock(Column.class);
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add("element");
         when(column1.getData()).thenReturn(set);
         when(oldBridge.getProtocolsColumn()).thenReturn(column1);
@@ -311,7 +311,7 @@ public class OvsdbBridgeUpdateCommandTest {
         Bridge bridge = mock(Bridge.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(bridge.getFailModeColumn()).thenReturn(column);
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add("standalone");
         when(column.getData()).thenReturn(set);
         when(ovsdbBridgeAugmentationBuilder.setFailMode(OvsdbFailModeStandalone.class)).thenReturn(ovsdbBridgeAugmentationBuilder);
@@ -327,7 +327,7 @@ public class OvsdbBridgeUpdateCommandTest {
         Bridge bridge = mock(Bridge.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(bridge.getOtherConfigColumn()).thenReturn(column);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("key", "value");
         when(column.getData()).thenReturn(map);
 
@@ -351,7 +351,7 @@ public class OvsdbBridgeUpdateCommandTest {
         Bridge bridge = mock(Bridge.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(bridge.getExternalIdsColumn()).thenReturn(column);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("key", "value");
         when(column.getData()).thenReturn(map);
 
@@ -376,7 +376,7 @@ public class OvsdbBridgeUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
 
         //Test setProtocol()
-        List<ProtocolEntry> listProtocolEntry = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> listProtocolEntry = new ArrayList<>();
         listProtocolEntry.add(mock(ProtocolEntry.class));
         when(SouthboundMapper.createMdsalProtocols(any(Bridge.class))).thenReturn(listProtocolEntry);
         when(ovsdbBridgeAugmentationBuilder.setProtocolEntry(any(List.class))).thenReturn(ovsdbBridgeAugmentationBuilder);
@@ -399,13 +399,13 @@ public class OvsdbBridgeUpdateCommandTest {
         Bridge bridge = mock(Bridge.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
 
-        Map<UUID, Controller> updatedControllerRows = new HashMap<UUID, Controller>();
+        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         when(ovsdbBridgeUpdateCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
         when(ovsdbBridgeUpdateCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
         PowerMockito.mockStatic(TyperUtils.class);
         when(TyperUtils.extractRowsUpdated(eq(Controller.class), any(TableUpdates.class), any(DatabaseSchema.class))).thenReturn(updatedControllerRows);
 
-        List<ControllerEntry> controllerEntryList = new ArrayList<ControllerEntry>();
+        List<ControllerEntry> controllerEntryList = new ArrayList<>();
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         controllerEntryList.add(controllerEntry);
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class))).thenReturn(controllerEntryList);

@@ -45,16 +45,16 @@ public class TransactionInvokerImplTest {
     private static final int QUEUE_SIZE = 10000;
     @Mock private BindingTransactionChain chain;
     @Mock private DataBroker db;
-    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<TransactionCommand>(QUEUE_SIZE);
+    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
-        = new LinkedBlockingQueue<ReadWriteTransaction>(QUEUE_SIZE);
+        = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
-        = new LinkedBlockingQueue<AsyncTransaction<?, ?>>(QUEUE_SIZE);
+        = new LinkedBlockingQueue<>(QUEUE_SIZE);
     @Mock private ExecutorService executor;
     @Mock private AtomicBoolean runTask;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
-        = new HashMap<ReadWriteTransaction,TransactionCommand>();
-    private List<ReadWriteTransaction> pendingTransactions = new ArrayList<ReadWriteTransaction>();
+        = new HashMap<>();
+    private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
     private TransactionInvokerImpl transactionInvokerImpl;
 
     @Before
@@ -107,7 +107,7 @@ public class TransactionInvokerImplTest {
         pendingTransactions.add((ReadWriteTransaction) tx2);
         MemberModifier.field(TransactionInvokerImpl.class, "pendingTransactions").set(transactionInvokerImpl, pendingTransactions);
 
-        List<ReadWriteTransaction> transactions= new ArrayList<ReadWriteTransaction>();
+        List<ReadWriteTransaction> transactions= new ArrayList<>();
         transactions.add((ReadWriteTransaction) tx1);
 
         TransactionCommand txCommand = mock(TransactionCommand.class);
@@ -117,7 +117,7 @@ public class TransactionInvokerImplTest {
         MemberModifier.field(TransactionInvokerImpl.class, "transactionToCommand").set(transactionInvokerImpl, transactionToCommand);
         PowerMockito.suppress(MemberModifier.method(TransactionInvokerImpl.class, "resetTransactionQueue"));
 
-        List<TransactionCommand> testCommands = new ArrayList<TransactionCommand>();
+        List<TransactionCommand> testCommands = new ArrayList<>();
         testCommands.add(txCommand);
 
         assertEquals(testCommands, Whitebox.invokeMethod(transactionInvokerImpl, "extractResubmitCommands"));
@@ -176,7 +176,7 @@ public class TransactionInvokerImplTest {
         TransactionCommand command = mock(TransactionCommand.class);
         inputQueue.add(command);
         MemberModifier.field(TransactionInvokerImpl.class, "inputQueue").set(transactionInvokerImpl, inputQueue);
-        List<TransactionCommand> testResult = new ArrayList<TransactionCommand>();
+        List<TransactionCommand> testResult = new ArrayList<>();
         testResult.add(command);
         assertEquals(testResult, Whitebox.invokeMethod(transactionInvokerImpl, "extractCommandsFromQueue"));
     }

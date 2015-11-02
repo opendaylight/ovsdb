@@ -44,11 +44,11 @@ public class NeutronCacheUtilsTest {
         Neutron_IPs ip = mock(Neutron_IPs.class);
         when(ip.getIpAddress()).thenReturn("ip_address");
         when(ip.getSubnetUUID()).thenReturn("subnetUUID");
-        List<Neutron_IPs> list_fixedIP = new ArrayList<Neutron_IPs>();
+        List<Neutron_IPs> list_fixedIP = new ArrayList<>();
         list_fixedIP.add(ip);
         when(port.getFixedIPs()).thenReturn(list_fixedIP);
         when(port.getMacAddress()).thenReturn("mac_address");
-        List<NeutronPort> list_port = new ArrayList<NeutronPort>();
+        List<NeutronPort> list_port = new ArrayList<>();
         list_port.add(port);
 
         when(neutronPortsCache.getAllPorts()).thenReturn(list_port);
@@ -65,7 +65,7 @@ public class NeutronCacheUtilsTest {
         NeutronSubnet subnet = mock(NeutronSubnet.class);
         when(subnet.getID()).thenReturn("subnetUUID");
         when(subnet.getNetworkUUID()).thenReturn("networkUUID");
-        List<NeutronSubnet> list_subnet = new ArrayList<NeutronSubnet>();
+        List<NeutronSubnet> list_subnet = new ArrayList<>();
         list_subnet.add(subnet);
 
         when(neutronSubnetCache.getAllSubnets()).thenReturn(list_subnet );
@@ -75,12 +75,12 @@ public class NeutronCacheUtilsTest {
         when(network.getID()).thenReturn("networkUUID");
         when(network.getProviderNetworkType()).thenReturn("network_type_1");
         when(network.getProviderSegmentationID()).thenReturn("network_segID");
-        List<NeutronNetwork> list_network = new ArrayList<NeutronNetwork>();
+        List<NeutronNetwork> list_network = new ArrayList<>();
         list_network.add(network);
 
         when(neutronNetworkCache.getAllNetworks()).thenReturn(list_network);
 
-        Map.Entry<String,String> entry = new AbstractMap.SimpleEntry<String, String>(
+        Map.Entry<String,String> entry = new AbstractMap.SimpleEntry<>(
                 network.getProviderNetworkType(), network.getProviderSegmentationID());
 
         assertEquals("Error, getProviderInformation() did not return the correct values", entry, NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, "subnetUUID"));

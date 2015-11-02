@@ -122,7 +122,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     public void createTransactInvokers() {
         if (transactInvokers == null) {
             try {
-                transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
+                transactInvokers = new HashMap<>();
                 List<String> databases = getDatabases().get();
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();
@@ -165,7 +165,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            Map<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<>();
 
             List<OpenvswitchExternalIds> externalIds = this.initialCreateData.getOpenvswitchExternalIds();
 
@@ -192,7 +192,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             List<OpenvswitchOtherConfigs> otherConfigs = this.initialCreateData.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
-                Map<String, String> otherConfigsMap = new HashMap<String, String>();
+                Map<String, String> otherConfigsMap = new HashMap<>();
                 for (OpenvswitchOtherConfigs otherConfig : otherConfigs) {
                     otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
                 }

@@ -282,7 +282,7 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testGetTerminationPointBridge() throws Exception {
         UUID portUUID = mock(UUID.class);
-        bridgeUpdatedRows = new HashMap<UUID, Bridge>();
+        bridgeUpdatedRows = new HashMap<>();
         UUID bridgeUUID = mock(UUID.class);
         Bridge bridge = mock(Bridge.class);
         bridgeUpdatedRows.put(bridgeUUID, bridge);

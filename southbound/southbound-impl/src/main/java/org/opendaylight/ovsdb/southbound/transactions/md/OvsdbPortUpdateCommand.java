@@ -271,7 +271,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Set<Long> portTrunks = port.getTrunksColumn().getData();
-        List<Trunks> modelTrunks = new ArrayList<Trunks>();
+        List<Trunks> modelTrunks = new ArrayList<>();
         if (!portTrunks.isEmpty()) {
             for (Long trunk: portTrunks) {
                 if (trunk != null) {
@@ -355,7 +355,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
             Set<String> externalIdKeys = interfaceExternalIds.keySet();
             List<InterfaceExternalIds> externalIdsList =
-                    new ArrayList<InterfaceExternalIds>();
+                    new ArrayList<>();
             String externalIdValue;
             for (String externalIdKey : externalIdKeys) {
                 externalIdValue = interfaceExternalIds.get(externalIdKey);
@@ -375,7 +375,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         Map<String, String> portExternalIds = port.getExternalIdsColumn().getData();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
             Set<String> externalIdKeys = portExternalIds.keySet();
-            List<PortExternalIds> externalIdsList = new ArrayList<PortExternalIds>();
+            List<PortExternalIds> externalIdsList = new ArrayList<>();
             String externalIdValue;
             for (String externalIdKey : externalIdKeys) {
                 externalIdValue = portExternalIds.get(externalIdKey);
@@ -394,7 +394,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> optionsMap = interf.getOptionsColumn().getData();
         if (optionsMap != null && !optionsMap.isEmpty()) {
-            List<Options> options = new ArrayList<Options>();
+            List<Options> options = new ArrayList<>();
             String optionsValueString;
             OptionsKey optionsKey;
             for (String optionsKeyString : optionsMap.keySet()) {
@@ -415,7 +415,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> portOtherConfigMap = port.getOtherConfigColumn().getData();
         if (portOtherConfigMap != null && !portOtherConfigMap.isEmpty()) {
-            List<PortOtherConfigs> portOtherConfigs = new ArrayList<PortOtherConfigs>();
+            List<PortOtherConfigs> portOtherConfigs = new ArrayList<>();
             String portOtherConfigValueString;
             for (String portOtherConfigKeyString : portOtherConfigMap.keySet()) {
                 portOtherConfigValueString = portOtherConfigMap.get(portOtherConfigKeyString);
@@ -434,7 +434,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> interfaceOtherConfigMap = interf.getOtherConfigColumn().getData();
         if (interfaceOtherConfigMap != null && !interfaceOtherConfigMap.isEmpty()) {
-            List<InterfaceOtherConfigs> interfaceOtherConfigs = new ArrayList<InterfaceOtherConfigs>();
+            List<InterfaceOtherConfigs> interfaceOtherConfigs = new ArrayList<>();
             String interfaceOtherConfigValueString;
             for (String interfaceOtherConfigKeyString : interfaceOtherConfigMap.keySet()) {
                 interfaceOtherConfigValueString = interfaceOtherConfigMap.get(interfaceOtherConfigKeyString);

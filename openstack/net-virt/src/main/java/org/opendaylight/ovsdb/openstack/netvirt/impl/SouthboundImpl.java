@@ -290,7 +290,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     private List<ProtocolEntry> createMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 MdsalHelper.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().
@@ -357,7 +357,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public List<Node> getAllBridgesOnOvsdbNode(Node node) {
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         List<ManagedNodeEntry> managedNodes = node.getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
         for (ManagedNodeEntry managedNode : managedNodes) {
             InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
@@ -450,7 +450,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public List<TerminationPoint> extractTerminationPoints(Node node) {
-        List<TerminationPoint> terminationPoints = new ArrayList<TerminationPoint>();
+        List<TerminationPoint> terminationPoints = new ArrayList<>();
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation != null) {
             terminationPoints.addAll(node.getTerminationPoint());
@@ -459,7 +459,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public List<OvsdbTerminationPointAugmentation> extractTerminationPointAugmentations( Node node ) {
-        List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<>();
         List<TerminationPoint> terminationPoints = node.getTerminationPoint();
         if(terminationPoints != null && !terminationPoints.isEmpty()){
             for(TerminationPoint tp : terminationPoints){
@@ -479,7 +479,7 @@ public class SouthboundImpl implements Southbound {
         if(operNode != null){
             return extractTerminationPointAugmentations(operNode);
         }
-        return new ArrayList<OvsdbTerminationPointAugmentation>();
+        return new ArrayList<>();
     }
 
     public String getInterfaceExternalIdsValue(
@@ -530,7 +530,7 @@ public class SouthboundImpl implements Southbound {
             tpAugmentationBuilder.setInterfaceType(MdsalHelper.OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
 
-        List<Options> optionsList = new ArrayList<Options>();
+        List<Options> optionsList = new ArrayList<>();
         for (Map.Entry<String, String> entry : options.entrySet()) {
             OptionsBuilder optionsBuilder = new OptionsBuilder();
             optionsBuilder.setKey(new OptionsKey(entry.getKey()));
@@ -563,7 +563,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
-        Map<String, String> option = new HashMap<String, String>();
+        Map<String, String> option = new HashMap<>();
         option.put("peer", peerPortName);
         return addTerminationPoint(node, bridgeName, portName, PATCH_PORT_TYPE, option);
     }

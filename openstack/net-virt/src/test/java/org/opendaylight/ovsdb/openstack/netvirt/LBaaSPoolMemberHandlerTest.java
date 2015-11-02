@@ -85,7 +85,7 @@ public class LBaaSPoolMemberHandlerTest {
         when(NeutronCacheUtils.getMacAddress(any(INeutronPortCRUD.class), anyString(), anyString())).thenReturn("mac_address");
         when(NeutronCacheUtils.getProviderInformation(any(INeutronNetworkCRUD.class), any(INeutronSubnetCRUD.class), anyString())).thenReturn(providerInfo);
 
-        List<NeutronLoadBalancerPoolMember> members = new ArrayList<NeutronLoadBalancerPoolMember>();
+        List<NeutronLoadBalancerPoolMember> members = new ArrayList<>();
         NeutronLoadBalancerPoolMember neutronLBPoolMember = mock(NeutronLoadBalancerPoolMember.class);
         when(neutronLBPoolMember.getPoolMemberAdminStateIsUp()).thenReturn(true);
         when(neutronLBPoolMember.getPoolMemberSubnetID()).thenReturn("subnetID");
@@ -98,7 +98,7 @@ public class LBaaSPoolMemberHandlerTest {
         when(neutronLBPool.getLoadBalancerPoolMembers()).thenReturn(members);
         when(neutronLBPoolCache.getNeutronLoadBalancerPool(anyString())).thenReturn(neutronLBPool);
 
-        List<NeutronLoadBalancer> list_neutronLB = new ArrayList<NeutronLoadBalancer>();
+        List<NeutronLoadBalancer> list_neutronLB = new ArrayList<>();
         NeutronLoadBalancer neutronLB = mock(NeutronLoadBalancer.class);
         when(neutronLB.getLoadBalancerName()).thenReturn("load_balancer_name");
         when(neutronLB.getLoadBalancerVipAddress()).thenReturn("vip_address");
@@ -169,7 +169,7 @@ public class LBaaSPoolMemberHandlerTest {
         NorthboundEvent ev = mock(NorthboundEvent.class);
         when(ev.getLoadBalancerPoolMember()).thenReturn(neutronLBMember);
 
-        List<Node> list_node = new ArrayList<Node>();
+        List<Node> list_node = new ArrayList<>();
         list_node .add(mock(Node.class));
         when(nodeCacheManager.getBridgeNodes()).thenReturn(list_node);
 

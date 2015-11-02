@@ -74,8 +74,8 @@ public class EgressAclServiceTest {
     private Neutron_IPs neutron_ip_src;
     private Neutron_IPs neutron_ip_dest_1;
     private Neutron_IPs neutron_ip_dest_2;
-    private List<Neutron_IPs> neutronSrcIpList = new ArrayList<Neutron_IPs>();
-    private List<Neutron_IPs> neutronDestIpList = new ArrayList<Neutron_IPs>();
+    private List<Neutron_IPs> neutronSrcIpList = new ArrayList<>();
+    private List<Neutron_IPs> neutronDestIpList = new ArrayList<>();
     private static final String HOST_ADDRESS = "127.0.0.1/32";
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
     private static final String SRC_IP = "192.168.0.1";
@@ -119,7 +119,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRuleEthertype()).thenReturn("IPv4");
         when(portSecurityRule.getSecurityRuleDirection()).thenReturn("egress");
 
-        List<NeutronSecurityRule> portSecurityList = new ArrayList<NeutronSecurityRule>();
+        List<NeutronSecurityRule> portSecurityList = new ArrayList<>();
         portSecurityList.add(portSecurityRule);
 
         neutron_ip_src = new Neutron_IPs();

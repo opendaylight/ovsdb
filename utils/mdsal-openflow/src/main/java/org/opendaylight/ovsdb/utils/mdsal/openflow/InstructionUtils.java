@@ -68,8 +68,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 
-import com.google.common.collect.Lists;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +89,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSendToControllerInstructions(String nodeName, InstructionBuilder ib) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         OutputActionBuilder output = new OutputActionBuilder();
@@ -124,7 +122,7 @@ public class InstructionUtils {
 
     public static InstructionBuilder createNormalInstructions(String nodeName, InstructionBuilder ib) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         OutputActionBuilder output = new OutputActionBuilder();
@@ -160,7 +158,7 @@ public class InstructionUtils {
         LOG.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
                 dpidLong, port);
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         OutputActionBuilder oab = new OutputActionBuilder();
         oab.setOutputNodeConnector(ncid);
@@ -196,7 +194,7 @@ public class InstructionUtils {
                 "addOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         List<Action> existingActions;
@@ -242,7 +240,7 @@ public class InstructionUtils {
                 "removeOutputPortFromInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab;
 
         // Start of by locating actions that will have port removed, from the existing instructionList
@@ -345,7 +343,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetVlanInstructions(InstructionBuilder ib, VlanId vlanId) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         /* First we push vlan header */
@@ -380,7 +378,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createPopVlanInstructions(InstructionBuilder ib) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         PopVlanActionBuilder popVlanActionBuilder = new PopVlanActionBuilder();
@@ -407,7 +405,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createNwSrcInstructions(InstructionBuilder ib, Ipv4Prefix prefixsrc) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         SetNwSrcActionBuilder setNwsrcActionBuilder = new SetNwSrcActionBuilder();
@@ -440,7 +438,7 @@ public class InstructionUtils {
     public static InstructionBuilder createNwDstInstructions(InstructionBuilder ib, Ipv4Prefix prefixdst,
                                                              ActionBuilder extraAction) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         SetNwDstActionBuilder setNwDstActionBuilder = new SetNwDstActionBuilder();
@@ -484,7 +482,7 @@ public class InstructionUtils {
         ab.setKey(new ActionKey(0));
 
         // Add our drop action to a list
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         actionList.add(ab.build());
 
         // Create an Apply Action
@@ -524,7 +522,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetTunnelIdInstructions(InstructionBuilder ib, BigInteger tunnelId) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -555,7 +553,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetSrcTCPPort(InstructionBuilder ib, PortNumber tcpport) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -586,7 +584,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetDstTCPPort(InstructionBuilder ib, PortNumber tcpport) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -617,7 +615,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetSrcUDPPort(InstructionBuilder ib, PortNumber udpport) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -648,7 +646,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetDstUDPPort(InstructionBuilder ib, PortNumber udpport) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -680,7 +678,7 @@ public class InstructionUtils {
 
     public static InstructionBuilder createSetIcmpCodeInstruction(InstructionBuilder ib, short code) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
@@ -710,7 +708,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetIcmpTypeInstruction(InstructionBuilder ib, short type) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
@@ -747,7 +745,7 @@ public class InstructionUtils {
         ab.setKey(new ActionKey(0));
 
         // Add our drop action to a list
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         actionList.add(ab.build());
 
         // Create an Apply Action
@@ -768,7 +766,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSrcArpMacInstructions(InstructionBuilder ib, MacAddress macsrc) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
@@ -798,7 +796,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createDstArpMacInstructions(InstructionBuilder ib, MacAddress macdst) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -827,7 +825,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createDstArpIpInstructions(InstructionBuilder ib, Ipv4Prefix dstiparp) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -855,7 +853,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSrcArpIpInstructions(InstructionBuilder ib, Ipv4Prefix srciparp) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
         SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
 
@@ -883,7 +881,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createTunnelIpv4SrcInstructions(InstructionBuilder ib, Ipv4Prefix srcIp) {
 
-        List<Action> actionList = new ArrayList<Action>();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         // Build the tunnel endpoint source IPv4 address
@@ -917,7 +915,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createTunnelIpv4DstInstructions(InstructionBuilder ib, Ipv4Prefix dstIp) {
 
-        List<Action> actionList = new ArrayList<Action>();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         // Build the tunnel endpoint dst IPv4 address
@@ -974,7 +972,7 @@ public class InstructionUtils {
 
     public static InstructionBuilder createDlSrcInstructions(InstructionBuilder ib, MacAddress macAddress) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         SetDlSrcActionBuilder dlSrcActionBuilder= new SetDlSrcActionBuilder();
@@ -999,7 +997,7 @@ public class InstructionUtils {
 
     public static InstructionBuilder createDlDstInstructions(InstructionBuilder ib, MacAddress macAddress) {
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         SetDlDstActionBuilder dlDstActionBuilder= new SetDlDstActionBuilder();
@@ -1024,7 +1022,7 @@ public class InstructionUtils {
     public static List<Action>
                   actionList(org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
 
-        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> alist
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> alist
             = new ArrayList<>();
         int count = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action action : actions) {

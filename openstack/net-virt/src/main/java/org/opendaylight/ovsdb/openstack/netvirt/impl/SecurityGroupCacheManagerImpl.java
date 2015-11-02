@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -35,9 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityGroupCacheManger{
 
-    private final Map<String, HashSet<String>> securityGroupCache  =
-            new ConcurrentHashMap<String, HashSet<String>>();
-    private static final Logger LOG = LoggerFactory.getLogger(NodeCacheManagerImpl.class);
+    private final Map<String, Set<String>> securityGroupCache = new ConcurrentHashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityGroupCacheManagerImpl.class);
     private volatile SecurityServicesManager securityServicesManager;
     private volatile INeutronPortCRUD neutronPortCache;
 
@@ -58,9 +58,9 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
     @Override
     public void addToCache(String remoteSgUuid, String portUuid) {
         LOG.debug("In addToCache remoteSgUuid:" + remoteSgUuid + "portUuid:" + portUuid);
-        HashSet<String> portList = securityGroupCache.get(remoteSgUuid);
+        Set<String> portList = securityGroupCache.get(remoteSgUuid);
         if (null == portList) {
-            portList = new HashSet<String>();
+            portList = new HashSet<>();
             securityGroupCache.put(remoteSgUuid, portList);
         }
         portList.add(portUuid);
@@ -69,7 +69,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
     @Override
     public void removeFromCache(String remoteSgUuid, String portUuid) {
         LOG.debug("In removeFromCache remoteSgUuid:" + remoteSgUuid + " portUuid:" + portUuid);
-        HashSet<String> portList = securityGroupCache.get(remoteSgUuid);
+        Set<String> portList = securityGroupCache.get(remoteSgUuid);
         if (null == portList) {
             return;
         }
@@ -91,7 +91,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
          * add the rule to allow traffic to/from the new port added.
          */
         LOG.debug("In processPortAdded securityGroupUuid:" + securityGroupUuid + " NeutronPort:" + port);
-        HashSet<String> portList = this.securityGroupCache.get(securityGroupUuid);
+        Set<String> portList = this.securityGroupCache.get(securityGroupUuid);
         if (null == portList) {
             return;
         }
@@ -104,7 +104,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
                 return;
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
-            for (NeutronSecurityRule securityRule:remoteSecurityRules) {
+            for (NeutronSecurityRule securityRule : remoteSecurityRules) {
                 for (Neutron_IPs vmIp : port.getFixedIPs()) {
                     securityServicesManager.syncSecurityRule(cachedport, securityRule, vmIp, true);
                 }
@@ -118,7 +118,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
          * the rule to allow traffic to/from the  port that got deleted.
          */
         LOG.debug("In processPortRemoved securityGroupUuid:" + securityGroupUuid + " port:" + port);
-        HashSet<String> portList = this.securityGroupCache.get(securityGroupUuid);
+        Set<String> portList = this.securityGroupCache.get(securityGroupUuid);
         if (null == portList) {
             return;
         }
@@ -131,7 +131,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
                 return;
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
-            for (NeutronSecurityRule securityRule:remoteSecurityRules) {
+            for (NeutronSecurityRule securityRule : remoteSecurityRules) {
                 for (Neutron_IPs vmIp : port.getFixedIPs()) {
                     securityServicesManager.syncSecurityRule(cachedport, securityRule, vmIp, false);
                 }
@@ -149,10 +149,10 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         if (null == port) {
             return null;
         }
-        List<NeutronSecurityRule> remoteSecurityRules = new ArrayList<NeutronSecurityRule>();
+        List<NeutronSecurityRule> remoteSecurityRules = new ArrayList<>();
         List<NeutronSecurityGroup> securityGroups = port.getSecurityGroups();
-        for (NeutronSecurityGroup securtiyGroup : securityGroups) {
-            List<NeutronSecurityRule> securityRules = securtiyGroup.getSecurityRules();
+        for (NeutronSecurityGroup securityGroup : securityGroups) {
+            List<NeutronSecurityRule> securityRules = securityGroup.getSecurityRules();
             for (NeutronSecurityRule securityRule : securityRules) {
                 if (securityGroupUuid.equals(securityRule.getSecurityRemoteGroupID())) {
                     remoteSecurityRules.add(securityRule);

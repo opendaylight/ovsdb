@@ -693,8 +693,8 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     private List<NeutronSecurityGroup> getsecurityGroupChanged(NeutronPort port1, NeutronPort port2) {
         LOG.trace("getsecurityGroupChanged:" + "Port1:" + port1 + "Port2" + port2);
-        ArrayList<NeutronSecurityGroup> list1 = new ArrayList<NeutronSecurityGroup>(port1.getSecurityGroups());
-        ArrayList<NeutronSecurityGroup> list2 = new ArrayList<NeutronSecurityGroup>(port2.getSecurityGroups());
+        List<NeutronSecurityGroup> list1 = new ArrayList<>(port1.getSecurityGroups());
+        List<NeutronSecurityGroup> list2 = new ArrayList<>(port2.getSecurityGroups());
         for (Iterator<NeutronSecurityGroup> iterator = list1.iterator(); iterator.hasNext();) {
             NeutronSecurityGroup securityGroup1 = iterator.next();
             for (NeutronSecurityGroup securityGroup2 :list2) {

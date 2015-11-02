@@ -56,9 +56,12 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
     private HwvtepDataChangeListener hwvtepDTListener;
 
     public HwvtepSouthboundProvider(
-            EntityOwnershipService entityOwnershipServiceDependency) {
+            EntityOwnershipService entityOwnershipServiceDependency,
+            OvsdbConnection ovsdbConnection) {
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
+        this.ovsdbConnection = ovsdbConnection;
+        LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
     }
 
     @Override
@@ -82,11 +85,8 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
             if (ownershipStateOpt.isPresent()) {
                 EntityOwnershipState ownershipState = ownershipStateOpt.get();
                 if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    if (ovsdbConnection == null) {
-                        ovsdbConnection = new OvsdbConnectionService();
-                        ovsdbConnection.registerConnectionListener(cm);
-                        ovsdbConnection.startOvsdbManager(HwvtepSouthboundConstants.DEFAULT_OVSDB_PORT);
-                    }
+                    ovsdbConnection.registerConnectionListener(cm);
+                    ovsdbConnection.startOvsdbManager(HwvtepSouthboundConstants.DEFAULT_OVSDB_PORT);
                 }
             }
         } catch (CandidateAlreadyRegisteredException e) {

@@ -327,7 +327,7 @@ public class NeutronL3AdapterTest {
         INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
         when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
         PowerMockito.doReturn(neutronPort).when(neutronL3Adapter, "findNeutronPortForFloatingIp", anyString());
-        PowerMockito.doReturn(Long.valueOf(15)).when(neutronL3Adapter, "findOFPortForExtPatch", anyLong());
+        PowerMockito.doReturn(15L).when(neutronL3Adapter, "findOFPortForExtPatch", anyLong());
         MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
         MemberModifier.field(NeutronL3Adapter.class, "neutronPortToDpIdCache").set(neutronL3Adapter , neutronPortToDpIdCache);
         MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , neutronPortCache);
@@ -429,7 +429,7 @@ public class NeutronL3AdapterTest {
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventAdd", String.class, Long.class, Uuid.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventDelete", OvsdbTerminationPointAugmentation.class, Long.class));
 
-        PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(Long.valueOf(45));
+        PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(45L);
         Mockito.doNothing().when(neutronL3Adapter).handleNeutronPortEvent(any(NeutronPort.class), any(Action.class));
 
         neutronL3Adapter.handleInterfaceEvent(node, intf, mock(NeutronNetwork.class), Action.ADD);
@@ -490,7 +490,7 @@ public class NeutronL3AdapterTest {
         when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
         List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
-        PowerMockito.doReturn(Long.valueOf(15)).when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class));
+        PowerMockito.doReturn(15L).when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class));
 
         // init instance variables
         networkIdToRouterMacCache .put(UUID, MAC_ADDRESS);
@@ -620,7 +620,7 @@ public class NeutronL3AdapterTest {
         MemberModifier.field(NeutronL3Adapter.class, "neutronSubnetCache").set(neutronL3Adapter , neutronSubnetCache);
         MemberModifier.field(NeutronL3Adapter.class, "neutronNetworkCache").set(neutronL3Adapter , neutronNetworkCache);
         MemberModifier.field(NeutronL3Adapter.class, "nodeCacheManager").set(neutronL3Adapter , nodeCacheManager);
-        PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(Long.valueOf(45));
+        PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(45L);
 
         int networkIdToRouterMacCacheSize, networkIdToRouterIpListCacheSize, subnetIdToRouterInterfaceCacheSize;
         networkIdToRouterMacCacheSize = networkIdToRouterMacCache.size();
@@ -918,14 +918,14 @@ public class NeutronL3AdapterTest {
 
         PowerMockito.when(southbound.getBridge(any(Node.class), anyString())).thenReturn(mock(OvsdbBridgeAugmentation.class));
         PowerMockito.when(configurationService.getIntegrationBridgeName()).thenReturn("");
-        PowerMockito.when(southbound.getDataPathId(any(Node.class))).thenReturn(Long.valueOf(45));
+        PowerMockito.when(southbound.getDataPathId(any(Node.class))).thenReturn(45L);
 
-        assertEquals("Error, did not return the correct Dpid", Long.valueOf(45), Whitebox.invokeMethod(neutronL3Adapter, "getDpidForIntegrationBridge", mock(Node.class)));
+        assertEquals("Error, did not return the correct Dpid", 45L, Whitebox.invokeMethod(neutronL3Adapter, "getDpidForIntegrationBridge", mock(Node.class)));
     }
 
     @Test
     public void testencodeExcplicitOFPort() throws Exception {
-        assertEquals("Error, did not correctly encode the port", OFPort, NeutronL3Adapter.encodeExcplicitOFPort(Long.valueOf(45)));
+        assertEquals("Error, did not correctly encode the port", OFPort, NeutronL3Adapter.encodeExcplicitOFPort(45L));
     }
 
     @Test
@@ -1010,6 +1010,6 @@ public class NeutronL3AdapterTest {
         Class clazz = Whitebox.getInnerClassType(NeutronL3Adapter.class, "FloatIpData");
         Constructor [] constructors = clazz.getConstructors();
         Constructor c  = constructors[0];
-        return c.newInstance(new NeutronL3Adapter(), Long.valueOf(415), Long.valueOf(415), "a", "b", "c", "d", "e");
+        return c.newInstance(new NeutronL3Adapter(), 415L, 415L, "a", "b", "c", "d", "e");
     }
 }

@@ -377,9 +377,9 @@ public class SouthboundMapperTest {
         PowerMockito.whenNew(ConnectionInfoBuilder.class).withNoArguments().thenReturn(connectionInfoBuilder);
 
         when(client.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
-        when(client.getConnectionInfo().getRemotePort()).thenReturn(new Integer(8080));
+        when(client.getConnectionInfo().getRemotePort()).thenReturn(8080);
         when(client.getConnectionInfo().getLocalAddress()).thenReturn(mock(InetAddress.class));
-        when(client.getConnectionInfo().getLocalPort()).thenReturn(new Integer(8080));
+        when(client.getConnectionInfo().getLocalPort()).thenReturn(8080);
         PortNumber portNum = mock(PortNumber.class);
         PowerMockito.whenNew(PortNumber.class).withAnyArguments().thenReturn(portNum);
         when(connectionInfoBuilder.setRemoteIp(any(IpAddress .class))).thenReturn(connectionInfoBuilder);

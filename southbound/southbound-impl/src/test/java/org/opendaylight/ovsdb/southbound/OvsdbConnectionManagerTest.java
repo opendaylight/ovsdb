@@ -103,7 +103,7 @@ public class OvsdbConnectionManagerTest {
         InetAddress ip = mock(InetAddress.class);
 
         when(externalClient.getConnectionInfo().getRemoteAddress()).thenReturn(ip);
-        when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(new Integer(8080));
+        when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(8080);
 
         ConnectionInfo key = mock(ConnectionInfo.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -131,7 +131,7 @@ public class OvsdbConnectionManagerTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         InetAddress ip = mock(InetAddress.class);
         when(client.getConnectionInfo().getRemoteAddress()).thenReturn(ip);
-        when(client.getConnectionInfo().getRemotePort()).thenReturn(new Integer(8080));
+        when(client.getConnectionInfo().getRemotePort()).thenReturn(8080);
 
         ConnectionInfo key = mock(ConnectionInfo.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -286,7 +286,7 @@ public class OvsdbConnectionManagerTest {
         when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
         PortNumber port = mock(PortNumber.class);
         when(connectionInfo.getRemotePort()).thenReturn(port);
-        when(port.getValue()).thenReturn(new Integer(8080));
+        when(port.getValue()).thenReturn(8080);
         when(ovsdbConnection.connect(any(InetAddress.class), anyInt())).thenReturn(client);
 
         //client not null case

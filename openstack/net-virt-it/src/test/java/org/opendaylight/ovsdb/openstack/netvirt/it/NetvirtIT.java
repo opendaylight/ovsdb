@@ -160,7 +160,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}",
                 connectionType, addressStr, portStr);
 
-        Option[] options = new Option[] {
+        return new Option[] {
                 editConfigurationFilePut(NetvirtITConstants.CUSTOM_PROPERTIES,
                         NetvirtITConstants.SERVER_IPADDRESS, addressStr),
                 editConfigurationFilePut(NetvirtITConstants.CUSTOM_PROPERTIES,
@@ -168,7 +168,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(NetvirtITConstants.CUSTOM_PROPERTIES,
                         NetvirtITConstants.CONNECTION_TYPE, connectionType),
         };
-        return options;
     }
 
     @Before
@@ -268,9 +267,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     }
 
     private Node getOvsdbNode(final ConnectionInfo connectionInfo) {
-        Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
                 SouthboundMapper.createInstanceIdentifier(connectionInfo));
-        return node;
     }
 
     private boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {

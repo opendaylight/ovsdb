@@ -162,8 +162,7 @@ public class TransactUtils {
         String uuidString = insert.getUuidName() != null
                 ? insert.getUuidName() : SouthboundMapper.getRandomUUID();
         insert.setUuidName(uuidString);
-        UUID uuid = new UUID(uuidString);
-        return uuid;
+        return new UUID(uuidString);
     }
 
     public static <T  extends TableSchema<T>> void stampInstanceIdentifier(TransactionBuilder transaction,

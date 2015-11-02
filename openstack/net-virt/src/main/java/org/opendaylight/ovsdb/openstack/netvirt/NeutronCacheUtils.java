@@ -73,9 +73,8 @@ public class NeutronCacheUtils {
         List<NeutronNetwork> allNetworks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network: allNetworks) {
             if (network.getID().equals(networkID)) {
-                Map.Entry<String,String> entry = new AbstractMap.SimpleEntry<>(
+                return new AbstractMap.SimpleEntry<>(
                         network.getProviderNetworkType(), network.getProviderSegmentationID());
-                return entry;
             }
         }
         return null;

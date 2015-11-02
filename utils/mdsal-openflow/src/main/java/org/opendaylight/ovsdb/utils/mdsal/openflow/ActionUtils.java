@@ -169,8 +169,8 @@ public final class ActionUtils {
         NxRegLoad r = new NxRegLoadBuilder()
             .setDst(new DstBuilder()
                 .setDstChoice(dstChoice)
-                .setStart(Integer.valueOf(0))
-                .setEnd(Integer.valueOf(endOffset))
+                .setStart(0)
+                .setEnd(endOffset)
                 .build())
             .setValue(value)
             .build();
@@ -236,13 +236,13 @@ public final class ActionUtils {
         NxRegMove r = new NxRegMoveBuilder()
             .setSrc(new SrcBuilder()
                 .setSrcChoice(srcChoice)
-                .setStart(Integer.valueOf(0))
-                .setEnd(Integer.valueOf(endOffset))
+                .setStart(0)
+                .setEnd(endOffset)
                 .build())
             .setDst(new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nx.action.reg.move.grouping.nx.reg.move.DstBuilder()
                 .setDstChoice(dstChoice)
-                .setStart(Integer.valueOf(0))
-                .setEnd(Integer.valueOf(endOffset))
+                .setStart(0)
+                .setEnd(endOffset)
                 .build())
             .build();
         if (groupBucket) {
@@ -296,9 +296,9 @@ public final class ActionUtils {
         NxOutputReg r = new NxOutputRegBuilder()
             .setSrc(new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nx.action.output.reg.grouping.nx.output.reg.SrcBuilder()
                 .setSrcChoice(srcChoice)
-                .setOfsNbits(Integer.valueOf(31))
+                .setOfsNbits(31)
                 .build())
-            .setMaxLen(Integer.valueOf(0xffff))
+            .setMaxLen(0xffff)
             .build();
         return new NxActionOutputRegNodesNodeTableFlowApplyActionsCaseBuilder()
             .setNxOutputReg(r).build();

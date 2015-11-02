@@ -352,12 +352,12 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public Boolean getHasDeviceOwnership() {
-        return Boolean.valueOf(hasDeviceOwnership);
+        return hasDeviceOwnership;
     }
 
     public void setHasDeviceOwnership(Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
-            this.hasDeviceOwnership = hasDeviceOwnership.booleanValue();
+            this.hasDeviceOwnership = hasDeviceOwnership;
         }
     }
 

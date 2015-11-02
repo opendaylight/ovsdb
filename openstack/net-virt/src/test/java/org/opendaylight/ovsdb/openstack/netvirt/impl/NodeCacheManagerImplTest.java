@@ -69,7 +69,7 @@ public class NodeCacheManagerImplTest {
     @Test
     public void testCacheListenerAddedAndRemoved() {
         ServiceReference ref = mock(ServiceReference.class);
-        when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(Long.valueOf(1));
+        when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(1L);
 
         // add
         nodeCacheManagerImpl.cacheListenerAdded(ref, mock(NodeCacheListener.class));

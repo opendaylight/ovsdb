@@ -202,7 +202,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
                         NETWORK_MAP.inverse();
                     segmentsBuilder.setNetworkType((Class<? extends NetworkTypeBase>) mapper.get(segment.getProviderNetworkType()));
                 }
-                segmentsBuilder.setSegmentationIndex(Long.valueOf(count));
+                segmentsBuilder.setSegmentationIndex(count);
                 segments.add(segmentsBuilder.build());
             }
             providerExtensionBuilder.setSegments(segments);

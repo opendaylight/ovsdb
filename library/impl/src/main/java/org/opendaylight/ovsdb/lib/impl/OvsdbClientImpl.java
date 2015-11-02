@@ -201,8 +201,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
-        TableUpdates updates = transformingCallback(result, dbSchema);
-        return updates;
+        return transformingCallback(result, dbSchema);
     }
 
     private void registerCallback(MonitorHandle monitorHandle, MonitorCallBack callback, DatabaseSchema schema) {

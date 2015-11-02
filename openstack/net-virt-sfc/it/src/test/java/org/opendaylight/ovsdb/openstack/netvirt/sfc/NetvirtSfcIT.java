@@ -305,8 +305,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private SfcBuilder setSfc() {
-        SfcBuilder sfcBuilder = sfcUtils.createSfc(new SfcBuilder(), "sfc");
-        return sfcBuilder;
+        return sfcUtils.createSfc(new SfcBuilder(), "sfc");
     }
 
     @Test

@@ -148,9 +148,8 @@ public class SouthboundUtils {
     }
 
     public Node getOvsdbNode(final ConnectionInfo connectionInfo) {
-        Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
                 createInstanceIdentifier(connectionInfo));
-        return node;
     }
 
     public boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) {

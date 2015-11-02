@@ -13,8 +13,7 @@ import java.math.BigInteger;
 public class StringConvertor{
 
     public static long dpidStringToLong(String values) {
-        long value = new BigInteger(values.replaceAll(":", ""), 16).longValue();
-        return value;
+        return new BigInteger(values.replaceAll(":", ""), 16).longValue();
     }
 
 }

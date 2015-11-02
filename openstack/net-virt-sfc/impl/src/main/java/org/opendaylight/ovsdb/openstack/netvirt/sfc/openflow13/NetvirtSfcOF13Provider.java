@@ -288,8 +288,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
                 AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
                 if (aceIpv4.getDestinationIpv4Network() != null) {
                     String ipAddrPrefix = aceIpv4.getDestinationIpv4Network().getValue();
-                    String ipAddr = new StringTokenizer(ipAddrPrefix, "/").nextToken();
-                    return ipAddr;
+                    return new StringTokenizer(ipAddrPrefix, "/").nextToken();
                 }
             }
         }
@@ -302,9 +301,8 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
             if (aceIp.getAceIpVersion() instanceof AceIpv4) {
                 AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
                 if (aceIpv4.getSourceIpv4Network() != null) {
-                    String ipAddrPrefix = aceIpv4.getSourceIpv4Network().getValue();
                     //String ipAddr = new StringTokenizer(ipAddrPrefix, "/").nextToken();
-                    return ipAddrPrefix;
+                    return aceIpv4.getSourceIpv4Network().getValue();
                 }
             }
         }

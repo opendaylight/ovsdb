@@ -697,8 +697,7 @@ public class SouthboundImpl implements Southbound {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(MdsalHelper.OVSDB_TOPOLOGY_ID));
 
-        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
-        return topology;
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
     }
 
     public Long getOFPort(OvsdbTerminationPointAugmentation port) {

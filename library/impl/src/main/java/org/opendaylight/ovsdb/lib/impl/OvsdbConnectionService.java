@@ -124,9 +124,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
-            OvsdbClient client = getChannelClient(channel, ConnectionType.ACTIVE,
+            return getChannelClient(channel, ConnectionType.ACTIVE,
                     Executors.newFixedThreadPool(NUM_THREADS));
-            return client;
         } catch (InterruptedException e) {
             LOG.warn("Thread was interrupted during connect", e);
         } catch (Exception e) {

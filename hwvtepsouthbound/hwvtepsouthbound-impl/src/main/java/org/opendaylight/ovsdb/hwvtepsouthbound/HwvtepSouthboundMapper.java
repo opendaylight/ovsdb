@@ -43,11 +43,10 @@ public class HwvtepSouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        InstanceIdentifier<Node> nodePath = InstanceIdentifier
+        return InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
-        return nodePath;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier (OvsdbClient client) {

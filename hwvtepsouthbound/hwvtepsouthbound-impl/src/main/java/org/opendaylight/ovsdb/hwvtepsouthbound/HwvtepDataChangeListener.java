@@ -232,10 +232,9 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
     }
 
     private InstanceIdentifier<Node> getWildcardPath() {
-        InstanceIdentifier<Node> path = InstanceIdentifier
+        return InstanceIdentifier
                         .create(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class);
-        return path;
     }
 }

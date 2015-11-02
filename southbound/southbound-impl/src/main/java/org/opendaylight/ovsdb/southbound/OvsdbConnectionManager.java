@@ -228,8 +228,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
-        InstanceIdentifier<Node> iid = instanceIdentifiers.get(connectionInfo);
-        return iid;
+        return instanceIdentifiers.get(connectionInfo);
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {

@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -164,38 +163,38 @@ public class NeutronSecurityRule implements Serializable, INeutronObject {
 
     public NeutronSecurityRule extractFields(List<String> fields) {
         NeutronSecurityRule ans = new NeutronSecurityRule();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("direction")) {
-                ans.setSecurityRuleDirection(this.getSecurityRuleDirection());
-            }
-            if (s.equals("protocol")) {
-                ans.setSecurityRuleProtocol(this.getSecurityRuleProtocol());
-            }
-            if (s.equals("port_range_min")) {
-                ans.setSecurityRulePortMin(this.getSecurityRulePortMin());
-            }
-            if (s.equals("port_range_max")) {
-                ans.setSecurityRulePortMax(this.getSecurityRulePortMax());
-            }
-            if (s.equals("ethertype")) {
-                ans.setSecurityRuleEthertype(this.getSecurityRuleEthertype());
-            }
-            if (s.equals("remote_ip_prefix")) {
-                ans.setSecurityRuleRemoteIpPrefix(this.getSecurityRuleRemoteIpPrefix());
-            }
-            if (s.equals("remote_group_id")) {
-                ans.setSecurityRemoteGroupID(this.getSecurityRemoteGroupID());
-            }
-            if (s.equals("security_group_id")) {
-                ans.setSecurityRuleGroupID(this.getSecurityRuleGroupID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setSecurityRuleTenantID(this.getSecurityRuleTenantID());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "direction":
+                    ans.setSecurityRuleDirection(this.getSecurityRuleDirection());
+                    break;
+                case "protocol":
+                    ans.setSecurityRuleProtocol(this.getSecurityRuleProtocol());
+                    break;
+                case "port_range_min":
+                    ans.setSecurityRulePortMin(this.getSecurityRulePortMin());
+                    break;
+                case "port_range_max":
+                    ans.setSecurityRulePortMax(this.getSecurityRulePortMax());
+                    break;
+                case "ethertype":
+                    ans.setSecurityRuleEthertype(this.getSecurityRuleEthertype());
+                    break;
+                case "remote_ip_prefix":
+                    ans.setSecurityRuleRemoteIpPrefix(this.getSecurityRuleRemoteIpPrefix());
+                    break;
+                case "remote_group_id":
+                    ans.setSecurityRemoteGroupID(this.getSecurityRemoteGroupID());
+                    break;
+                case "security_group_id":
+                    ans.setSecurityRuleGroupID(this.getSecurityRuleGroupID());
+                    break;
+                case "tenant_id":
+                    ans.setSecurityRuleTenantID(this.getSecurityRuleTenantID());
+                    break;
             }
         }
         return ans;

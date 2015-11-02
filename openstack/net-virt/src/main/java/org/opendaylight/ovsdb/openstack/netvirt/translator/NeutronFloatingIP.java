@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.openstack.netvirt.translator;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -139,32 +138,32 @@ public class NeutronFloatingIP implements Serializable, INeutronObject {
 
     public NeutronFloatingIP extractFields(List<String> fields) {
         NeutronFloatingIP ans = new NeutronFloatingIP();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("floating_network_id")) {
-                ans.setFloatingNetworkUUID(this.getFloatingNetworkUUID());
-            }
-            if (s.equals("port_id")) {
-                ans.setPortUUID(this.getPortUUID());
-            }
-            if (s.equals("fixed_ip_address")) {
-                ans.setFixedIPAddress(this.getFixedIPAddress());
-            }
-            if (s.equals("floating_ip_address")) {
-                ans.setFloatingIPAddress(this.getFloatingIPAddress());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setTenantUUID(this.getTenantUUID());
-            }
-            if (s.equals("router_id")) {
-                ans.setRouterUUID(this.getRouterUUID());
-            }
-            if (s.equals("status")) {
-                ans.setStatus(this.getStatus());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "floating_network_id":
+                    ans.setFloatingNetworkUUID(this.getFloatingNetworkUUID());
+                    break;
+                case "port_id":
+                    ans.setPortUUID(this.getPortUUID());
+                    break;
+                case "fixed_ip_address":
+                    ans.setFixedIPAddress(this.getFixedIPAddress());
+                    break;
+                case "floating_ip_address":
+                    ans.setFloatingIPAddress(this.getFloatingIPAddress());
+                    break;
+                case "tenant_id":
+                    ans.setTenantUUID(this.getTenantUUID());
+                    break;
+                case "router_id":
+                    ans.setRouterUUID(this.getRouterUUID());
+                    break;
+                case "status":
+                    ans.setStatus(this.getStatus());
+                    break;
             }
         }
         return ans;

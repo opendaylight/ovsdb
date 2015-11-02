@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 @XmlRootElement
@@ -131,32 +130,32 @@ public class NeutronLoadBalancerPoolMember
 
     public NeutronLoadBalancerPoolMember extractFields(List<String> fields) {
         NeutronLoadBalancerPoolMember ans = new NeutronLoadBalancerPoolMember();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("pool_id")) {
-                ans.setPoolID(this.getPoolID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setPoolMemberTenantID(this.getPoolMemberTenantID());
-            }
-            if (s.equals("address")) {
-                ans.setPoolMemberAddress(this.getPoolMemberAddress());
-            }
-            if(s.equals("protocol_port")) {
-                ans.setPoolMemberProtoPort(this.getPoolMemberProtoPort());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setPoolMemberAdminStateIsUp(poolMemberAdminStateIsUp);
-            }
-            if(s.equals("weight")) {
-                ans.setPoolMemberWeight(this.getPoolMemberWeight());
-            }
-            if(s.equals("subnet_id")) {
-                ans.setPoolMemberSubnetID(this.getPoolMemberSubnetID());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "pool_id":
+                    ans.setPoolID(this.getPoolID());
+                    break;
+                case "tenant_id":
+                    ans.setPoolMemberTenantID(this.getPoolMemberTenantID());
+                    break;
+                case "address":
+                    ans.setPoolMemberAddress(this.getPoolMemberAddress());
+                    break;
+                case "protocol_port":
+                    ans.setPoolMemberProtoPort(this.getPoolMemberProtoPort());
+                    break;
+                case "admin_state_up":
+                    ans.setPoolMemberAdminStateIsUp(poolMemberAdminStateIsUp);
+                    break;
+                case "weight":
+                    ans.setPoolMemberWeight(this.getPoolMemberWeight());
+                    break;
+                case "subnet_id":
+                    ans.setPoolMemberSubnetID(this.getPoolMemberSubnetID());
+                    break;
             }
         }
         return ans;

@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -166,32 +165,32 @@ public class NeutronLoadBalancerListener
 
     public NeutronLoadBalancerListener extractFields(List<String> fields) {
         NeutronLoadBalancerListener ans = new NeutronLoadBalancerListener();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if(s.equals("default_pool_id")) {
-                ans.setNeutronLoadBalancerListenerDefaultPoolID(this.getNeutronLoadBalancerListenerDefaultPoolID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setLoadBalancerListenerTenantID(this.getLoadBalancerListenerTenantID());
-            }
-            if (s.equals("name")) {
-                ans.setLoadBalancerListenerName(this.getLoadBalancerListenerName());
-            }
-            if(s.equals("description")) {
-                ans.setLoadBalancerListenerDescription(this.getLoadBalancerListenerDescription());
-            }
-            if (s.equals("protocol")) {
-                ans.setNeutronLoadBalancerListenerProtocol(this.getNeutronLoadBalancerListenerProtocol());
-            }
-            if (s.equals("protocol_port")) {
-                ans.setNeutronLoadBalancerListenerProtocolPort(this.getNeutronLoadBalancerListenerProtocolPort());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setLoadBalancerListenerAdminStateIsUp(loadBalancerListenerAdminStateIsUp);
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "default_pool_id":
+                    ans.setNeutronLoadBalancerListenerDefaultPoolID(this.getNeutronLoadBalancerListenerDefaultPoolID());
+                    break;
+                case "tenant_id":
+                    ans.setLoadBalancerListenerTenantID(this.getLoadBalancerListenerTenantID());
+                    break;
+                case "name":
+                    ans.setLoadBalancerListenerName(this.getLoadBalancerListenerName());
+                    break;
+                case "description":
+                    ans.setLoadBalancerListenerDescription(this.getLoadBalancerListenerDescription());
+                    break;
+                case "protocol":
+                    ans.setNeutronLoadBalancerListenerProtocol(this.getNeutronLoadBalancerListenerProtocol());
+                    break;
+                case "protocol_port":
+                    ans.setNeutronLoadBalancerListenerProtocolPort(this.getNeutronLoadBalancerListenerProtocolPort());
+                    break;
+                case "admin_state_up":
+                    ans.setLoadBalancerListenerAdminStateIsUp(loadBalancerListenerAdminStateIsUp);
+                    break;
             }
         }
         return ans;

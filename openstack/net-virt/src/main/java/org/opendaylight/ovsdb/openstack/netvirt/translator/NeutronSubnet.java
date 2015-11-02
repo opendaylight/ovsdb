@@ -219,53 +219,53 @@ public class NeutronSubnet implements Serializable, INeutronObject {
 
     public NeutronSubnet extractFields(List<String> fields) {
         NeutronSubnet ans = new NeutronSubnet();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setSubnetUUID(this.getSubnetUUID());
-            }
-            if (s.equals("network_id")) {
-                ans.setNetworkUUID(this.getNetworkUUID());
-            }
-            if (s.equals("name")) {
-                ans.setName(this.getName());
-            }
-            if (s.equals("ip_version")) {
-                ans.setIpVersion(this.getIpVersion());
-            }
-            if (s.equals("cidr")) {
-                ans.setCidr(this.getCidr());
-            }
-            if (s.equals("gateway_ip")) {
-                ans.setGatewayIP(this.getGatewayIP());
-            }
-            if (s.equals("dns_nameservers")) {
-                List<String> nsList = new ArrayList<>();
-                nsList.addAll(this.getDnsNameservers());
-                ans.setDnsNameservers(nsList);
-            }
-            if (s.equals("allocation_pools")) {
-                List<NeutronSubnetIPAllocationPool> aPools = new ArrayList<>();
-                aPools.addAll(this.getAllocationPools());
-                ans.setAllocationPools(aPools);
-            }
-            if (s.equals("host_routes")) {
-                List<NeutronSubnet_HostRoute> hRoutes = new ArrayList<>();
-                hRoutes.addAll(this.getHostRoutes());
-                ans.setHostRoutes(hRoutes);
-            }
-            if (s.equals("enable_dhcp")) {
-                ans.setEnableDHCP(this.getEnableDHCP());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setTenantID(this.getTenantID());
-            }
-            if (s.equals("ipv6_address_mode")) {
-                ans.setIpV6AddressMode(this.getIpV6AddressMode());
-            }
-            if (s.equals("ipv6_ra_mode")) {
-                ans.setIpV6RaMode(this.getIpV6RaMode());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setSubnetUUID(this.getSubnetUUID());
+                    break;
+                case "network_id":
+                    ans.setNetworkUUID(this.getNetworkUUID());
+                    break;
+                case "name":
+                    ans.setName(this.getName());
+                    break;
+                case "ip_version":
+                    ans.setIpVersion(this.getIpVersion());
+                    break;
+                case "cidr":
+                    ans.setCidr(this.getCidr());
+                    break;
+                case "gateway_ip":
+                    ans.setGatewayIP(this.getGatewayIP());
+                    break;
+                case "dns_nameservers":
+                    List<String> nsList = new ArrayList<>();
+                    nsList.addAll(this.getDnsNameservers());
+                    ans.setDnsNameservers(nsList);
+                    break;
+                case "allocation_pools":
+                    List<NeutronSubnetIPAllocationPool> aPools = new ArrayList<>();
+                    aPools.addAll(this.getAllocationPools());
+                    ans.setAllocationPools(aPools);
+                    break;
+                case "host_routes":
+                    List<NeutronSubnet_HostRoute> hRoutes = new ArrayList<>();
+                    hRoutes.addAll(this.getHostRoutes());
+                    ans.setHostRoutes(hRoutes);
+                    break;
+                case "enable_dhcp":
+                    ans.setEnableDHCP(this.getEnableDHCP());
+                    break;
+                case "tenant_id":
+                    ans.setTenantID(this.getTenantID());
+                    break;
+                case "ipv6_address_mode":
+                    ans.setIpV6AddressMode(this.getIpV6AddressMode());
+                    break;
+                case "ipv6_ra_mode":
+                    ans.setIpV6RaMode(this.getIpV6RaMode());
+                    break;
             }
         }
         return ans;
@@ -340,9 +340,7 @@ public class NeutronSubnet implements Serializable, INeutronObject {
      * or assigning a gateway IP)
      */
     public boolean gatewayIP_Pool_overlap() {
-        Iterator<NeutronSubnetIPAllocationPool> i = allocationPools.iterator();
-        while (i.hasNext()) {
-            NeutronSubnetIPAllocationPool pool = i.next();
+        for (NeutronSubnetIPAllocationPool pool : allocationPools) {
             if (ipVersion == IPV4_VERSION && pool.contains(gatewayIP)) {
                 return true;
             }
@@ -456,23 +454,21 @@ public class NeutronSubnet implements Serializable, INeutronObject {
      */
     public String getLowAddr() {
         String ans = null;
-        Iterator<NeutronSubnetIPAllocationPool> i = allocationPools.iterator();
-        while (i.hasNext()) {
-            NeutronSubnetIPAllocationPool pool = i.next();
+        for (NeutronSubnetIPAllocationPool pool : allocationPools) {
             if (ans == null) {
                 ans = pool.getPoolStart();
-            }
-            else {
+            } else {
                 if (ipVersion == IPV4_VERSION &&
-                    NeutronSubnetIPAllocationPool.convert(pool.getPoolStart()) <
-                            NeutronSubnetIPAllocationPool.convert(ans)) {
+                        NeutronSubnetIPAllocationPool.convert(pool.getPoolStart()) <
+                                NeutronSubnetIPAllocationPool.convert(ans)) {
                     ans = pool.getPoolStart();
                 }
                 if (ipVersion == IPV6_VERSION &&
-                    NeutronSubnetIPAllocationPool.convertV6(pool.getPoolStart()).compareTo(NeutronSubnetIPAllocationPool.convertV6(ans)) < 0) {
+                        NeutronSubnetIPAllocationPool.convertV6(pool.getPoolStart()).compareTo(
+                                NeutronSubnetIPAllocationPool.convertV6(ans)) < 0) {
                     ans = pool.getPoolStart();
                 }
-           }
+            }
         }
         return ans;
     }

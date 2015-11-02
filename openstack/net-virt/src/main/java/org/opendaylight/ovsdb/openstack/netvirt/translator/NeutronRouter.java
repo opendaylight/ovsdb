@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.translator;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -155,35 +154,35 @@ public class NeutronRouter implements Serializable, INeutronObject {
      */
     public NeutronRouter extractFields(List<String> fields) {
         NeutronRouter ans = new NeutronRouter();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setRouterUUID(this.getRouterUUID());
-            }
-            if (s.equals("name")) {
-                ans.setName(this.getName());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setAdminStateUp(this.getAdminStateUp());
-            }
-            if (s.equals("status")) {
-                ans.setStatus(this.getStatus());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setTenantID(this.getTenantID());
-            }
-            if (s.equals("external_gateway_info")) {
-                ans.setExternalGatewayInfo(this.getExternalGatewayInfo());
-            }
-            if (s.equals("distributed")) {
-                ans.setDistributed(this.getDistributed());
-            }
-            if (s.equals("gw_port_id")) {
-                ans.setGatewayPortId(this.getGatewayPortId());
-            }
-            if (s.equals("routes")){
-                ans.setRoutes(this.getRoutes());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setRouterUUID(this.getRouterUUID());
+                    break;
+                case "name":
+                    ans.setName(this.getName());
+                    break;
+                case "admin_state_up":
+                    ans.setAdminStateUp(this.getAdminStateUp());
+                    break;
+                case "status":
+                    ans.setStatus(this.getStatus());
+                    break;
+                case "tenant_id":
+                    ans.setTenantID(this.getTenantID());
+                    break;
+                case "external_gateway_info":
+                    ans.setExternalGatewayInfo(this.getExternalGatewayInfo());
+                    break;
+                case "distributed":
+                    ans.setDistributed(this.getDistributed());
+                    break;
+                case "gw_port_id":
+                    ans.setGatewayPortId(this.getGatewayPortId());
+                    break;
+                case "routes":
+                    ans.setRoutes(this.getRoutes());
+                    break;
             }
         }
         return ans;

@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -138,32 +137,32 @@ public class NeutronLoadBalancer implements Serializable, INeutronObject {
 
     public NeutronLoadBalancer extractFields(List<String> fields) {
         NeutronLoadBalancer ans = new NeutronLoadBalancer();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setLoadBalancerTenantID(this.getLoadBalancerTenantID());
-            }
-            if (s.equals("name")) {
-                ans.setLoadBalancerName(this.getLoadBalancerName());
-            }
-            if(s.equals("description")) {
-                ans.setLoadBalancerDescription(this.getLoadBalancerDescription());
-            }
-            if (s.equals("vip_address")) {
-                ans.setLoadBalancerVipAddress(this.getLoadBalancerVipAddress());
-            }
-            if (s.equals("vip_subnet_id")) {
-                ans.setLoadBalancerVipSubnetID(this.getLoadBalancerVipSubnetID());
-            }
-            if (s.equals("status")) {
-                ans.setLoadBalancerStatus(this.getLoadBalancerStatus());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setLoadBalancerAdminStateUp(this.getLoadBalancerAdminStateUp());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "tenant_id":
+                    ans.setLoadBalancerTenantID(this.getLoadBalancerTenantID());
+                    break;
+                case "name":
+                    ans.setLoadBalancerName(this.getLoadBalancerName());
+                    break;
+                case "description":
+                    ans.setLoadBalancerDescription(this.getLoadBalancerDescription());
+                    break;
+                case "vip_address":
+                    ans.setLoadBalancerVipAddress(this.getLoadBalancerVipAddress());
+                    break;
+                case "vip_subnet_id":
+                    ans.setLoadBalancerVipSubnetID(this.getLoadBalancerVipSubnetID());
+                    break;
+                case "status":
+                    ans.setLoadBalancerStatus(this.getLoadBalancerStatus());
+                    break;
+                case "admin_state_up":
+                    ans.setLoadBalancerAdminStateUp(this.getLoadBalancerAdminStateUp());
+                    break;
             }
         }
         return ans;

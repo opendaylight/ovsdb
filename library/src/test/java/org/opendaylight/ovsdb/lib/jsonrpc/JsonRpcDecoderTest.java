@@ -17,7 +17,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderException;
-import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.CharsetUtil;
 import java.net.URL;
 import org.junit.Before;

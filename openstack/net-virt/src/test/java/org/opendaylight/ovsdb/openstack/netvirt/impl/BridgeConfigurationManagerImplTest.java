@@ -263,12 +263,16 @@ public class BridgeConfigurationManagerImplTest {
 
             assertTrue("Error, isCreated is not true for " + networkType,
                     bridgeConfigurationManagerImplSpy.createLocalNetwork(node, neutronNetworkMock));
-            if (networkType.equals("vlan")) {
-                verify(neutronNetworkMock, times(1)).getProviderNetworkType();
-            } else if (networkType.equals("vxlan")) {
-                verify(neutronNetworkMock, times(2)).getProviderNetworkType();
-            } else if (networkType.equals("gre")) {
-                verify(neutronNetworkMock, times(3)).getProviderNetworkType();
+            switch (networkType) {
+                case "vlan":
+                    verify(neutronNetworkMock, times(1)).getProviderNetworkType();
+                    break;
+                case "vxlan":
+                    verify(neutronNetworkMock, times(2)).getProviderNetworkType();
+                    break;
+                case "gre":
+                    verify(neutronNetworkMock, times(3)).getProviderNetworkType();
+                    break;
             }
             reset(neutronNetworkMock);
             reset(node);

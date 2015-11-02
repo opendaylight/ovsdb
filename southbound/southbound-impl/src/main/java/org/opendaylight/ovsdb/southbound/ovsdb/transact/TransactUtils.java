@@ -51,7 +51,7 @@ public class TransactUtils {
             Map<InstanceIdentifier<?>, DataObject> changes) {
         Map<InstanceIdentifier<Node>,Node> result
             = new HashMap<>();
-        if (changes != null && changes.entrySet() != null) {
+        if (changes != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (created.getValue() instanceof Node) {
                     Node value = (Node) created.getValue();
@@ -122,7 +122,7 @@ public class TransactUtils {
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = new HashMap<>();
-        if (changes != null && changes.entrySet() != null) {
+        if (changes != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
                     @SuppressWarnings("unchecked")
@@ -142,11 +142,9 @@ public class TransactUtils {
     public static List<Insert> extractInsert(TransactionBuilder transaction, GenericTableSchema schema) {
         List<Operation> operations = transaction.getOperations();
         List<Insert> inserts = new ArrayList<>();
-        for (int count = 0;count < operations.size();count++) {
-            Operation operation = operations.get(count);
+        for (Operation operation : operations) {
             if (operation instanceof Insert && operation.getTableSchema().equals(schema)) {
-                Insert insert = (Insert)operation;
-                inserts.add(insert);
+                inserts.add((Insert) operation);
             }
         }
         return inserts;

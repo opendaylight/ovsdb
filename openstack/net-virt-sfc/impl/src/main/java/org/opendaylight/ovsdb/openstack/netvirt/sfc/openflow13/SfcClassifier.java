@@ -41,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
@@ -62,7 +63,7 @@ public class SfcClassifier {
     public static final Class<? extends NxmNxReg> REG_FIELD = NxmNxReg0.class;
     private static final String OPENFLOW = "openflow:";
 
-    SfcClassifier(DataBroker dataBroker, Southbound southbound, MdsalUtils mdsalUtils) {
+    public SfcClassifier(DataBroker dataBroker, Southbound southbound, MdsalUtils mdsalUtils) {
         this.dataBroker = dataBroker;
         this.southbound = southbound;
         this.mdsalUtils = mdsalUtils;
@@ -96,6 +97,13 @@ public class SfcClassifier {
 
         if (write) {
             List<Action> actionList = getNshAction(nshHeader);
+            ActionBuilder ab = new ActionBuilder();
+
+            ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + tunnelOfPort)));
+            ab.setOrder(actionList.size());
+            ab.setKey(new ActionKey(actionList.size()));
+            actionList.add(ab.build());
+
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);
 
@@ -104,11 +112,6 @@ public class SfcClassifier {
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             List<Instruction> instructions = Lists.newArrayList();
-            instructions.add(ib.build());
-
-            InstructionUtils.createOutputPortInstructions(ib, dpidLong, tunnelOfPort);
-            ib.setOrder(1);
-            ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
             InstructionsBuilder isb = new InstructionsBuilder();

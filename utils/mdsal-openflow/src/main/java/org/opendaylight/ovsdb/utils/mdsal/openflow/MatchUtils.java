@@ -208,8 +208,10 @@ public class MatchUtils {
 
         // Build the ICMPv4 Match
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
-        icmpv4match.setIcmpv4Type(type);
-        icmpv4match.setIcmpv4Code(code);
+        if (type != -1 || code != -1) {
+            icmpv4match.setIcmpv4Type(type);
+            icmpv4match.setIcmpv4Code(code);
+        }
         matchBuilder.setIcmpv4Match(icmpv4match.build());
 
         return matchBuilder;

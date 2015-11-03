@@ -114,9 +114,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                     securityGroupCacheManger.portRemoved(securityGroup.getSecurityGroupUUID(), portUuid);
                 }
             }
-
-
-
         }
     }
 
@@ -149,10 +146,44 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                  write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                   break;
               default:
-                  LOG.error("programPortSecurityRule: Protocol not supported", portSecurityRule);
+                  LOG.info("programPortSecurityAcl: Protocol is not TCP/UDP/ICMP but other " +
+                          "protocol = ", portSecurityRule.getSecurityRuleProtocol());
+                  ingressOtherProtocolAclHandler(dpid, segmentationId, attachedMac, portSecurityRule,
+                              null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                   break;
             }
         }
+    }
+
+    private void ingressOtherProtocolAclHandler(Long dpidLong, String segmentationId, String dstMac,
+          NeutronSecurityRule portSecurityRule, String srcAddress,
+          boolean write, Integer protoPortMatchPriority) {
+
+          MatchBuilder matchBuilder = new MatchBuilder();
+          String flowId = "Ingress_Other_" + segmentationId + "_" + dstMac + "_";
+          matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+          short proto = 0;
+          try {
+              Integer protocol = new Integer(portSecurityRule.getSecurityRuleProtocol());
+              proto = protocol.shortValue();
+              flowId = flowId + proto;
+          } catch (NumberFormatException e) {
+              LOG.error("Protocol vlaue conversion failure", e);
+          }
+          matchBuilder = MatchUtils.createIpProtocolMatch(matchBuilder, proto);
+          if (null != srcAddress) {
+              flowId = flowId + srcAddress;
+              matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
+                                        MatchUtils.iPv4PrefixFromIPv4Address(srcAddress), null);
+          } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+              flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+              matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
+                                        new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()),null);
+          }
+          String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+          NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+          flowId = flowId + "_Permit";
+          syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
 
     @Override
@@ -311,14 +342,22 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                 boolean write, Integer protoPortMatchPriority) {
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_"
-                + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
-                + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";;
+        String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
-        matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
-                                                    portSecurityRule.getSecurityRulePortMin().shortValue(),
-                                                    portSecurityRule.getSecurityRulePortMax().shortValue());
+
+        /* Custom ICMP Match */
+        if (portSecurityRule.getSecurityRulePortMin() != null &&
+                portSecurityRule.getSecurityRulePortMax() != null) {
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
+            matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
+                    portSecurityRule.getSecurityRulePortMin().shortValue(),
+                    portSecurityRule.getSecurityRulePortMax().shortValue());
+        } else {
+            /* All ICMP Match */
+            flowId = flowId + "all" + "_";
+            matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,MatchUtils.ALL_ICMP, MatchUtils.ALL_ICMP);
+        }
         if (null != srcAddress) {
             flowId = flowId + srcAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,

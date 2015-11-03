@@ -29,7 +29,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <karaf.distro.artifactId>openstack.net-virt-sfc-karaf</karaf.distro.artifactId>
     <karaf.distro.version>${project.version}</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
-  </properties>
+   </properties>
 
   <dependencyManagement>
     <dependencies>

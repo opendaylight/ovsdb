@@ -81,6 +81,7 @@ public class MatchUtils {
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
     public static final String ICMP = "icmp";
+    public static final short ALL_ICMP = -1;
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -208,8 +209,10 @@ public class MatchUtils {
 
         // Build the ICMPv4 Match
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
-        icmpv4match.setIcmpv4Type(type);
-        icmpv4match.setIcmpv4Code(code);
+        if (type != ALL_ICMP || code != ALL_ICMP) {
+            icmpv4match.setIcmpv4Type(type);
+            icmpv4match.setIcmpv4Code(code);
+        }
         matchBuilder.setIcmpv4Match(icmpv4match.build());
 
         return matchBuilder;

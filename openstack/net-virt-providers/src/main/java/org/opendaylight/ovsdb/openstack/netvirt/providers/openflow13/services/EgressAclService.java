@@ -149,12 +149,50 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                 Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                   break;
               default:
-                  LOG.error("programPortSecurityRule: Protocol not supported", portSecurityRule);
+                  LOG.info("programPortSecurityAcl: Protocol is not TCP/UDP/ICMP but other " +
+                          "protocol = ", portSecurityRule.getSecurityRuleProtocol());
+                  egressOtherProtocolAclHandler(dpid, segmentationId, attachedMac,
+                                      portSecurityRule, ipaddress, write,
+                                      Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                   break;
             }
         }
 
     }
+
+    private void egressOtherProtocolAclHandler(Long dpidLong, String segmentationId, String srcMac,
+         NeutronSecurityRule portSecurityRule, String dstAddress,
+         boolean write, Integer protoPortMatchPriority) {
+
+         MatchBuilder matchBuilder = new MatchBuilder();
+         String flowId = "Egress_Other_" + segmentationId + "_" + srcMac + "_";
+         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+
+         short proto = 0;
+         try {
+             Integer protocol = new Integer(portSecurityRule.getSecurityRuleProtocol());
+             proto = protocol.shortValue();
+             flowId = flowId + proto;
+         } catch (NumberFormatException e) {
+             LOG.error("Protocol vlaue conversion failure", e);
+         }
+         matchBuilder = MatchUtils.createIpProtocolMatch(matchBuilder, proto);
+
+         if (null != dstAddress) {
+             flowId = flowId + dstAddress;
+             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+                                                         MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
+
+         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,new Ipv4Prefix(portSecurityRule
+                                                                        .getSecurityRuleRemoteIpPrefix()));
+         }
+         flowId = flowId + "_Permit";
+         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+ }
 
     @Override
     public void programFixedSecurityGroup(Long dpid, String segmentationId, String attachedMac,
@@ -264,14 +302,23 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private void egressAclIcmp(Long dpidLong, String segmentationId, String srcMac,
                                NeutronSecurityRule portSecurityRule, String dstAddress,
                                boolean write, Integer protoPortMatchPriority) {
+
         MatchBuilder matchBuilder = new MatchBuilder();
-        String flowId = "Egress_ICMP_" + segmentationId + "_" + srcMac + "_"
-                    + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
-                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
+        String flowId = "Egress_ICMP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
-        matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
-                                                    portSecurityRule.getSecurityRulePortMin().shortValue(),
-                                                    portSecurityRule.getSecurityRulePortMax().shortValue());
+        /*Custom ICMP Match */
+        if (portSecurityRule.getSecurityRulePortMin() != null &&
+                             portSecurityRule.getSecurityRulePortMax() != null) {
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
+            matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
+                    portSecurityRule.getSecurityRulePortMin().shortValue(),
+                    portSecurityRule.getSecurityRulePortMax().shortValue());
+        } else {
+            /* All ICMP Match */ // We are getting from neutron NULL for both min and max
+            flowId = flowId + "all" + "_" ;
+            matchBuilder = MatchUtils.createICMPv4Match(matchBuilder, MatchUtils.ALL_ICMP, MatchUtils.ALL_ICMP);
+        }
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,

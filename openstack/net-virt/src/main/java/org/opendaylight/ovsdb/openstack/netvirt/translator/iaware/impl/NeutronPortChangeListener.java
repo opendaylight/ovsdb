@@ -171,7 +171,10 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
             NeutronCRUDInterfaces interfaces = new NeutronCRUDInterfaces().fetchINeutronSecurityGroupCRUD(this);
             INeutronSecurityGroupCRUD sgIf = interfaces.getSecurityGroupInterface();
             for (Uuid sgUuid : port.getSecurityGroups()) {
-                allGroups.add(sgIf.getNeutronSecurityGroup(sgUuid.getValue()));
+                NeutronSecurityGroup secGroup = sgIf.getNeutronSecurityGroup(sgUuid.getValue());
+                if (secGroup != null) {
+                    allGroups.add(sgIf.getNeutronSecurityGroup(sgUuid.getValue()));
+                }
             }
             List<NeutronSecurityGroup> groups = new ArrayList<>();
             groups.addAll(allGroups);

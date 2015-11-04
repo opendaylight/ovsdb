@@ -21,15 +21,7 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -268,12 +260,13 @@ public class SouthboundUtils {
      * @throws InterruptedException
      */
     public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
-                              final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-                              final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-                              final Class<? extends DatapathTypeBase> dpType,
-                              final List<BridgeExternalIds> externalIds,
-                              final List<ControllerEntry> controllerEntries,
-                              final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
+                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             final List<BridgeExternalIds> externalIds,
+                             final List<ControllerEntry> controllerEntries,
+                             final List<BridgeOtherConfigs> otherConfigs,
+                             final String dpid) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         if (bridgeIid == null) {
@@ -306,6 +299,10 @@ public class SouthboundUtils {
         if (otherConfigs != null) {
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
         }
+        if (dpid != null && !dpid.isEmpty()) {
+            DatapathId datapathId = new DatapathId(dpid);
+            ovsdbBridgeAugmentationBuilder.setDatapathId(datapathId);
+        }
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.toString());
@@ -313,6 +310,18 @@ public class SouthboundUtils {
                 bridgeIid, bridgeNodeBuilder.build());
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
+    }
+
+    public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
+                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             final List<BridgeExternalIds> externalIds,
+                             final List<ControllerEntry> controllerEntries,
+                             final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
+        return addBridge(connectionInfo, bridgeIid, bridgeName, bridgeNodeId, setProtocolEntries,
+                failMode, setManagedBy, dpType, externalIds, controllerEntries,
+                otherConfigs, null);
     }
 
     public boolean addBridge(final ConnectionInfo connectionInfo, final String bridgeName)

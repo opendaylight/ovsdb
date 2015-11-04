@@ -33,10 +33,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${openflowplugin.version}'>odl-openflowplugin-nxm-extensions</feature>
     <feature version='${project.version}'>odl-ovsdb-southbound-impl</feature>
     <feature version='${project.version}'>odl-ovsdb-openstack</feature>
-    <feature version='${sfc.version}'>odl-sfc-core</feature>
-    <!--<feature version='${sfc.version}'>odl-sfc-ovs</feature>-->
+    <feature version='${sfc.version}'>odl-sfc-provider</feature>
     <feature version='${sfc.version}'>odl-sfcofl2</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version='${project.version}'>odl-ovsdb-sfc-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${project.version}</bundle>

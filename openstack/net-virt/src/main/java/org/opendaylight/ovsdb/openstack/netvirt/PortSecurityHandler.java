@@ -9,12 +9,19 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityGroupAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityRuleAware;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -27,6 +34,8 @@ public class PortSecurityHandler extends AbstractHandler
         implements INeutronSecurityGroupAware, INeutronSecurityRuleAware, ConfigInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(PortSecurityHandler.class);
+    private volatile INeutronPortCRUD neutronPortCache;
+    private volatile SecurityServicesManager securityServicesManager;
 
     @Override
     public int canCreateNeutronSecurityGroup(NeutronSecurityGroup neutronSecurityGroup) {
@@ -80,10 +89,7 @@ public class PortSecurityHandler extends AbstractHandler
 
     @Override
     public void neutronSecurityRuleCreated(NeutronSecurityRule neutronSecurityRule) {
-        int result = canCreateNeutronSecurityRule(neutronSecurityRule);
-        if (result != HttpURLConnection.HTTP_CREATED) {
-            LOG.debug("Neutron Security Group creation failed {} ", result);
-        }
+        enqueueEvent(new NorthboundEvent(neutronSecurityRule, Action.ADD));
     }
 
     @Override
@@ -103,10 +109,7 @@ public class PortSecurityHandler extends AbstractHandler
 
     @Override
     public void neutronSecurityRuleDeleted(NeutronSecurityRule neutronSecurityRule) {
-        int result = canDeleteNeutronSecurityRule(neutronSecurityRule);
-        if  (result != HttpURLConnection.HTTP_OK) {
-            LOG.error(" delete Neutron Security Rule validation failed for result - {} ", result);
-        }
+        enqueueEvent(new NorthboundEvent(neutronSecurityRule, Action.DELETE));
     }
 
     /**
@@ -123,12 +126,60 @@ public class PortSecurityHandler extends AbstractHandler
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
         switch (ev.getAction()) {
-            // TODO: add handling of events here, once callbacks do something
-            //       other than logging.
+            case ADD:
+                doNeutronSecurityRuleAdded(ev.getNeutronSecurityRule());
+                break;
+            case DELETE:
+                doNeutronSecurityRuleDeleted(ev.getNeutronSecurityRule());
+                break;
             default:
                 LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
+    }
+
+    private void doNeutronSecurityRuleAdded(NeutronSecurityRule neutronSecurityRule) {
+        List<NeutronPort> portList = getPortWithSecurityGroup(neutronSecurityRule.getSecurityRuleGroupID());
+        for (NeutronPort port:portList) {
+            syncSecurityGroup(neutronSecurityRule,port,neutronSecurityRule.getSecurityRuleGroupID(),true);
+        }
+    }
+
+    private void doNeutronSecurityRuleDeleted(NeutronSecurityRule neutronSecurityRule) {
+        List<NeutronPort> portList = getPortWithSecurityGroup(neutronSecurityRule.getSecurityRuleGroupID());
+        for (NeutronPort port:portList) {
+            syncSecurityGroup(neutronSecurityRule,port,neutronSecurityRule.getSecurityRuleGroupID(),false);
+        }
+    }
+
+    private void syncSecurityGroup(NeutronSecurityRule  securityRule,NeutronPort port,
+                                   String neutronSecurityGroupId,boolean write) {
+
+        if (null != securityRule.getSecurityRemoteGroupID()) {
+            List<Neutron_IPs> vmIpList  = securityServicesManager
+                    .getVmListForSecurityGroup(port.getID(), neutronSecurityGroupId);
+            for (Neutron_IPs vmIp :vmIpList ) {
+                securityServicesManager.syncSecurityRule(port, securityRule, vmIp, write);
+            }
+        } else {
+            securityServicesManager.syncSecurityRule(port, securityRule, null, write);
+        }
+    }
+
+    private List<NeutronPort> getPortWithSecurityGroup(String securityGroupUuid) {
+
+        List<NeutronPort> neutronPortList = neutronPortCache.getAllPorts();
+        List<NeutronPort> neutronPortInSG = new ArrayList<NeutronPort>();
+        for (NeutronPort neutronPort:neutronPortList) {
+            List<NeutronSecurityGroup> securityGroupList = neutronPort.getSecurityGroups();
+            for (NeutronSecurityGroup neutronSecurityGroup:securityGroupList) {
+                if (neutronSecurityGroup.getID().equals(securityGroupUuid)) {
+                    neutronPortInSG.add(neutronPort);
+                    break;
+                }
+            }
+        }
+        return neutronPortInSG;
     }
 
     @Override
@@ -136,6 +187,10 @@ public class PortSecurityHandler extends AbstractHandler
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(serviceReference, this);
+        neutronPortCache =
+                (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        securityServicesManager =
+                (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
     }
 
     @Override

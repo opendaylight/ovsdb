@@ -180,7 +180,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
         RenderedServicePathFirstHop firstRspHop = SfcProviderRenderedPathAPI
                 .readRenderedServicePathFirstHop(new RspName(rspName));
 
-        LOG.debug("First Hop IPAddress = {}, Port = {}", firstRspHop.getIp().getIpv4Address().getValue(),
+        LOG.debug("sFirst Hop IPAddress = {}, Port = {}", firstRspHop.getIp().getIpv4Address().getValue(),
                 firstRspHop.getPort().getValue().intValue());
 
         for (Bridge bridge : bridges.getBridge()) {

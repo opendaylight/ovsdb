@@ -24,6 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceIp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
@@ -136,7 +138,7 @@ public class SfcClassifier {
         String nodeName = OPENFLOW + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
-
+        String ncId = OPENFLOW + dpidLong + ":" + destOfPort;
         LOG.debug("Processing Egress Flow={} on Node={}, nshHeader={}, destPort={}", ruleName, dpidLong, nshHeader, destOfPort);
         MatchBuilder matchBuilder = buildMatch(match);
         matchBuilder = updateMatch(matchBuilder, nshHeader);
@@ -154,12 +156,11 @@ public class SfcClassifier {
         flowBuilder.setIdleTimeout(0);
 
         if (write) {
-            List<Action> actionList = Lists.newArrayList();;
+            List<Action> actionList = Lists.newArrayList();
             ActionBuilder ab = new ActionBuilder();
-
-            ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + destOfPort)));
-            ab.setOrder(actionList.size());
-            ab.setKey(new ActionKey(actionList.size()));
+            ab.setAction(ActionUtils.outputAction(new NodeConnectorId(ncId)));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
             actionList.add(ab.build());
 
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -169,6 +170,7 @@ public class SfcClassifier {
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
+
             List<Instruction> instructions = Lists.newArrayList();
             instructions.add(ib.build());
 
@@ -205,12 +207,12 @@ public class SfcClassifier {
 
         int count = 0;
         List<Action> actionList = Lists.newArrayList();
-      /*  actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC1Load).build());
+        actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC1Load).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC2Load).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(nspLoad).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(nsiLoad).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunDest).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunVnid).build());*/
+        actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunVnid).build());
         return actionList;
     }
 
@@ -306,10 +308,10 @@ public class SfcClassifier {
         if (matches.getAceType() instanceof AceIp) {
             AceIp aceIp = (AceIp)matches.getAceType();
             if (aceIp.getAceIpVersion() instanceof AceIpv4) {
-                //AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
-                //MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Network());
-                //MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
-                //MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
+                AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
+                MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Network());
+                MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
+                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
                         aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
             }

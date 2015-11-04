@@ -10,7 +10,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.net.UnknownHostException;
 import java.util.Collection;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
@@ -46,7 +47,7 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
 
     private void registerListener(final DataBroker db) {
         final DataTreeIdentifier<Node> treeId =
-                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
+                        new DataTreeIdentifier<Node>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
         try {
             LOG.trace("Registering on path: {}", treeId);
             registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
@@ -160,7 +161,11 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
          * Update data for each connection
          * Requires Command patterns. TBD.
          */
-        
+        connectionInstancesFromChanges(changes);
+        /*for (Entry<InstanceIdentifier<Node>, HwvtepConnectionInstance> connectionInstanceEntry :
+            connectionInstancesFromChanges(changes).entrySet()) {
+            
+        }*/
     }
 
     private void disconnect(Collection<DataTreeModification<Node>> changes) {
@@ -232,9 +237,42 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
     }
 
     private InstanceIdentifier<Node> getWildcardPath() {
-        return InstanceIdentifier
+        InstanceIdentifier<Node> path = InstanceIdentifier
                         .create(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class);
+        return path;
     }
+
+    public Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> connectionInstancesFromChanges(
+                    Collection<DataTreeModification<Node>> changes) {
+        Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> result =
+                        new HashMap<InstanceIdentifier<Node>, HwvtepConnectionInstance>();
+        for (DataTreeModification<Node> change : changes) {
+            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final DataObjectModification<Node> mod = change.getRootNode();
+            Node created = getCreated(mod);
+            Node updated = getUpdated(mod);
+            Node original = getOriginal(mod);
+            Node deleted = getRemoved(mod);
+
+            if((original != null) && (deleted == null)) {
+                result.put(key, getConnectionInstance(original));
+            }
+            if(created != null) {
+                result.put(key, getConnectionInstance(created));
+            } else if(updated != null) {
+                result.put(key, getConnectionInstance(updated));
+            }
+        }
+        LOG.trace("Connection Instance Map: {}", result);
+        return result;
+    }
+
+    private HwvtepConnectionInstance getConnectionInstance(Node node) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
 }

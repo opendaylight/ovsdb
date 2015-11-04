@@ -19,11 +19,23 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 public class HwvtepOperationalCommandAggregator implements TransactionCommand {
 
 
-    private List<TransactionCommand> commands = new ArrayList<>();
+    private List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
 
     public HwvtepOperationalCommandAggregator(HwvtepConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {
         //TODO: Add commands in here
+        commands.add(new GlobalUpdateCommand(key, updates, dbSchema));
+        commands.add(new PhysicalSwitchUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepManagerUpdateCommand(key, updates, dbSchema));
+        commands.add(new LogicalSwitchUpdateCommand(key, updates, dbSchema));
+        commands.add(new PhysicalPortUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepTunnelUpdateCommand(key, updates, dbSchema));
+        commands.add(new PhysicalLocatorUpdateCommand(key, updates, dbSchema));
+        commands.add(new PhysicalLocatorSetUpdateCommand(key, updates, dbSchema));
+        commands.add(new UcastMacsLocalUpdateCommand(key, updates, dbSchema));
+        commands.add(new UcastMacsRemoteUpdateCommand(key, updates, dbSchema));
+        commands.add(new McastMacsLocalUpdateCommand(key, updates, dbSchema));
+        commands.add(new McastMacsRemoteUpdateCommand(key, updates, dbSchema));
     }
 
     @Override

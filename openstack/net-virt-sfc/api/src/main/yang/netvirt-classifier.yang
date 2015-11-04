@@ -38,6 +38,12 @@ module netvirt-sfc-classifier {
                     leaf name {
                         type string;
                     }
+                    leaf direction {
+                        type enumeration {
+                            enum ingress;
+                            enum egress;
+                        }
+                    }
                 }
             }
         }

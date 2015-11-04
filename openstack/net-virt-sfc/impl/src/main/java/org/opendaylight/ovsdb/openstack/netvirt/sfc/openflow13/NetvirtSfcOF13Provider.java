@@ -40,6 +40,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.Bridges;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -94,23 +95,23 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
     }
 
     @Override
-    public void addClassifierRules(Bridge bridge, Acl acl) {
-        Preconditions.checkNotNull(bridge, "Input bridge cannot be NULL!");
+    public void addClassifierRules(Bridges bridges, Acl acl) {
+        Preconditions.checkNotNull(bridges, "Input bridge cannot be NULL!");
         Preconditions.checkNotNull(acl, "Input accesslist cannot be NULL!");
 
-        Node bridgeNode = getBridgeNode(bridge.getName());
-        if (bridgeNode == null) {
-            LOG.debug("bridge {} not yet configured. Skip processing !!", bridge.getName());
-            return;
-        }
+        //Node bridgeNode = getBridgeNode(bridge.getName());
+        //if (bridgeNode == null) {
+        //    LOG.debug("bridge {} not yet configured. Skip processing !!", bridge.getName());
+        //    return;
+        //}
 
         // TODO: Find all nodes needing the classifier and add classifier to them
         for (Ace ace : acl.getAccessListEntries().getAce()) {
-            processAclEntry(ace, bridgeNode, true);
+            processAclEntry(ace, bridges, true);
         }
     }
 
-    private void processAclEntry(Ace entry, Node srcNode, boolean write) {
+    private void processAclEntry(Ace entry, Bridges bridges, boolean write) {
         Matches matches = entry.getMatches();
         if (matches == null) {
             LOG.warn("processAclEntry: matches not found");
@@ -118,8 +119,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
         }
 
         RedirectToSfc sfcRedirect = entry.getActions().getAugmentation(RedirectToSfc.class);
-        LOG.debug("Processing ACL entry = {} on Node = {} sfcRedirect = {}", entry.getRuleName(),
-                srcNode.getNodeId(), sfcRedirect);
+        LOG.debug("Processing ACL entry = {} sfcRedirect = {}", entry.getRuleName(), sfcRedirect);
         if (sfcRedirect == null) {
             LOG.warn("processAClEntry: sfcRedirect is null");
             return;
@@ -182,38 +182,51 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
 
         LOG.debug("First Hop IPAddress = {}, Port = {}", firstRspHop.getIp().getIpv4Address().getValue(),
                 firstRspHop.getPort().getValue().intValue());
-        long tunnelOfPort = southbound.getOFPort(srcNode, CLIENT_GPE_PORT_NAME);
-        if (tunnelOfPort == 0L) {
-            LOG.error("programAclEntry: Could not identify tunnel port {} -> OF ({}) on {}",
-                    CLIENT_GPE_PORT_NAME, tunnelOfPort, srcNode);
-            return;
+
+        for (Bridge bridge : bridges.getBridge()) {
+            if (bridge.getDirection().getIntValue() == 0) {
+                Node bridgeNode = getBridgeNode(bridge.getName());
+                if (bridgeNode == null) {
+                    LOG.debug("bridge {} not yet configured. Skip processing !!", bridge.getName());
+                    continue;
+                }
+
+                long tunnelOfPort = southbound.getOFPort(bridgeNode, CLIENT_GPE_PORT_NAME);
+                if (tunnelOfPort == 0L) {
+                    LOG.error("programAclEntry: Could not identify tunnel port {} -> OF ({}) on {}",
+                            CLIENT_GPE_PORT_NAME, tunnelOfPort, bridgeNode);
+                    return;
+                }
+
+                long localOfPort = southbound.getOFPort(bridgeNode, CLIENT_PORT_NAME);
+                if (localOfPort == 0L) {
+                    LOG.error("programAclEntry: Could not identify local port {} -> OF ({}) on {}",
+                            CLIENT_GPE_PORT_NAME, localOfPort, bridgeNode);
+                    return;
+                }
+
+                NshUtils nshHeader = new NshUtils();
+                // C1 is the normal overlay dest ip and c2 is the vnid
+                // Hardcoded for now, netvirt integration will have those values
+                nshHeader.setNshMetaC1(NshUtils.convertIpAddressToLong(new Ipv4Address(TUNNEL_DST)));
+                nshHeader.setNshMetaC2(Long.parseLong(TUNNEL_VNID));
+                nshHeader.setNshNsp(rsp.getPathId());
+
+                RenderedServicePathHop firstHop = pathHopList.get(0);
+                nshHeader.setNshNsi(firstHop.getServiceIndex());
+                nshHeader.setNshTunIpDst(firstRspHop.getIp().getIpv4Address());
+                nshHeader.setNshTunUdpPort(firstRspHop.getPort());
+                LOG.debug("The Nsh Header = {}", nshHeader);
+
+                handleLocalInPort(southbound.getDataPathId(bridgeNode), rsp.getPathId().toString(), localOfPort,
+                        TABLE_0_CLASSIFIER, TABLE_3_INGR_ACL, true);
+
+                handleSfcClassiferFlows(southbound.getDataPathId(bridgeNode), TABLE_3_INGR_ACL, entry.getRuleName(),
+                        matches, nshHeader, tunnelOfPort, true);
+            } else {
+
+            }
         }
-
-        long localOfPort = southbound.getOFPort(srcNode, CLIENT_PORT_NAME);
-        if (localOfPort == 0L) {
-            LOG.error("programAclEntry: Could not identify local port {} -> OF ({}) on {}",
-                    CLIENT_GPE_PORT_NAME, localOfPort, srcNode);
-            return;
-        }
-
-        NshUtils nshHeader = new NshUtils();
-        // C1 is the normal overlay dest ip and c2 is the vnid
-        // Hardcoded for now, netvirt integration will have those values
-        nshHeader.setNshMetaC1(NshUtils.convertIpAddressToLong(new Ipv4Address(TUNNEL_DST)));
-        nshHeader.setNshMetaC2(Long.parseLong(TUNNEL_VNID));
-        nshHeader.setNshNsp(rsp.getPathId());
-
-        RenderedServicePathHop firstHop = pathHopList.get(0);
-        nshHeader.setNshNsi(firstHop.getServiceIndex());
-        nshHeader.setNshTunIpDst(firstRspHop.getIp().getIpv4Address());
-        nshHeader.setNshTunUdpPort(firstRspHop.getPort());
-        LOG.debug("The Nsh Header = {}", nshHeader);
-
-        handleLocalInPort(southbound.getDataPathId(srcNode), rsp.getPathId().toString(), localOfPort,
-                TABLE_0_CLASSIFIER, TABLE_3_INGR_ACL, true);
-
-        handleSfcClassiferFlows(southbound.getDataPathId(srcNode), TABLE_3_INGR_ACL, entry.getRuleName(),
-                matches, nshHeader, tunnelOfPort, true);
     }
 
     private void handleSfcClassiferFlows(long dataPathId, short writeTable, String ruleName,

@@ -205,36 +205,6 @@ public class SfcClassifier {
         }
     }
 
-/*
-    public InstructionsBuilder buildActions(String ruleName, Actions actions, String datapathId) {
-        InstructionBuilder ib = new InstructionBuilder();
-
-        if (actions.getPacketHandling() instanceof Deny) {
-            InstructionUtils.createDropInstructions(ib);
-        } else if (actions.getPacketHandling() instanceof Permit) {
-            //Permit actPermit = (Permit) actions.getPacketHandling();
-        } else {
-            InstructionUtils.createDropInstructions(ib);
-        }
-
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = Lists.newArrayList();
-        instructions.add(ib.build());
-
-        // Call the InstructionBuilder Methods Containing Actions
-        ib = this.getMutablePipelineInstructionBuilder();
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        InstructionsBuilder isb = new InstructionsBuilder();
-        isb.setInstruction(instructions);
-        return isb;
-    }*/
-
     public MatchBuilder buildMatch(Matches matches) {
         MatchBuilder matchBuilder = new MatchBuilder();
 
@@ -264,25 +234,6 @@ public class SfcClassifier {
         mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
                 flowBuilder.build());
     }
-
-    /*private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
-                flowBuilder.build(), nodeBuilder.build());
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
-                nodeBuilder.build(), true);
-        modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
-                flowBuilder.build(), true);
-
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            modification.cancel();
-        }
-    }*/
 
     protected void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder));

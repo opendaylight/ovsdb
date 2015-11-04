@@ -1,0 +1,176 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_f08855c8",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "can we rename this as ingressOtherProtocolAclHandler()? Just to have more clear method name,thoughts?",
+      "range": {
+        "startLine": 154,
+        "startChar": 18,
+        "endLine": 154,
+        "endChar": 38
+      },
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_108639ba",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "can you please add Precondition checks for the parameter that must not be null.",
+      "range": {
+        "startLine": 161,
+        "startChar": 38,
+        "endLine": 163,
+        "endChar": 55
+      },
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_b092cdf4",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "please log the exception e.g Log.debug{\"Protocol value conversion failure\",e).",
+      "range": {
+        "startLine": 176,
+        "startChar": 14,
+        "endLine": 176,
+        "endChar": 18
+      },
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_d08f51cb",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "isn\u0027t it that it will generate the flowid where srcAddress is appended twice, because if srcAddress is not null, above condition will also pass and it will append srcAddress to the flowId. or is it intentional?",
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_70bc656d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "please fix the indentation.",
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_90c1c9e6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "do you want this to be AND condition? because it will throw null pointer exception in the flowId creation if any of these returns null.",
+      "range": {
+        "startLine": 354,
+        "startChar": 61,
+        "endLine": 354,
+        "endChar": 64
+      },
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_f0aff529",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "can you please use static enum rather then using hardcoded values.",
+      "range": {
+        "startLine": 364,
+        "startChar": 73,
+        "endLine": 364,
+        "endChar": 93
+      },
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_10add931",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/MatchUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-11-04T21:43:42Z",
+      "side": 1,
+      "message": "please use the enum to define these numbers.",
+      "range": {
+        "startLine": 211,
+        "startChar": 18,
+        "endLine": 211,
+        "endChar": 36
+      },
+      "revId": "160bde112ccc3e046189910a4e72aa971716669d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 
 import com.google.common.collect.Lists;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -123,6 +124,70 @@ public class SfcClassifier {
         }
     }
 
+    /*
+     * (TABLE:50) EGRESS VM TRAFFIC TOWARDS TEP with NSH header
+     * MATCH: Match fields passed through ACL entry
+     * INSTRUCTION: SET TUNNELID AND GOTO TABLE TUNNEL TABLE (N)
+     * TABLE=0,IN_PORT=2,DL_SRC=00:00:00:00:00:01 \
+     * ACTIONS=SET_FIELD:5->TUN_ID,GOTO_TABLE=1"
+     */
+    public void programSfcEgressClassiferFlows(Long dpidLong, short writeTable, String ruleName, Matches match,
+                                         NshUtils nshHeader, long destOfPort, boolean write) {
+        String nodeName = OPENFLOW + dpidLong;
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        LOG.debug("Processing Egress Flow={} on Node={}, nshHeader={}, destPort={}", ruleName, dpidLong, nshHeader, destOfPort);
+        MatchBuilder matchBuilder = buildMatch(match);
+        matchBuilder = updateMatch(matchBuilder, nshHeader);
+        flowBuilder.setMatch(matchBuilder.build());
+
+        LOG.debug("UpdatedMatch={}", matchBuilder.build());
+        String flowId = "sfcClass_" + ruleName + "_egress_" +nshHeader.getNshNsp();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            List<Action> actionList = Lists.newArrayList();;
+            ActionBuilder ab = new ActionBuilder();
+
+            ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + destOfPort)));
+            ab.setOrder(actionList.size());
+            ab.setKey(new ActionKey(actionList.size()));
+            actionList.add(ab.build());
+
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            List<Instruction> instructions = Lists.newArrayList();
+            instructions.add(ib.build());
+
+            InstructionsBuilder isb = new InstructionsBuilder();
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+    
+    private MatchBuilder updateMatch(MatchBuilder match, NshUtils nshHeader) {
+        MatchUtils.addNxNsp(match, nshHeader.getNshNsp());
+        MatchUtils.addNxNsi(match, nshHeader.getNshNsi());
+        MatchUtils.addNxTunIdMatch(match, (int) nshHeader.getNshMetaC2());
+        return match;
+    }
+
     private List<Action> getNshAction(NshUtils header) {
         // Build the Actions to Add the NSH Header
         org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action nshC1Load =
@@ -140,12 +205,12 @@ public class SfcClassifier {
 
         int count = 0;
         List<Action> actionList = Lists.newArrayList();
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC1Load).build());
+      /*  actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC1Load).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC2Load).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(nspLoad).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(nsiLoad).build());
         actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunDest).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunVnid).build());
+        actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunVnid).build());*/
         return actionList;
     }
 

@@ -10,6 +10,21 @@ module netvirt-sfc-classifier {
         description "Initial revision of netvirt classifier model";
     }
 
+    // DIRECTION
+    identity direction {
+        description "Base identity for direction a classifier being applied.";
+    }
+
+    identity ingress-direction {
+        description "Ingress direction.";
+        base direction;
+    }
+
+    identity egress-direction {
+        description "Egress direction.";
+        base direction;
+    }
+
     container classifiers {
         description "Classifier container which represents the ACL being applied,
                      atachment point and the associated chain";
@@ -22,6 +37,11 @@ module netvirt-sfc-classifier {
             }
             leaf acl {
                 type string;
+            }
+            leaf direction {
+                type identityref {
+		    base direction;
+                }
             }
             container sffs {
                 list sff {

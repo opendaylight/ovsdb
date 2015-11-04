@@ -9,6 +9,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -21,6 +23,9 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Direction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.EgressDirection;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.IngressDirection;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
@@ -37,6 +42,11 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
     private ListenerRegistration<NetvirtSfcAclListener> listenerRegistration;
     private MdsalUtils dbutils;
 
+    private static final ImmutableBiMap<Class<? extends Direction>,String> DIRECTION_MAP
+            = new ImmutableBiMap.Builder<Class<? extends Direction>,String>()
+            .put(EgressDirection.class,"egress")
+            .put(IngressDirection.class,"ingress")
+            .build();
     /**
      * {@link NetvirtSfcAclListener} constructor.
      * @param provider OpenFlow 1.3 Provider
@@ -118,7 +128,7 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
             if (classifier.getAcl().equals(aclName)) {
                 if (classifier.getBridges() != null) {
                     for (Bridge bridge : classifier.getBridges().getBridge()) {
-                        provider.addClassifierRules(bridge, addDataObj);
+                        provider.addClassifierRules(bridge, addDataObj, DIRECTION_MAP.get(classifier.getDirection()));
                     }
                 }
             }

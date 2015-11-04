@@ -25,7 +25,7 @@ public interface INetvirtSfcOF13Provider {
      * @param bridge - Service Function Forwarder
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
-    void addClassifierRules(Bridge bridge, Acl acl);
+    void addClassifierRules(Bridge bridge, Acl acl, String direction);
 
     /**
      * Method removes the OF rules corresponding to rules within ACL

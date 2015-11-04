@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
 
 import java.util.List;
 import java.util.StringTokenizer;
@@ -42,6 +43,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev14
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Direction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.EgressDirection;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.IngressDirection;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
@@ -77,6 +81,11 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
     private static final String SERVER_GPE_PORT_NAME = "sw6-vxlangpe-0";
     private static final String INTERFACE_TYPE_VXLAN_GPE = "vxlangpe";
 
+    private static final ImmutableBiMap<Class<? extends Direction>,String> DIRECTION_MAP
+    = new ImmutableBiMap.Builder<Class<? extends Direction>,String>()
+    .put(EgressDirection.class,"egress")
+    .put(IngressDirection.class,"ingress")
+    .build();
     /**
      * {@link NetvirtSfcOF13Provider} constructor.
      * @param dataBroker MdSal {@link DataBroker}
@@ -94,7 +103,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
     }
 
     @Override
-    public void addClassifierRules(Bridge bridge, Acl acl) {
+    public void addClassifierRules(Bridge bridge, Acl acl, String direction) {
         Preconditions.checkNotNull(bridge, "Input bridge cannot be NULL!");
         Preconditions.checkNotNull(acl, "Input accesslist cannot be NULL!");
 
@@ -106,11 +115,57 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
 
         // TODO: Find all nodes needing the classifier and add classifier to them
         for (Ace ace : acl.getAccessListEntries().getAce()) {
-            processAclEntry(ace, bridgeNode, true);
+            if (direction.equalsIgnoreCase(DIRECTION_MAP.get(IngressDirection.class))) {
+                processIngressAclEntry(ace, bridgeNode, true);
+            } else {
+                // Derive the Tunnel ID  & Tunnel Destination and use it as Match.
+                NshUtils nshHeader = new NshUtils();
+                // C1 is the normal overlay dest ip and c2 is the vnid
+                // Hardcoded for now, netvirt integration will have those values
+                nshHeader.setNshMetaC1(NshUtils.convertIpAddressToLong(new Ipv4Address(TUNNEL_DST)));
+                nshHeader.setNshMetaC2(Long.parseLong(TUNNEL_VNID));
+
+                // Derive the RSP ID and RSP path Index.. For Demo they're hardcoded.
+                nshHeader.setNshNsp(10);
+                nshHeader.setNshNsi((short)253);
+                LOG.debug("The Nsh Header = {}, while applying Egress Classifier", nshHeader);
+                processEgressAclEntry(ace, bridgeNode, nshHeader, true);
+            }
         }
     }
 
-    private void processAclEntry(Ace entry, Node srcNode, boolean write) {
+    private void processEgressAclEntry(Ace ace, Node bridgeNode, NshUtils nshHeader, boolean write) {
+        Matches matches = ace.getMatches();
+        if (matches == null) {
+            LOG.warn("processAclEntry: matches not found");
+            return;
+        }
+
+        long ingTunnelPort = southbound.getOFPort(bridgeNode, SERVER_GPE_PORT_NAME);
+        if (ingTunnelPort == 0L) {
+            LOG.error("programAclEntry: Could not identify tunnel port {} -> OF ({}) on {}",
+                    CLIENT_GPE_PORT_NAME, ingTunnelPort, bridgeNode);
+            return;
+        }
+
+        long destOfPort = southbound.getOFPort(bridgeNode, SERVER_PORT_NAME);
+        if (destOfPort == 0L) {
+            LOG.error("programAclEntry: Could not identify local port {} -> OF ({}) on {}",
+                    CLIENT_GPE_PORT_NAME, destOfPort, bridgeNode);
+            return;
+        }
+
+        LOG.debug("Processing Egress ACL entry= ingrPort={}, destPort={}, nsp= {}, DPID={}", ingTunnelPort, destOfPort,
+                                       String.valueOf(nshHeader.getNshNsp()), southbound.getDataPathId(bridgeNode));
+
+        handleLocalInPort(southbound.getDataPathId(bridgeNode), String.valueOf(nshHeader.getNshNsp()), ingTunnelPort,
+                TABLE_0_CLASSIFIER, TABLE_3_INGR_ACL, true);
+
+        handleSfcEgressClassiferFlows(southbound.getDataPathId(bridgeNode), TABLE_3_INGR_ACL, ace.getRuleName(),
+                matches, nshHeader, destOfPort, true);
+    }
+
+    private void processIngressAclEntry(Ace entry, Node srcNode, boolean write) {
         Matches matches = entry.getMatches();
         if (matches == null) {
             LOG.warn("processAclEntry: matches not found");
@@ -221,6 +276,13 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider{
                                          boolean write) {
         sfcClassifier.programSfcClassiferFlows(dataPathId, writeTable, ruleName, matches, nshHeader,
                 tunnelOfPort, write);
+    }
+
+    private void handleSfcEgressClassiferFlows(long dataPathId, short writeTable, String ruleName,
+            Matches matches, NshUtils nshHeader, long destOfPort,
+            boolean write) {
+        sfcClassifier.programSfcEgressClassiferFlows(dataPathId, writeTable, ruleName, matches, nshHeader,
+                destOfPort, write);
     }
 
     private InstanceIdentifier<RenderedServicePaths> getRspsId() {

@@ -9,6 +9,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -18,6 +20,9 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Direction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.EgressDirection;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.IngressDirection;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
@@ -35,6 +40,12 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcClassifierListener.class);
     private MdsalUtils dbutils;
     private ListenerRegistration<NetvirtSfcClassifierListener> listenerRegistration;
+
+    private static final ImmutableBiMap<Class<? extends Direction>,String> DIRECTION_MAP
+    = new ImmutableBiMap.Builder<Class<? extends Direction>,String>()
+    .put(EgressDirection.class,"egress")
+    .put(IngressDirection.class,"ingress")
+    .build();
 
     /**
      * {@link NetvirtSfcClassifierListener} constructor.
@@ -89,7 +100,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         if (removeDataObj.getSffs() != null) {
             for (Sff sff : removeDataObj.getSffs().getSff()) {
                 // Netvirt classifier binds an ACL with service function forwarder that is identified by SFF name.
-                // SFF validation can be done with SFC Provider APIs, as SFF is configured within SFC project.  
+                // SFF validation can be done with SFC Provider APIs, as SFF is configured within SFC project.
                 // Netvirt SFC provider will validate the SFF using SFC provider APIs.
                 provider.removeClassifierRules(sff, acl);
             }
@@ -118,7 +129,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
 
         if (addDataObj.getBridges() != null) {
             for (Bridge bridge : addDataObj.getBridges().getBridge()) {
-                provider.addClassifierRules(bridge, acl);
+                provider.addClassifierRules(bridge, acl, DIRECTION_MAP.get(addDataObj.getDirection()));
             }
         }
     }

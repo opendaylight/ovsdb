@@ -49,16 +49,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoCloseable{
-    private Map<ConnectionInfo, HwvtepConnectionInstance> clients = new ConcurrentHashMap<>();
+    private Map<ConnectionInfo, HwvtepConnectionInstance> clients =
+                    new ConcurrentHashMap<ConnectionInfo,HwvtepConnectionInstance>();
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionManager.class);
     private static final String ENTITY_TYPE = "hwvtep";
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
-    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
-    private Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
+    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
+                    new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
+    private Map<Entity, HwvtepConnectionInstance> entityConnectionMap =
+                    new ConcurrentHashMap<>();
     private EntityOwnershipService entityOwnershipService;
     private HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
 
@@ -184,6 +188,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         return clients.get(connectionInfo);
     }
+    public HwvtepConnectionInstance getConnectionInstance(Node node) {
+        Preconditions.checkNotNull(node);
+        HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
+        if (hwvtepGlobal != null) {
+            return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
+        } //TODO: We could get it from Managers also.
+        else {
+            LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
+            return null;
+        }
+    }
 
     private void removeConnectionInstance(ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
@@ -198,7 +213,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
-        return instanceIdentifiers.get(connectionInfo);
+        InstanceIdentifier<Node> iid = instanceIdentifiers.get(connectionInfo);
+        return iid;
     }
 
     private void removeInstanceIdentifier(ConnectionInfo key) {
@@ -257,17 +273,18 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         if (dbSchema != null) {
             GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, Global.class);
 
-            List<String> hwvtepTableColumn = new ArrayList<>();
+            List<String> hwvtepTableColumn = new ArrayList<String>();
             hwvtepTableColumn.addAll(hwvtepSchema.getColumns());
             Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-            selectOperation.setColumns(hwvtepTableColumn);
+            selectOperation.setColumns(hwvtepTableColumn);;
 
-            List<Operation> operations = new ArrayList<>();
+            ArrayList<Operation> operations = new ArrayList<Operation>();
             operations.add(selectOperation);
             operations.add(op.comment("Fetching hardware_vtep table rows"));
 
+            List<OperationResult> results = null;
             try {
-                List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
+                results = connectionInstance.transact(dbSchema, operations).get();
                 if (results != null ) {
                     OperationResult selectResult = results.get(0);
                     globalRow = TyperUtils.getTypedRowWrapper(

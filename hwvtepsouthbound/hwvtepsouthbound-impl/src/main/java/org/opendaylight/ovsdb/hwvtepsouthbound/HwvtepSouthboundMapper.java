@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
@@ -43,10 +44,11 @@ public class HwvtepSouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        return InstanceIdentifier
+        InstanceIdentifier<Node> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
+        return nodePath;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier (OvsdbClient client) {
@@ -120,7 +122,8 @@ public class HwvtepSouthboundMapper {
     public static InstanceIdentifier<Node> getInstanceIdentifier(Global global) {
         InstanceIdentifier<Node> iid = null;
         if (global.getManagersColumn() != null
-                && global.getManagersColumn().getData() != null) {
+                && global.getManagersColumn().getData() != null
+                && !global.getManagersColumn().getData().isEmpty()) {
             String iidString = global.getManagersColumn().getData().iterator().next().toString();
             iid = (InstanceIdentifier<Node>) HwvtepSouthboundUtil.deserializeInstanceIdentifier(iidString);
         } else {
@@ -134,6 +137,18 @@ public class HwvtepSouthboundMapper {
                             .child(Node.class,nodeKey)
                             .build();
         }
+        return iid;
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
+                    PhysicalSwitch pSwitch) {
+        InstanceIdentifier<Node> iid = null;
+        String nodeString = client.getNodeKey().getNodeId().getValue() + "/physicalswitch/" + pSwitch.getName();
+        NodeId nodeId = new NodeId(new Uri(nodeString));
+        NodeKey nodeKey = new NodeKey(nodeId);
+        iid =InstanceIdentifier.builder(NetworkTopology.class)
+                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                        .child(Node.class, nodeKey).build();
         return iid;
     }
 }

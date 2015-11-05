@@ -422,34 +422,48 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     Assert.assertNotNull(bridge);
                     Assert.assertEquals(dpType, bridge.getDatapathType());
 
-                    // Add dpdk port
-                    final String TEST_PORT_NAME = "testDPDKPort";
-                    OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                            createGenericDpdkOvsdbTerminationPointAugmentationBuilder(TEST_PORT_NAME);
-                    Assert.assertTrue(addTerminationPoint(bridgeNodeId, TEST_PORT_NAME, ovsdbTerminationBuilder));
+                    // Add port for all dpdk interface types (dpdkvhost not supported in existing dpdk ovs)
+                    List<String> dpdkTypes = new ArrayList<String>();
+                    dpdkTypes.add("dpdk");
+                    dpdkTypes.add("dpdkr");
+                    dpdkTypes.add("dpdkvhostuser");
+                    //dpdkTypes.add("dpdkvhost");
 
-                    // Verify that DPDK port was created
+                    for (String dpdkType : dpdkTypes) {
+                        String testPortname = "test"+dpdkType+"port";
+                        LOG.info("DPDK portname and type is {}, {}", testPortname, dpdkType);
+                        Class<? extends InterfaceTypeBase> dpdkIfType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
+                                .get( dpdkType);
+                        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationpointBuilder =
+                                createSpecificDpdkOvsdbTerminationPointAugmentationBuilder(testPortname, dpdkIfType);
+                        Assert.assertTrue(addTerminationPoint(bridgeNodeId, testPortname , ovsdbTerminationpointBuilder));
+                    }
+
+                    // Verify that all DPDK ports are created
                     InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
                     Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
                             terminationPointIid);
                     Assert.assertNotNull(terminationPointNode);
 
-                    // Verify that each termination point has DPDK ifType
-                    Class<? extends InterfaceTypeBase> dpdkIfType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
-                            .get("dpdk");
-                    List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
-                    for (TerminationPoint terminationPoint : terminationPoints) {
-                        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
-                                .getAugmentation(OvsdbTerminationPointAugmentation.class);
-                        if (ovsdbTerminationPointAugmentation.getName().equals(TEST_PORT_NAME)) {
-                            Class<? extends InterfaceTypeBase> opPort = ovsdbTerminationPointAugmentation
-                                    .getInterfaceType();
-                            Assert.assertEquals(dpdkIfType, opPort);
+                    // Verify that each termination point has the specific DPDK ifType
+                    for (String dpdkType : dpdkTypes) {
+                        String testPortname = "test"+dpdkType+"port";
+                        Class<? extends InterfaceTypeBase> dpdkIfType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
+                                .get(dpdkType);
+                        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+                        for (TerminationPoint terminationPoint : terminationPoints) {
+                            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
+                                    .getAugmentation(OvsdbTerminationPointAugmentation.class);
+                            if (ovsdbTerminationPointAugmentation.getName().equals(testPortname)) {
+                                Class<? extends InterfaceTypeBase> opPort = ovsdbTerminationPointAugmentation
+                                        .getInterfaceType();
+                                Assert.assertEquals(dpdkIfType, opPort);
+                            }
                         }
                     }
-                    Assert.assertTrue(deleteBridge(connectionInfo));
-                    break;
                 }
+                Assert.assertTrue(deleteBridge(connectionInfo));
+                break;
             }
         }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
@@ -554,6 +568,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Class<? extends InterfaceTypeBase> ifType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
                 .get("dpdk");
         ovsdbTerminationBuilder.setInterfaceType(ifType);
+        return ovsdbTerminationBuilder;
+    }
+
+    private OvsdbTerminationPointAugmentationBuilder createSpecificDpdkOvsdbTerminationPointAugmentationBuilder(
+            String testPortname,Class<? extends InterfaceTypeBase> dpdkIfType) {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationBuilder.setName(testPortname);
+        ovsdbTerminationBuilder.setInterfaceType(dpdkIfType);
         return ovsdbTerminationBuilder;
     }
 

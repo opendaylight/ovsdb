@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_263c672f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-05T13:27:24Z",
+      "side": 1,
+      "message": "Set IID in connectionInstance. This way, when switch eventually connects, we will see if IID is there or not. If yes, we will end up using whatever user configured as node-id. If no, it will be filled when switch connects in getEntityFromConnectionInstance()",
+      "revId": "66c18581336ea9dbe903beb6abcc8bda761c8dd5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_8612f3b2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-05T13:27:24Z",
+      "side": 1,
+      "message": "User initiated connection will always have iid filled in as per earlier comment/change. For switch initiated connections, this is good time to fill it in HwvtepConnectionInstance. At this point, HwvtepConnectionInstance will *always* have the right identifier.",
+      "revId": "66c18581336ea9dbe903beb6abcc8bda761c8dd5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_460c0b95",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/GlobalUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-05T13:27:24Z",
+      "side": 1,
+      "message": "With other changes in hwvtepConnectionManager, we rely on ConnectionInstance [should rename it to hwvtepConnectionInstance] to always provide us iid. Adding a log here in case missed any corner case.",
+      "revId": "66c18581336ea9dbe903beb6abcc8bda761c8dd5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

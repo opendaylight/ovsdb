@@ -21,7 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <maven>3.1.1</maven>
   </prerequisites>
   <properties>
-    <karaf.localFeature>odl-hwvtepsouthbound-ui</karaf.localFeature>
+    <karaf.localFeature>odl-ovsdb-hwvtepsouthbound-ui</karaf.localFeature>
   </properties>
   <dependencyManagement>
     <dependencies>

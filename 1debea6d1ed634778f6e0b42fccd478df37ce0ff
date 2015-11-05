@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_01682db9",
+        "filename": "openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/sfc/NetvirtSfcClassifierListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-05T15:26:04Z",
+      "side": 1,
+      "message": "remove commented out lines? or maybe comment on why they are no used?",
+      "revId": "1debea6d1ed634778f6e0b42fccd478df37ce0ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_c161c5d4",
+        "filename": "openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/sfc/openflow13/INetvirtSfcOF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-05T15:26:04Z",
+      "side": 1,
+      "message": "update java doc, remove non-list addClassifierRules",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 30,
+        "endChar": 27
+      },
+      "revId": "1debea6d1ed634778f6e0b42fccd478df37ce0ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

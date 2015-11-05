@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_8b12feb2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-05T07:53:23Z",
+      "side": 1,
+      "message": "Because of the difference of OVS schema and Hardware one, the NodeId cannot be get from ManagersColumn. When connection initialed form ODL, NodeId can be get from HwvtepConnectionInstance.getNodeId(),SO the function HwvtepSouthboundMapper:getInstanceIdentifier() should like this:\n\npublic static InstanceIdentifier\u003cNode\u003e getInstanceIdentifier(HwvtepConnectionInstance key, Global global) {\n        InstanceIdentifier\u003cNode\u003e iid \u003d null;\n        NodeId nodeId \u003d null;\n        if (key.isActive()) {\n    \t\tnodeId \u003d key.getNodeId();\n    \t} else {\n    \t\tString nodeString \u003d HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + \"://\" + HwvtepSouthboundConstants.UUID + \"/\"\n                    + global.getUuid().toString();\n            nodeId \u003d new NodeId(new Uri(nodeString));\n    \t}\n        \n        NodeKey nodeKey \u003d new NodeKey(nodeId);\n        iid \u003d InstanceIdentifier.builder(NetworkTopology.class)\n                .child(Topology.class,new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))\n                .child(Node.class,nodeKey)\n                .build();\n        \n        return iid;\n    }",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 5
+      },
+      "revId": "8d25e3d6f12fd0ca445d7dbfe454465f68c40067",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_0b260e17",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/GlobalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-05T07:53:23Z",
+      "side": 1,
+      "message": "HwvtepConnectionInstance key \u003d getOvsdbConnectionInstance();\n    \tInstanceIdentifier\u003cNode\u003e iid \u003d HwvtepSouthboundMapper.getInstanceIdentifier(key, hwvtep);",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 91
+      },
+      "revId": "8d25e3d6f12fd0ca445d7dbfe454465f68c40067",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

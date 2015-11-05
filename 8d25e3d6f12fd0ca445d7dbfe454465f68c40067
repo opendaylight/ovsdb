@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bada0100_eb02aa0a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-05T09:42:18Z",
+      "side": 1,
+      "message": "Actually it is a bit more tricky than that. If we do it this way, we will end up using connection as node-id even for cases of switch initiated connection. This is just place-holder code till I figure out where I can add node-id for ODL initiated connection. I was planning to do it in manager, but it may not always be present and can change dynamically.",
+      "parentUuid": "bada0100_8b12feb2",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 5
+      },
+      "revId": "8d25e3d6f12fd0ca445d7dbfe454465f68c40067",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bada0100_0b260e17",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/GlobalUpdateCommand.java",
         "patchSetId": 1

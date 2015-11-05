@@ -10,11 +10,13 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
 
 import com.google.common.collect.Lists;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
@@ -26,11 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
@@ -41,15 +39,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +72,7 @@ public class SfcClassifier {
     public void programSfcClassiferFlows(Long dpidLong, short writeTable, String ruleName, Matches match,
                                          NshUtils nshHeader, long tunnelOfPort, boolean write) {
         String nodeName = OPENFLOW + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         MatchBuilder matchBuilder = buildMatch(match);
@@ -99,7 +92,7 @@ public class SfcClassifier {
             List<Action> actionList = getNshAction(nshHeader);
             ActionBuilder ab = new ActionBuilder();
 
-            ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + tunnelOfPort)));
+            ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(tunnelOfPort, nodeName)));
             ab.setOrder(actionList.size());
             ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
@@ -116,6 +109,65 @@ public class SfcClassifier {
 
             InstructionsBuilder isb = new InstructionsBuilder();
             isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    public void programEgressSfcClassiferFlows(Long dpidLong, short writeTable, String ruleName,
+                                               Matches match, NshUtils nshHeader,
+                                               long tunnelOfPort, long outOfPort, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, tunnelOfPort).build());
+        flowBuilder.setMatch(
+                MatchUtils.createTunnelIDMatch(matchBuilder, BigInteger.valueOf(nshHeader.getNshMetaC2())).build());
+        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nshHeader.getNshNsp()).build());
+        flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nshHeader.getNshNsi()).build());
+
+        String flowId = "egressSfcClass_" + ruleName + "_" + nshHeader.getNshNsp() + "_" + nshHeader.getNshNsi();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            List<Action> actionList = new ArrayList<>();
+            ActionBuilder ab = new ActionBuilder();
+
+            ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD).build(),
+                    BigInteger.valueOf(REG_VALUE_FROM_REMOTE)));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dpidLong, outOfPort)));
+            ab.setOrder(1);
+            ab.setKey(new ActionKey(1));
+            actionList.add(ab.build());
+
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            List<Instruction> instructions = new ArrayList<>();
+            instructions.add(ib.build());
+
+            InstructionsBuilder isb = new InstructionsBuilder();
+            isb.setInstruction(instructions);
+
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -150,13 +202,14 @@ public class SfcClassifier {
     }
 
     public void programLocalInPort(Long dpidLong, String segmentationId, Long inPort,
-                                   short writeTable, short goToTableId, boolean write) {
+                                   short writeTable, short goToTableId, Matches match, boolean write) {
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
+        MatchBuilder matchBuilder = buildMatch(match);
+        flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
         String flowId = "sfcIngress_" + segmentationId + "_" + inPort;
         flowBuilder.setId(new FlowId(flowId));
@@ -205,36 +258,6 @@ public class SfcClassifier {
         }
     }
 
-/*
-    public InstructionsBuilder buildActions(String ruleName, Actions actions, String datapathId) {
-        InstructionBuilder ib = new InstructionBuilder();
-
-        if (actions.getPacketHandling() instanceof Deny) {
-            InstructionUtils.createDropInstructions(ib);
-        } else if (actions.getPacketHandling() instanceof Permit) {
-            //Permit actPermit = (Permit) actions.getPacketHandling();
-        } else {
-            InstructionUtils.createDropInstructions(ib);
-        }
-
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = Lists.newArrayList();
-        instructions.add(ib.build());
-
-        // Call the InstructionBuilder Methods Containing Actions
-        ib = this.getMutablePipelineInstructionBuilder();
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        InstructionsBuilder isb = new InstructionsBuilder();
-        isb.setInstruction(instructions);
-        return isb;
-    }*/
-
     public MatchBuilder buildMatch(Matches matches) {
         MatchBuilder matchBuilder = new MatchBuilder();
 
@@ -244,7 +267,7 @@ public class SfcClassifier {
                 //AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
                 //MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Network());
                 //MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
-                //MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
+                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
                         aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
             }
@@ -255,59 +278,19 @@ public class SfcClassifier {
                     new MacAddress(aceEth.getDestinationMacAddressMask().getValue()));
         }
 
+        LOG.info("buildMatch: {}", matchBuilder.build());
         return matchBuilder;
     }
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}", flowBuilder.build(), nodeBuilder.build());
-        mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder), nodeBuilder.build());
-        mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
+        mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, FlowUtils.createNodePath(nodeBuilder),
+                nodeBuilder.build());
+        mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, FlowUtils.createFlowPath(flowBuilder, nodeBuilder),
                 flowBuilder.build());
     }
 
-    /*private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
-                flowBuilder.build(), nodeBuilder.build());
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
-                nodeBuilder.build(), true);
-        modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
-                flowBuilder.build(), true);
-
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            modification.cancel();
-        }
-    }*/
-
     protected void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder));
-    }
-
-    private NodeBuilder createNodeBuilder(String nodeId) {
-        NodeBuilder builder = new NodeBuilder();
-        builder.setId(new NodeId(nodeId));
-        builder.setKey(new NodeKey(builder.getId()));
-        return builder;
-    }
-
-    private static InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        return InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
-                        nodeBuilder.getKey())
-                .augmentation(FlowCapableNode.class)
-                .child(Table.class, new TableKey(flowBuilder.getTableId()))
-                .child(Flow.class, flowBuilder.getKey()).build();
-    }
-
-    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
-    createNodePath(NodeBuilder nodeBuilder) {
-        return InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
-                        nodeBuilder.getKey()).build();
+        mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, FlowUtils.createFlowPath(flowBuilder, nodeBuilder));
     }
 }

@@ -15,13 +15,16 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
-import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +44,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -50,10 +55,18 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.AccessListEntriesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.ActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Matches;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.MatchesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.oxm.container.match.entry.value.Nshc1CaseValue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.ClassifierBuilder;
@@ -149,9 +162,13 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     private Option[] getOtherOptions() {
         return new Option[] {
+                wrappedBundle(
+                        mavenBundle("org.opendaylight.ovsdb", "utils.mdsal-openflow")
+                                .version(asInProject())
+                                .type("jar")),
                 configureConsole().startLocalConsole(),
                 vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
-                keepRuntimeFolder()
+                        keepRuntimeFolder()
         };
     }
 
@@ -461,18 +478,22 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
             Thread.sleep(1000);
         }
 
-        SfcClassifier sfcClassifier = new SfcClassifier(dataBroker, southbound, mdsalUtils);
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
         assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
-        //sfcClassifier.programSfcClassiferFlows();
-        sfcClassifier.programLocalInPort(datapathId, "4096", (long)1, (short)0, (short)50, true);
+
+        SfcClassifier sfcClassifier = new SfcClassifier(dataBroker, southbound, mdsalUtils);
+        //sfcClassifier.programLocalInPort(datapathId, "4096", (long)1, (short)0, (short)50, true);
 
         NshUtils nshUtils = new NshUtils(new Ipv4Address("192.168.50.71"), new PortNumber(6633),
                 (long)10, (short)255, (long)4096, (long)4096);
         MatchesBuilder matchesBuilder = aclUtils.createMatches(new MatchesBuilder(), 80);
-        sfcClassifier.programSfcClassiferFlows(datapathId, (short)50, "test", matchesBuilder.build(),
+        sfcClassifier.programSfcClassiferFlows(datapathId, (short)0, "test", matchesBuilder.build(),
                 nshUtils, (long)2, true);
+
+        nshUtils = new NshUtils(null, null, (long)10, (short)253, 0, 0);
+        //sfcClassifier.programEgressSfcClassiferFlows(datapathId, (short)0, "test", null,
+        //        nshUtils, (long)2, (long)3, true);
 
         //try {
         //    System.in.read();
@@ -480,11 +501,110 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         //    e.printStackTrace();
         //}
 
-        Thread.sleep(15000);
+        /*NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
+        FlowBuilder flowBuilder = getLocalInPortFlow(datapathId, "4096", (long) 1, (short) 0);
+        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("Could not find flow in config", flow);
+        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("Could not find flow in operational", flow);*/
+
+        MatchBuilder matchBuilder = sfcClassifier.buildMatch(matchesBuilder.build());
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
+        FlowBuilder flowBuilder = getSfcClassifierFlow(datapathId, (short) 0, "test", null,
+                nshUtils, (long) 2, matchBuilder);
+        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("Could not find flow in config", flow);
+        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("Could not find flow in operational", flow);
+
+        //nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
+        //flowBuilder = getEgressSfcClassifierFlow(datapathId, (short) 0, "test", nshUtils, (long) 2);
+        //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        //assertNotNull("Could not find flow in config", flow);
+        //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        //assertNotNull("Could not find flow in operational", flow);
+
+        LOG.info("***** Go look for flows *****");
+        Thread.sleep(30000);
         assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
         Thread.sleep(1000);
         assertTrue(southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME));
         Thread.sleep(1000);
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
+    }
+
+    private FlowBuilder getLocalInPortFlow(long dpidLong, String segmentationId, long inPort, short writeTable) {
+        MatchBuilder matchBuilder = new MatchBuilder();
+
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+        String flowId = "sfcIngress_" + segmentationId + "_" + inPort;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        return flowBuilder;
+    }
+
+    public FlowBuilder getSfcClassifierFlow(long dpidLong, short writeTable, String ruleName, Matches match,
+                                             NshUtils nshHeader, long tunnelOfPort, MatchBuilder matchBuilder) {
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(matchBuilder.build());
+
+        String flowId = "sfcClass_" + ruleName + "_" + nshHeader.getNshNsp();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        return flowBuilder;
+    }
+
+    private FlowBuilder getEgressSfcClassifierFlow(long dpidLong, short writeTable, String ruleName,
+                                                   NshUtils nshHeader, long tunnelOfPort) {
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, tunnelOfPort).build());
+        flowBuilder.setMatch(
+                MatchUtils.createTunnelIDMatch(matchBuilder, BigInteger.valueOf(nshHeader.getNshNsp())).build());
+        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nshHeader.getNshNsp()).build());
+        flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nshHeader.getNshNsi()).build());
+
+        String flowId = "egressSfcClass_" + ruleName + "_" + nshHeader.getNshNsp() + "_" + nshHeader.getNshNsi();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        return flowBuilder;
+    }
+
+    private Flow getFlow (FlowBuilder flowBuilder, NodeBuilder nodeBuilder, LogicalDatastoreType store)
+            throws InterruptedException {
+        Flow flow = null;
+        for (int i = 0; i < 10; i++) {
+            flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
+            if (flow != null) {
+                LOG.info("flow({}): {}", store, flow);
+                break;
+            }
+            Thread.sleep(1000);
+        }
+        return flow;
     }
 }

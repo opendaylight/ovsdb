@@ -116,11 +116,11 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
             return;
         }
 
-        if (addDataObj.getBridges() != null) {
-            for (Bridge bridge : addDataObj.getBridges().getBridge()) {
-                provider.addClassifierRules(bridge, acl);
-            }
-        }
+        //if (addDataObj.getBridges() != null) {
+        //    for (Bridge bridge : addDataObj.getBridges().getBridge()) {
+                provider.addClassifierRules(addDataObj.getBridges(), acl);
+        //    }
+        //}
     }
 
     public InstanceIdentifier<Classifier> getClassifierIid() {

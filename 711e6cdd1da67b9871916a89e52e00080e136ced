@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ace114c_0c20779a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/ConfigActivator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-06T22:01:55Z",
+      "side": 1,
+      "message": "avoid using .*",
+      "revId": "711e6cdd1da67b9871916a89e52e00080e136ced",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ace114c_2c2533ab",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-06T22:01:55Z",
+      "side": 1,
+      "message": "avoid *",
+      "revId": "711e6cdd1da67b9871916a89e52e00080e136ced",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

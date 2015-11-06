@@ -21,7 +21,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.OngoingStubbing;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -33,6 +35,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import org.powermock.api.mockito.PowerMockito;
+
 /**
  * Unit test for class {@link MdsalUtils}
  *
@@ -46,13 +50,24 @@ public class MdsalUtilsTest {
     @Mock private DataBroker databroker;
 
     @Test
-    public void testDelete() {
+    public void testDelete() throws ReadFailedException{
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
         when(writeTransaction.submit()).thenReturn(future );
+        InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
 
-        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class));
+        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
+        when(databroker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
+        CheckedFuture<Optional, ReadFailedException> futureRead = mock(CheckedFuture.class);
+        Optional opt = mock(Optional.class);
+        when(opt.isPresent()).thenReturn(true);
+        DataObject obj = mock(DataObject.class);
+        when(opt.get()).thenReturn(obj );
+        when(futureRead.checkedGet()).thenReturn(opt);
+        when(readOnlyTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(futureRead);
+
+        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid);
 
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(1)).submit();

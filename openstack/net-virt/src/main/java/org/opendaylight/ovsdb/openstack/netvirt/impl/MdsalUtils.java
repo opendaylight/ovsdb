@@ -44,14 +44,18 @@ public class MdsalUtils {
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
             final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
         boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
+        if(this.read(store,path) != null) {
+            final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+            transaction.delete(store, path);
+            CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+            try {
+                future.checkedGet();
+                result = true;
+            } catch (TransactionCommitFailedException e) {
+                LOG.warn("Failed to delete {} ", path, e);
+            }
+        } else {
             result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", path, e);
         }
         return result;
     }

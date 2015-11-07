@@ -37,6 +37,8 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.NshUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.SfcClassifier;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
@@ -89,6 +91,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -187,9 +190,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
                         LogLevel.TRACE.name()),
-                /*editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.TRACE.name()),*/
+                        LogLevelOption.LogLevel.TRACE.name()),
                 super.getLoggingOption());
     }
 
@@ -360,7 +363,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
      * and program the pipeline flows.
      */
     @Test
-    public void testDoIt() throws InterruptedException {
+    public void testNetvirtSfc() throws InterruptedException {
         String bridgeName = INTEGRATION_BRIDGE_NAME;
         ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
@@ -371,24 +374,37 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         for (int i = 0; i < 10; i++) {
             ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
             assertNotNull("ovsdb node not found", ovsdbNode);
-            String controllerTarget = "tcp:192.168.50.1:6653";//SouthboundUtil.getControllerTarget(ovsdbNode);
+            String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
             assertNotNull("Failed to get controller target", controllerTarget);
             OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, bridgeName);
-            assertNotNull(bridge);
-            assertNotNull(bridge.getControllerEntry());
-            controllerEntry = bridge.getControllerEntry().iterator().next();
-            assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
-            if (controllerEntry.isIsConnected()) {
-                Assert.assertTrue(controllerEntry.isIsConnected());
-                break;
+            if (bridge != null) {
+                assertNotNull("Failed to read bridge", bridge);
+                assertNotNull("Failed to extract controllerEntry", bridge.getControllerEntry());
+                controllerEntry = bridge.getControllerEntry().iterator().next();
+                assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
+                if (controllerEntry.isIsConnected()) {
+                    Assert.assertTrue("switch is not connected to the controller", controllerEntry.isIsConnected());
+                    break;
+                }
             }
             Thread.sleep(1000);
         }
+
+        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
+        assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
+        long datapathId = southbound.getDataPathId(bridgeNode);
 
         /* TODO: add code to write to mdsal to exercise the sfc dataChangeListener */
         /* allow some time to let the impl code do it's work to push flows */
         /* or just comment out below lines and just manually verify on the bridges and reset them */
         //Thread.sleep(10000);
+
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
+        FlowBuilder flowBuilder = FlowUtils.getPipelineFlow(Service.SFC_CLASSIFIER.getTable(), (short)0);
+        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("Could not find flow in config", flow);
+        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("Could not find flow in operational", flow);
 
         assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
         Thread.sleep(1000);
@@ -600,7 +616,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         for (int i = 0; i < 10; i++) {
             flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
             if (flow != null) {
-                LOG.info("flow({}): {}", store, flow);
+                LOG.info("getFlow: flow({}): {}", store, flow);
                 break;
             }
             Thread.sleep(1000);

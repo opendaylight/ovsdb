@@ -27,6 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <networkconfig.neutron.version>0.6.0-SNAPSHOT</networkconfig.neutron.version>
     <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
+    <powermock.version>1.5.2</powermock.version>
     <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sfc.project.version>0.2.0-SNAPSHOT</sfc.project.version>
   </properties>
@@ -92,6 +93,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>sal-common-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-inventory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin-extension-nicira</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowjava-extension-nicira</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-base</artifactId>
       <version>${openflowplugin.version}</version>
@@ -108,11 +123,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.sfc</groupId>
       <artifactId>sfc-model</artifactId>
-      <version>${sfc.project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.sfc</groupId>
-      <artifactId>sfc-ovs</artifactId>
       <version>${sfc.project.version}</version>
     </dependency>
     <dependency>
@@ -137,6 +147,24 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-core</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito</artifactId>
+      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

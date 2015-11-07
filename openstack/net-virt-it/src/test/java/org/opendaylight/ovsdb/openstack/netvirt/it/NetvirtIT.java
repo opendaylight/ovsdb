@@ -7,11 +7,16 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.it;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
@@ -26,6 +31,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
@@ -37,10 +43,17 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
@@ -124,6 +137,10 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     private Option[] getOtherOptions() {
         return new Option[] {
+                wrappedBundle(
+                        mavenBundle("org.opendaylight.ovsdb", "utils.mdsal-openflow")
+                                .version(asInProject())
+                                .type("jar")),
                 vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
                 keepRuntimeFolder()
         };
@@ -677,8 +694,34 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     @Test
     public void testNetVirt() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        connectOvsdbNode(connectionInfo);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+
         Thread.sleep(10000);
+        // Verify the pipeline flows were installed
+        PipelineOrchestrator pipelineOrchestrator =
+                (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
+        assertNotNull("Could not find PipelineOrchestrator Service", pipelineOrchestrator);
+        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
+        assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
+        long datapathId = southbound.getDataPathId(bridgeNode);
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
+                FlowUtils.createNodeBuilder(datapathId);
+
+        List<Service> staticPipeline = pipelineOrchestrator.getStaticPipeline();
+        List<Service> staticPipelineFound = Lists.newArrayList();
+        for (Service service : pipelineOrchestrator.getServiceRegistry().keySet()) {
+            if (staticPipeline.contains(service)) {
+                staticPipelineFound.add(service);
+            }
+            FlowBuilder flowBuilder = FlowUtils.getPipelineFlow(service.getTable(), (short)0);
+            Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+            assertNotNull("Could not find flow in config", flow);
+            flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+            assertNotNull("Could not find flow in operational", flow);
+        }
+        assertEquals("did not find all expected flows in static pipeline",
+                staticPipeline.size(), staticPipelineFound.size());
+
         netVirtAddPort(connectionInfo);
         Thread.sleep(10000);
         Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
@@ -699,5 +742,23 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         for (Node node : ovsdbNodes) {
             LOG.info(">>>>> node: {}", node);
         }
+    }
+
+    private Flow getFlow (
+            FlowBuilder flowBuilder,
+            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder,
+            LogicalDatastoreType store)
+            throws InterruptedException {
+
+        Flow flow = null;
+        for (int i = 0; i < 10; i++) {
+            flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
+            if (flow != null) {
+                LOG.info("getFlow: flow({}): {}", store, flow);
+                break;
+            }
+            Thread.sleep(1000);
+        }
+        return flow;
     }
 }

@@ -37,6 +37,7 @@ public class NetvirtSfcModule extends AbstractNetvirtSfcModule {
     public java.lang.AutoCloseable createInstance() {
         LOG.info("Netvirt SFC module initialization.");
         NetvirtSfcProvider sfcProvider = new NetvirtSfcProvider(bundleContext);
+        sfcProvider.setOf13Provider(getOf13provider());
         getBrokerDependency().registerProvider(sfcProvider);
         return sfcProvider;
     }

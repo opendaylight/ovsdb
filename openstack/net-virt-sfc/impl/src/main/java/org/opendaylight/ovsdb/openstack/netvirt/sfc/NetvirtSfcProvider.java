@@ -27,11 +27,18 @@ import org.slf4j.LoggerFactory;
 public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcProvider.class);
     private NetvirtSfcAclListener aclListener;
-    private NetvirtSfcClassifierListener classfierListener;
+    private NetvirtSfcClassifierListener classifierListener;
+
+    public void setOf13Provider(String of13Provider) {
+        LOG.info("of13Provider is: {}", of13Provider);
+        this.of13Provider = of13Provider;
+    }
+
+    private String of13Provider;
 
     public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
         LOG.info("bundleContext is: {}", bundleContext);
+        this.bundleContext = bundleContext;
     }
 
     private BundleContext bundleContext;
@@ -47,9 +54,14 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         DataBroker dataBroker = session.getSALService(DataBroker.class);
 
         // Allocate provider based on config
-        INetvirtSfcOF13Provider provider = new NetvirtSfcOF13Provider(dataBroker);
+        INetvirtSfcOF13Provider provider;
+        if (of13Provider.equals("standalone")) {
+            provider = new NetvirtSfcOF13Provider(dataBroker);
+        } else {
+            provider = new NetvirtSfcOF13Provider(dataBroker);
+        }
         aclListener = new NetvirtSfcAclListener(provider, dataBroker);
-        classfierListener = new NetvirtSfcClassifierListener(provider, dataBroker);
+        classifierListener = new NetvirtSfcClassifierListener(provider, dataBroker);
 
         addToPipeline();
     }
@@ -58,7 +70,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
     public void close() throws Exception {
         LOG.info("NetvirtSfcProvider Closed");
         aclListener.close();
-        classfierListener.close();
+        classifierListener.close();
     }
 
     private void addToPipeline() {

@@ -18,6 +18,7 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
+import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
@@ -39,7 +40,7 @@ import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.SfcClassifier;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.SfcClassifier;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
@@ -121,6 +122,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public static final String DEFAULT_SERVER_PORT = "6640";
     public static final String INTEGRATION_BRIDGE_NAME = "br-int";
     private static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
+    private static final String OVSDB_TRACE = "ovsdb.trace";
 
     @Override
     public String getModuleName() {
@@ -175,16 +177,18 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     public Option[] getPropertiesOptions() {
         return new Option[] {
-                propagateSystemProperties(SERVER_IPADDRESS, SERVER_PORT, CONNECTION_TYPE, CONTROLLER_IPADDRESS),
+                propagateSystemProperties(SERVER_IPADDRESS, SERVER_PORT, CONNECTION_TYPE,
+                        CONTROLLER_IPADDRESS, OVSDB_TRACE),
         };
     }
 
     @Override
     public Option getLoggingOption() {
         return composite(
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.TRACE.name()),
+                when(Boolean.getBoolean(OVSDB_TRACE)).useOptions(
+                        editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                                "log4j.logger.org.opendaylight.ovsdb",
+                                LogLevelOption.LogLevel.TRACE.name())),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(NetvirtSfcIT.class),
                         LogLevel.INFO.name()),
@@ -212,6 +216,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 fail(usage());
             }
         }
+        LOG.info("getProperties {}: {}", OVSDB_TRACE, props.getProperty(OVSDB_TRACE));
     }
 
     @Before
@@ -360,7 +365,6 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
      * Connect to an ovsdb node. Netvirt should add br-int, add the controller address
      * and program the pipeline flows.
      */
-    @Ignore
     @Test
     public void testNetvirtSfc() throws InterruptedException {
         String bridgeName = INTEGRATION_BRIDGE_NAME;

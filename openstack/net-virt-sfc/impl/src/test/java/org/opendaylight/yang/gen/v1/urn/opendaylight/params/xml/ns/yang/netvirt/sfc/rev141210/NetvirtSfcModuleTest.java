@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.NetvirtSfcProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 
 import javax.management.ObjectName;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.services.SfcClassifierService;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.services.SfcClassifierService;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

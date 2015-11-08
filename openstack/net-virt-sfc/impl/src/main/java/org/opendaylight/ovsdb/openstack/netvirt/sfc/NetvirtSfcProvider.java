@@ -17,7 +17,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.INetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.NetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.services.SfcClassifierService;
 import org.osgi.framework.BundleContext;
@@ -47,6 +46,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("NetvirtSfcProvider Session Initiated");
         DataBroker dataBroker = session.getSALService(DataBroker.class);
 
+        // Allocate provider based on config
         INetvirtSfcOF13Provider provider = new NetvirtSfcOF13Provider(dataBroker);
         aclListener = new NetvirtSfcAclListener(provider, dataBroker);
         classfierListener = new NetvirtSfcClassifierListener(provider, dataBroker);

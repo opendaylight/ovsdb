@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.Bridges;
@@ -37,4 +37,7 @@ public interface INetvirtSfcOF13Provider {
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
     void removeClassifierRules(Sff sff, Acl acl);
+
+    void addClassifierRules(Acl acl);
+    void removeClassifierRules(Acl acl);
 }

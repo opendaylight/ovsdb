@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import com.google.common.net.InetAddresses;
 

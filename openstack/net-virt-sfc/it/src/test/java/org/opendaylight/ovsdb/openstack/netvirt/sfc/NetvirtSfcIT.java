@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -37,9 +38,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.NshUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.SfcClassifier;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
@@ -68,7 +67,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.oxm.container.match.entry.value.Nshc1CaseValue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.ClassifierBuilder;
@@ -185,14 +183,14 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public Option getLoggingOption() {
         return composite(
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb",
+                        LogLevelOption.LogLevel.TRACE.name()),
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(NetvirtSfcIT.class),
                         LogLevel.INFO.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
                         LogLevel.TRACE.name()),
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.TRACE.name()),
                 super.getLoggingOption());
     }
 
@@ -362,6 +360,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
      * Connect to an ovsdb node. Netvirt should add br-int, add the controller address
      * and program the pipeline flows.
      */
+    @Ignore
     @Test
     public void testNetvirtSfc() throws InterruptedException {
         String bridgeName = INTEGRATION_BRIDGE_NAME;
@@ -394,9 +393,6 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
 
-        /* TODO: add code to write to mdsal to exercise the sfc dataChangeListener */
-        /* allow some time to let the impl code do it's work to push flows */
-        /* or just comment out below lines and just manually verify on the bridges and reset them */
         //Thread.sleep(10000);
 
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
@@ -411,62 +407,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
     }
 
+    @Ignore
     @Test
-    public void testDemo() throws InterruptedException {
-        for (DemoVm vm : demoVms){
-            ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(vm.ipAddr, vm.ipPort);
-            assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
-            Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
-            assertNotNull("node is not connected", ovsdbNode);
-            String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
-            assertNotNull("Failed to get controller target", controllerTarget);
-            List<ControllerEntry> setControllerEntry = southboundUtils.createControllerEntry(controllerTarget);
-            Uri setUri = new Uri(controllerTarget);
-            assertTrue(southboundUtils.addBridge(connectionInfo, null, vm.name, null, true,
-                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
-                    setControllerEntry, null));
-
-            for (int i = 0; i < 10; i++) {
-                OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, vm.name);
-                assertNotNull("bridge was not found: " + vm.name, bridge);
-                assertNotNull("ControllerEntry was not found: "
-                                + southboundUtils.createControllerEntry(controllerTarget),
-                        bridge.getControllerEntry());
-                List<ControllerEntry> getControllerEntries = bridge.getControllerEntry();
-                for (ControllerEntry entry : getControllerEntries) {
-                    if (entry.isIsConnected()) {
-                        assertTrue(entry.isIsConnected());
-                        break;
-                    }
-                }
-                Thread.sleep(1000);
-            }
-
-            assertTrue(southboundUtils.deleteBridge(connectionInfo, vm.name));
-            Thread.sleep(1000);
-            assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
-        }
-    }
-
-    private class DemoVm {
-        String name;
-        String ipAddr;
-        String ipPort;
-
-        DemoVm(String name, String ipAddr, String ipPort) {
-            this.name = name;
-            this.ipAddr = ipAddr;
-            this.ipPort = ipPort;
-        }
-    }
-
-    private DemoVm[] demoVms = {
-            new DemoVm("sw1", "192.168.50.70", "6640"),
-            //new DemoVm("sw2", "192.168.50.71", "6640"),
-    };
-
-    @Test
-    public void testDoIt2() throws InterruptedException {
+    public void testStandalone() throws InterruptedException {
         String bridgeName = "sw1";
         ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
@@ -517,12 +460,12 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         //    e.printStackTrace();
         //}
 
-        /*NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
-        FlowBuilder flowBuilder = getLocalInPortFlow(datapathId, "4096", (long) 1, (short) 0);
-        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("Could not find flow in config", flow);
-        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational", flow);*/
+        //NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
+        //FlowBuilder flowBuilder = getLocalInPortFlow(datapathId, "4096", (long) 1, (short) 0);
+        //Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        //assertNotNull("Could not find flow in config", flow);
+        //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        //assertNotNull("Could not find flow in operational", flow);
 
         MatchBuilder matchBuilder = sfcClassifier.buildMatch(matchesBuilder.build());
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);

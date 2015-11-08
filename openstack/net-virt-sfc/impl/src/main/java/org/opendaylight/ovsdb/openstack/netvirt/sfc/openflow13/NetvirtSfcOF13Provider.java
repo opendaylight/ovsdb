@@ -18,6 +18,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.INetvirtSfcOF13Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.NshUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.sfc.provider.api.SfcProviderRenderedPathAPI;
@@ -39,6 +41,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.Classifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.Bridges;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
@@ -84,6 +88,44 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider {
 
     public void removeClassifierRules(Sff sff, Acl acl) {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void addClassifierRules(Acl acl) {
+        String aclName = acl.getAclName();
+        Classifiers classifiers = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
+        if (classifiers == null) {
+            LOG.debug("add: No Classifiers found");
+            return;
+        }
+
+        LOG.debug("add: Classifiers: {}", classifiers);
+        for (Classifier classifier : classifiers.getClassifier()) {
+            if (classifier.getAcl().equals(aclName)) {
+                if (classifier.getBridges() != null) {
+                    for (Bridge bridge : classifier.getBridges().getBridge()) {
+                        addClassifierRules(bridge, acl);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void removeClassifierRules(Acl acl) {
+        String aclName = acl.getAclName();
+        Classifiers classifiers = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, getClassifierIid());
+        if (classifiers != null) {
+            for (Classifier classifier : classifiers.getClassifier()) {
+                if (classifier.getAcl().equalsIgnoreCase(aclName)) {
+                    if (classifier.getSffs() != null) {
+                        for (Sff sff : classifier.getSffs().getSff()) {
+                            removeClassifierRules(sff, acl);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -363,6 +405,10 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider {
             }
         }
         return null;
+    }
+
+    private InstanceIdentifier<Classifiers> getClassifierIid() {
+        return InstanceIdentifier.create(Classifiers.class);
     }
 
     public void handleLocalInPort(long dpidLong, String segmentationId, Long inPort,

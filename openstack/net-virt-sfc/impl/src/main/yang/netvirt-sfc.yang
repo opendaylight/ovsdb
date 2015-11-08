@@ -30,6 +30,10 @@ module netvirt-sfc {
                     }
                 }
             }
+
+            leaf of13provider {
+                type string;
+            }
         }
     }
 }

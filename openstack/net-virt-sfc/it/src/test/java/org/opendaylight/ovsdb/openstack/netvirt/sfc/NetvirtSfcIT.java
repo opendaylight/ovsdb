@@ -26,6 +26,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,6 +45,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.SfcCla
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionForwarderUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionUtils;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
@@ -51,6 +54,24 @@ import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctions;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.function.entry.SfDataPlaneLocator;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.function.entry.SfDataPlaneLocatorBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunctionBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.ServiceFunctionForwarders;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.ServiceFunctionForwardersBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarderBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.ServiceFunctionDictionary;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.ServiceFunctionDictionaryBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.SffDataPlaneLocator;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.SffDataPlaneLocatorBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.service.function.dictionary.SffSfDataPlaneLocatorBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.sff.data.plane.locator.DataPlaneLocatorBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sft.rev140701.Dpi;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sft.rev140701.Firewall;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessListsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclBuilder;
@@ -105,6 +126,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static AclUtils aclUtils = new AclUtils();
     private static ClassifierUtils classifierUtils = new ClassifierUtils();
     private static SfcUtils sfcUtils = new SfcUtils();
+    private static ServiceFunctionUtils serviceFunctionUtils = new ServiceFunctionUtils();
+    private static ServiceFunctionForwarderUtils serviceFunctionForwarderUtils = new ServiceFunctionForwarderUtils();
     private static MdsalUtils mdsalUtils;
     private static AtomicBoolean setup = new AtomicBoolean(false);
     private static SouthboundUtils southboundUtils;
@@ -194,6 +217,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                         LogLevel.INFO.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
+                        LogLevel.TRACE.name()),
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.sfc",
                         LogLevel.TRACE.name()),
                 super.getLoggingOption());
     }
@@ -306,59 +332,138 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private AccessListsBuilder setAccessLists () {
-        MatchesBuilder matchesBuilder = aclUtils.createMatches(new MatchesBuilder(), 80);
-        ActionsBuilder actionsBuilder = aclUtils.createActions(new ActionsBuilder(), Boolean.TRUE);
-        AceBuilder accessListEntryBuilder = aclUtils.createAccessListEntryBuilder(
+        MatchesBuilder matchesBuilder = aclUtils.matchesBuilder(new MatchesBuilder(), 80);
+        ActionsBuilder actionsBuilder = aclUtils.actionsBuilder(new ActionsBuilder(), Boolean.TRUE);
+        AceBuilder accessListEntryBuilder = aclUtils.aceBuilder(
                 new AceBuilder(), "http", matchesBuilder, actionsBuilder);
-        AccessListEntriesBuilder accessListEntriesBuilder = aclUtils.createAccessListEntries(
+        AccessListEntriesBuilder accessListEntriesBuilder = aclUtils.accessListEntriesBuidler(
                 new AccessListEntriesBuilder(), accessListEntryBuilder);
-        AclBuilder accessListBuilder = aclUtils.createAccessList(new AclBuilder(),
+        AclBuilder accessListBuilder = aclUtils.aclBuilder(new AclBuilder(),
                 "http", accessListEntriesBuilder);
-        AccessListsBuilder accessListsBuilder = aclUtils.createAccessLists(new AccessListsBuilder(),
+        AccessListsBuilder accessListsBuilder = aclUtils.accessListsBuidler(new AccessListsBuilder(),
                 accessListBuilder);
         LOG.info("AccessLists: {}", accessListsBuilder.build());
         return accessListsBuilder;
     }
 
     @Test
-    public void testAccessLists() {
-        testModel(setAccessLists(), AccessLists.class);
+    public void testAccessLists() throws InterruptedException {
+        testModel(setAccessLists(), AccessLists.class, 0);
     }
 
     private ClassifiersBuilder setClassifiers() {
-        SffBuilder sffBuilder = classifierUtils.createSff(new SffBuilder(), "sffname");
-        SffsBuilder sffsBuilder = classifierUtils.createSffs(new SffsBuilder(), sffBuilder);
-        ClassifierBuilder classifierBuilder = classifierUtils.createClassifier(new ClassifierBuilder(),
+        SffBuilder sffBuilder = classifierUtils.sffBuilder(new SffBuilder(), "sffname");
+        SffsBuilder sffsBuilder = classifierUtils.sffsBuilder(new SffsBuilder(), sffBuilder);
+        ClassifierBuilder classifierBuilder = classifierUtils.classifierBuilder(new ClassifierBuilder(),
                 "classifierName", "aclName", sffsBuilder);
-        ClassifiersBuilder classifiersBuilder = classifierUtils.createClassifiers(new ClassifiersBuilder(),
+        ClassifiersBuilder classifiersBuilder = classifierUtils.ClassifiersBuilder(new ClassifiersBuilder(),
                 classifierBuilder);
         LOG.info("Classifiers: {}", classifiersBuilder.build());
         return classifiersBuilder;
     }
 
     @Test
-    public void testClassifiers() {
-        testModel(setClassifiers(), Classifiers.class);
+    public void testClassifiers() throws InterruptedException {
+        testModel(setClassifiers(), Classifiers.class, 0);
     }
 
-    private SfcBuilder setSfc() {
-        return sfcUtils.createSfc(new SfcBuilder(), "sfc");
+    private SfcBuilder netvirtSfcBuilder() {
+        return sfcUtils.sfcBuilder(new SfcBuilder(), "sfc");
     }
 
     @Test
-    public void testSfc() {
-        testModel(setSfc(), Sfc.class);
+    public void testNetvirtSfcModel() throws InterruptedException {
+        testModel(netvirtSfcBuilder(), Sfc.class, 0);
     }
 
-    private <T extends DataObject> void testModel(Builder<T> builder, Class<T> clazz) {
+    private <T extends DataObject> void testModel(Builder<T> builder, Class<T> clazz, long wait)
+            throws InterruptedException {
         InstanceIdentifier<T> path = InstanceIdentifier.create(clazz);
         assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, path, builder.build()));
         T result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
         assertNotNull(clazz.getSimpleName() + " should not be null", result);
+        Thread.sleep(wait);
         assertTrue("Failed to remove " + clazz.getSimpleName(),
                 mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, path));
         result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
         assertNull(clazz.getSimpleName() + " should be null", result);
+    }
+
+    private ServiceFunctionsBuilder serviceFunctionsBuilder() {
+        SfDataPlaneLocatorBuilder sfDataPlaneLocator =
+                serviceFunctionUtils.sfDataPlaneLocatorBuilder(new SfDataPlaneLocatorBuilder(),
+                        "192.168.120.31", 6633, "testDpl1-1234-uuid", "testSff1");
+        List<SfDataPlaneLocator> sfDataPlaneLocatorList = serviceFunctionUtils.list(
+                new ArrayList<SfDataPlaneLocator>(), sfDataPlaneLocator);
+        ServiceFunctionBuilder serviceFunctionBuilder =
+                serviceFunctionUtils.serviceFunctionBuidler(new ServiceFunctionBuilder(),
+                        "192.168.120.31", "testSf", sfDataPlaneLocatorList, Firewall.class);
+        List<ServiceFunction> serviceFunctionList = serviceFunctionUtils.list(
+                new ArrayList<ServiceFunction>(), serviceFunctionBuilder);
+
+        sfDataPlaneLocator =
+                serviceFunctionUtils.sfDataPlaneLocatorBuilder(new SfDataPlaneLocatorBuilder(),
+                        "192.168.120.32", 6633, "testDpl2-1234-uuid", "testSff2");
+        sfDataPlaneLocatorList = serviceFunctionUtils.list(
+                new ArrayList<SfDataPlaneLocator>(), sfDataPlaneLocator);
+        serviceFunctionBuilder =
+                serviceFunctionUtils.serviceFunctionBuidler(new ServiceFunctionBuilder(),
+                        "192.168.120.32", "testSf2", sfDataPlaneLocatorList, Dpi.class);
+        serviceFunctionList = serviceFunctionUtils.list(
+                serviceFunctionList, serviceFunctionBuilder);
+
+        ServiceFunctionsBuilder serviceFunctionsBuilder =
+                serviceFunctionUtils.serviceFunctionsBuilder(new ServiceFunctionsBuilder(),
+                        serviceFunctionList);
+        LOG.info("ServiceFunctions: {}", serviceFunctionsBuilder.build());
+        return serviceFunctionsBuilder;
+    }
+
+    private ServiceFunctionForwardersBuilder serviceFunctionForwardersBuilder() {
+        String sf1Name = "firewall-72";
+        String sff1Ip = "192.168.120.31";
+        String sff1Name = "SFF1";
+        String sffDpl1Name = "sfc-tun2";
+        String sn1Name = "OVSDB2";
+        String bridge1Name= "sw2";
+        int port = 6633;
+
+        DataPlaneLocatorBuilder dataPlaneLocatorBuilder =
+                serviceFunctionForwarderUtils.dataPlaneLocatorBuilder(
+                        new DataPlaneLocatorBuilder(), sff1Ip, port);
+        SffDataPlaneLocatorBuilder sffDataPlaneLocatorBuilder =
+                serviceFunctionForwarderUtils.sffDataPlaneLocatorBuilder(
+                        new SffDataPlaneLocatorBuilder(), dataPlaneLocatorBuilder, sffDpl1Name);
+        List<SffDataPlaneLocator> sffDataPlaneLocatorList = serviceFunctionForwarderUtils.list(
+                new ArrayList<SffDataPlaneLocator>(), sffDataPlaneLocatorBuilder);
+
+        SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder =
+                serviceFunctionForwarderUtils.sffSfDataPlaneLocatorBuilder(
+                        new SffSfDataPlaneLocatorBuilder(), sff1Ip, port);
+        ServiceFunctionDictionaryBuilder serviceFunctionDictionaryBuilder =
+                serviceFunctionForwarderUtils.serviceFunctionDictionaryBuilder(
+                        new ServiceFunctionDictionaryBuilder(), sf1Name, Firewall.class,
+                        sffSfDataPlaneLocatorBuilder);
+        List<ServiceFunctionDictionary> serviceFunctionDictionaryList = serviceFunctionForwarderUtils.list(
+                new ArrayList<ServiceFunctionDictionary>(), serviceFunctionDictionaryBuilder);
+
+        ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
+                serviceFunctionForwarderUtils.serviceFunctionForwarderBuilder(
+                        new ServiceFunctionForwarderBuilder(), sff1Name, sn1Name, bridge1Name,
+                        sffDataPlaneLocatorList, serviceFunctionDictionaryList);
+        List<ServiceFunctionForwarder>  serviceFunctionForwarderList = serviceFunctionForwarderUtils.list(
+                new ArrayList<ServiceFunctionForwarder>(), serviceFunctionForwarderBuilder);
+        ServiceFunctionForwardersBuilder serviceFunctionForwardersBuilder =
+                serviceFunctionForwarderUtils.serviceFunctionForwardersBuilder(
+                        new ServiceFunctionForwardersBuilder(), serviceFunctionForwarderList);
+        LOG.info("ServiceFunctionForwarders: {}", serviceFunctionForwardersBuilder.build());
+        return serviceFunctionForwardersBuilder;
+    }
+
+    @Test
+    public void testSfcModel() throws InterruptedException {
+        testModel(serviceFunctionsBuilder(), ServiceFunctions.class, 3000);
+        testModel(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class, 3000);
     }
 
     /*
@@ -450,7 +555,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         NshUtils nshUtils = new NshUtils(new Ipv4Address("192.168.50.71"), new PortNumber(6633),
                 (long)10, (short)255, (long)4096, (long)4096);
-        MatchesBuilder matchesBuilder = aclUtils.createMatches(new MatchesBuilder(), 80);
+        MatchesBuilder matchesBuilder = aclUtils.matchesBuilder(new MatchesBuilder(), 80);
         sfcClassifier.programSfcClassiferFlows(datapathId, (short)0, "test", matchesBuilder.build(),
                 nshUtils, (long)2, true);
 

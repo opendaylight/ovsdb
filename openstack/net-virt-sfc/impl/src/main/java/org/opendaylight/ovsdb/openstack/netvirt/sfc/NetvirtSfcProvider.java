@@ -17,8 +17,10 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.NetvirtSfcOF13Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.NetvirtSfcStandaloneOF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.services.SfcClassifierService;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.NetvirtSfcWorkaroundOF13Provider;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -53,12 +55,14 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("NetvirtSfcProvider Session Initiated");
         DataBroker dataBroker = session.getSALService(DataBroker.class);
 
+        MdsalUtils mdsalUtils = new MdsalUtils(dataBroker);
+        SfcUtils sfcUtils = new SfcUtils(mdsalUtils);
         // Allocate provider based on config
         INetvirtSfcOF13Provider provider;
         if (of13Provider.equals("standalone")) {
-            provider = new NetvirtSfcOF13Provider(dataBroker);
+            provider = new NetvirtSfcStandaloneOF13Provider(dataBroker);
         } else {
-            provider = new NetvirtSfcOF13Provider(dataBroker);
+            provider = new NetvirtSfcWorkaroundOF13Provider(dataBroker, mdsalUtils, sfcUtils);
         }
         aclListener = new NetvirtSfcAclListener(provider, dataBroker);
         classifierListener = new NetvirtSfcClassifierListener(provider, dataBroker);

@@ -6,19 +6,15 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.services;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services;
 
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SfcClassifierService extends AbstractServiceInstance implements ConfigInterface {
-    private static final Logger LOG = LoggerFactory.getLogger(SfcClassifierService.class);
-
     public SfcClassifierService(Service service) {
         super(service);
     }

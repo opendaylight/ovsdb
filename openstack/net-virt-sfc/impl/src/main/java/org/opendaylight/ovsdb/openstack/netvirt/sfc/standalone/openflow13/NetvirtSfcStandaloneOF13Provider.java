@@ -56,8 +56,8 @@ import org.slf4j.LoggerFactory;
  * Open vSwitch OpenFlow 1.3 Networking Provider for Netvirt SFC
  * @author Arun Yerra
  */
-public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider {
-    private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcOF13Provider.class);
+public class NetvirtSfcStandaloneOF13Provider implements INetvirtSfcOF13Provider {
+    private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcStandaloneOF13Provider.class);
     private static final short TABLE_0_CLASSIFIER = 0;
     private static final short TABLE_3_INGR_ACL = 50;
 
@@ -76,10 +76,10 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider {
     private static final String INTERFACE_TYPE_VXLAN_GPE = "vxlangpe";
 
     /**
-     * {@link NetvirtSfcOF13Provider} constructor.
+     * {@link NetvirtSfcStandaloneOF13Provider} constructor.
      * @param dataBroker MdSal {@link DataBroker}
      */
-    public NetvirtSfcOF13Provider(final DataBroker dataBroker) {
+    public NetvirtSfcStandaloneOF13Provider(final DataBroker dataBroker) {
         Preconditions.checkNotNull(dataBroker, "Input dataBroker cannot be NULL!");
         mdsalUtils = new MdsalUtils(dataBroker);
         this.setDependencies(null);
@@ -103,9 +103,7 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider {
         for (Classifier classifier : classifiers.getClassifier()) {
             if (classifier.getAcl().equals(aclName)) {
                 if (classifier.getBridges() != null) {
-                    for (Bridge bridge : classifier.getBridges().getBridge()) {
-                        addClassifierRules(bridge, acl);
-                    }
+                    addClassifierRules(classifier.getBridges(), acl);
                 }
             }
         }
@@ -135,16 +133,9 @@ public class NetvirtSfcOF13Provider implements INetvirtSfcOF13Provider {
 
     @Override
     public void addClassifierRules(Bridges bridges, Acl acl) {
-        Preconditions.checkNotNull(bridges, "Input bridge cannot be NULL!");
+        Preconditions.checkNotNull(bridges, "Input bridges cannot be NULL!");
         Preconditions.checkNotNull(acl, "Input accesslist cannot be NULL!");
 
-        //Node bridgeNode = getBridgeNode(bridge.getName());
-        //if (bridgeNode == null) {
-        //    LOG.debug("bridge {} not yet configured. Skip processing !!", bridge.getName());
-        //    return;
-        //}
-
-        // TODO: Find all nodes needing the classifier and add classifier to them
         for (Ace ace : acl.getAccessListEntries().getAce()) {
             processAclEntry(ace, bridges, true);
         }

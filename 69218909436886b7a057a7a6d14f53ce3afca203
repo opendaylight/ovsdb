@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1acb0d3e_2b03d974",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-09T06:51:50Z",
+      "side": 1,
+      "message": "When we create a logicalSwitch by restconf, the value of hwvtepGloabal is null.",
+      "range": {
+        "startLine": 117,
+        "startChar": 41,
+        "endLine": 117,
+        "endChar": 53
+      },
+      "revId": "69218909436886b7a057a7a6d14f53ce3afca203",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1acb0d3e_8bc3ed37",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-09T06:51:50Z",
+      "side": 1,
+      "message": "how about \"hcm.getConnectionInstance(created)\"?",
+      "range": {
+        "startLine": 260,
+        "startChar": 32,
+        "endLine": 260,
+        "endChar": 63
+      },
+      "revId": "69218909436886b7a057a7a6d14f53ce3afca203",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

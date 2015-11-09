@@ -22,6 +22,30 @@
       "revId": "270d1191c64ac8739b5738498d6d8c2536f38409",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1acb0d3e_eb78712d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/PortSecurityHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-11-09T05:28:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bada0100_709545e3",
+      "range": {
+        "startLine": 130,
+        "startChar": 16,
+        "endLine": 130,
+        "endChar": 42
+      },
+      "revId": "270d1191c64ac8739b5738498d6d8c2536f38409",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

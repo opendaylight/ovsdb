@@ -85,6 +85,12 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
              *
              */
 
+            if (portSecurityRule == null ||
+                    portSecurityRule.getSecurityRuleEthertype() == null ||
+                    portSecurityRule.getSecurityRuleDirection() == null) {
+                continue;
+            }
+
             if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
                     && "ingress".equals(portSecurityRule.getSecurityRuleDirection())) {
                 LOG.debug("programPortSecurityGroup: Rule matching IPv4 and ingress is: {} ", portSecurityRule);

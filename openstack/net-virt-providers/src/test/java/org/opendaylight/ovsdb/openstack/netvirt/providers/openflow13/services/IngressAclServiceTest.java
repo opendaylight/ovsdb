@@ -267,6 +267,43 @@ public class IngressAclServiceTest {
     }
 */
     /**
+     * Test method {@link EgressAclService#programPortSecurityGroup(java.lang.Long, java.lang.String,
+     * java.lang.String, long, org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup,
+     * java.lang.String, boolean)} when portSecurityRule is incomplete
+     */
+    @Test
+    public void testProgramPortSecurityGroupWithIncompleteRule() throws Exception {
+        NeutronSecurityRule portSecurityRule1 = mock(NeutronSecurityRule.class);
+        when(portSecurityRule1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(portSecurityRule1.getSecurityRuleDirection()).thenReturn("not_ingress");  // other direction
+
+        NeutronSecurityRule portSecurityRule2 = mock(NeutronSecurityRule.class);
+        when(portSecurityRule2.getSecurityRuleEthertype()).thenReturn(null);
+        when(portSecurityRule2.getSecurityRuleDirection()).thenReturn("ingress");
+
+        NeutronSecurityRule portSecurityRule3 = mock(NeutronSecurityRule.class);
+        when(portSecurityRule3.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(portSecurityRule3.getSecurityRuleDirection()).thenReturn(null);
+
+        NeutronSecurityRule portSecurityRule4 = mock(NeutronSecurityRule.class);
+        when(portSecurityRule4.getSecurityRuleEthertype()).thenReturn(null);
+        when(portSecurityRule4.getSecurityRuleDirection()).thenReturn(null);
+
+        List<NeutronSecurityRule> portSecurityList = new ArrayList<>();
+        portSecurityList.add(null);
+        portSecurityList.add(portSecurityRule1);
+        portSecurityList.add(portSecurityRule2);
+        portSecurityList.add(portSecurityRule3);
+        portSecurityList.add(portSecurityRule4);
+
+        NeutronSecurityGroup localSecurityGroup = mock(NeutronSecurityGroup.class);
+        when(localSecurityGroup.getSecurityRules()).thenReturn(portSecurityList);
+
+        ingressAclServiceSpy.programPortSecurityGroup(
+                Long.valueOf(1554), "2", MAC_ADDRESS, 124, localSecurityGroup, PORT_UUID, false);
+    }
+
+    /**
      *  Test IPv4 add test case.
      */
     @Test

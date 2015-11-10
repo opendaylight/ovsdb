@@ -8,10 +8,12 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.SfcClassifierService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.Bridges;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Open vSwitch OpenFlow 1.3 Networking Provider for Netvirt SFC
@@ -40,4 +42,7 @@ public interface INetvirtSfcOF13Provider {
 
     void addClassifierRules(Acl acl);
     void removeClassifierRules(Acl acl);
+
+    void setSfcClassifierService(ISfcClassifierService sfcClassifierService);
+    public void setDependencies(ServiceReference serviceReference);
 }

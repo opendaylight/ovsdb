@@ -114,4 +114,23 @@ public class SouthboundConstants {
             return this.mode;
         }
     }
+
+    public enum OWNERSHIPSTATES {
+        OWNER("OWNER"),
+        NONOWNER("NON-OWNER");
+
+        private final String state;
+
+        OWNERSHIPSTATES(String state) {
+            this.state = state;
+        }
+        @Override
+        public String toString() {
+            return state;
+        }
+
+        public String getState() {
+            return this.state;
+        }
+    }
 }

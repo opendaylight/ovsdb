@@ -87,6 +87,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
                         ovsdbConnection = new OvsdbConnectionService();
                         ovsdbConnection.registerConnectionListener(cm);
                         ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+                        LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
                     }
                 }
             }

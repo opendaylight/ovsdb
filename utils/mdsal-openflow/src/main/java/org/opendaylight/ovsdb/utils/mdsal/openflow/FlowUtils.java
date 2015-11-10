@@ -26,6 +26,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,9 @@ import org.slf4j.LoggerFactory;
 public class FlowUtils {
     private static final Logger LOG = LoggerFactory.getLogger(FlowUtils.class);
     private static final String OPENFLOW = "openflow";
+    public final static long REG_VALUE_FROM_LOCAL = 0x1L;
+    public final static long REG_VALUE_FROM_REMOTE = 0x2L;
+    public static final Class<? extends NxmNxReg> REG_FIELD = NxmNxReg0.class;
 
     public static String getNodeName(long dpidLong) {
         return OPENFLOW + ":" + dpidLong;
@@ -80,7 +85,7 @@ public class FlowUtils {
             LOG.error(e.getMessage(), e);
         }
 
-        LOG.info("Cannot find data for Flow {}", flowBuilder.getFlowName());
+        LOG.info("Cannot find data for Flow {} in {}", flowBuilder.getFlowName(), store);
         return null;
     }
 

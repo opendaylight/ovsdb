@@ -23,6 +23,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4Builder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.packet.fields.rev150611.acl.transport.header.fields.DestinationPortRangeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfcBuilder;
 
 public class AclUtils extends AbstractUtils {
     public MatchesBuilder matchesBuilder(MatchesBuilder matchesBuilder, int destPort) {
@@ -43,6 +45,12 @@ public class AclUtils extends AbstractUtils {
         return actionsBuilder.setPacketHandling(new PermitBuilder().setPermit(permit).build());
     }
 
+    public ActionsBuilder actionsBuilder(ActionsBuilder actionsBuilder, String sfcName) {
+        RedirectToSfcBuilder redirectToSfcBuilder = new RedirectToSfcBuilder().setRedirectSfc(sfcName);
+
+        return actionsBuilder.addAugmentation(RedirectToSfc.class, redirectToSfcBuilder.build());
+    }
+
     public AceBuilder aceBuilder(AceBuilder accessListEntryBuilder,
                                  String ruleName,
                                  MatchesBuilder matchesBuilder,
@@ -54,27 +62,26 @@ public class AclUtils extends AbstractUtils {
     }
 
     public AccessListEntriesBuilder accessListEntriesBuidler(AccessListEntriesBuilder accessListEntriesBuilder,
-                                                             AceBuilder accessListEntryBuilder) {
-        List<Ace> accessListEntriesList = new ArrayList<>();
-        accessListEntriesList.add(accessListEntryBuilder.build());
+                                                             AceBuilder aceBuilder) {
+        List<Ace> aceList = new ArrayList<>();
+        aceList.add(aceBuilder.build());
 
-        return accessListEntriesBuilder;
+        return accessListEntriesBuilder.setAce(aceList);
     }
 
-    public AclBuilder aclBuilder(AclBuilder accessListBuilder,
+    public AclBuilder aclBuilder(AclBuilder aclBuilder,
                                  String aclName,
                                  AccessListEntriesBuilder accessListEntriesBuilder) {
-        return accessListBuilder
+        return aclBuilder
                 .setAclName(aclName)
                 .setAccessListEntries(accessListEntriesBuilder.build());
     }
 
-    public AccessListsBuilder accessListsBuidler(AccessListsBuilder accessListsBuilder,
-                                                 AclBuilder accessListBuilder) {
-        List<Acl> accessListList = new ArrayList<>();
-        accessListList.add(accessListBuilder.build());
-        accessListsBuilder.setAcl(accessListList);
+    public AccessListsBuilder accesslistsbuilder(AccessListsBuilder accessListsBuilder,
+                                                 AclBuilder aclBuilder) {
+        List<Acl> aclList = new ArrayList<>();
+        aclList.add(aclBuilder.build());
 
-        return accessListsBuilder;
+        return accessListsBuilder.setAcl(aclList);
     }
 }

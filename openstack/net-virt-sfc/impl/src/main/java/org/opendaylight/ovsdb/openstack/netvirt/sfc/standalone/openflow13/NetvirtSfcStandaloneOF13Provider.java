@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.INetvirtSfcOF13Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.ISfcClassifierService;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NshUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -82,7 +83,7 @@ public class NetvirtSfcStandaloneOF13Provider implements INetvirtSfcOF13Provider
     public NetvirtSfcStandaloneOF13Provider(final DataBroker dataBroker) {
         Preconditions.checkNotNull(dataBroker, "Input dataBroker cannot be NULL!");
         mdsalUtils = new MdsalUtils(dataBroker);
-        this.setDependencies(null);
+        //this.setDependencies(null);
         sfcClassifier = new SfcClassifier(dataBroker, southbound, mdsalUtils);
     }
 
@@ -124,6 +125,11 @@ public class NetvirtSfcStandaloneOF13Provider implements INetvirtSfcOF13Provider
                 }
             }
         }
+    }
+
+    @Override
+    public void setSfcClassifierService(ISfcClassifierService sfcClassifierService) {
+
     }
 
     @Override
@@ -407,7 +413,8 @@ public class NetvirtSfcStandaloneOF13Provider implements INetvirtSfcOF13Provider
         sfcClassifier.programLocalInPort(dpidLong, segmentationId, inPort, writeTable, goToTableId, matches, write);
     }
 
-    private void setDependencies(ServiceReference serviceReference) {
+    @Override
+    public void setDependencies(ServiceReference serviceReference) {
         nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }

@@ -19,7 +19,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provide
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.NetvirtSfcStandaloneOF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.services.SfcClassifierService;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.NetvirtSfcWorkaroundOF13Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.NetvirtSfcWorkaroundOF13Provider;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -57,6 +57,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
 
         MdsalUtils mdsalUtils = new MdsalUtils(dataBroker);
         SfcUtils sfcUtils = new SfcUtils(mdsalUtils);
+
         // Allocate provider based on config
         INetvirtSfcOF13Provider provider;
         if (of13Provider.equals("standalone")) {
@@ -67,7 +68,8 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         aclListener = new NetvirtSfcAclListener(provider, dataBroker);
         classifierListener = new NetvirtSfcClassifierListener(provider, dataBroker);
 
-        addToPipeline();
+        addToPipeline(provider);
+        provider.setDependencies(null);
     }
 
     @Override
@@ -77,12 +79,23 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         classifierListener.close();
     }
 
-    private void addToPipeline() {
-        SfcClassifierService sfcClassifierService = new SfcClassifierService();
-        registerService(bundleContext, SfcClassifierService.class.getName(),
-                        sfcClassifierService, Service.SFC_CLASSIFIER);
-        sfcClassifierService.setDependencies(bundleContext, null);
+    private void addToPipeline(INetvirtSfcOF13Provider provider) {
+        if (provider instanceof NetvirtSfcStandaloneOF13Provider) {
+            SfcClassifierService sfcClassifierService =
+                    new org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.services.SfcClassifierService();
+            registerService(bundleContext, ISfcClassifierService.class.getName(),
+                    sfcClassifierService, Service.SFC_CLASSIFIER);
+            sfcClassifierService.setDependencies(bundleContext, null);
+        } else {
+            org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.SfcClassifierService sfcClassifierService =
+                    new org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.SfcClassifierService();
+            registerService(bundleContext, ISfcClassifierService.class.getName(),
+                    sfcClassifierService, Service.SFC_CLASSIFIER);
+            sfcClassifierService.setDependencies(bundleContext, null);
         }
+
+        //provider.setSfcClassifierService(sfcClassifierService);
+    }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,
                                                    Dictionary<String, Object> properties, Object impl) {
@@ -96,7 +109,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         properties.put(AbstractServiceInstance.SERVICE_PROPERTY, serviceProperty);
         properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
         return registerService(bundleContext,
-                new String[] {AbstractServiceInstance.class.getName(),
-                interfaceClassName}, properties, impl);
+                new String[] {AbstractServiceInstance.class.getName(),interfaceClassName},
+                properties, impl);
     }
 }

@@ -211,17 +211,9 @@ public class TyperUtils {
     }
 
     private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion) {
-        if (!fromVersion.equals(Version.NULL)) {
-            if (schemaVersion.compareTo(fromVersion) < 0) {
-                String message = SchemaVersionMismatchException.createMessage(schemaVersion, fromVersion);
-                throw new SchemaVersionMismatchException(message);
-            }
-        }
-        if (!untilVersion.equals(Version.NULL)) {
-            if (schemaVersion.compareTo(untilVersion) > 0) {
-                String message = SchemaVersionMismatchException.createMessage(schemaVersion, untilVersion);
-                throw new SchemaVersionMismatchException(message);
-            }
+        if ((!fromVersion.equals(Version.NULL) && schemaVersion.compareTo(fromVersion) < 0) || (!untilVersion.equals(
+                Version.NULL) && schemaVersion.compareTo(untilVersion) > 0)) {
+            throw new SchemaVersionMismatchException(schemaVersion, fromVersion, untilVersion);
         }
     }
 

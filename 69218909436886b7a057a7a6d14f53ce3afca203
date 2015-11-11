@@ -45,6 +45,52 @@
       "revId": "69218909436886b7a057a7a6d14f53ce3afca203",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_4d4aed84",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-11T06:58:46Z",
+      "side": 1,
+      "message": "The name of the function is a little misleading. How about \"createInstanceIdentifier\" or \"createGlobalIid\"?",
+      "range": {
+        "startLine": 122,
+        "startChar": 43,
+        "endLine": 122,
+        "endChar": 64
+      },
+      "revId": "69218909436886b7a057a7a6d14f53ce3afca203",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_ad7da9b3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-11T06:58:46Z",
+      "side": 1,
+      "message": "The name of this function does not express its action exactly. How about \"createPhysicalSwitchIid\"?",
+      "range": {
+        "startLine": 136,
+        "startChar": 43,
+        "endLine": 136,
+        "endChar": 67
+      },
+      "revId": "69218909436886b7a057a7a6d14f53ce3afca203",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

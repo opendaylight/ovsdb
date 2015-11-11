@@ -113,7 +113,7 @@ public class InstructionUtils {
     }
 
     /**
-     * Create NORMAL Reserved Port Instruction (packet_in)
+     * Create LOCAL Reserved Port Instruction
      *
      * @param nodeName Uri Prefix, containing nodeConnectorType and dpId (aka NodeId)
      * @param ib Map InstructionBuilder without any instructions
@@ -129,6 +129,35 @@ public class InstructionUtils {
         NodeId nodeId = new NodeId(nodeName);
         output.setOutputNodeConnector(new NodeConnectorId(nodeId.getValue() + ":"
                 + OutputPortValues.NORMAL.toString()));
+        ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
+        actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+    /**
+     * Create NORMAL Reserved Port Instruction (packet_in)
+     *
+     * @param ib Map InstructionBuilder without any instructions
+     * @param dpidLong Long the datapath ID of a switch/node
+     * @return ib Map InstructionBuilder with instructions
+     */
+    public static InstructionBuilder createLocalInstructions(InstructionBuilder ib, long dpidLong) {
+        List<Action> actionList = new ArrayList<>();
+        ActionBuilder ab = new ActionBuilder();
+
+        OutputActionBuilder output = new OutputActionBuilder();
+        output.setOutputNodeConnector(new NodeConnectorId("openflow:" + dpidLong + ":"
+                + OutputPortValues.LOCAL.toString()));
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));

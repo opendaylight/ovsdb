@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services;
 
 import com.google.common.collect.Lists;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -18,6 +19,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.ISfcClassifierService;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NshUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Matches;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceEth;
@@ -45,7 +47,8 @@ import org.slf4j.LoggerFactory;
 
 public class SfcClassifierService extends AbstractServiceInstance implements ConfigInterface, ISfcClassifierService {
     private static final Logger LOG = LoggerFactory.getLogger(SfcClassifierService.class);
-    private static final short SFC_TABLE = 10;
+    private static final short TABLE_0 = 0;
+    private static final short UDP_SHORT = 17;
 
     public SfcClassifierService(Service service) {
         super(service);
@@ -71,22 +74,30 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
         MatchBuilder matchBuilder = buildMatch(matches);
         flowBuilder.setMatch(matchBuilder.build());
-        MatchUtils.addNxRegMatch(matchBuilder,
-                new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL));
+        flowBuilder.setMatch(MatchUtils.addNxRegMatch(
+                matchBuilder,
+                new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL)).build());
 
-        String flowId = "sfcClass_" + ruleName;// + "_" + nshHeader.getNshNsp();
+        String flowId = "sfcIngressClass_" + ruleName;// + "_" + nshHeader.getNshNsp();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(SFC_TABLE);
+        flowBuilder.setTableId(getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
 
         if (write) {
-            List<Action> actionList = getNshAction(nshHeader);
             ActionBuilder ab = new ActionBuilder();
+            List<Action> actionList = new ArrayList<>();
+
+            ab.setAction(ActionUtils.nxMoveTunIdtoNshc2());
+            ab.setOrder(actionList.size());
+            ab.setKey(new ActionKey(actionList.size()));
+            actionList.add(ab.build());
+
+            getNshAction(nshHeader, actionList);
 
             ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dataPathId, vxGpeOfPort)));
             ab.setOrder(actionList.size());
@@ -112,7 +123,185 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         }
     }
 
-    private List<Action> getNshAction(NshUtils header) {
+    @Override
+    public void programSfcTable(long dataPathId, long vxGpeOfPort, short goToTableId, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort).build());
+
+        String flowId = "sfcTable_" + vxGpeOfPort;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        flowBuilder.setPriority(1000);
+
+        if (write) {
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            InstructionBuilder ib =
+                    InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), goToTableId);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    @Override
+    public void programEgressClassifier1(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
+                                         int tunnelOfPort, int tunnelId, short gotoTableId, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort).build());
+        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nsp).build());
+        flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nsi).build());
+
+        String flowId = "sfcEgressClass1_" + vxGpeOfPort;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            List<Action> actionList = Lists.newArrayList();
+
+            ActionBuilder ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxMoveNshc2ToTunId());
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            ib = InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), getTable());
+            ib.setOrder(1);
+            ib.setKey(new InstructionKey(1));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    @Override
+    public void programEgressClassifier2(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
+                                         int tunnelOfPort, int tunnelId, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort).build());
+        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nsp).build());
+        flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nsi).build());
+
+        String flowId = "sfcEgressClass2_" + vxGpeOfPort;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            List<Action> actionList = Lists.newArrayList();
+
+            ActionBuilder ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxResubmitAction(tunnelOfPort, TABLE_0));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    @Override
+    public void program_sfEgress(long dataPathId, int dstPort, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createIpProtocolMatch(matchBuilder, UDP_SHORT);
+        flowBuilder.setMatch(MatchUtils.addLayer4Match(matchBuilder, UDP_SHORT, 0, dstPort).build());
+        flowBuilder.setMatch(MatchUtils.addNxRegMatch(
+                matchBuilder, new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL)).build());
+
+        String flowId = "sfEgress_" + dstPort;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            InstructionUtils.createLocalInstructions(ib, dataPathId);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    private List<Action> getNshAction(NshUtils header, List<Action> actionList) {
         // Build the Actions to Add the NSH Header
         org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action nshC1Load =
                 ActionUtils.nxLoadNshc1RegAction(header.getNshMetaC1());
@@ -127,14 +316,19 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action loadChainTunDest =
                 ActionUtils.nxLoadTunIPv4Action(header.getNshTunIpDst().getValue(), false);
 
-        int count = 0;
-        List<Action> actionList = Lists.newArrayList();
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC1Load).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(nshC2Load).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(nspLoad).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(nsiLoad).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunDest).build());
-        actionList.add(new ActionBuilder().setOrder(count++).setAction(loadChainTunVnid).build());
+        int count = actionList.size();
+        actionList.add(new ActionBuilder()
+                .setKey(new ActionKey(count)).setOrder(count++).setAction(nshC1Load).build());
+        //actionList.add(new ActionBuilder()
+        // .setKey(new ActionKey(count)).setOrder(count++).setAction(nshC2Load).build());
+        actionList.add(new ActionBuilder()
+                .setKey(new ActionKey(count)).setOrder(count++).setAction(nspLoad).build());
+        actionList.add(new ActionBuilder()
+                .setKey(new ActionKey(count)).setOrder(count++).setAction(nsiLoad).build());
+        actionList.add(new ActionBuilder()
+                .setKey(new ActionKey(count)).setOrder(count++).setAction(loadChainTunDest).build());
+        actionList.add(new ActionBuilder()
+                .setKey(new ActionKey(count)).setOrder(count).setAction(loadChainTunVnid).build());
         return actionList;
     }
 
@@ -147,6 +341,10 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                 //AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
                 //MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Network());
                 //MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
+                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
+                MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
+                        aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
+            } else {
                 MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
                         aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());

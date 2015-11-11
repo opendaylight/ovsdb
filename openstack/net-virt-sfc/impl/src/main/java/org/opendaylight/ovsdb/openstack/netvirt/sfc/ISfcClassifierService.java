@@ -8,7 +8,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
+import java.net.InetAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Matches;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 
 public interface ISfcClassifierService {
     void programIngressClassifier(long dataPathId, String ruleName, Matches matches,
@@ -23,4 +25,10 @@ public interface ISfcClassifierService {
                                   int tunnelOfPort, int tunnelId, boolean write);
 
     void program_sfEgress(long dataPathId, int dstPort, boolean write);
+
+    void program_sfIngress(long dataPathId, int dstPort, long sfOfPort,
+                           String ipAddress, String sfDplName, boolean write);
+
+    void programStaticArpEntry(long dataPathId, long ofPort, String macAddressStr,
+                               String ipAddress, boolean write);
 }

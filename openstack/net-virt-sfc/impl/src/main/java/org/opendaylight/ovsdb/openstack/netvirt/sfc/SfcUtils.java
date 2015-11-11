@@ -92,7 +92,27 @@ public class SfcUtils {
             return null;
         }
 
+        return getSfIp(serviceFunction);
+    }
+
+    public IpAddress getSfIp(ServiceFunction serviceFunction) {
+        if (serviceFunction == null) {
+            LOG.info("getSfIp: Servicefunction is null");
+            return null;
+        }
+
         Ip ipLocator = (Ip) serviceFunction.getSfDataPlaneLocator().get(0).getLocatorType();
         return ipLocator.getIp();
+    }
+
+    public String getSfDplName(ServiceFunction serviceFunction) {
+        String sfDplName = null;
+        if (serviceFunction == null) {
+            LOG.warn("getSfDplName: Servicefunction is null");
+            return null;
+        }
+
+        sfDplName = serviceFunction.getSfDataPlaneLocator().get(0).getName().getValue();
+        return sfDplName;
     }
 }

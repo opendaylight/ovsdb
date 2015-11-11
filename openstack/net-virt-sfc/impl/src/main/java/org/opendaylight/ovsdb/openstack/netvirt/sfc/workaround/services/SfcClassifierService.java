@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -25,6 +26,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceEth;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceIp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
@@ -32,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
@@ -40,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -73,7 +78,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         FlowBuilder flowBuilder = new FlowBuilder();
 
         MatchBuilder matchBuilder = buildMatch(matches);
-        flowBuilder.setMatch(matchBuilder.build());
+        //flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setMatch(MatchUtils.addNxRegMatch(
                 matchBuilder,
                 new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL)).build());
@@ -166,8 +171,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         FlowBuilder flowBuilder = new FlowBuilder();
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort).build());
-        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nsp).build());
+        MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort);
+        MatchUtils.addNxNspMatch(matchBuilder, nsp);
         flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nsi).build());
 
         String flowId = "sfcEgressClass1_" + vxGpeOfPort;
@@ -183,7 +188,9 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructions = Lists.newArrayList();
-            List<Action> actionList = Lists.newArrayList();
+            InstructionBuilder ib = new InstructionBuilder();
+
+            /*List<Action> actionList = Lists.newArrayList();
 
             ActionBuilder ab = new ActionBuilder();
             ab.setAction(ActionUtils.nxMoveNshc2ToTunId());
@@ -193,16 +200,15 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);
-            InstructionBuilder ib = new InstructionBuilder();
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
+            ib.setOrder(instructions.size());
+            ib.setKey(new InstructionKey(instructions.size()));
+            instructions.add(ib.build());*/
 
             ib = InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), getTable());
-            ib.setOrder(1);
-            ib.setKey(new InstructionKey(1));
+            ib.setOrder(instructions.size());
+            ib.setKey(new InstructionKey(instructions.size()));
             instructions.add(ib.build());
 
             isb.setInstruction(instructions);
@@ -220,8 +226,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         FlowBuilder flowBuilder = new FlowBuilder();
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort).build());
-        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nsp).build());
+        MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort);
+        MatchUtils.addNxNspMatch(matchBuilder, nsp);
         flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nsi).build());
 
         String flowId = "sfcEgressClass2_" + vxGpeOfPort;
@@ -263,6 +269,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         }
     }
 
+    // packet from sf to sff that need to go out local
     @Override
     public void program_sfEgress(long dataPathId, int dstPort, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
@@ -270,7 +277,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createIpProtocolMatch(matchBuilder, UDP_SHORT);
-        flowBuilder.setMatch(MatchUtils.addLayer4Match(matchBuilder, UDP_SHORT, 0, dstPort).build());
+        MatchUtils.addLayer4Match(matchBuilder, UDP_SHORT, 0, dstPort);
         flowBuilder.setMatch(MatchUtils.addNxRegMatch(
                 matchBuilder, new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL)).build());
 
@@ -289,6 +296,143 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructions = Lists.newArrayList();
             InstructionUtils.createLocalInstructions(ib, dataPathId);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    // looped back sff to sf packets
+    @Override
+    public void program_sfIngress(long dataPathId, int dstPort, long sfOfPort,
+                                  String ipAddress, String sfDplName, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createIpProtocolMatch(matchBuilder, UDP_SHORT);
+        Ipv4Prefix ipCidr = MatchUtils.iPv4PrefixFromIPv4Address(ipAddress);
+        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(ipCidr));
+        flowBuilder.setMatch(MatchUtils.addLayer4Match(matchBuilder, UDP_SHORT, 0, dstPort).build());
+
+        String flowId = "sfIngress_" + dstPort + "_" + ipAddress;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            InstructionUtils.createOutputPortInstructions(ib, dataPathId, sfOfPort);
+
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    @Override
+    public void programStaticArpEntry(long dataPathId, long ofPort, String macAddressStr,
+                                      String ipAddress, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        MacAddress macAddress = new MacAddress(macAddressStr);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));
+        MatchUtils.createArpDstIpv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress));
+        flowBuilder.setMatch(matchBuilder.build());
+
+        String flowId = "ArpResponder_" + ipAddress;
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(1024);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write == true) {
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            ActionBuilder ab = new ActionBuilder();
+            List<Action> actionList = Lists.newArrayList();
+
+            // Move Eth Src to Eth Dst
+            ab.setAction(ActionUtils.nxMoveEthSrcToEthDstAction());
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            // Set Eth Src
+            ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(macAddress)));
+            ab.setOrder(1);
+            ab.setKey(new ActionKey(1));
+            actionList.add(ab.build());
+
+            // Set ARP OP
+            ab.setAction(ActionUtils.nxLoadArpOpAction(BigInteger.valueOf(0x02L)));
+            ab.setOrder(2);
+            ab.setKey(new ActionKey(2));
+            actionList.add(ab.build());
+
+            // Move ARP SHA to ARP THA
+            ab.setAction(ActionUtils.nxMoveArpShaToArpThaAction());
+            ab.setOrder(3);
+            ab.setKey(new ActionKey(3));
+            actionList.add(ab.build());
+
+            // Move ARP SPA to ARP TPA
+            ab.setAction(ActionUtils.nxMoveArpSpaToArpTpaAction());
+            ab.setOrder(4);
+            ab.setKey(new ActionKey(4));
+            actionList.add(ab.build());
+
+            // Load Mac to ARP SHA
+            ab.setAction(ActionUtils.nxLoadArpShaAction(macAddress));
+            ab.setOrder(5);
+            ab.setKey(new ActionKey(5));
+            actionList.add(ab.build());
+
+            // Load IP to ARP SPA
+            ab.setAction(ActionUtils.nxLoadArpSpaAction(ipAddress));
+            ab.setOrder(6);
+            ab.setKey(new ActionKey(6));
+            actionList.add(ab.build());
+
+            // Output of InPort
+            ab.setAction(ActionUtils.outputAction(
+                    FlowUtils.getSpecialNodeConnectorId(dataPathId, OutputPortValues.INPORT.toString())));
+            ab.setOrder(7);
+            ab.setKey(new ActionKey(7));
+            actionList.add(ab.build());
+
+            // Create Apply Actions Instruction
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());

@@ -42,4 +42,24 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     public void programIngressClassifier(long dataPathId, String ruleName, Matches matches, NshUtils nshHeader, long vxGpeOfPort, boolean write) {
 
     }
+
+    @Override
+    public void programSfcTable(long dataPathId, long vxGpeOfPort, short goToTableId, boolean write) {
+
+    }
+
+    @Override
+    public void programEgressClassifier1(long dataPathId, long vxGpeOfPort, long nsp, short nsi, int tunnelOfPort, int tunnelId, short gotoTableId, boolean write) {
+
+    }
+
+    @Override
+    public void programEgressClassifier2(long dataPathId, long vxGpeOfPort, long nsp, short nsi, int tunnelOfPort, int tunnelId, boolean write) {
+
+    }
+
+    @Override
+    public void program_sfEgress(long dataPathId, int dstPort, boolean write) {
+
+    }
 }

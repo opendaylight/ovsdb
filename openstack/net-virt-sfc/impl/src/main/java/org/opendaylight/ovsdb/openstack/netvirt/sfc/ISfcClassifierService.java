@@ -13,4 +13,14 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 public interface ISfcClassifierService {
     void programIngressClassifier(long dataPathId, String ruleName, Matches matches,
                                   NshUtils nshHeader, long vxGpeOfPort, boolean write);
+
+    void programSfcTable(long dataPathId, long vxGpeOfPort, short goToTableId, boolean write);
+
+    void programEgressClassifier1(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
+                                  int tunnelOfPort, int tunnelId, short gotoTableId, boolean write);
+
+    void programEgressClassifier2(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
+                                  int tunnelOfPort, int tunnelId, boolean write);
+
+    void program_sfEgress(long dataPathId, int dstPort, boolean write);
 }

@@ -31,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetFieldBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TunnelBuilder;
@@ -58,6 +59,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nx.action.set.nshc._4.grouping.NxSetNshc4Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.SrcChoice;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxArpShaCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxNshc1CaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxNshc2CaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxRegCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxTunIdCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxTunIpv4DstCaseBuilder;
@@ -261,35 +264,27 @@ public final class ActionUtils {
 
     public static Action nxMoveRegTunIdAction(Class<? extends NxmNxReg> src,
                                               boolean groupBucket) {
-        return nxMoveRegAction(new SrcNxRegCaseBuilder()
-                                    .setNxReg(src).build(),
-                               new DstNxTunIdCaseBuilder()
-                                   .setNxTunId(Boolean.TRUE).build(),
+        return nxMoveRegAction(new SrcNxRegCaseBuilder().setNxReg(src).build(),
+                               new DstNxTunIdCaseBuilder().setNxTunId(Boolean.TRUE).build(),
                                31,
                                groupBucket);
     }
 
     public static Action nxMoveArpShaToArpThaAction() {
-        return nxMoveRegAction(new SrcNxArpShaCaseBuilder()
-                                   .setNxArpSha(Boolean.TRUE).build(),
-                               new DstNxArpThaCaseBuilder()
-                                   .setNxArpTha(Boolean.TRUE).build(),
+        return nxMoveRegAction(new SrcNxArpShaCaseBuilder().setNxArpSha(Boolean.TRUE).build(),
+                               new DstNxArpThaCaseBuilder().setNxArpTha(Boolean.TRUE).build(),
                                47, false);
     }
 
     public static Action nxMoveEthSrcToEthDstAction() {
-        return nxMoveRegAction(new SrcOfEthSrcCaseBuilder()
-                                   .setOfEthSrc(Boolean.TRUE).build(),
-                               new DstOfEthDstCaseBuilder()
-                                   .setOfEthDst(Boolean.TRUE).build(),
+        return nxMoveRegAction(new SrcOfEthSrcCaseBuilder().setOfEthSrc(Boolean.TRUE).build(),
+                               new DstOfEthDstCaseBuilder().setOfEthDst(Boolean.TRUE).build(),
                                47, false);
     }
 
     public static Action nxMoveArpSpaToArpTpaAction() {
-        return nxMoveRegAction(new SrcOfArpSpaCaseBuilder()
-                                   .setOfArpSpa(Boolean.TRUE).build(),
-                               new DstOfArpTpaCaseBuilder()
-                                   .setOfArpTpa(Boolean.TRUE).build());
+        return nxMoveRegAction(new SrcOfArpSpaCaseBuilder().setOfArpSpa(Boolean.TRUE).build(),
+                               new DstOfArpTpaCaseBuilder().setOfArpTpa(Boolean.TRUE).build());
     }
 
     public static Action nxOutputRegAction(SrcChoice srcChoice) {
@@ -359,13 +354,31 @@ public final class ActionUtils {
     }
 
     public static Action nxMoveRegTunDstToNshc1() {
-        return nxMoveRegAction(new SrcNxTunIpv4DstCaseBuilder().setNxTunIpv4Dst(Boolean.TRUE).build(),
-                new DstNxNshc1CaseBuilder().setNxNshc1Dst(Boolean.TRUE).build(), 31, false);
+        return nxMoveRegAction(
+                new SrcNxTunIpv4DstCaseBuilder().setNxTunIpv4Dst(Boolean.TRUE).build(),
+                new DstNxNshc1CaseBuilder().setNxNshc1Dst(Boolean.TRUE).build(),
+                31, false);
     }
 
     public static Action nxMoveTunIdtoNshc2() {
-        return nxMoveRegAction(new SrcNxTunIdCaseBuilder().setNxTunId(Boolean.TRUE).build(),
-                new DstNxNshc2CaseBuilder().setNxNshc2Dst(Boolean.TRUE).build(), 31, false);
+        return nxMoveRegAction(
+                new SrcNxTunIdCaseBuilder().setNxTunId(Boolean.TRUE).build(),
+                new DstNxNshc2CaseBuilder().setNxNshc2Dst(Boolean.TRUE).build(),
+                31, false);
+    }
+
+    public static Action nxMoveNshc1ToTunIpv4Dst() {
+        return nxMoveRegAction(
+                new SrcNxNshc1CaseBuilder().setNxNshc1Dst(Boolean.TRUE).build(),
+                new DstNxTunIpv4DstCaseBuilder().setNxTunIpv4Dst(Boolean.TRUE).build(),
+                31, false);
+    }
+
+    public static Action nxMoveNshc2ToTunId() {
+        return nxMoveRegAction(
+                new SrcNxNshc2CaseBuilder().setNxNshc2Dst(Boolean.TRUE).build(),
+                new DstNxTunIdCaseBuilder().setNxTunId(Boolean.TRUE).build(),
+                31, false);
     }
 
     public static Action nxLoadTunIdAction(BigInteger tunnelId, boolean groupBucket) {

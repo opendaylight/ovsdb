@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.ISfcClassifierService;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NshUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.SfcUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.SfcClassifierService;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.sfc.provider.api.SfcProviderRenderedPathAPI;
@@ -52,6 +53,9 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private volatile NodeCacheManager nodeCacheManager;
     private volatile Southbound southbound;
     private volatile ISfcClassifierService sfcClassifierService;
+    private static final short SFC_TABLE = 150;
+    private static final int GPE_PORT = 6633;
+    private static final String NETWORK_TYPE_VXLAN = "vxlan";
 
     public void setSfcClassifierService(ISfcClassifierService sfcClassifierService) {
         this.sfcClassifierService = sfcClassifierService;
@@ -126,6 +130,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         handleIngressClassifier(rsp, entry);
         //handleEgressClassifier();
         //handleSfLoopback();
+        //sfArp and ingressSfLoopback uses linux stack
     }
 
     private void handleIngressClassifier(RenderedServicePath rsp, Ace entry) {
@@ -154,10 +159,15 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             if (ovsdbBridgeAugmentation == null) {
                 continue;
             }
-            long vxGpeOfPort = southbound.getOFPort(bridgeNode, VXGPE);
+            long vxGpeOfPort = getOFPort(bridgeNode, VXGPE);
             if (vxGpeOfPort == 0L) {
                 LOG.warn("programAclEntry: Could not identify tunnel port {} -> OF ({}) on {}",
                         VXGPE, vxGpeOfPort, bridgeNode);
+                continue;
+            }
+            long dataPathId = southbound.getDataPathId(bridgeNode);
+            if (dataPathId == 0L) {
+                LOG.warn("programAclEntry: Could not identify datapathId on {}", bridgeNode);
                 continue;
             }
 
@@ -173,10 +183,11 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
             NshUtils nshHeader = new NshUtils();
             nshHeader.setNshMetaC1(NshUtils.convertIpAddressToLong(new Ipv4Address(TUNNEL_DST)));
-            nshHeader.setNshMetaC2(Long.parseLong(TUNNEL_VNID));
+            nshHeader.setNshMetaC2(Long.parseLong(TUNNEL_VNID)); // get from register //get from
             nshHeader.setNshNsp(rsp.getPathId());
 
             RenderedServicePathHop firstHop = pathHopList.get(0);
+            RenderedServicePathHop lastHop = pathHopList.get(pathHopList.size()-1);
             nshHeader.setNshNsi(firstHop.getServiceIndex());
             // workaround: bypass sff and got directly to sf
             //nshHeader.setNshTunIpDst(firstRspHop.getIp().getIpv4Address());
@@ -185,9 +196,22 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             nshHeader.setNshTunUdpPort(firstRspHop.getPort());
             LOG.debug("handleIngressClassifier: NSH Header = {}", nshHeader);
 
-            sfcClassifierService.programIngressClassifier(
-                    southbound.getDataPathId(bridgeNode), entry.getRuleName(),
-                    matches, nshHeader, vxGpeOfPort, true);
+            sfcClassifierService.programIngressClassifier(dataPathId, entry.getRuleName(), matches,
+                    nshHeader, vxGpeOfPort, true);
+
+            sfcClassifierService.program_sfEgress(dataPathId, GPE_PORT, true);
+            //not needed if ip route and arp can be added to stack
+            //sfcClassifierService.program_sfIngress(dataPathId, true);
+            //sfcClassifierService.program_sfArp(dataPathId, true);
+
+            short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
+            long tunnelOfPort = getTunnelOfPort(bridgeNode, VXGPE);
+            sfcClassifierService.programEgressClassifier1(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, (int)tunnelOfPort, 0, (short)0, true);
+            sfcClassifierService.programEgressClassifier2(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, (int) tunnelOfPort, 0, true);
+
+            sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
         }
     }
 
@@ -198,7 +222,6 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private void handleSfWorkaround(RenderedServicePath rsp) {
 
     }
-
 
     private RenderedServicePath getRenderedServicePath (Ace entry) {
         RedirectToSfc sfcRedirect = entry.getActions().getAugmentation(RedirectToSfc.class);
@@ -251,8 +274,29 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         return rsp;
     }
 
-    public Long getOFPort(Node bridgeNode, String portName) {
-        Long ofPort = 0L;
+    // loop through all ports looking for vxlan types, skip vxgpe, keep the rest
+    // first pass we only have two tunnels: one for normal vxlan and the other for gpe
+    // so just return the first non-gpe vxlan port
+    private long getTunnelOfPort(Node bridgeNode, String vxGpePortName) {
+        long port = 0L;
+        List<OvsdbTerminationPointAugmentation> ovsdbTerminationPointAugmentations =
+                southbound.getTerminationPointsOfBridge(bridgeNode);
+        if (!ovsdbTerminationPointAugmentations.isEmpty()) {
+            for (OvsdbTerminationPointAugmentation terminationPointAugmentation : ovsdbTerminationPointAugmentations) {
+                if (terminationPointAugmentation.getInterfaceType() ==
+                        SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(NETWORK_TYPE_VXLAN)) {
+                    if (!terminationPointAugmentation.getName().equals(vxGpePortName)) {
+                        port = terminationPointAugmentation.getOfport();
+                        break;
+                    }
+                }
+            }
+        }
+        return port;
+    }
+
+    private long getOFPort(Node bridgeNode, String portName) {
+        long ofPort = 0L;
         OvsdbTerminationPointAugmentation port = southbound.extractTerminationPointAugmentation(bridgeNode, portName);
         if (port != null) {
             ofPort = southbound.getOFPort(port);

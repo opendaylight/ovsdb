@@ -25,10 +25,12 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configure
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
@@ -154,12 +156,12 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final String OVSDB_TRACE = "ovsdb.trace";
     private static final String SF1NAME = "firewall-72";
     private static final String SF2NAME = "dpi-72";
-    private static final String SF1IP = "127.0.0.1";//"192.168.50.70";//"192.168.120.31";
-    private static final String SF2IP = "192.168.120.32";
-    private static final String SF1DPLNAME = "1";
-    private static final String SF2DPLNAME = "2";
-    private static final String SFF1IP = "192.168.120.31";
-    private static final String SFF2IP = "192.168.120.32";
+    private static final String SF1IP = "10.2.1.1";//"192.168.50.70";//"192.168.120.31";
+    private static final String SF2IP = "10.2.1.2";
+    private static final String SF1DPLNAME = "sf1";
+    private static final String SF2DPLNAME = "sf2";
+    private static final String SFF1IP = "127.0.0.1";
+    private static final String SFF2IP = "127.0.0.1";
     private static final String SFF1NAME = "SFF1";
     private static final String SFF2NAME = "SFF2";
     private static final String SFFDPL1NAME = "vxgpe";
@@ -245,6 +247,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                         LogLevel.INFO.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
+                        LogLevel.TRACE.name()),
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13",
                         LogLevel.TRACE.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.sfc",
@@ -434,20 +439,20 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         String sf1Ip = SF1IP;
         String sff1Ip = SF1IP;
         String sff1Name = SFF1NAME;
-        String sffDpl1Name = SFFDPL1NAME;
+        String sf1DplName = SF1DPLNAME;
         String sn1Name = SN1NAME;
         String bridge1Name= BRIDGE1NAME;
         String sf2Name = SF2NAME;
         String sf2Ip = SF2IP;
         String sff2Ip = SF2IP;
         String sff2Name = SFF2NAME;
-        String sffDpl2Name = SFFDPL2NAME;
+        String sf2DplName = SF2DPLNAME;
         String sn2Name = SN2NAME;
         String bridge2Name= BRIDGE2NAME;
         int port = GPEPORT;
 
         ServiceFunctionBuilder serviceFunctionBuilder =
-                serviceFunctionUtils.serviceFunctionBuilder(sf1Ip, port, sffDpl1Name, sff1Name, sf1Name);
+                serviceFunctionUtils.serviceFunctionBuilder(sf1Ip, port, sf1DplName, sff1Name, sf1Name);
         List<ServiceFunction> serviceFunctionList = serviceFunctionUtils.list(
                 new ArrayList<ServiceFunction>(), serviceFunctionBuilder);
 
@@ -466,14 +471,14 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private ServiceFunctionForwardersBuilder serviceFunctionForwardersBuilder() {
         String sf1Name = SF1NAME;
         String sf1Ip = SF1IP;
-        String sff1Ip = SF1IP;
+        String sff1Ip = SFF1IP;
         String sff1Name = SFF1NAME;
         String sffDpl1Name = SFFDPL1NAME;
         String sn1Name = SN1NAME;
         String bridge1Name= BRIDGE1NAME;
         String sf2Name = SF2NAME;
         String sf2Ip = SF2IP;
-        String sff2Ip = SF2IP;
+        String sff2Ip = SFF2IP;
         String sff2Name = SFF2NAME;
         String sffDpl2Name = SFFDPL2NAME;
         String sn2Name = SN2NAME;
@@ -483,7 +488,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
                 serviceFunctionForwarderUtils.serviceFunctionForwarderBuilder(
-                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Name, sff1Ip, sn1Name, bridge1Name, Firewall.class);
+                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Name, sf1Ip, sn1Name, bridge1Name, Firewall.class);
         List<ServiceFunctionForwarder>  serviceFunctionForwarderList = serviceFunctionForwarderUtils.list(
                 new ArrayList<ServiceFunctionForwarder>(), serviceFunctionForwarderBuilder);
 
@@ -559,6 +564,20 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertNotNull("node is not connected", ovsdbNode);
 
         Thread.sleep(5000);
+        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
+        assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
+        long datapathId = southbound.getDataPathId(bridgeNode);
+
+        Map<String, String> externalIds = Maps.newHashMap();
+        externalIds.put("attached-mac", "01:02:03:04:05:06");
+        southboundUtils.addTerminationPoint(bridgeNode, null, SF1DPLNAME, "internal", null, externalIds);
+        southboundUtils.addTerminationPoint(bridgeNode, null, "vm1", "internal");
+        southboundUtils.addTerminationPoint(bridgeNode, null, "vm2", "internal");
+        Map<String, String> options = Maps.newHashMap();
+        options.put("key", "flow");
+        options.put("remote_ip", "192.168.120.32");
+        southboundUtils.addTerminationPoint(bridgeNode, null, "vx", "vxlan", options, null);
+        Thread.sleep(1000);
 
         testModelPut(serviceFunctionsBuilder(), ServiceFunctions.class);
         testModelPut(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class);
@@ -571,10 +590,6 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         testModelPut(classifiersBuilder(), Classifiers.class);
 
         Thread.sleep(10000);
-
-        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
-        assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
-        long datapathId = southbound.getDataPathId(bridgeNode);
 
         ISfcClassifierService sfcClassifierService = (ISfcClassifierService) ServiceHelper.getGlobalInstance(ISfcClassifierService.class, this);
         LOG.info("SfcClassifierService: {}", sfcClassifierService);

@@ -19,6 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -45,6 +46,10 @@ public class FlowUtils {
 
     public static NodeConnectorId getNodeConnectorId(long ofPort, String nodeName) {
         return new NodeConnectorId(nodeName + ":" + ofPort);
+    }
+
+    public static NodeConnectorId getSpecialNodeConnectorId(long dpidLong, String portName) {
+        return new NodeConnectorId(getNodeName(dpidLong) + ":" + portName);
     }
 
     public static NodeConnectorId getNodeConnectorId(long dpidLong, long ofPort) {

@@ -26,7 +26,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceEth;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.AceIp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.matches.ace.type.ace.ip.ace.ip.version.AceIpv4;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
@@ -35,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
@@ -54,6 +54,14 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     private static final Logger LOG = LoggerFactory.getLogger(SfcClassifierService.class);
     private static final short TABLE_0 = 0;
     private static final short UDP_SHORT = 17;
+    private static int cookieCounter = 0;
+    private static final int FLOW_INGRESSCLASS = 1;
+    private static final int FLOW_SFINGRESS = 2;
+    private static final int FLOW_SFEGRESS = 3;
+    private static final int FLOW_SFARP = 4;
+    private static final int FLOW_EGRESSCLASS1 = 5;
+    private static final int FLOW_EGRESSCLASS2 = 6;
+    private static final int FLOW_SFCTABLE = 7;
 
     public SfcClassifierService(Service service) {
         super(service);
@@ -70,6 +78,11 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
     @Override
     public void setDependencies(Object impl) {}
+
+    private BigInteger getCookie(int index) {
+        String indexString = new String().format("%02d0000000000%04d", index, cookieCounter++);
+        return new BigInteger(indexString, 16);
+    }
 
     @Override
     public void programIngressClassifier(long dataPathId, String ruleName, Matches matches,
@@ -92,6 +105,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_INGRESSCLASS)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_INGRESSCLASS)));
 
         if (write) {
             ActionBuilder ab = new ActionBuilder();
@@ -146,6 +161,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         flowBuilder.setPriority(1000);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_SFCTABLE)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_SFCTABLE)));
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -184,6 +201,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_EGRESSCLASS1)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_EGRESSCLASS1)));
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -219,6 +238,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         }
     }
 
+    // add 3: same match, add in_port sf, priority=40k, move c2 to tun_id, reg0-1, nsp=0,nsi=0
     @Override
     public void programEgressClassifier2(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
                                          int tunnelOfPort, int tunnelId, boolean write) {
@@ -227,6 +247,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort);
+        MatchUtils.addNxRegMatch(matchBuilder,
+                new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL)).build();
         MatchUtils.addNxNspMatch(matchBuilder, nsp);
         flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nsi).build());
 
@@ -239,6 +261,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_EGRESSCLASS2)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_EGRESSCLASS2)));
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -246,9 +270,16 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
             List<Action> actionList = Lists.newArrayList();
 
             ActionBuilder ab = new ActionBuilder();
+
+            // don't do this, need it to match on the resubmit side and get past table 10 so it isn't reclassified
+            //ab.setAction(ActionUtils.nxSetNspAction((long)(0)));
+            //ab.setOrder(0);
+            //ab.setKey(new ActionKey(0));
+            //actionList.add(ab.build());
+
             ab.setAction(ActionUtils.nxResubmitAction(tunnelOfPort, TABLE_0));
-            ab.setOrder(0);
-            ab.setKey(new ActionKey(0));
+            ab.setOrder(actionList.size());
+            ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
 
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -290,6 +321,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_SFEGRESS)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_SFEGRESS)));
 
         if (write) {
             InstructionBuilder ib = new InstructionBuilder();
@@ -330,6 +363,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_SFINGRESS)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_SFINGRESS)));
 
         if (write) {
             InstructionBuilder ib = new InstructionBuilder();
@@ -372,6 +407,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        flowBuilder.setCookie(new FlowCookie(getCookie(FLOW_SFARP)));
+        flowBuilder.setCookieMask(new FlowCookie(getCookie(FLOW_SFARP)));
 
         if (write == true) {
             InstructionBuilder ib = new InstructionBuilder();

@@ -131,14 +131,11 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             return;
         }
 
-        handleIngressClassifier(rsp, entry);
-        //handleEgressClassifier();
-        //handleSfLoopback();
-        //sfArp and ingressSfLoopback uses linux stack
+        handleRenderedServicePath(rsp, entry);
     }
 
-    private void handleIngressClassifier(RenderedServicePath rsp, Ace entry) {
-        LOG.info("handleIngressClassifier: RSP: {}", rsp);
+    private void handleRenderedServicePath(RenderedServicePath rsp, Ace entry) {
+        LOG.info("handleRenderedServicePath: RSP: {}", rsp);
 
         Matches matches = entry.getMatches();
         if (matches == null) {
@@ -148,14 +145,14 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
         List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
         if (pathHopList.isEmpty()) {
-            LOG.warn("handleIngressClassifier: RSP {} has empty hops!!", rsp.getName());
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
             return;
         }
-        LOG.info("handleIngressClassifier: pathHopList: {}", pathHopList);
+        LOG.info("handleRenderedServicePath: pathHopList: {}", pathHopList);
 
         final List<Node> bridgeNodes = nodeCacheManager.getBridgeNodes();
         if (bridgeNodes == null || bridgeNodes.isEmpty()) {
-            LOG.warn("handleIngressClassifier: There are no bridges to process");
+            LOG.warn("handleRenderedServicePath: There are no bridges to process");
             return;
         }
         for (Node bridgeNode : bridgeNodes) {
@@ -180,8 +177,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             RenderedServicePathFirstHop firstRspHop = SfcProviderRenderedPathAPI
                     .readRenderedServicePathFirstHop(rsp.getName());
 
-            LOG.info("handleIngressClassifier: firstRspHop: {}", firstRspHop);
-            LOG.debug("handleIngressClassifier: First Hop IPAddress = {}, Port = {}",
+            LOG.info("handleRenderedServicePath: firstRspHop: {}", firstRspHop);
+            LOG.debug("handleRenderedServicePath: First Hop IPAddress = {}, Port = {}",
                     firstRspHop.getIp().getIpv4Address().getValue(),
                     firstRspHop.getPort().getValue().intValue());
 
@@ -209,7 +206,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             //sfcUtils.getSfIp(firstHop.getServiceFunctionName().getValue());
             nshHeader.setNshTunIpDst(sfIpAddress.getIpv4Address());
             nshHeader.setNshTunUdpPort(firstRspHop.getPort());
-            LOG.debug("handleIngressClassifier: NSH Header = {}", nshHeader);
+            LOG.debug("handleRenderedServicePath: NSH Header = {}", nshHeader);
 
             sfcClassifierService.programIngressClassifier(dataPathId, entry.getRuleName(), matches,
                     nshHeader, vxGpeOfPort, true);
@@ -220,7 +217,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
             String sfMac = getMacFromExternalIds(bridgeNode, sfDplName);
             String sfIpString = new String(sfIpAddress.getValue());
-            LOG.info("handleIngressClassifier: sfDplName: {}, sfMac: {}, sfOfPort: {}, sfIpAddress: {}",
+            LOG.info("handleRenderedServicePath: sfDplName: {}, sfMac: {}, sfOfPort: {}, sfIpAddress: {}",
                     sfDplName, sfMac, sfOfPort, sfIpString);
             if (sfMac != null) { // install if the sf is on this bridge, expand when using multiple bridges
                 sfcClassifierService.program_sfIngress(dataPathId, GPE_PORT, sfOfPort, sfIpString, sfDplName, true);
@@ -235,12 +232,6 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
             sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
         }
-    }
-
-    private String getSfPortName(SfName sfName) {
-        String sfPortName = null;
-
-        return sfPortName;
     }
 
     private RenderedServicePath getRenderedServicePath (Ace entry) {

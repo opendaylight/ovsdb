@@ -83,6 +83,13 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
              * http://docs.openstack.org/api/openstack-network/2.0/content/security_groups.html
              *
              */
+
+            if (portSecurityRule == null ||
+                    portSecurityRule.getSecurityRuleEthertype() == null ||
+                    portSecurityRule.getSecurityRuleDirection() == null) {
+                continue;
+            }
+
             if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
                     && portSecurityRule.getSecurityRuleDirection().equals("egress")) {
                 LOG.debug("programPortSecurityGroup: Acl Rule matching IPv4 and ingress is: {} ", portSecurityRule);

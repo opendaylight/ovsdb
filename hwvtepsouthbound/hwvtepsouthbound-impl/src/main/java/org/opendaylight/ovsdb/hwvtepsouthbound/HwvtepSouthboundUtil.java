@@ -8,10 +8,16 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAttributes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -19,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
 public class HwvtepSouthboundUtil {
@@ -77,4 +84,77 @@ public class HwvtepSouthboundUtil {
         }
         return result;
     }
+
+    public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db,
+                    HwvtepPhysicalSwitchAttributes pNode) {
+        Preconditions.checkNotNull(pNode);
+        Optional<HwvtepGlobalAugmentation> result = null;
+        HwvtepGlobalRef ref = pNode.getManagedBy();
+        if (ref != null && ref.getValue() != null) {
+            result = getManagingNode(db, ref);
+        } else {
+            LOG.warn("Cannot find client for PhysicalSwitch without a specified ManagedBy {}", pNode);
+            return Optional.absent();
+        }
+        if (!result.isPresent()) {
+            LOG.warn("Failed to find managing node for PhysicalSwitch {}", pNode);
+        }
+        return result;
+    }
+
+    public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db,
+                    HwvtepLogicalSwitchAttributes lNode) {
+        Preconditions.checkNotNull(lNode);
+        Optional<HwvtepGlobalAugmentation> result = null;
+        // TODO: Add managed-by to hwvtep-logical-switch-attributes in
+        // hwvtep.yang
+        /*
+         * HwvtepGlobalRef ref = lNode.getManagedBy(); if (ref != null &&
+         * ref.getValue() != null) { result = getManagingNode(db, ref); } else {
+         * LOG.warn(
+         * "Cannot find client for LogicalSwitch without a specified ManagedBy {}"
+         * , pNode); return Optional.absent(); } if(!result.isPresent()) {
+         * LOG.warn("Failed to find managing node for PhysicalSwitch {}",
+         * pNode); } return result;
+         */
+        return Optional.absent(); // TODO: Delete this once yang is updated
+    }
+
+    private static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
+        try {
+            ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
+            @SuppressWarnings("unchecked")
+            // Note: erasure makes this safe in combination with the typecheck
+            // below
+            InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
+
+            CheckedFuture<Optional<Node>, ReadFailedException> nf =
+                            transaction.read(LogicalDatastoreType.OPERATIONAL, path);
+            transaction.close();
+            Optional<Node> optional = nf.get();
+            if (optional != null && optional.isPresent()) {
+                HwvtepGlobalAugmentation hwvtepNode = null;
+                Node node = optional.get();
+                if (node instanceof HwvtepGlobalAugmentation) {
+                    hwvtepNode = (HwvtepGlobalAugmentation) node;
+                } else if (node != null) {
+                    hwvtepNode = node.getAugmentation(HwvtepGlobalAugmentation.class);
+                }
+                if (hwvtepNode != null) {
+                    return Optional.of(hwvtepNode);
+                } else {
+                    LOG.warn("Hwvtep switch claims to be managed by {} but " + "that HwvtepNode does not exist",
+                                    ref.getValue());
+                    return Optional.absent();
+                }
+            } else {
+                LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
+                return Optional.absent();
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to get HwvtepNode {}", ref, e);
+            return Optional.absent();
+        }
+    }
+
 }

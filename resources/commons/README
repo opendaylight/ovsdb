@@ -28,3 +28,5 @@ Contents
 - 3-Node-Cluster-Setup-Environment-Variables.postman_environment : Postman environment file that defines variables for Restconf request for southbound plugin running in 3 node cluster environment
 
 - NetvirtSfc.json.postman_collection : Collection of REST-APIs to interact with Netvirt-Sfc.
+
+- Ovsdb-HwvtepSouthbound-Collection.json.postman_collection : Collection contains Restconf request for doing CRUD operations (hwvtep global node, physical switch, logical switch, physical locator, and physical port) on hwvtepsouthbound plugin running in standalone controller.

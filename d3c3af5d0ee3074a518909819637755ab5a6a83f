@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_dc39a9d9",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclServiceTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-11-12T08:42:14Z",
+      "side": 1,
+      "message": "See my comments in IngressAclServiceTest.java regarding the use of mocks. I don\u0027t mind reworking the test-suite in its entirety if you want to leave the mocks as-is for now!",
+      "revId": "d3c3af5d0ee3074a518909819637755ab5a6a83f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_5cfff901",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclServiceTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-11-12T08:42:14Z",
+      "side": 1,
+      "message": "Since there\u0027s no Mockito verification or JUnit assertions in this test method, it\u0027s worth adding a comment to point out that the aim of the test is to make sure programPortSecurityAcl() doesn\u0027t throw an exception.\n\nAlso, 1554L instead of Long.valueOf(1554) (IntelliJ complains about the latter, I don\u0027t know off-hand whether Sonar would too).",
+      "revId": "d3c3af5d0ee3074a518909819637755ab5a6a83f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_dc120958",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclServiceTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-11-12T08:42:14Z",
+      "side": 1,
+      "message": "Is there a particular reason to use a mock object here? AFAICS this should work just as well:\n\n    NeutronSecurityRule portSecurityRule1 \u003d new NeutronSecurityRule();\n    portSecurityRule1.setSecurityRuleEthertype(\"IPv4\");\n    portSecurityRule1.setSecurityRuleDirection(\"not_ingress\");\n\netc.",
+      "revId": "d3c3af5d0ee3074a518909819637755ab5a6a83f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_9c1c916c",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclServiceTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-11-12T08:42:14Z",
+      "side": 1,
+      "message": "Likewise here, we can just use an instance of NeutronSecurityGroup without mocking it.",
+      "revId": "d3c3af5d0ee3074a518909819637755ab5a6a83f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_3c0ec535",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclServiceTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-11-12T08:42:14Z",
+      "side": 1,
+      "message": "Since there\u0027s no Mockito verification or JUnit assertions in this test method, it\u0027s worth adding a comment to point out that the aim of the test is to make sure programPortSecurityAcl() doesn\u0027t throw an exception.\n\nAlso, 1554L instead of Long.valueOf(1554) (IntelliJ complains about the latter, I don\u0027t know off-hand whether Sonar would too).",
+      "revId": "d3c3af5d0ee3074a518909819637755ab5a6a83f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

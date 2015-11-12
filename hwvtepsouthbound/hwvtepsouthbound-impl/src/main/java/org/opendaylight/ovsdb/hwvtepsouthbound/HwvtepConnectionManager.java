@@ -412,5 +412,4 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             hcm.handleOwnershipChanged(ownershipChange);
         }
     }
-
 }

@@ -18,4 +18,5 @@ public class HwvtepSouthboundConstants {
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
     public static final String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
     public static final String UUID = "uuid";
+    public static final String DB_NAME = "hardware_vtep";
 }

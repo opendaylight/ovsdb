@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_61c7ba13",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-12T05:16:52Z",
+      "side": 1,
+      "message": "I think the db name is constant as \"hardware_vtep\". Am i right?",
+      "range": {
+        "startLine": 111,
+        "startChar": 52,
+        "endLine": 111,
+        "endChar": 85
+      },
+      "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_81cc2e37",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-12T05:16:52Z",
+      "side": 1,
+      "message": "When requesting to create a logical switch, hwvtepGlobal is null.",
+      "range": {
+        "startLine": 131,
+        "startChar": 19,
+        "endLine": 131,
+        "endChar": 41
+      },
+      "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_01d83eee",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-12T05:16:52Z",
+      "side": 1,
+      "message": "Changes are divided by connection instance.",
+      "range": {
+        "startLine": 267,
+        "startChar": 82,
+        "endLine": 267,
+        "endChar": 110
+      },
+      "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_c1e1c69b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-12T05:16:52Z",
+      "side": 1,
+      "message": "When ODL initiates connection,we can get connectionInfo from nodeId by parsing URI. But when switch initiates connection, we can not get conectionInfo by parsing URI. It will be better to get connection instance by node identifier. Is it possible to have a MAP\u003cInstanceIdentifier\u003cNode\u003e,HwvtepConnectionInstance\u003e in class HwvtepConnectionManager?",
+      "range": {
+        "startLine": 311,
+        "startChar": 24,
+        "endLine": 311,
+        "endChar": 53
+      },
+      "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

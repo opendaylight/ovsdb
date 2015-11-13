@@ -91,7 +91,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         FlowBuilder flowBuilder = new FlowBuilder();
 
         MatchBuilder matchBuilder = buildMatch(matches);
-        //flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setMatch(MatchUtils.addNxRegMatch(
                 matchBuilder,
                 new MatchUtils.RegMatch(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL)).build());

@@ -46,7 +46,7 @@ public class AclUtils extends AbstractUtils {
     }
 
     public ActionsBuilder actionsBuilder(ActionsBuilder actionsBuilder, String sfcName) {
-        RedirectToSfcBuilder redirectToSfcBuilder = new RedirectToSfcBuilder().setRedirectSfc(sfcName);
+        RedirectToSfcBuilder redirectToSfcBuilder = new RedirectToSfcBuilder().setSfcName(sfcName);
 
         return actionsBuilder.addAugmentation(RedirectToSfc.class, redirectToSfcBuilder.build());
     }

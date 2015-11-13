@@ -52,7 +52,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
                             getOvsdbConnectionInstance().getInstanceIdentifier());
                 } else {
                     LOG.debug("Other southbound plugin instances in cluster are connected to the device,"
-                            + " not deleting OvsdbNode form data store.");
+                            + " not deleting OvsdbNode from operational data store.");
                 }
             }
         } catch (Exception e) {
@@ -76,13 +76,14 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
             if (connectedManager == 0) {
                 return true;
             }
-        }
-        /*When switch is listening in passive mode, this number represent number of active connection to the device
-        This is to handle the controller initiated connection scenario, where all the controller will connect, but
-        switch will have only one manager.
-        */
-        if (onlyConnectedManager.getNumberOfConnections() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE) {
-            return false;
+
+            /*When switch is listening in passive mode, this number represent number of active connection to the device
+            This is to handle the controller initiated connection scenario, where all the controller will connect, but
+            switch will have only one manager.
+            */
+            if (onlyConnectedManager.getNumberOfConnections() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE) {
+                return false;
+            }
         }
         return true;
     }

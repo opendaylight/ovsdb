@@ -470,18 +470,12 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         bridgeDelete(testBridgeUuid);
     }
 
-    @Test
+    @Test(expected = SchemaVersionMismatchException.class)
     public void testFlowSampleCollectorSetTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) < 0);
 
-        boolean isExceptionRaised = false;
-        try {
-            getClient().createTypedRowWrapper(FlowSampleCollectorSet.class);
-        } catch (SchemaVersionMismatchException e) {
-            isExceptionRaised = true;
-        }
-        assertTrue(isExceptionRaised);
+        getClient().createTypedRowWrapper(FlowSampleCollectorSet.class);
     }
 
     public void flowSampleCollectorSetInsert () throws ExecutionException, InterruptedException {
@@ -540,18 +534,12 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         bridgeDelete(testBridgeUuid);
     }
 
-    @Test
+    @Test(expected = SchemaVersionMismatchException.class)
     public void testFlowTableTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) < 0);
 
-        boolean isExceptionRaised = false;
-        try {
-            getClient().createTypedRowWrapper(FlowTable.class);
-        } catch (SchemaVersionMismatchException e) {
-            isExceptionRaised = true;
-        }
-        assertTrue(isExceptionRaised);
+        getClient().createTypedRowWrapper(FlowTable.class);
     }
 
     public void flowTableInsert () throws ExecutionException, InterruptedException {
@@ -632,18 +620,12 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         bridgeDelete(testBridgeUuid);
     }
 
-    @Test
+    @Test(expected = SchemaVersionMismatchException.class)
     public void testIpfixTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) < 0);
 
-        boolean isExceptionRaised = false;
-        try {
-            getClient().createTypedRowWrapper(IPFIX.class);
-        } catch (SchemaVersionMismatchException e) {
-            isExceptionRaised = true;
-        }
-        assertTrue(isExceptionRaised);
+        getClient().createTypedRowWrapper(IPFIX.class);
     }
 
     public void ipfixInsert () throws ExecutionException, InterruptedException {

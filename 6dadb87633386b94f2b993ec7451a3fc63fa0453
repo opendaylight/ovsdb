@@ -96,6 +96,23 @@
     },
     {
       "key": {
+        "uuid": "7aade967_1a82ed00",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-11-13T04:18:45Z",
+      "side": 1,
+      "message": "Canyou fix the whitespace issues? Looks like the editor is using tabs instead of spaces.",
+      "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_01d83eee",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
         "patchSetId": 1
@@ -184,6 +201,23 @@
         "endLine": 311,
         "endChar": 53
       },
+      "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_3a87a911",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalLocatorRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-11-13T04:18:45Z",
+      "side": 1,
+      "message": "whitespace",
       "revId": "6dadb87633386b94f2b993ec7451a3fc63fa0453",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

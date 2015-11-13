@@ -108,7 +108,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
         psNodeBuilder.addAugmentation(PhysicalSwitchAugmentation.class, psAugmentationBuilder.build());
 
-        LOG.trace("Built with the intent to store bridge data {}",
+        LOG.trace("Built with the intent to store PhysicalSwitch data {}",
                 psAugmentationBuilder.build());
         return psNodeBuilder.build();
     }

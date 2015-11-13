@@ -29,7 +29,9 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         commands.add(new PhysicalSwitchRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepManagerUpdateCommand(key, updates, dbSchema));
         commands.add(new LogicalSwitchUpdateCommand(key, updates, dbSchema));
+        commands.add(new LogicalSwitchRemoveCommand(key, updates, dbSchema));
         commands.add(new PhysicalPortUpdateCommand(key, updates, dbSchema));
+        commands.add(new PhysicalPortRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepTunnelUpdateCommand(key, updates, dbSchema));
         commands.add(new PhysicalLocatorUpdateCommand(key, updates, dbSchema));
         commands.add(new PhysicalLocatorSetUpdateCommand(key, updates, dbSchema));

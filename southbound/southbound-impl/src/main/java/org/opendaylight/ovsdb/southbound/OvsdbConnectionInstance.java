@@ -70,7 +70,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
-    // private ConnectionInfo key;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;

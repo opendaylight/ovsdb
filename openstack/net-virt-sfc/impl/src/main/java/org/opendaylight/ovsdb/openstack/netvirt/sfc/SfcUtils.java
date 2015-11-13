@@ -20,10 +20,12 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev1407
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctions;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunctionKey;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPaths;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sl.rev140701.data.plane.locator.locator.type.Ip;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -55,6 +57,10 @@ public class SfcUtils {
                 .child(ServiceFunction.class, new ServiceFunctionKey(SfName.getDefaultInstance(sfName))).build();
     }
 
+    public RenderedServicePath getRsp(String rspName) {
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, getRspId(rspName));
+    }
+
     public RenderedServicePath getRspforSfp(String sfpName) {
         RenderedServicePath rspFound = null;
         RenderedServicePaths rsps = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, this.getRspsId());
@@ -83,7 +89,7 @@ public class SfcUtils {
         return sfpFound;
     }
 
-    public IpAddress getSfIp(String sfname) {
+    public IpAddress getSfIpAddress(String sfname) {
         ServiceFunction serviceFunction =
                 SfcProviderServiceFunctionAPI.readServiceFunction(SfName.getDefaultInstance(sfname));
 
@@ -92,10 +98,10 @@ public class SfcUtils {
             return null;
         }
 
-        return getSfIp(serviceFunction);
+        return getSfIpAddress(serviceFunction);
     }
 
-    public IpAddress getSfIp(ServiceFunction serviceFunction) {
+    public IpAddress getSfIpAddress(ServiceFunction serviceFunction) {
         if (serviceFunction == null) {
             LOG.info("getSfIp: Servicefunction is null");
             return null;
@@ -103,6 +109,25 @@ public class SfcUtils {
 
         Ip ipLocator = (Ip) serviceFunction.getSfDataPlaneLocator().get(0).getLocatorType();
         return ipLocator.getIp();
+    }
+
+    public PortNumber getSfPort(ServiceFunction serviceFunction) {
+        if (serviceFunction == null) {
+            LOG.info("getSfIp: Servicefunction is null");
+            return null;
+        }
+
+        Ip ipLocator = (Ip) serviceFunction.getSfDataPlaneLocator().get(0).getLocatorType();
+        return ipLocator.getPort();
+    }
+
+    public Ip getSfIp(ServiceFunction serviceFunction) {
+        if (serviceFunction == null) {
+            LOG.info("getSfIp: Servicefunction is null");
+            return null;
+        }
+
+        return (Ip)serviceFunction.getSfDataPlaneLocator().get(0).getLocatorType();
     }
 
     public String getSfDplName(ServiceFunction serviceFunction) {
@@ -114,5 +139,14 @@ public class SfcUtils {
 
         sfDplName = serviceFunction.getSfDataPlaneLocator().get(0).getName().getValue();
         return sfDplName;
+    }
+
+    public Ip getSffIp(ServiceFunctionForwarder serviceFunctionForwarder) {
+        if (serviceFunctionForwarder == null) {
+            LOG.info("getSfIp: ServicefunctionForwarder is null");
+            return null;
+        }
+
+        return (Ip)serviceFunctionForwarder.getSffDataPlaneLocator().get(0).getDataPlaneLocator().getLocatorType();
     }
 }

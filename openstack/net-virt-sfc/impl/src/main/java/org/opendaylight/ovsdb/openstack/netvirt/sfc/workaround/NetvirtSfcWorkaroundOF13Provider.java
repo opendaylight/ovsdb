@@ -14,24 +14,27 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.INetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.ISfcClassifierService;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NshUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.SfcUtils;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.SfcClassifierService;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.sfc.provider.api.SfcProviderRenderedPathAPI;
+import org.opendaylight.sfc.provider.api.SfcProviderServiceForwarderAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServiceFunctionAPI;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SfName;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sl.rev140701.data.plane.locator.locator.type.Ip;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.CreateRenderedPathInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.CreateRenderedPathInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.path.first.hop.info.RenderedServicePathFirstHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.rendered.service.path.RenderedServicePathHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
@@ -45,6 +48,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -66,6 +70,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private static final String VXGPE = "vxgpe";
     private static final String TUNNEL_DST = "192.168.120.31";
     private static final String TUNNEL_VNID = "10";
+    public static final String TUNNEL_ENDPOINT_KEY = "local_ip";
 
     public NetvirtSfcWorkaroundOF13Provider(final DataBroker dataBroker, MdsalUtils mdsalUtils, SfcUtils sfcUtils) {
         Preconditions.checkNotNull(dataBroker, "Input dataBroker cannot be NULL!");
@@ -131,7 +136,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             return;
         }
 
-        handleRenderedServicePath(rsp, entry);
+        handleRenderedServicePath2(rsp, entry);
     }
 
     private void handleRenderedServicePath(RenderedServicePath rsp, Ace entry) {
@@ -180,7 +185,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             LOG.info("handleRenderedServicePath: firstRspHop: {}", firstRspHop);
             LOG.debug("handleRenderedServicePath: First Hop IPAddress = {}, Port = {}",
                     firstRspHop.getIp().getIpv4Address().getValue(),
-                    firstRspHop.getPort().getValue().intValue());
+                    firstRspHop.getPort().getValue());
 
             NshUtils nshHeader = new NshUtils();
             nshHeader.setNshMetaC1(NshUtils.convertIpAddressToLong(new Ipv4Address(TUNNEL_DST)));
@@ -201,7 +206,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             nshHeader.setNshNsi(firstHop.getServiceIndex());
             // workaround: bypass sff and got directly to sf
             //nshHeader.setNshTunIpDst(firstRspHop.getIp().getIpv4Address());
-            IpAddress sfIpAddress = sfcUtils.getSfIp(serviceFunction);
+            IpAddress sfIpAddress = sfcUtils.getSfIpAddress(serviceFunction);
             String sfDplName = sfcUtils.getSfDplName(serviceFunction);
             //sfcUtils.getSfIp(firstHop.getServiceFunctionName().getValue());
             nshHeader.setNshTunIpDst(sfIpAddress.getIpv4Address());
@@ -212,7 +217,6 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                     nshHeader, vxGpeOfPort, true);
 
             sfcClassifierService.program_sfEgress(dataPathId, GPE_PORT, true);
-            //not needed if ip route and arp can be added to stack
             long sfOfPort = getSfPort(bridgeNode, sfDplName);
 
             String sfMac = getMacFromExternalIds(bridgeNode, sfDplName);
@@ -234,7 +238,152 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         }
     }
 
+    private void handleRenderedServicePath2(RenderedServicePath rsp, Ace entry) {
+        LOG.info("handleRenderedServicePath: RSP: {}", rsp);
+
+        Matches matches = entry.getMatches();
+        if (matches == null) {
+            LOG.warn("processAclEntry: matches not found");
+            return;
+        }
+
+        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
+        if (pathHopList.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return;
+        }
+        LOG.info("handleRenderedServicePath: pathHopList: {}", pathHopList);
+
+        RenderedServicePathFirstHop firstRspHop = SfcProviderRenderedPathAPI
+                .readRenderedServicePathFirstHop(rsp.getName());
+        LOG.info("handleRenderedServicePath: firstRspHop: {}", firstRspHop);
+
+        RenderedServicePathHop firstHop = pathHopList.get(0);
+        RenderedServicePathHop lastHop = pathHopList.get(pathHopList.size()-1);
+
+        final List<Node> bridgeNodes = nodeCacheManager.getBridgeNodes();
+        if (bridgeNodes == null || bridgeNodes.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: There are no bridges to process");
+            return;
+        }
+        for (RenderedServicePathHop hop : pathHopList) {
+            for (Node bridgeNode : bridgeNodes) {
+                long vxGpeOfPort = getOFPort(bridgeNode, VXGPE);
+                if (vxGpeOfPort == 0L) {
+                    LOG.warn("programAclEntry: Could not identify gpe vtep {} -> OF ({}) on {}",
+                            VXGPE, vxGpeOfPort, bridgeNode);
+                    continue;
+                }
+                long dataPathId = southbound.getDataPathId(bridgeNode);
+                if (dataPathId == 0L) {
+                    LOG.warn("programAclEntry: Could not identify datapathId on {}", bridgeNode);
+                    continue;
+                }
+
+                ServiceFunction serviceFunction =
+                        SfcProviderServiceFunctionAPI.readServiceFunction(firstHop.getServiceFunctionName());
+                if (serviceFunction == null) {
+                    LOG.warn("programAclEntry: Could not identify ServiceFunction {} on {}",
+                            firstHop.getServiceFunctionName().getValue(), bridgeNode);
+                    continue;
+                }
+                ServiceFunctionForwarder serviceFunctionForwarder =
+                        SfcProviderServiceForwarderAPI
+                                .readServiceFunctionForwarder(hop.getServiceFunctionForwarder());
+                if (serviceFunctionForwarder == null) {
+                    LOG.warn("programAclEntry: Could not identify ServiceFunctionForwarder {} on {}",
+                            firstHop.getServiceFunctionName().getValue(), bridgeNode);
+                    continue;
+                }
+
+                handleSf(bridgeNode, serviceFunction);
+                handleSff(bridgeNode, serviceFunctionForwarder, serviceFunction, hop, firstHop, lastHop,
+                        entry.getRuleName(), matches, vxGpeOfPort, rsp);
+                if (firstHop == lastHop) {
+                    handleSff(bridgeNode, serviceFunctionForwarder, serviceFunction, hop, null, lastHop,
+                            entry.getRuleName(), matches, vxGpeOfPort, rsp);
+                }
+            }
+        }
+    }
+
+    private void handleSff(Node bridgeNode, ServiceFunctionForwarder serviceFunctionForwarder,
+                           ServiceFunction serviceFunction,
+                           RenderedServicePathHop hop,
+                           RenderedServicePathHop firstHop,
+                           RenderedServicePathHop lastHop,
+                           String ruleName, Matches matches,
+                           long vxGpeOfPort, RenderedServicePath rsp) {
+        long dataPathId = southbound.getDataPathId(bridgeNode);
+
+        if (hop == firstHop) {
+            NshUtils nshHeader = new NshUtils();
+            nshHeader.setNshNsp(rsp.getPathId());
+            nshHeader.setNshNsi(firstHop.getServiceIndex());
+            if (isSffOnBridge(bridgeNode, serviceFunctionForwarder)) {
+                Ip ip = sfcUtils.getSfIp(serviceFunction);
+                nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
+                nshHeader.setNshTunUdpPort(ip.getPort());
+            } else {
+                Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
+                nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
+                nshHeader.setNshTunUdpPort(ip.getPort());
+            }
+            sfcClassifierService.programIngressClassifier(dataPathId, ruleName, matches,
+                    nshHeader, vxGpeOfPort, true);
+        } else if (hop == lastHop) {
+            short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
+            String sfDplName = sfcUtils.getSfDplName(serviceFunction);
+            long sfOfPort = getSfPort(bridgeNode, sfDplName);
+            sfcClassifierService.programEgressClassifier1(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, (int)sfOfPort, 0, (short)0, true);
+            sfcClassifierService.programEgressClassifier2(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, (int)sfOfPort, 0, true);
+        } else {
+            // add typical sff flows
+        }
+
+        sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
+    }
+
+    void handleSf(Node bridgeNode, ServiceFunction serviceFunction) {
+        if (isSfOnBridge(bridgeNode, serviceFunction)) {
+            long dataPathId = southbound.getDataPathId(bridgeNode);
+            Ip ip = sfcUtils.getSfIp(serviceFunction);
+            String sfIpAddr = String.valueOf(ip.getIp().getValue());
+            int sfIpPort = ip.getPort().getValue(); //GPE_PORT
+            String sfDplName = sfcUtils.getSfDplName(serviceFunction);
+            long sfOfPort = getSfPort(bridgeNode, sfDplName);
+            String sfMac = getMacFromExternalIds(bridgeNode, sfDplName);
+            //should be sffdplport, but they should all be the same 6633/4790
+            sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
+            sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
+            sfcClassifierService.programStaticArpEntry(dataPathId, 0L, sfMac, sfIpAddr, true);
+        }
+    }
+
+    private boolean isSffOnBridge(Node bridgeNode, ServiceFunctionForwarder serviceFunctionForwarder) {
+        String local_ip = "";
+        Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
+        Node ovsdbNode = southbound.readOvsdbNode(bridgeNode);
+        if (ovsdbNode != null) {
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+            if (ovsdbNodeAugmentation != null && ovsdbNodeAugmentation.getOpenvswitchOtherConfigs() != null) {
+                southbound.getOtherConfig(ovsdbNode, OvsdbTables.OPENVSWITCH, TUNNEL_ENDPOINT_KEY);
+            }
+
+        }
+        return local_ip.equals(String.valueOf(ip.getIp().getValue()));
+    }
+
+    private boolean isSfOnBridge(Node bridgeNode, ServiceFunction serviceFunction) {
+        String sfDplName = sfcUtils.getSfDplName(serviceFunction);
+        long sfOfPort = getSfPort(bridgeNode, sfDplName);
+        return sfOfPort != 0L;
+    }
+
     private RenderedServicePath getRenderedServicePath (Ace entry) {
+        RenderedServicePath rsp = null;
         RedirectToSfc sfcRedirect = entry.getActions().getAugmentation(RedirectToSfc.class);
         LOG.debug("Processing ACL entry = {} sfcRedirect = {}", entry.getRuleName(), sfcRedirect);
         if (sfcRedirect == null) {
@@ -242,14 +391,37 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             return null;
         }
 
-        String sfcName = sfcRedirect.getRedirectSfc();
+        if (sfcRedirect.getRspName() != null) {
+            rsp = getRenderedServicePathFromRsp(sfcRedirect.getRspName());
+        } else if (sfcRedirect.getSfpName() != null) {
+            LOG.warn("getRenderedServicePath: sfp not handled yet");
+        } else {
+            rsp = getRenderedServicePathFromSfc(entry);
+        }
+        LOG.info("getRenderedServicePath: rsp: {}", rsp);
+        return rsp;
+    }
+
+    private RenderedServicePath getRenderedServicePathFromRsp(String rspName) {
+        return sfcUtils.getRsp(rspName);
+    }
+
+    private RenderedServicePath getRenderedServicePathFromSfc (Ace entry) {
+        RedirectToSfc sfcRedirect = entry.getActions().getAugmentation(RedirectToSfc.class);
+        LOG.debug("Processing ACL entry = {} sfcRedirect = {}", entry.getRuleName(), sfcRedirect);
+        if (sfcRedirect == null) {
+            LOG.warn("processAClEntry: sfcRedirect is null");
+            return null;
+        }
+
+        String sfcName = sfcRedirect.getSfcName();
         ServiceFunctionPath sfp = sfcUtils.getSfp(sfcName);
         if (sfp == null || sfp.getName() == null) {
             LOG.warn("There is no configured SFP with sfcName = {}; so skip installing the ACL entry!!", sfcName);
             return null;
         }
 
-        LOG.debug("Processing Redirect to SFC = {}, SFP = {}", sfcRedirect.getRedirectSfc(), sfp);
+        LOG.debug("Processing Redirect to SFC = {}, SFP = {}", sfcName, sfp);
         // If RSP doesn't exist, create an RSP.
         String sfpName = sfp.getName().getValue();
         RenderedServicePath rsp = sfcUtils.getRspforSfp(sfpName);
@@ -293,7 +465,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         List<OvsdbTerminationPointAugmentation> ovsdbTerminationPointAugmentations =
                 southbound.getTerminationPointsOfBridge(bridgeNode);
         if (!ovsdbTerminationPointAugmentations.isEmpty()) {
-            for (OvsdbTerminationPointAugmentation terminationPointAugmentation : ovsdbTerminationPointAugmentations) {
+            for (OvsdbTerminationPointAugmentation terminationPointAugmentation :
+                    ovsdbTerminationPointAugmentations) {
                 if (terminationPointAugmentation.getInterfaceType() ==
                         SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(NETWORK_TYPE_VXLAN)) {
                     if (!terminationPointAugmentation.getName().equals(vxGpePortName)) {
@@ -314,7 +487,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     private long getOFPort(Node bridgeNode, String portName) {
         long ofPort = 0L;
-        OvsdbTerminationPointAugmentation port = southbound.extractTerminationPointAugmentation(bridgeNode, portName);
+        OvsdbTerminationPointAugmentation port =
+                southbound.extractTerminationPointAugmentation(bridgeNode, portName);
         if (port != null) {
             ofPort = southbound.getOFPort(port);
         }

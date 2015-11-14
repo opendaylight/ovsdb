@@ -136,10 +136,10 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             return;
         }
 
-        handleRenderedServicePath2(rsp, entry);
+        handleRenderedServicePath(rsp, entry);
     }
 
-    private void handleRenderedServicePath(RenderedServicePath rsp, Ace entry) {
+    private void handleRenderedServicePathOld(RenderedServicePath rsp, Ace entry) {
         LOG.info("handleRenderedServicePath: RSP: {}", rsp);
 
         Matches matches = entry.getMatches();
@@ -229,16 +229,16 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             }
 
             short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
-            sfcClassifierService.programEgressClassifier1(dataPathId, vxGpeOfPort, rsp.getPathId(),
-                    lastServiceindex, (int)sfOfPort, 0, (short)0, true);
-            sfcClassifierService.programEgressClassifier2(dataPathId, vxGpeOfPort, rsp.getPathId(),
-                    lastServiceindex, (int)sfOfPort, 0, true);
+            sfcClassifierService.programEgressClassifier(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, sfOfPort, 0, true);
+            sfcClassifierService.programEgressClassifierBypass(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, sfOfPort, 0, true);
 
             sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
         }
     }
 
-    private void handleRenderedServicePath2(RenderedServicePath rsp, Ace entry) {
+    private void handleRenderedServicePath(RenderedServicePath rsp, Ace entry) {
         LOG.info("handleRenderedServicePath: RSP: {}", rsp);
 
         Matches matches = entry.getMatches();
@@ -268,6 +268,11 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         }
         for (RenderedServicePathHop hop : pathHopList) {
             for (Node bridgeNode : bridgeNodes) {
+                // ignore bridges other than br-int
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = southbound.getBridge(bridgeNode, "br-int");
+                if (ovsdbBridgeAugmentation == null) {
+                    continue;
+                }
                 long vxGpeOfPort = getOFPort(bridgeNode, VXGPE);
                 if (vxGpeOfPort == 0L) {
                     LOG.warn("programAclEntry: Could not identify gpe vtep {} -> OF ({}) on {}",
@@ -317,14 +322,20 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         long dataPathId = southbound.getDataPathId(bridgeNode);
 
         if (hop == firstHop) {
+            LOG.info("handleSff: first hop processing {} - {}",
+                    bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
             NshUtils nshHeader = new NshUtils();
             nshHeader.setNshNsp(rsp.getPathId());
             nshHeader.setNshNsi(firstHop.getServiceIndex());
             if (isSffOnBridge(bridgeNode, serviceFunctionForwarder)) {
+                LOG.info("handleSff: sff and bridge are the same: {} - {}, skipping first sff",
+                        bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
                 Ip ip = sfcUtils.getSfIp(serviceFunction);
                 nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
                 nshHeader.setNshTunUdpPort(ip.getPort());
             } else {
+                LOG.info("handleSff: sff and bridge are not the same: {} - {}, sending to first sff",
+                        bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
                 Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
                 nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
                 nshHeader.setNshTunUdpPort(ip.getPort());
@@ -332,13 +343,15 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             sfcClassifierService.programIngressClassifier(dataPathId, ruleName, matches,
                     nshHeader, vxGpeOfPort, true);
         } else if (hop == lastHop) {
+            LOG.info("handleSff: last hop processing {} - {}",
+                    bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
             short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
             String sfDplName = sfcUtils.getSfDplName(serviceFunction);
             long sfOfPort = getSfPort(bridgeNode, sfDplName);
-            sfcClassifierService.programEgressClassifier1(dataPathId, vxGpeOfPort, rsp.getPathId(),
-                    lastServiceindex, (int)sfOfPort, 0, (short)0, true);
-            sfcClassifierService.programEgressClassifier2(dataPathId, vxGpeOfPort, rsp.getPathId(),
-                    lastServiceindex, (int)sfOfPort, 0, true);
+            sfcClassifierService.programEgressClassifier(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, sfOfPort, 0, true);
+            sfcClassifierService.programEgressClassifierBypass(dataPathId, vxGpeOfPort, rsp.getPathId(),
+                    lastServiceindex, sfOfPort, 0, true);
         } else {
             // add typical sff flows
         }
@@ -348,6 +361,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     void handleSf(Node bridgeNode, ServiceFunction serviceFunction) {
         if (isSfOnBridge(bridgeNode, serviceFunction)) {
+            LOG.info("handleSf: sf and bridge are on the same node: {} - {}, adding workaround and arp",
+                    bridgeNode.getNodeId(), serviceFunction.getName());
             long dataPathId = southbound.getDataPathId(bridgeNode);
             Ip ip = sfcUtils.getSfIp(serviceFunction);
             String sfIpAddr = String.valueOf(ip.getIp().getValue());
@@ -355,6 +370,10 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             String sfDplName = sfcUtils.getSfDplName(serviceFunction);
             long sfOfPort = getSfPort(bridgeNode, sfDplName);
             String sfMac = getMacFromExternalIds(bridgeNode, sfDplName);
+            if (sfMac == null) {
+                LOG.warn("handleSff: could not find mac for {} on {}", sfDplName, bridgeNode);
+                return;
+            }
             //should be sffdplport, but they should all be the same 6633/4790
             sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
             sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
@@ -534,7 +553,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     private String getMacFromExternalIds(Node bridgeNode, String portName) {
         String mac = null;
-        OvsdbTerminationPointAugmentation port = southbound.extractTerminationPointAugmentation(bridgeNode, portName);
+        OvsdbTerminationPointAugmentation port = southbound.getTerminationPointOfBridge(bridgeNode, portName);
         LOG.info("getMac: portName: {}, bridgeNode: {},,, port: {}", portName, bridgeNode, port);
         if (port != null && port.getInterfaceExternalIds() != null) {
             mac = southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_VM_MAC);

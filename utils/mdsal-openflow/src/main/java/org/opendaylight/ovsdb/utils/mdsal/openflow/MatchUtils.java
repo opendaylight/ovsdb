@@ -100,6 +100,17 @@ public class MatchUtils {
         return matchBuilder;
     }
 
+    public static MatchBuilder createInPortReservedMatch(MatchBuilder matchBuilder, Long dpidLong, String inPort) {
+
+        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + inPort);
+        LOG.debug("createInPortResrevedMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
+                dpidLong, inPort);
+        matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
+        matchBuilder.setInPort(ncid);
+
+        return matchBuilder;
+    }
+
     /**
      * Create EtherType Match
      *
@@ -244,7 +255,8 @@ public class MatchUtils {
      */
     public static MatchBuilder createArpDstIpv4Match(MatchBuilder matchBuilder, Ipv4Prefix dstip) {
         ArpMatchBuilder arpDstMatch = new ArpMatchBuilder();
-        arpDstMatch.setArpTargetTransportAddress(dstip);
+        arpDstMatch.setArpTargetTransportAddress(dstip)
+                .setArpOp(FlowUtils.ARP_OP_REQUEST);
         matchBuilder.setLayer3Match(arpDstMatch.build());
 
         return matchBuilder;

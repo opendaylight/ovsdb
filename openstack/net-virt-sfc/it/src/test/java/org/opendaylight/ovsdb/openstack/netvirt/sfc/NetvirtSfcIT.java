@@ -160,8 +160,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final String SF2IP = "10.2.1.2";
     private static final String SF1DPLNAME = "sf1";
     private static final String SF2DPLNAME = "sf2";
-    private static final String SFF1IP = "127.0.0.1";
-    private static final String SFF2IP = "127.0.0.1";
+    private static final String SFF1IP = "127.0.0.1"; //"192.168.1.129"
+    private static final String SFF2IP = "192.168.1.129";//"127.0.0.1";
     private static final String SFF1NAME = "SFF1";
     private static final String SFF2NAME = "SFF2";
     private static final String SFFDPL1NAME = "vxgpe";

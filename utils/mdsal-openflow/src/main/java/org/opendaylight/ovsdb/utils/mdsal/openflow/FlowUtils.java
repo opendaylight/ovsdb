@@ -39,6 +39,9 @@ public class FlowUtils {
     public final static long REG_VALUE_FROM_LOCAL = 0x1L;
     public final static long REG_VALUE_FROM_REMOTE = 0x2L;
     public static final Class<? extends NxmNxReg> REG_FIELD = NxmNxReg0.class;
+    public static final int ARP_OP_REQUEST = 0x1;
+    public static final int ARP_OP_REPLY = 0x2;
+
 
     public static String getNodeName(long dpidLong) {
         return OPENFLOW + ":" + dpidLong;

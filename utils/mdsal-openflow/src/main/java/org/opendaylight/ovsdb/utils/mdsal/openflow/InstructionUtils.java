@@ -113,7 +113,7 @@ public class InstructionUtils {
     }
 
     /**
-     * Create LOCAL Reserved Port Instruction
+     * Create NORMAL Reserved Port Instruction (packet_in)
      *
      * @param nodeName Uri Prefix, containing nodeConnectorType and dpId (aka NodeId)
      * @param ib Map InstructionBuilder without any instructions
@@ -145,7 +145,7 @@ public class InstructionUtils {
     }
 
     /**
-     * Create NORMAL Reserved Port Instruction (packet_in)
+     * Create LOCAL Reserved Port Instruction
      *
      * @param ib Map InstructionBuilder without any instructions
      * @param dpidLong Long the datapath ID of a switch/node

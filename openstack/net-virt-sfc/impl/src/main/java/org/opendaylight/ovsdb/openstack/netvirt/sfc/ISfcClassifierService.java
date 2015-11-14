@@ -21,8 +21,11 @@ public interface ISfcClassifierService {
     void programEgressClassifier1(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
                                   int tunnelOfPort, int tunnelId, short gotoTableId, boolean write);
 
-    void programEgressClassifier2(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
-                                  int tunnelOfPort, int tunnelId, boolean write);
+    void programEgressClassifier(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
+                                 long sfOfPort, int tunnelId, boolean write);
+
+    void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
+                                       long sfOfPort, int tunnelId, boolean write);
 
     void program_sfEgress(long dataPathId, int dstPort, boolean write);
 

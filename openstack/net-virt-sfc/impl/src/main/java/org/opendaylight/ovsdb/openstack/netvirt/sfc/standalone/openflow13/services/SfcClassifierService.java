@@ -55,7 +55,12 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     }
 
     @Override
-    public void programEgressClassifier2(long dataPathId, long vxGpeOfPort, long nsp, short nsi, int tunnelOfPort, int tunnelId, boolean write) {
+    public void programEgressClassifier(long dataPathId, long vxGpeOfPort, long nsp, short nsi, long sfOfPort, int tunnelId, boolean write) {
+
+    }
+
+    @Override
+    public void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi, long sfOfPort, int tunnelId, boolean write) {
 
     }
 

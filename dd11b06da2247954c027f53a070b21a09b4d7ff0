@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_06c7ef46",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundConstants.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-15T12:06:29Z",
+      "side": 1,
+      "message": "Already defined in HwvtepSchemaConstats.databaseName. Why not use from there?",
+      "revId": "dd11b06da2247954c027f53a070b21a09b4d7ff0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_c6c0f72c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-15T12:06:29Z",
+      "side": 1,
+      "message": "I believe this was used while writing code. Change the message and severity both.",
+      "revId": "dd11b06da2247954c027f53a070b21a09b4d7ff0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_66dd8314",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-15T12:06:29Z",
+      "side": 1,
+      "message": "Should be debug. Also, delete TODO. If something more needs to be done here, add TODO with appropriate message.",
+      "revId": "dd11b06da2247954c027f53a070b21a09b4d7ff0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_86e2ffd3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-15T12:06:29Z",
+      "side": 1,
+      "message": "Nitpick: As earlier, delete this or change message to reflect what needs to be done.",
+      "revId": "dd11b06da2247954c027f53a070b21a09b4d7ff0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_e6d093f9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-15T12:06:29Z",
+      "side": 1,
+      "message": "Hope the order of commands was considered in scenarios where all transactions come together. I am not sure yet what the right order would be.",
+      "revId": "dd11b06da2247954c027f53a070b21a09b4d7ff0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

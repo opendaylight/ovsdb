@@ -19,8 +19,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/${project.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/${project.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.sfc/features-sfc/${sfc.version}/xml/features</repository>
-  <!--<repository>mvn:org.opendaylight.sfc/features-sfc-ovs/${sfc.version}/xml/features</repository>-->
-  <repository>mvn:org.opendaylight.sfc/features-sfcofl2/${sfc.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <feature name='odl-ovsdb-sfc-api' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: api'>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>

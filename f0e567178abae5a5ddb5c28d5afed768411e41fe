@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_52bb6172",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-16T19:22:37Z",
+      "side": 1,
+      "message": "Set of NeutronPorts seems a bit overkill?!?",
+      "range": {
+        "startLine": 111,
+        "startChar": 16,
+        "endLine": 111,
+        "endChar": 27
+      },
+      "revId": "f0e567178abae5a5ddb5c28d5afed768411e41fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_f2884dc8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-16T19:22:37Z",
+      "side": 1,
+      "message": "I don\u0027t understand why this cache needs to live in NeutronL3Adapter. It looks to me that the code that needs\nthis cache should implement it. As I look in this code, there is nothing in this scope that needs this.",
+      "range": {
+        "startLine": 111,
+        "startChar": 29,
+        "endLine": 111,
+        "endChar": 45
+      },
+      "revId": "f0e567178abae5a5ddb5c28d5afed768411e41fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_32b6e58b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1273,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-16T19:22:37Z",
+      "side": 1,
+      "message": "public but only used by locally?",
+      "range": {
+        "startLine": 1273,
+        "startChar": 4,
+        "endLine": 1273,
+        "endChar": 10
+      },
+      "revId": "f0e567178abae5a5ddb5c28d5afed768411e41fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_92c1d9e6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1279,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-16T19:22:37Z",
+      "side": 1,
+      "message": "this should be symmetric. It looks wrong that the code that calls this is external to L3Adapter, while the caller of storePortInCleanupCache is local.",
+      "range": {
+        "startLine": 1279,
+        "startChar": 16,
+        "endLine": 1279,
+        "endChar": 42
+      },
+      "revId": "f0e567178abae5a5ddb5c28d5afed768411e41fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

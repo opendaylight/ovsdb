@@ -9,9 +9,15 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
@@ -19,10 +25,17 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -115,21 +128,22 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
             Node node = getCreated(mod);
             if (node != null) {
                 HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
-                ConnectionInfo connection = hwvtepGlobal.getConnectionInfo();
-                InstanceIdentifier<Node> iid = hcm.getInstanceIdentifier(connection);
-                if (iid != null) {
-                    LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
-                                    + "to same device, hence dropping the request {}", connection, hwvtepGlobal);
-                } else {
-                    try {
-                        hcm.connect(HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId()), hwvtepGlobal);
-                    } catch (UnknownHostException e) {
-                        LOG.warn("Failed to connect to OVSDB node", e);
+                if (hwvtepGlobal != null) {
+                    ConnectionInfo connection = hwvtepGlobal.getConnectionInfo();
+                    InstanceIdentifier<Node> iid = hcm.getInstanceIdentifier(connection);
+                    if (iid != null) {
+                        LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
+                                        + "to same device, hence dropping the request {}", connection, hwvtepGlobal);
+                    } else {
+                        try {
+                            hcm.connect(HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId()), hwvtepGlobal);
+                        } catch (UnknownHostException e) {
+                            LOG.warn("Failed to connect to OVSDB node", e);
+                        }
                     }
                 }
             }
         }
-
     }
 
     private void updateConnections(Collection<DataTreeModification<Node>> changes) {
@@ -141,18 +155,19 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
                 Node original = getOriginal(mod);
                 HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
                 HwvtepGlobalAugmentation hgOriginal = original.getAugmentation(HwvtepGlobalAugmentation.class);
-                OvsdbClient client = hcm.getClient(hgUpdated.getConnectionInfo());
-                if (client == null) {
-                    try {
-                        hcm.disconnect(hgOriginal);
-                        hcm.connect(HwvtepSouthboundMapper.createInstanceIdentifier(original.getNodeId()), hgUpdated);
-                    } catch (UnknownHostException e) {
-                        LOG.warn("Failed to update connection on OVSDB Node", e);
+                if (hgUpdated != null && hgOriginal != null) {
+                    OvsdbClient client = hcm.getClient(hgUpdated.getConnectionInfo());
+                    if (client == null) {
+                        try {
+                            hcm.disconnect(hgOriginal);
+                            hcm.connect(HwvtepSouthboundMapper.createInstanceIdentifier(original.getNodeId()), hgUpdated);
+                        } catch (UnknownHostException e) {
+                            LOG.warn("Failed to update connection on OVSDB Node", e);
+                        }
                     }
                 }
             }
         }
-
     }
 
     private void updateData(Collection<DataTreeModification<Node>> changes) {
@@ -161,11 +176,12 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
          * Update data for each connection
          * Requires Command patterns. TBD.
          */
-        connectionInstancesFromChanges(changes);
-        /*for (Entry<InstanceIdentifier<Node>, HwvtepConnectionInstance> connectionInstanceEntry :
-            connectionInstancesFromChanges(changes).entrySet()) {
-            
-        }*/
+        for (Entry<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> changesEntry :
+                changesByConnectionInstance(changes).entrySet()) {
+            HwvtepConnectionInstance connectionInstance = changesEntry.getKey();
+            connectionInstance.transact(new TransactCommandAggregator(
+                new HwvtepOperationalState(db, changesEntry.getValue()),changesEntry.getValue()));
+        }
     }
 
     private void disconnect(Collection<DataTreeModification<Node>> changes) {
@@ -175,17 +191,19 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
             Node deleted = getRemoved(mod);
             if (deleted != null) {
                 HwvtepGlobalAugmentation hgDeleted = deleted.getAugmentation(HwvtepGlobalAugmentation.class);
-                try {
-                    hcm.disconnect(hgDeleted);
-                } catch (UnknownHostException e) {
-                    LOG.warn("Failed to disconnect OVSDB Node", e);
+                if (hgDeleted != null) {
+                    try {
+                        hcm.disconnect(hgDeleted);
+                    } catch (UnknownHostException e) {
+                        LOG.warn("Failed to disconnect OVSDB Node", e);
+                    }
                 }
             }
         }
     }
 
     private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE) 
+        if((mod.getModificationType() == ModificationType.WRITE)
                         && (mod.getDataBefore() == null)){
             return mod.getDataAfter();
         }
@@ -244,35 +262,28 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
         return path;
     }
 
-    public Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> connectionInstancesFromChanges(
-                    Collection<DataTreeModification<Node>> changes) {
-        Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> result =
-                        new HashMap<InstanceIdentifier<Node>, HwvtepConnectionInstance>();
+    private Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> changesByConnectionInstance(
+            Collection<DataTreeModification<Node>> changes) {
+        Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> result =
+                new HashMap<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>>();
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
-            Node created = getCreated(mod);
-            Node updated = getUpdated(mod);
-            Node original = getOriginal(mod);
-            Node deleted = getRemoved(mod);
-
-            if((original != null) && (deleted == null)) {
-                result.put(key, getConnectionInstance(original));
-            }
-            if(created != null) {
-                result.put(key, getConnectionInstance(created));
-            } else if(updated != null) {
-                result.put(key, getConnectionInstance(updated));
+            //From original node to get connection instance
+            Node node = mod.getDataBefore()!=null ? mod.getDataBefore() : mod.getDataAfter();
+            HwvtepConnectionInstance connection = hcm.getConnectionInstance(node);
+            if (connection != null) {
+                if (!result.containsKey(connection)) {
+                    List<DataTreeModification<Node>> tempChanges= new ArrayList<DataTreeModification<Node>>();
+                    tempChanges.add(change);
+                    result.put(connection, tempChanges);
+                } else {
+                    result.get(connection).add(change);
+                }
+            } else {
+                LOG.warn("Failed to get the connection of changed node: {}", node);
             }
         }
-        LOG.trace("Connection Instance Map: {}", result);
+        LOG.trace("Connection Change Map: {}", result);
         return result;
     }
-
-    private HwvtepConnectionInstance getConnectionInstance(Node node) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-
 }

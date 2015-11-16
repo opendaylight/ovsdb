@@ -106,18 +106,18 @@ public class HwvtepSouthboundUtil {
                     HwvtepLogicalSwitchAttributes lNode) {
         Preconditions.checkNotNull(lNode);
         Optional<HwvtepGlobalAugmentation> result = null;
-        // TODO: Add managed-by to hwvtep-logical-switch-attributes in
-        // hwvtep.yang
-        /*
-         * HwvtepGlobalRef ref = lNode.getManagedBy(); if (ref != null &&
-         * ref.getValue() != null) { result = getManagingNode(db, ref); } else {
-         * LOG.warn(
-         * "Cannot find client for LogicalSwitch without a specified ManagedBy {}"
-         * , pNode); return Optional.absent(); } if(!result.isPresent()) {
-         * LOG.warn("Failed to find managing node for PhysicalSwitch {}",
-         * pNode); } return result;
-         */
-        return Optional.absent(); // TODO: Delete this once yang is updated
+
+        HwvtepGlobalRef ref = lNode.getLogicalSwitchManagedBy();
+        if (ref != null && ref.getValue() != null) {
+            result = getManagingNode(db, ref);
+        } else {
+            LOG.warn("Cannot find client for LogicalSwitch without a specified ManagedBy {}", lNode);
+            return Optional.absent();
+        }
+        if(!result.isPresent()) {
+            LOG.warn("Failed to find managing node for PhysicalSwitch {}",lNode);
+        }
+        return result;
     }
 
     private static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {

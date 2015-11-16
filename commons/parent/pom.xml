@@ -97,8 +97,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <switchmanager.api.version>0.9.0-SNAPSHOT</switchmanager.api.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
     <!-- 3rd Pary Dependency Versions -->
-    <commons.collection.version>1.0</commons.collection.version>
-    <httpcomponents.version>4.2.1</httpcomponents.version>
+    <commons.collection.version>3.2.1</commons.collection.version>
+    <httpcomponents.version>4.4.1</httpcomponents.version>
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
     <dlux.version>0.3.0-SNAPSHOT</dlux.version>
@@ -143,23 +143,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>commons.northbound</artifactId>
-        <version>${northbound.commons.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-api</artifactId>
         <version>${controller.config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>containermanager</artifactId>
-        <version>${containermanager.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>forwardingrulesmanager</artifactId>
-        <version>${forwardingrulesmanager.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.neutron</groupId>
@@ -171,11 +156,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>opendaylight-karaf-empty</artifactId>
         <version>1.6.0-SNAPSHOT</version>
         <type>zip</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal</artifactId>
-        <version>${sal.version}</version>
       </dependency>
 
       <dependency>
@@ -207,11 +187,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <scope>import</scope>
       </dependency>
 
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>switchmanager</artifactId>
-        <version>${switchmanager.api.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.opendaylight.openflowplugin.model</groupId>
         <artifactId>model-flow-base</artifactId>

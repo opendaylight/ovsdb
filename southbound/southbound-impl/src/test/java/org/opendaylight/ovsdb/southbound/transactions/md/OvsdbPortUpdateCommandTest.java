@@ -290,7 +290,7 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testGetTerminationPointBridge() throws Exception {
         UUID portUUID = mock(UUID.class);
-        bridgeUpdatedRows = new HashMap<UUID, Bridge>();
+        bridgeUpdatedRows = new HashMap<>();
         UUID bridgeUUID = mock(UUID.class);
         Bridge bridge = mock(Bridge.class);
         bridgeUpdatedRows.put(bridgeUUID, bridge);
@@ -376,7 +376,7 @@ import com.google.common.util.concurrent.CheckedFuture;
         PowerMockito.when(SouthboundMapper.createInterfaceType(anyString())).thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
             public Class<? extends InterfaceTypeBase> answer(
                     InvocationOnMock invocation) throws Throwable {
-                return (Class<? extends InterfaceTypeBase>) InterfaceTypeInternal.class;
+                return InterfaceTypeInternal.class;
             }
         });
         when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);

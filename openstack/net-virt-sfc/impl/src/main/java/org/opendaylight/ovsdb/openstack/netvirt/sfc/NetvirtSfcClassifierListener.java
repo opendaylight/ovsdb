@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13.INetvirtSfcOF13Provider;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Classifier> {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcClassifierListener.class);
-    private MdsalUtils dbutils;
+    private MdsalUtils mdsalUtils;
     private ListenerRegistration<NetvirtSfcClassifierListener> listenerRegistration;
 
     /**
@@ -43,7 +42,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
     public NetvirtSfcClassifierListener(final INetvirtSfcOF13Provider provider, final DataBroker db) {
         super(provider, Classifier.class);
         Preconditions.checkNotNull(db, "DataBroker can not be null!");
-        dbutils = new MdsalUtils(db);
+        mdsalUtils = new MdsalUtils(db);
         registrationListener(db);
     }
 
@@ -55,7 +54,6 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
             LOG.warn("Netvirt Classifier DataChange listener registration fail!");
-            LOG.debug("Netvirt Classifier DataChange listener registration fail!", e);
             throw new IllegalStateException("NetvirtSfcClassifierListener startup fail! System needs restart.", e);
         }
     }
@@ -67,7 +65,6 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
                 listenerRegistration.close();
             } catch (final Exception e) {
                 LOG.warn("Error to stop Netvirt Classifier DataChange listener: {}", e.getMessage());
-                LOG.debug("Error to stop Netvirt Classifier DataChange listener..", e);
             }
             listenerRegistration = null;
         }
@@ -79,20 +76,13 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
         Preconditions.checkNotNull(removeDataObj, "Added object can not be null!");
         String aclName = removeDataObj.getAcl();
         // Read the ACL information from data store and make sure it exists.
-        Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
+        Acl acl = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
         if (acl == null) {
             LOG.debug("IETF ACL with name ={} is not yet configured. skip this operation", aclName);
             return;
         }
 
-        if (removeDataObj.getSffs() != null) {
-            for (Sff sff : removeDataObj.getSffs().getSff()) {
-                // Netvirt classifier binds an ACL with service function forwarder that is identified by SFF name.
-                // SFF validation can be done with SFC Provider APIs, as SFF is configured within SFC project.  
-                // Netvirt SFC provider will validate the SFF using SFC provider APIs.
-                provider.removeClassifierRules(sff, acl);
-            }
-        }
+        provider.removeClassifierRules(acl);
     }
 
     @Override
@@ -107,21 +97,15 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
                     final Classifier addDataObj) {
         Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
         String aclName = addDataObj.getAcl();
+        LOG.debug("Adding classifier iid = {}, dataObj = {}", identifier, addDataObj);
         // Read the ACL information from data store and make sure it exists.
-        Acl acl = dbutils.read(LogicalDatastoreType.CONFIGURATION,getIetfAclIid(aclName));
+        Acl acl = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
         if (acl == null) {
             LOG.debug("IETF ACL with name ={} is not yet configured. skip this operation", aclName);
             return;
         }
 
-        if (addDataObj.getSffs() != null) {
-            for (Sff sff : addDataObj.getSffs().getSff()) {
-                // Netvirt classifier binds an ACL with service function forwarder that is identified by SFF name.
-                // SFF validation can be done with SFC Provider APIs, as SFF is configured within SFC project.  
-                // Netvirt SFC provider will validate the SFF using SFC provider APIs.
-                provider.addClassifierRules(sff, acl);
-            }
-        }
+        provider.addClassifierRules(acl);
     }
 
     public InstanceIdentifier<Classifier> getClassifierIid() {

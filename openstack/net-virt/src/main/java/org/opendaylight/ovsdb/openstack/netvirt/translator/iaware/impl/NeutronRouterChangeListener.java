@@ -123,7 +123,7 @@ public class NeutronRouterChangeListener implements ClusteredDataChangeListener,
             result.setGatewayPortId(String.valueOf(router.getGatewayPortId().getValue()));
         }
         if (router.getRoutes() != null) {
-            List<String> routes = new ArrayList<String>();
+            List<String> routes = new ArrayList<>();
             for (String route : router.getRoutes()) {
                 routes.add(route);
             }
@@ -135,7 +135,7 @@ public class NeutronRouterChangeListener implements ClusteredDataChangeListener,
             extGwInfo.setNetworkID(String.valueOf(router.getExternalGatewayInfo().getExternalNetworkId().getValue()));
             extGwInfo.setEnableSNAT(router.getExternalGatewayInfo().isEnableSnat());
             if (router.getExternalGatewayInfo().getExternalFixedIps() != null) {
-                List<Neutron_IPs> fixedIPs = new ArrayList<Neutron_IPs>();
+                List<Neutron_IPs> fixedIPs = new ArrayList<>();
                 for (ExternalFixedIps mdFixedIP : router.getExternalGatewayInfo().getExternalFixedIps()) {
                      Neutron_IPs fixedIP = new Neutron_IPs();
                      fixedIP.setSubnetUUID(String.valueOf(mdFixedIP.getSubnetId().getValue()));
@@ -148,7 +148,7 @@ public class NeutronRouterChangeListener implements ClusteredDataChangeListener,
         }
 
         if (router.getInterfaces() != null) {
-            Map<String, NeutronRouter_Interface> interfaces = new HashMap<String, NeutronRouter_Interface>();
+            Map<String, NeutronRouter_Interface> interfaces = new HashMap<>();
             for (Interfaces mdInterface : router.getInterfaces()) {
                 NeutronRouter_Interface pojoInterface = new NeutronRouter_Interface();
                 String id = String.valueOf(mdInterface.getUuid().getValue());

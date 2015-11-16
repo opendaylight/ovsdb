@@ -60,7 +60,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
                             getOvsdbConnectionInstance().getInstanceIdentifier());
                 } else {
                     LOG.debug("Other southbound plugin instances in cluster are connected to the device,"
-                            + " not deleting OvsdbNode form data store.");
+                            + " not deleting OvsdbNode from operational data store.");
                 }
             }
         } catch (Exception e) {
@@ -72,25 +72,28 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
         ManagerEntry onlyConnectedManager = null;
         if (ovsdbNodeAugmentation != null) {
             int connectedManager = 0;
-            for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
-                if (manager.isConnected()) {
-                    connectedManager++;
-                    if (connectedManager > ONE_CONNECTED_MANAGER) {
-                        return false;
+            if (ovsdbNodeAugmentation.getManagerEntry() != null) {
+                for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
+                    if (manager.isConnected()) {
+                        connectedManager++;
+                        if (connectedManager > ONE_CONNECTED_MANAGER) {
+                            return false;
+                        }
+                        onlyConnectedManager = manager;
                     }
-                    onlyConnectedManager = manager;
                 }
             }
             if (connectedManager == 0) {
                 return true;
             }
-        }
-        /*When switch is listening in passive mode, this number represent number of active connection to the device
-        This is to handle the controller initiated connection scenario, where all the controller will connect, but
-        switch will have only one manager.
-        */
-        if (onlyConnectedManager.getNumberOfConnections().longValue() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE) {
-            return false;
+
+            /*When switch is listening in passive mode, this number represent number of active connection to the device
+            This is to handle the controller initiated connection scenario, where all the controller will connect, but
+            switch will have only one manager.
+            */
+            if (onlyConnectedManager.getNumberOfConnections() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE) {
+                return false;
+            }
         }
         return true;
     }

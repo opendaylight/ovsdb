@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.translator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -81,7 +80,7 @@ public class NeutronNetwork implements Serializable, INeutronObject {
     }
 
     public void initDefaults() {
-        subnets = new ArrayList<String>();
+        subnets = new ArrayList<>();
         if (status == null) {
             status = "ACTIVE";
         }
@@ -237,43 +236,43 @@ public class NeutronNetwork implements Serializable, INeutronObject {
 
     public NeutronNetwork extractFields(List<String> fields) {
         NeutronNetwork ans = new NeutronNetwork();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setNetworkUUID(this.getNetworkUUID());
-            }
-            if (s.equals("name")) {
-                ans.setNetworkName(this.getNetworkName());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setAdminStateUp(adminStateUp);
-            }
-            if (s.equals("status")) {
-                ans.setStatus(this.getStatus());
-            }
-            if (s.equals("subnets")) {
-                List<String> subnetList = new ArrayList<String>();
-                subnetList.addAll(this.getSubnets());
-                ans.setSubnets(subnetList);
-            }
-            if (s.equals("shared")) {
-                ans.setShared(shared);
-            }
-            if (s.equals("tenant_id")) {
-                ans.setTenantID(this.getTenantID());
-            }
-            if (s.equals("external")) {
-                ans.setRouterExternal(this.getRouterExternal());
-            }
-            if (s.equals("segmentation_id")) {
-                ans.setProviderSegmentationID(this.getProviderSegmentationID());
-            }
-            if (s.equals("physical_network")) {
-                ans.setProviderPhysicalNetwork(this.getProviderPhysicalNetwork());
-            }
-            if (s.equals("network_type")) {
-                ans.setProviderNetworkType(this.getProviderNetworkType());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setNetworkUUID(this.getNetworkUUID());
+                    break;
+                case "name":
+                    ans.setNetworkName(this.getNetworkName());
+                    break;
+                case "admin_state_up":
+                    ans.setAdminStateUp(adminStateUp);
+                    break;
+                case "status":
+                    ans.setStatus(this.getStatus());
+                    break;
+                case "subnets":
+                    List<String> subnetList = new ArrayList<>();
+                    subnetList.addAll(this.getSubnets());
+                    ans.setSubnets(subnetList);
+                    break;
+                case "shared":
+                    ans.setShared(shared);
+                    break;
+                case "tenant_id":
+                    ans.setTenantID(this.getTenantID());
+                    break;
+                case "external":
+                    ans.setRouterExternal(this.getRouterExternal());
+                    break;
+                case "segmentation_id":
+                    ans.setProviderSegmentationID(this.getProviderSegmentationID());
+                    break;
+                case "physical_network":
+                    ans.setProviderPhysicalNetwork(this.getProviderPhysicalNetwork());
+                    break;
+                case "network_type":
+                    ans.setProviderNetworkType(this.getProviderNetworkType());
+                    break;
             }
         }
         return ans;

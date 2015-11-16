@@ -47,7 +47,7 @@ import com.google.common.collect.ImmutableBiMap;
 
 public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<Pool, NeutronLoadBalancerPool> implements INeutronLoadBalancerPoolCRUD {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronLoadBalancerPoolInterface.class);
-    private ConcurrentMap<String, NeutronLoadBalancerPool> loadBalancerPoolDB = new ConcurrentHashMap<String, NeutronLoadBalancerPool>();
+    private ConcurrentMap<String, NeutronLoadBalancerPool> loadBalancerPoolDB = new ConcurrentHashMap<>();
 
     private static final ImmutableBiMap<Class<? extends ProtocolBase>,String> PROTOCOL_MAP
             = new ImmutableBiMap.Builder<Class<? extends ProtocolBase>,String>()
@@ -76,13 +76,13 @@ public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<P
 
     @Override
     public List<NeutronLoadBalancerPool> getAllNeutronLoadBalancerPools() {
-        Set<NeutronLoadBalancerPool> allLoadBalancerPools = new HashSet<NeutronLoadBalancerPool>();
+        Set<NeutronLoadBalancerPool> allLoadBalancerPools = new HashSet<>();
         for (Entry<String, NeutronLoadBalancerPool> entry : loadBalancerPoolDB.entrySet()) {
             NeutronLoadBalancerPool loadBalancerPool = entry.getValue();
             allLoadBalancerPools.add(loadBalancerPool);
         }
         LOGGER.debug("Exiting getLoadBalancerPools, Found {} OpenStackLoadBalancerPool", allLoadBalancerPools.size());
-        List<NeutronLoadBalancerPool> ans = new ArrayList<NeutronLoadBalancerPool>();
+        List<NeutronLoadBalancerPool> ans = new ArrayList<>();
         ans.addAll(allLoadBalancerPools);
         return ans;
     }
@@ -149,7 +149,7 @@ public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<P
             poolBuilder.setLbAlgorithm(pool.getLoadBalancerPoolLbAlgorithm());
         }
         if (pool.getLoadBalancerPoolListeners() != null) {
-            List<Uuid> listListener = new ArrayList<Uuid>();
+            List<Uuid> listListener = new ArrayList<>();
             for (Neutron_ID neutron_id : pool.getLoadBalancerPoolListeners()) {
                 listListener.add(toUuid(neutron_id.getID()));
             }
@@ -163,7 +163,7 @@ public class NeutronLoadBalancerPoolInterface extends AbstractNeutronInterface<P
         if (pool.getLoadBalancerPoolProtocol() != null) {
             ImmutableBiMap<String, Class<? extends ProtocolBase>> mapper =
                 PROTOCOL_MAP.inverse();
-            poolBuilder.setProtocol((Class<? extends ProtocolBase>) mapper.get(pool.getLoadBalancerPoolProtocol()));
+            poolBuilder.setProtocol(mapper.get(pool.getLoadBalancerPoolProtocol()));
         }
         if (pool.getLoadBalancerPoolSessionPersistence() != null) {
             NeutronLoadBalancer_SessionPersistence sessionPersistence = pool.getLoadBalancerPoolSessionPersistence();

@@ -16,7 +16,44 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.*;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityGroupCacheManger;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NodeCacheManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.OvsdbInventoryServiceImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityGroupCacheManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SouthboundImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
@@ -50,8 +87,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronRouter
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityGroupAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityRuleAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSubnetAware;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
-import org.opendaylight.ovsdb.openstack.netvirt.impl.*;
+import org.opendaylight.ovsdb.utils.mdsal.utils.NeutronModelsDataStoreHelper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -62,7 +98,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
-    private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<ServiceRegistration<?>>();
+    private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<>();
     private List<Pair<Object, ServiceRegistration>> servicesAndRegistrations = new ArrayList<>();
     private ProviderContext providerContext;
 
@@ -136,6 +172,13 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
+        final SecurityGroupCacheManger securityGroupCacheManger = new SecurityGroupCacheManagerImpl();
+        registerService(context,
+                        new String[]{SecurityGroupCacheManger.class.getName()}, null, securityGroupCacheManger);
+
+        registerService(context,
+                new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
+
         FWaasHandler fWaasHandler = new FWaasHandler();
         registerAbstractHandlerService(context,
                 new Class[] {INeutronFirewallAware.class, INeutronFirewallRuleAware.class, INeutronFirewallPolicyAware.class},
@@ -149,7 +192,8 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{EventDispatcher.class.getName()}, null, eventDispatcher);
 
-        final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter();
+        final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter(
+                new NeutronModelsDataStoreHelper(this.providerContext.getSALService(DataBroker.class)));
         registerService(context,
                 new String[]{NeutronL3Adapter.class.getName()}, null, neutronL3Adapter);
 
@@ -194,6 +238,7 @@ public class ConfigActivator implements BundleActivator {
                 securityServices, neutronL3Adapter);
         trackService(context, INeutronPortCRUD.class, tenantNetworkManager, lBaaSHandler, lBaaSPoolHandler,
                 lBaaSPoolMemberHandler, securityServices, neutronL3Adapter);
+        trackService(context, INeutronFloatingIPCRUD.class, neutronL3Adapter);
         trackService(context, INeutronLoadBalancerCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
         trackService(context, INeutronLoadBalancerPoolCRUD.class, lBaaSHandler, lBaaSPoolMemberHandler);
         trackService(context, LoadBalancerProvider.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);

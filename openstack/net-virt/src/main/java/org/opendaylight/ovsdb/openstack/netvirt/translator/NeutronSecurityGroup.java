@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.translator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -52,7 +51,7 @@ public class NeutronSecurityGroup implements Serializable, INeutronObject {
     List<NeutronSecurityRule> neutronSecurityRule;
 
     public NeutronSecurityGroup() {
-        neutronSecurityRule = new ArrayList<NeutronSecurityRule>();
+        neutronSecurityRule = new ArrayList<>();
 
     }
 
@@ -109,23 +108,23 @@ public class NeutronSecurityGroup implements Serializable, INeutronObject {
 
     public NeutronSecurityGroup extractFields(List<String> fields) {
         NeutronSecurityGroup ans = new NeutronSecurityGroup ();
-        Iterator<String> i = fields.iterator ();
-        while (i.hasNext ()) {
-            String s = i.next ();
-            if (s.equals ("id")) {
-                ans.setID (this.getID ());
-            }
-            if (s.equals ("name")) {
-                ans.setSecurityGroupName (this.getSecurityGroupName ());
-            }
-            if (s.equals ("description")) {
-                ans.setSecurityGroupDescription (this.getSecurityGroupDescription ());
-            }
-            if (s.equals ("tenant_id")) {
-                ans.setSecurityGroupTenantID (this.getSecurityGroupTenantID ());
-            }
-            if (s.equals ("security_group_rules")) {
-                ans.setSecurityRules (this.getSecurityRules ());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "name":
+                    ans.setSecurityGroupName(this.getSecurityGroupName());
+                    break;
+                case "description":
+                    ans.setSecurityGroupDescription(this.getSecurityGroupDescription());
+                    break;
+                case "tenant_id":
+                    ans.setSecurityGroupTenantID(this.getSecurityGroupTenantID());
+                    break;
+                case "security_group_rules":
+                    ans.setSecurityRules(this.getSecurityRules());
+                    break;
             }
         }
         return ans;

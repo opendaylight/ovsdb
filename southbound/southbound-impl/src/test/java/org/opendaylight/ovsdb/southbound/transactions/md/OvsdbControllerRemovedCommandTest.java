@@ -74,7 +74,7 @@ public class OvsdbControllerRemovedCommandTest {
     @Test
     public void testExecute() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        updatedBridgeRows = new HashMap<UUID, Bridge>();
+        updatedBridgeRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         Bridge bridge = mock(Bridge.class);
         updatedBridgeRows.put(uuid, bridge);
@@ -92,7 +92,7 @@ public class OvsdbControllerRemovedCommandTest {
     @Test
     public void testDeleteControllers() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        List<InstanceIdentifier<ControllerEntry>> controllerEntryIids = new ArrayList<InstanceIdentifier<ControllerEntry>>();
+        List<InstanceIdentifier<ControllerEntry>> controllerEntryIids = new ArrayList<>();
 
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         Whitebox.invokeMethod(ovsdbControllerRemovedCommand, "deleteControllers", transaction, controllerEntryIids);
@@ -112,12 +112,12 @@ public class OvsdbControllerRemovedCommandTest {
 
         UUID uuid = mock(UUID.class);
         Bridge oldBridgeNode = mock(Bridge.class);
-        oldBridgeRows = new HashMap<UUID, Bridge>();
+        oldBridgeRows = new HashMap<>();
         oldBridgeRows.put(uuid, oldBridgeNode);
         when(bridge.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbControllerRemovedCommand.class, "oldBridgeRows").set(ovsdbControllerRemovedCommand, oldBridgeRows);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
-        Set<UUID> set = new HashSet<UUID>();
+        Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
         set.add(controllerUuid);
         when(column.getData()).thenReturn(set);

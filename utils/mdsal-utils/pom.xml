@@ -15,6 +15,24 @@
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <developers>
+    <developer>
+      <name>Anil Vishnoi</name>
+      <email>vishnoianil@gmail.com</email>
+      <url>https://github.com/vishnoianil</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
+
+  <properties>
+    <neutron.model.version>0.6.0-SNAPSHOT</neutron.model.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -44,6 +62,27 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>model</artifactId>
+      <version>${neutron.model.version}</version>
+    </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.opendaylight.ovsdb.utils.mdsal.utils
+            </Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

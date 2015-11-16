@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -21,7 +20,7 @@ public class TransactionBuilder {
 
     private DatabaseSchema databaseSchema;
     OvsdbClient ovs;
-    ArrayList<Operation> operations = Lists.newArrayList();
+    List<Operation> operations = Lists.newArrayList();
 
     public TransactionBuilder(OvsdbClient ovs, DatabaseSchema schema) {
         this.ovs = ovs;

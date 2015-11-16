@@ -10,12 +10,11 @@ package org.opendaylight.ovsdb.utils.southbound.utils;
 
 import com.google.common.collect.ImmutableBiMap;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 import java.util.List;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -23,15 +22,7 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -40,13 +31,24 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,10 +59,30 @@ public class SouthboundUtils {
     private static final String DEFAULT_OPENFLOW_PORT = "6653";
     private static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     private MdsalUtils mdsalUtils;
+    public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
     }
+
+    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
+            = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
+            .put("internal", InterfaceTypeInternal.class)
+            .put("vxlan", InterfaceTypeVxlan.class)
+            .put("patch", InterfaceTypePatch.class)
+            .put("system", InterfaceTypeSystem.class)
+            .put("tap", InterfaceTypeTap.class)
+            .put("geneve", InterfaceTypeGeneve.class)
+            .put("gre", InterfaceTypeGre.class)
+            .put("ipsec_gre", InterfaceTypeIpsecGre.class)
+            .put("gre64", InterfaceTypeGre64.class)
+            .put("ipsec_gre64", InterfaceTypeIpsecGre64.class)
+            .put("lisp", InterfaceTypeLisp.class)
+            .put("dpdk", InterfaceTypeDpdk.class)
+            .put("dpdkr", InterfaceTypeDpdkr.class)
+            .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
+            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
+            .build();
 
     public NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
@@ -97,6 +119,18 @@ public class SouthboundUtils {
 
     public InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
         return SouthboundMapper.createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+    }
+
+    public InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(Node node, String portName){
+
+        InstanceIdentifier<TerminationPoint> terminationPointPath = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+                .child(Node.class,node.getKey())
+                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+
+        LOG.debug("Termination point InstanceIdentifier generated : {}",terminationPointPath);
+        return terminationPointPath;
     }
 
     public NodeKey createNodeKey(IpAddress ip, PortNumber port) {
@@ -144,15 +178,14 @@ public class SouthboundUtils {
         try {
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Interrupted while waiting after adding OVSDB node {}", connectionInfoToString(connectionInfo), e);
         }
         return result;
     }
 
     public Node getOvsdbNode(final ConnectionInfo connectionInfo) {
-        Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
                 createInstanceIdentifier(connectionInfo));
-        return node;
     }
 
     public boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) {
@@ -161,7 +194,8 @@ public class SouthboundUtils {
         try {
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Interrupted while waiting after deleting OVSDB node {}", connectionInfoToString(connectionInfo),
+                    e);
         }
         return result;
     }
@@ -240,7 +274,7 @@ public class SouthboundUtils {
         try {
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Interrupted while waiting after deleting bridge {}", bridgeName, e);
         }
         return result;
     }
@@ -270,12 +304,13 @@ public class SouthboundUtils {
      * @throws InterruptedException
      */
     public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
-                              final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-                              final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-                              final Class<? extends DatapathTypeBase> dpType,
-                              final List<BridgeExternalIds> externalIds,
-                              final List<ControllerEntry> controllerEntries,
-                              final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
+                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             final List<BridgeExternalIds> externalIds,
+                             final List<ControllerEntry> controllerEntries,
+                             final List<BridgeOtherConfigs> otherConfigs,
+                             final String dpid) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         if (bridgeIid == null) {
@@ -308,6 +343,10 @@ public class SouthboundUtils {
         if (otherConfigs != null) {
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
         }
+        if (dpid != null && !dpid.isEmpty()) {
+            DatapathId datapathId = new DatapathId(dpid);
+            ovsdbBridgeAugmentationBuilder.setDatapathId(datapathId);
+        }
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.toString());
@@ -317,9 +356,85 @@ public class SouthboundUtils {
         return result;
     }
 
+    public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
+                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             final List<BridgeExternalIds> externalIds,
+                             final List<ControllerEntry> controllerEntries,
+                             final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
+        return addBridge(connectionInfo, bridgeIid, bridgeName, bridgeNodeId, setProtocolEntries,
+                failMode, setManagedBy, dpType, externalIds, controllerEntries,
+                otherConfigs, null);
+    }
+
+    public boolean addBridge(final ConnectionInfo connectionInfo, final String bridgeName)
+            throws InterruptedException {
+
+        return addBridge(connectionInfo, null, bridgeName, null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null, null);
+    }
+
     private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+    }
+
+    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
+                                       String type, Map<String, String> options,
+                                       Map<String, String> externalIds) {
+        InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+
+        tpAugmentationBuilder.setName(portName);
+        if (type != null) {
+            tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
+        }
+
+        if (options != null && options.size() > 0) {
+            List<Options> optionsList = new ArrayList<>();
+            for (Map.Entry<String, String> entry : options.entrySet()) {
+                OptionsBuilder optionsBuilder = new OptionsBuilder();
+                optionsBuilder.setKey(new OptionsKey(entry.getKey()));
+                optionsBuilder.setOption(entry.getKey());
+                optionsBuilder.setValue(entry.getValue());
+                optionsList.add(optionsBuilder.build());
+            }
+            tpAugmentationBuilder.setOptions(optionsList);
+        }
+
+        if (externalIds != null && externalIds.size() > 0) {
+            List<InterfaceExternalIds> externalIdsList = new ArrayList<>();
+            for (Map.Entry<String, String> entry : externalIds.entrySet()) {
+                InterfaceExternalIdsBuilder interfaceExternalIdsBuilder = new InterfaceExternalIdsBuilder();
+                interfaceExternalIdsBuilder.setKey(new InterfaceExternalIdsKey(entry.getKey()));
+                interfaceExternalIdsBuilder.setExternalIdKey(entry.getKey());
+                interfaceExternalIdsBuilder.setExternalIdValue(entry.getValue());
+                externalIdsList.add(interfaceExternalIdsBuilder.build());
+            }
+            tpAugmentationBuilder.setInterfaceExternalIds(externalIdsList);
+        }
+
+        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+        /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
+        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+    }
+
+    public TerminationPoint readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
+        InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(
+                bridgeNode, portName);
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpIid);
+    }
+
+    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
+        return addTerminationPoint(bridgeNode, bridgeName, portName, type, null, null);
+    }
+
+    public Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
+                                             Map<String, String> options) {
+        return addTerminationPoint(bridgeNode, bridgeName, portName, type, options, null);
     }
 }

@@ -59,7 +59,7 @@ public class NeutronSecurityGroupInterface extends AbstractNeutronInterface<Secu
 
     @Override
     public List<NeutronSecurityGroup> getAllNeutronSecurityGroups() {
-        Set<NeutronSecurityGroup> allSecurityGroups = new HashSet<NeutronSecurityGroup>();
+        Set<NeutronSecurityGroup> allSecurityGroups = new HashSet<>();
         SecurityGroups groups = readMd(createInstanceIdentifier());
         if (groups != null) {
             for (SecurityGroup group: groups.getSecurityGroup()) {
@@ -67,7 +67,7 @@ public class NeutronSecurityGroupInterface extends AbstractNeutronInterface<Secu
             }
         }
         LOGGER.debug("Exiting getSecurityGroups, Found {} OpenStackSecurityGroup", allSecurityGroups.size());
-        List<NeutronSecurityGroup> ans = new ArrayList<NeutronSecurityGroup>();
+        List<NeutronSecurityGroup> ans = new ArrayList<>();
         ans.addAll(allSecurityGroups);
         return ans;
     }
@@ -120,7 +120,7 @@ public class NeutronSecurityGroupInterface extends AbstractNeutronInterface<Secu
                 .fetchINeutronSecurityRuleCRUD(this);
             INeutronSecurityRuleCRUD srCrud = interfaces.getSecurityRuleInterface();
 
-            List<NeutronSecurityRule> rules = new ArrayList<NeutronSecurityRule>();
+            List<NeutronSecurityRule> rules = new ArrayList<>();
             for (Uuid uuid: group.getSecurityRules()) {
                  rules.add(srCrud.getNeutronSecurityRule(uuid.getValue()));
             }
@@ -145,7 +145,7 @@ public class NeutronSecurityGroupInterface extends AbstractNeutronInterface<Secu
             securityGroupBuilder.setTenantId(toUuid(securityGroup.getSecurityGroupTenantID()));
         }
         if (securityGroup.getSecurityRules() != null) {
-            List<Uuid> neutronSecurityRule = new ArrayList<Uuid>();
+            List<Uuid> neutronSecurityRule = new ArrayList<>();
             for (NeutronSecurityRule securityRule : securityGroup.getSecurityRules()) {
                 if (securityRule.getID() != null) {
                     neutronSecurityRule.add(toUuid(securityRule.getID()));

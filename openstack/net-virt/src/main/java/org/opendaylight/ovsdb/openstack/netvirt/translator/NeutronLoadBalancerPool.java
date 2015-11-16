@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -194,35 +193,35 @@ public class NeutronLoadBalancerPool implements Serializable, INeutronObject {
 
     public NeutronLoadBalancerPool extractFields(List<String> fields) {
         NeutronLoadBalancerPool ans = new NeutronLoadBalancerPool();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setLoadBalancerPoolTenantID(this.getLoadBalancerPoolTenantID());
-            }
-            if (s.equals("name")) {
-                ans.setLoadBalancerPoolName(this.getLoadBalancerPoolName());
-            }
-            if(s.equals("description")) {
-                ans.setLoadBalancerPoolDescription(this.getLoadBalancerPoolDescription());
-            }
-            if(s.equals("protocol")) {
-                ans.setLoadBalancerPoolProtocol(this.getLoadBalancerPoolProtocol());
-            }
-            if (s.equals("lb_algorithm")) {
-                ans.setLoadBalancerPoolLbAlgorithm(this.getLoadBalancerPoolLbAlgorithm());
-            }
-            if (s.equals("healthmonitor_id")) {
-                ans.setNeutronLoadBalancerPoolHealthMonitorID(this.getNeutronLoadBalancerPoolHealthMonitorID());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setLoadBalancerPoolAdminStateIsUp(loadBalancerPoolAdminStateIsUp);
-            }
-            if (s.equals("members")) {
-                ans.setLoadBalancerPoolMembers(getLoadBalancerPoolMembers());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "tenant_id":
+                    ans.setLoadBalancerPoolTenantID(this.getLoadBalancerPoolTenantID());
+                    break;
+                case "name":
+                    ans.setLoadBalancerPoolName(this.getLoadBalancerPoolName());
+                    break;
+                case "description":
+                    ans.setLoadBalancerPoolDescription(this.getLoadBalancerPoolDescription());
+                    break;
+                case "protocol":
+                    ans.setLoadBalancerPoolProtocol(this.getLoadBalancerPoolProtocol());
+                    break;
+                case "lb_algorithm":
+                    ans.setLoadBalancerPoolLbAlgorithm(this.getLoadBalancerPoolLbAlgorithm());
+                    break;
+                case "healthmonitor_id":
+                    ans.setNeutronLoadBalancerPoolHealthMonitorID(this.getNeutronLoadBalancerPoolHealthMonitorID());
+                    break;
+                case "admin_state_up":
+                    ans.setLoadBalancerPoolAdminStateIsUp(loadBalancerPoolAdminStateIsUp);
+                    break;
+                case "members":
+                    ans.setLoadBalancerPoolMembers(getLoadBalancerPoolMembers());
+                    break;
             }
         }
         return ans;

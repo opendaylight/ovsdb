@@ -63,16 +63,16 @@ public class FloatingIPHandlerTest {
         when(ev.getNeutronFloatingIP()).thenReturn(mock(NeutronFloatingIP.class));
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
-        floatingHandler.processEvent((AbstractEvent) ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent(ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
 
         when(ev.getAction()).thenReturn(Action.ADD);
-        floatingHandler.processEvent((AbstractEvent) ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent(ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
 
         when(ev.getAction()).thenReturn(Action.DELETE);
-        floatingHandler.processEvent((AbstractEvent) ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent(ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
     }
 
     @Test

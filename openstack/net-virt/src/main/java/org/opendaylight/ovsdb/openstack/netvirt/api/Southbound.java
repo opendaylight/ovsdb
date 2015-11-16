@@ -31,6 +31,7 @@ public interface Southbound {
     OvsdbNodeAugmentation extractOvsdbNode(Node node);
     NodeId extractBridgeOvsdbNodeId(Node bridgeNode);
     List<Node> readOvsdbTopologyNodes();
+    List<Node> readOvsdbTopologyBridgeNodes();
     Node readOvsdbNode(Node bridgeNode);
     boolean isBridgeOnOvsdbNode(Node node, String bridgeName);
     String getOvsdbNodeUUID(Node node);

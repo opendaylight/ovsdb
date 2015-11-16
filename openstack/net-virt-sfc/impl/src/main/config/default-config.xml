@@ -21,6 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <module>
           <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:sfc">prefix:netvirt-sfc</type>
           <name>netvirt-sfc-default</name>
+          <of13provider>workaround</of13provider>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>

@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import java.util.List;
+import java.util.Map;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 
@@ -21,6 +23,8 @@ import org.osgi.framework.ServiceReference;
 public interface PipelineOrchestrator {
     Service getNextServiceInPipeline(Service service);
     AbstractServiceInstance getServiceInstance(Service service);
+    Map<Service, AbstractServiceInstance> getServiceRegistry();
+    List<Service> getStaticPipeline();
     void enqueue(Node node);
     void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance);
     void unregisterService(final ServiceReference ref);

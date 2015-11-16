@@ -17,14 +17,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.SffBuilder;
 
-public class ClassifierUtils {
-    public SffBuilder createSff(SffBuilder sffBuilder, String sffName) {
-        sffBuilder.setName(sffName);
-
-        return sffBuilder;
+public class ClassifierUtils extends AbstractUtils {
+    public SffBuilder sffBuilder(SffBuilder sffBuilder, String sffName) {
+        return sffBuilder.setName(sffName);
     }
 
-    public SffsBuilder createSffs(SffsBuilder sffsBuilder, SffBuilder sffBuilder) {
+    public SffsBuilder sffsBuilder(SffsBuilder sffsBuilder, SffBuilder sffBuilder) {
         List<Sff> sffList = new ArrayList<>();
         sffList.add(sffBuilder.build());
         sffsBuilder.setSff(sffList);
@@ -32,17 +30,16 @@ public class ClassifierUtils {
         return sffsBuilder;
     }
 
-    public ClassifierBuilder createClassifier(ClassifierBuilder classifierBuilder,
-                                       String classifierName, String aclName,
-                                       SffsBuilder sffsBuilder) {
-        classifierBuilder.setName(classifierName);
-        classifierBuilder.setAcl(aclName);
-
-        return classifierBuilder;
+    public ClassifierBuilder classifierBuilder(ClassifierBuilder classifierBuilder,
+                                               String classifierName, String aclName,
+                                               SffsBuilder sffsBuilder) {
+        return classifierBuilder
+                .setName(classifierName)
+                .setAcl(aclName);
     }
 
-    public ClassifiersBuilder createClassifiers(ClassifiersBuilder classifiersBuilder,
-                                                ClassifierBuilder classifierBuilder) {
+    public ClassifiersBuilder ClassifiersBuilder(ClassifiersBuilder classifiersBuilder,
+                                                 ClassifierBuilder classifierBuilder) {
         List<Classifier> classifierList = new ArrayList<>();
         classifierList.add(classifierBuilder.build());
         classifiersBuilder.setClassifier(classifierList);

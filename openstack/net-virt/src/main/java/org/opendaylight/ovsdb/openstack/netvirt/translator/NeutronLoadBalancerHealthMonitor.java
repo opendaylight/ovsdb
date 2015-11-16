@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -177,38 +176,38 @@ public class NeutronLoadBalancerHealthMonitor
 
     public NeutronLoadBalancerHealthMonitor extractFields(List<String> fields) {
         NeutronLoadBalancerHealthMonitor ans = new NeutronLoadBalancerHealthMonitor();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setLoadBalancerHealthMonitorTenantID(this.getLoadBalancerHealthMonitorTenantID());
-            }
-            if (s.equals("type")) {
-                ans.setLoadBalancerHealthMonitorType(this.getLoadBalancerHealthMonitorType());
-            }
-            if (s.equals("delay")) {
-                ans.setLoadBalancerHealthMonitorDelay(this.getLoadBalancerHealthMonitorDelay());
-            }
-            if (s.equals("timeout")) {
-                ans.setLoadBalancerHealthMonitorTimeout(this.getLoadBalancerHealthMonitorTimeout());
-            }
-            if (s.equals("max_retries")) {
-                ans.setLoadBalancerHealthMonitorMaxRetries(this.getLoadBalancerHealthMonitorMaxRetries());
-            }
-            if (s.equals("http_method")) {
-                ans.setLoadBalancerHealthMonitorHttpMethod(this.getLoadBalancerHealthMonitorHttpMethod());
-            }
-            if(s.equals("url_path")) {
-                ans.setLoadBalancerHealthMonitorUrlPath(this.getLoadBalancerHealthMonitorUrlPath());
-            }
-            if (s.equals("expected_codes")) {
-                ans.setLoadBalancerHealthMonitorExpectedCodes(this.getLoadBalancerHealthMonitorExpectedCodes());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setLoadBalancerHealthMonitorAdminStateIsUp(loadBalancerHealthMonitorAdminStateIsUp);
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "tenant_id":
+                    ans.setLoadBalancerHealthMonitorTenantID(this.getLoadBalancerHealthMonitorTenantID());
+                    break;
+                case "type":
+                    ans.setLoadBalancerHealthMonitorType(this.getLoadBalancerHealthMonitorType());
+                    break;
+                case "delay":
+                    ans.setLoadBalancerHealthMonitorDelay(this.getLoadBalancerHealthMonitorDelay());
+                    break;
+                case "timeout":
+                    ans.setLoadBalancerHealthMonitorTimeout(this.getLoadBalancerHealthMonitorTimeout());
+                    break;
+                case "max_retries":
+                    ans.setLoadBalancerHealthMonitorMaxRetries(this.getLoadBalancerHealthMonitorMaxRetries());
+                    break;
+                case "http_method":
+                    ans.setLoadBalancerHealthMonitorHttpMethod(this.getLoadBalancerHealthMonitorHttpMethod());
+                    break;
+                case "url_path":
+                    ans.setLoadBalancerHealthMonitorUrlPath(this.getLoadBalancerHealthMonitorUrlPath());
+                    break;
+                case "expected_codes":
+                    ans.setLoadBalancerHealthMonitorExpectedCodes(this.getLoadBalancerHealthMonitorExpectedCodes());
+                    break;
+                case "admin_state_up":
+                    ans.setLoadBalancerHealthMonitorAdminStateIsUp(loadBalancerHealthMonitorAdminStateIsUp);
+                    break;
             }
         }
         return ans;

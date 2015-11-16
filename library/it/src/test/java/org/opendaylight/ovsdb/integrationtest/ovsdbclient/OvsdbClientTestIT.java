@@ -92,7 +92,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         Assert.assertNotNull(dbSchema);
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
-        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
@@ -180,7 +180,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         Assert.assertNotNull(dbSchema);
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
 
-        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
         List<OperationResult> results = ovs.transactBuilder(dbSchema)

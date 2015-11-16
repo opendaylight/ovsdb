@@ -207,7 +207,7 @@ public class AbstractServiceInstanceTest {
     @Test
     public void testProgramDefaultPipelineRule() {
         when(southbound.getBridgeName(any(Node.class))).thenReturn(Constants.INTEGRATION_BRIDGE);
-        when(southbound.getDataPathId(any(Node.class))).thenReturn(Long.valueOf(261));
+        when(southbound.getDataPathId(any(Node.class))).thenReturn(261L);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 

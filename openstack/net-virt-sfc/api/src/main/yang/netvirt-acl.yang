@@ -10,19 +10,25 @@ module netvirt-sfc-acl {
         description "Initial revision of netvirt extensions to ietf-acl model";
     }
 
-    // TODO: Add choice for Neutron and add fields there instead of at the root of matches
   //augment "/ietf-acl:access-lists/ietf-acl:access-list/ietf-acl:access-list-entries/ietf-acl:access-list-entry/ietf-acl:matches" {
     augment "/ietf-acl:access-lists/ietf-acl:acl/ietf-acl:access-list-entries/ietf-acl:ace/ietf-acl:matches" {
         description "Neutron network uuid";
+        ext:augment-identifier "neutron-network";
         leaf network-uuid {
             type string;
         }
     }
 
-    // TODO: Add choice for Neutron and add fields there instead of at the root of matches
     augment "/ietf-acl:access-lists/ietf-acl:acl/ietf-acl:access-list-entries/ietf-acl:ace/ietf-acl:actions" {
-        description "Redirect traffic to SFC identified by SFC Path ID";
-        leaf redirect-sfc {
+        description "Redirect traffic to SFC identified by either SFC, SFP or RSP";
+        ext:augment-identifier "redirect-to-sfc";
+        leaf sfc-name {
+            type string;
+        }
+        leaf sfp-name {
+            type string;
+        }
+        leaf rsp-name {
             type string;
         }
     }

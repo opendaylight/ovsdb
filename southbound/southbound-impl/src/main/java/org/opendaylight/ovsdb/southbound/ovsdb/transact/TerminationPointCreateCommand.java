@@ -77,7 +77,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                         getOperationalState().getBridgeTerminationPoint(terminationPointIid);
                 if (!terminationPointOptional.isPresent()) {
                     // Configure interface
-                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
+                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();
                     Interface ovsInterface =
                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
                     createInterface(terminationPoint, ovsInterface);
@@ -171,7 +171,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
         //Configure optional input
         if (terminationPoint.getOptions() != null) {
-            Map<String, String> optionsMap = new HashMap<String, String>();
+            Map<String, String> optionsMap = new HashMap<>();
             for (Options option : terminationPoint.getOptions()) {
                 optionsMap.put(option.getOption(), option.getValue());
             }
@@ -190,7 +190,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<InterfaceExternalIds> interfaceExternalIds =
                 terminationPoint.getInterfaceExternalIds();
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            Map<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<>();
             for (InterfaceExternalIds externalId: interfaceExternalIds) {
                 externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
             }
@@ -209,7 +209,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<InterfaceOtherConfigs> interfaceOtherConfigs =
                 terminationPoint.getInterfaceOtherConfigs();
         if (interfaceOtherConfigs != null && !interfaceOtherConfigs.isEmpty()) {
-            Map<String, String> otherConfigsMap = new HashMap<String, String>();
+            Map<String, String> otherConfigsMap = new HashMap<>();
             for (InterfaceOtherConfigs interfaceOtherConfig : interfaceOtherConfigs) {
                 otherConfigsMap.put(interfaceOtherConfig.getOtherConfigKey(),
                         interfaceOtherConfig.getOtherConfigValue());
@@ -228,7 +228,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
         List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            Map<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<>();
             for (PortExternalIds externalId: portExternalIds) {
                 externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
             }
@@ -245,7 +245,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             final Port port) {
 
         if (terminationPoint.getVlanTag() != null) {
-            Set<Long> vlanTag = new HashSet<Long>();
+            Set<Long> vlanTag = new HashSet<>();
             vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
             port.setTag(vlanTag);
         }
@@ -256,7 +256,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             final Port port) {
 
         if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
-            Set<Long> portTrunks = new HashSet<Long>();
+            Set<Long> portTrunks = new HashSet<>();
             List<Trunks> modelTrunks = terminationPoint.getTrunks();
             for (Trunks trunk: modelTrunks) {
                 if (trunk.getTrunk() != null) {
@@ -271,7 +271,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
         if (terminationPoint.getVlanMode() != null) {
-            Set<String> portVlanMode = new HashSet<String>();
+            Set<String> portVlanMode = new HashSet<>();
             VlanMode modelVlanMode = terminationPoint.getVlanMode();
             portVlanMode.add(SouthboundConstants.VLANMODES.values()[modelVlanMode.getIntValue() - 1].getMode());
             port.setVlanMode(portVlanMode);
@@ -284,7 +284,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<PortOtherConfigs> portOtherConfigs =
                 terminationPoint.getPortOtherConfigs();
         if (portOtherConfigs != null && !portOtherConfigs.isEmpty()) {
-            Map<String, String> otherConfigsMap = new HashMap<String, String>();
+            Map<String, String> otherConfigsMap = new HashMap<>();
             for (PortOtherConfigs portOtherConfig : portOtherConfigs) {
                 otherConfigsMap.put(portOtherConfig.getOtherConfigKey(),
                         portOtherConfig.getOtherConfigValue());
@@ -326,7 +326,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
     public static void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<TerminationPoint> iid,
             String interfaceName) {
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-        port.setName(interfaceName);;
+        port.setName(interfaceName);
         port.setExternalIds(Collections.<String,String>emptyMap());
         Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction,
                 iid,

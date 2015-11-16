@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ import org.powermock.reflect.Whitebox;
 @RunWith(PowerMockRunner.class)
 public class OvsdbOperationalCommandAggregatorTest {
     private static final int NUMBER_OF_COMMANDS = 9;
-    private List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
+    private List<TransactionCommand> commands = new ArrayList<>();
     private OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator;
 
     @Before

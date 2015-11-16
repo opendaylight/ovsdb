@@ -17,7 +17,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 
 import java.util.AbstractMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,19 +35,11 @@ public class NeutronCacheUtils {
             return null;
         }
 
-        List<Neutron_IPs> fixedIPs;
-        Iterator<Neutron_IPs> fixedIPIterator;
-        Neutron_IPs ip;
-
         List<NeutronPort> allPorts = neutronPortsCache.getAllPorts();
-        Iterator<NeutronPort> i = allPorts.iterator();
-        while (i.hasNext()) {
-            NeutronPort port = i.next();
-            fixedIPs = port.getFixedIPs();
-            if (fixedIPs != null && fixedIPs.size() > 0) {
-                fixedIPIterator = fixedIPs.iterator();
-                while (fixedIPIterator.hasNext()) {
-                    ip = fixedIPIterator.next();
+        for (NeutronPort port : allPorts) {
+            List<Neutron_IPs> fixedIPs = port.getFixedIPs();
+            if (fixedIPs != null && !fixedIPs.isEmpty()) {
+                for (Neutron_IPs ip : fixedIPs) {
                     if (ip.getIpAddress().equals(ipAddr) && ip.getSubnetUUID().equals(subnetID)) {
                         return port.getMacAddress();
                     }
@@ -87,9 +78,8 @@ public class NeutronCacheUtils {
         List<NeutronNetwork> allNetworks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network: allNetworks) {
             if (network.getID().equals(networkID)) {
-                Map.Entry<String,String> entry = new AbstractMap.SimpleEntry<String, String>(
+                return new AbstractMap.SimpleEntry<>(
                         network.getProviderNetworkType(), network.getProviderSegmentationID());
-                return entry;
             }
         }
         return null;

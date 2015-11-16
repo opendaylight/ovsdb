@@ -78,7 +78,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
 
     @Override
     public List<NeutronNetwork> getAllNetworks() {
-        Set<NeutronNetwork> allNetworks = new HashSet<NeutronNetwork>();
+        Set<NeutronNetwork> allNetworks = new HashSet<>();
         Networks networks = readMd(createInstanceIdentifier());
         if (networks != null) {
             for (Network network: networks.getNetwork()) {
@@ -86,7 +86,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
             }
         }
         LOGGER.debug("Exiting getAllNetworks, Found {} OpenStackNetworks", allNetworks.size());
-        List<NeutronNetwork> ans = new ArrayList<NeutronNetwork>();
+        List<NeutronNetwork> ans = new ArrayList<>();
         ans.addAll(allNetworks);
         return ans;
     }
@@ -135,7 +135,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
         result.setShared(network.isShared());
         result.setStatus(network.getStatus());
         if (network.getSubnets() != null) {
-            List<String> neutronSubnets = new ArrayList<String>();
+            List<String> neutronSubnets = new ArrayList<>();
             for( Uuid subnet : network.getSubnets()) {
                neutronSubnets.add(subnet.getValue());
             }
@@ -152,7 +152,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
         result.setProviderPhysicalNetwork(providerExtension.getPhysicalNetwork());
         result.setProviderSegmentationID(providerExtension.getSegmentationId());
         result.setProviderNetworkType(NETWORK_MAP.get(providerExtension.getNetworkType()));
-        List<NeutronNetwork_Segment> segments = new ArrayList<NeutronNetwork_Segment>();
+        List<NeutronNetwork_Segment> segments = new ArrayList<>();
         if (providerExtension.getSegments() != null) {
             for (Segments segment: providerExtension.getSegments()) {
                 NeutronNetwork_Segment neutronSegment = new NeutronNetwork_Segment();
@@ -183,10 +183,10 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
         if (network.getProviderNetworkType() != null) {
             ImmutableBiMap<String, Class<? extends NetworkTypeBase>> mapper =
                 NETWORK_MAP.inverse();
-            providerExtensionBuilder.setNetworkType((Class<? extends NetworkTypeBase>) mapper.get(network.getProviderNetworkType()));
+            providerExtensionBuilder.setNetworkType(mapper.get(network.getProviderNetworkType()));
         }
         if (network.getSegments() != null) {
-            List<Segments> segments = new ArrayList<Segments>();
+            List<Segments> segments = new ArrayList<>();
             long count = 0;
             for( NeutronNetwork_Segment segment : network.getSegments()) {
                 count++;
@@ -200,9 +200,9 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
                 if (segment.getProviderNetworkType() != null) {
                     ImmutableBiMap<String, Class<? extends NetworkTypeBase>> mapper =
                         NETWORK_MAP.inverse();
-                    segmentsBuilder.setNetworkType((Class<? extends NetworkTypeBase>) mapper.get(segment.getProviderNetworkType()));
+                    segmentsBuilder.setNetworkType(mapper.get(segment.getProviderNetworkType()));
                 }
-                segmentsBuilder.setSegmentationIndex(Long.valueOf(count));
+                segmentsBuilder.setSegmentationIndex(count);
                 segments.add(segmentsBuilder.build());
             }
             providerExtensionBuilder.setSegments(segments);
@@ -232,7 +232,7 @@ public class NeutronNetworkInterface extends AbstractNeutronInterface<Network,Ne
             networkBuilder.setStatus(network.getStatus());
         }
         if (network.getSubnets() != null) {
-            List<Uuid> subnets = new ArrayList<Uuid>();
+            List<Uuid> subnets = new ArrayList<>();
             for( String subnet : network.getSubnets()) {
                 subnets.add(toUuid(subnet));
             }

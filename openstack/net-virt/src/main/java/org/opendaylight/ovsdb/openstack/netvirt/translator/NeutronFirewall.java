@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -140,32 +139,32 @@ public class NeutronFirewall implements Serializable, INeutronObject {
 
     public NeutronFirewall extractFields(List<String> fields) {
         NeutronFirewall ans = new NeutronFirewall();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setFirewallTenantID(this.getFirewallTenantID());
-            }
-            if (s.equals("name")) {
-                ans.setFirewallName(this.getFirewallName());
-            }
-            if(s.equals("description")) {
-                ans.setFirewallDescription(this.getFirewallDescription());
-            }
-            if (s.equals("admin_state_up")) {
-                ans.setFirewallAdminStateIsUp(firewallAdminStateIsUp);
-            }
-            if (s.equals("status")) {
-                ans.setFirewallStatus(this.getFirewallStatus());
-            }
-            if (s.equals("shared")) {
-                ans.setFirewallIsShared(firewallIsShared);
-            }
-            if (s.equals("firewall_policy_id")) {
-                ans.setNeutronFirewallPolicyID(this.getFirewallPolicyID());
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "tenant_id":
+                    ans.setFirewallTenantID(this.getFirewallTenantID());
+                    break;
+                case "name":
+                    ans.setFirewallName(this.getFirewallName());
+                    break;
+                case "description":
+                    ans.setFirewallDescription(this.getFirewallDescription());
+                    break;
+                case "admin_state_up":
+                    ans.setFirewallAdminStateIsUp(firewallAdminStateIsUp);
+                    break;
+                case "status":
+                    ans.setFirewallStatus(this.getFirewallStatus());
+                    break;
+                case "shared":
+                    ans.setFirewallIsShared(firewallIsShared);
+                    break;
+                case "firewall_policy_id":
+                    ans.setNeutronFirewallPolicyID(this.getFirewallPolicyID());
+                    break;
             }
         }
         return ans;

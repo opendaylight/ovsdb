@@ -17,7 +17,7 @@ public enum Mutator {
     INSERT("insert"),
     DELETE("delete");
 
-    private Mutator(String name) {
+    Mutator(String name) {
         this.name = name;
     }
 

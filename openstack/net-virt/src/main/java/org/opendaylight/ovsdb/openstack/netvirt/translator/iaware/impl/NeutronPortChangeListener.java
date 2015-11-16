@@ -132,7 +132,7 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
         NeutronPort result = new NeutronPort();
         result.setAdminStateUp(port.isAdminStateUp());
         if (port.getAllowedAddressPairs() != null) {
-            List<NeutronPort_AllowedAddressPairs> pairs = new ArrayList<NeutronPort_AllowedAddressPairs>();
+            List<NeutronPort_AllowedAddressPairs> pairs = new ArrayList<>();
             for (AllowedAddressPairs mdPair : port.getAllowedAddressPairs()) {
                 NeutronPort_AllowedAddressPairs pair = new NeutronPort_AllowedAddressPairs();
                 pair.setIpAddress(mdPair.getIpAddress());
@@ -145,7 +145,7 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
         result.setDeviceID(port.getDeviceId());
         result.setDeviceOwner(port.getDeviceOwner());
         if (port.getExtraDhcpOpts() != null) {
-            List<NeutronPort_ExtraDHCPOption> options = new ArrayList<NeutronPort_ExtraDHCPOption>();
+            List<NeutronPort_ExtraDHCPOption> options = new ArrayList<>();
             for (ExtraDhcpOpts opt : port.getExtraDhcpOpts()) {
                 NeutronPort_ExtraDHCPOption arg = new NeutronPort_ExtraDHCPOption();
                 arg.setName(opt.getOptName());
@@ -155,7 +155,7 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
             result.setExtraDHCPOptions(options);
         }
         if (port.getFixedIps() != null) {
-            List<Neutron_IPs> ips = new ArrayList<Neutron_IPs>();
+            List<Neutron_IPs> ips = new ArrayList<>();
             for (FixedIps mdIP : port.getFixedIps()) {
                 Neutron_IPs ip = new Neutron_IPs();
                 ip.setIpAddress(String.valueOf(mdIP.getIpAddress().getValue()));
@@ -168,13 +168,16 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
         result.setName(port.getName());
         result.setNetworkUUID(String.valueOf(port.getNetworkId().getValue()));
         if (port.getSecurityGroups() != null) {
-            Set<NeutronSecurityGroup> allGroups = new HashSet<NeutronSecurityGroup>();
+            Set<NeutronSecurityGroup> allGroups = new HashSet<>();
             NeutronCRUDInterfaces interfaces = new NeutronCRUDInterfaces().fetchINeutronSecurityGroupCRUD(this);
             INeutronSecurityGroupCRUD sgIf = interfaces.getSecurityGroupInterface();
             for (Uuid sgUuid : port.getSecurityGroups()) {
-                allGroups.add(sgIf.getNeutronSecurityGroup(sgUuid.getValue()));
+                NeutronSecurityGroup secGroup = sgIf.getNeutronSecurityGroup(sgUuid.getValue());
+                if (secGroup != null) {
+                    allGroups.add(sgIf.getNeutronSecurityGroup(sgUuid.getValue()));
+                }
             }
-            List<NeutronSecurityGroup> groups = new ArrayList<NeutronSecurityGroup>();
+            List<NeutronSecurityGroup> groups = new ArrayList<>();
             groups.addAll(allGroups);
             result.setSecurityGroups(groups);
         }
@@ -191,7 +194,7 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
         PortBindingExtension binding = port.getAugmentation(PortBindingExtension.class);
         result.setBindinghostID(binding.getHostId());
         if (binding.getVifDetails() != null) {
-            List<NeutronPort_VIFDetail> details = new ArrayList<NeutronPort_VIFDetail>();
+            List<NeutronPort_VIFDetail> details = new ArrayList<>();
             for (VifDetails vifDetail : binding.getVifDetails()) {
                 NeutronPort_VIFDetail detail = new NeutronPort_VIFDetail();
                 detail.setPortFilter(vifDetail.isPortFilter());
@@ -206,7 +209,7 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
 
     private  Map<String,NeutronPort> getChangedPorts(Map<InstanceIdentifier<?>, DataObject> changedData) {
         LOG.trace("getChangedPorts:" + changedData);
-        Map<String,NeutronPort> portMap = new HashMap<String,NeutronPort>();
+        Map<String,NeutronPort> portMap = new HashMap<>();
         for (Map.Entry<InstanceIdentifier<?>, DataObject> changed : changedData.entrySet()) {
             if (changed.getValue() instanceof Port) {
                 NeutronPort port = fromMd((Port)changed.getValue());

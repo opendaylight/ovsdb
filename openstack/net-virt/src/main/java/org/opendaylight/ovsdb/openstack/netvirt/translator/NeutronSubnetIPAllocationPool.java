@@ -138,7 +138,7 @@ public class NeutronSubnetIPAllocationPool implements Serializable {
             return BigInteger.ZERO;
         }
         try {
-            return new BigInteger(((Inet6Address) InetAddress.getByName(inputString)).getAddress());
+            return new BigInteger(InetAddress.getByName(inputString).getAddress());
         } catch (Exception e) {
             LOGGER.error("convertV6 error", e);
             return BigInteger.ZERO;
@@ -211,7 +211,7 @@ public class NeutronSubnetIPAllocationPool implements Serializable {
      * the other ranging from parameter+1 to high
      */
     public List<NeutronSubnetIPAllocationPool> splitPool(String ipAddress) {
-        List<NeutronSubnetIPAllocationPool> ans = new ArrayList<NeutronSubnetIPAllocationPool>();
+        List<NeutronSubnetIPAllocationPool> ans = new ArrayList<>();
         long gIP = NeutronSubnetIPAllocationPool.convert(ipAddress);
         long sIP = NeutronSubnetIPAllocationPool.convert(poolStart);
         long eIP = NeutronSubnetIPAllocationPool.convert(poolEnd);
@@ -277,7 +277,7 @@ public class NeutronSubnetIPAllocationPool implements Serializable {
      * If the pool is a single address, return null
      */
     public List<NeutronSubnetIPAllocationPool> splitPoolV6(String ipAddress) {
-        List<NeutronSubnetIPAllocationPool> ans = new ArrayList<NeutronSubnetIPAllocationPool>();
+        List<NeutronSubnetIPAllocationPool> ans = new ArrayList<>();
         BigInteger gIP = NeutronSubnetIPAllocationPool.convertV6(ipAddress);
         BigInteger sIP = NeutronSubnetIPAllocationPool.convertV6(poolStart);
         BigInteger eIP = NeutronSubnetIPAllocationPool.convertV6(poolEnd);

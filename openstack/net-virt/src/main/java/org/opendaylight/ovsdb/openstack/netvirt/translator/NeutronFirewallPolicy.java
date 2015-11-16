@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -129,31 +128,31 @@ public class NeutronFirewallPolicy implements Serializable, INeutronObject {
 
     public NeutronFirewallPolicy extractFields(List<String> fields) {
         NeutronFirewallPolicy ans = new NeutronFirewallPolicy();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setFirewallPolicyTenantID(this.getFirewallPolicyTenantID());
-            }
-            if (s.equals("name")) {
-                ans.setFirewallPolicyName(this.getFirewallPolicyName());
-            }
-            if(s.equals("description")) {
-                ans.setFirewallPolicyDescription(this.getFirewallPolicyDescription());
-            }
-            if (s.equals("shared")) {
-                ans.setFirewallPolicyIsShared(firewallPolicyIsShared);
-            }
-            if (s.equals("firewall_rules")) {
-                List<String> firewallRuleList = new ArrayList<String>();
-                firewallRuleList.addAll(this.getFirewallPolicyRules());
-                ans.setFirewallPolicyRules(firewallRuleList);
-            }
-            if (s.equals("audited")) {
-                ans.setFirewallPolicyIsAudited(firewallPolicyIsAudited);
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "tenant_id":
+                    ans.setFirewallPolicyTenantID(this.getFirewallPolicyTenantID());
+                    break;
+                case "name":
+                    ans.setFirewallPolicyName(this.getFirewallPolicyName());
+                    break;
+                case "description":
+                    ans.setFirewallPolicyDescription(this.getFirewallPolicyDescription());
+                    break;
+                case "shared":
+                    ans.setFirewallPolicyIsShared(firewallPolicyIsShared);
+                    break;
+                case "firewall_rules":
+                    List<String> firewallRuleList = new ArrayList<>();
+                    firewallRuleList.addAll(this.getFirewallPolicyRules());
+                    ans.setFirewallPolicyRules(firewallRuleList);
+                    break;
+                case "audited":
+                    ans.setFirewallPolicyIsAudited(firewallPolicyIsAudited);
+                    break;
             }
         }
         return ans;

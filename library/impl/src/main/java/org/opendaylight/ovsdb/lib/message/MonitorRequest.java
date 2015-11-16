@@ -19,10 +19,9 @@ import com.google.common.collect.Sets;
 /**
  * @author Ashwin Raveendran
  * @author Madhu Venugopal
- * @param <E> monitor
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MonitorRequest<E extends TableSchema<E>> {
+public class MonitorRequest {
     @JsonIgnore String tableName;
     Set<String> columns;
     MonitorSelect select;
@@ -65,7 +64,7 @@ public class MonitorRequest<E extends TableSchema<E>> {
 
     public void addColumn(String column) {
         if (columns == null) {
-            columns = Sets.<String>newHashSet();
+            columns = Sets.newHashSet();
         }
         columns.add(column);
     }

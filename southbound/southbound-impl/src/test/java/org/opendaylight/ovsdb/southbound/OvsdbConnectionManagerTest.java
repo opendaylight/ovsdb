@@ -28,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -104,7 +103,7 @@ public class OvsdbConnectionManagerTest {
         InetAddress ip = mock(InetAddress.class);
 
         when(externalClient.getConnectionInfo().getRemoteAddress()).thenReturn(ip);
-        when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(new Integer(8080));
+        when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(8080);
 
         ConnectionInfo key = mock(ConnectionInfo.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -132,13 +131,13 @@ public class OvsdbConnectionManagerTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         InetAddress ip = mock(InetAddress.class);
         when(client.getConnectionInfo().getRemoteAddress()).thenReturn(ip);
-        when(client.getConnectionInfo().getRemotePort()).thenReturn(new Integer(8080));
+        when(client.getConnectionInfo().getRemotePort()).thenReturn(8080);
 
         ConnectionInfo key = mock(ConnectionInfo.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
 
-        clients = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+        clients = new ConcurrentHashMap<>();
         clients.put(key, ovsdbConnectionInstance);
         MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
 
@@ -191,7 +190,7 @@ public class OvsdbConnectionManagerTest {
         ConnectionInfo key2 = mock(ConnectionInfo.class);
         OvsdbConnectionInstance ovsdbConnectionInstance1 = mock(OvsdbConnectionInstance.class);
         OvsdbConnectionInstance ovsdbConnectionInstance2 = mock(OvsdbConnectionInstance.class);
-        clients = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+        clients = new ConcurrentHashMap<>();
         clients.put(key1, ovsdbConnectionInstance1);
         clients.put(key2, ovsdbConnectionInstance2);
         MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
@@ -208,7 +207,7 @@ public class OvsdbConnectionManagerTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
 
-        clients = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
+        clients = new ConcurrentHashMap<>();
         MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
 
         //Test putConnectionInstance()
@@ -229,7 +228,7 @@ public class OvsdbConnectionManagerTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
 
-        instanceIdentifiers = new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
+        instanceIdentifiers = new ConcurrentHashMap<>();
         MemberModifier.field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnectionManager, instanceIdentifiers);
 
         //Test putInstanceIdentifier()
@@ -287,7 +286,7 @@ public class OvsdbConnectionManagerTest {
         when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
         PortNumber port = mock(PortNumber.class);
         when(connectionInfo.getRemotePort()).thenReturn(port);
-        when(port.getValue()).thenReturn(new Integer(8080));
+        when(port.getValue()).thenReturn(8080);
         when(ovsdbConnection.connect(any(InetAddress.class), anyInt())).thenReturn(client);
 
         //client not null case

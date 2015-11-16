@@ -70,7 +70,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
-    // private ConnectionInfo key;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
@@ -118,7 +117,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     public void createTransactInvokers() {
         if (transactInvokers == null) {
             try {
-                transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
+                transactInvokers = new HashMap<>();
                 List<String> databases = getDatabases().get();
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();
@@ -135,7 +134,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private void monitorAllTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
-            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+            List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                 Set<String> columns = tableSchema.getColumns();
@@ -161,7 +160,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            Map<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<>();
 
             List<OpenvswitchExternalIds> externalIds = this.initialCreateData.getOpenvswitchExternalIds();
 
@@ -188,7 +187,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             List<OpenvswitchOtherConfigs> otherConfigs = this.initialCreateData.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
-                Map<String, String> otherConfigsMap = new HashMap<String, String>();
+                Map<String, String> otherConfigsMap = new HashMap<>();
                 for (OpenvswitchOtherConfigs otherConfig : otherConfigs) {
                     otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
                 }
@@ -248,7 +247,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorCallBack callback) {
         return client.monitor(schema, monitorRequests, callback);
     }
@@ -334,7 +333,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorHandle monitorHandle, MonitorCallBack callback) {
         return null;
     }
@@ -352,12 +351,12 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public Boolean getHasDeviceOwnership() {
-        return Boolean.valueOf(hasDeviceOwnership);
+        return hasDeviceOwnership;
     }
 
     public void setHasDeviceOwnership(Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
-            this.hasDeviceOwnership = hasDeviceOwnership.booleanValue();
+            this.hasDeviceOwnership = hasDeviceOwnership;
         }
     }
 

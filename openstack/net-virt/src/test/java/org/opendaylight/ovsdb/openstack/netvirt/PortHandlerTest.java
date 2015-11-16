@@ -90,11 +90,11 @@ public class PortHandlerTest {
         portHandlerSpy.processEvent(ev);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.UPDATE);
 
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         when(nodeCacheManager.getNodes()).thenReturn(nodes);
 
-        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<>();
         OvsdbTerminationPointAugmentation port = mock(OvsdbTerminationPointAugmentation.class);
         ports.add(port);
         when(southbound.getTerminationPointsOfBridge(any(Node.class))).thenReturn(ports);

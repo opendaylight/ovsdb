@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -237,53 +236,53 @@ public class NeutronFirewallRule implements Serializable, INeutronObject {
 
     public NeutronFirewallRule extractFields(List<String> fields) {
         NeutronFirewallRule ans = new NeutronFirewallRule();
-        Iterator<String> i = fields.iterator();
-        while (i.hasNext()) {
-            String s = i.next();
-            if (s.equals("id")) {
-                ans.setID(this.getID());
-            }
-            if (s.equals("tenant_id")) {
-                ans.setFirewallRuleTenantID(this.getFirewallRuleTenantID());
-            }
-            if (s.equals("name")) {
-                ans.setFirewallRuleName(this.getFirewallRuleName());
-            }
-            if (s.equals("description")) {
-                ans.setFirewallRuleDescription(this.getFirewallRuleDescription());
-            }
-            if (s.equals("status")) {
-                ans.setFirewallRuleStatus(this.getFirewallRuleStatus());
-            }
-            if (s.equals("shared")) {
-                ans.setFirewallRuleIsShared(firewallRuleIsShared);
-            }
-            if (s.equals("firewall_policy_id")) {
-                ans.setFirewallRulesPolicyID(this.getFirewallRulePolicyID());
-            }
-            if (s.equals("protocol")) {
-                ans.setFirewallRuleProtocol(this.getFirewallRuleProtocol());
-            }
-            if (s.equals("source_ip_address")) {
-                ans.setFirewallRuleSrcIpAddr(this.getFirewallRuleSrcIpAddr());
-            }
-            if (s.equals("destination_ip_address")) {
-                ans.setFirewallRuleDstIpAddr(this.getFirewallRuleDstIpAddr());
-            }
-            if (s.equals("source_port")) {
-                ans.setFirewallRuleSrcPort(this.getFirewallRuleSrcPort());
-            }
-            if (s.equals("destination_port")) {
-                ans.setFirewallRuleDstPort(this.getFirewallRuleDstPort());
-            }
-            if (s.equals("position")) {
-                ans.setFirewallRulePosition(this.getFirewallRulePosition());
-            }
-            if (s.equals("action")) {
-                ans.setFirewallRuleAction(this.getFirewallRuleAction());
-            }
-            if (s.equals("enabled")) {
-                ans.setFirewallRuleIsEnabled(firewallRuleIsEnabled);
+        for (String s : fields) {
+            switch (s) {
+                case "id":
+                    ans.setID(this.getID());
+                    break;
+                case "tenant_id":
+                    ans.setFirewallRuleTenantID(this.getFirewallRuleTenantID());
+                    break;
+                case "name":
+                    ans.setFirewallRuleName(this.getFirewallRuleName());
+                    break;
+                case "description":
+                    ans.setFirewallRuleDescription(this.getFirewallRuleDescription());
+                    break;
+                case "status":
+                    ans.setFirewallRuleStatus(this.getFirewallRuleStatus());
+                    break;
+                case "shared":
+                    ans.setFirewallRuleIsShared(firewallRuleIsShared);
+                    break;
+                case "firewall_policy_id":
+                    ans.setFirewallRulesPolicyID(this.getFirewallRulePolicyID());
+                    break;
+                case "protocol":
+                    ans.setFirewallRuleProtocol(this.getFirewallRuleProtocol());
+                    break;
+                case "source_ip_address":
+                    ans.setFirewallRuleSrcIpAddr(this.getFirewallRuleSrcIpAddr());
+                    break;
+                case "destination_ip_address":
+                    ans.setFirewallRuleDstIpAddr(this.getFirewallRuleDstIpAddr());
+                    break;
+                case "source_port":
+                    ans.setFirewallRuleSrcPort(this.getFirewallRuleSrcPort());
+                    break;
+                case "destination_port":
+                    ans.setFirewallRuleDstPort(this.getFirewallRuleDstPort());
+                    break;
+                case "position":
+                    ans.setFirewallRulePosition(this.getFirewallRulePosition());
+                    break;
+                case "action":
+                    ans.setFirewallRuleAction(this.getFirewallRuleAction());
+                    break;
+                case "enabled":
+                    ans.setFirewallRuleIsEnabled(firewallRuleIsEnabled);
+                    break;
             }
 
         }

@@ -22,8 +22,7 @@ public class ColumnSchemaNotFoundException extends RuntimeException {
     }
 
     public static String createMessage(String columnName, String tableName) {
-        String message = "Unable to locate ColumnSchema for " +  columnName + " in " + tableName;
-        return message;
+        return "Unable to locate ColumnSchema for " +  columnName + " in " + tableName;
     }
 
 }

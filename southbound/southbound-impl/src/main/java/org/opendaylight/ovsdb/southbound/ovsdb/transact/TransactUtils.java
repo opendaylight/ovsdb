@@ -50,8 +50,8 @@ public class TransactUtils {
     public static Map<InstanceIdentifier<Node>,Node> extractNode(
             Map<InstanceIdentifier<?>, DataObject> changes) {
         Map<InstanceIdentifier<Node>,Node> result
-            = new HashMap<InstanceIdentifier<Node>,Node>();
-        if (changes != null && changes.entrySet() != null) {
+            = new HashMap<>();
+        if (changes != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (created.getValue() instanceof Node) {
                     Node value = (Node) created.getValue();
@@ -99,7 +99,7 @@ public class TransactUtils {
 
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
-        Set<InstanceIdentifier<T>> result = new HashSet<InstanceIdentifier<T>>();
+        Set<InstanceIdentifier<T>> result = new HashSet<>();
         if (changes != null && changes.getRemovedPaths() != null) {
             for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
                 if (iid.getTargetType().equals(klazz)) {
@@ -121,8 +121,8 @@ public class TransactUtils {
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
             Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
-        Map<InstanceIdentifier<T>,T> result = new HashMap<InstanceIdentifier<T>,T>();
-        if (changes != null && changes.entrySet() != null) {
+        Map<InstanceIdentifier<T>,T> result = new HashMap<>();
+        if (changes != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
                     @SuppressWarnings("unchecked")
@@ -141,12 +141,10 @@ public class TransactUtils {
 
     public static List<Insert> extractInsert(TransactionBuilder transaction, GenericTableSchema schema) {
         List<Operation> operations = transaction.getOperations();
-        List<Insert> inserts = new ArrayList<Insert>();
-        for (int count = 0;count < operations.size();count++) {
-            Operation operation = operations.get(count);
+        List<Insert> inserts = new ArrayList<>();
+        for (Operation operation : operations) {
             if (operation instanceof Insert && operation.getTableSchema().equals(schema)) {
-                Insert insert = (Insert)operation;
-                inserts.add(insert);
+                inserts.add((Insert) operation);
             }
         }
         return inserts;
@@ -164,8 +162,7 @@ public class TransactUtils {
         String uuidString = insert.getUuidName() != null
                 ? insert.getUuidName() : SouthboundMapper.getRandomUUID();
         insert.setUuidName(uuidString);
-        UUID uuid = new UUID(uuidString);
-        return uuid;
+        return new UUID(uuidString);
     }
 
     public static <T  extends TableSchema<T>> void stampInstanceIdentifier(TransactionBuilder transaction,

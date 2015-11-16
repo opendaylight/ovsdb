@@ -89,7 +89,7 @@ public class SouthboundConstants {
             .build();
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
 
-    public static enum VLANMODES {
+    public enum VLANMODES {
         ACCESS("access"),
         NATIVE_TAGGED("native-tagged"),
         NATIVE_UNTAGGED("native-untagged"),
@@ -97,7 +97,7 @@ public class SouthboundConstants {
 
         private final String mode;
 
-        private VLANMODES(String mode) {
+        VLANMODES(String mode) {
             this.mode = mode;
         }
         @Override

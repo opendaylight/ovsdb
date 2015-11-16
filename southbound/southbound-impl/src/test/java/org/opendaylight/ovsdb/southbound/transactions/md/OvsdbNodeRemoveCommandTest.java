@@ -86,7 +86,7 @@ public class OvsdbNodeRemoveCommandTest {
 
         PowerMockito.doReturn(true).when(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", any(OvsdbNodeAugmentation.class));
 
-        List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<ManagedNodeEntry>();
+        List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<>();
         ManagedNodeEntry managedNode = mock(ManagedNodeEntry.class);
         listManagedNodeEntry.add(managedNode);
         when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(listManagedNodeEntry);
@@ -106,7 +106,7 @@ public class OvsdbNodeRemoveCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         ManagerEntry onlyConnectedManager= mock(ManagerEntry.class);
         ManagerEntry manager = mock(ManagerEntry.class);
-        List<ManagerEntry> listManagerEntry = new ArrayList<ManagerEntry>();
+        List<ManagerEntry> listManagerEntry = new ArrayList<>();
         listManagerEntry.add(manager);
 
         //case 1: connectedManager > ONE_CONNECTED_MANAGER
@@ -121,7 +121,8 @@ public class OvsdbNodeRemoveCommandTest {
         assertEquals(true, Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
         //case 3: onlyConnectedManager.getNumberOfConnections().longValue() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE
-        when(onlyConnectedManager.getNumberOfConnections()).thenReturn(new Long(ONE_CONNECTED_MANAGER + 1), new Long(ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE));
+        when(onlyConnectedManager.getNumberOfConnections()).thenReturn(ONE_CONNECTED_MANAGER + 1,
+                ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE);
         assertEquals(false, Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
         //case 4: when all the above don't apply

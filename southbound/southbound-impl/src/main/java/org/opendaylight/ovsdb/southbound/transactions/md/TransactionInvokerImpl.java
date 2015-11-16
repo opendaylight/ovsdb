@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -37,15 +39,16 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
     private DataBroker db;
-    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<TransactionCommand>(QUEUE_SIZE);
+    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
-        = new LinkedBlockingQueue<ReadWriteTransaction>(QUEUE_SIZE);
+        = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
-        = new LinkedBlockingQueue<AsyncTransaction<?, ?>>(QUEUE_SIZE);
+        = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private ExecutorService executor;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
-        = new HashMap<ReadWriteTransaction,TransactionCommand>();
-    private List<ReadWriteTransaction> pendingTransactions = new ArrayList<ReadWriteTransaction>();
+        = new HashMap<>();
+    private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
+    private final AtomicBoolean runTask = new AtomicBoolean( true );
 
     public TransactionInvokerImpl(DataBroker db) {
         this.db = db;
@@ -75,7 +78,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void run() {
-        while (true) {
+        while (runTask.get()) {
             forgetSuccessfulTransactions();
             try {
                 List<TransactionCommand> commands = extractCommands();
@@ -103,7 +106,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     private List<TransactionCommand> extractResubmitCommands() {
         AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
-        List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
+        List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
             int index = pendingTransactions.lastIndexOf(transaction);
             List<ReadWriteTransaction> transactions =
@@ -119,8 +122,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private void resetTransactionQueue() {
         chain.close();
         chain = db.createTransactionChain(this);
-        pendingTransactions = new ArrayList<ReadWriteTransaction>();
-        transactionToCommand = new HashMap<ReadWriteTransaction,TransactionCommand>();
+        pendingTransactions = new ArrayList<>();
+        transactionToCommand = new HashMap<>();
         failedTransactionQueue.clear();
         successfulTransactionQueue.clear();
     }
@@ -138,7 +141,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     private List<TransactionCommand> extractCommandsFromQueue() throws InterruptedException {
-        List<TransactionCommand> result = new ArrayList<TransactionCommand>();
+        List<TransactionCommand> result = new ArrayList<>();
         TransactionCommand command = inputQueue.take();
         while (command != null) {
             result.add(command);
@@ -159,5 +162,9 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void close() throws Exception {
         this.executor.shutdown();
+        if (!this.executor.awaitTermination(1, TimeUnit.SECONDS)) {
+            runTask.set(false);
+            this.executor.shutdownNow();
+        }
     }
 }

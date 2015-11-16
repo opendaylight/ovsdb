@@ -144,13 +144,13 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
-                                                            List<MonitorRequest<E>> monitorRequest,
+                                                            List<MonitorRequest> monitorRequest,
                                                             final MonitorCallBack callback) {
 
-        final ImmutableMap<String, MonitorRequest<E>> reqMap = Maps.uniqueIndex(monitorRequest,
-                new Function<MonitorRequest<E>, String>() {
+        final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
+                new Function<MonitorRequest, String>() {
                     @Override
-                    public String apply(MonitorRequest<E> input) {
+                    public String apply(MonitorRequest input) {
                         return input.getTableName();
                     }
                 });
@@ -175,14 +175,14 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
-                                                           List<MonitorRequest<E>> monitorRequest,
+                                                           List<MonitorRequest> monitorRequest,
                                                            final MonitorHandle monitorHandle,
                                                            final MonitorCallBack callback) {
 
-        final ImmutableMap<String, MonitorRequest<E>> reqMap = Maps.uniqueIndex(monitorRequest,
-                new Function<MonitorRequest<E>, String>() {
+        final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
+                new Function<MonitorRequest, String>() {
                     @Override
-                    public String apply(MonitorRequest<E> input) {
+                    public String apply(MonitorRequest input) {
                         return input.getTableName();
                     }
                 });
@@ -201,8 +201,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
-        TableUpdates updates = transformingCallback(result, dbSchema);
-        return updates;
+        return transformingCallback(result, dbSchema);
     }
 
     private void registerCallback(MonitorHandle monitorHandle, MonitorCallBack callback, DatabaseSchema schema) {

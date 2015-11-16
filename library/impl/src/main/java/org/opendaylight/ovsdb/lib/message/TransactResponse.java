@@ -8,18 +8,18 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 
 public class TransactResponse extends Response {
-    ArrayList<OperationResult> result;
+    List<OperationResult> result;
 
-    public ArrayList<OperationResult> getResult() {
+    public List<OperationResult> getResult() {
         return result;
     }
 
-    public void setResult(ArrayList<OperationResult> result) {
+    public void setResult(List<OperationResult> result) {
         this.result = result;
     }
 

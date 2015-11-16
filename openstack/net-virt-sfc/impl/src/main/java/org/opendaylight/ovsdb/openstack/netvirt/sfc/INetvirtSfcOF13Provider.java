@@ -6,10 +6,14 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.openflow13;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.SfcClassifierService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.Bridges;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.bridges.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.classifier.sffs.Sff;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Open vSwitch OpenFlow 1.3 Networking Provider for Netvirt SFC
@@ -21,10 +25,11 @@ public interface INetvirtSfcOF13Provider {
      * Method installs the OF rules corresponding to rules within ACL
      * on a given Service Function Forwarder. DataObject which is identified by InstanceIdentifier.
      *
-     * @param sff - Service Function Forwarder
+     * @param bridge - Service Function Forwarder
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
-    public void addClassifierRules(Sff sff, Acl acl);
+    void addClassifierRules(Bridge bridge, Acl acl);
+    void addClassifierRules(Bridges bridges, Acl acl);
 
     /**
      * Method removes the OF rules corresponding to rules within ACL
@@ -33,5 +38,11 @@ public interface INetvirtSfcOF13Provider {
      * @param sff - Service Function Forwarder
      * @param acl - Access list includes rules that need to be installed in a SFF.
      */
-    public void removeClassifierRules(Sff sff, Acl acl);
+    void removeClassifierRules(Sff sff, Acl acl);
+
+    void addClassifierRules(Acl acl);
+    void removeClassifierRules(Acl acl);
+
+    void setSfcClassifierService(ISfcClassifierService sfcClassifierService);
+    public void setDependencies(ServiceReference serviceReference);
 }

@@ -176,7 +176,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     public Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> connectionInstancesFromChanges(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =
-                new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
+                new HashMap<>();
         result.putAll(connectionInstancesFromMap(changes.getCreatedData()));
         result.putAll(connectionInstancesFromMap(changes.getUpdatedData()));
         result.putAll(connectionInstancesFromMap(
@@ -188,7 +188,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             DataObject> map) {
         Preconditions.checkNotNull(map);
         Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =
-                new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
+                new HashMap<>();
         for ( Entry<InstanceIdentifier<?>, DataObject> created : map.entrySet()) {
             if (created.getValue() instanceof Node) {
                 OvsdbConnectionInstance client = null;

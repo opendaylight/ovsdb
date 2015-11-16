@@ -52,8 +52,8 @@ public class NeutronSubnetChangeListener implements ClusteredDataChangeListener,
 
     private static final ImmutableBiMap<Class<? extends IpVersionBase>,Integer> IPV_MAP
     = new ImmutableBiMap.Builder<Class<? extends IpVersionBase>,Integer>()
-    .put(IpVersionV4.class,Integer.valueOf(4))
-    .put(IpVersionV6.class,Integer.valueOf(6))
+    .put(IpVersionV4.class, 4)
+    .put(IpVersionV6.class, 6)
     .build();
 
     private static final ImmutableBiMap<Class<? extends Dhcpv6Base>,String> DHCPV6_MAP
@@ -148,7 +148,7 @@ public class NeutronSubnetChangeListener implements ClusteredDataChangeListener,
         result.setIpV6AddressMode(DHCPV6_MAP.get(subnet.getIpv6AddressMode()));
         result.setEnableDHCP(subnet.isEnableDhcp());
         if (subnet.getAllocationPools() != null) {
-            List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<NeutronSubnetIPAllocationPool>();
+            List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<>();
             for (AllocationPools allocationPool : subnet.getAllocationPools()) {
                 NeutronSubnetIPAllocationPool pool = new NeutronSubnetIPAllocationPool();
                 pool.setPoolStart(allocationPool.getStart());
@@ -158,7 +158,7 @@ public class NeutronSubnetChangeListener implements ClusteredDataChangeListener,
             result.setAllocationPools(allocationPools);
         }
         if (subnet.getDnsNameservers() != null) {
-            List<String> dnsNameServers = new ArrayList<String>();
+            List<String> dnsNameServers = new ArrayList<>();
             for (IpAddress dnsNameServer : subnet.getDnsNameservers()) {
                 dnsNameServers.add(String.valueOf(dnsNameServer.getValue()));
             }
@@ -168,7 +168,7 @@ public class NeutronSubnetChangeListener implements ClusteredDataChangeListener,
 
         // read through the ports and put the ones in this subnet into the internal
         // myPorts object.
-       Set<NeutronPort> allPorts = new HashSet<NeutronPort>();
+       Set<NeutronPort> allPorts = new HashSet<>();
         NeutronCRUDInterfaces interfaces = new NeutronCRUDInterfaces()
             .fetchINeutronPortCRUD(this);
         INeutronPortCRUD portIf = interfaces.getPortInterface();
@@ -181,7 +181,7 @@ public class NeutronSubnetChangeListener implements ClusteredDataChangeListener,
                 }
             }
         }
-        List<NeutronPort> ports = new ArrayList<NeutronPort>();
+        List<NeutronPort> ports = new ArrayList<>();
         ports.addAll(allPorts);
         result.setPorts(ports);
         return result;

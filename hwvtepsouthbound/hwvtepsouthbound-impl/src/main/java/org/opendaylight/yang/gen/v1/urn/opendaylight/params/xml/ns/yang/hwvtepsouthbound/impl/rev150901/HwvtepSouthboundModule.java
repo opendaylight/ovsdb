@@ -30,7 +30,8 @@ public class HwvtepSouthboundModule extends org.opendaylight.yang.gen.v1.urn.ope
     public java.lang.AutoCloseable createInstance() {
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(getSchemaServiceDependency(),
                         getBindingNormalizedNodeSerializerDependency()));
-        HwvtepSouthboundProvider provider = new HwvtepSouthboundProvider(getClusteringEntityOwnershipServiceDependency());
+        HwvtepSouthboundProvider provider = new HwvtepSouthboundProvider(getClusteringEntityOwnershipServiceDependency(),
+                        getConnectionServiceDependency());
         getBrokerDependency().registerProvider(provider);
         return provider;
     }

@@ -33,8 +33,7 @@ public class LibraryModule extends org.opendaylight.yang.gen.v1.urn.opendaylight
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        OvsdbConnectionService provider = new OvsdbConnectionService();
-        return provider;
+        return new OvsdbConnectionService();
     }
 
     public void setBundleContext(BundleContext bundleContext) {

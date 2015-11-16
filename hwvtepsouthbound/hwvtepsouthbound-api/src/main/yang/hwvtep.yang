@@ -104,9 +104,7 @@ module hwvtep {
     }
 
     grouping hwvtep-physical-switch-attributes {
-        container physical-switch-id {
-            uses hwvtep-node-identification;
-        }
+        uses hwvtep-node-identification;
         list management-ips {
             key "management-ips-key";
             leaf management-ips-key {
@@ -127,6 +125,14 @@ module hwvtep {
         }
         list tunnels {
             uses hwvtep-tunnel-attributes ;
+        }
+        list logical-switch {
+            key "tunnel-key";
+            uses hwvtep-logical-switch-attributes;
+        }
+        list physical-locator {
+            key "dst-ip";
+            uses hwvtep-physical-locator-attributes;
         }
         list ucast-macs-local {
             key "mac-entry-key";
@@ -256,10 +262,7 @@ module hwvtep {
             description "Per Logical Switch tunnel key";
             type string;
         }
-        leaf logical-switch-managed-by {
-            description "The hwvtep global node to which this logical switch belongs to";
-            type hwvtep-global-ref;
-        }
+        uses hwvtep-physical-locator-set-attributes;
     }
 
     grouping hwvtep-physical-port-attributes {
@@ -292,22 +295,6 @@ module hwvtep {
         uses hwvtep-global-attributes;
     }
 
-    augment "/topo:network-topology/topo:topology/topo:node" {
-        description "Augmentation for logical switches for a hwvtep node";
-        ext:augment-identifier "hwvtep-logical-switch-augmentation";
-        uses hwvtep-logical-switch-attributes;
-    }
-
-    augment "/topo:network-topology/topo:topology/topo:node" {
-        description "Augmentation for physical locator set for a hwvtep node";
-        ext:augment-identifier "hwvtep-physical-locator-set-augmentation";
-        uses hwvtep-physical-locator-set-attributes;
-    }
-    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
-        description "Augment topology node termination-point for a hwvtep physical-locator";
-        ext:augment-identifier "hwvtep-physical-locator-augmentation";
-        uses hwvtep-physical-locator-attributes;
-    }
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
         description "Augment topology node termination-point for a hwvtep physical-port";
         ext:augment-identifier "hwvtep-physical-port-augmentation";

@@ -26,6 +26,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -37,6 +38,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -72,6 +76,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
@@ -97,6 +102,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.concepts.Builder;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -121,11 +127,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final String NETDEV_DP_TYPE = "netdev";
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
+    private static final int OVSDB_ROUNDTRIP_TIMEOUT = 10000;
     private static final String FORMAT_STR = "%s_%s_%d";
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;
-    private static Boolean setup = false;
+    private static boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
 
     // TODO Constants copied from AbstractConfigTestBase, need to be removed (see TODO below)
@@ -136,6 +143,56 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Inject
     private BundleContext bundleContext;
+
+    private static final NotifyingDataChangeListener CONFIGURATION_LISTENER =
+            new NotifyingDataChangeListener(LogicalDatastoreType.CONFIGURATION);
+    private static final NotifyingDataChangeListener OPERATIONAL_LISTENER =
+            new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL);
+
+    private static class NotifyingDataChangeListener implements DataChangeListener {
+        private final LogicalDatastoreType type;
+        private final Set<InstanceIdentifier<?>> createdIids = new HashSet<>();
+        private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
+        private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
+
+        private NotifyingDataChangeListener(LogicalDatastoreType type) {
+            this.type = type;
+        }
+
+        @Override
+        public void onDataChanged(
+                AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asyncDataChangeEvent) {
+            LOG.info("{} DataChanged: created {}", type, asyncDataChangeEvent.getCreatedData().keySet());
+            LOG.info("{} DataChanged: removed {}", type, asyncDataChangeEvent.getRemovedPaths());
+            LOG.info("{} DataChanged: updated {}", type, asyncDataChangeEvent.getUpdatedData().keySet());
+            createdIids.addAll(asyncDataChangeEvent.getCreatedData().keySet());
+            removedIids.addAll(asyncDataChangeEvent.getRemovedPaths());
+            updatedIids.addAll(asyncDataChangeEvent.getUpdatedData().keySet());
+            // Handled managed iids
+            for (DataObject obj : asyncDataChangeEvent.getCreatedData().values()) {
+                if (obj instanceof ManagedNodeEntry) {
+                    ManagedNodeEntry managedNodeEntry = (ManagedNodeEntry) obj;
+                    LOG.info("{} DataChanged: created managed {}", managedNodeEntry.getBridgeRef().getValue());
+                    createdIids.add(managedNodeEntry.getBridgeRef().getValue());
+                }
+            }
+            synchronized(this) {
+                notifyAll();
+            }
+        }
+
+        public boolean isCreated(InstanceIdentifier<?> iid) {
+            return createdIids.remove(iid);
+        }
+
+        public boolean isRemoved(InstanceIdentifier<?> iid) {
+            return removedIids.remove(iid);
+        }
+
+        public boolean isUpdated(InstanceIdentifier<?> iid) {
+            return updatedIids.remove(iid);
+        }
+    }
 
     @Configuration
     public Option[] config() {
@@ -274,6 +331,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         mdsalUtils = new MdsalUtils(dataBroker);
+        dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                createInstanceIdentifier(getConnectionInfo(addressStr, portNumber)), CONFIGURATION_LISTENER,
+                AsyncDataBroker.DataChangeScope.SUBTREE);
+        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                createInstanceIdentifier(getConnectionInfo(addressStr, portNumber)), OPERATIONAL_LISTENER,
+                AsyncDataBroker.DataChangeScope.SUBTREE);
+
         setup = true;
     }
 
@@ -343,14 +407,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 topology);
     }
 
-    private boolean addOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
-                createInstanceIdentifier(connectionInfo),
-                createNode(connectionInfo));
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
     private InstanceIdentifier<Node> createInstanceIdentifier(
             ConnectionInfo connectionInfo) {
         return InstanceIdentifier
@@ -360,40 +416,66 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         createNodeKey(connectionInfo.getRemoteIp(), connectionInfo.getRemotePort()));
     }
 
-    private Node getOvsdbNode(final ConnectionInfo connectionInfo) {
-        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
-                createInstanceIdentifier(connectionInfo));
-    }
-
-    private boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                createInstanceIdentifier(connectionInfo));
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
     private Node connectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        Assert.assertTrue(addOvsdbNode(connectionInfo));
-        Node node = getOvsdbNode(connectionInfo);
+        final InstanceIdentifier<Node> iid = createInstanceIdentifier(connectionInfo);
+        Assert.assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, iid, createNode(connectionInfo)));
+        waitForOperationalCreation(iid);
+        Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, iid);
         Assert.assertNotNull(node);
         LOG.info("Connected to {}", connectionInfoToString(connectionInfo));
         return node;
     }
 
-    private boolean disconnectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        Assert.assertTrue(deleteOvsdbNode(connectionInfo));
-        Node node = getOvsdbNode(connectionInfo);
+    private void waitForOperationalCreation(InstanceIdentifier<Node> iid) throws InterruptedException {
+        synchronized (OPERATIONAL_LISTENER) {
+            long _start = System.currentTimeMillis();
+            LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
+            while (!OPERATIONAL_LISTENER.isCreated(
+                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
+            }
+            LOG.info("Woke up, waited {} for creation of {}", (System.currentTimeMillis() - _start), iid);
+        }
+    }
+
+    private void waitForOperationalDeletion(InstanceIdentifier<Node> iid) throws InterruptedException {
+        synchronized (OPERATIONAL_LISTENER) {
+            long _start = System.currentTimeMillis();
+            LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
+            while (!OPERATIONAL_LISTENER.isRemoved(
+                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
+            }
+            LOG.info("Woke up, waited {} for deletion of {}", (System.currentTimeMillis() - _start), iid);
+        }
+    }
+
+    private void waitForOperationalUpdate(InstanceIdentifier<Node> iid) throws InterruptedException {
+        synchronized (OPERATIONAL_LISTENER) {
+            long _start = System.currentTimeMillis();
+            LOG.info("Waiting for OPERATIONAL DataChanged update on {}", iid);
+            while (!OPERATIONAL_LISTENER.isUpdated(
+                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
+            }
+            LOG.info("Woke up, waited {} for update of {}", (System.currentTimeMillis() - _start), iid);
+        }
+    }
+
+    private void disconnectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
+        final InstanceIdentifier<Node> iid = createInstanceIdentifier(connectionInfo);
+        Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
+        waitForOperationalDeletion(iid);
+        Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, iid);
         Assert.assertNull(node);
-        //Assume.assumeNotNull(node); // Using assumeNotNull because there is no assumeNull
         LOG.info("Disconnected from {}", connectionInfoToString(connectionInfo));
-        return true;
     }
 
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         connectOvsdbNode(connectionInfo);
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -466,7 +548,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 break;
             }
         }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -476,7 +558,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -498,7 +580,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } else {
             LOG.info("other_config is not present");
         }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -524,7 +606,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         Assert.assertTrue(deleteBridge(connectionInfo));
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     private List<ControllerEntry> createControllerEntry(String controllerTarget) {
@@ -657,8 +739,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
         }
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
-        LOG.debug("Built with the intent to store bridge data {}",
-                ovsdbBridgeAugmentationBuilder.toString());
+        LOG.debug("Built with the intent to store bridge data {}", ovsdbBridgeAugmentationBuilder.toString());
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 bridgeIid, bridgeNodeBuilder.build());
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -742,9 +823,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName)
             throws InterruptedException {
 
-        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                createInstanceIdentifier(connectionInfo,
-                        new OvsdbBridgeName(bridgeName)));
+        final InstanceIdentifier<Node> iid = createInstanceIdentifier(connectionInfo,
+                new OvsdbBridgeName(bridgeName));
+        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid);
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
     }
@@ -761,7 +842,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         Assert.assertTrue(deleteBridge(connectionInfo));
 
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
@@ -833,7 +914,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -885,7 +966,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     private <T> void assertExpectedExist(List<T> expected, List<T> test) {
@@ -1000,7 +1081,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(deleteBridge(connectionInfo, testBridgeAndPortName));
             }
         }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     /*
@@ -1111,9 +1192,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateAugmentationBuilder.build());
         tpUpdateBuilder.setTpId(new TpId(portName));
         portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                portIid, portUpdateNodeBuilder.build());
-        Assert.assertTrue(result);
+        Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
 
         terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1131,7 +1210,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -1184,9 +1263,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     tpUpdateAugmentationBuilder.build());
             tpUpdateBuilder.setTpId(new TpId(portName));
             portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                    portIid, portUpdateNodeBuilder.build());
-            Assert.assertTrue(result);
+            Assert.assertTrue(
+                    mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
 
             terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1203,7 +1281,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // DELETE
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @SuppressWarnings("unchecked")
@@ -1282,9 +1360,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     tpUpdateAugmentationBuilder.build());
             tpUpdateBuilder.setTpId(new TpId(portName));
             portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
-            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                    portIid, portUpdateNodeBuilder.build());
-            Assert.assertTrue(result);
+            Assert.assertTrue(
+                    mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
 
             terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1301,7 +1378,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // DELETE
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -1326,7 +1403,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertNotNull("Expected to find Node: " + expectedNodeId, foundNode);
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     /*
@@ -1413,7 +1490,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
             }
         }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        disconnectOvsdbNode(connectionInfo);
     }
 
     /*

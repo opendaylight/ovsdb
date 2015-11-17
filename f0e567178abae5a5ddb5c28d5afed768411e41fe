@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7aade967_dde68144",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-11-17T19:34:14Z",
+      "side": 1,
+      "message": "please confirm that this is only an issue on lithium\nand if so, update comment to indicate that this is not\nneeded in Beryllium.",
+      "range": {
+        "startLine": 7,
+        "startChar": 48,
+        "endLine": 7,
+        "endChar": 53
+      },
+      "revId": "f0e567178abae5a5ddb5c28d5afed768411e41fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_52bb6172",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 4

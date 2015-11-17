@@ -134,6 +134,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static String connectionType;
     private static boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
+    private static Node node;
 
     // TODO Constants copied from AbstractConfigTestBase, need to be removed (see TODO below)
     private static final String PAX_EXAM_UNPACK_DIRECTORY = "target/exam";
@@ -331,12 +332,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         mdsalUtils = new MdsalUtils(dataBroker);
+        final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        final InstanceIdentifier<Node> iid = createInstanceIdentifier(connectionInfo);
         dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                createInstanceIdentifier(getConnectionInfo(addressStr, portNumber)), CONFIGURATION_LISTENER,
-                AsyncDataBroker.DataChangeScope.SUBTREE);
+                iid, CONFIGURATION_LISTENER, AsyncDataBroker.DataChangeScope.SUBTREE);
         dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
-                createInstanceIdentifier(getConnectionInfo(addressStr, portNumber)), OPERATIONAL_LISTENER,
-                AsyncDataBroker.DataChangeScope.SUBTREE);
+                iid, OPERATIONAL_LISTENER, AsyncDataBroker.DataChangeScope.SUBTREE);
+
+        node = connectOvsdbNode(connectionInfo);
 
         setup = true;
     }
@@ -374,7 +377,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return connectionInfo;
     }
 
-    private String connectionInfoToString(final ConnectionInfo connectionInfo) {
+    private static String connectionInfoToString(final ConnectionInfo connectionInfo) {
         return new String(connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
     }
 
@@ -407,8 +410,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 topology);
     }
 
-    private InstanceIdentifier<Node> createInstanceIdentifier(
-            ConnectionInfo connectionInfo) {
+    private static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo connectionInfo) {
         return InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -438,7 +440,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private void waitForOperationalDeletion(InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalDeletion(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
@@ -462,7 +464,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private void disconnectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
+    private static void disconnectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
         final InstanceIdentifier<Node> iid = createInstanceIdentifier(connectionInfo);
         Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
         waitForOperationalDeletion(iid);
@@ -474,15 +476,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
+        // At this point we're connected, disconnect and reconnect (the connection will be removed at the very end)
         disconnectOvsdbNode(connectionInfo);
+        connectOvsdbNode(connectionInfo);
     }
 
     @Test
     public void testDpdkSwitch() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        List<DatapathTypeEntry> datapathTypeEntries = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)
+        List<DatapathTypeEntry> datapathTypeEntries = node.getAugmentation(OvsdbNodeAugmentation.class)
                 .getDatapathTypeEntry();
         if (datapathTypeEntries == null) {
             LOG.info("DPDK not supported on this node.");
@@ -548,24 +550,18 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 break;
             }
         }
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
     public void testOvsdbNodeOvsVersion() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
     public void testOpenVSwitchOtherConfig() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeAugmentation.getOpenvswitchOtherConfigs();
         if (otherConfigsList != null) {
@@ -580,14 +576,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } else {
             LOG.info("other_config is not present");
         }
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
     public void testOvsdbBridgeControllerInfo() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portNumber);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
+        String controllerTarget = SouthboundUtil.getControllerTarget(node);
         assertNotNull("Failed to get controller target", controllerTarget);
         List<ControllerEntry> setControllerEntry = createControllerEntry(controllerTarget);
         Uri setUri = new Uri(controllerTarget);
@@ -606,7 +600,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         Assert.assertTrue(deleteBridge(connectionInfo));
-        disconnectOvsdbNode(connectionInfo);
     }
 
     private List<ControllerEntry> createControllerEntry(String controllerTarget) {
@@ -833,7 +826,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testAddDeleteBridge() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
 
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
@@ -841,8 +833,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         LOG.info("bridge: {}", bridge);
 
         Assert.assertTrue(deleteBridge(connectionInfo));
-
-        disconnectOvsdbNode(connectionInfo);
     }
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
@@ -875,7 +865,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final Long OFPORT_EXPECTED = 45002L;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
 
         // CREATE
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
@@ -914,7 +903,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
@@ -923,7 +911,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final Long OFPORT_INPUT = 45008L;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
 
         // CREATE
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
@@ -966,7 +953,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
-        disconnectOvsdbNode(connectionInfo);
     }
 
     private <T> void assertExpectedExist(List<T> expected, List<T> test) {
@@ -993,7 +979,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final int TERMINATION_POINT_TEST_INDEX = 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
 
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
@@ -1081,7 +1066,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(deleteBridge(connectionInfo, testBridgeAndPortName));
             }
         }
-        disconnectOvsdbNode(connectionInfo);
     }
 
     /*
@@ -1144,7 +1128,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final Integer UPDATED_VLAN_ID = 4001;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
 
         // CREATE
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
@@ -1210,14 +1193,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
     public void testCRUDTerminationPointVlanModes() throws InterruptedException {
         final VlanMode UPDATED_VLAN_MODE = VlanMode.Access;
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
         VlanMode []vlanModes = VlanMode.values();
         for (VlanMode vlanMode : vlanModes) {
             // CREATE
@@ -1281,7 +1262,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // DELETE
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @SuppressWarnings("unchecked")
@@ -1308,7 +1288,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRUDTerminationPointVlanTrunks() throws InterruptedException {
         final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Sets.newHashSet(2011));
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
         Iterable<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
         for (Set<Integer> vlanSet : vlanSets) {
@@ -1378,13 +1357,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // DELETE
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
-        disconnectOvsdbNode(connectionInfo);
     }
 
     @Test
     public void testGetOvsdbNodes() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
         InstanceIdentifier<Topology> topologyPath = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
@@ -1403,7 +1380,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertNotNull("Expected to find Node: " + expectedNodeId, foundNode);
-        disconnectOvsdbNode(connectionInfo);
     }
 
     /*
@@ -1423,7 +1399,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private <T> void testCRUDBridge(String prefix, KeyValueBuilder<T> builder, SouthboundBridgeHelper<T> helper)
             throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        connectOvsdbNode(connectionInfo);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
         // the update has been performed.
         List<SouthboundTestCase<T>> updateFromTestCases = generateKeyValueTestCases(builder, prefix + "From");
@@ -1490,7 +1465,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
             }
         }
-        disconnectOvsdbNode(connectionInfo);
     }
 
     /*

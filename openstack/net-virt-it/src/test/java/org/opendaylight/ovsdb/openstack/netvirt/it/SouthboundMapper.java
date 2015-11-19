@@ -154,12 +154,10 @@ public class SouthboundMapper {
     public static String createDatapathType(OvsdbBridgeAugmentation mdsalbridge) {
         String datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
 
-        if (mdsalbridge.getDatapathType() != null) {
-            if (SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()) != null) {
-                datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
-            } else {
-                throw new IllegalArgumentException("Unknown datapath type "
-                        + SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()));
+        if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.class)) {
+            datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
+            if (datapathtype == null) {
+                throw new IllegalArgumentException("Unknown datapath type " + mdsalbridge.getDatapathType().getName());
             }
         }
         return datapathtype;

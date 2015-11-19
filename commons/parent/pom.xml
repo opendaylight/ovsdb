@@ -96,10 +96,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <sal.version>0.10.0-SNAPSHOT</sal.version>
     <switchmanager.api.version>0.9.0-SNAPSHOT</switchmanager.api.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
-    <!-- 3rd Pary Dependency Versions -->
-    <commons.collection.version>1.0</commons.collection.version>
-    <httpcomponents.version>4.2.1</httpcomponents.version>
-    <portlet.version>2.0</portlet.version>
+    <!-- 3rd Party Dependency Versions -->
     <powermock.version>1.5.2</powermock.version>
     <dlux.version>0.3.0-SNAPSHOT</dlux.version>
     <ovsdb.ui.version>0.1.0-SNAPSHOT</ovsdb.ui.version>
@@ -122,44 +119,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>${commons.collection.version}</version>
-      </dependency>
-      <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-all</artifactId>
         <version>${netty.version}</version>
       </dependency>
       <dependency>
-        <groupId>javax.portlet</groupId>
-        <artifactId>portlet-api</artifactId>
-        <version>${portlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpcore-nio</artifactId>
-        <version>${httpcomponents.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>commons.northbound</artifactId>
-        <version>${northbound.commons.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-api</artifactId>
         <version>${controller.config.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>containermanager</artifactId>
-        <version>${containermanager.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>forwardingrulesmanager</artifactId>
-        <version>${forwardingrulesmanager.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.neutron</groupId>
@@ -171,11 +138,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>opendaylight-karaf-empty</artifactId>
         <version>1.6.0-SNAPSHOT</version>
         <type>zip</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal</artifactId>
-        <version>${sal.version}</version>
       </dependency>
 
       <dependency>
@@ -207,11 +169,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <scope>import</scope>
       </dependency>
 
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>switchmanager</artifactId>
-        <version>${switchmanager.api.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.opendaylight.openflowplugin.model</groupId>
         <artifactId>model-flow-base</artifactId>

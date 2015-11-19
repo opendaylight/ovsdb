@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -144,4 +145,17 @@ public class HwvtepSouthboundMapper {
                         .child(Node.class, nodeKey).build();
         return iid;
     }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
+                    LogicalSwitch lSwitch) {
+        InstanceIdentifier<Node> iid = null;
+        String nodeString = client.getNodeKey().getNodeId().getValue() + "/logicalswitch/" + lSwitch.getName();
+        NodeId nodeId = new NodeId(new Uri(nodeString));
+        NodeKey nodeKey = new NodeKey(nodeId);
+        iid =InstanceIdentifier.builder(NetworkTopology.class)
+                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                        .child(Node.class, nodeKey).build();
+        return iid;
+    }
+
 }

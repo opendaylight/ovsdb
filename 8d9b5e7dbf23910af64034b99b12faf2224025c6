@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_b4e9571c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-19T08:22:52Z",
+      "side": 1,
+      "message": "physical locator is now under physical switch? am i right?\n\nI still think it should be a part of global node, since locator is just a IP and encapsulation type. Its name \"physical locator\" is misleading since it is not \"physical\". It has no connection with physical siwtch just like logcial switch does. I think put locator and logical switch under same position will be better.",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 245,
+        "endChar": 9
+      },
+      "revId": "8d9b5e7dbf23910af64034b99b12faf2224025c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_9481bb4c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-19T08:22:52Z",
+      "side": 1,
+      "message": "If we put physical locator as termination point augmentation, this leaf owner-switch is unnecessary. Because we can get its belonging node from parent node identifier.",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 245,
+        "endChar": 9
+      },
+      "revId": "8d9b5e7dbf23910af64034b99b12faf2224025c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

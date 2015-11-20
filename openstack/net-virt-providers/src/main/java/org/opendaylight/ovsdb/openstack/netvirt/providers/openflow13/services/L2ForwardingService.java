@@ -9,6 +9,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
@@ -16,6 +18,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -30,11 +33,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.Fl
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
@@ -42,13 +45,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
 
 public class L2ForwardingService extends AbstractServiceInstance implements ConfigInterface, L2ForwardingProvider {
     private static final Logger LOG = LoggerFactory.getLogger(L2ForwardingService.class);
@@ -72,50 +72,35 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null);
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "UcastOut_" + segmentationId + "_" + localPort + "_" + attachedMac;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-
             // Set the Output Port/Iface
-            InstructionUtils.createOutputPortInstructions(ib, dpidLong, localPort);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction setOutputPortInstruction =
+                    InstructionUtils.createOutputPortInstructions(new InstructionBuilder(), dpidLong, localPort)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(0))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, setOutputPortInstruction);
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
     }
+
     /*
      * (Table:2) Local VLAN unicast
      * Match: VLAN ID and dMAC
@@ -129,87 +114,42 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true);
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null);
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "VlanUcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "VlanUcastOut_" + segmentationId + "_" + localPort + "_" + attachedMac;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-            List<Instruction> instructions_tmp = Lists.newArrayList();
-
             /* Strip vlan and store to tmp instruction space*/
-            InstructionUtils.createPopVlanInstructions(ib);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions_tmp.add(ib.build());
+            Instruction stripVlanInstruction = InstructionUtils.createPopVlanInstructions(new InstructionBuilder())
+                    .setOrder(0)
+                    .setKey(new InstructionKey(0))
+                    .build();
 
             // Set the Output Port/Iface
-            ib = new InstructionBuilder();
-            InstructionUtils.addOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
-            ib.setOrder(1);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction setOutputPortInstruction =
+                    InstructionUtils.addOutputPortInstructions(new InstructionBuilder(), dpidLong, localPort,
+                            Collections.singletonList(stripVlanInstruction))
+                            .setOrder(1)
+                            .setKey(new InstructionKey(0))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, setOutputPortInstruction);
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
     }
 
-
-    /**
-     * Utility function used by the flooding logic to allow a flow to be resubmitted
-     * to the local port flooding rule, after being outputed to all available tunnel
-     * or VLAN egress ports.
-     */
-    private void appendResubmitLocalFlood(InstructionBuilder ib) {
-
-        //Update the ApplyActions instructions
-        ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
-        List<Action> actionList = aac.getApplyActions().getAction();
-
-        int index = actionList.size();
-        ActionBuilder ab = new ActionBuilder();
-        ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(ClassifierService.REG_FIELD).build(),
-                BigInteger.valueOf(ClassifierService.REG_VALUE_FROM_REMOTE)));
-        ab.setOrder(index);
-        ab.setKey(new ActionKey(index));
-        actionList.add(ab.build());
-
-        index++;
-        ab = new ActionBuilder();
-        ab.setAction(ActionUtils.nxResubmitAction(null, this.getTable()));
-        ab.setOrder(index);
-        ab.setKey(new ActionKey(index));
-        actionList.add(ab.build());
-    }
 
     /*
      * (Table:2) Local Broadcast Flood
@@ -223,61 +163,45 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_REMOTE));
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
-                new MacAddress("01:00:00:00:00:00")).build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.addNxRegMatch(matchBuilder,
+                new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_REMOTE));
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+                new MacAddress("01:00:00:00:00:00"));
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "BcastOut_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(16384);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "BcastOut_" + segmentationId;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable())
+                .setPriority(16384);
+
         Flow flow = this.getFlow(flowBuilder, nodeBuilder);
-        // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
-        List<Instruction> existingInstructions = null;
-        if (flow != null) {
-            Instructions ins = flow.getInstructions();
-            if (ins != null) {
-                existingInstructions = ins.getInstruction();
-            }
-        }
+
+        // Retrieve the existing instructions
+        List<Instruction> existingInstructions = InstructionUtils.extractExistingInstructions(flow);
 
         if (write) {
             // Create output port list
-            createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
+            Instruction outputPortInstruction =
+                    createOutputPortInstructions(new InstructionBuilder(), dpidLong, localPort, existingInstructions)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(0))
+                            .build();
 
-            /* Alternative method to address Bug 2004 is to make a call
-             * here to appendResubmitLocalFlood(ib) so that we send the
-             * flow back to the local flood rule.
-             */
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            /* Alternative method to address Bug 2004 is to use appendResubmitLocalFlood(ib) so that we send the
+             * flow back to the local flood rule. (See git history.) */
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
 
             writeFlow(flowBuilder, nodeBuilder);
         } else {
+            InstructionBuilder ib = new InstructionBuilder();
             boolean flowRemove = InstructionUtils.removeOutputPortFromInstructions(ib, dpidLong, localPort,
                     existingInstructions);
             if (flowRemove) {
@@ -285,15 +209,14 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                 removeFlow(flowBuilder, nodeBuilder);
             } else {
                 /* Install instruction with new output port list*/
-                ib.setOrder(0);
-                ib.setKey(new InstructionKey(0));
-                instructions.add(ib.build());
-
-                // Add InstructionBuilder to the Instruction(s)Builder List
-                isb.setInstruction(instructions);
+                Instruction outputPortInstruction = ib
+                        .setOrder(0)
+                        .setKey(new InstructionKey(0))
+                        .build();
 
                 // Add InstructionsBuilder to FlowBuilder
-                flowBuilder.setInstructions(isb.build());
+                InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
+
                 writeFlow(flowBuilder, nodeBuilder);
             }
         }
@@ -313,78 +236,69 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
-                new MacAddress("01:00:00:00:00:00")).build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true);
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+                new MacAddress("01:00:00:00:00:00"));
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "VlanBcastOut_"+segmentationId+"_"+ethPort;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(16384);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "VlanBcastOut_" + segmentationId + "_" + ethPort;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable())
+                .setPriority(16384);
         Flow flow = this.getFlow(flowBuilder, nodeBuilder);
-        // Instantiate the Builders for the OF Actions and Instructions
-        List<Instruction> existingInstructions = null;
-        if (flow != null) {
-            Instructions ins = flow.getInstructions();
-            if (ins != null) {
-                existingInstructions = ins.getInstruction();
-            }
-        }
 
-        List<Instruction> instructions = Lists.newArrayList();
-        InstructionBuilder ib = new InstructionBuilder();
-        List<Action> actionList;
+        // Retrieve the existing instructions
+        List<Instruction> existingInstructions = InstructionUtils.extractExistingInstructions(flow);
+
         if (write) {
-            if (existingInstructions == null) {
+            List<Action> actionList;
+            if (existingInstructions == null || existingInstructions.isEmpty()) {
                 /* First time called there should be no instructions.
                  * We can simply add the output:ethPort first, followed by
                  * popVlan and then the local port. The next calls will append
                  * the rest of the local ports.
                  */
-                ActionBuilder ab = new ActionBuilder();
-                actionList = Lists.newArrayList();
+                actionList = new ArrayList<>();
 
-                ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + ethPort)));
-                ab.setOrder(0);
-                ab.setKey(new ActionKey(0));
-                actionList.add(ab.build());
+                actionList.add(
+                        new ActionBuilder()
+                                .setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + ethPort)))
+                                .setOrder(0)
+                                .setKey(new ActionKey(0))
+                                .build());
 
-                ab.setAction(ActionUtils.popVlanAction());
-                ab.setOrder(1);
-                ab.setKey(new ActionKey(1));
-                actionList.add(ab.build());
+                actionList.add(
+                        new ActionBuilder()
+                                .setAction(ActionUtils.popVlanAction())
+                                .setOrder(1)
+                                .setKey(new ActionKey(1))
+                                .build());
 
-                ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + localPort)));
-                ab.setOrder(2);
-                ab.setKey(new ActionKey(2));
-                actionList.add(ab.build());
+                actionList.add(
+                        new ActionBuilder()
+                                .setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + localPort)))
+                                .setOrder(2)
+                                .setKey(new ActionKey(2))
+                                .build());
             } else {
                 /* Subsequent calls require appending any new local ports for this tenant. */
                 Instruction in = existingInstructions.get(0);
                 actionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
 
                 NodeConnectorId ncid = new NodeConnectorId(nodeName + ":" + localPort);
+                final Uri nodeConnectorUri = new Uri(ncid);
                 boolean addNew = true;
 
                 /* Check if the port is already in the output list */
                 for (Action action : actionList) {
                     if (action.getAction() instanceof OutputActionCase) {
                         OutputActionCase opAction = (OutputActionCase) action.getAction();
-                        if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
+                        if (opAction.getOutputAction().getOutputNodeConnector().equals(nodeConnectorUri)) {
                             addNew = false;
                             break;
                         }
@@ -392,32 +306,29 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                 }
 
                 if (addNew) {
-                    ActionBuilder ab = new ActionBuilder();
-
-                    ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + localPort)));
-                    ab.setOrder(actionList.size());
-                    ab.setKey(new ActionKey(actionList.size()));
-                    actionList.add(ab.build());
+                    actionList.add(
+                            new ActionBuilder()
+                                    .setAction(
+                                            ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + localPort)))
+                                    .setOrder(actionList.size())
+                                    .setKey(new ActionKey(actionList.size()))
+                                    .build());
                 }
             }
 
-            ApplyActionsBuilder aab = new ApplyActionsBuilder();
-            aab.setAction(actionList);
-            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            InstructionsBuilder isb = new InstructionsBuilder();
-            isb.setInstruction(instructions);
+            ApplyActions applyActions = new ApplyActionsBuilder().setAction(actionList).build();
+            Instruction applyActionsInstruction =
+                    new InstructionBuilder()
+                            .setInstruction(new ApplyActionsCaseBuilder().setApplyActions(applyActions).build())
+                            .setOrder(0)
+                            .setKey(new InstructionKey(0))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, applyActionsInstruction);
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            //boolean flowRemove = removeOutputPortFromGroup(nodeBuilder, ib, dpidLong,
-            //                     localPort, existingInstructions);
+            InstructionBuilder ib = new InstructionBuilder();
             boolean flowRemove = removeOutputPortFromInstructions(ib, dpidLong, localPort, ethPort,
                     existingInstructions);
             if (flowRemove) {
@@ -425,16 +336,13 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                 removeFlow(flowBuilder, nodeBuilder);
             } else {
                 /* Install instruction with new output port list*/
-                ib.setOrder(0);
-                ib.setKey(new InstructionKey(0));
-                instructions.add(ib.build());
-
-                // Add InstructionBuilder to the Instruction(s)Builder List
-                InstructionsBuilder isb = new InstructionsBuilder();
-                isb.setInstruction(instructions);
+                Instruction outputPortInstruction = ib
+                        .setOrder(0)
+                        .setKey(new InstructionKey(0))
+                        .build();
 
                 // Add InstructionsBuilder to FlowBuilder
-                flowBuilder.setInstructions(isb.build());
+                InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
                 writeFlow(flowBuilder, nodeBuilder);
             }
         }
@@ -442,43 +350,44 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
     private boolean removeOutputPortFromInstructions(InstructionBuilder ib, Long dpidLong, Long localPort,
                                                      Long ethPort, List<Instruction> instructions) {
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         boolean removeFlow = true;
 
-        if (instructions != null) {
+        if (instructions != null && !instructions.isEmpty()) {
             Instruction in = instructions.get(0);
             List<Action> oldActionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
             NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + localPort);
+            final Uri localNodeConnectorUri = new Uri(ncid);
             NodeConnectorId ncidEth = new NodeConnectorId(OPENFLOW + dpidLong + ":" + ethPort);
+            final Uri ethNodeConnectorUri = new Uri(ncidEth);
 
             // Remove the port from the output list
-            ActionBuilder ab = new ActionBuilder();
             int index = 2;
-            //for (ListIterator<Action> it = oldActionList.listIterator(oldActionList.size()); it.hasPrevious();) {
-            //    Action action = it.previous();
             for (Action action : oldActionList) {
                 if (action.getAction() instanceof OutputActionCase) {
                     OutputActionCase opAction = (OutputActionCase) action.getAction();
-                    if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncidEth))) {
+                    if (opAction.getOutputAction().getOutputNodeConnector().equals(ethNodeConnectorUri)) {
                         actionList.add(action);
-                    } else if (!opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
-                        ab.setAction(action.getAction());
-                        ab.setOrder(index);
-                        ab.setKey(new ActionKey(index));
-                        actionList.add(ab.build());
+                    } else if (!opAction.getOutputAction().getOutputNodeConnector().equals(localNodeConnectorUri)) {
+                        actionList.add(
+                                new ActionBuilder()
+                                        .setAction(action.getAction())
+                                        .setOrder(index)
+                                        .setKey(new ActionKey(index))
+                                        .build());
                         index++;
                     }
                 } else {
                     actionList.add(action);
                 }
             }
-            ApplyActionsBuilder aab = new ApplyActionsBuilder();
-            aab.setAction(actionList);
-            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ApplyActions applyActions = new ApplyActionsBuilder().setAction(actionList).build();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(applyActions).build());
         }
 
         if (actionList.size() > 2) {
             // Add InstructionBuilder to the Instruction(s)Builder List
+            // TODO This doesn't actually do anything
             InstructionsBuilder isb = new InstructionsBuilder();
             isb.setInstruction(instructions);
             removeFlow = false;
@@ -499,46 +408,28 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(
+                MatchUtils.createTunnelIDMatch(new MatchBuilder(), new BigInteger(segmentationId)).build());
 
         if (write) {
-            // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-
             // Call the InstructionBuilder Methods Containing Actions
-            InstructionUtils.createDropInstructions(ib);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction dropInstruction = InstructionUtils.createDropInstructions(new InstructionBuilder())
+                    .setOrder(0)
+                    .setKey(new InstructionKey(0))
+                    .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, dropInstruction);
         }
 
-        String flowId = "LocalTableMiss_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(8192);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "LocalTableMiss_" + segmentationId;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable())
+                .setPriority(8192);
         if (write) {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -558,47 +449,29 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
+                MatchUtils.createVlanIdMatch(new MatchBuilder(), new VlanId(Integer.valueOf(segmentationId)),
+                        true).build());
 
         if (write) {
-            // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-
             // Call the InstructionBuilder Methods Containing Actions
-            InstructionUtils.createDropInstructions(ib);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction dropInstruction = InstructionUtils.createDropInstructions(new InstructionBuilder())
+                    .setOrder(0)
+                    .setKey(new InstructionKey(0))
+                    .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, dropInstruction);
         }
 
-        String flowId = "LocalTableMiss_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(8192);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "LocalTableMiss_" + segmentationId;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable())
+                .setPriority(8192);
         if (write) {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -620,45 +493,29 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null);
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "TunnelOut_" + segmentationId + "_" + OFPortOut + "_" + attachedMac;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-
             // Set the Output Port/Iface
-            InstructionUtils.createOutputPortInstructions(ib, dpidLong, OFPortOut);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(1));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction outputPortInstruction =
+                    InstructionUtils.createOutputPortInstructions(new InstructionBuilder(), dpidLong, OFPortOut)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(1))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
 
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -679,44 +536,29 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true);
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null);
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "VlanOut_"+segmentationId+"_"+ethPort+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "VlanOut_" + segmentationId + "_" + ethPort + "_" + attachedMac;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
             // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-            InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(1));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction outputPortInstruction =
+                    InstructionUtils.createOutputPortInstructions(new InstructionBuilder(), dpidLong, ethPort)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(1))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
 
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -736,59 +578,51 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
+        MatchBuilder matchBuilder = new MatchBuilder();
         // Match TunnelID
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_LOCAL));
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        MatchUtils.addNxRegMatch(matchBuilder,
+                new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_LOCAL));
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         // Match DMAC
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
-                new MacAddress("01:00:00:00:00:00")).build());
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+                new MacAddress("01:00:00:00:00:00"));
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "TunnelFloodOut_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(16383);  // FIXME: change it back to 16384 once bug 3005 is fixed.
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "TunnelFloodOut_" + segmentationId;
+        final FlowId flowId = new FlowId(flowName);
+        flowBuilder
+                .setId(flowId)
+                .setBarrier(true)
+                .setTableId(getTable())
+                .setKey(new FlowKey(flowId))
+                .setPriority(16383)  // FIXME: change it back to 16384 once bug 3005 is fixed.
+                .setFlowName(flowName)
+                .setHardTimeout(0)
+                .setIdleTimeout(0);
 
         Flow flow = this.getFlow(flowBuilder, nodeBuilder);
         // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
-        List<Instruction> existingInstructions = null;
-        if (flow != null) {
-            Instructions ins = flow.getInstructions();
-            if (ins != null) {
-                existingInstructions = ins.getInstruction();
-            }
-        }
+        List<Instruction> existingInstructions = InstructionUtils.extractExistingInstructions(flow);
 
         if (write) {
             // Set the Output Port/Iface
-            //createOutputGroupInstructions(nodeBuilder, ib, dpidLong, OFPortOut, existingInstructions);
-            createOutputPortInstructions(ib, dpidLong, OFPortOut, existingInstructions);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction outputPortInstruction =
+                    createOutputPortInstructions(new InstructionBuilder(), dpidLong, OFPortOut, existingInstructions)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(0))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
 
             writeFlow(flowBuilder, nodeBuilder);
         } else {
+            InstructionBuilder ib = new InstructionBuilder();
             /* remove port from action list */
             boolean flowRemove = InstructionUtils.removeOutputPortFromInstructions(ib, dpidLong,
                     OFPortOut, existingInstructions);
@@ -797,15 +631,13 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                 removeFlow(flowBuilder, nodeBuilder);
             } else {
                 /* Install instruction with new output port list*/
-                ib.setOrder(0);
-                ib.setKey(new InstructionKey(0));
-                instructions.add(ib.build());
-
-                // Add InstructionBuilder to the Instruction(s)Builder List
-                isb.setInstruction(instructions);
+                Instruction instruction = ib
+                        .setOrder(0)
+                        .setKey(new InstructionKey(0))
+                        .build();
 
                 // Add InstructionsBuilder to FlowBuilder
-                flowBuilder.setInstructions(isb.build());
+                InstructionUtils.setFlowBuilderInstruction(flowBuilder, instruction);
                 writeFlow(flowBuilder, nodeBuilder);
             }
         }
@@ -824,50 +656,44 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
+        MatchBuilder matchBuilder = new MatchBuilder();
         // Match Vlan ID
-        flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
+        MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true);
         // Match DMAC
-        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
-                new MacAddress("01:00:00:00:00:00")).build());
+        MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+                new MacAddress("01:00:00:00:00:00"));
+        flowBuilder.setMatch(matchBuilder.build());
 
-        String flowId = "VlanFloodOut_"+segmentationId+"_"+ethPort;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(16384);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "VlanFloodOut_" + segmentationId + "_" + ethPort;
+        final FlowId flowId = new FlowId(flowName);
+        flowBuilder
+                .setId(flowId)
+                .setBarrier(true)
+                .setTableId(getTable())
+                .setKey(new FlowKey(flowId))
+                .setPriority(16384)
+                .setFlowName(flowName)
+                .setHardTimeout(0)
+                .setIdleTimeout(0);
 
         //ToDo: Is there something to be done with result of the call to getFlow?
-
         Flow flow = this.getFlow(flowBuilder, nodeBuilder);
-        // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
 
         if (write) {
             // Set the Output Port/Iface
-            InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction outputPortInstruction =
+                    InstructionUtils.createOutputPortInstructions(new InstructionBuilder(), dpidLong, ethPort)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(0))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
 
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -886,45 +712,28 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(
+                MatchUtils.createTunnelIDMatch(new MatchBuilder(), new BigInteger(segmentationId)).build());
 
         if (write) {
-            // Create the OF Actions and Instructions
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-
             // Call the InstructionBuilder Methods Containing Actions
-            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction mutablePipelineInstruction = getMutablePipelineInstructionBuilder()
+                    .setOrder(0)
+                    .setKey(new InstructionKey(0))
+                    .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, mutablePipelineInstruction);
         }
 
-        String flowId = "TunnelMiss_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(8192);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "TunnelMiss_" + segmentationId;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable())
+                .setPriority(8192);
         if (write) {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -945,47 +754,30 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         String nodeName = OPENFLOW + dpidLong;
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
+                MatchUtils.createVlanIdMatch(new MatchBuilder(), new VlanId(Integer.valueOf(segmentationId)),
+                        true).build());
 
         if (write) {
-            // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-
-            // Instructions List Stores Individual Instructions
-            List<Instruction> instructions = Lists.newArrayList();
-
             // Set the Output Port/Iface
-            InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(1));
-            instructions.add(ib.build());
-
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
+            Instruction outputPortInstruction =
+                    InstructionUtils.createOutputPortInstructions(new InstructionBuilder(), dpidLong, ethPort)
+                            .setOrder(0)
+                            .setKey(new InstructionKey(1))
+                            .build();
 
             // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
+            InstructionUtils.setFlowBuilderInstruction(flowBuilder, outputPortInstruction);
         }
 
-        String flowId = "VlanMiss_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(8192);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        String flowName = "VlanMiss_" + segmentationId;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable())
+                .setPriority(8192);
         if (write) {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -1007,7 +799,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
         NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + port);
         LOG.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
-        List<Action> actionList = Lists.newArrayList();
+        List<Action> actionList = new ArrayList<>();
         ActionBuilder ab = new ActionBuilder();
 
         List<Action> existingActions;

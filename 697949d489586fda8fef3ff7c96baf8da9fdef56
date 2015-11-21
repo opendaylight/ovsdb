@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_8d8689b8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-21T05:11:49Z",
+      "side": 1,
+      "message": "This leaf is unnecessary. When we create a physical_locator, we send a request like: POST, http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640.\n\"hwvtep:%2F%2F192.168.1.115:6640\" is its owner-node, ie, the hwvtep global node this locator belongs to.",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 245,
+        "endChar": 9
+      },
+      "revId": "697949d489586fda8fef3ff7c96baf8da9fdef56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -200,6 +200,34 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return isCreated;
     }
 
+
+
+    @Override
+    public String getExternalInterfaceName (Node node, String extNetwork) {
+        String phyIf = null;
+        String providerMaps = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
+                configurationService.getProviderMappingsKey());
+        if (providerMaps != null) {
+            for (String map : providerMaps.split(",")) {
+                String[] pair = map.split(":");
+                if (pair[0].equals(extNetwork)) {
+                    phyIf = pair[1];
+                    break;
+                }
+            }
+        }
+        if (phyIf == null) {
+            LOG.error("External interface not found for Node: {}, Network {}",
+                    node, extNetwork);
+        }
+        else {
+            LOG.info("External interface found for Node: {}, Network {} is {}",node,extNetwork,phyIf);
+        }
+        return phyIf;
+    }
+
+
+
     @Override
     public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
         String phyIf = null;
@@ -378,8 +406,15 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 LOG.error("Add Port {} to Bridge {} failed", portNameExt, brExt);
                 return false;
             }
+            String extNetName = getExternalInterfaceName(extBridgeNode, brExt);
+            if ( extNetName != null) {
+                if (!addPortToBridge(extBridgeNode, brExt, extNetName)) {
+                    LOG.error("Add External Port {} to Bridge {} failed", extNetName, brExt);
+                    return false;
+                }
+            LOG.info("Add External Port {} to Ext Bridge {} success", extNetName, brExt);
+            }
         }
-
         /* For vlan network types add physical port to br-int. */
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             String phyNetName = this.getPhysicalInterfaceName(bridgeNode, network.getProviderPhysicalNetwork());
@@ -389,7 +424,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             }
         }
 
-        LOG.debug("createBridges: node: {}, status: success", bridgeNode);
+        LOG.info("createBridges: node: {}, status: success", bridgeNode);
         return true;
     }
 

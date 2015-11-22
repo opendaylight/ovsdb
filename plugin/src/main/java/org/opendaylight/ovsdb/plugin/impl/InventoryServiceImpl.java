@@ -213,11 +213,14 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
 
     @Override
     public void notifyNodeAdded(Node node, InetAddress address, int port) {
+        logger.info("notifyNodeAdded enter: size: {}", ovsdbInventoryListeners.size());
         if (!ovsdbInventoryListeners.isEmpty()) {
             for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
+                logger.info("notifyNodeAdded: listener: {}", listener);
                 listener.nodeAdded(node, address, port);
             }
         }
+        logger.info("notifyNodeAdded exit: size: {}", ovsdbInventoryListeners.size());
     }
 
     @Override
@@ -233,6 +236,8 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
 
     private void listenerAdded(OvsdbInventoryListener listener) {
         this.ovsdbInventoryListeners.add(listener);
+        logger.info("listenerAdded: size: {}, listener: {}",
+                ovsdbInventoryListeners.size(), listener);
     }
 
     private void listenerRemoved(OvsdbInventoryListener listener) {

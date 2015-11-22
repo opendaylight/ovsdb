@@ -21,6 +21,8 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a proxy class for ovsdb plugin's OvsdbInventoryService class
@@ -35,6 +37,7 @@ import com.google.common.collect.Sets;
 public class InventoryServiceImpl implements OvsdbInventoryService,
         org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener {
     private volatile org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService pluginOvsdbInventoryService;
+    private static final Logger logger = LoggerFactory.getLogger(InventoryServiceImpl.class);
 
     private Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
 
@@ -84,6 +87,8 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     //Register listener for ovsdb.compatibility
     public void addOvsdbInventoryListener(OvsdbInventoryListener pluginOvsdbInventoryListener){
         this.ovsdbInventoryListeners.add(pluginOvsdbInventoryListener);
+        logger.info("addOvsdbInventoryListener: size: {}, listener: {}",
+                ovsdbInventoryListeners.size(), pluginOvsdbInventoryListener);
     }
 
     public void removeOvsdbInventoryListener(OvsdbInventoryListener pluginOvsdbInventoryListener){
@@ -150,10 +155,12 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     @Override
     public void nodeAdded(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
                           InetAddress address, int port) {
+        logger.info("nodeAdded enter: size: {}", ovsdbInventoryListeners.size());
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners) {
+            logger.info("nodeAdded listener {}: size: {}", listener, ovsdbInventoryListeners.size());
             listener.nodeAdded(NodeUtils.getSalNode(node), address, port);
         }
-
+        logger.info("nodeAdded exit: size: {}", ovsdbInventoryListeners.size());
     }
 
     @Override

@@ -241,7 +241,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
-                            logger.debug("New Passive channel created : {}", channel);
+                            logger.info("New Passive channel created : {}", channel);
                             if (sslContext != null) {
                                 /* Add SSL handler first if SSL context is provided */
                                 SSLEngine engine = sslContext.createSSLEngine();
@@ -318,10 +318,13 @@ public class OvsdbConnectionService implements OvsdbConnection {
                         return;
                     }
                 }
-                logger.debug("Notify listener");
+                logger.info("Notify listener start");
                 for (OvsdbConnectionListener listener : connectionListeners) {
+                    logger.info("Notify listener before: {}", listener.getClass().getSimpleName());
                     listener.connected(client);
+                    logger.info("Notify listener after: {}", listener.getClass().getSimpleName());
                 }
+                logger.info("Notify listener exit");
             }
         });
     }

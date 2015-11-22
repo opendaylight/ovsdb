@@ -102,6 +102,8 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
             ovsdbListenPort = Integer.decode(portString).intValue();
         }
 
+        logger.warn("start: starting ovsdbManager with listenPort: 6642");
+        ovsdbListenPort = 6642;
         if (!connectionLib.startOvsdbManager(ovsdbListenPort)) {
             logger.warn("Start OVSDB manager call from ConnectionService was not necessary");
         }

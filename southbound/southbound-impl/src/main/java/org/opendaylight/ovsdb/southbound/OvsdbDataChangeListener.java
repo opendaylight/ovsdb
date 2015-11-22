@@ -41,6 +41,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     private OvsdbConnectionManager cm;
     private DataBroker db;
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataChangeListener.class);
+    static int cnt = 0;
 
     OvsdbDataChangeListener(DataBroker db, OvsdbConnectionManager cm) {
         LOG.info("Registering OvsdbNodeDataChangeListener");
@@ -63,7 +64,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     @Override
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.trace("onDataChanged: {}", changes);
+        LOG.info("onDataChanged {}: {}", cnt, changes);
         // Connect first if we have to:
         connect(changes);
 
@@ -78,7 +79,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
 
  //       init(changes);
 
-        LOG.trace("onDataChanged: exit");
+        LOG.info("onDataChanged {}: exit", cnt++);
     }
 
     private void updateData(

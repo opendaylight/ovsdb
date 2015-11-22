@@ -83,11 +83,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void connected(@Nonnull final OvsdbClient externalClient) {
-
+        LOG.info("connected: enter");
         OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
 
         // Register Cluster Ownership for ConnectionInfo
         registerEntityForOwnership(client);
+        LOG.info("connected: exit");
     }
 
     public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {
@@ -108,15 +109,17 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             // Unregister Cluster Ownership for ConnectionInfo
             // Because the ovsdbConnectionInstance is about to be completely replaced!
             unregisterEntityForOwnership(ovsdbConnectionInstance);
-
+            LOG.info("connectedButCallBacksNotRegistered: 1");
             ovsdbConnectionInstance.disconnect();
-
+            LOG.info("connectedButCallBacksNotRegistered: 2");
             removeConnectionInstance(key);
         }
 
+        LOG.info("connectedButCallBacksNotRegistered: 3");
         ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
                 getInstanceIdentifier(key));
         ovsdbConnectionInstance.createTransactInvokers();
+        LOG.info("connectedButCallBacksNotRegistered: exit");
         return ovsdbConnectionInstance;
     }
 
@@ -140,7 +143,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         } else {
             LOG.warn("disconnected : Connection instance not found for OVSDB Node {} ", key);
         }
-        LOG.trace("OvsdbConnectionManager: disconnected exit");
+        LOG.info("OvsdbConnectionManager: disconnected exit");
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,
@@ -176,7 +179,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
             removeInstanceIdentifier(ovsdbNode.getConnectionInfo());
         } else {
-            LOG.debug("disconnect : connection instance not found for {}",ovsdbNode.getConnectionInfo());
+            LOG.info("disconnect : connection instance not found for {}",ovsdbNode.getConnectionInfo());
         }
     }
 
@@ -306,7 +309,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
-        LOG.debug("handleOwnershipChanged: {} event received for device {}",
+        LOG.info("handleOwnershipChanged: {} event received for device {}",
                 ownershipChange, ovsdbConnectionInstance != null ? ovsdbConnectionInstance.getConnectionInfo()
                         : "that's currently NOT registered by *this* southbound plugin instance");
 
@@ -320,7 +323,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 // If all the controller instance that was connected to the device are down, so the
                 // running instance can clear up the operational data store even though it was not
                 // connected to the device.
-                LOG.debug("handleOwnershipChanged: No connection instance found for {}", ownershipChange.getEntity());
+                LOG.info("handleOwnershipChanged: No connection instance found for {}", ownershipChange.getEntity());
             }
 
             // If entity has no owner, clean up the operational data store (it's possible because owner controller
@@ -428,7 +431,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
         YangInstanceIdentifier entityId = SouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
         Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
-        LOG.debug("Entity {} created for device connection {}",
+        LOG.info("Entity {} created for device connection {}",
                 deviceEntity, ovsdbConnectionInstance.getConnectionInfo());
         return deviceEntity;
     }

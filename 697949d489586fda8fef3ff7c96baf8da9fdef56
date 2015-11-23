@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7aade967_13507a31",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-23T07:04:28Z",
+      "side": 1,
+      "message": "\"logical-switches\" will be better",
+      "range": {
+        "startLine": 211,
+        "startChar": 13,
+        "endLine": 211,
+        "endChar": 27
+      },
+      "revId": "697949d489586fda8fef3ff7c96baf8da9fdef56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_8d8689b8",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
         "patchSetId": 4

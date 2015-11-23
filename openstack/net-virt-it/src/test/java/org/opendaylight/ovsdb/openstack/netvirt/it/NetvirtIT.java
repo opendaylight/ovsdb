@@ -8,6 +8,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
@@ -277,6 +278,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      *
      * @throws InterruptedException
      */
+    @Ignore
     @Test
     public void testPassiveNode() throws InterruptedException {
         if (connectionType.equalsIgnoreCase(NetvirtITConstants.CONNECTION_TYPE_PASSIVE)) {
@@ -391,7 +393,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return target;
     }
 
-    //@Ignore//
+    @Ignore
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
@@ -696,14 +698,16 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
 
-        Thread.sleep(10000);
+        Thread.sleep(30000);
         // Verify the pipeline flows were installed
         PipelineOrchestrator pipelineOrchestrator =
                 (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
         assertNotNull("Could not find PipelineOrchestrator Service", pipelineOrchestrator);
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
         assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
+        LOG.info("testNetVirt: bridgeNode: {}", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
+        assertNotEquals("datapathId was not found", datapathId, 0);
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
                 FlowUtils.createNodeBuilder(datapathId);
 
@@ -735,6 +739,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Thread.sleep(60000);
     }
 
+    @Ignore
     @Test
     public void testReadOvsdbTopologyNodes() throws InterruptedException {
         Thread.sleep(10000);

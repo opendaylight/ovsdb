@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "7aade967_b33ba6ea",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/L2ForwardingService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 5218
+      },
+      "writtenOn": "2015-11-23T07:33:36Z",
+      "side": 1,
+      "message": "it seems we don\u0027t quite need this local variable.",
+      "range": {
+        "startLine": 192,
+        "startChar": 36,
+        "endLine": 192,
+        "endChar": 37
+      },
+      "revId": "25430a7633169ed152f1e0117059e68210ab31af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_33c81674",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/L2ForwardingService.java",
         "patchSetId": 1

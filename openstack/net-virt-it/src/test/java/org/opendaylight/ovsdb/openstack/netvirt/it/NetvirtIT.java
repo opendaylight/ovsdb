@@ -194,9 +194,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.TRACE.name()),
-                editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb.lib",
-                        LogLevelOption.LogLevel.INFO.name()),
+                //editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                //        "log4j.logger.org.opendaylight.ovsdb.lib",
+                //        LogLevelOption.LogLevel.INFO.name()),
                 super.getLoggingOption());
     }
 

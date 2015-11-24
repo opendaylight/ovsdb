@@ -27,9 +27,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ControllerUpdateCommand extends AbstractTransactCommand {
-
+    private static final Logger LOG = LoggerFactory.getLogger(ControllerUpdateCommand.class);
 
     public ControllerUpdateCommand(BridgeOperationalState state,
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
@@ -42,6 +44,7 @@ public class ControllerUpdateCommand extends AbstractTransactCommand {
                 TransactUtils.extractCreatedOrUpdated(getChanges(), ControllerEntry.class);
         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges =
                 TransactUtils.extractCreatedOrUpdated(getChanges(), OvsdbBridgeAugmentation.class);
+        LOG.info("execute: controllers: {} --- bridges: {}", controllers, bridges);
         for (Entry<InstanceIdentifier<ControllerEntry>, ControllerEntry> entry: controllers.entrySet()) {
             Optional<ControllerEntry> operationalControllerEntryOptional =
                     getOperationalState().getControllerEntry(entry.getKey());
@@ -70,6 +73,7 @@ public class ControllerUpdateCommand extends AbstractTransactCommand {
                     Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     bridge.setName(ovsdbBridge.getBridgeName().getValue());
                     bridge.setController(Sets.newHashSet(controllerNamedUuid));
+                    LOG.info("execute: bridge: {}", bridge);
                     transaction.add(op.mutate(bridge)
                             .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
                                     bridge.getControllerColumn().getData())
@@ -78,6 +82,7 @@ public class ControllerUpdateCommand extends AbstractTransactCommand {
                 }
             }
         }
+        LOG.info("execute: transaction: {}", transaction.build());
 
     }
 

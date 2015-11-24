@@ -77,11 +77,10 @@ public interface SecurityServicesManager {
     boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Returns the  list of ip address assigned to the interface.
-     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the list of ip address associated with the vm
      */
-    List<Neutron_IPs> getIpAddressList(Node node, OvsdbTerminationPointAugmentation intf);
+    List<Neutron_IPs> getIpAddressList(OvsdbTerminationPointAugmentation intf);
     /**
      * Get the list of vm belonging to a security group.
      * @param portUuid the uuid of the port.

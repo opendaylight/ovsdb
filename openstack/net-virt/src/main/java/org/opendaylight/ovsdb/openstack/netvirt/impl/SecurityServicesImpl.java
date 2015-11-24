@@ -280,8 +280,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
-    public List<Neutron_IPs> getIpAddressList(Node node,
-                                          OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+    public List<Neutron_IPs> getIpAddressList(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
             LOG.error("getIpAddress: neutron port is null");
             return null;

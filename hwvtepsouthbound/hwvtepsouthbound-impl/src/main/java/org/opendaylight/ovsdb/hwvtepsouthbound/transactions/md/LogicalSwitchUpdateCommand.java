@@ -25,10 +25,10 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -79,26 +79,20 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
     }
 
     private Node buildLogicalSwitchNode(LogicalSwitch lSwitch) {
-        NodeBuilder lsNodeBuilder = new NodeBuilder();
+        return null;
+/*        NodeBuilder lsNodeBuilder = new NodeBuilder();
         NodeId psNodeId = getNodeId(lSwitch);
         lsNodeBuilder.setNodeId(psNodeId);
-        HwvtepLogicalSwitchAugmentationBuilder lsAugBuilder = new HwvtepLogicalSwitchAugmentationBuilder();
-        setManagedBy(lsAugBuilder, lSwitch);
+        LogicalSwitchesBuilder lsAugBuilder = new LogicalSwitchesBuilder();
         setLogicalSwitchId(lsAugBuilder, lSwitch);
-
-        lsNodeBuilder.addAugmentation(HwvtepLogicalSwitchAugmentation.class, lsAugBuilder.build());
+        lsNodeBuilder.addAugmentation(LogicalSwitches.class, lsAugBuilder.build());
 
         LOG.trace("Built with the intent to store PhysicalSwitch data {}",
                 lsAugBuilder.build());
-        return lsNodeBuilder.build();
+        return lsNodeBuilder.build();*/
     }
 
-    private void setManagedBy(HwvtepLogicalSwitchAugmentationBuilder lsAugBuilder, LogicalSwitch lSwitch) {
-        // TODO This requires change to yang file
-    }
-
-
-    private void setLogicalSwitchId(HwvtepLogicalSwitchAugmentationBuilder lsAugBuilder, LogicalSwitch lSwitch) {
+    private void setLogicalSwitchId(LogicalSwitchesBuilder lsAugBuilder, LogicalSwitch lSwitch) {
         lsAugBuilder.setHwvtepNodeName(new HwvtepNodeName(lSwitch.getName()));
         if(lSwitch.getDescription() != null) {
             lsAugBuilder.setHwvtepNodeDescription(lSwitch.getDescription());

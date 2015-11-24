@@ -21,11 +21,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorSetAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -135,11 +136,11 @@ public class HwvtepOperationalState {
         return Optional.fromNullable(operationalNodes.get(nodeIid));
     }
 
-    public Optional<HwvtepLogicalSwitchAugmentation> getLogicalSwitchAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getGlobalNode(iid);
-        if (nodeOptional.isPresent()) {
+        /*if (nodeOptional.isPresent()) {
             return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepLogicalSwitchAugmentation.class));
-        }
+        }*/
         return Optional.absent();
     }
 
@@ -151,11 +152,11 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
-    public Optional<HwvtepPhysicalLocatorSetAugmentation> getPhysicalLocatorSetAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<LocatorSet> getPhysicalLocatorSet(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getGlobalNode(iid);
-        if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepPhysicalLocatorSetAugmentation.class));
-        }
+        /*if (nodeOptional.isPresent()) {
+            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches());
+        }*/
         return Optional.absent();
     }
 

@@ -24,7 +24,8 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -42,11 +43,19 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<HwvtepLogicalSwitchAugmentation>, HwvtepLogicalSwitchAugmentation> created =
-                extractCreated(getChanges(),HwvtepLogicalSwitchAugmentation.class);
-        if(created != null) {
-            for(Entry<InstanceIdentifier<HwvtepLogicalSwitchAugmentation>, HwvtepLogicalSwitchAugmentation> logicalSwitchEntry:
+        Map<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> created =
+                extractCreated(getChanges(),LogicalSwitches.class);
+        if (!created.isEmpty()) {
+            for(Entry<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> logicalSwitchEntry:
                 created.entrySet()) {
+                updateLogicalSwitch(transaction,  logicalSwitchEntry.getKey(), logicalSwitchEntry.getValue());
+            }
+        }
+        Map<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> updated =
+                extractUpdated(getChanges(),LogicalSwitches.class);
+        if(!updated.isEmpty()) {
+            for(Entry<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> logicalSwitchEntry:
+                updated.entrySet()) {
                 updateLogicalSwitch(transaction,  logicalSwitchEntry.getKey(), logicalSwitchEntry.getValue());
             }
         }
@@ -54,15 +63,15 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
 
 
     private void updateLogicalSwitch(TransactionBuilder transaction,
-            InstanceIdentifier<HwvtepLogicalSwitchAugmentation> iid, HwvtepLogicalSwitchAugmentation logicalSwitchAugmentation) {
-        LOG.debug("Creating a logical switch named: {}", logicalSwitchAugmentation.getHwvtepNodeName());
-        Optional<HwvtepLogicalSwitchAugmentation> operationalLogicalSwitchOptional =
-                getOperationalState().getLogicalSwitchAugmentation(iid);
+            InstanceIdentifier<LogicalSwitches> iid, LogicalSwitches logicalSwitches) {
+        LOG.debug("Creating a logical switch named: {}", logicalSwitches.getHwvtepNodeName());
+        Optional<LogicalSwitches> operationalLogicalSwitchOptional =
+                getOperationalState().getLogicalSwitches(iid);
         DatabaseSchema dbSchema = transaction.getDatabaseSchema();
         LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);
         if(!operationalLogicalSwitchOptional.isPresent()) {
-            setName(logicalSwitch, logicalSwitchAugmentation, operationalLogicalSwitchOptional);
-            setTunnelKey(logicalSwitch, logicalSwitchAugmentation, operationalLogicalSwitchOptional);
+            setName(logicalSwitch, logicalSwitches, operationalLogicalSwitchOptional);
+            setTunnelKey(logicalSwitch, logicalSwitches, operationalLogicalSwitchOptional);
             transaction.add(op.insert(logicalSwitch));
         } else {
             String existingLogicalSwitchName = operationalLogicalSwitchOptional.get().getHwvtepNodeName().getValue();
@@ -76,20 +85,20 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setName(LogicalSwitch logicalSwitch, HwvtepLogicalSwitchAugmentation logicalSwitchAugmentation,
-            Optional<HwvtepLogicalSwitchAugmentation> operationalLogicalSwitchOptional) {
-        if(logicalSwitchAugmentation.getHwvtepNodeName() != null) {
-            logicalSwitch.setName(logicalSwitchAugmentation.getHwvtepNodeName().getValue());
+    private void setName(LogicalSwitch logicalSwitch, LogicalSwitches logicalSwitches,
+            Optional<LogicalSwitches> operationalLogicalSwitchOptional) {
+        if(logicalSwitches.getHwvtepNodeName() != null) {
+            logicalSwitch.setName(logicalSwitches.getHwvtepNodeName().getValue());
         } else if(operationalLogicalSwitchOptional.isPresent() && operationalLogicalSwitchOptional.get().getHwvtepNodeName() != null) {
             logicalSwitch.setName(operationalLogicalSwitchOptional.get().getHwvtepNodeName().getValue());
         }
     }
 
-    private void setTunnelKey(LogicalSwitch logicalSwitch, HwvtepLogicalSwitchAugmentation logicalSwitchAugmentation,
-            Optional<HwvtepLogicalSwitchAugmentation> operationalLogicalSwitchOptional) {
-        if(logicalSwitchAugmentation.getTunnelKey() != null) {
+    private void setTunnelKey(LogicalSwitch logicalSwitch, LogicalSwitches logicalSwitches,
+            Optional<LogicalSwitches> operationalLogicalSwitchOptional) {
+        if(logicalSwitches.getTunnelKey() != null) {
             Set<Long> tunnel = new HashSet<Long>();
-            tunnel.add(Long.valueOf(logicalSwitchAugmentation.getTunnelKey()));
+            tunnel.add(Long.valueOf(logicalSwitches.getTunnelKey()));
             logicalSwitch.setTunnelKey(tunnel);
         } else if(operationalLogicalSwitchOptional.isPresent() && operationalLogicalSwitchOptional.get().getTunnelKey() != null) {
             Set<Long> tunnel = new HashSet<Long>();
@@ -98,29 +107,42 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE)
-                        && (mod.getDataBefore() == null)){
-            return mod.getDataAfter();
-        }
-        return null;
-    }
-
-    private Map<InstanceIdentifier<HwvtepLogicalSwitchAugmentation>, HwvtepLogicalSwitchAugmentation> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<HwvtepLogicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<HwvtepLogicalSwitchAugmentation>, HwvtepLogicalSwitchAugmentation> result
-            = new HashMap<InstanceIdentifier<HwvtepLogicalSwitchAugmentation>, HwvtepLogicalSwitchAugmentation>();
+    private Map<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> extractCreated(
+            Collection<DataTreeModification<Node>> changes, Class<LogicalSwitches> class1) {
+        Map<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> result
+            = new HashMap<InstanceIdentifier<LogicalSwitches>, LogicalSwitches>();
         if(changes != null && !changes.isEmpty()) {
             for(DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = getCreated(mod);
+                Node created = TransactUtils.getCreated(mod);
                 if(created != null) {
-                    HwvtepLogicalSwitchAugmentation logicalSwitch = created.getAugmentation(HwvtepLogicalSwitchAugmentation.class);
-                    InstanceIdentifier<HwvtepLogicalSwitchAugmentation> iid = change.getRootPath().getRootIdentifier().augmentation(HwvtepLogicalSwitchAugmentation.class);
+/*                    LogicalSwitches logicalSwitch = created.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    InstanceIdentifier<LogicalSwitches> iid = change.getRootPath().getRootIdentifier().augmentation(LogicalSwitches.class);
                     if(logicalSwitch != null) {
                         result.put(iid, logicalSwitch);
-                    }
+                    }*/
+                }
+            }
+        }
+        return result;
+    }
+
+    private Map<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> extractUpdated(
+            Collection<DataTreeModification<Node>> changes, Class<LogicalSwitches> class1) {
+        Map<InstanceIdentifier<LogicalSwitches>, LogicalSwitches> result
+            = new HashMap<InstanceIdentifier<LogicalSwitches>, LogicalSwitches>();
+        if(changes != null && !changes.isEmpty()) {
+            for(DataTreeModification<Node> change : changes) {
+                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectModification<Node> mod = change.getRootNode();
+                Node updated = TransactUtils.getUpdated(mod);
+                if(updated != null) {
+/*                    LogicalSwitches logicalSwitch = updated.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    InstanceIdentifier<LogicalSwitches> iid = change.getRootPath().getRootIdentifier().augmentation(LogicalSwitches.class);
+                    if(logicalSwitch != null) {
+                        result.put(iid, logicalSwitch);
+                    }*/
                 }
             }
         }

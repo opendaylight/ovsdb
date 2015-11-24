@@ -34,7 +34,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PhysicalPortIdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsKey;
@@ -126,13 +125,10 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
 
     private void updatePhysicalPortId(PhysicalPort portUpdate,
                     HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
-        PhysicalPortIdBuilder portIdBuilder = new PhysicalPortIdBuilder();
-        portIdBuilder.setHwvtepNodeName(new HwvtepNodeName(portUpdate.getName()));
+        tpAugmentationBuilder.setHwvtepNodeName(new HwvtepNodeName(portUpdate.getName()));
         if(portUpdate.getDescription() != null) {
-            portIdBuilder.setHwvtepNodeDescription(portUpdate.getDescription());
+            tpAugmentationBuilder.setHwvtepNodeDescription(portUpdate.getDescription());
         }
-
-        tpAugmentationBuilder.setPhysicalPortId(portIdBuilder.build());
     }
 
     private void updateVlanBindings(PhysicalPort portUpdate,
@@ -158,7 +154,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
         vbBuilder.setKey(vbKey);
         vbBuilder.setVlanIdKey(vbKey.getVlanIdKey());
         HwvtepLogicalSwitchRef lSwitchRef = this.getLogicalSwitchRef(value, portUpdate.getUuid());
-        vbBuilder.setLogicalSwitch(lSwitchRef);
+        vbBuilder.setLogicalSwitchRef(lSwitchRef);
         return vbBuilder.build();
     }
 

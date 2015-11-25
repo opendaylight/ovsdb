@@ -181,7 +181,7 @@
             "id":"ee151670-85a0-30ec-b22b-5defe7b66e0b",
             "name":"Get Config  Hwvtep Topology",
             "description":"Fetch the config hwvtep topology from configuration data store.",
-            "url":"http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/hwvtep:1/",
+            "url":"http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/",
             "method":"GET",
             "headers":"Authorization: Basic YWRtaW46YWRtaW4=\n",
             "data":"{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640\",\n            \"connection-info\": {\n              \"hwvtep:remote-port\": 6640,\n              \"hwvtep:remote-ip\": \"{{hwvtepNodeIp}}\"\n            }\n        }\n    ]\n}",

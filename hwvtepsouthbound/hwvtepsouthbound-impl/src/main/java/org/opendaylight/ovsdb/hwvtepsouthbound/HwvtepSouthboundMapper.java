@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -23,16 +24,24 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
 
 public class HwvtepSouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundMapper.class);
@@ -156,6 +165,32 @@ public class HwvtepSouthboundMapper {
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class, nodeKey).build();
         return iid;
+    }
+
+    public static Class<? extends EncapsulationTypeBase> createEncapsulationType(String type) {
+        Preconditions.checkNotNull(type);
+        if (type.isEmpty()) {
+            return EncapsulationTypeVxlanOverIpv4.class;
+        } else {
+            ImmutableBiMap<String, Class<? extends EncapsulationTypeBase>> mapper =
+                    HwvtepSouthboundConstants.ENCAPS_TYPE_MAP.inverse();
+            return mapper.get(type);
+        }
+    }
+
+    public static InstanceIdentifier<TerminationPoint> createInstanceIdentifier(InstanceIdentifier<Node> nodeIid,
+                    PhysicalLocator physicalLocator) {
+        return nodeIid.child(TerminationPoint.class, getTerminationPointKey(physicalLocator));
+    }
+
+    public static TerminationPointKey getTerminationPointKey(PhysicalLocator pLoc) {
+        TerminationPointKey tpKey = null;
+        if(pLoc.getEncapsulationTypeColumn().getData() != null &&
+                        pLoc.getDstIpColumn().getData() != null) {
+            String tpKeyStr = pLoc.getEncapsulationTypeColumn().getData()+':'+pLoc.getDstIpColumn().getData();
+            tpKey = new TerminationPointKey(new TpId(tpKeyStr));
+        }
+        return tpKey;
     }
 
 }

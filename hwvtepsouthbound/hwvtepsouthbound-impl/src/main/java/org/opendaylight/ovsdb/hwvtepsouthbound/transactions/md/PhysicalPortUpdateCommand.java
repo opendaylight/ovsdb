@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -74,7 +75,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
             return;
         }
         LOG.trace("PhysicalPortTable updated: {}", updatedPPRows);
-        Optional<Node> node = readNode(transaction, connectionIId);
+        Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (node.isPresent()) {
             updateTerminationPoints(transaction, node.get());
             //TODO: Handle Deletion of VLAN Bindings
@@ -160,11 +161,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
 
     private HwvtepLogicalSwitchRef getLogicalSwitchRef( UUID switchUUID, UUID portUUID) {
             if (lSwitchUpdatedRows.get(switchUUID) != null) {
-                Optional<InstanceIdentifier<Node>> optSwitchIid = Optional.of(HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                        this.lSwitchUpdatedRows.get(switchUUID)));
-                if(optSwitchIid.isPresent()) {
-                    return new HwvtepLogicalSwitchRef(optSwitchIid.get());
-                }
+                return new HwvtepLogicalSwitchRef(lSwitchUpdatedRows.get(switchUUID).getName());
             }
         return null;
     }
@@ -185,7 +182,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
                 List<Switches> switchNodes = hwvtepNode.getSwitches();
                 for ( Switches managedNodeEntry : switchNodes ) {
                     @SuppressWarnings("unchecked")
-                    Node switchNode = readNode(transaction,
+                    Node switchNode = HwvtepSouthboundUtil.readNode(transaction,
                             (InstanceIdentifier<Node>)managedNodeEntry.getSwitchRef().getValue()).get();
                     TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                     TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
@@ -199,19 +196,6 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
                 }
                 return Optional.absent();
             }
-
-    private Optional<Node> readNode(final ReadWriteTransaction transaction, final InstanceIdentifier<Node> nodePath) {
-        Optional<Node> node = Optional.absent();
-        try {
-            node = transaction.read(
-                    LogicalDatastoreType.OPERATIONAL, nodePath)
-                    .checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.warn("Read Operational/DS for Node fail! {}",
-                    nodePath, e);
-        }
-        return node;
-    }
 
     private InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> switchIid,
                     PhysicalPort pPort) {

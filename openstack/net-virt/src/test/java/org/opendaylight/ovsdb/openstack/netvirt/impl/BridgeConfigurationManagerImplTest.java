@@ -41,6 +41,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -223,7 +224,7 @@ public class BridgeConfigurationManagerImplTest {
         PowerMockito.mockStatic(ConfigProperties.class);
         when(ConfigProperties.getProperty(any(Class.class), anyString())).thenReturn(ADDRESS);
 
-        when(southbound.addBridge(any(Node.class), anyString(), anyList())).thenReturn(true);
+        when(southbound.addBridge(any(Node.class), anyString(), anyList(), eq(DatapathTypeSystem.class))).thenReturn(true);
         when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
 
         bridgeConfigurationManagerImpl.prepareNode(node);

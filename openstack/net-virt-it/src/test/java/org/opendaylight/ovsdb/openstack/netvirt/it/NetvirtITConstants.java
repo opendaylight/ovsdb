@@ -20,6 +20,7 @@ public final class NetvirtITConstants {
     public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     public static final String SERVER_PORT = "ovsdbserver.port";
     public static final String CONTROLLER_IPADDRESS = "ovsdb.controller.address";
+    public static final String USERSPACE_ENABLED = "ovsdb.userspace.enabled";
     public static final String SERVER_EXTRAS = "ovsdbserver.extras";
     public static final String CONNECTION_TYPE = "ovsdbserver.connection";
     public static final String CONNECTION_TYPE_ACTIVE = "active";

@@ -34,14 +34,12 @@ public class ProtocolRemovedCommand extends AbstractTransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolRemovedCommand.class);
     private Set<InstanceIdentifier<ProtocolEntry>> removed;
-    private Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> operationalProtocolEntries;
     private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges;
 
     public ProtocolRemovedCommand(BridgeOperationalState state,
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         super(state, changes);
         removed = TransactUtils.extractRemoved(getChanges(),ProtocolEntry.class);
-        operationalProtocolEntries = TransactUtils.extractOriginal(getChanges(),ProtocolEntry.class);
         updatedBridges = TransactUtils.extractCreatedOrUpdatedOrRemoved(getChanges(),OvsdbBridgeAugmentation.class);
     }
 

@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_5bafe0e3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-25T19:10:10Z",
+      "side": 1,
+      "message": "You are right, it cannot removed. At first, I thought there is no created any more since creating logical switch is after global node creating. But user may create global node with logical switches info.",
+      "parentUuid": "7aade967_402ccbab",
+      "revId": "e519d22a336ee66d3c19abb60ed1faf6b05c68a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_202f4fa3",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
         "patchSetId": 1

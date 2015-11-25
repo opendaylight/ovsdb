@@ -178,7 +178,7 @@ public class SouthboundUtilTest {
         char[] ipAddress = {'0', '.', '0', '.', '0', '.', '0'};
         when(connectionInfo.getLocalIp().getValue()).thenReturn(ipAddress);
         String testTarget = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
-                + new String(ipAddress) + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
+                + String.valueOf(ipAddress) + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
         assertEquals("Incorrect controller IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode));
         verify(ovsdbNode).getAugmentation(OvsdbNodeAugmentation.class);
         verify(ovsdbNodeAugmentation).getConnectionInfo();

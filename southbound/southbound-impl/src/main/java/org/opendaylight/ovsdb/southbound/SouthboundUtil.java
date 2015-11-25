@@ -159,7 +159,7 @@ public class SouthboundUtil {
         ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
         LOG.info("connectionInfo: {}", connectionInfo);
         if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-            ipAddr = new String(connectionInfo.getLocalIp().getValue());
+            ipAddr = String.valueOf(connectionInfo.getLocalIp().getValue());
         }
         if (ipAddr == null) {
             ipAddr = getLocalControllerHostIpAddress();

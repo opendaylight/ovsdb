@@ -10,22 +10,22 @@ package org.opendaylight.ovsdb.openstack.netvirt.it;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
-import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.inject.Inject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -44,15 +43,19 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
@@ -64,9 +67,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
@@ -75,13 +83,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,63 +104,11 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
+    private static String controllerStr;
     private static AtomicBoolean setup = new AtomicBoolean(false);
     private static MdsalUtils mdsalUtils = null;
     private static Southbound southbound = null;
-    private static final String NETVIRT = "org.opendaylight.ovsdb.openstack.net-virt";
-    private static final String NETVIRTPROVIDERS = "org.opendaylight.ovsdb.openstack.net-virt-providers";
-
-    // TODO Constants copied frmo AbstractConfigTestBase, need to be removed (see TODO below)
-    private static final String PAX_EXAM_UNPACK_DIRECTORY = "target/exam";
-    private static final String KARAF_DEBUG_PORT = "5005";
-    private static final String KARAF_DEBUG_PROP = "karaf.debug";
-    private static final String KEEP_UNPACK_DIRECTORY_PROP = "karaf.keep.unpack";
-
-    @Inject
-    private BundleContext bundleContext;
-
-    @Configuration
-    public Option[] config() {
-        // TODO Figure out how to use the parent Karaf setup, then just use super.config()
-        Option[] options = new Option[] {
-                when(Boolean.getBoolean(KARAF_DEBUG_PROP))
-                        .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
-                karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
-                        .useDeployFolder(false),
-                when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
-                // Works only if we don't specify the feature repo and name
-                getLoggingOption()};
-        Option[] propertyOptions = getPropertiesOptions();
-        Option[] otherOptions = getOtherOptions();
-        Option[] combinedOptions = new Option[options.length + propertyOptions.length + otherOptions.length];
-        System.arraycopy(options, 0, combinedOptions, 0, options.length);
-        System.arraycopy(propertyOptions, 0, combinedOptions, options.length, propertyOptions.length);
-        System.arraycopy(otherOptions, 0, combinedOptions, options.length + propertyOptions.length,
-                otherOptions.length);
-        return combinedOptions;
-    }
-
-    private Option[] getOtherOptions() {
-        return new Option[] {
-                wrappedBundle(
-                        mavenBundle("org.opendaylight.ovsdb", "utils.mdsal-openflow")
-                                .version(asInProject())
-                                .type("jar")),
-                vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
-                keepRuntimeFolder()
-        };
-    }
-
-    @Override
-    public String getKarafDistro() {
-        return maven()
-                .groupId("org.opendaylight.ovsdb")
-                .artifactId("karaf")
-                .versionAsInProject()
-                .type("zip")
-                .getURL();
-    }
+    private static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
 
     @Override
     public String getModuleName() {
@@ -182,10 +135,42 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return "odl-ovsdb-openstack";
     }
 
-    protected String usage() {
-        return "Integration Test needs a valid connection configuration as follows :\n"
-                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
-                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
+    @Configuration
+    @Override
+    public Option[] config() {
+        Option[] parentOptions = super.config();
+        Option[] propertiesOptions = getPropertiesOptions();
+        Option[] otherOptions = getOtherOptions();
+        Option[] options = new Option[parentOptions.length + propertiesOptions.length + otherOptions.length];
+        System.arraycopy(parentOptions, 0, options, 0, parentOptions.length);
+        System.arraycopy(propertiesOptions, 0, options, parentOptions.length, propertiesOptions.length);
+        System.arraycopy(otherOptions, 0, options, parentOptions.length + propertiesOptions.length,
+                otherOptions.length);
+        return options;
+    }
+
+    private Option[] getOtherOptions() {
+        return new Option[] {
+                wrappedBundle(
+                        mavenBundle("org.opendaylight.ovsdb", "utils.mdsal-openflow")
+                                .version(asInProject())
+                                .type("jar")),
+                wrappedBundle(
+                        mavenBundle("org.opendaylight.ovsdb", "utils.config")
+                                .version(asInProject())
+                                .type("jar")),
+                configureConsole().startLocalConsole(),
+                vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
+                keepRuntimeFolder()
+        };
+    }
+
+    public Option[] getPropertiesOptions() {
+        return new Option[] {
+                propagateSystemProperties(NetvirtITConstants.SERVER_IPADDRESS,
+                        NetvirtITConstants.SERVER_PORT, NetvirtITConstants.CONNECTION_TYPE,
+                        NetvirtITConstants.CONTROLLER_IPADDRESS),
+        };
     }
 
     @Override
@@ -194,32 +179,34 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.TRACE.name()),
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                        logConfiguration(NetvirtIT.class),
+                        LogLevelOption.LogLevel.INFO.name()),
                 //editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                 //        "log4j.logger.org.opendaylight.ovsdb.lib",
                 //        LogLevelOption.LogLevel.INFO.name()),
                 super.getLoggingOption());
     }
 
-    private Option[] getPropertiesOptions() {
-        Properties props = new Properties(System.getProperties());
-        String addressStr = props.getProperty(NetvirtITConstants.SERVER_IPADDRESS,
-                NetvirtITConstants.DEFAULT_SERVER_IPADDRESS);
-        String portStr = props.getProperty(NetvirtITConstants.SERVER_PORT,
-                NetvirtITConstants.DEFAULT_SERVER_PORT);
-        String connectionType = props.getProperty(NetvirtITConstants.CONNECTION_TYPE,
-                NetvirtITConstants.CONNECTION_TYPE_ACTIVE);
+    protected String usage() {
+        return "Integration Test needs a valid connection configuration as follows :\n"
+                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
+                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
+    }
 
-        LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}",
-                connectionType, addressStr, portStr);
-
-        return new Option[] {
-                editConfigurationFilePut(NetvirtITConstants.CUSTOM_PROPERTIES,
-                        NetvirtITConstants.SERVER_IPADDRESS, addressStr),
-                editConfigurationFilePut(NetvirtITConstants.CUSTOM_PROPERTIES,
-                        NetvirtITConstants.SERVER_PORT, portStr),
-                editConfigurationFilePut(NetvirtITConstants.CUSTOM_PROPERTIES,
-                        NetvirtITConstants.CONNECTION_TYPE, connectionType),
-        };
+    private void getProperties() {
+        Properties props = System.getProperties();
+        addressStr = props.getProperty(NetvirtITConstants.SERVER_IPADDRESS);
+        portStr = props.getProperty(NetvirtITConstants.SERVER_PORT, NetvirtITConstants.DEFAULT_SERVER_PORT);
+        connectionType = props.getProperty(NetvirtITConstants.CONNECTION_TYPE, "active");
+        controllerStr = props.getProperty(NetvirtITConstants.CONTROLLER_IPADDRESS);
+        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}, controller ip: {}",
+                connectionType, addressStr, portStr, controllerStr);
+        if (connectionType.equalsIgnoreCase(NetvirtITConstants.CONNECTION_TYPE_ACTIVE)) {
+            if (addressStr == null) {
+                fail(usage());
+            }
+        }
     }
 
     @Before
@@ -236,40 +223,75 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             e.printStackTrace();
         }
 
-        addressStr = bundleContext.getProperty(NetvirtITConstants.SERVER_IPADDRESS);
-        portStr = bundleContext.getProperty(NetvirtITConstants.SERVER_PORT);
-        connectionType = bundleContext.getProperty(NetvirtITConstants.CONNECTION_TYPE);
+        getProperties();
 
-        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}",
-                connectionType, addressStr, portStr);
         if (connectionType.equalsIgnoreCase(NetvirtITConstants.CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
             }
         }
 
-        isBundleReady(bundleContext, NETVIRT);
-        isBundleReady(bundleContext, NETVIRTPROVIDERS);
+        dataBroker = getDatabroker(getProviderContext());
+        mdsalUtils = new MdsalUtils(dataBroker);
+        assertNotNull("mdsalUtils should not be null", mdsalUtils);
+        assertTrue("Did not find " + NETVIRT_TOPOLOGY_ID, getNetvirtTopology());
+        southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+        assertNotNull("southbound should not be null", southbound);
+        setup.set(true);
+    }
 
-        //dataBroker = getSession().getSALService(DataBroker.class);
-        //Thread.sleep(3000);
-        //dataBroker = OvsdbInventoryServiceImpl.getDataBroker();
-        for (int i=0; i<20; i++) {
-            southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
-            if (southbound != null) {
-                dataBroker = southbound.getDatabroker();
-                if (dataBroker != null) {
-                    break;
+    private BindingAwareBroker.ProviderContext getProviderContext() {
+        BindingAwareBroker.ProviderContext providerContext = null;
+        for (int i=0; i < 60; i++) {
+            providerContext = getSession();
+            if (providerContext != null) {
+                break;
+            } else {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
-            LOG.warn("NetvirtIT: dataBroker is null");
-            Thread.sleep(5000);
         }
-        Assert.assertNotNull("dataBroker should not be null", dataBroker);
-        Thread.sleep(5000);
+        assertNotNull("providercontext should not be null", providerContext);
+        /* One more second to let the provider finish initialization */
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return providerContext;
+    }
 
-        mdsalUtils = new MdsalUtils(dataBroker);
-        setup.set(true);
+    private DataBroker getDatabroker(BindingAwareBroker.ProviderContext providerContext) {
+        DataBroker dataBroker = providerContext.getSALService(DataBroker.class);
+        assertNotNull("dataBroker should not be null", dataBroker);
+        return dataBroker;
+    }
+
+    private Boolean getNetvirtTopology() {
+        LOG.info("getNetvirtTopology: looking for {}...", NETVIRT_TOPOLOGY_ID);
+        Boolean found = false;
+        final TopologyId topologyId = new TopologyId(new Uri(NETVIRT_TOPOLOGY_ID));
+        InstanceIdentifier<Topology> path =
+                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        for (int i = 0; i < 60; i++) {
+            Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
+            if (topology != null) {
+                LOG.info("getNetvirtTopology: found {}...", NETVIRT_TOPOLOGY_ID);
+                found = true;
+                break;
+            } else {
+                LOG.info("getNetvirtTopology: still looking ({})...", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return found;
     }
 
     /**
@@ -349,51 +371,136 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return true;
     }
 
+    private String getControllerIPAddress() {
+        String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
+        if (addressString != null) {
+            try {
+                if (InetAddress.getByName(addressString) != null) {
+                    return addressString;
+                }
+            } catch (UnknownHostException e) {
+                LOG.error("Host {} is invalid", addressString);
+            }
+        }
+
+        addressString = ConfigProperties.getProperty(this.getClass(), "of.address");
+        if (addressString != null) {
+            try {
+                if (InetAddress.getByName(addressString) != null) {
+                    return addressString;
+                }
+            } catch (UnknownHostException e) {
+                LOG.error("Host {} is invalid", addressString);
+            }
+        }
+
+        return null;
+    }
+
+    private short getControllerOFPort() {
+        short openFlowPort = Constants.OPENFLOW_PORT;
+        String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
+        if (portString != null) {
+            try {
+                openFlowPort = Short.parseShort(portString);
+            } catch (NumberFormatException e) {
+                LOG.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort);
+            }
+        }
+        return openFlowPort;
+    }
+
+    private List<String> getControllersFromOvsdbNode(Node node) {
+        List<String> controllersStr = new ArrayList<>();
+
+        String controllerIpStr = getControllerIPAddress();
+        if (controllerIpStr != null) {
+            // If codepath makes it here, the ip address to be used was explicitly provided.
+            // Being so, also fetch openflowPort provided via ConfigProperties.
+            controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                    + ":" + controllerIpStr + ":" + getControllerOFPort());
+        } else {
+            // Check if ovsdb node has manager entries
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = southbound.extractOvsdbNode(node);
+            if (ovsdbNodeAugmentation != null) {
+                List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
+                if (managerEntries != null && !managerEntries.isEmpty()) {
+                    for (ManagerEntry managerEntry : managerEntries) {
+                        if (managerEntry == null || managerEntry.getTarget() == null) {
+                            continue;
+                        }
+                        String[] tokens = managerEntry.getTarget().getValue().split(":");
+                        if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
+                            controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                                    + ":" + tokens[1] + ":" + getControllerOFPort());
+                        } else if (tokens[0].equalsIgnoreCase("ptcp")) {
+                            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+                                controllerIpStr = new String(connectionInfo.getLocalIp().getValue());
+                                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
+                            } else {
+                                LOG.warn("Ovsdb Node does not contain connection info: {}", node);
+                            }
+                        } else {
+                            LOG.trace("Skipping manager entry {} for node {}",
+                                    managerEntry.getTarget(), node.getNodeId().getValue());
+                        }
+                    }
+                } else {
+                    LOG.warn("Ovsdb Node does not contain manager entries : {}", node);
+                }
+            }
+        }
+
+        if (controllersStr.isEmpty()) {
+            // Neither user provided ip nor ovsdb node has manager entries. Lets use local machine ip address.
+            LOG.debug("Use local machine ip address as a OpenFlow Controller ip address");
+            controllerIpStr = getLocalControllerHostIpAddress();
+            if (controllerIpStr != null) {
+                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
+            }
+        }
+
+        if (controllersStr.isEmpty()) {
+            LOG.warn("Failed to determine OpenFlow controller ip address");
+        } else if (LOG.isDebugEnabled()) {
+            controllerIpStr = "";
+            for (String currControllerIpStr : controllersStr) {
+                controllerIpStr += " " + currControllerIpStr;
+            }
+            LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(), controllerIpStr);
+        }
+
+        return controllersStr;
+    }
+
     private String getLocalControllerHostIpAddress() {
         String ipaddress = null;
         try{
-            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
-                 ifaces.hasMoreElements();) {
+            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();ifaces.hasMoreElements();){
                 NetworkInterface iface = ifaces.nextElement();
 
                 for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
                     InetAddress inetAddr = inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress()) {
-                        if (inetAddr.isSiteLocalAddress()) {
-                            ipaddress = inetAddr.getHostAddress();
-                            break;
-                        }
+                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
+                        ipaddress = inetAddr.getHostAddress();
+                        break;
                     }
                 }
             }
         }catch (Exception e){
-            LOG.warn("Exception while fetching local host ip address ",e);
+            LOG.warn("Exception while fetching local host ip address ", e);
         }
         return ipaddress;
     }
 
     private String getControllerTarget(Node ovsdbNode) {
-        String target = null;
-        String ipAddr = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-        ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-        LOG.info("connectionInfo: {}", connectionInfo);
-        if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-            ipAddr = new String(connectionInfo.getLocalIp().getValue());
-        }
-        if (ipAddr == null) {
-            ipAddr = getLocalControllerHostIpAddress();
-        }
-
-        if (ipAddr != null) {
-            target = NetvirtITConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
-                    + ipAddr + ":" + NetvirtITConstants.DEFAULT_OPENFLOW_PORT;
-        }
-
-        return target;
+        return getControllersFromOvsdbNode(ovsdbNode).get(0);
     }
 
-    @Ignore
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
@@ -640,31 +747,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             bridge.getBridgeName());
     }
 
-    /**
-     * isBundleReady is used to check if the requested bundle is Active
-     */
-    public void isBundleReady(BundleContext bundleContext, String bundleName) throws InterruptedException {
-        boolean ready = false;
-
-        while (!ready) {
-            int state = Bundle.UNINSTALLED;
-            Bundle[] bundles = bundleContext.getBundles();
-            for (Bundle element : bundles) {
-                if (element.getSymbolicName().equals(bundleName)) {
-                    state = element.getState();
-                    LOG.info(">>>>> bundle is ready {}", bundleName);
-                    break;
-                }
-            }
-            if (state != Bundle.ACTIVE) {
-                LOG.info(">>>>> bundle not ready {}", bundleName);
-                Thread.sleep(5000);
-            } else {
-                ready = true;
-            }
-        }
-    }
-
     private void netVirtAddPort(ConnectionInfo connectionInfo) throws InterruptedException {
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
         Assert.assertNotNull(bridge);
@@ -691,8 +773,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * </pre>
      * @throws InterruptedException
      */
-    // TODO add verification of flows
-    //@Ignore //
+    @Ignore
     @Test
     public void testNetVirt() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);

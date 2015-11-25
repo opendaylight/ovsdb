@@ -74,21 +74,27 @@ public class TransactUtils {
         return node;
     }
 
+    //TODO: change this function to be generic
     public static Map<InstanceIdentifier<Node>, Node> extractCreatedOrUpdatedOrRemoved(
             Collection<DataTreeModification<Node>> changes, Class<Node> class1) {
-        // TODO Auto-generated method stub
         Map<InstanceIdentifier<Node>, Node> result = new HashMap<InstanceIdentifier<Node>, Node>();
         for(DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node created = getCreated(mod);
-            result.put(key, created);
+            if (created != null) {
+                result.put(key, created);
+            }
             Node updated = getUpdated(mod);
-            result.put(key, updated);
+            if (updated != null) {
+                result.put(key, updated);
+            }
             Node deleted = getRemoved(mod);
-            result.put(key, deleted);
+            if (deleted != null) {
+                result.put(key, deleted);
+            }
         }
-        return null;
+        return result;
     }
 
     /*

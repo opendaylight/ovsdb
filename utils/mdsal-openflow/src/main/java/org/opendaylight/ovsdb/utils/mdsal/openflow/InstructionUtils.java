@@ -43,6 +43,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
@@ -73,6 +75,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class InstructionUtils {
@@ -1092,6 +1095,37 @@ public class InstructionUtils {
 
     public static Instructions dropInstructions() {
         return getInstructions(applyActionIns(dropAction()));
+    }
+
+    /**
+     * Extracts the existing instructions (if any) from the flow.
+     *
+     * @param flow The flow.
+     * @return The instructions in the flow (empty if none).
+     */
+    public static List<Instruction> extractExistingInstructions(Flow flow) {
+        if (flow != null) {
+            Instructions ins = flow.getInstructions();
+            if (ins != null) {
+                return ins.getInstruction();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Configures the flow builder to have the single given instruction.
+     *
+     * @param flowBuilder The flow builder.
+     * @param instruction The instruction.
+     * @return The flow builder.
+     */
+    public static FlowBuilder setFlowBuilderInstruction(FlowBuilder flowBuilder, Instruction instruction) {
+        flowBuilder.setInstructions(
+                new InstructionsBuilder()
+                        .setInstruction(Collections.singletonList(instruction))
+                        .build());
+        return flowBuilder;
     }
 
     /**

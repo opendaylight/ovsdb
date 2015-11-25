@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_4a770cd5",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-25T07:23:19Z",
+      "side": 1,
+      "message": "Add hgAugmentationBuilder.setLogicalSwitches(lsBuilder.build())",
+      "revId": "91b590efaeb73d93d917c9d04623ab09625aa7d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

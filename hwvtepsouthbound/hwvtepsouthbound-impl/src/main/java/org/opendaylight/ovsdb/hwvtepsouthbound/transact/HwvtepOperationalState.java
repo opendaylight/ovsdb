@@ -10,15 +10,14 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -26,6 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -43,8 +43,7 @@ public class HwvtepOperationalState {
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
         ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
-            extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-            //TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+            TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
         if (nodeCreateOrUpdate != null) {
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
                 CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
@@ -62,85 +61,23 @@ public class HwvtepOperationalState {
         transaction.close();
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE)
-                        && (mod.getDataBefore() == null)){
-            return mod.getDataAfter();
-        }
-        return null;
-    }
-
-    private Node getRemoved(DataObjectModification<Node> mod) {
-        if(mod.getModificationType() == ModificationType.DELETE){
-            return mod.getDataBefore();
-        }
-        return null;
-    }
-
-    private Node getUpdated(DataObjectModification<Node> mod) {
-        Node node = null;
-        switch(mod.getModificationType()) {
-            case SUBTREE_MODIFIED:
-                node = mod.getDataAfter();
-                break;
-            case WRITE:
-                if(mod.getDataBefore() !=  null) {
-                    node = mod.getDataAfter();
-                }
-                break;
-            default:
-                break;
-        }
-        return node;
-    }
-
-    private Node getOriginal(DataObjectModification<Node> mod) {
-        Node node = null;
-        switch(mod.getModificationType()) {
-            case SUBTREE_MODIFIED:
-                node = mod.getDataBefore();
-                break;
-            case WRITE:
-                if(mod.getDataBefore() !=  null) {
-                    node = mod.getDataBefore();
-                }
-                break;
-            case DELETE:
-                node = mod.getDataBefore();
-                break;
-            default:
-                break;
-        }
-        return node;
-    }
-
-    private Map<InstanceIdentifier<Node>, Node> extractCreatedOrUpdatedOrRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<Node> class1) {
-        // TODO Auto-generated method stub
-        Map<InstanceIdentifier<Node>, Node> result = new HashMap<InstanceIdentifier<Node>, Node>();
-        for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-            final DataObjectModification<Node> mod = change.getRootNode();
-            Node created = getCreated(mod);
-            result.put(key, created);
-            Node updated = getUpdated(mod);
-            result.put(key, updated);
-            Node deleted = getRemoved(mod);
-            result.put(key, deleted);
-        }
-        return result;
-    }
-
     public Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
         return Optional.fromNullable(operationalNodes.get(nodeIid));
     }
 
-    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid) {
+    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid, LogicalSwitchesKey lswitchKey) {
         Optional<Node> nodeOptional = getGlobalNode(iid);
-        /*if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepLogicalSwitchAugmentation.class));
-        }*/
+        if (nodeOptional.isPresent()) {
+            List<LogicalSwitches> lswitchList = nodeOptional.get().getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+            if (lswitchList != null) {
+                for (LogicalSwitches lswitch: lswitchList) {
+                    if (lswitch.getKey().equals(lswitchKey)) {
+                        return Optional.fromNullable(lswitch);
+                    }
+                }
+            }
+        }
         return Optional.absent();
     }
 
@@ -154,6 +91,7 @@ public class HwvtepOperationalState {
 
     public Optional<LocatorSet> getPhysicalLocatorSet(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getGlobalNode(iid);
+        //TODO: physical locator set are under different logical switches
         /*if (nodeOptional.isPresent()) {
             return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches());
         }*/

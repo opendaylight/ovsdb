@@ -179,6 +179,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     }
 
     @Override
+    public boolean isUserSpaceEnabled() {
+        final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.userspace.enabled");
+        return enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes");
+    }
+
+    @Override
     public void setDependencies(ServiceReference serviceReference) {
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);

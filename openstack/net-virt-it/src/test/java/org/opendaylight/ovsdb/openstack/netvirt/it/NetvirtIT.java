@@ -169,7 +169,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return new Option[] {
                 propagateSystemProperties(NetvirtITConstants.SERVER_IPADDRESS,
                         NetvirtITConstants.SERVER_PORT, NetvirtITConstants.CONNECTION_TYPE,
-                        NetvirtITConstants.CONTROLLER_IPADDRESS),
+                        NetvirtITConstants.CONTROLLER_IPADDRESS,
+                        NetvirtITConstants.USERSPACE_ENABLED)
         };
     }
 
@@ -199,9 +200,11 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         addressStr = props.getProperty(NetvirtITConstants.SERVER_IPADDRESS);
         portStr = props.getProperty(NetvirtITConstants.SERVER_PORT, NetvirtITConstants.DEFAULT_SERVER_PORT);
         connectionType = props.getProperty(NetvirtITConstants.CONNECTION_TYPE, "active");
-        controllerStr = props.getProperty(NetvirtITConstants.CONTROLLER_IPADDRESS);
-        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}, controller ip: {}",
-                connectionType, addressStr, portStr, controllerStr);
+        controllerStr = props.getProperty(NetvirtITConstants.CONTROLLER_IPADDRESS, "0.0.0.0");
+        String userSpaceEnabled = props.getProperty(NetvirtITConstants.USERSPACE_ENABLED, "no");
+        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}, controller ip: {}, " +
+                "userspace.enabled: {}",
+                connectionType, addressStr, portStr, controllerStr, userSpaceEnabled);
         if (connectionType.equalsIgnoreCase(NetvirtITConstants.CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
@@ -773,13 +776,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * </pre>
      * @throws InterruptedException
      */
-    @Ignore
     @Test
     public void testNetVirt() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
 
-        Thread.sleep(30000);
+        Thread.sleep(15000);
         // Verify the pipeline flows were installed
         PipelineOrchestrator pipelineOrchestrator =
                 (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);

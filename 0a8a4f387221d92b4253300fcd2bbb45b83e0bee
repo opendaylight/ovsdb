@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_e8786b2d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T13:37:33Z",
+      "side": 1,
+      "message": "Move all set* functions except setName to before the if condition. Take a look at changes I did for LogicaSwitchUpdate to make this a bit easier to read. xcept for setName no other set needs operationalPhysicalSwitchOptional.",
+      "revId": "0a8a4f387221d92b4253300fcd2bbb45b83e0bee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

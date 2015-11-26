@@ -244,8 +244,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
-        InstanceIdentifier<Node> iid = instanceIdentifiers.get(connectionInfo);
-        return iid;
+        return instanceIdentifiers.get(connectionInfo);
     }
 
     private void removeInstanceIdentifier(ConnectionInfo key) {

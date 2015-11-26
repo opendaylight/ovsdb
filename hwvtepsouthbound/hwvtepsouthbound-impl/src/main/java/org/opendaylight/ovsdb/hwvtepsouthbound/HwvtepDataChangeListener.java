@@ -149,6 +149,7 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
                 HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
                 HwvtepGlobalAugmentation hgOriginal = original.getAugmentation(HwvtepGlobalAugmentation.class);
                 if (hgUpdated != null && hgOriginal != null) {
+                    //FIXME: how to get OvsdbClient from the quest of creating a physical port? Because there is no managed-by.
                     OvsdbClient client = hcm.getClient(hgUpdated.getConnectionInfo());
                     if (client == null) {
                         try {

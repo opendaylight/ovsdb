@@ -186,4 +186,7 @@ public class HwvtepSouthboundMapper {
         return tpKey;
     }
 
+    public static String getRandomUUID() {
+        return "Random_" + java.util.UUID.randomUUID().toString().replace("-", "");
+    }
 }

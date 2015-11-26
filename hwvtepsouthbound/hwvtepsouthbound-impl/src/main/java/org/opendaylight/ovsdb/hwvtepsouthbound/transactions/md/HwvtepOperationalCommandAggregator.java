@@ -36,9 +36,13 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         commands.add(new PhysicalLocatorUpdateCommand(key, updates, dbSchema));
         commands.add(new PhysicalLocatorSetUpdateCommand(key, updates, dbSchema));
         commands.add(new UcastMacsLocalUpdateCommand(key, updates, dbSchema));
+        commands.add(new UcastMacsLocalRemoveCommand(key, updates, dbSchema));
         commands.add(new UcastMacsRemoteUpdateCommand(key, updates, dbSchema));
+        commands.add(new UcastMacsRemoteRemoveCommand(key, updates, dbSchema));
         commands.add(new McastMacsLocalUpdateCommand(key, updates, dbSchema));
+        commands.add(new McastMacsLocalRemoveCommand(key, updates, dbSchema));
         commands.add(new McastMacsRemoteUpdateCommand(key, updates, dbSchema));
+        commands.add(new McastMacsRemoteRemoveCommand(key, updates, dbSchema));
     }
 
     @Override

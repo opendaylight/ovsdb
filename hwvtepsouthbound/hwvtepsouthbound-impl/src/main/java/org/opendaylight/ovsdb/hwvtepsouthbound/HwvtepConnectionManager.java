@@ -400,10 +400,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
         final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, nodeIid);
-        if (node.isPresent()) {
-            HwvtepSouthboundUtil.deleteNode(transaction, nodeIid);
-        }
+        HwvtepSouthboundUtil.deleteNode(transaction, nodeIid);
     }
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {

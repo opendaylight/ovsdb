@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -31,10 +30,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.PhysicalSwitchRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -58,7 +54,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoCloseable{
     private Map<ConnectionInfo, HwvtepConnectionInstance> clients = new ConcurrentHashMap<>();
@@ -196,25 +191,6 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             return getConnectionInstance(pSwitchNode);
         } else {
             LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
-            return null;
-        }
-    }
-
-    public HwvtepConnectionInstance getConnectionInstance(InstanceIdentifier<Node> nodePath) {
-        try {
-            ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-            CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(
-                    LogicalDatastoreType.OPERATIONAL, nodePath);
-            transaction.close();
-            Optional<Node> optional = nodeFuture.get();
-            if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
-                return this.getConnectionInstance(optional.get());
-            } else {
-                LOG.warn("Found non-topological node {} on path {}",optional);
-                return null;
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to get Hwvtep Node {}",nodePath, e);
             return null;
         }
     }

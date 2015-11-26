@@ -300,13 +300,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return ovsdbConnectionInstance.getHasDeviceOwnership();
     }
 
-    public void setHasDeviceOwnership(ConnectionInfo connectionInfo, Boolean hasDeviceOwnership) {
-        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(connectionInfo);
-        if (ovsdbConnectionInstance != null) {
-            ovsdbConnectionInstance.setHasDeviceOwnership(hasDeviceOwnership);
-        }
-    }
-
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
         LOG.debug("handleOwnershipChanged: {} event received for device {}",

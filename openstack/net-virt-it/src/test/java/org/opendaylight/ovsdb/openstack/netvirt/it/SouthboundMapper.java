@@ -10,24 +10,16 @@ package org.opendaylight.ovsdb.openstack.netvirt.it;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -40,10 +32,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableBiMap;
 
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
@@ -130,86 +119,8 @@ public class SouthboundMapper {
         return new NodeId(uri);
     }
 
-    public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
-        if (ip.getIpv4Address() != null) {
-            return InetAddress.getByName(ip.getIpv4Address().getValue());
-        } else if (ip.getIpv6Address() != null) {
-            return InetAddress.getByName(ip.getIpv6Address().getValue());
-        } else {
-            throw new UnknownHostException("IP Address has no value");
-        }
-    }
-
-    public static DatapathId createDatapathId(Set<String> dpids) {
-        Preconditions.checkNotNull(dpids);
-        if (dpids.isEmpty()) {
-            return null;
-        } else {
-            String[] dpidArray = new String[dpids.size()];
-            dpids.toArray(dpidArray);
-            return createDatapathId(dpidArray[0]);
-        }
-    }
-
-    public static String createDatapathType(OvsdbBridgeAugmentation mdsalbridge) {
-        String datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
-
-        if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.class)) {
-            datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
-            if (datapathtype == null) {
-                throw new IllegalArgumentException("Unknown datapath type " + mdsalbridge.getDatapathType().getName());
-            }
-        }
-        return datapathtype;
-    }
-
-    public static  Class<? extends DatapathTypeBase> createDatapathType(String type) {
-        Preconditions.checkNotNull(type);
-        if (type.isEmpty()) {
-            return DatapathTypeSystem.class;
-        } else {
-            ImmutableBiMap<String, Class<? extends DatapathTypeBase>> mapper =
-                    SouthboundConstants.DATAPATH_TYPE_MAP.inverse();
-            return mapper.get(type);
-        }
-    }
-
-    public static DatapathId createDatapathId(String dpid) {
-        Preconditions.checkNotNull(dpid);
-        DatapathId datapath;
-        if (dpid.matches("^[0-9a-fA-F]{16}")) {
-            Splitter splitter = Splitter.fixedLength(2);
-            Joiner joiner = Joiner.on(":");
-            datapath = new DatapathId(joiner.join(splitter.split(dpid)));
-        } else {
-            datapath = new DatapathId(dpid);
-        }
-        return datapath;
-    }
-
-    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
-        Set<String> protocols = new HashSet<>();
-        if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
-            for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
-                if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
-                    protocols.add(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()));
-                } else {
-                    throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
-                }
-            }
-        }
-        return protocols;
-    }
-
     public static  Class<? extends InterfaceTypeBase> createInterfaceType(String type) {
         Preconditions.checkNotNull(type);
         return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(type);
-    }
-
-    public static String createOvsdbInterfaceType(Class<? extends InterfaceTypeBase> mdsaltype) {
-        Preconditions.checkNotNull(mdsaltype);
-        ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper =
-                SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse();
-        return mapper.get(mdsaltype);
     }
 }

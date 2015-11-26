@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_4b189984",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T18:57:37Z",
+      "side": 1,
+      "message": "This will get called even for update. Name being immutable can\u0027t be modified. This should be called only from within create use case.",
+      "revId": "0f7c230f52df556eb22857dc7628d35fc8b67464",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_2b175d53",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T18:57:37Z",
+      "side": 1,
+      "message": "Only setName needs operationalPhysicalSwitchOptional argument, all others don\u0027t need it.",
+      "revId": "0f7c230f52df556eb22857dc7628d35fc8b67464",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_6b1d5573",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T18:57:37Z",
+      "side": 1,
+      "message": "Move setName here.",
+      "revId": "0f7c230f52df556eb22857dc7628d35fc8b67464",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_0b12a162",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T18:57:37Z",
+      "side": 1,
+      "message": "Else case is not needed. Refer to changes I uploaded for LogicalSwitchUpdate. If fields are null in augmentation, it means user hasn\u0027t modified them or set them. This applies to all functions except setName.",
+      "revId": "0f7c230f52df556eb22857dc7628d35fc8b67464",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

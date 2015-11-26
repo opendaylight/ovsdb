@@ -41,6 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider, ConfigInterface {
@@ -215,9 +218,19 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                                  Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
             //Adds rule to check legitimate ip/mac pair for each packet from the vm
             for (Neutron_IPs srcAddress : srcAddressList) {
-                String addressWithPrefix = srcAddress.getIpAddress() + HOST_MASK;
-                egressAclAllowTrafficFromVmIpMacPair(dpid, localPort, attachedMac, addressWithPrefix,
-                                                     Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
+                try {
+                    InetAddress address = InetAddress.getByName(srcAddress.getIpAddress());
+                    if (address instanceof Inet4Address) {
+                        String addressWithPrefix = srcAddress.getIpAddress() + HOST_MASK;
+                        egressAclAllowTrafficFromVmIpMacPair(dpid, localPort, attachedMac, addressWithPrefix,
+                                                             Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
+                    } else {
+                        LOG.debug("Skipping IPv6 address {}. IPv6 support is not yet implemented.",
+                                  srcAddress.getIpAddress());
+                    }
+                } catch(UnknownHostException e) {
+                    LOG.warn("Invalid IP address {}", srcAddress.getIpAddress());
+                }
             }
         }
     }

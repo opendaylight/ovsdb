@@ -468,7 +468,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_SFARP)));
         flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_SFARP)));
 
-        if (write == true) {
+        if (write) {
             InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructions = Lists.newArrayList();
@@ -582,11 +582,11 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                 //MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
                 MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
-                        aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
+                        aceIp.getDestinationPortRange().getLowerPort().getValue());
             } else {
                 MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
-                        aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
+                        aceIp.getDestinationPortRange().getLowerPort().getValue());
             }
         } else if (matches.getAceType() instanceof AceEth) {
             AceEth aceEth = (AceEth) matches.getAceType();

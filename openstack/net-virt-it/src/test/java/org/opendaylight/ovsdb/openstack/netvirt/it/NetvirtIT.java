@@ -296,7 +296,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     /**
      * Test passive connection mode. The southbound starts in a listening mode waiting for connections on port
-     * 6640. This test will wait for incoming connections for {@link NetvirtITConstants.CONNECTION_INIT_TIMEOUT} ms.
+     * 6640. This test will wait for incoming connections for {@link NetvirtITConstants#CONNECTION_INIT_TIMEOUT} ms.
      *
      * @throws InterruptedException
      */
@@ -673,8 +673,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * Extract the <code>store</code> type data store contents for the particular bridge identified by
      * <code>bridgeName</code>.
      *
-     * @param connectionInfo
-     * @param bridgeName
+     * @param connectionInfo The connection information.
+     * @param bridgeName The bridge name.
      * @param store defined by the <code>LogicalDatastoreType</code> enumeration
      * @return <code>store</code> type data store contents
      */
@@ -691,8 +691,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * extract the <code>LogicalDataStoreType.OPERATIONAL</code> type data store contents for the particular bridge
      * identified by <code>bridgeName</code>
      *
-     * @param connectionInfo
-     * @param bridgeName
+     * @param connectionInfo The connection information.
+     * @param bridgeName The bridge name.
      * @see <code>NetvirtIT.getBridge(ConnectionInfo, String, LogicalDatastoreType)</code>
      * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
      */
@@ -704,8 +704,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * Extract the node contents from <code>store</code> type data store for the
      * bridge identified by <code>bridgeName</code>
      *
-     * @param connectionInfo
-     * @param bridgeName
+     * @param connectionInfo The connection information.
+     * @param bridgeName The bridge name.
      * @param store defined by the <code>LogicalDatastoreType</code> enumeration
      * @return <code>store</code> type data store contents
      */

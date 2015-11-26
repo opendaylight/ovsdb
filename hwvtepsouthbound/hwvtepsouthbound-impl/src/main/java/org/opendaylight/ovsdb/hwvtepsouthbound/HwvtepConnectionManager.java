@@ -61,17 +61,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
 public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoCloseable{
-    private Map<ConnectionInfo, HwvtepConnectionInstance> clients =
-                    new ConcurrentHashMap<ConnectionInfo,HwvtepConnectionInstance>();
+    private Map<ConnectionInfo, HwvtepConnectionInstance> clients = new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionManager.class);
     private static final String ENTITY_TYPE = "hwvtep";
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
-    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
-                    new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
-    private Map<Entity, HwvtepConnectionInstance> entityConnectionMap =
-                    new ConcurrentHashMap<>();
+    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
+    private Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private EntityOwnershipService entityOwnershipService;
     private HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
 
@@ -303,18 +300,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         if (dbSchema != null) {
             GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, Global.class);
 
-            List<String> hwvtepTableColumn = new ArrayList<String>();
+            List<String> hwvtepTableColumn = new ArrayList<>();
             hwvtepTableColumn.addAll(hwvtepSchema.getColumns());
             Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-            selectOperation.setColumns(hwvtepTableColumn);;
+            selectOperation.setColumns(hwvtepTableColumn);
 
-            ArrayList<Operation> operations = new ArrayList<Operation>();
+            ArrayList<Operation> operations = new ArrayList<>();
             operations.add(selectOperation);
             operations.add(op.comment("Fetching hardware_vtep table rows"));
 
-            List<OperationResult> results = null;
             try {
-                results = connectionInstance.transact(dbSchema, operations).get();
+                List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
                 if (results != null ) {
                     OperationResult selectResult = results.get(0);
                     globalRow = TyperUtils.getTypedRowWrapper(
@@ -330,7 +326,6 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     private Entity getEntityFromConnectionInstance(@Nonnull HwvtepConnectionInstance hwvtepConnectionInstance) {
-        YangInstanceIdentifier entityId = null;
         InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();
         if ( iid == null ) {
             //TODO: Is Global the right one?
@@ -342,7 +337,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     + "connection {}",iid, hwvtepConnectionInstance.getConnectionInfo());
 
         }
-        entityId = HwvtepSouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
+        YangInstanceIdentifier entityId =
+                HwvtepSouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
         Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
         LOG.debug("Entity {} created for device connection {}",
                 deviceEntity, hwvtepConnectionInstance.getConnectionInfo());

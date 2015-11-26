@@ -268,7 +268,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     LogicalDatastoreType.OPERATIONAL, nodePath);
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
-            if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
+            if (optional != null && optional.isPresent() && optional.get() != null) {
                 return this.getConnectionInstance(optional.get());
             } else {
                 LOG.warn("Found non-topological node {} on path {}",optional);

@@ -102,7 +102,7 @@ public class HwvtepSouthboundUtil {
         return result;
     }
 
-    private static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
+    public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
         try {
             ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
             @SuppressWarnings("unchecked")

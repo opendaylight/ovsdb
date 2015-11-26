@@ -55,17 +55,13 @@ public abstract class AbstractNeutronInterface<T extends DataObject, S extends I
 
     protected abstract T toMd(String uuid);
 
-    protected <T extends org.opendaylight.yangtools.yang.binding.DataObject> T readMd(InstanceIdentifier<T> path) {
-        T result = null;
+    protected <B extends org.opendaylight.yangtools.yang.binding.DataObject> B readMd(InstanceIdentifier<B> path) {
+        B result = null;
         final ReadOnlyTransaction transaction = getDataBroker().newReadOnlyTransaction();
-        CheckedFuture<Optional<T>, ReadFailedException> future = transaction.read(LogicalDatastoreType.CONFIGURATION, path);
+        CheckedFuture<Optional<B>, ReadFailedException> future = transaction.read(LogicalDatastoreType.CONFIGURATION, path);
         if (future != null) {
-            Optional<T> optional;
             try {
-                optional = future.checkedGet();
-                if (optional.isPresent()) {
-                    result = optional.get();
-                }
+                result = future.checkedGet().orNull();
             } catch (ReadFailedException e) {
                 LOGGER.warn("Failed to read {}", path, e);
             }

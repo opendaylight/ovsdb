@@ -512,14 +512,12 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         if (ofPort == 0L) {
             for (int i = 0; i < 5; i++) {
                 LOG.info("Looking for ofPort {}, try: {}", portName, i);
-                if (ofPort == 0L) {
-                    TerminationPoint tp = southbound.readTerminationPoint(bridgeNode, null, portName);
-                    if (tp != null) {
-                        port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
-                        if (port != null) {
-                            ofPort = southbound.getOFPort(port);
-                            break;
-                        }
+                TerminationPoint tp = southbound.readTerminationPoint(bridgeNode, null, portName);
+                if (tp != null) {
+                    port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                    if (port != null) {
+                        ofPort = southbound.getOFPort(port);
+                        break;
                     }
                 }
                 try {

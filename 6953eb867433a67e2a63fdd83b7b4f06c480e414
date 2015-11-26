@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_088387cd",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/LogicalSwitchRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "Change the comment. TODO item is to check if anything needs to be cleaned up here.",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_889217f5",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/McastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "Delete this, don\u0027t need this.",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_28a44356",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/McastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "Delete blank lines.",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_a88fd3cb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/McastMacsRemoteRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "Remove blank lines",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_68c1dbe3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/McastMacsRemoteUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "Delete this or make it trace.",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_08b6278b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/McastMacsRemoteUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "delete blank lines",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_28bbe373",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/UcastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-26T14:09:18Z",
+      "side": 1,
+      "message": "delete this or make it trace.",
+      "revId": "6953eb867433a67e2a63fdd83b7b4f06c480e414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

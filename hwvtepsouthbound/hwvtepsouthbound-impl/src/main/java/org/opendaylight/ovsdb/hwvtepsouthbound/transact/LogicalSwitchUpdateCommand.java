@@ -118,7 +118,10 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
-                    List<LogicalSwitches> lswitchListUpdated = created.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    List<LogicalSwitches> lswitchListUpdated = null;
+                    if (created.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
+                        lswitchListUpdated = created.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    }
                     if (lswitchListUpdated != null) {
                         result.put(key, lswitchListUpdated);
                     }
@@ -139,8 +142,14 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
                 Node updated = TransactUtils.getUpdated(mod);
                 Node before = mod.getDataBefore();
                 if (updated != null && before != null) {
-                    List<LogicalSwitches> lswitchListUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    List<LogicalSwitches> lswitchListBefore = before.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    List<LogicalSwitches> lswitchListUpdated = null;
+                    List<LogicalSwitches> lswitchListBefore = null;
+                    if (updated.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
+                        lswitchListUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    }
+                    if (before.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
+                        lswitchListBefore = before.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+                    }
                     if (lswitchListUpdated != null) {
                         if (lswitchListBefore != null) {
                             lswitchListUpdated.removeAll(lswitchListBefore);

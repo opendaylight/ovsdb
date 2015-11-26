@@ -24,6 +24,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefixBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
@@ -42,6 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 
@@ -134,7 +139,35 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             String ipaddress = null;
             if (null != vmIp) {
                 ipaddress = vmIp.getIpAddress();
+                try {
+                    InetAddress address = InetAddress.getByName(vmIp.getIpAddress());
+                    if (address instanceof Inet6Address) {
+                        LOG.debug("Skipping IPv6 address {}. IPv6 support is not yet implemented.",
+                                vmIp.getIpAddress());
+                        return;
+                    }
+                } catch (UnknownHostException e) {
+                    LOG.warn("Invalid IP address {}", vmIp.getIpAddress());
+                    return;
+                }
             }
+
+            if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+                try {
+                    IpPrefix ipPrefix =
+                            IpPrefixBuilder.getDefaultInstance(portSecurityRule.getSecurityRuleRemoteIpPrefix());
+                    // TODO: remove this when ipv6 support is implemented
+                    if (ipPrefix.getIpv6Prefix() != null) {
+                        LOG.debug("Skipping IPv6 prefix {}. IPv6 support is not yet implemented.",
+                                portSecurityRule.getSecurityRuleRemoteIpPrefix());
+                        return;
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOG.warn("Invalid IP prefix {}", portSecurityRule.getSecurityRuleRemoteIpPrefix(), e);
+                    return;
+                }
+            }
+
             switch (portSecurityRule.getSecurityRuleProtocol()) {
               case MatchUtils.TCP:
                   LOG.debug("programPortSecurityRule: Rule matching TCP", portSecurityRule);

@@ -185,7 +185,7 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
-    public Optional<HwvtepPhysicalPortAugmentation> getPhysycalPortAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<HwvtepPhysicalPortAugmentation> getPhysicalPortAugmentation(InstanceIdentifier<?> iid) {
         Optional<TerminationPoint> tpOptional = getHwvtepTerminationPoint(iid);
         if (tpOptional.isPresent()) {
             return Optional.fromNullable(tpOptional.get().getAugmentation(HwvtepPhysicalPortAugmentation.class));

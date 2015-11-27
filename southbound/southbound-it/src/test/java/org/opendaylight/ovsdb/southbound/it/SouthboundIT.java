@@ -379,7 +379,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return new String(connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+        return String.valueOf(
+                connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
     }
 
     @Test
@@ -1489,7 +1490,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
-                + new String(ip.getValue()) + ":" + port.getValue();
+                + String.valueOf(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         return new NodeId(uri);
     }

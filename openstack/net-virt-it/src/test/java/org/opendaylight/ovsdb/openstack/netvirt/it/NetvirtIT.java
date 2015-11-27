@@ -334,7 +334,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     }
 
     private String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return new String(connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+        return String.valueOf(connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
     }
 
     private boolean addOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
@@ -440,7 +440,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                         } else if (tokens[0].equalsIgnoreCase("ptcp")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                                controllerIpStr = new String(connectionInfo.getLocalIp().getValue());
+                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
                                 controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
                                         + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
                             } else {

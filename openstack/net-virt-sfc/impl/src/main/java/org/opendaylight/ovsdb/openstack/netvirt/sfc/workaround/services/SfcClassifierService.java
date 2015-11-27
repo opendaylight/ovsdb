@@ -68,11 +68,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
     }
 
-    //private AtomicLong flowCookieInc = new AtomicLong(0x1L);
     private BigInteger getCookie(FlowID flowID) {
-        String cookieString = new String().format("1110%02d%010d", flowID.value, cookieIndex++);
-                //new String().format("1100%02d00%04d", flowID.value, flowCookieInc.getAndIncrement());
-                // "1100%02000000d%04d"
+        String cookieString = String.format("1110%02d%010d", flowID.value, cookieIndex++);
         return new BigInteger(cookieString, 16);
     }
 

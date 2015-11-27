@@ -561,7 +561,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                         } else if (tokens[0].equalsIgnoreCase("ptcp")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                                controllerIpStr = new String(connectionInfo.getLocalIp().getValue());
+                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
                                 controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
                                         + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
                             } else {

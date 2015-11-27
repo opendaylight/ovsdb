@@ -21,7 +21,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
@@ -42,9 +41,7 @@ public class HwvtepOperationalState {
 
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
         ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-        Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
-            extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-            //TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+        Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate = extractCreatedOrUpdatedOrRemoved(changes);
         if (nodeCreateOrUpdate != null) {
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
                 CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
@@ -63,15 +60,15 @@ public class HwvtepOperationalState {
     }
 
     private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE)
-                        && (mod.getDataBefore() == null)){
+        if ((mod.getModificationType() == ModificationType.WRITE)
+                && (mod.getDataBefore() == null)) {
             return mod.getDataAfter();
         }
         return null;
     }
 
     private Node getRemoved(DataObjectModification<Node> mod) {
-        if(mod.getModificationType() == ModificationType.DELETE){
+        if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
@@ -79,12 +76,12 @@ public class HwvtepOperationalState {
 
     private Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
-        switch(mod.getModificationType()) {
+        switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
                 node = mod.getDataAfter();
                 break;
             case WRITE:
-                if(mod.getDataBefore() !=  null) {
+                if (mod.getDataBefore() != null) {
                     node = mod.getDataAfter();
                 }
                 break;
@@ -96,12 +93,12 @@ public class HwvtepOperationalState {
 
     private Node getOriginal(DataObjectModification<Node> mod) {
         Node node = null;
-        switch(mod.getModificationType()) {
+        switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
                 node = mod.getDataBefore();
                 break;
             case WRITE:
-                if(mod.getDataBefore() !=  null) {
+                if (mod.getDataBefore() != null) {
                     node = mod.getDataBefore();
                 }
                 break;
@@ -115,20 +112,22 @@ public class HwvtepOperationalState {
     }
 
     private Map<InstanceIdentifier<Node>, Node> extractCreatedOrUpdatedOrRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<Node> class1) {
-        // TODO Auto-generated method stub
-        Map<InstanceIdentifier<Node>, Node> result = new HashMap<InstanceIdentifier<Node>, Node>();
+            Collection<DataTreeModification<Node>> changes) {
+        Map<InstanceIdentifier<Node>, Node> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
-            Node created = getCreated(mod);
-            result.put(key, created);
-            Node updated = getUpdated(mod);
-            result.put(key, updated);
-            Node deleted = getRemoved(mod);
-            result.put(key, deleted);
+            putIfNotNull(result, key, getCreated(mod));
+            putIfNotNull(result, key, getUpdated(mod));
+            putIfNotNull(result, key, getRemoved(mod));
         }
         return result;
+    }
+
+    private void putIfNotNull(Map<InstanceIdentifier<Node>, Node> map, InstanceIdentifier<Node> key, Node value) {
+        if (value != null) {
+            map.put(key, value);
+        }
     }
 
     public Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {

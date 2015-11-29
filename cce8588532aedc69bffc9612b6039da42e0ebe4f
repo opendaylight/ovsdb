@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_ff47bf1b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-29T00:06:16Z",
+      "side": 1,
+      "message": "@Vishal\nMaybe we need to save a map of InstanceIdentifier\u003cPhysicalSwitchAugmentation\u003e to HwvtepConnectionInstance.\n\nPOST http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{HwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0\n{\n  \"network-topology:termination-point\": [\n        {\n            \"tp-id\": \"port0\",\n          \t\"hwvtep-node-name\": \"port0\",\n            \"hwvtep-node-description\": \"\",\n            \"vlan-bindings\": [\n          \t\t{\n                  \"vlan-id-key\": \"100\",\n                  \"logical-switch-ref\": \"ls0\"\n            \t}\n          \t]\n\t\t}\n    ]\n}",
+      "range": {
+        "startLine": 152,
+        "startChar": 20,
+        "endLine": 152,
+        "endChar": 99
+      },
+      "revId": "cce8588532aedc69bffc9612b6039da42e0ebe4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

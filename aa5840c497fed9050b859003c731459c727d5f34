@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_9f19eb24",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalLocatorUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-29T15:44:47Z",
+      "side": 1,
+      "message": "do we need to update physical locator?",
+      "range": {
+        "startLine": 72,
+        "startChar": 12,
+        "endLine": 72,
+        "endChar": 58
+      },
+      "revId": "aa5840c497fed9050b859003c731459c727d5f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_ff1c9f15",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalLocatorUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-11-29T15:44:47Z",
+      "side": 1,
+      "message": "Why not set EncapsulationType to String rather than EncapsulationTypeVxlanOverIpv4 in hwvtep.yang?",
+      "range": {
+        "startLine": 78,
+        "startChar": 16,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "aa5840c497fed9050b859003c731459c727d5f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

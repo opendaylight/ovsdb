@@ -24,26 +24,18 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
-import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,14 +83,13 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
         InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-
         List<RemoteUcastMacs> remoteUMacs = new ArrayList<>();
         RemoteUcastMacsBuilder rumBuilder = new RemoteUcastMacsBuilder();
         rumBuilder.setMacEntryKey(new MacAddress(uMacRemote.getMac()));
         if(uMacRemote.getIpAddr() != null && !uMacRemote.getIpAddr().isEmpty()) {
             rumBuilder.setIpaddr(new IpAddress(uMacRemote.getIpAddr().toCharArray()));
         }
-        if(uMacRemote.getLocatorColumn() != null 
+        if(uMacRemote.getLocatorColumn() != null
                         && uMacRemote.getLocatorColumn().getData() != null) {
             UUID pLocUUID = uMacRemote.getLocatorColumn().getData();
             if(updatedPLocRows.get(pLocUUID) != null) {
@@ -106,19 +97,16 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
                 rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
             }
         }
-        if(uMacRemote.getLogicalSwitchColumn() != null 
+        if(uMacRemote.getLogicalSwitchColumn() != null
                         && uMacRemote.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = uMacRemote.getLogicalSwitchColumn().getData();
             if(updatedLSRows.get(lsUUID) != null) {
-                
                 rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(updatedLSRows.get(lsUUID).getName()));
             }
         }
         remoteUMacs.add(rumBuilder.build());
         hgAugmentationBuilder.setRemoteUcastMacs(remoteUMacs );
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
-
-        LOG.debug("Update node with UcastMacsRemote {}", remoteUMacs);
         return connectionNode.build();
     }
 

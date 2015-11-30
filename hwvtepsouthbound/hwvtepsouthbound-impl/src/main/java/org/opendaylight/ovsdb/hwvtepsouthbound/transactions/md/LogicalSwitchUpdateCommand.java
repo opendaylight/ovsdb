@@ -70,15 +70,12 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-
     private Node buildConnectionNode(LogicalSwitch lSwitch) {
         //Update node with LogicalSwitch reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<LogicalSwitches> lSwitches = new ArrayList<>();
-
         LogicalSwitchesBuilder lsBuilder = new LogicalSwitchesBuilder();
         lsBuilder.setHwvtepLogicalSwitchExternalId(new Uuid(lSwitch.getUuid().toString()));
         lsBuilder.setHwvtepNodeDescription(lSwitch.getDescription());
@@ -90,10 +87,8 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         }
         lSwitches.add(lsBuilder.build());
         hgAugmentationBuilder.setLogicalSwitches(lSwitches);
-
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
-
-        LOG.debug("Update node with logicalswitches {}", lSwitches);
         return connectionNode.build();
     }
+
 }

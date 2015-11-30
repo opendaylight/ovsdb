@@ -23,7 +23,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configure
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 
 import java.net.InetAddress;
@@ -32,7 +31,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
@@ -45,9 +43,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
@@ -59,11 +55,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
@@ -299,7 +292,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     /**
      * Test passive connection mode. The southbound starts in a listening mode waiting for connections on port
-     * 6640. This test will wait for incoming connections for {@link NetvirtITConstants.CONNECTION_INIT_TIMEOUT} ms.
+     * 6640. This test will wait for incoming connections for {@link NetvirtITConstants#CONNECTION_INIT_TIMEOUT} ms.
      *
      * @throws InterruptedException
      */
@@ -555,21 +548,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
-    private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-                              final ConnectionInfo connectionInfo) {
-        InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(connectionInfo);
-        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
-    }
-
-    private List<ProtocolEntry> createMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<>();
-        ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
-        protocolList.add(new ProtocolEntryBuilder().
-                setProtocol(mapper.get("OpenFlow13")).build());
-        return protocolList;
-    }
-
     private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
                 new OvsdbTerminationPointAugmentationBuilder();
@@ -601,83 +579,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return result;
     }
 
-    /*
-     * base method for adding test bridges.  Other helper methods used to create bridges should utilize this method.
-     *
-     * @param connectionInfo
-     * @param bridgeIid if passed null, one is created
-     * @param bridgeName cannot be null
-     * @param bridgeNodeId if passed null, one is created based on <code>bridgeIid</code>
-     * @param setProtocolEntries toggles whether default protocol entries are set for the bridge
-     * @param failMode toggles whether default fail mode is set for the bridge
-     * @param setManagedBy toggles whether to setManagedBy for the bridge
-     * @param dpType if passed null, this parameter is ignored
-     * @param externalIds if passed null, this parameter is ignored
-     * @param otherConfig if passed null, this parameter is ignored
-     * @return success of bridge addition
-     * @throws InterruptedException
-     */
-    private boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
-            final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-            final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-            final Class<? extends DatapathTypeBase> dpType,
-            final List<BridgeExternalIds> externalIds,
-            final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
-
-        NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-        if (bridgeIid == null) {
-            bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
-        }
-        if (bridgeNodeId == null) {
-            bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
-        }
-        bridgeNodeBuilder.setNodeId(bridgeNodeId);
-        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-        ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
-        if (setProtocolEntries) {
-            ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
-        }
-        if (failMode != null) {
-            ovsdbBridgeAugmentationBuilder.setFailMode(failMode);
-        }
-        if (setManagedBy) {
-            setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
-        }
-        if (dpType != null) {
-            ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
-        }
-        if (externalIds != null) {
-            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIds);
-        }
-        if (otherConfigs != null) {
-            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
-        }
-        bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
-        LOG.debug("Built with the intent to store bridge data {}",
-                ovsdbBridgeAugmentationBuilder.toString());
-        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                bridgeIid, bridgeNodeBuilder.build());
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
-    private boolean addBridge(final ConnectionInfo connectionInfo, final String bridgeName)
-        throws InterruptedException {
-
-        return addBridge(connectionInfo, null, bridgeName, null, true,
-                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null);
-    }
-
-    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo) {
-        return getBridge(connectionInfo, NetvirtITConstants.BRIDGE_NAME);
-    }
-
     /**
      * Extract the <code>store</code> type data store contents for the particular bridge identified by
      * <code>bridgeName</code>.
      *
-     * @param connectionInfo
-     * @param bridgeName
+     * @param connectionInfo The connection information.
+     * @param bridgeName The bridge name.
      * @param store defined by the <code>LogicalDatastoreType</code> enumeration
      * @return <code>store</code> type data store contents
      */
@@ -694,8 +601,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * extract the <code>LogicalDataStoreType.OPERATIONAL</code> type data store contents for the particular bridge
      * identified by <code>bridgeName</code>
      *
-     * @param connectionInfo
-     * @param bridgeName
+     * @param connectionInfo The connection information.
+     * @param bridgeName The bridge name.
      * @see <code>NetvirtIT.getBridge(ConnectionInfo, String, LogicalDatastoreType)</code>
      * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
      */
@@ -707,8 +614,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * Extract the node contents from <code>store</code> type data store for the
      * bridge identified by <code>bridgeName</code>
      *
-     * @param connectionInfo
-     * @param bridgeName
+     * @param connectionInfo The connection information.
+     * @param bridgeName The bridge name.
      * @param store defined by the <code>LogicalDatastoreType</code> enumeration
      * @return <code>store</code> type data store contents
      */
@@ -717,22 +624,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 SouthboundMapper.createInstanceIdentifier(connectionInfo,
                     new OvsdbBridgeName(bridgeName));
         return mdsalUtils.read(store, bridgeIid);
-    }
-
-    /**
-     * Extract the node contents from <code>LogicalDataStoreType.OPERATIONAL</code> data store for the
-     * bridge identified by <code>bridgeName</code>
-     *
-     * @param connectionInfo
-     * @param bridgeName
-     * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
-     */
-    private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName) {
-        return getBridgeNode(connectionInfo, bridgeName, LogicalDatastoreType.OPERATIONAL);
-    }
-
-    private boolean deleteBridge(ConnectionInfo connectionInfo) throws InterruptedException {
-        return deleteBridge(connectionInfo, NetvirtITConstants.BRIDGE_NAME);
     }
 
     private boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName)

@@ -214,25 +214,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructions = Lists.newArrayList();
-            InstructionBuilder ib = new InstructionBuilder();
 
-            /*List<Action> actionList = Lists.newArrayList();
-
-            ActionBuilder ab = new ActionBuilder();
-            ab.setAction(ActionUtils.nxMoveNshc2ToTunId());
-            ab.setOrder(0);
-            ab.setKey(new ActionKey(0));
-            actionList.add(ab.build());
-
-            ApplyActionsBuilder aab = new ApplyActionsBuilder();
-            aab.setAction(actionList);
-            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-
-            ib.setOrder(instructions.size());
-            ib.setKey(new InstructionKey(instructions.size()));
-            instructions.add(ib.build());*/
-
-            ib = InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), getTable());
+            InstructionBuilder ib = InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), getTable());
             ib.setOrder(instructions.size());
             ib.setKey(new InstructionKey(instructions.size()));
             instructions.add(ib.build());
@@ -468,7 +451,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_SFARP)));
         flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_SFARP)));
 
-        if (write == true) {
+        if (write) {
             InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructions = Lists.newArrayList();
@@ -544,8 +527,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         // Build the Actions to Add the NSH Header
         org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action nshC1Load =
                 ActionUtils.nxLoadNshc1RegAction(header.getNshMetaC1());
-        org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action nshC2Load =
-                ActionUtils.nxLoadNshc2RegAction(header.getNshMetaC2());
         org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action nspLoad =
                 ActionUtils.nxSetNspAction(header.getNshNsp());
         org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action nsiLoad =
@@ -558,8 +539,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         int count = actionList.size();
         actionList.add(new ActionBuilder()
                 .setKey(new ActionKey(count)).setOrder(count++).setAction(nshC1Load).build());
-        //actionList.add(new ActionBuilder()
-        // .setKey(new ActionKey(count)).setOrder(count++).setAction(nshC2Load).build());
         actionList.add(new ActionBuilder()
                 .setKey(new ActionKey(count)).setOrder(count++).setAction(nspLoad).build());
         actionList.add(new ActionBuilder()
@@ -577,16 +556,13 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         if (matches.getAceType() instanceof AceIp) {
             AceIp aceIp = (AceIp)matches.getAceType();
             if (aceIp.getAceIpVersion() instanceof AceIpv4) {
-                //AceIpv4 aceIpv4 = (AceIpv4) aceIp.getAceIpVersion();
-                //MatchUtils.createSrcL3IPv4Match(matchBuilder, aceIpv4.getSourceIpv4Network());
-                //MatchUtils.createDstL3IPv4Match(matchBuilder, aceIpv4.getDestinationIpv4Network());
                 MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
-                        aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
+                        aceIp.getDestinationPortRange().getLowerPort().getValue());
             } else {
                 MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
                 MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
-                        aceIp.getDestinationPortRange().getLowerPort().getValue().intValue());
+                        aceIp.getDestinationPortRange().getLowerPort().getValue());
             }
         } else if (matches.getAceType() instanceof AceEth) {
             AceEth aceEth = (AceEth) matches.getAceType();

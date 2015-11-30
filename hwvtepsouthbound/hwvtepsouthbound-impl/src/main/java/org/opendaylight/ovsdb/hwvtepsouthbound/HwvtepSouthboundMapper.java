@@ -54,11 +54,10 @@ public class HwvtepSouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        InstanceIdentifier<Node> nodePath = InstanceIdentifier
+        return InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
-        return nodePath;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier (OvsdbClient client) {
@@ -130,41 +129,35 @@ public class HwvtepSouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> getInstanceIdentifier(Global global) {
-        InstanceIdentifier<Node> iid = null;
         String nodeString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://" +
-                        HwvtepSouthboundConstants.UUID + "/" + global.getUuid().toString();
-            NodeId nodeId = new NodeId(new Uri(nodeString));
-            NodeKey nodeKey = new NodeKey(nodeId);
-            TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
-            iid = InstanceIdentifier.builder(NetworkTopology.class)
-                            .child(Topology.class, topoKey)
-                            .child(Node.class,nodeKey)
-                            .build();
-        return iid;
+                HwvtepSouthboundConstants.UUID + "/" + global.getUuid().toString();
+        NodeId nodeId = new NodeId(new Uri(nodeString));
+        NodeKey nodeKey = new NodeKey(nodeId);
+        TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
+        return InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, topoKey)
+                .child(Node.class, nodeKey)
+                .build();
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
                     PhysicalSwitch pSwitch) {
-        InstanceIdentifier<Node> iid = null;
         String nodeString = client.getNodeKey().getNodeId().getValue() + "/physicalswitch/" + pSwitch.getName();
         NodeId nodeId = new NodeId(new Uri(nodeString));
         NodeKey nodeKey = new NodeKey(nodeId);
-        iid =InstanceIdentifier.builder(NetworkTopology.class)
+        return InstanceIdentifier.builder(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class, nodeKey).build();
-        return iid;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
                     LogicalSwitch lSwitch) {
-        InstanceIdentifier<Node> iid = null;
         String nodeString = client.getNodeKey().getNodeId().getValue() + "/logicalswitch/" + lSwitch.getName();
         NodeId nodeId = new NodeId(new Uri(nodeString));
         NodeKey nodeKey = new NodeKey(nodeId);
-        iid =InstanceIdentifier.builder(NetworkTopology.class)
+        return InstanceIdentifier.builder(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class, nodeKey).build();
-        return iid;
     }
 
     public static Class<? extends EncapsulationTypeBase> createEncapsulationType(String type) {

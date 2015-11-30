@@ -499,9 +499,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     }
 
     private long getSfPort(Node bridgeNode, String sfPortName) {
-        long port = 0L;
-        port = getOFPort(bridgeNode, sfPortName);
-        return port;
+        return getOFPort(bridgeNode, sfPortName);
     }
 
     private long getOFPort(Node bridgeNode, String portName) {

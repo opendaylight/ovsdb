@@ -21,12 +21,14 @@ public class TransactCommandAggregator implements TransactCommand {
     private List<TransactCommand> commands = new ArrayList<TransactCommand>();
 
     public TransactCommandAggregator(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
+        commands.add(new PhysicalSwitchUpdateCommand(state,changes));
+        commands.add(new PhysicalSwitchRemoveCommand(state,changes));
         commands.add(new LogicalSwitchUpdateCommand(state,changes));
-/*        commands.add(new LogicalSwitchRemoveCommand(state,changes));
+        commands.add(new LogicalSwitchRemoveCommand(state,changes));
+        commands.add(new PhysicalPortUpdateCommand(state,changes));
+        commands.add(new PhysicalPortRemoveCommand(state,changes));
         commands.add(new PhysicalLocatorUpdateCommand(state,changes));
         commands.add(new PhysicalLocatorRemoveCommand(state,changes));
-        commands.add(new PhysicalPortUpdateCommand(state,changes));
-        commands.add(new PhysicalPortRemoveCommand(state,changes));*/
     }
 
     @Override

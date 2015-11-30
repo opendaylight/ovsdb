@@ -22,6 +22,30 @@
       "revId": "cce8588532aedc69bffc9612b6039da42e0ebe4f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_0e938aa4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-11-30T08:19:09Z",
+      "side": 1,
+      "message": "No, I\u0027ll be adding a utility function that will use instanceIdentifier to read from Operational DataStore and get connection instance. I thought I had written it already, but looks like not. Don\u0027t worry about this, I have the code ready but need your changes to go in to test it out.",
+      "parentUuid": "5aaae553_ff47bf1b",
+      "range": {
+        "startLine": 152,
+        "startChar": 20,
+        "endLine": 152,
+        "endChar": 99
+      },
+      "revId": "cce8588532aedc69bffc9612b6039da42e0ebe4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

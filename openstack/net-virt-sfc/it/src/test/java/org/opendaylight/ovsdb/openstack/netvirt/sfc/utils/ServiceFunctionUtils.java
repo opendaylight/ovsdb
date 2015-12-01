@@ -10,16 +10,16 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SfDataPlaneLocatorName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SfName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SffName;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SftType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.function.entry.SfDataPlaneLocator;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.function.entry.SfDataPlaneLocatorBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunctionBuilder;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sft.rev140701.Firewall;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sft.rev140701.ServiceFunctionTypeIdentity;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sl.rev140701.VxlanGpe;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 
@@ -36,7 +36,7 @@ public class ServiceFunctionUtils extends AbstractUtils {
     public ServiceFunctionBuilder serviceFunctionBuilder(ServiceFunctionBuilder serviceFunctionBuilder,
                                                          String ip, String sfName,
                                                          List<SfDataPlaneLocator> sfDataPlaneLocatorList,
-                                                         Class<? extends ServiceFunctionTypeIdentity> type) {
+                                                         SftType type) {
         return serviceFunctionBuilder
                 .setSfDataPlaneLocator(sfDataPlaneLocatorList)
                 .setName(new SfName(sfName))
@@ -57,7 +57,7 @@ public class ServiceFunctionUtils extends AbstractUtils {
         List<SfDataPlaneLocator> sfDataPlaneLocatorList =
                 list(new ArrayList<SfDataPlaneLocator>(), sfDataPlaneLocator);
         return serviceFunctionBuilder(
-                new ServiceFunctionBuilder(), sfIp, sfName, sfDataPlaneLocatorList, Firewall.class);
+                new ServiceFunctionBuilder(), sfIp, sfName, sfDataPlaneLocatorList, new SftType("firewall"));
     }
 
 

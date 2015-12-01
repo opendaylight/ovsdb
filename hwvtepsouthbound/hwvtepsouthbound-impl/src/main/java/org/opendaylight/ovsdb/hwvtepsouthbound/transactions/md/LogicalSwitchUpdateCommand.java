@@ -63,7 +63,6 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
-            LOG.debug("Connection {} is present",connection);
             Node connectionNode = buildConnectionNode(lSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
 //            TODO: Delete entries that are no longer needed
@@ -77,7 +76,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<LogicalSwitches> lSwitches = new ArrayList<>();
         LogicalSwitchesBuilder lsBuilder = new LogicalSwitchesBuilder();
-        lsBuilder.setHwvtepLogicalSwitchExternalId(new Uuid(lSwitch.getUuid().toString()));
+        lsBuilder.setLogicalSwitchUuid(new Uuid(lSwitch.getUuid().toString()));
         lsBuilder.setHwvtepNodeDescription(lSwitch.getDescription());
         HwvtepNodeName hwvtepName = new HwvtepNodeName(lSwitch.getName());
         lsBuilder.setHwvtepNodeName(hwvtepName);

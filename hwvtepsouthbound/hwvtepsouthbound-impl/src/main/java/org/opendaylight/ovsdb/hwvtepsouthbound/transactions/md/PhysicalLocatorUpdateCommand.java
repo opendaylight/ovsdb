@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -54,7 +55,6 @@ public class PhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
                 || updatedPLocRows.isEmpty()) {
             return;
         }
-        LOG.trace("PhysicalLocatorTable updated: {}", updatedPLocRows);
         Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (node.isPresent()) {
             updateTerminationPoints(transaction, node.get());
@@ -74,6 +74,7 @@ public class PhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
                         HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, pLoc);
                 HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalLocatorAugmentationBuilder();
+                tpAugmentationBuilder.setPhysicalLocatorUuid(new Uuid(pLoc.getUuid().toString()));
                 setEncapsType(tpAugmentationBuilder, pLoc);
                 setDstIp(tpAugmentationBuilder, pLoc);
                 tpBuilder.addAugmentation(HwvtepPhysicalLocatorAugmentation.class, tpAugmentationBuilder.build());

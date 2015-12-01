@@ -24,6 +24,6 @@ public class HwvtepSouthboundConstants {
     public static final String UUID = "uuid";
     public static final ImmutableBiMap<Class<? extends EncapsulationTypeBase>,String> ENCAPS_TYPE_MAP
     = new ImmutableBiMap.Builder<Class<? extends EncapsulationTypeBase>,String>()
-        .put(EncapsulationTypeVxlanOverIpv4.class,"vxlan-over-ipv4")
+        .put(EncapsulationTypeVxlanOverIpv4.class,"vxlan_over_ipv4")
         .build();
 }

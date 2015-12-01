@@ -9,10 +9,12 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -25,13 +27,17 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorSetRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSetBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -44,6 +50,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private Map<UUID, McastMacsRemote> updatedMMacsRemoteRows;
     private Map<UUID, McastMacsRemote> oldMMacsRemoteRows;
+    private Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
     private Map<UUID, LogicalSwitch> updatedLSRows;
 
@@ -52,6 +59,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
         super(key, updates, dbSchema);
         updatedMMacsRemoteRows = TyperUtils.extractRowsUpdated(McastMacsRemote.class, getUpdates(),getDbSchema());
         oldMMacsRemoteRows = TyperUtils.extractRowsOld(McastMacsRemote.class, getUpdates(),getDbSchema());
+        updatedPLocSetRows = TyperUtils.extractRowsUpdated(PhysicalLocatorSet.class, getUpdates(),getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(),getDbSchema());
         updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(),getDbSchema());
     }
@@ -77,33 +85,58 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     }
 
     private Node buildConnectionNode(McastMacsRemote mMacRemote) {
-      //Update node with McastMacsRemote reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         RemoteMcastMacsBuilder mMacRemoteBuilder= new RemoteMcastMacsBuilder();
         mMacRemoteBuilder.setMacEntryKey(new MacAddress(mMacRemote.getMac()));
-        if(mMacRemote.getLocatorSetColumn() != null
-                && mMacRemote.getLocatorSetColumn().getData() != null){
-            UUID plocUUID = mMacRemote.getLocatorSetColumn().getData();
-            if(updatedPLocRows.get(plocUUID) != null ){
-                InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, updatedPLocRows.get(plocUUID));
-                mMacRemoteBuilder.setLocatorSetRef(new HwvtepPhysicalLocatorSetRef(plIid));
-            }
-        }
-        if(mMacRemote.getLogicalSwitchColumn() != null
-                && mMacRemote.getLogicalSwitchColumn().getData() != null){
-            UUID lsUUID = mMacRemote.getLogicalSwitchColumn().getData();
-            if (updatedLSRows.get(lsUUID) != null) {
-                mMacRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(updatedLSRows.get(lsUUID).getName()));
-            }
-        }
+        setIpAddress(mMacRemoteBuilder, mMacRemote);
+        setLocatorSet(mMacRemoteBuilder, mMacRemote);
+        setLogicalSwitch(mMacRemoteBuilder, mMacRemote);
+
         List<RemoteMcastMacs> mMacRemoteList = new ArrayList<>();
         mMacRemoteList.add(mMacRemoteBuilder.build());
         hgAugmentationBuilder.setRemoteMcastMacs(mMacRemoteList);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         return connectionNode.build();
+    }
+
+    private void setLogicalSwitch(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
+        LogicalSwitch lSwitch = null;
+        if (mMacRemote.getLogicalSwitchColumn() != null && mMacRemote.getLogicalSwitchColumn().getData() != null) {
+            UUID lsUUID = mMacRemote.getLogicalSwitchColumn().getData();
+            if (updatedLSRows.get(lsUUID) != null) {
+                lSwitch = updatedLSRows.get(lsUUID);
+                mMacRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitch.getName()));
+            }
+        }
+    }
+
+    private void setIpAddress(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
+        if(mMacRemote.getIpAddr() != null && !mMacRemote.getIpAddr().isEmpty()) {
+            mMacRemoteBuilder.setIpaddr(new IpAddress(mMacRemote.getIpAddr().toCharArray()));
+        }
+    }
+
+    private void setLocatorSet(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
+        if (mMacRemote.getLocatorSetColumn() != null && mMacRemote.getLocatorSetColumn().getData() != null) {
+            UUID pLocSetUUID = mMacRemote.getLocatorSetColumn().getData();
+            if (updatedPLocSetRows.get(pLocSetUUID) != null) {
+                PhysicalLocatorSet plSet = updatedPLocSetRows.get(pLocSetUUID);
+                if (plSet.getLocatorsColumn() != null && plSet.getLocatorsColumn().getData() != null
+                                && !plSet.getLocatorsColumn().getData().isEmpty()) {
+                    List<LocatorSet> plsList = new ArrayList<>();
+                    for (UUID pLocUUID : plSet.getLocatorsColumn().getData()) {
+                        PhysicalLocator pLoc = updatedPLocRows.get(pLocUUID);
+                        InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
+                                        getOvsdbConnectionInstance().getInstanceIdentifier(), pLoc);
+                        plsList.add(new LocatorSetBuilder()
+                                    .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid)).build());
+                    }
+                    mMacRemoteBuilder.setLocatorSet(plsList);
+                }
+            }
+        }
     }
 
 }

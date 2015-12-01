@@ -185,7 +185,12 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
         PhysicalSwitchAugmentation pSwitchNode = node.getAugmentation(PhysicalSwitchAugmentation.class);
         if (hwvtepGlobal != null) {
-            return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
+            if(hwvtepGlobal.getConnectionInfo() != null) {
+                return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
+            } else {
+                // TODO: Case of user configured connection
+                return null; //for now
+            }
         } //TODO: We could get it from Managers also.
         else if(pSwitchNode != null){
             return getConnectionInstance(pSwitchNode);

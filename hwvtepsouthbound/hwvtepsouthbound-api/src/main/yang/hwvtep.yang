@@ -77,13 +77,19 @@ module hwvtep {
     }
 
     grouping hwvtep-mcast-mac-table-attributes {
-        leaf locator-set-ref {
-            description "Reference to a set of physical locators used for replication";
-            type hwvtep-physical-locator-set-ref;
+        description "Multicast mac table attributes";
+        leaf ipaddr {
+            description "Optional IP address associated with the mac";
+            type inet:ip-address;
         }
+        uses hwvtep-physical-locator-set-attributes;
     }
 
     grouping hwvtep-tunnel-attributes {
+        leaf tunnel-uuid {
+            description "The unique identifier of the tunnel";
+            type yang:uuid;
+        }
         leaf local-locator-ref {
             description "Reference to the physical locator to reach this entry";
             type hwvtep-physical-locator-ref;
@@ -105,6 +111,11 @@ module hwvtep {
 
     grouping hwvtep-physical-switch-attributes {
         uses hwvtep-node-identification;
+
+        leaf physical-switch-uuid {
+            description "The unique identifier of the physical-switch";
+            type yang:uuid;
+        }
         list management-ips {
             key "management-ips-key";
             leaf management-ips-key {
@@ -231,6 +242,10 @@ module hwvtep {
     }
 
     grouping hwvtep-physical-locator-attributes {
+        leaf physical-locator-uuid {
+            description "The unique identifier of the physical-locator";
+            type yang:uuid;
+        }
         leaf encapsulation-type {
             type encapsulation-type;
             description "Encapsulation type used by this locator";
@@ -251,7 +266,7 @@ module hwvtep {
 
     grouping hwvtep-logical-switch-attributes {
         uses hwvtep-node-identification;
-        leaf hwvtep-logical-switch-external-id {
+        leaf logical-switch-uuid {
             description "A unique identifier of the logical switch";
             type yang:uuid;
         }
@@ -259,7 +274,6 @@ module hwvtep {
             description "Per Logical Switch tunnel key";
             type string;
         }
-        uses hwvtep-physical-locator-set-attributes;
     }
 
     grouping hwvtep-physical-port-attributes {
@@ -274,6 +288,10 @@ module hwvtep {
             leaf logical-switch-ref {
                 description "Reference to logical switch for the vlan";
                 type hwvtep-logical-switch-ref;
+            }
+            leaf physical-port-uuid {
+                description "The unique identifier of the physical-port";
+                type yang:uuid;
             }
         }
     }

@@ -24,8 +24,12 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -46,12 +50,6 @@ import com.google.common.collect.ImmutableBiMap;
 public class HwvtepSouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundMapper.class);
     private static final String N_CONNECTIONS_STR = "n_connections";
-
-    private static NodeId createNodeId(HwvtepConnectionInstance client) {
-        NodeKey key = client.getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
-        return key.getNodeId();
-
-    }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
         return InstanceIdentifier
@@ -150,14 +148,19 @@ public class HwvtepSouthboundMapper {
                         .child(Node.class, nodeKey).build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
+    public static InstanceIdentifier<LogicalSwitches> createInstanceIdentifier(HwvtepConnectionInstance client,
                     LogicalSwitch lSwitch) {
-        String nodeString = client.getNodeKey().getNodeId().getValue() + "/logicalswitch/" + lSwitch.getName();
-        NodeId nodeId = new NodeId(new Uri(nodeString));
-        NodeKey nodeKey = new NodeKey(nodeId);
-        return InstanceIdentifier.builder(NetworkTopology.class)
+        InstanceIdentifier<LogicalSwitches> iid = null;
+        iid = InstanceIdentifier.builder(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                        .child(Node.class, nodeKey).build();
+                        .child(Node.class, client.getNodeKey()).augmentation(HwvtepGlobalAugmentation.class)
+                        .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())))
+                        .build();
+        /* TODO: Will this work instead to make it simpler?
+        iid = client.getInstanceIdentifier().builder()
+            .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())))).build()
+         */
+        return iid;
     }
 
     public static Class<? extends EncapsulationTypeBase> createEncapsulationType(String type) {

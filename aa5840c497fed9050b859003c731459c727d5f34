@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_dda9a67c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalLocatorUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-01T02:47:46Z",
+      "side": 1,
+      "message": "Since our key for physical locator is encaps type and IP, changing IP is basically creating a new PhysicalLocator. Unless it has any other fields, it will not require updates.",
+      "parentUuid": "5aaae553_9f19eb24",
+      "range": {
+        "startLine": 72,
+        "startChar": 12,
+        "endLine": 72,
+        "endChar": 58
+      },
+      "revId": "aa5840c497fed9050b859003c731459c727d5f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_ff1c9f15",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalLocatorUpdateCommand.java",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-29T15:44:47Z",
       "side": 1,
       "message": "Why not set EncapsulationType to String rather than EncapsulationTypeVxlanOverIpv4 in hwvtep.yang?",
+      "range": {
+        "startLine": 78,
+        "startChar": 16,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "aa5840c497fed9050b859003c731459c727d5f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_7db672de",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalLocatorUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-01T02:47:46Z",
+      "side": 1,
+      "message": "This is way we handle enums in yang. I won\u0027t recommend this. I\u0027ve declared a map that you can use to get the string for encaps type. This will allow us to support more types in future without needing to modify this code. I\u0027ll lookup snipped and share with you.",
+      "parentUuid": "5aaae553_ff1c9f15",
       "range": {
         "startLine": 78,
         "startChar": 16,

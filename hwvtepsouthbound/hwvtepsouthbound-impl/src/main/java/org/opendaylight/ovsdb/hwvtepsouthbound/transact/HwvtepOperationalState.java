@@ -26,7 +26,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -86,15 +85,6 @@ public class HwvtepOperationalState {
         if (nodeOptional.isPresent()) {
             return Optional.fromNullable(nodeOptional.get().getAugmentation(PhysicalSwitchAugmentation.class));
         }
-        return Optional.absent();
-    }
-
-    public Optional<LocatorSet> getPhysicalLocatorSet(InstanceIdentifier<?> iid) {
-        Optional<Node> nodeOptional = getGlobalNode(iid);
-        //TODO: physical locator set are under different logical switches
-        /*if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches());
-        }*/
         return Optional.absent();
     }
 

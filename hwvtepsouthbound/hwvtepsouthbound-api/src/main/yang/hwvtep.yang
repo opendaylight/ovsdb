@@ -77,10 +77,12 @@ module hwvtep {
     }
 
     grouping hwvtep-mcast-mac-table-attributes {
-        leaf locator-set-ref {
-            description "Reference to a set of physical locators used for replication";
-            type hwvtep-physical-locator-set-ref;
+        description "Multicast mac table attributes";
+        leaf ipaddr {
+            description "Optional IP address associated with the mac";
+            type inet:ip-address;
         }
+        uses hwvtep-physical-locator-set-attributes;
     }
 
     grouping hwvtep-tunnel-attributes {
@@ -259,7 +261,6 @@ module hwvtep {
             description "Per Logical Switch tunnel key";
             type string;
         }
-        uses hwvtep-physical-locator-set-attributes;
     }
 
     grouping hwvtep-physical-port-attributes {

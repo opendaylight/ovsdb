@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.Mod
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
@@ -36,6 +37,8 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
 
@@ -121,7 +124,8 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
             Node node = getCreated(mod);
             if (node != null) {
                 HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
-                if (hwvtepGlobal != null) {
+                // We can only connect if user configured connection info
+                if (hwvtepGlobal != null && hwvtepGlobal.getConnectionInfo() != null) {
                     ConnectionInfo connection = hwvtepGlobal.getConnectionInfo();
                     InstanceIdentifier<Node> iid = hcm.getInstanceIdentifier(connection);
                     if (iid != null) {
@@ -148,7 +152,8 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
                 Node original = getOriginal(mod);
                 HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
                 HwvtepGlobalAugmentation hgOriginal = original.getAugmentation(HwvtepGlobalAugmentation.class);
-                if (hgUpdated != null && hgOriginal != null) {
+                // Check if user has updated connection information
+                if (hgUpdated != null && hgOriginal != null && hgUpdated.getConnectionInfo() != null) {
                     OvsdbClient client = hcm.getClient(hgUpdated.getConnectionInfo());
                     if (client == null) {
                         try {
@@ -264,6 +269,16 @@ public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, A
             //From original node to get connection instance
             Node node = mod.getDataBefore()!=null ? mod.getDataBefore() : mod.getDataAfter();
             HwvtepConnectionInstance connection = hcm.getConnectionInstance(node);
+            if(connection == null) {
+                //Let us try getting it from Operational DS
+                final ReadWriteTransaction transaction = db.newReadWriteTransaction();
+                InstanceIdentifier<Node> connectionIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
+                Optional<Node> optionalNode = HwvtepSouthboundUtil.readNode(transaction, connectionIid);
+                LOG.trace("Node in Operational DataStore for user node {} is {}", node, optionalNode);
+                if(optionalNode.isPresent()) {
+                    connection = hcm.getConnectionInstance(optionalNode.get());
+                }
+            }
             if (connection != null) {
                 if (!result.containsKey(connection)) {
                     List<DataTreeModification<Node>> tempChanges= new ArrayList<DataTreeModification<Node>>();

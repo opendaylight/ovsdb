@@ -25,7 +25,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configure
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
-import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -48,10 +48,10 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.SfcCla
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionChainUtils;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionPathUtils;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionForwarderUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionPathUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
@@ -59,6 +59,7 @@ import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SftType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctions;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
@@ -77,7 +78,6 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev1407
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPathsBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPathBuilder;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sft.rev140701.Firewall;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessListsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclBuilder;
@@ -113,7 +113,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -124,6 +123,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Maps;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -488,7 +489,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
                 serviceFunctionForwarderUtils.serviceFunctionForwarderBuilder(
-                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Name, sf1Ip, sn1Name, bridge1Name, Firewall.class);
+                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Ip, sn1Name, bridge1Name);
         List<ServiceFunctionForwarder>  serviceFunctionForwarderList = serviceFunctionForwarderUtils.list(
                 new ArrayList<ServiceFunctionForwarder>(), serviceFunctionForwarderBuilder);
 
@@ -507,11 +508,11 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     private ServiceFunctionChainsBuilder serviceFunctionChainsBuilder() {
         String sf1Name = "firewall-abstract1";
-        String sf2Name = "dpi-abstract1";
+        SftType sfType = new SftType("firewall");
         String sfcName = SFCNAME;
 
         SfcServiceFunctionBuilder sfcServiceFunctionBuilder = serviceFunctionChainUtils.sfcServiceFunctionBuilder(
-                new SfcServiceFunctionBuilder(), sf1Name, Firewall.class);
+                new SfcServiceFunctionBuilder(), sf1Name, sfType);
         List<SfcServiceFunction> sfcServiceFunctionList =
                 serviceFunctionChainUtils.list(new ArrayList<SfcServiceFunction>(), sfcServiceFunctionBuilder);
 

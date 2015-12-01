@@ -29,6 +29,16 @@ public class TransactCommandAggregator implements TransactCommand {
         commands.add(new PhysicalPortRemoveCommand(state,changes));
         commands.add(new PhysicalLocatorUpdateCommand(state,changes));
         commands.add(new PhysicalLocatorRemoveCommand(state,changes));
+        commands.add(new McastMacsRemoteUpdateCommand(state,changes));
+        commands.add(new McastMacsRemoteRemoveCommand(state,changes));
+        commands.add(new McastMacsLocalUpdateCommand(state,changes));
+        commands.add(new McastMacsLocalRemoveCommand(state,changes));
+        commands.add(new UcastMacsRemoteUpdateCommand(state,changes));
+        commands.add(new UcastMacsRemoteRemoveCommand(state,changes));
+        commands.add(new UcastMacsLocalUpdateCommand(state,changes));
+        commands.add(new UcastMacsLocalRemoveCommand(state,changes));
+        commands.add(new TunnelUpdateCommand(state,changes));
+        commands.add(new TunnelRemoveCommand(state,changes));
     }
 
     @Override

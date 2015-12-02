@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_dc576325",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T13:45:50Z",
+      "side": 1,
+      "message": "We\u0027ll need to revisit the order of commands and even lose some of these altogether. We\u0027ll do that once we got basic things working and test framework in place.",
+      "revId": "f37286009df6b7b7806ef24b789ab6e321f43bf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

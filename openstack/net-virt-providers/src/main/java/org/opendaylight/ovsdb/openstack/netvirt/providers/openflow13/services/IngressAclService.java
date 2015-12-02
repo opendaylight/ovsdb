@@ -1,22 +1,22 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
-import java.math.BigInteger;
-import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityGroupCacheManger;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -24,6 +24,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefixBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
@@ -41,12 +43,19 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import java.math.BigInteger;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+
+
 
 public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider, ConfigInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(IngressAclService.class);
     private volatile SecurityServicesManager securityServicesManager;
+    private volatile SecurityGroupCacheManger securityGroupCacheManger;
     private static final int PORT_RANGE_MIN = 1;
     private static final int PORT_RANGE_MAX = 65535;
 
@@ -59,11 +68,11 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     }
 
     @Override
-    public void programPortSecurityAcl(Long dpid, String segmentationId, String attachedMac,
+    public void programPortSecurityGroup(Long dpid, String segmentationId, String attachedMac,
                                        long localPort, NeutronSecurityGroup securityGroup,
-                                       List<Neutron_IPs> srcAddressList, boolean write) {
+                                       String portUuid, boolean write) {
 
-        LOG.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);
+        LOG.trace("programPortSecurityGroup neutronSecurityGroup: {} ", securityGroup);
         if (securityGroup == null || securityGroup.getSecurityRules() == null) {
             return;
         }
@@ -71,6 +80,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         List<NeutronSecurityRule> portSecurityList = securityGroup.getSecurityRules();
         /* Iterate over the Port Security Rules in the Port Security Group bound to the port*/
         for (NeutronSecurityRule portSecurityRule : portSecurityList) {
+
             /**
              * Neutron Port Security Acl "ingress" and "IPv4"
              * Check that the base conditions for flow based Port Security are true:
@@ -88,194 +98,134 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
             if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
                     && "ingress".equals(portSecurityRule.getSecurityRuleDirection())) {
-                LOG.debug("Acl Rule matching IPv4 and ingress is: {} ", portSecurityRule);
-                if (null == portSecurityRule.getSecurityRuleProtocol()) {
-                    ingressAclIPv4(dpid, segmentationId, attachedMac,
-                                   write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                } else if (null != portSecurityRule.getSecurityRemoteGroupID()) {
+                LOG.debug("programPortSecurityGroup: Rule matching IPv4 and ingress is: {} ", portSecurityRule);
+                if (null != portSecurityRule.getSecurityRemoteGroupID()) {
                     //Remote Security group is selected
                     List<Neutron_IPs> remoteSrcAddressList = securityServicesManager
-                            .getVmListForSecurityGroup(srcAddressList,portSecurityRule.getSecurityRemoteGroupID());
+                            .getVmListForSecurityGroup(portUuid,portSecurityRule.getSecurityRemoteGroupID());
                     if (null != remoteSrcAddressList) {
                         for (Neutron_IPs vmIp :remoteSrcAddressList ) {
-                            switch (portSecurityRule.getSecurityRuleProtocol()) {
-                                case MatchUtils.TCP:
-                                    ingressAclTcp(dpid, segmentationId, attachedMac, portSecurityRule,
-                                                vmIp.getIpAddress(),write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                    break;
-                                case MatchUtils.UDP:
-                                    ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule,
-                                                vmIp.getIpAddress(), write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                    break;
-                                case MatchUtils.ICMP:
-                                    ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule,
-                                                vmIp.getIpAddress(), write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                                    break;
-                                default:
-                                    LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
-                                    break;
-                            }
+                            programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                                                    portSecurityRule, vmIp, write);
+                        }
+                        if (write) {
+                            securityGroupCacheManger.addToCache(portSecurityRule.getSecurityRemoteGroupID(), portUuid);
+                        } else {
+                            securityGroupCacheManger.removeFromCache(portSecurityRule.getSecurityRemoteGroupID(),
+                                                                     portUuid);
                         }
                     }
                 } else {
-                    //CIDR is selected
-                    switch (portSecurityRule.getSecurityRuleProtocol()) {
-                        case MatchUtils.TCP:
-                            ingressAclTcp(dpid, segmentationId, attachedMac,
-                                          portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                            break;
-                        case MatchUtils.UDP:
-                            ingressAclUdp(dpid, segmentationId, attachedMac,
-                                          portSecurityRule, null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                            break;
-                        case MatchUtils.ICMP:
-                            ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, null,
-                                           write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                            break;
-                        default:
-                            LOG.error("programPortSecurityAcl: Protocol not supported", portSecurityRule);
-                    }
+                    programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                                            portSecurityRule, null, write);
                 }
-
-                /**
-                 * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (True)
-                 * TODO Some part of the code will be  used when conntrack is supported
-
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
-                                !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #1 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
-                            true);
-                    ingressACLTcpPortWithPrefix(dpid, segmentationId,
-                            attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                    continue;
+                if (write) {
+                    securityGroupCacheManger.portAdded(securityGroup.getSecurityGroupUUID(), portUuid);
+                } else {
+                    securityGroupCacheManger.portRemoved(securityGroup.getSecurityGroupUUID(), portUuid);
                 }
-                /**
-                 * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (True)
-                 */
-                /*if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
-                                !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #2 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                                             Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
-                            true);
-                    ingressACLTcpPortWithPrefix(dpid, segmentationId,
-                            attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                 *//**
-                 * TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-                 *//*
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #3 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, Constants.PROTO_PREFIX_MATCH_PRIORITY_DROP,
-                            true);
-                    ingressACLPermitAllProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PROTO_PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                  *//**
-                  * TCP Proto (False), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-                  *//*
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
-                                !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #4 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, Constants.PREFIX_MATCH_PRIORITY_DROP, true);
-                    ingressACLPermitAllProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                   *//**
-                   * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (False)
-                   *//*
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #5 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, Constants.PROTO_PORT_MATCH_PRIORITY_DROP,
-                            true);
-                    ingressACLTcpSyn(dpid, segmentationId,
-                            attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            Constants.PREFIX_PORT_MATCH_PRIORITY_DROP);
-                    continue;
-                }
-                    *//**
-                    * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (False)
-                    *//*
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #6 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                                             Constants.PROTO_PORT_MATCH_PRIORITY_DROP, true);
-                    ingressACLTcpSyn(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRulePortMin(), Constants.PROTO_PORT_MATCH_PRIORITY);
-                    continue;
-                }
-                     *//**
-                     * TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (False or 0.0.0.0/0)
-                     *//*
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        ((String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) ||
-                                String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #7 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    // No need to drop until UDP/ICMP are implemented
-                    // ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_MATCH_PRIORITY_DROP, true);
-                    handleIngressAllowProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleProtocol(), Constants.PROTO_MATCH_PRIORITY);
-                    continue;
-                }*/
-                LOG.debug("Ingress Acl Match combination not found for rule: {}", portSecurityRule);
             }
         }
     }
 
     @Override
-    public void programFixedSecurityAcl(Long dpid, String segmentationId, String dhcpMacAddress,
+    public void programPortSecurityRule(Long dpid, String segmentationId, String attachedMac,
+                                        long localPort, NeutronSecurityRule portSecurityRule,
+                                        Neutron_IPs vmIp, boolean write) {
+        if (null == portSecurityRule.getSecurityRuleProtocol()) {
+            ingressAclIPv4(dpid, segmentationId, attachedMac,
+                           write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+        } else {
+            String ipaddress = null;
+            if (null != vmIp) {
+                ipaddress = vmIp.getIpAddress();
+                try {
+                    InetAddress address = InetAddress.getByName(ipaddress);
+                    // TODO: remove this when ipv6 support is implemented
+                    if (address instanceof Inet6Address) {
+                        LOG.debug("Skipping ip address {}. IPv6 support is not yet implemented.", address);
+                        return;
+                    }
+                } catch (UnknownHostException e) {
+                    LOG.warn("Invalid ip address {}", ipaddress, e);
+                    return;
+                }
+            }
+
+            if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+                String ipPrefixStr = portSecurityRule.getSecurityRuleRemoteIpPrefix();
+                try {
+                    IpPrefix ipPrefix = IpPrefixBuilder.getDefaultInstance(ipPrefixStr);
+                    // TODO: remove this when ipv6 support is implemented
+                    if (ipPrefix.getIpv6Prefix() != null) {
+                        LOG.debug("Skipping ip prefix {}. IPv6 support is not yet implemented.", ipPrefix);
+                        return;
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOG.warn("Invalid ip prefix {}", ipPrefixStr, e);
+                    return;
+                }
+            }
+
+            switch (portSecurityRule.getSecurityRuleProtocol()) {
+              case MatchUtils.TCP:
+                  LOG.debug("programPortSecurityRule: Rule matching TCP", portSecurityRule);
+                  ingressAclTcp(dpid, segmentationId, attachedMac, portSecurityRule, ipaddress,
+                              write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                  break;
+              case MatchUtils.UDP:
+                  LOG.debug("programPortSecurityRule: Rule matching UDP", portSecurityRule);
+                  ingressAclUdp(dpid, segmentationId, attachedMac, portSecurityRule, ipaddress,
+                                write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                  break;
+              case MatchUtils.ICMP:
+                  LOG.debug("programPortSecurityRule: Rule matching ICMP", portSecurityRule);
+                  ingressAclIcmp(dpid, segmentationId, attachedMac, portSecurityRule, ipaddress,
+                                 write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                  break;
+              default:
+                  LOG.info("programPortSecurityAcl: Protocol is not TCP/UDP/ICMP but other " +
+                          "protocol = ", portSecurityRule.getSecurityRuleProtocol());
+                  ingressOtherProtocolAclHandler(dpid, segmentationId, attachedMac, portSecurityRule,
+                              null, write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                  break;
+            }
+        }
+    }
+
+    private void ingressOtherProtocolAclHandler(Long dpidLong, String segmentationId, String dstMac,
+          NeutronSecurityRule portSecurityRule, String srcAddress,
+          boolean write, Integer protoPortMatchPriority) {
+
+          MatchBuilder matchBuilder = new MatchBuilder();
+          String flowId = "Ingress_Other_" + segmentationId + "_" + dstMac + "_";
+          matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
+          short proto = 0;
+          try {
+              Integer protocol = new Integer(portSecurityRule.getSecurityRuleProtocol());
+              proto = protocol.shortValue();
+              flowId = flowId + proto;
+          } catch (NumberFormatException e) {
+              LOG.error("Protocol vlaue conversion failure", e);
+          }
+          matchBuilder = MatchUtils.createIpProtocolMatch(matchBuilder, proto);
+          if (null != srcAddress) {
+              flowId = flowId + srcAddress;
+              matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
+                                        MatchUtils.iPv4PrefixFromIPv4Address(srcAddress), null);
+          } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+              flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+              matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
+                                        new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()),null);
+          }
+          String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+          NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+          flowId = flowId + "_Permit";
+          syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+    }
+
+    @Override
+    public void programFixedSecurityGroup(Long dpid, String segmentationId, String dhcpMacAddress,
                                         long localPort, boolean isLastPortinSubnet,
                                         boolean isComputePort, boolean write) {
         //If this port is the only port in the compute node add the DHCP server rule.
@@ -294,7 +244,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
      * @param protoPortMatchPriority the protocol match priority.
      */
     private void ingressAclIPv4(Long dpidLong, String segmentationId, String dstMac,
-                               boolean write, Integer protoPortMatchPriority ) {
+                                boolean write, Integer protoPortMatchPriority ) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
@@ -316,8 +266,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
      * @param protoPortMatchPriority the protocol match priroty
      */
     private void ingressAclTcp(Long dpidLong, String segmentationId, String dstMac,
-                              NeutronSecurityRule portSecurityRule, String srcAddress, boolean write,
-                              Integer protoPortMatchPriority ) {
+                               NeutronSecurityRule portSecurityRule, String srcAddress, boolean write,
+                               Integer protoPortMatchPriority ) {
 
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
@@ -328,13 +278,13 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
             flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0,
-                                                    portSecurityRule.getSecurityRulePortMin());
+                                                     portSecurityRule.getSecurityRulePortMin());
         } else {
             /* All TCP Match */
-            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+            if (portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
                     && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
-                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
-                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
+                    + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
             }
             /*TODO TCP PortRange Match*/
@@ -372,8 +322,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
      * @param protoPortMatchPriority the protocol match priroty
      */
     private void ingressAclUdp(Long dpidLong, String segmentationId, String dstMac,
-                              NeutronSecurityRule portSecurityRule, String srcAddress,
-                              boolean write, Integer protoPortMatchPriority ) {
+                               NeutronSecurityRule portSecurityRule, String srcAddress,
+                               boolean write, Integer protoPortMatchPriority ) {
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_UDP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
@@ -382,13 +332,13 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
             flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_";
             matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0,
-                                                    portSecurityRule.getSecurityRulePortMin());
+                                                     portSecurityRule.getSecurityRulePortMin());
         } else {
             /* All UDP Match */
-            if(portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
+            if (portSecurityRule.getSecurityRulePortMin().equals(PORT_RANGE_MIN)
                     && portSecurityRule.getSecurityRulePortMax().equals(PORT_RANGE_MAX)) {
-                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_" +
-                    portSecurityRule.getSecurityRulePortMax()+ "_";
+                flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
+                    + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
             }
             /*TODO TCP PortRange Match*/
@@ -403,7 +353,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
-                                      new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()),null);
+                                                        new Ipv4Prefix(portSecurityRule
+                                                                       .getSecurityRuleRemoteIpPrefix()),null);
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
@@ -429,29 +380,38 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                 boolean write, Integer protoPortMatchPriority) {
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_"
-                    + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
-                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
+        String flowId = "Ingress_ICMP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
-        matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
-                        portSecurityRule.getSecurityRulePortMin().shortValue(),
-                        portSecurityRule.getSecurityRulePortMax().shortValue());
+
+        /* Custom ICMP Match */
+        if (portSecurityRule.getSecurityRulePortMin() != null &&
+                portSecurityRule.getSecurityRulePortMax() != null) {
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
+            matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,
+                    portSecurityRule.getSecurityRulePortMin().shortValue(),
+                    portSecurityRule.getSecurityRulePortMax().shortValue());
+        } else {
+            /* All ICMP Match */
+            flowId = flowId + "all" + "_";
+            matchBuilder = MatchUtils.createICMPv4Match(matchBuilder,MatchUtils.ALL_ICMP, MatchUtils.ALL_ICMP);
+        }
         if (null != srcAddress) {
             flowId = flowId + srcAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
-                    MatchUtils.iPv4PrefixFromIPv4Address(srcAddress), null);
-
+                                                        MatchUtils.iPv4PrefixFromIPv4Address(srcAddress), null);
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
-                    new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()),null);
+                                                        new Ipv4Prefix(portSecurityRule
+                                                                       .getSecurityRuleRemoteIpPrefix()),null);
         }
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
+
 
     public void ingressACLTcpSyn(Long dpidLong, String segmentationId, String attachedMac, boolean write,
                                  Integer securityRulePortMin, Integer protoPortMatchPriority) {
@@ -481,11 +441,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -533,11 +492,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             List<Instruction> instructionsList = Lists.newArrayList();
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -564,7 +522,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setMatch(MatchUtils
                              .createDmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null).build());
         flowBuilder.setMatch(MatchUtils
-                .createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+                             .createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
 
         String flowId = "UcastOut_" + segmentationId + "_" +
@@ -583,11 +541,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructionsList.add(ib.build());
@@ -780,6 +737,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         super.setDependencies(bundleContext.getServiceReference(IngressAclProvider.class.getName()), this);
         securityServicesManager =
                 (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
+        securityGroupCacheManger =
+                (SecurityGroupCacheManger) ServiceHelper.getGlobalInstance(SecurityGroupCacheManger.class, this);
     }
 
     @Override

@@ -154,15 +154,15 @@ public class NeutronL3AdapterTest {
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "updateL3ForNeutronPort", NeutronPort.class, boolean.class));
         Mockito.doNothing().when(neutronL3Adapter).handleNeutronRouterInterfaceEvent(any(NeutronRouter.class), any(NeutronRouter_Interface.class), any(Action.class));
 
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, null, Action.ADD);
         Mockito.verify(neutronL3Adapter).handleNeutronRouterInterfaceEvent(any(NeutronRouter.class), any(NeutronRouter_Interface.class), eq(Action.ADD));
 
         when(neutronPort.getDeviceOwner()).thenReturn("");
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, null,Action.ADD);
         Mockito.verify(neutronL3Adapter, times(2)).handleNeutronRouterInterfaceEvent(any(NeutronRouter.class), any(NeutronRouter_Interface.class), eq(Action.ADD));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("updateL3ForNeutronPort", any(NeutronPort.class), eq(false));
 
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, null,Action.DELETE);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("updateL3ForNeutronPort", any(NeutronPort.class), eq(true));
     }
 
@@ -430,16 +430,16 @@ public class NeutronL3AdapterTest {
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventDelete", OvsdbTerminationPointAugmentation.class, Long.class));
 
         PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(45L);
-        Mockito.doNothing().when(neutronL3Adapter).handleNeutronPortEvent(any(NeutronPort.class), any(Action.class));
+        Mockito.doNothing().when(neutronL3Adapter).handleNeutronPortEvent(any(NeutronPort.class), any(NeutronPort.class), any(Action.class));
 
         neutronL3Adapter.handleInterfaceEvent(node, intf, mock(NeutronNetwork.class), Action.ADD);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("handleInterfaceEventAdd", any(String.class), anyLong(), any(Uuid.class));
-        Mockito.verify(neutronL3Adapter).handleNeutronPortEvent(neutronPort, Action.ADD);
+        Mockito.verify(neutronL3Adapter).handleNeutronPortEvent(neutronPort, null, Action.ADD);
 
         neutronL3Adapter.handleInterfaceEvent(node, intf, mock(NeutronNetwork.class), Action.DELETE);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("handleInterfaceEventDelete", any(OvsdbTerminationPointAugmentation.class), anyLong());
-        Mockito.verify(neutronL3Adapter).handleNeutronPortEvent(neutronPort, Action.DELETE);
+        Mockito.verify(neutronL3Adapter).handleNeutronPortEvent(neutronPort, null, Action.DELETE);
     }
 
     @Test

@@ -84,11 +84,11 @@ public class PortHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.ADD);
         portHandlerSpy.processEvent(ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.ADD);
+        verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, null, Action.ADD);
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
         portHandlerSpy.processEvent(ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.UPDATE);
+        verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, null, Action.UPDATE);
 
         List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
@@ -103,7 +103,7 @@ public class PortHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.DELETE);
         portHandlerSpy.processEvent(ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.DELETE);
+        verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, null, Action.DELETE);
         verify(southbound, times(1)).deleteTerminationPoint(any(Node.class), anyString());
     }
 

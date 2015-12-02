@@ -10,7 +10,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendaylight.neutron.spi.INeutronPortAware;
 import org.opendaylight.neutron.spi.NeutronPort;
@@ -38,6 +40,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
     private volatile Southbound southbound;
+    private volatile Map <String, NeutronPort>  originalPortCache = new HashMap<String, NeutronPort>();
 
     /**
      * Invoked when a port creation is requested
@@ -65,7 +68,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                      " network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, null, Action.ADD);
     }
 
     /**
@@ -81,6 +84,11 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     @Override
     public int canUpdatePort(NeutronPort delta,
                              NeutronPort original) {
+        /**
+         * Cache added to store the original port to get the data before update.
+         * This cache is specific to lithium branch.
+         */
+        originalPortCache.put(original.getID(), clonePort(original));
         return HttpURLConnection.HTTP_OK;
     }
 
@@ -95,7 +103,13 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     }
     private void doNeutronPortUpdated(NeutronPort neutronPort) {
         logger.debug("Handling neutron update port " + neutronPort);
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.UPDATE);
+        /**
+         * The original port is passed incase of an update. A null value will be
+         * passed in other cases.
+         */
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, originalPortCache
+                                                .get(neutronPort.getID()),Action.UPDATE);
+        originalPortCache.remove(neutronPort.getID());
     }
 
     /**
@@ -121,7 +135,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     }
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
         logger.debug("Handling neutron delete port " + neutronPort);
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, null, Action.DELETE);
         //TODO: Need to implement getNodes
         List<Node> nodes = nodeCacheManager.getNodes();
         for (Node node : nodes) {
@@ -144,6 +158,14 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                      " network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
+    }
+
+    private NeutronPort clonePort (NeutronPort port) {
+        NeutronPort clonedPort = new NeutronPort();
+        clonedPort.setID(port.getID());
+        clonedPort.setSecurityGroups(port.getSecurityGroups());
+        return clonedPort;
+
     }
 
     /**

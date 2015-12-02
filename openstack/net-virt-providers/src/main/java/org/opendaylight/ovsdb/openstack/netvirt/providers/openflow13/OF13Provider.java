@@ -1013,15 +1013,15 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             isLastPortinSubnet = false;
             if (isComputePort) {
                 isLastPortinSubnet = securityServicesManager.isLastPortinSubnet(node, intf);
-                srcAddressList = securityServicesManager.getIpAddressList(node, intf);
+                srcAddressList = securityServicesManager.getIpAddressList(intf);
                 if (null == srcAddressList) {
                     LOG.warn("programLocalRules: No Ip address assigned {}", intf);
                     return;
                 }
             }
-            ingressAclProvider.programFixedSecurityAcl(dpid, segmentationId, dhcpPort.getMacAddress(), localPort,
+            ingressAclProvider.programFixedSecurityGroup(dpid, segmentationId, dhcpPort.getMacAddress(), localPort,
                                                        isLastPortinSubnet, isComputePort, write);
-            egressAclProvider.programFixedSecurityAcl(dpid, segmentationId, attachedMac, localPort,
+            egressAclProvider.programFixedSecurityGroup(dpid, segmentationId, attachedMac, localPort,
                                                       srcAddressList, isLastPortinBridge, isComputePort,write);
             /* If the network type is tunnel based (VXLAN/GRRE/etc) with Neutron Port Security ACLs */
             /* TODO SB_MIGRATION */
@@ -1032,11 +1032,13 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 //Associate the security group flows.
                 List<NeutronSecurityGroup> securityGroupListInPort = securityServicesManager
                         .getSecurityGroupInPortList(intf);
+                String neutronPortId = southbound.getInterfaceExternalIdsValue(intf,
+                                                                               Constants.EXTERNAL_ID_INTERFACE_ID);
                 for (NeutronSecurityGroup securityGroupInPort:securityGroupListInPort) {
-                    ingressAclProvider.programPortSecurityAcl(dpid, segmentationId, attachedMac, localPort,
-                                                              securityGroupInPort,srcAddressList, write);
-                    egressAclProvider.programPortSecurityAcl(dpid, segmentationId, attachedMac, localPort,
-                                                             securityGroupInPort,srcAddressList, write);
+                    ingressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
+                                                              securityGroupInPort, neutronPortId, write);
+                    egressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
+                                                             securityGroupInPort, neutronPortId, write);
                 }
             }
         } else {

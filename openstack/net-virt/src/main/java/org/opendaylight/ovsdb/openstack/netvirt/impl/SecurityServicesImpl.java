@@ -1,26 +1,29 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
+import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -30,12 +33,19 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SecurityServicesImpl implements ConfigInterface, SecurityServicesManager {
-    static final Logger LOG = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile Southbound southbound;
     private volatile NeutronL3Adapter neutronL3Adapter;
+    private volatile INeutronNetworkCRUD neutronNetworkCache;
+    private volatile ConfigurationService configurationService;
+    private volatile IngressAclProvider ingressAclProvider;
+    private volatile EgressAclProvider egressAclProvider;
 
     @Override
     public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
@@ -98,6 +108,8 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         }
         NeutronPort neutronPort = null;
 
+        LOG.trace("getDHCPServerPort for {}",
+                  terminationPointAugmentation.getName());
         try {
             String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                                                                            Constants.EXTERNAL_ID_INTERFACE_ID);
@@ -117,6 +129,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 }
                 LOG.info("getDHCPServerPort: neutron port of {} got from cleanupcache", neutronPortId);
 
+            }
+            /* if the current port is a DHCP port, return the same*/
+            if (neutronPort.getDeviceOwner().contains("dhcp")) {
+                return neutronPort;
             }
             /* if the current port is a DHCP port, return the same*/
             if (neutronPort.getDeviceOwner().contains("dhcp")) {
@@ -283,18 +299,16 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                                                                                 Constants.EXTERNAL_ID_INTERFACE_ID);
                         if (null != portId) {
                             NeutronPort port = neutronPortCache.getPort(portId);
-                            if (null != port) {
-                                if (!(port.getID().equals(neutronPort.getID()))
-                                        && port.getDeviceOwner().contains("compute")) {
-                                    List<Neutron_IPs> portFixedIp = port.getFixedIPs();
-                                    if (null == portFixedIp || portFixedIp.isEmpty()) {
-                                        return false;
-                                    }
-                                    if (portFixedIp.iterator().next().getSubnetUUID()
-                                            .equals(neutronPort.getFixedIPs().iterator().next().getSubnetUUID())) {
-                                        LOG.trace("isLastPortinSubnet: Port is not the only port.");
-                                        return false;
-                                    }
+                            if (null != port && !(port.getID().equals(neutronPort.getID()))
+                                    && port.getDeviceOwner().contains("compute")) {
+                                List<Neutron_IPs> portFixedIp = port.getFixedIPs();
+                                if (null == portFixedIp || portFixedIp.isEmpty()) {
+                                    return false;
+                                }
+                                if (portFixedIp.iterator().next().getSubnetUUID()
+                                        .equals(neutronPort.getFixedIPs().iterator().next().getSubnetUUID())) {
+                                    LOG.trace("isLastPortinSubnet: Port is not the only port.");
+                                    return false;
                                 }
                             }
                         }
@@ -317,14 +331,13 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             for (TerminationPoint tp : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
-                if (null != ovsdbTerminationPointAugmentation) {
-                    if (!(ovsdbTerminationPointAugmentation.getName().equals(Constants.INTEGRATION_BRIDGE))
-                            && !(terminationPointAugmentation.getInterfaceUuid()
-                                    .equals(ovsdbTerminationPointAugmentation.getInterfaceUuid()))) {
-                        LOG.debug("isLastPortinBridge: it the last port in bridge {}",
-                                  terminationPointAugmentation.getName());
-                        return false;
-                    }
+                if (null != ovsdbTerminationPointAugmentation
+                        && !(ovsdbTerminationPointAugmentation.getName().equals(Constants.INTEGRATION_BRIDGE))
+                        && !(terminationPointAugmentation.getInterfaceUuid()
+                        .equals(ovsdbTerminationPointAugmentation.getInterfaceUuid()))) {
+                    LOG.debug("isLastPortinBridge: it the last port in bridge {}",
+                            terminationPointAugmentation.getName());
+                    return false;
                 }
             }
         }
@@ -332,8 +345,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
-    public List<Neutron_IPs> getIpAddressList(Node node,
-                                          OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+    public List<Neutron_IPs> getIpAddressList(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
             LOG.warn("getIpAddress: neutronPortCache is null");
 
@@ -359,7 +371,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
-    public List<Neutron_IPs> getVmListForSecurityGroup(List<Neutron_IPs> srcAddressList, String securityGroupUuid) {
+    public List<Neutron_IPs> getVmListForSecurityGroup(String portUuid, String securityGroupUuid) {
         List<Neutron_IPs> vmListForSecurityGroup = new ArrayList<>();
         /*For every port check whether security grouplist contains the current
          * security group.*/
@@ -370,11 +382,13 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                             + "compute port belongs to {}", neutronPort.getID(), neutronPort.getDeviceOwner());
                     continue;
                 }
+                if (portUuid.equals(neutronPort.getID())) {
+                    continue;
+                }
                 List<NeutronSecurityGroup> securityGroups = neutronPort.getSecurityGroups();
                 if (null != securityGroups) {
                     for (NeutronSecurityGroup securityGroup:securityGroups) {
-                        if (securityGroup.getSecurityGroupUUID().equals(securityGroupUuid)
-                                && !neutronPort.getFixedIPs().containsAll(srcAddressList)) {
+                        if (securityGroup.getSecurityGroupUUID().equals(securityGroupUuid)) {
                             LOG.debug("getVMListForSecurityGroup : adding ports with ips {} "
                                     + "compute port", neutronPort.getFixedIPs());
                             vmListForSecurityGroup.addAll(neutronPort.getFixedIPs());
@@ -393,11 +407,127 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
+    public void syncSecurityGroup(NeutronPort port, List<NeutronSecurityGroup> securityGroupList, boolean write) {
+        LOG.trace("syncSecurityGroup:" + securityGroupList + " Write:" + write);
+        if (null != port && null != port.getSecurityGroups()) {
+            Node node = getNode(port);
+            NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            String segmentationId = neutronNetwork.getProviderSegmentationID();
+            OvsdbTerminationPointAugmentation intf = getInterface(node, port);
+            long localPort = southbound.getOFPort(intf);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                LOG.debug("programVlanRules: No AttachedMac seen in {}", intf);
+                return;
+            }
+            long dpid = getDpidOfIntegrationBridge(node);
+            String neutronPortId = southbound.getInterfaceExternalIdsValue(intf,
+                                                                           Constants.EXTERNAL_ID_INTERFACE_ID);
+            for (NeutronSecurityGroup securityGroupInPort:securityGroupList) {
+                ingressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
+                                                          securityGroupInPort, neutronPortId, write);
+                egressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
+                                                         securityGroupInPort, neutronPortId, write);
+            }
+        }
+    }
+
+    @Override
+    public void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write) {
+        LOG.trace("syncSecurityGroup:" + securityRule + " Write:" + write);
+        if (null != port && null != port.getSecurityGroups()) {
+            Node node = getNode(port);
+            NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            String segmentationId = neutronNetwork.getProviderSegmentationID();
+            OvsdbTerminationPointAugmentation intf = getInterface(node, port);
+            long localPort = southbound.getOFPort(intf);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                LOG.debug("programVlanRules: No AttachedMac seen in {}", intf);
+                return;
+            }
+            long dpid = getDpidOfIntegrationBridge(node);
+            if ("IPv4".equals(securityRule.getSecurityRuleEthertype())
+                    && "ingress".equals(securityRule.getSecurityRuleDirection())) {
+
+                ingressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                                                           securityRule, vmIp, write);
+            } else if (securityRule.getSecurityRuleEthertype().equals("IPv4")
+                    && securityRule.getSecurityRuleDirection().equals("egress")) {
+                egressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                                                          securityRule, vmIp, write);
+            }
+        }
+    }
+
+    private long getDpidOfIntegrationBridge(Node node) {
+        LOG.trace("getDpidOfIntegrationBridge:" + node);
+        long dpid = 0L;
+        if (southbound.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
+            dpid = getDpid(node);
+        }
+        return dpid;
+    }
+
+    private long getDpid(Node node) {
+        LOG.trace("getDpid" + node);
+        long dpid = southbound.getDataPathId(node);
+        if (dpid == 0) {
+            LOG.warn("getDpid: dpid not found: {}", node);
+        }
+        return dpid;
+    }
+
+    private Node getNode(NeutronPort port) {
+        LOG.trace("getNode:Port" + port);
+        List<Node> toplogyNodes = southbound.readOvsdbTopologyNodes();
+
+        for (Node topologyNode : toplogyNodes) {
+            try {
+                Node node = southbound.getBridgeNode(topologyNode,Constants.INTEGRATION_BRIDGE);
+                List<OvsdbTerminationPointAugmentation> ovsdbPorts = southbound.getTerminationPointsOfBridge(node);
+                for (OvsdbTerminationPointAugmentation ovsdbPort : ovsdbPorts) {
+                    String uuid = southbound.getInterfaceExternalIdsValue(ovsdbPort,
+                                                            Constants.EXTERNAL_ID_INTERFACE_ID);
+                    if (null != uuid && uuid.equals(port.getID())) {
+                        return node;
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Exception during handlingNeutron network delete", e);
+            }
+        }
+        return null;
+    }
+
+    private OvsdbTerminationPointAugmentation getInterface(Node node, NeutronPort port) {
+        LOG.trace("getInterface:Node:" + node + " Port:" + port);
+        try {
+            List<OvsdbTerminationPointAugmentation> ovsdbPorts = southbound.getTerminationPointsOfBridge(node);
+            for (OvsdbTerminationPointAugmentation ovsdbPort : ovsdbPorts) {
+                String uuid = southbound.getInterfaceExternalIdsValue(ovsdbPort,
+                                                                      Constants.EXTERNAL_ID_INTERFACE_ID);
+                if (null != uuid && uuid.equals(port.getID())) {
+                    return ovsdbPort;
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Exception during handlingNeutron network delete", e);
+        }
+        return null;
+    }
+
+    @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+        neutronNetworkCache =
+                (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        configurationService =
+                (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
+
     }
 
     @Override
@@ -406,6 +536,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             neutronPortCache = (INeutronPortCRUD)impl;
         } else if (impl instanceof INeutronSubnetCRUD) {
             neutronSubnetCache = (INeutronSubnetCRUD) impl;
+        } else if (impl instanceof IngressAclProvider) {
+            ingressAclProvider = (IngressAclProvider) impl;
+        } else if (impl instanceof EgressAclProvider) {
+            egressAclProvider = (EgressAclProvider) impl;
         }
     }
 }

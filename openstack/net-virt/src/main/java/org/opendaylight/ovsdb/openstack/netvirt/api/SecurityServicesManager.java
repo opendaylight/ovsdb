@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import java.util.List;
-
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+
+import java.util.List;
 
 /**
  * Open vSwitch isolates Tenant Networks using VLANs on the Integration Bridge.
@@ -84,17 +84,31 @@ public interface SecurityServicesManager {
     boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Returns the  list of ip address assigned to the interface.
-     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the list of ip address associated with the vm
      */
-    List<Neutron_IPs> getIpAddressList(Node node, OvsdbTerminationPointAugmentation intf);
+    List<Neutron_IPs> getIpAddressList(OvsdbTerminationPointAugmentation intf);
     /**
      * Get the list of vm belonging to a security group.
-     * @param srcAddressList the address list of the connected vm.
+     * @param portUuid the uuid of the port.
      * @param securityGroupUuid the UUID of the remote security group.
      * @return the list of all vm belonging to the security group UUID passed.
      */
-    List<Neutron_IPs> getVmListForSecurityGroup(List<Neutron_IPs> srcAddressList,
+    List<Neutron_IPs> getVmListForSecurityGroup(String portUuid,
                                                 String securityGroupUuid);
+    /**
+     * Add or remove the security groups  from the port.
+     * @param port the neutron port.
+     * @param securityGroup the security group associated with the port.
+     * @param write whether to add/delete flow.
+     */
+    void syncSecurityGroup(NeutronPort port, List<NeutronSecurityGroup> securityGroup, boolean write);
+    /**
+     * Add or remove individual security  rules from the port.
+     * @param port the neutron port.
+     * @param securityRule the security group associated with the port.
+     * @param vmIp The list of remote vm ips.
+     * @param write whether to add/delete flow.
+     */
+    void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write);
 }

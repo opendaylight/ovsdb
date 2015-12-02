@@ -368,10 +368,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
         final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        Optional<Node> node = SouthboundUtil.readNode(transaction, nodeIid);
-        if (node.isPresent()) {
-            SouthboundUtil.deleteNode(transaction, nodeIid);
-        }
+        SouthboundUtil.deleteNode(transaction, nodeIid);
     }
 
     private OpenVSwitch getOpenVswitchTableEntry(OvsdbConnectionInstance connectionInstance) {

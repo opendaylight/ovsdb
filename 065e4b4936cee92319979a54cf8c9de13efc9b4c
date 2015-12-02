@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_bcbb87c3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "I missed it, can you add transaction.close here?",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_7cb50fcc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "use HwvtepSouthboundUtil method.",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_3cc79747",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "we\u0027re not using node returned by this? Why?",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_dcc3e336",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "same as above, we\u0027re not using the value returned.",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_fca9ff7b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "Use HwvtepSouthboundUtil.readNode() for this. It reads from Operational DS given iid and transaction.",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_dcda0317",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "There is an optimal way to do this. Every element that has a key has an instance identifier that points to it and can be sued to read off data store. Even easier for PhysicalPort as it is a terminationPoint. Take a look at getInstanceIdentifier in transactions.md.PhysicalPortUpdate.java on how to get it from switch iid and physical port name. It will avoid using list or any string comparisons.",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_fcd7bfeb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "Same as above. Use instance identifier to particular element to read it directly off data store.",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_7c03cf73",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-02T11:57:09Z",
+      "side": 1,
+      "message": "created.getTerminationPoint() already returns us list of TerminationPoints. Why not return and use it? Will save an extra iteration through list of TPs. You can extract augmentation in the calling function.",
+      "revId": "065e4b4936cee92319979a54cf8c9de13efc9b4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

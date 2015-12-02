@@ -82,6 +82,7 @@ public class MatchUtils {
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
     public static final String ICMP = "icmp";
+    public static final short ALL_ICMP = -1;
 
     /**
      * Create Ingress Port Match dpidLong, inPort

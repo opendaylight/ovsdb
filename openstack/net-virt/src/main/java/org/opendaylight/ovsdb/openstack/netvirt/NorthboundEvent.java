@@ -18,6 +18,7 @@ import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
+import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 
@@ -32,6 +33,7 @@ public class NorthboundEvent extends AbstractEvent {
     private NeutronLoadBalancer loadBalancer;
     private NeutronLoadBalancerPool loadBalancerPool;
     private NeutronLoadBalancerPoolMember loadBalancerPoolMember;
+    private NeutronSecurityRule neutronSecurityRule;
 
     NorthboundEvent(NeutronPort port, Action action) {
         super(HandlerType.NEUTRON_PORT, action);
@@ -79,6 +81,11 @@ public class NorthboundEvent extends AbstractEvent {
         this.loadBalancerPoolMember = loadBalancerPoolMember;
     }
 
+    NorthboundEvent(NeutronSecurityRule neutronSecurityRule, Action action) {
+        super(HandlerType.NEUTRON_PORT_SECURITY, action);
+        this.neutronSecurityRule = neutronSecurityRule;
+    }
+
     public NeutronPort getPort() {
         return port;
     }
@@ -106,6 +113,9 @@ public class NorthboundEvent extends AbstractEvent {
     public NeutronLoadBalancerPoolMember getLoadBalancerPoolMember() {
         return loadBalancerPoolMember;
     }
+    public NeutronSecurityRule getNeutronSecurityRule() {
+        return neutronSecurityRule;
+    }
 
     @Override
     public String toString() {
@@ -120,6 +130,7 @@ public class NorthboundEvent extends AbstractEvent {
                + ", loadBalancer=" + loadBalancer
                + ", loadBalancerPool=" + loadBalancerPool
                + ", loadBalancerPoolMember=" + loadBalancerPoolMember
+               + ", neutronsecurityRule=" + neutronSecurityRule
                + "]";
     }
 
@@ -133,6 +144,7 @@ public class NorthboundEvent extends AbstractEvent {
         result = prime * result + ((routerInterface == null) ? 0 : routerInterface.hashCode());
         result = prime * result + ((neutronFloatingIP == null) ? 0 : neutronFloatingIP.hashCode());
         result = prime * result + ((neutronNetwork == null) ? 0 : neutronNetwork.hashCode());
+        result = prime * result + ((neutronSecurityRule == null) ? 0 : neutronSecurityRule.hashCode());
         return result;
     }
 
@@ -212,6 +224,13 @@ public class NorthboundEvent extends AbstractEvent {
                 return false;
             }
         } else if (!loadBalancerPoolMember.equals(other.loadBalancerPoolMember)) {
+            return false;
+        }
+        if (neutronSecurityRule == null) {
+            if (other.neutronSecurityRule != null) {
+                return false;
+            }
+        } else if (!neutronSecurityRule.equals(other.neutronSecurityRule)) {
             return false;
         }
         return true;

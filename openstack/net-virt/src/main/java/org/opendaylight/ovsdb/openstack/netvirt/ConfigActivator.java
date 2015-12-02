@@ -34,6 +34,8 @@ public class ConfigActivator implements BundleActivator {
     private ServiceTracker routingProviderTracker;
     private ServiceTracker l3ForwardingProviderTracker;
     private ServiceTracker gatewayMacResolverProviderTracker;
+    private ServiceTracker ingressAclProviderTracker;
+    private ServiceTracker egressAclProviderTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -142,6 +144,10 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
+        final SecurityGroupCacheManagerImpl securityGroupCacheManger = new SecurityGroupCacheManagerImpl();
+        registerService(context,
+                        new String[]{SecurityGroupCacheManger.class.getName()}, null, securityGroupCacheManger);
+
         Dictionary<String, Object> fWaasHandlerProperties = new Hashtable<>();
         fWaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_FWAAS);
         FWaasHandler fWaasHandler = new FWaasHandler();
@@ -189,6 +195,7 @@ public class ConfigActivator implements BundleActivator {
         providerNetworkManager.setDependencies(context, null);
         fWaasHandler.setDependencies(context, null);
         securityServices.setDependencies(context, null);
+        securityGroupCacheManger.setDependencies(context, null);
         portSecurityHandler.setDependencies(context, null);
         lBaaSPoolMemberHandler.setDependencies(context, null);
         lBaaSPoolHandler.setDependencies(context, null);
@@ -259,6 +266,7 @@ public class ConfigActivator implements BundleActivator {
                     lBaaSPoolMemberHandler.setDependencies(service);
                     securityServices.setDependencies(service);
                     neutronL3Adapter.setDependencies(service);
+                    securityGroupCacheManger.setDependencies(service);
                 }
                 return service;
             }
@@ -422,6 +430,40 @@ public class ConfigActivator implements BundleActivator {
         };
         gatewayMacResolverProviderTracker.open();
         this.gatewayMacResolverProviderTracker = gatewayMacResolverProviderTracker;
+        @SuppressWarnings("unchecked")
+        ServiceTracker ingressAclProviderTracker = new ServiceTracker(context,
+                IngressAclProvider.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService IngressAclProvider");
+                IngressAclProvider service =
+                        (IngressAclProvider) context.getService(reference);
+                if (service != null) {
+                    securityServices.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        ingressAclProviderTracker.open();
+        this.ingressAclProviderTracker = ingressAclProviderTracker;
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker egressAclProviderTracker = new ServiceTracker(context,
+                EgressAclProvider.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService EgressAclProvider");
+                EgressAclProvider service =
+                        (EgressAclProvider) context.getService(reference);
+                if (service != null) {
+                    securityServices.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        egressAclProviderTracker.open();
+        this.egressAclProviderTracker = egressAclProviderTracker;
+
     }
 
 

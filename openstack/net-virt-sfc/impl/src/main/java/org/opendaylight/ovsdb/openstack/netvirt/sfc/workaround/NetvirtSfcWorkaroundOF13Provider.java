@@ -280,7 +280,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         if (ovsdbNode != null) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null && ovsdbNodeAugmentation.getOpenvswitchOtherConfigs() != null) {
-                southbound.getOtherConfig(ovsdbNode, OvsdbTables.OPENVSWITCH, TUNNEL_ENDPOINT_KEY);
+                local_ip = southbound.getOtherConfig(ovsdbNode, OvsdbTables.OPENVSWITCH, TUNNEL_ENDPOINT_KEY);
             }
 
         }

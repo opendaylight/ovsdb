@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_67b018f5",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 990,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-12-02T15:13:04Z",
+      "side": 1,
+      "message": "Hey Eric, I was just wondering why it wasn\u0027t okay in the port section ? (Asking that because in the schema the QoS is linked to the port)",
+      "revId": "3222c26f93b675129d2b4aeff7f98592f65c33bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

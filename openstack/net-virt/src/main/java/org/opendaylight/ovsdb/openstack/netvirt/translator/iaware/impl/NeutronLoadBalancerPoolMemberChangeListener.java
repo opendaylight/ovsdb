@@ -121,7 +121,9 @@ public class NeutronLoadBalancerPoolMemberChangeListener implements DataChangeLi
         }
 
         result.setID(member.getUuid().getValue());
-        result.setPoolMemberAdminStateIsUp(member.isAdminStateUp());
+        if (member.isAdminStateUp() != null) {
+            result.setPoolMemberAdminStateIsUp(member.isAdminStateUp());
+        }
 
         final IpAddress memberIpAddress = member.getAddress();
         if (memberIpAddress != null) {
@@ -132,10 +134,18 @@ public class NeutronLoadBalancerPoolMemberChangeListener implements DataChangeLi
             }
         }
 
-        result.setPoolMemberProtoPort(member.getProtocolPort());
-        result.setPoolMemberSubnetID(member.getSubnetId().getValue());
-        result.setPoolMemberTenantID(member.getTenantId().getValue());
-        result.setPoolMemberWeight(member.getWeight());
+        if (member.getProtocolPort() != null) {
+            result.setPoolMemberProtoPort(member.getProtocolPort());
+        }
+        if (member.getSubnetId() != null) {
+            result.setPoolMemberSubnetID(member.getSubnetId().getValue());
+        }
+        if (member.getTenantId() != null) {
+            result.setPoolMemberTenantID(member.getTenantId().getValue());
+        }
+        if (member.getWeight() != null) {
+            result.setPoolMemberWeight(member.getWeight());
+        }
 
         return result;
     }

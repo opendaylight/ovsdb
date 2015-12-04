@@ -37,41 +37,36 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
 public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
-    private Map<UUID, UcastMacsRemote> updatedUMacsRemoteRows;
-    private Map<UUID, UcastMacsRemote> oldUMacsRemoteRows;
-    private Map<UUID, PhysicalLocator> updatedPLocRows;
-    private Map<UUID, LogicalSwitch> updatedLSRows;
+    private final Map<UUID, UcastMacsRemote> updatedUMacsRemoteRows;
+    private final Map<UUID, UcastMacsRemote> oldUMacsRemoteRows;
+    private final Map<UUID, PhysicalLocator> updatedPLocRows;
+    private final Map<UUID, LogicalSwitch> updatedLSRows;
 
     public UcastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedUMacsRemoteRows = TyperUtils.extractRowsUpdated(UcastMacsRemote.class, getUpdates(),getDbSchema());
-        oldUMacsRemoteRows = TyperUtils.extractRowsOld(UcastMacsRemote.class, getUpdates(),getDbSchema());
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(),getDbSchema());
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(),getDbSchema());
+        updatedUMacsRemoteRows = TyperUtils.extractRowsUpdated(UcastMacsRemote.class, getUpdates(), getDbSchema());
+        oldUMacsRemoteRows = TyperUtils.extractRowsOld(UcastMacsRemote.class, getUpdates(), getDbSchema());
+        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        if (updatedUMacsRemoteRows != null || !updatedUMacsRemoteRows.isEmpty()) {
-            for (Entry<UUID, UcastMacsRemote> umrUpdate : updatedUMacsRemoteRows.entrySet()) {
-                updateUcastMacsRemote(transaction, umrUpdate.getValue());
-            }
+        for (Entry<UUID, UcastMacsRemote> umrUpdate : updatedUMacsRemoteRows.entrySet()) {
+            updateUcastMacsRemote(transaction, umrUpdate.getValue());
         }
     }
 
     private void updateUcastMacsRemote(ReadWriteTransaction transaction, UcastMacsRemote ucastMacsRemote) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
-        if(connection.isPresent()) {
+        if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(ucastMacsRemote);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
             //TODO: Handle any deletes
@@ -86,26 +81,26 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
         List<RemoteUcastMacs> remoteUMacs = new ArrayList<>();
         RemoteUcastMacsBuilder rumBuilder = new RemoteUcastMacsBuilder();
         rumBuilder.setMacEntryKey(new MacAddress(uMacRemote.getMac()));
-        if(uMacRemote.getIpAddr() != null && !uMacRemote.getIpAddr().isEmpty()) {
+        if (uMacRemote.getIpAddr() != null && !uMacRemote.getIpAddr().isEmpty()) {
             rumBuilder.setIpaddr(new IpAddress(uMacRemote.getIpAddr().toCharArray()));
         }
-        if(uMacRemote.getLocatorColumn() != null
-                        && uMacRemote.getLocatorColumn().getData() != null) {
+        if (uMacRemote.getLocatorColumn() != null
+                && uMacRemote.getLocatorColumn().getData() != null) {
             UUID pLocUUID = uMacRemote.getLocatorColumn().getData();
-            if(updatedPLocRows.get(pLocUUID) != null) {
+            if (updatedPLocRows.get(pLocUUID) != null) {
                 InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, updatedPLocRows.get(pLocUUID));
                 rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
             }
         }
-        if(uMacRemote.getLogicalSwitchColumn() != null
-                        && uMacRemote.getLogicalSwitchColumn().getData() != null) {
+        if (uMacRemote.getLogicalSwitchColumn() != null
+                && uMacRemote.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = uMacRemote.getLogicalSwitchColumn().getData();
-            if(updatedLSRows.get(lsUUID) != null) {
+            if (updatedLSRows.get(lsUUID) != null) {
                 rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(updatedLSRows.get(lsUUID).getName()));
             }
         }
         remoteUMacs.add(rumBuilder.build());
-        hgAugmentationBuilder.setRemoteUcastMacs(remoteUMacs );
+        hgAugmentationBuilder.setRemoteUcastMacs(remoteUMacs);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         return connectionNode.build();
     }

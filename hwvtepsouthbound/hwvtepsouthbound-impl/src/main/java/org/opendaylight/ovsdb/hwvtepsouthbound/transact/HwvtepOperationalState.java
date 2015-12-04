@@ -25,8 +25,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -36,15 +44,17 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
+//TODO: need to be optimized, get entry by iid not name
 public class HwvtepOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
     private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    ReadWriteTransaction transaction;
 
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
             TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
         if (nodeCreateOrUpdate != null) {
-            final ReadWriteTransaction transaction = db.newReadWriteTransaction();
+            transaction = db.newReadWriteTransaction();
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
                 Optional<Node> readNode = HwvtepSouthboundUtil.readNode(transaction, entry.getKey());
                 //add related globalNode or physicalSwitchNode to operationalNodes map
@@ -160,5 +170,97 @@ public class HwvtepOperationalState {
             }
         }
         return Optional.absent();
+    }
+
+    public Optional<LocalMcastMacs> getLocalMcastMacs(InstanceIdentifier<?> iid, LocalMcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<LocalMcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getLocalMcastMacs();
+            }
+            if (macList != null) {
+                for (LocalMcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<RemoteMcastMacs> getRemoteMcastMacs(InstanceIdentifier<?> iid, RemoteMcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<RemoteMcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getRemoteMcastMacs();
+            }
+            if (macList != null) {
+                for (RemoteMcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<LocalUcastMacs> getLocalUcastMacs(InstanceIdentifier<?> iid, LocalUcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<LocalUcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getLocalUcastMacs();
+            }
+            if (macList != null) {
+                for (LocalUcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<RemoteUcastMacs> getRemoteUcastMacs(InstanceIdentifier<?> iid, RemoteUcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<RemoteUcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getRemoteUcastMacs();
+            }
+            if (macList != null) {
+                for (RemoteUcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
+        Optional<TerminationPoint> tp = HwvtepSouthboundUtil.readNode(transaction, iid);
+        if (tp.isPresent()) {
+            return Optional.fromNullable(tp.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
+        }
+        return Optional.absent();
+    }
+    
+    public ReadWriteTransaction getReadWriteTransaction() {
+        return transaction;
     }
 }

@@ -7,17 +7,32 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 public class TransactUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
@@ -123,4 +138,37 @@ public class TransactUtils {
     }
     */
 
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNodeFromConfig(
+            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
+        Optional<D> node = Optional.absent();
+        try {
+            node = transaction.read(LogicalDatastoreType.CONFIGURATION, connectionIid).checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.warn("Read Configration/DS for Node failed! {}", connectionIid, e);
+        }
+        return node;
+    }
+
+    public static UUID createPhysicalLocator(TransactionBuilder transaction, HwvtepPhysicalLocatorAugmentation inputLocator) {
+        LOG.debug("Creating a physical locator: {}", inputLocator.getDstIp());
+        PhysicalLocator physicalLocator = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalLocator.class);
+        setEncapsulationType(physicalLocator, inputLocator);
+        setDstIp(physicalLocator, inputLocator);
+        String locatorUuid = "PhysicalLocator_" + HwvtepSouthboundMapper.getRandomUUID();
+        transaction.add(op.insert(physicalLocator).withId(locatorUuid));
+        return new UUID(locatorUuid);
+    }
+
+    private static final void setEncapsulationType(PhysicalLocator physicalLocator, HwvtepPhysicalLocatorAugmentation inputLocator) {
+        if (inputLocator.getEncapsulationType() != null) {
+            String encapType = HwvtepSouthboundConstants.ENCAPS_TYPE_MAP.get(HwvtepSouthboundMapper.createEncapsulationType(""));
+            physicalLocator.setEncapsulationType(encapType);
+        }
+    }
+
+    private static final void setDstIp(PhysicalLocator physicalLocator, HwvtepPhysicalLocatorAugmentation inputLocator) {
+        if (inputLocator.getDstIp() != null) {
+            physicalLocator.setDstIp(inputLocator.getDstIp().getIpv4Address().getValue());
+        }
+    }
 }

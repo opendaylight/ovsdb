@@ -70,7 +70,6 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
         this.mdsalUtils = mdsalUtils;
         this.sfcUtils = sfcUtils;
-        //this.setDependencies(null);
     }
 
     public void setSfcClassifierService(ISfcClassifierService sfcClassifierService) {
@@ -274,17 +273,17 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     }
 
     private boolean isSffOnBridge(Node bridgeNode, ServiceFunctionForwarder serviceFunctionForwarder) {
-        String local_ip = "";
+        String localIp = "";
         Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
         Node ovsdbNode = southbound.readOvsdbNode(bridgeNode);
         if (ovsdbNode != null) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null && ovsdbNodeAugmentation.getOpenvswitchOtherConfigs() != null) {
-                local_ip = southbound.getOtherConfig(ovsdbNode, OvsdbTables.OPENVSWITCH, TUNNEL_ENDPOINT_KEY);
+                localIp = southbound.getOtherConfig(ovsdbNode, OvsdbTables.OPENVSWITCH, TUNNEL_ENDPOINT_KEY);
             }
 
         }
-        return local_ip.equals(String.valueOf(ip.getIp().getValue()));
+        return localIp.equals(String.valueOf(ip.getIp().getValue()));
     }
 
     private boolean isSfOnBridge(Node bridgeNode, ServiceFunction serviceFunction) {
@@ -393,7 +392,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.error("Interrupted while waiting for ofPort {}", portName, e);
                 }
             }
         }

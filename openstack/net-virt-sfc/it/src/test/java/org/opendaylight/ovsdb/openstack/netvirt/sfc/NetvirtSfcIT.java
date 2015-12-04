@@ -143,6 +143,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
+    private static boolean ovsdb_wait = false;
     private static Southbound southbound;
     private static DataBroker dataBroker;
     public static final String CONTROLLER_IPADDRESS = "ovsdb.controller.address";
@@ -155,24 +156,29 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public static final String INTEGRATION_BRIDGE_NAME = "br-int";
     private static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
     private static final String OVSDB_TRACE = "ovsdb.trace";
+    private static final String OVSDB_WAIT = "ovsdb.wait";
     private static final String SF1NAME = "firewall-72";
     private static final String SF2NAME = "dpi-72";
     private static final String SF1IP = "10.2.1.1";//"192.168.50.70";//"192.168.120.31";
     private static final String SF2IP = "10.2.1.2";
-    private static final String SF1DPLNAME = "sf1";
-    private static final String SF2DPLNAME = "sf2";
+    private static final String SF1DPLNAME = "sf1Dpl";
+    private static final String SF2DPLNAME = "sf2Dpl";
     private static final String SFF1IP = "127.0.0.1"; //"192.168.1.129"
     private static final String SFF2IP = "192.168.1.129";//"127.0.0.1";
-    private static final String SFF1NAME = "SFF1";
-    private static final String SFF2NAME = "SFF2";
+    private static final String SFF1NAME = "sff1";
+    private static final String SFF2NAME = "sff2";
     private static final String SFFDPL1NAME = "vxgpe";
     private static final String SFFDPL2NAME = "vxgpe";
-    private static final String SN1NAME = "OVSDB1";
-    private static final String SN2NAME = "OVSDB2";
+    private static final String SN1NAME = "ovsdb1";
+    private static final String SN2NAME = "ovsdb2";
     private static final String BRIDGE1NAME= "br-int";
     private static final String BRIDGE2NAME= "br-int";
     private static final String ACLNAME= "httpAcl";
-    private static final String SFCNAME = "SFC";
+    private static final String RULENAME= "httpRule";
+    private static final String SFCNAME = "sfc1";
+    private static final String SFCPATH = "SFC-Path";
+    private static final String SFCSF1NAME = "firewall-abstract";
+    private static final SftType SFCSF1TYPE = new SftType("firewall");
     private static final int GPEPORT = 6633;
 
     @Override
@@ -229,7 +235,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public Option[] getPropertiesOptions() {
         return new Option[] {
                 propagateSystemProperties(SERVER_IPADDRESS, SERVER_PORT, CONNECTION_TYPE,
-                        CONTROLLER_IPADDRESS, OVSDB_TRACE),
+                        CONTROLLER_IPADDRESS, OVSDB_TRACE, OVSDB_WAIT),
         };
     }
 
@@ -249,9 +255,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
                         LogLevel.TRACE.name()),
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13",
-                        LogLevel.TRACE.name()),
+                //editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                //        "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13",
+                //        LogLevel.TRACE.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.sfc",
                         LogLevel.TRACE.name()),
@@ -277,6 +283,10 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
             }
         }
         LOG.info("getProperties {}: {}", OVSDB_TRACE, props.getProperty(OVSDB_TRACE));
+        LOG.info("getProperties {}: {}", OVSDB_WAIT, props.getProperty(OVSDB_WAIT));
+        if (props.getProperty(OVSDB_WAIT).equals("true")) {
+            ovsdb_wait = true;
+        }
     }
 
     @Before
@@ -366,12 +376,13 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private AccessListsBuilder accessListsBuilder() {
+        String ruleName = RULENAME;
+        String sfcName = SFCNAME;
         MatchesBuilder matchesBuilder = aclUtils.matchesBuilder(new MatchesBuilder(), 80);
         LOG.info("Matches: {}", matchesBuilder.build());
-        //ActionsBuilder actionsBuilder = aclUtils.actionsBuilder(new ActionsBuilder(), Boolean.TRUE);
-        ActionsBuilder actionsBuilder = aclUtils.actionsBuilder(new ActionsBuilder(), SFCNAME);
+        ActionsBuilder actionsBuilder = aclUtils.actionsBuilder(new ActionsBuilder(), sfcName);
         AceBuilder accessListEntryBuilder =
-                aclUtils.aceBuilder(new AceBuilder(), "httpRule", matchesBuilder, actionsBuilder);
+                aclUtils.aceBuilder(new AceBuilder(), ruleName, matchesBuilder, actionsBuilder);
         AccessListEntriesBuilder accessListEntriesBuilder =
                 aclUtils.accessListEntriesBuidler(new AccessListEntriesBuilder(), accessListEntryBuilder);
         AclBuilder accessListBuilder =
@@ -472,6 +483,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private ServiceFunctionForwardersBuilder serviceFunctionForwardersBuilder() {
         String sf1Name = SF1NAME;
         String sf1Ip = SF1IP;
+        String sf1DplName = SF1DPLNAME;
         String sff1Ip = SFF1IP;
         String sff1Name = SFF1NAME;
         String sffDpl1Name = SFFDPL1NAME;
@@ -489,7 +501,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
                 serviceFunctionForwarderUtils.serviceFunctionForwarderBuilder(
-                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Ip, sn1Name, bridge1Name);
+                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Ip, sn1Name, bridge1Name, sf1Name, sf1DplName);
         List<ServiceFunctionForwarder>  serviceFunctionForwarderList = serviceFunctionForwarderUtils.list(
                 new ArrayList<ServiceFunctionForwarder>(), serviceFunctionForwarderBuilder);
 
@@ -507,8 +519,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private ServiceFunctionChainsBuilder serviceFunctionChainsBuilder() {
-        String sf1Name = "firewall-abstract1";
-        SftType sfType = new SftType("firewall");
+        String sf1Name = SFCSF1NAME;
+        SftType sfType = SFCSF1TYPE;
         String sfcName = SFCNAME;
 
         SfcServiceFunctionBuilder sfcServiceFunctionBuilder = serviceFunctionChainUtils.sfcServiceFunctionBuilder(
@@ -533,8 +545,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private ServiceFunctionPathsBuilder serviceFunctionPathsBuilder() {
-        String sfpName = "SFC-Path";
-        String sfcName = "SFC";
+        String sfpName = SFCPATH;
+        String sfcName = SFCNAME;
         short startingIndex = 255;
 
         ServiceFunctionPathBuilder serviceFunctionPathBuilder =
@@ -592,10 +604,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         Thread.sleep(10000);
 
-        ISfcClassifierService sfcClassifierService = (ISfcClassifierService) ServiceHelper.getGlobalInstance(ISfcClassifierService.class, this);
-        LOG.info("SfcClassifierService: {}", sfcClassifierService);
         readwait();
-        //sfcClassifierService.programIngressClassifier(datapathId);
 
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
         FlowBuilder flowBuilder = getSfcIngressClassifierFlowBuilder();
@@ -807,7 +816,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     private FlowBuilder getSfcIngressClassifierFlowBuilder() {
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "sfcClass_" + "httpRule";
+        String flowId = "sfcIngressClass_" + "httpRule";
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setKey(key);
@@ -831,10 +840,13 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private void readwait() {
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (ovsdb_wait) {
+            LOG.warn("Waiting, kill with ps -ef | grep java, kill xxx... ");
+            try {
+                System.in.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -63,23 +63,24 @@ public class ServiceFunctionForwarderUtils extends AbstractUtils {
     }
 
     public SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder(
-            SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder, String ip, int port) {
+            SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder, String sffDplName, String sfDplName) {
         return sffSfDataPlaneLocatorBuilder
-                .setSfDplName(new SfDataPlaneLocatorName("toSff1"))
-                .setSffDplName(new SffDataPlaneLocatorName("ulSff1Ingress"));
+                .setSfDplName(SfDataPlaneLocatorName.getDefaultInstance(sfDplName))
+                .setSffDplName(SffDataPlaneLocatorName.getDefaultInstance(sffDplName));
     }
 
     public ServiceFunctionDictionaryBuilder serviceFunctionDictionaryBuilder(
             ServiceFunctionDictionaryBuilder serviceFunctionDictionaryBuilder,
-            SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder) {
+            SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder,
+            String sfName) {
 
         return serviceFunctionDictionaryBuilder
-                .setName(new SfName("toSff1"))
+                .setName(SfName.getDefaultInstance(sfName))
                 .setSffSfDataPlaneLocator(sffSfDataPlaneLocatorBuilder.build());
     }
 
-    public OvsBridgeBuilder ovsBridgeBuilder(OvsBridgeBuilder ovsBridgeBuilder, String bridgeNme) {
-        return ovsBridgeBuilder.setBridgeName(bridgeNme);
+    public OvsBridgeBuilder ovsBridgeBuilder(OvsBridgeBuilder ovsBridgeBuilder, String bridgeName) {
+        return ovsBridgeBuilder.setBridgeName(bridgeName);
     }
 
     public ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder(
@@ -107,7 +108,7 @@ public class ServiceFunctionForwarderUtils extends AbstractUtils {
 
     public ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder(
             String sffName, String sffIp, int port, String sffDplName,
-            String sfIp, String snName, String bridgeName) {
+            String sfIp, String snName, String bridgeName, String sfName, String sfDplName) {
 
         DataPlaneLocatorBuilder dataPlaneLocatorBuilder =
                 dataPlaneLocatorBuilder(new DataPlaneLocatorBuilder(), sffIp, port);
@@ -117,10 +118,10 @@ public class ServiceFunctionForwarderUtils extends AbstractUtils {
                 list(new ArrayList<SffDataPlaneLocator>(), sffDataPlaneLocatorBuilder);
 
         SffSfDataPlaneLocatorBuilder sffSfDataPlaneLocatorBuilder =
-                sffSfDataPlaneLocatorBuilder(new SffSfDataPlaneLocatorBuilder(), sffIp, port);
+                sffSfDataPlaneLocatorBuilder(new SffSfDataPlaneLocatorBuilder(), sffDplName, sfDplName);
         ServiceFunctionDictionaryBuilder serviceFunctionDictionaryBuilder =
                 serviceFunctionDictionaryBuilder(new ServiceFunctionDictionaryBuilder(),
-                        sffSfDataPlaneLocatorBuilder);
+                        sffSfDataPlaneLocatorBuilder, sfName);
         List<ServiceFunctionDictionary> serviceFunctionDictionaryList =
                 list(new ArrayList<ServiceFunctionDictionary>(), serviceFunctionDictionaryBuilder);
 

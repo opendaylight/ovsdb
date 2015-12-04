@@ -11,13 +11,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 public class TransactUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
@@ -123,4 +129,15 @@ public class TransactUtils {
     }
     */
 
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNodeFromConfig(
+            DataBroker db, final InstanceIdentifier<D> connectionIid) {
+        final ReadWriteTransaction transaction = db.newReadWriteTransaction();
+        Optional<D> node = Optional.absent();
+        try {
+            node = transaction.read(LogicalDatastoreType.CONFIGURATION, connectionIid).checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.warn("Read Configration/DS for Node failed! {}", connectionIid, e);
+        }
+        return node;
+    }
 }

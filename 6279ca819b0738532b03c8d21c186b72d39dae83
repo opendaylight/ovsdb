@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa7f18b_67a6ecc3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-07T08:07:44Z",
+      "side": 1,
+      "message": "setEncapsulation and setDstIp don\u0027t need to be public static. might be better to have this code inline in createPhysicalLocator. Also, am not sure if this function should be here or in HwvtepSouthboundUtils/Mapper. Can leave here for now, something to consider when refactoring code.",
+      "revId": "6279ca819b0738532b03c8d21c186b72d39dae83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_27b0f4f3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-07T08:07:44Z",
+      "side": 1,
+      "message": "remoteUcastMacs, will be easier to read.",
+      "revId": "6279ca819b0738532b03c8d21c186b72d39dae83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa7f18b_67d82c54",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-07T07:55:53Z",
+      "side": 1,
+      "message": "HwvtepOperationalState is the only class which can get databroker or transaction in transact package.I have changed db to transaction. In future, HwvtepOperationalState is needed to optimize to get entry by iid rather than name or some key. So HwvtepOperationalState should be a transaction holder.",
+      "parentUuid": "3aa7f18b_a78ce480",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa7f18b_47e97019",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
         "patchSetId": 1
@@ -30,6 +48,42 @@
       "writtenOn": "2015-12-07T03:22:25Z",
       "side": 1,
       "message": "I still think passing a transaction might be better idea than passing db. Maybe can consider it in a later refactoring.",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_272b1432",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-07T07:55:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa7f18b_47e97019",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_27b9d4e9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-07T07:55:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa7f18b_47e97019",
       "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

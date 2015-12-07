@@ -243,6 +243,9 @@ public class SouthboundImpl implements Southbound {
         Node ovsdbNode = node;
         if (extractNodeAugmentation(ovsdbNode) == null) {
             ovsdbNode = readOvsdbNode(node);
+            if (ovsdbNode == null) {
+                return null;
+            }
         }
         Node bridgeNode = null;
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
@@ -606,7 +609,9 @@ public class SouthboundImpl implements Southbound {
             OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
             if (ovsdbNode == null) {
                 Node nodeFromReadOvsdbNode = readOvsdbNode(node);
-                ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                if (nodeFromReadOvsdbNode != null) {
+                    ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                }
             }
             if (ovsdbNode != null && ovsdbNode.getOpenvswitchExternalIds() != null) {
                 for (OpenvswitchExternalIds openvswitchExternalIds : ovsdbNode.getOpenvswitchExternalIds()) {
@@ -655,7 +660,9 @@ public class SouthboundImpl implements Southbound {
                 OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
                 if (ovsdbNode == null) {
                     Node nodeFromReadOvsdbNode = readOvsdbNode(node);
-                    ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                    if (nodeFromReadOvsdbNode == null) {
+                        ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                    }
                 }
                 if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
                     for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {

@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa7f18b_a78ce480",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-07T03:22:25Z",
+      "side": 1,
+      "message": "Why did you need to add it now and not earlier?",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_47e97019",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-07T03:22:25Z",
+      "side": 1,
+      "message": "I still think passing a transaction might be better idea than passing db. Maybe can consider it in a later refactoring.",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_c7dc8077",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-07T03:22:25Z",
+      "side": 1,
+      "message": "Add a TODO here, we need to optimize by eliminating the read.",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_e7d97c84",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-07T03:22:25Z",
+      "side": 1,
+      "message": "This would be a good candidate for HwvtepSouthboundMapper function as other Mac commands will also need it.",
+      "revId": "d404a59e8ffa418b1be9e3d2a196a8395de975db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -148,6 +148,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             /* Get all the ports in the subnet and identify the dhcp port*/
             String subnetUuid = fixedIps.iterator().next().getSubnetUUID();
             NeutronSubnet neutronSubnet = neutronSubnetCache.getSubnet(subnetUuid);
+            if (neutronSubnet == null) {
+                LOG.error("getDHCPServerPort: No subnet is found for " + subnetUuid);
+                return null;
+            }
             List<NeutronPort> ports = neutronSubnet.getPortsInSubnet();
             for (NeutronPort port : ports) {
                 if (port.getDeviceOwner().contains("dhcp")) {
@@ -411,9 +415,18 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         LOG.trace("syncSecurityGroup:" + securityGroupList + " Write:" + write);
         if (null != port && null != port.getSecurityGroups()) {
             Node node = getNode(port);
+            if (node == null) {
+                return;
+            }
             NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            if (neutronNetwork == null) {
+                return;
+            }
             String segmentationId = neutronNetwork.getProviderSegmentationID();
             OvsdbTerminationPointAugmentation intf = getInterface(node, port);
+            if (intf == null) {
+                return;
+            }
             long localPort = southbound.getOFPort(intf);
             String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
@@ -421,8 +434,15 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return;
             }
             long dpid = getDpidOfIntegrationBridge(node);
+            if (dpid == 0L) {
+                return;
+            }
             String neutronPortId = southbound.getInterfaceExternalIdsValue(intf,
                                                                            Constants.EXTERNAL_ID_INTERFACE_ID);
+            if (neutronPortId == null) {
+                LOG.debug("syncSecurityGroup: No neutronPortId seen in {}", intf);
+                return;
+            }
             for (NeutronSecurityGroup securityGroupInPort:securityGroupList) {
                 ingressAclProvider.programPortSecurityGroup(dpid, segmentationId, attachedMac, localPort,
                                                           securityGroupInPort, neutronPortId, write);
@@ -437,9 +457,18 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         LOG.trace("syncSecurityGroup:" + securityRule + " Write:" + write);
         if (null != port && null != port.getSecurityGroups()) {
             Node node = getNode(port);
+            if (node == null) {
+                return;
+            }
             NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            if (neutronNetwork == null) {
+                return;
+            }
             String segmentationId = neutronNetwork.getProviderSegmentationID();
             OvsdbTerminationPointAugmentation intf = getInterface(node, port);
+            if (intf == null) {
+                return;
+            }
             long localPort = southbound.getOFPort(intf);
             String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
@@ -447,6 +476,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return;
             }
             long dpid = getDpidOfIntegrationBridge(node);
+            if (dpid == 0L) {
+                return;
+            }
             if ("IPv4".equals(securityRule.getSecurityRuleEthertype())
                     && "ingress".equals(securityRule.getSecurityRuleDirection())) {
 
@@ -465,6 +497,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         long dpid = 0L;
         if (southbound.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
             dpid = getDpid(node);
+        }
+        if (dpid == 0L) {
+            LOG.warn("getDpidOfIntegerationBridge: dpid not found: {}", node);
         }
         return dpid;
     }
@@ -497,6 +532,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 LOG.error("Exception during handlingNeutron network delete", e);
             }
         }
+        LOG.info("no node found for port:" + port);
         return null;
     }
 
@@ -514,6 +550,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         } catch (Exception e) {
             LOG.error("Exception during handlingNeutron network delete", e);
         }
+        LOG.info("no interface found for node: " + node + " port:" + port);
         return null;
     }
 

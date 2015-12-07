@@ -212,6 +212,10 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             return null;
         }
         NeutronLoadBalancerPool neutronLBPool = neutronLBPoolCache.getNeutronLoadBalancerPool(memberPoolID);
+        if (neutronLBPool == null) {
+            logger.debug("Neutron LB pool {} unavailable", memberPoolID);
+            return null;
+        }
         memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
         if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
                 memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||

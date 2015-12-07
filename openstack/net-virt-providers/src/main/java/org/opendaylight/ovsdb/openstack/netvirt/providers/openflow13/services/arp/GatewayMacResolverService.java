@@ -257,6 +257,10 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                 LOG.debug("Flow to route ARP Reply to Controller installed successfully : {}", flowIid);
 
                 ArpResolverMetadata gatewayArpMetadata = gatewayToArpMetadataMap.get(gatewayIp);
+                if (gatewayArpMetadata == null) {
+                    LOG.warn("No metadata found for gatewayIp: {}", gatewayIp);
+                    return;
+                }
 
                 //cache metadata
                 gatewayArpMetadata.setFlowToRemove(new RemoveFlowInputBuilder(arpReplyToControllerFlow).setNode(nodeRef).build());

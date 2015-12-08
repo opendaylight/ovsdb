@@ -49,13 +49,14 @@ public class AbstractEventTest {
     public void testAbstractEvent(){
         assertEquals("Error, getAction() did not return the correct value", Action.DELETE, abstractEvent1.getAction());
 
-        assertEquals("Error, getHandletType() did not return the correct value", HandlerType.SOUTHBOUND, abstractEvent1.getHandlerType());
+        assertEquals("Error, getHandlerType() did not return the correct value", HandlerType.SOUTHBOUND, abstractEvent1.getHandlerType());
 
         assertTrue("Error, equals() did not succeed", abstractEvent2.equals(abstractEvent3));
 
         assertNotNull("Error, hashCode() did not return any value", abstractEvent1.hashCode());
         assertEquals("Error, hashCode() is not consistent", abstractEvent2.hashCode(), abstractEvent3.hashCode());
 
-        assertEquals("Error, toString() did not return the correct value", "AbstractEvent [handlerType=SOUTHBOUND action=DELETE]", abstractEvent1.toString());
+        assertEquals("Error, toString() did not return the correct value",
+                "AbstractEvent [transactionId=1 handlerType=SOUTHBOUND action=DELETE]", abstractEvent1.toString());
     }
 }

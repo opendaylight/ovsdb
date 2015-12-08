@@ -85,6 +85,7 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
     }
 
     private void dispatchEvent(AbstractEvent ev) {
+        LOG.trace("dispatchEvent: Processing (id={}): {}", ev.getTransactionId(), ev);
         AbstractHandler handler = handlers[ev.getHandlerType().ordinal()];
         if (handler == null) {
             LOG.warn("event dispatcher found no handler for {}", ev);
@@ -92,6 +93,7 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
         }
 
         handler.processEvent(ev);
+        LOG.trace("dispatchEvent: Done processing (id={}): {}", ev.getTransactionId(), ev);
     }
 
     public void eventHandlerAdded(final ServiceReference ref, AbstractHandler handler){

@@ -66,7 +66,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         }
         nodeCache.put(nodeId, node);
 
-        LOG.debug("processNodeUpdate: {} Node type {} {}: {}",
+        LOG.debug("processNodeUpdate: size= {}, Node type= {}, action= {}, node= {}",
                 nodeCache.size(),
                 southbound.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
                 action == Action.ADD ? "ADD" : "UPDATE",

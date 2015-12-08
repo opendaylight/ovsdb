@@ -273,6 +273,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <excludes>
+            <exclude>**/services/*Test.java</exclude>
+          </excludes>
           <properties>
             <property>
               <name>listener</name>

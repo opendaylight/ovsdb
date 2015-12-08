@@ -50,7 +50,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkC
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronIAwareUtil;
-import org.opendaylight.ovsdb.utils.mdsal.utils.NeutronModelsDataStoreHelper;
+import org.opendaylight.ovsdb.utils.neutron.utils.NeutronModelsDataStoreHelper;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;

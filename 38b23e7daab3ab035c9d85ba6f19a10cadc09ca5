@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_bdbaaf08",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-08T23:38:32Z",
+      "side": 0,
+      "message": "with the merge here UT are failing big time.. looking forward seeing this in, or UT fixed.",
+      "range": {
+        "startLine": 150,
+        "startChar": 21,
+        "endLine": 150,
+        "endChar": 26
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

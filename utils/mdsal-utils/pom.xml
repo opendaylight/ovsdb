@@ -29,10 +29,6 @@
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
 
-  <properties>
-    <neutron.model.version>0.6.0-SNAPSHOT</neutron.model.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -61,11 +57,6 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.neutron</groupId>
-      <artifactId>model</artifactId>
-      <version>${neutron.model.version}</version>
     </dependency>
   </dependencies>
 

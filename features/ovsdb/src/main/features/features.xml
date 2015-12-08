@@ -36,6 +36,7 @@
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>

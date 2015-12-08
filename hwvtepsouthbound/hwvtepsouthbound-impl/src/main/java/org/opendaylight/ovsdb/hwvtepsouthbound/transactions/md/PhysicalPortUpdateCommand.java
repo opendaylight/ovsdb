@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others. All
+ * rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -42,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +76,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
         Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (node.isPresent()) {
             updateTerminationPoints(transaction, node.get());
-            //TODO: Handle Deletion of VLAN Bindings
+            // TODO: Handle Deletion of VLAN Bindings
         }
     }
 
@@ -97,38 +99,62 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
                 buildTerminationPoint(tpAugmentationBuilder, pPortUpdate);
                 tpBuilder.addAugmentation(HwvtepPhysicalPortAugmentation.class, tpAugmentationBuilder.build());
                 if (oldPPRows.containsKey(pPortUpdateEntry.getKey())) {
-                    transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                    transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 } else {
-                    transaction.put(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                    transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
+                }
+                // Update with Deleted VlanBindings
+                if (oldPPRows.get(pPortUpdateEntry.getKey()) != null) {
+                    List<InstanceIdentifier<VlanBindings>> vBIiList = new ArrayList<>();
+                    Map<Long, UUID> oldVb = oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn().getData();
+                    Map<Long, UUID> updatedVb = pPortUpdateEntry.getValue().getVlanBindingsColumn().getData();
+                    for (Map.Entry<Long, UUID> oldVbEntry : oldVb.entrySet()) {
+                        Long key = oldVbEntry.getKey();
+                        if (!updatedVb.containsKey(key)) {
+                            VlanBindings vBindings = createVlanBinding(key, oldVbEntry.getValue());
+                            InstanceIdentifier<VlanBindings> vBid = getInstanceIdentifier(tpPath, vBindings);
+                            vBIiList.add(vBid);
+                        }
+                        deleteEntries(transaction, vBIiList);
+                    }
                 }
             }
         }
     }
 
-    private void buildTerminationPoint(
-            HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder, PhysicalPort portUpdate) {
+    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+            List<InstanceIdentifier<T>> entryIids) {
+        for (InstanceIdentifier<T> entryIid : entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+        }
+    }
+
+    private InstanceIdentifier<VlanBindings> getInstanceIdentifier(InstanceIdentifier<TerminationPoint> tpPath,
+            VlanBindings vBindings) {
+        return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), tpPath, vBindings);
+    }
+
+    private void buildTerminationPoint(HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder,
+            PhysicalPort portUpdate) {
         updatePhysicalPortId(portUpdate, tpAugmentationBuilder);
         updatePort(portUpdate, tpAugmentationBuilder);
     }
 
-    private void updatePort(
-            PhysicalPort portUpdate, HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
+    private void updatePort(PhysicalPort portUpdate, HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
         updateVlanBindings(portUpdate, tpAugmentationBuilder);
         tpAugmentationBuilder.setPhysicalPortUuid(new Uuid(portUpdate.getUuid().toString()));
     }
 
-    private void updatePhysicalPortId(
-            PhysicalPort portUpdate, HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
+    private void updatePhysicalPortId(PhysicalPort portUpdate,
+            HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
         tpAugmentationBuilder.setHwvtepNodeName(new HwvtepNodeName(portUpdate.getName()));
         if (portUpdate.getDescription() != null) {
             tpAugmentationBuilder.setHwvtepNodeDescription(portUpdate.getDescription());
         }
     }
 
-    private void updateVlanBindings(
-            PhysicalPort portUpdate, HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
+    private void updateVlanBindings(PhysicalPort portUpdate,
+            HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
         Map<Long, UUID> vlanBindings = portUpdate.getVlanBindingsColumn().getData();
         if (vlanBindings != null && !vlanBindings.isEmpty()) {
             List<VlanBindings> vlanBindingsList = new ArrayList<>();
@@ -170,14 +196,14 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
         return Optional.absent();
     }
 
-    private Optional<InstanceIdentifier<Node>> getTerminationPointSwitch(
-            final ReadWriteTransaction transaction, Node node, String tpName) {
+    private Optional<InstanceIdentifier<Node>> getTerminationPointSwitch(final ReadWriteTransaction transaction,
+            Node node, String tpName) {
         HwvtepGlobalAugmentation hwvtepNode = node.getAugmentation(HwvtepGlobalAugmentation.class);
         List<Switches> switchNodes = hwvtepNode.getSwitches();
         for (Switches managedNodeEntry : switchNodes) {
             @SuppressWarnings("unchecked")
-            Node switchNode = HwvtepSouthboundUtil.readNode(transaction,
-                    (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
+            Node switchNode = HwvtepSouthboundUtil
+                    .readNode(transaction, (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
             TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
             TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
             tpBuilder.setKey(tpKey);

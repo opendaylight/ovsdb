@@ -51,8 +51,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>net-virt</module>
     <module>net-virt-providers</module>
     <module>net-virt-it</module>
-    <!-- TEMPORARILY DISABLE FOR CYCLIC DEPENDENCY
     <module>net-virt-sfc</module>
-    -->
   </modules>
 </project>

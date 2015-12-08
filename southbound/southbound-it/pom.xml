@@ -84,6 +84,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-util</artifactId>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>utils.southbound-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- Dependencies for pax exam karaf container -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>

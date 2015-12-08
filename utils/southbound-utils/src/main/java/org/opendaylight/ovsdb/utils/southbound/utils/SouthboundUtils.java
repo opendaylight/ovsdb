@@ -84,31 +84,31 @@ public class SouthboundUtils {
             .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
             .build();
 
-    public NodeId createNodeId(IpAddress ip, PortNumber port) {
+    public static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
                 + String.valueOf(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         return new NodeId(uri);
     }
 
-    public Node createNode(ConnectionInfo key) {
+    public static Node createNode(ConnectionInfo key) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setNodeId(createNodeId(key.getRemoteIp(), key.getRemotePort()));
         nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(key));
         return nodeBuilder.build();
     }
 
-    public OvsdbNodeAugmentation createOvsdbAugmentation(ConnectionInfo key) {
+    public static OvsdbNodeAugmentation createOvsdbAugmentation(ConnectionInfo key) {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
         ovsdbNodeBuilder.setConnectionInfo(key);
         return ovsdbNodeBuilder.build();
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
         return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -117,7 +117,7 @@ public class SouthboundUtils {
         return path;
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
         return SouthboundMapper.createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
@@ -133,20 +133,25 @@ public class SouthboundUtils {
         return terminationPointPath;
     }
 
-    public NodeKey createNodeKey(IpAddress ip, PortNumber port) {
+    public static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
         return new NodeKey(createNodeId(ip, port));
     }
 
-    public NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
+    public static NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
         return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), bridgeName);
     }
 
-    public NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
+    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
         return new NodeId(createNodeId(ip,port).getValue()
                 + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
-    public ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
+    }
+
+    public static ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(addressStr);
@@ -167,7 +172,7 @@ public class SouthboundUtils {
                 .build();
     }
 
-    public String connectionInfoToString(final ConnectionInfo connectionInfo) {
+    public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
         return String.valueOf(
                 connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
     }

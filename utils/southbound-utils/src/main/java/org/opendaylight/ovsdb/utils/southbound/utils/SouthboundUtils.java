@@ -387,13 +387,20 @@ public class SouthboundUtils {
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
+    public boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
                                        String type, Map<String, String> options,
                                        Map<String, String> externalIds) {
+        return addTerminationPoint(bridgeNode, bridgeName, portName, type, options, externalIds, null);
+    }
+
+    public boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
+                                       String type, Map<String, String> options,
+                                       Map<String, String> externalIds, Long ofPort) {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
 
         tpAugmentationBuilder.setName(portName);
+        tpAugmentationBuilder.setOfport(ofPort);
         if (type != null) {
             tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }

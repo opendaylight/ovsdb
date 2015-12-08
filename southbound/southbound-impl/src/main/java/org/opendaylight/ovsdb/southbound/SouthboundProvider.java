@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbService;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -53,6 +55,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     private EntityOwnershipCandidateRegistration registration;
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private OvsdbConnection ovsdbConnection;
+    //private OvsdbService ovsdbService;
+    private org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbService ovsdbService;
 
 
     public SouthboundProvider(
@@ -71,6 +75,10 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection);
         ovsdbDataChangeListener = new OvsdbDataChangeListener(db,cm);
+
+        OvsdbSouthboundImpl ovsdbSouthboundImpl = new OvsdbSouthboundImpl(db);
+        //ovsdbService = session.addRpcImplementation(OvsdbService.class, ovsdbSouthboundImpl);
+        ovsdbService = session.addRpcImplementation(org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbService, ovsdbSouthboundImpl);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -99,6 +107,9 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     @Override
     public void close() throws Exception {
         LOG.info("SouthboundProvider Closed");
+        if (ovsdbService != null) {
+            //ovsdbService.close();
+        }
         cm.close();
         ovsdbDataChangeListener.close();
         registration.close();

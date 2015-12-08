@@ -84,7 +84,7 @@ public class SouthboundUtils {
             .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
             .build();
 
-    public NodeId createNodeId(IpAddress ip, PortNumber port) {
+    public static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
                 + String.valueOf(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);

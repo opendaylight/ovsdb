@@ -48,6 +48,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -198,16 +199,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Configuration
     public Option[] config() {
-        // TODO Figure out how to use the parent Karaf setup, then just use super.config()
-        Option[] options = new Option[] {
-                when(Boolean.getBoolean(KARAF_DEBUG_PROP))
-                        .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
-                karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
-                        .useDeployFolder(false),
-                when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
-                // Works only if we don't specify the feature repo and name
-                getLoggingOption()};
+        Option[] options = super.config();
         Option[] propertyOptions = getPropertiesOptions();
         Option[] otherOptions = getOtherOptions();
         Option[] combinedOptions = new Option[options.length + propertyOptions.length + otherOptions.length];
@@ -257,7 +249,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-ovsdb-southbound-impl-ui";
+        return "odl-ovsdb-southbound-test";
     }
 
     protected String usage() {
@@ -1484,24 +1476,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
-        return new NodeId(createNodeId(ip,port).getValue()
+        return new NodeId(SouthboundUtils.createNodeId(ip,port).getValue()
                 + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
-    public static NodeId createNodeId(IpAddress ip, PortNumber port) {
-        String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
-                + String.valueOf(ip.getValue()) + ":" + port.getValue();
-        Uri uri = new Uri(uriString);
-        return new NodeId(uri);
-    }
-
     public static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
-        return new NodeKey(createNodeId(ip,port));
+        return new NodeKey(SouthboundUtils.createNodeId(ip,port));
     }
 
     public static Node createNode(ConnectionInfo key) {
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setNodeId(createNodeId(key.getRemoteIp(),key.getRemotePort()));
+        nodeBuilder.setNodeId(SouthboundUtils.createNodeId(key.getRemoteIp(),key.getRemotePort()));
         nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(key));
         return nodeBuilder.build();
     }

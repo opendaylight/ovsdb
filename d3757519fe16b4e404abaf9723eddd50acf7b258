@@ -22,6 +22,30 @@
       "revId": "d3757519fe16b4e404abaf9723eddd50acf7b258",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_0cab9b8a",
+        "filename": "openstack/net-virt-sfc/features/test/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-08T15:42:26Z",
+      "side": 1,
+      "message": "I don\u0027t think so, I was playing it safe here while waiting for the test results (it takes hours now to run IT...).",
+      "parentUuid": "1aa4ed85_2c1457f4",
+      "range": {
+        "startLine": 15,
+        "startChar": 53,
+        "endLine": 15,
+        "endChar": 58
+      },
+      "revId": "d3757519fe16b4e404abaf9723eddd50acf7b258",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

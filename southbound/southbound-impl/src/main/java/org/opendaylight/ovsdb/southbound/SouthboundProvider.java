@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -32,6 +33,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbService;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -53,6 +56,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     private EntityOwnershipCandidateRegistration registration;
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private OvsdbConnection ovsdbConnection;
+    private RpcRegistration<OvsdbService> ovsdbService;
 
 
     public SouthboundProvider(
@@ -71,6 +75,9 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection);
         ovsdbDataChangeListener = new OvsdbDataChangeListener(db,cm);
+
+        OvsdbSouthboundImpl ovsdbSouthboundImpl = new OvsdbSouthboundImpl(db);
+        ovsdbService = session.addRpcImplementation(OvsdbService.class, ovsdbSouthboundImpl);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -99,6 +106,9 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     @Override
     public void close() throws Exception {
         LOG.info("SouthboundProvider Closed");
+        if (ovsdbService != null) {
+            ovsdbService.close();
+        }
         cm.close();
         ovsdbDataChangeListener.close();
         registration.close();

@@ -34,6 +34,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${sfc.version}'>odl-sfc-provider</feature>
     <feature version='${sfc.version}'>odl-sfcofl2</feature>
     <feature version='${project.version}'>odl-ovsdb-sfc-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-impl/{{VERSION}}</bundle>

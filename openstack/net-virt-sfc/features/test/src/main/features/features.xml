@@ -12,6 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-features/1.2.1-SNAPSHOT/xml/features</repository>
   <feature name='odl-ovsdb-sfc-test' version='${project.version}' description='OpenDaylight :: ovsdb-sfc-test'>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
     <feature version='${project.version}'>odl-ovsdb-sfc-ui</feature>

@@ -1,6 +1,8 @@
 DIRECTORY ORGANIZATION
 ======================
 
+TEST
+
 - commons
   +-- parent : Contains Parent pom.xml for all the ovsdb modules.
 

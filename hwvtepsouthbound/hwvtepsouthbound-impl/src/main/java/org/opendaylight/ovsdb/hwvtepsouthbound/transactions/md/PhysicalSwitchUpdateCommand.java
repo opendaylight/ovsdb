@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,12 +24,15 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentationBuilder;
@@ -46,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,21 +62,53 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchUpdateCommand.class);
     private Map<UUID, PhysicalSwitch> updatedPSRows;
     private Map<UUID, PhysicalSwitch> oldPSRows;
+    private Map<UUID, Tunnel> updatedTunnelRows;
+    private Map<UUID, PhysicalLocator> updatedPLocRows;
+    private Collection<Tunnel> deletedTunnelRows;
+    private Map<UUID, Tunnel> oldTunnelRows;
+    private Map<UUID, PhysicalSwitch> deletedPSRows;
 
     public PhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(),getDbSchema());
         oldPSRows = TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(),getDbSchema());
+        deletedPSRows = TyperUtils.extractRowsRemoved(PhysicalSwitch.class, getUpdates(),getDbSchema());
+        deletedTunnelRows = TyperUtils.extractRowsRemoved(Tunnel.class, getUpdates(),getDbSchema()).values();
+        oldTunnelRows = TyperUtils.extractRowsOld(Tunnel.class, getUpdates(),getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
+        LOG.trace("Old Physical Switch Rows are {} as stated", oldPSRows.values() );
+        LOG.trace("Updated Physical Switch Rows are {} as stated", updatedPSRows.values() );
+        LOG.trace("Deleted Physical Switch Rows are {} as stated", deletedPSRows.values() );
+
         if(updatedPSRows != null && !updatedPSRows.isEmpty()) {
             for (Entry<UUID, PhysicalSwitch> entry : updatedPSRows.entrySet()) {
                 updatePhysicalSwitch(transaction, entry.getValue());
             }
         }
+        if(deletedTunnelRows != null && !deletedTunnelRows.isEmpty()){
+            for(Tunnel tunnel : deletedTunnelRows){
+                deleteTunnel(transaction, tunnel);
+            }
+
+        }
+    }
+
+    private void deleteTunnel(ReadWriteTransaction transaction, Tunnel tunnel) {
+        if(oldPSRows != null && !oldPSRows.isEmpty()){
+            for (PhysicalSwitch pSwitch : oldPSRows.values()){
+                Set<UUID> uuidList = pSwitch.getTunnels().getData();
+                for(UUID uuid : uuidList){
+                    if(oldTunnelRows.get(uuid)==tunnel){
+                       //TODO delete Tunnel from Operational Data Store
+                    }
+                }
+            }
+        }
+
     }
 
     private void updatePhysicalSwitch(ReadWriteTransaction transaction, PhysicalSwitch pSwitch) {
@@ -85,13 +122,13 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
             // Update the Physical Switch with whatever data we are getting
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(pSwitch);
-            Node psNode = buildPhysicalSwitchNode(pSwitch);
+            Node psNode = buildPhysicalSwitchNode(connection.get(),pSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
 //            TODO: Delete entries that are no longer needed
         }
     }
 
-    private Node buildPhysicalSwitchNode(PhysicalSwitch pSwitch) {
+    private Node buildPhysicalSwitchNode(Node node, PhysicalSwitch pSwitch) {
         NodeBuilder psNodeBuilder = new NodeBuilder();
         NodeId psNodeId = getNodeId(pSwitch);
         psNodeBuilder.setNodeId(psNodeId);
@@ -100,16 +137,46 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
         setPhysicalSwitchId(psAugmentationBuilder, pSwitch);
         setManagementIps(psAugmentationBuilder, pSwitch);
         setTunnelIps(psAugmentationBuilder, pSwitch);
-        setUcastMacsLocal(psAugmentationBuilder, pSwitch);
-        setUcastMacsRemote(psAugmentationBuilder, pSwitch);
-        setMcastMacsLocal(psAugmentationBuilder, pSwitch);
-        setMcastMacsRemote(psAugmentationBuilder, pSwitch);
+        setTunnels(node, psAugmentationBuilder, pSwitch);
 
         psNodeBuilder.addAugmentation(PhysicalSwitchAugmentation.class, psAugmentationBuilder.build());
-
         LOG.trace("Built with the intent to store PhysicalSwitch data {}",
                 psAugmentationBuilder.build());
+        LOG.trace("Updated PS rows{} are present ", updatedPSRows.values());
+        LOG.trace("Old PS rows{} are present", oldPSRows.values());
+        LOG.trace("Deleted PS rows{} are present", deletedPSRows.values());
         return psNodeBuilder.build();
+    }
+
+    private void setTunnels(Node node, PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+            PhysicalSwitch pSwitch){
+        if(pSwitch.getTunnels()!=null && pSwitch.getTunnels().getData()!=null
+                && pSwitch.getTunnels().getData().isEmpty()){
+            Set<UUID> uuidList = pSwitch.getTunnels().getData();
+            List<Tunnels> tunnelList = new ArrayList<>();
+            TunnelsBuilder tBuilder = new TunnelsBuilder();
+            for(UUID uuid : uuidList){
+                Tunnel tunnel = updatedTunnelRows.get(uuid);
+                if (tunnel.getLocalColumn().getData() != null){
+                    PhysicalLocator pLoc = updatedPLocRows.get(tunnel.getLocalColumn().getData());
+                    InstanceIdentifier<TerminationPoint> tpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
+                            HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId()), pLoc);
+                    tBuilder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(tpPath));
+                }
+                //TODO bfdconfiglocal
+                //TODO bfdconfigremote
+                //TODO bfdparams
+                if (tunnel.getRemoteColumn().getData() != null){
+                    PhysicalLocator pLoc = updatedPLocRows.get(tunnel.getRemoteColumn().getData());
+                    InstanceIdentifier<TerminationPoint> tpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
+                            HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId()), pLoc);
+                    tBuilder.setRemoteLocatorRef(new HwvtepPhysicalLocatorRef(tpPath));
+                }
+                tunnelList.add(tBuilder.build());
+            }
+            psAugmentationBuilder.setTunnels(tunnelList);
+        }
+
     }
 
     private void setManagedBy(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
@@ -127,7 +194,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        if(pSwitch.getManagementIpsColumn() != null 
+        if(pSwitch.getManagementIpsColumn() != null
                 && pSwitch.getManagementIpsColumn().getData() != null
                 && !pSwitch.getManagementIpsColumn().getData().isEmpty() ) {
             List<ManagementIps> mgmtIps = new ArrayList<>();
@@ -158,26 +225,6 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setUcastMacsLocal(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void setUcastMacsRemote(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void setMcastMacsLocal(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void setMcastMacsRemote(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        // TODO Auto-generated method stub
-        
-    }
-
     private Node buildConnectionNode(PhysicalSwitch pSwitch) {
         //Update node with PhysicalSwitch reference
         NodeBuilder connectionNode = new NodeBuilder();
@@ -185,11 +232,11 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<Switches> switches = new ArrayList<>();
-        InstanceIdentifier<Node> switchIid = HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                        pSwitch);
+        InstanceIdentifier<Node> switchIid = HwvtepSouthboundMapper
+                .createInstanceIdentifier(getOvsdbConnectionInstance(),pSwitch);
         hgAugmentationBuilder.setSwitches(switches);
         Switches physicalSwitch = new SwitchesBuilder().setSwitchRef(
-                        new HwvtepPhysicalSwitchRef(switchIid)).build(); 
+                        new HwvtepPhysicalSwitchRef(switchIid)).build();
         switches.add(physicalSwitch);
 
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());

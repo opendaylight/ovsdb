@@ -1009,4 +1009,19 @@ module ovsdb {
         ext:augment-identifier "ovsdb-termination-point-augmentation";
         uses ovsdb-port-interface-attributes;
     }
+
+    rpc is-node-dpdk-enabled {
+        description "Check whether one node is DPDK enabled or not.";
+        input {
+            leaf node-ip {
+                type inet:ip-address;
+                description "Node's management IP or connection IP.";
+            }
+        }
+        output {
+            leaf dpdk-enabled {
+                 type boolean;
+            }
+        }
+    }
 }

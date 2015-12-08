@@ -11,7 +11,10 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -26,8 +29,11 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,6 +153,43 @@ public class TransactUtils {
             LOG.warn("Read Configration/DS for Node failed! {}", connectionIid, e);
         }
         return node;
+    }
+
+    public static UUID createPhysicalLocatorSet(HwvtepOperationalState hwvtepOperationalState, TransactionBuilder transaction, List<LocatorSet> locatorList) {
+        Set<UUID> locators = new HashSet<UUID>();
+        for (LocatorSet locator: locatorList) {
+            UUID locatorUuid = null;
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<TerminationPoint> iid =(InstanceIdentifier<TerminationPoint>) locator.getLocatorRef().getValue();
+            //try to find locator in operational DS
+            Optional<HwvtepPhysicalLocatorAugmentation> operationalLocatorOptional =
+                    hwvtepOperationalState.getPhysicalLocatorAugmentation(iid);
+            if (operationalLocatorOptional.isPresent()) {
+                //if exist, get uuid
+                HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
+                locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
+            } else {
+                //if no, get it from config DS and create id
+                Optional<TerminationPoint> configLocatorOptional =
+                        readNodeFromConfig(hwvtepOperationalState.getReadWriteTransaction(), iid);
+                if (configLocatorOptional.isPresent()) {
+                    HwvtepPhysicalLocatorAugmentation locatorAugmentation =
+                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+                } else {
+                    LOG.warn("Create or update localMcastMac: No physical locator found in operational datastore!"
+                            + "Its indentifier is {}", locator.getLocatorRef().getValue());
+                }
+            }
+            if (locatorUuid != null) {
+                locators.add(locatorUuid);
+            }
+        }
+        PhysicalLocatorSet physicalLocatorSet = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalLocatorSet.class);
+        physicalLocatorSet.setLocators(locators);
+        String locatorSetUuid = "PhysicalLocatorSet_" + HwvtepSouthboundMapper.getRandomUUID();
+        transaction.add(op.insert(physicalLocatorSet).withId(locatorSetUuid));
+        return new UUID(locatorSetUuid);
     }
 
     public static UUID createPhysicalLocator(TransactionBuilder transaction, HwvtepPhysicalLocatorAugmentation inputLocator) {

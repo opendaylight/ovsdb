@@ -139,15 +139,19 @@ public abstract class AbstractServiceInstance {
     }
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+        LOG.debug("writeFlow 3: flowBuilder: {}, nodeBuilder: {}",
                 flowBuilder.build(), nodeBuilder.build());
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
+        LOG.debug("writeFlow: about to put nodePath for Flow {}, nodePath: {}",
+                flowBuilder.getFlowName(), createNodePath(nodeBuilder));
         modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
                 nodeBuilder.build(), true /*createMissingParents*/);
-        modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
+        LOG.debug("writeFlow: about to put Flow {}", flowBuilder.getFlowName());
+        modification.merge(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
                 flowBuilder.build(), true /*createMissingParents*/);
-
+        LOG.debug("writeFlow: about to submit Flow {}", flowBuilder.getFlowName());
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+        LOG.debug("writeFlow: checking status of Flow {}", flowBuilder.getFlowName());
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());

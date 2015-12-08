@@ -34,6 +34,19 @@ public abstract class AbstractEvent {
 
     private HandlerType handlerType;
     private Action action;
+    private int transactionId;
+
+    public int getTransactionId() {
+        return transactionId;
+    }
+
+    private static int txId = 0;
+    private static int incTxId() {
+        return ++txId;
+    }
+    public static int getTxId() {
+        return txId;
+    }
 
     private AbstractEvent() {
         // this is private to force proper construction
@@ -42,6 +55,7 @@ public abstract class AbstractEvent {
     protected AbstractEvent(HandlerType handlerType, Action action) {
         this.handlerType = handlerType;
         this.action = action;
+        this.transactionId = incTxId();
     }
 
     public HandlerType getHandlerType() {
@@ -54,7 +68,8 @@ public abstract class AbstractEvent {
 
     @Override
     public String toString() {
-        return "AbstractEvent [handlerType=" + handlerType + " action=" + action + "]";
+        return "AbstractEvent [transactionId=" + transactionId
+                + "handlerType=" + handlerType + " action=" + action + "]";
     }
 
     @Override

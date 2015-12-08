@@ -42,6 +42,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +104,35 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
                     transaction.put(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
                 }
+                //Update with Deleted VlanBindings
+                if(oldPPRows.get(pPortUpdateEntry.getKey()) != null){
+                    List<InstanceIdentifier<VlanBindings>> vBIiList = new ArrayList<>();
+                    Map<Long, UUID> oldVb = oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn().getData();
+                    Map<Long, UUID> updatedVb = pPortUpdateEntry.getValue().getVlanBindingsColumn().getData();
+                    for( Map.Entry<Long, UUID> oldVbEntry : oldVb.entrySet()){
+                        Long key = oldVbEntry.getKey();
+                        if(!updatedVb.containsKey(key)){
+                           VlanBindings vBindings = createVlanBinding(key, oldVb.get(key));
+                           InstanceIdentifier<VlanBindings> vBid = getInstanceIdentifier(tpPath, vBindings);
+                           vBIiList.add(vBid);
+                         }
+                        deleteEntries(transaction,vBIiList);
+                    }
+               }
             }
         }
+    }
+
+    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+            List<InstanceIdentifier<T>> entryIids) {
+        for (InstanceIdentifier<T> entryIid: entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+        }
+    }
+
+    private InstanceIdentifier<VlanBindings> getInstanceIdentifier(InstanceIdentifier<TerminationPoint> tpPath, VlanBindings vBindings) {
+        return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),tpPath,
+                vBindings);
     }
 
     private void buildTerminationPoint(

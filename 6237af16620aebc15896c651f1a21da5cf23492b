@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_a62b8893",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-08T06:36:35Z",
+      "side": 1,
+      "message": "localMcastMacs, makes it easier to read.",
+      "revId": "6237af16620aebc15896c651f1a21da5cf23492b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_46189484",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsLocalUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-08T06:36:35Z",
+      "side": 1,
+      "message": "This can be a method in HwvtepSouthboundUtils/Mapper as this will be used by McastMacsRemote also, right?",
+      "revId": "6237af16620aebc15896c651f1a21da5cf23492b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

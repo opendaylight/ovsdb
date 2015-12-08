@@ -24,6 +24,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -31,8 +32,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -42,21 +45,35 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.neutron.spi.INeutronPortCRUD;
+import org.opendaylight.neutron.spi.INeutronSecurityGroupCRUD;
+import org.opendaylight.neutron.spi.INeutronSecurityRuleCRUD;
+import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
+import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
+import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.NeutronSecurityRule;
+import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
@@ -101,7 +118,14 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     private static AtomicBoolean setup = new AtomicBoolean(false);
     private static MdsalUtils mdsalUtils = null;
     private static Southbound southbound = null;
+    private static SouthboundUtils southboundUtils;
     private static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
+    private static final String SDPLNAME = "sg1";
+    private static final String NETWORK_ID = "521e29d6-67b8-4b3c-8633-027d21195111";
+    private static final String TENANT_ID = "521e29d6-67b8-4b3c-8633-027d21195100";
+    private static final String SUBNET_ID = "521e29d6-67b8-4b3c-8633-027d21195112";
+    private static final String PORT1_ID = "521e29d6-67b8-4b3c-8633-027d21195113";
+    private static final String DHCPPORT_ID ="521e29d6-67b8-4b3c-8633-027d21195115";
 
     @Override
     public String getModuleName() {
@@ -233,6 +257,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + NETVIRT_TOPOLOGY_ID, getNetvirtTopology());
         southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         assertNotNull("southbound should not be null", southbound);
+        southboundUtils = new SouthboundUtils(mdsalUtils);
         setup.set(true);
     }
 
@@ -721,6 +746,194 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         for (Node node : ovsdbNodes) {
             LOG.info(">>>>> node: {}", node);
         }
+    }
+
+    @Test
+    public void testNetVirtFixedSG() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        assertNotNull("node is not connected", ovsdbNode);
+
+        Thread.sleep(30000);
+        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
+        assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
+        long datapathId = southbound.getDataPathId(bridgeNode);
+        assertNotEquals("datapathId was not found", datapathId, 0);
+
+        NeutronNetwork nn = createNeutronNetwork(NETWORK_ID, TENANT_ID,NetworkHandler.NETWORK_TYPE_VXLAN, "100");
+        NeutronSubnet ns = createNeutronSubnet(SUBNET_ID, TENANT_ID, NETWORK_ID, "10.0.0.0/24");
+        NeutronPort nport = createNeutronPort(NETWORK_ID, SUBNET_ID, PORT1_ID, "compute", "10.0.0.10", "f6:00:00:0f:00:01");
+        NeutronPort dhcp = createNeutronPort(NETWORK_ID, SUBNET_ID, DHCPPORT_ID, "dhcp", "10.0.0.1", "f6:00:00:0f:00:02");
+
+        Thread.sleep(30000);
+        Map<String, String> externalIds = Maps.newHashMap();
+        externalIds.put("attached-mac", "f6:00:00:0f:00:01");
+        externalIds.put("iface-id", PORT1_ID);
+        southboundUtils.addTerminationPoint(bridgeNode, null, SDPLNAME, "internal", null, externalIds, new Long(3));
+        southboundUtils.addTerminationPoint(bridgeNode, null, "vm1", "internal", null, null, 0L);
+        southboundUtils.addTerminationPoint(bridgeNode, null, "vm2", "internal", null, null, 0L);
+        Map<String, String> options = Maps.newHashMap();
+        options.put("key", "flow");
+        options.put("remote_ip", "192.168.120.32");
+        southboundUtils.addTerminationPoint(bridgeNode, null, "vx", "vxlan", options, null, new Long(4));
+        Thread.sleep(1000);
+
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
+                FlowUtils.createNodeBuilder(datapathId);
+        MatchBuilder matchBuilder1 = new MatchBuilder();
+        matchBuilder1 = MatchUtils.createDhcpMatch(matchBuilder1, 68, 67);
+        String flowId1 = "Egress_DHCP_Client"  + "_Permit_";
+        FlowBuilder flowBuilder1 = initFlowBuilder(matchBuilder1, flowId1, (short)40);
+        Flow flow1 = getFlow(flowBuilder1, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("EgressSG : Could not find flow in configuration ", flow1);
+        flow1 = getFlow(flowBuilder1, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("EgressSG Operational : Could not find flow in config", flow1);
+
+        testDefaultsSG(nport, datapathId, nn);
+        Thread.sleep(30000);
+        Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+        Thread.sleep(10000);
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    private void testDefaultsSG(NeutronPort nport, long datapathId, NeutronNetwork nn)
+            throws InterruptedException {
+        INeutronSecurityGroupCRUD ineutronSecurityGroupCRUD =
+                (INeutronSecurityGroupCRUD) ServiceHelper.getGlobalInstance(INeutronSecurityGroupCRUD.class, this);
+        assertNotNull("Could not find ineutronSecurityGroupCRUD Service", ineutronSecurityGroupCRUD);
+        INeutronSecurityRuleCRUD ineutronSecurityRuleCRUD =
+                (INeutronSecurityRuleCRUD) ServiceHelper.getGlobalInstance(INeutronSecurityRuleCRUD.class, this);
+        assertNotNull("Could not find ineutronSecurityRuleCRUD Service", ineutronSecurityRuleCRUD);
+
+        NeutronSecurityGroup neutronSG = new NeutronSecurityGroup();
+        neutronSG.setSecurityGroupDescription("testig defaultSG-IT");
+        neutronSG.setSecurityGroupName("DefaultSG");
+        neutronSG.setSecurityGroupUUID("d3329053-bae5-4bf4-a2d1-7330f11ba5db");
+        neutronSG.setTenantID(TENANT_ID);
+
+        List<NeutronSecurityRule> nsrs = new ArrayList<NeutronSecurityRule>();
+        NeutronSecurityRule nsrIN = new NeutronSecurityRule();
+        nsrIN.setSecurityRemoteGroupID(null);
+        nsrIN.setSecurityRuleDirection("ingress");
+        nsrIN.setSecurityRuleEthertype("IPv4");
+        nsrIN.setSecurityRuleGroupID("d3329053-bae5-4bf4-a2d1-7330f11ba5db");
+        nsrIN.setSecurityRuleProtocol("TCP");
+        nsrIN.setSecurityRuleRemoteIpPrefix("10.0.0.0/24");
+        nsrIN.setSecurityRuleUUID("823faaf7-175d-4f01-a271-0bf56fb1e7e6");
+        nsrIN.setTenantID(TENANT_ID);
+
+        NeutronSecurityRule nsrEG = new NeutronSecurityRule();
+        nsrEG.setSecurityRemoteGroupID(null);
+        nsrEG.setSecurityRuleDirection("egress");
+        nsrEG.setSecurityRuleEthertype("IPv4");
+        nsrEG.setSecurityRuleGroupID("d3329053-bae5-4bf4-a2d1-7330f11ba5db");
+        nsrEG.setSecurityRuleProtocol("TCP");
+        nsrEG.setSecurityRuleRemoteIpPrefix("10.0.0.0/24");
+        nsrEG.setSecurityRuleUUID("823faaf7-175d-4f01-a271-0bf56fb1e7e1");
+        nsrEG.setTenantID(TENANT_ID);
+
+        nsrs.add(nsrIN);
+        nsrs.add(nsrEG);
+
+        neutronSG.setSecurityRules(nsrs);
+        ineutronSecurityRuleCRUD.addNeutronSecurityRule(nsrIN);
+        ineutronSecurityRuleCRUD.addNeutronSecurityRule(nsrEG);
+        ineutronSecurityGroupCRUD.add(neutronSG);
+
+        List<NeutronSecurityGroup> sgs = new ArrayList<NeutronSecurityGroup>();
+        sgs.add(neutronSG);
+        nport.setSecurityGroups(sgs);
+
+        INeutronPortCRUD iNeutronPortCRUD =
+                (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        iNeutronPortCRUD.update(PORT1_ID, nport);
+
+        Thread.sleep(20000);
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilderEg =
+                FlowUtils.createNodeBuilder(datapathId);
+        MatchBuilder matchBuilderEg = new MatchBuilder();
+        matchBuilderEg = MatchUtils.createEtherMatchWithType(matchBuilderEg, null, nport.getMacAddress());
+        String flowIdEg = "Egress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
+        FlowBuilder flowBuilderEg = initFlowBuilder(matchBuilderEg, flowIdEg, (short)40);
+        Flow flowEg = getFlow(flowBuilderEg, nodeBuilderEg, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("EgressSG : Could not find flow in configuration ", flowEg);
+        flowEg = getFlow(flowBuilderEg, nodeBuilderEg, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("EgressSG Operational : Could not find flow in config", flowEg);
+
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilderIng =
+                FlowUtils.createNodeBuilder(datapathId);
+        MatchBuilder matchBuilderIng = new MatchBuilder();
+        matchBuilderIng = MatchUtils.createEtherMatchWithType(matchBuilderIng,null, nport.getMacAddress());
+        String flowIdIng = "Ingress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
+        FlowBuilder flowBuilderIng = initFlowBuilder(matchBuilderIng, flowIdIng, (short)90);
+        Flow flowIng = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("IngressSG : Could not find flow in configuration ", flowIng);
+        flowEg = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("IngressSG Operational : Could not find flow in config", flowIng);
+
+    }
+
+    private NeutronPort createNeutronPort(String networkId, String subnetId,
+             String id, String owner, String ipaddr, String mac) {
+        INeutronPortCRUD iNeutronPortCRUD =
+                (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        NeutronPort np = new NeutronPort();
+        np.initDefaults();
+        np.setID(id);
+        np.setDeviceOwner(owner);
+        np.setMacAddress(mac);
+        np.setNetworkUUID(networkId);
+        List<org.opendaylight.neutron.spi.Neutron_IPs> srcAddressList =
+                     new ArrayList<org.opendaylight.neutron.spi.Neutron_IPs>();
+        org.opendaylight.neutron.spi.Neutron_IPs nip = new org.opendaylight.neutron.spi.Neutron_IPs();
+        nip.setIpAddress(ipaddr);
+        nip.setSubnetUUID(subnetId);
+        srcAddressList.add(nip);
+        np.setFixedIPs(srcAddressList);
+        List<NeutronSecurityGroup> nsgs = new ArrayList<NeutronSecurityGroup>();
+        np.setSecurityGroups(nsgs);
+        iNeutronPortCRUD.add(np);
+        return np;
+    }
+
+    private NeutronSubnet createNeutronSubnet(String subnetId, String tenantId,
+              String networkId, String cidr) {
+        INeutronSubnetCRUD iNeutronSubnetCRUD =
+                (INeutronSubnetCRUD) ServiceHelper.getGlobalInstance(INeutronSubnetCRUD.class, this);
+        NeutronSubnet ns = new NeutronSubnet();
+        ns.setID(subnetId);
+        ns.setCidr(cidr);
+        ns.initDefaults();
+        ns.setNetworkUUID(networkId);
+        ns.setTenantID(tenantId);
+        iNeutronSubnetCRUD.add(ns);
+        return ns;
+    }
+
+    private NeutronNetwork createNeutronNetwork(String uuid, String tenantID, String networkTypeVxlan, String segId) {
+        INeutronNetworkCRUD iNeutronNetworkCRUD =
+                (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        NeutronNetwork nn = new NeutronNetwork();
+        nn.setID(uuid);
+        nn.initDefaults();
+        nn.setTenantID(tenantID);
+        nn.setProviderNetworkType(networkTypeVxlan);
+        nn.setProviderSegmentationID(segId);
+        iNeutronNetworkCRUD.addNetwork(nn);
+        return nn;
+    }
+
+    private FlowBuilder initFlowBuilder(MatchBuilder matchBuilder, String flowId, short tableId) {
+        FlowBuilder flowBuilder = new FlowBuilder();
+        flowBuilder.setMatch(matchBuilder.build());
+        flowBuilder.setId(new FlowId(flowId));
+        flowBuilder.setFlowName(flowId);
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(tableId);
+        flowBuilder.setKey(key);
+        return flowBuilder;
     }
 
     private Flow getFlow (

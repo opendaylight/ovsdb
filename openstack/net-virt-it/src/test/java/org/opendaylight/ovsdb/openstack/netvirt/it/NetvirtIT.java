@@ -171,6 +171,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     @Override
     public Option getLoggingOption() {
         return composite(
+                //editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                //        "log4j.logger.org.opendaylight.controller",
+                //        LogLevelOption.LogLevel.TRACE.name()),
                 editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.TRACE.name()),
@@ -677,7 +680,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         LOG.info("testNetVirt: should be connected");
 
-        Thread.sleep(30000);
+        Thread.sleep(10000);
         LOG.info("testNetVirt: should really be connected after sleep");
         // Verify the pipeline flows were installed
         PipelineOrchestrator pipelineOrchestrator =
@@ -702,9 +705,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             FlowBuilder flowBuilder = FlowUtils.getPipelineFlow(service.getTable(), (short)0);
             Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
             assertNotNull("Could not find flow in config", flow);
-            //Thread.sleep(1000);
-            //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-            //assertNotNull("Could not find flow in operational", flow);
+            Thread.sleep(1000);
+            flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+            assertNotNull("Could not find flow in operational", flow);
         }
         assertEquals("did not find all expected flows in static pipeline",
                 staticPipeline.size(), staticPipelineFound.size());

@@ -583,13 +583,13 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
-        southboundUtils.addTerminationPoint(bridgeNode, null, SF1DPLNAME, "internal", null, externalIds);
-        southboundUtils.addTerminationPoint(bridgeNode, null, "vm1", "internal");
-        southboundUtils.addTerminationPoint(bridgeNode, null, "vm2", "internal");
+        southboundUtils.addTerminationPoint(bridgeNode, SF1DPLNAME, "internal", null, externalIds);
+        southboundUtils.addTerminationPoint(bridgeNode, "vm1", "internal");
+        southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal");
         Map<String, String> options = Maps.newHashMap();
         options.put("key", "flow");
         options.put("remote_ip", "192.168.120.32");
-        southboundUtils.addTerminationPoint(bridgeNode, null, "vx", "vxlan", options, null);
+        southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null);
         Thread.sleep(1000);
 
         testModelPut(serviceFunctionsBuilder(), ServiceFunctions.class);

@@ -58,13 +58,15 @@ import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -361,20 +363,20 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     private boolean addOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo),
-                SouthboundMapper.createNode(connectionInfo));
+                SouthboundUtils.createInstanceIdentifier(connectionInfo),
+                SouthboundUtils.createNode(connectionInfo));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
     }
 
     private Node getOvsdbNode(final ConnectionInfo connectionInfo) {
         return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo));
+                SouthboundUtils.createInstanceIdentifier(connectionInfo));
     }
 
     private boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo));
+                SouthboundUtils.createInstanceIdentifier(connectionInfo));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
     }
@@ -652,7 +654,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      */
     private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName, LogicalDatastoreType store) {
         InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                SouthboundUtils.createInstanceIdentifier(connectionInfo,
                     new OvsdbBridgeName(bridgeName));
         return mdsalUtils.read(store, bridgeIid);
     }
@@ -661,21 +663,21 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         throws InterruptedException {
 
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                SouthboundUtils.createInstanceIdentifier(connectionInfo,
                         new OvsdbBridgeName(bridgeName)));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
     }
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
-        return SouthboundMapper.createInstanceIdentifier(connectionInfo,
+        return SouthboundUtils.createInstanceIdentifier(connectionInfo,
             bridge.getBridgeName());
     }
 
     private void netVirtAddPort(ConnectionInfo connectionInfo) throws InterruptedException {
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
         Assert.assertNotNull(bridge);
-        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                 connectionInfo, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -782,13 +784,13 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
         externalIds.put("iface-id", PORT1_ID);
-        southboundUtils.addTerminationPoint(bridgeNode, null, SDPLNAME, "internal", null, externalIds, new Long(3));
-        southboundUtils.addTerminationPoint(bridgeNode, null, "vm1", "internal", null, null, 0L);
-        southboundUtils.addTerminationPoint(bridgeNode, null, "vm2", "internal", null, null, 0L);
+        southboundUtils.addTerminationPoint(bridgeNode, SDPLNAME, "internal", null, externalIds, 3L);
+        southboundUtils.addTerminationPoint(bridgeNode, "vm1", "internal", null, null, 0L);
+        southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal", null, null, 0L);
         Map<String, String> options = Maps.newHashMap();
         options.put("key", "flow");
         options.put("remote_ip", "192.168.120.32");
-        southboundUtils.addTerminationPoint(bridgeNode, null, "vx", "vxlan", options, null, new Long(4));
+        southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null, 4L);
         Thread.sleep(1000);
 
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
@@ -824,7 +826,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         neutronSG.setSecurityGroupUUID("d3329053-bae5-4bf4-a2d1-7330f11ba5db");
         neutronSG.setTenantID(TENANT_ID);
 
-        List<NeutronSecurityRule> nsrs = new ArrayList<NeutronSecurityRule>();
+        List<NeutronSecurityRule> nsrs = new ArrayList<>();
         NeutronSecurityRule nsrIN = new NeutronSecurityRule();
         nsrIN.setSecurityRemoteGroupID(null);
         nsrIN.setSecurityRuleDirection("ingress");
@@ -853,7 +855,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         ineutronSecurityRuleCRUD.addNeutronSecurityRule(nsrEG);
         ineutronSecurityGroupCRUD.add(neutronSG);
 
-        List<NeutronSecurityGroup> sgs = new ArrayList<NeutronSecurityGroup>();
+        List<NeutronSecurityGroup> sgs = new ArrayList<>();
         sgs.add(neutronSG);
         nport.setSecurityGroups(sgs);
 
@@ -882,7 +884,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Flow flowIng = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.CONFIGURATION);
         assertNotNull("IngressSG : Could not find flow in configuration ", flowIng);
         flowEg = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("IngressSG Operational : Could not find flow in config", flowIng);
+        assertNotNull("IngressSG Operational : Could not find flow in config", flowEg);
 
     }
 
@@ -897,13 +899,13 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         np.setMacAddress(mac);
         np.setNetworkUUID(networkId);
         List<org.opendaylight.neutron.spi.Neutron_IPs> srcAddressList =
-                     new ArrayList<org.opendaylight.neutron.spi.Neutron_IPs>();
+                new ArrayList<>();
         org.opendaylight.neutron.spi.Neutron_IPs nip = new org.opendaylight.neutron.spi.Neutron_IPs();
         nip.setIpAddress(ipaddr);
         nip.setSubnetUUID(subnetId);
         srcAddressList.add(nip);
         np.setFixedIPs(srcAddressList);
-        List<NeutronSecurityGroup> nsgs = new ArrayList<NeutronSecurityGroup>();
+        List<NeutronSecurityGroup> nsgs = new ArrayList<>();
         np.setSecurityGroups(nsgs);
         iNeutronPortCRUD.add(np);
         return np;

@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1aa4ed85_92e6c243",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-12-08T20:40:13Z",
+      "side": 1,
+      "message": "nitpick: changes",
+      "range": {
+        "startLine": 7,
+        "startChar": 25,
+        "endLine": 7,
+        "endChar": 32
+      },
+      "revId": "c7ca6ff241535beff47d3ec5cb87d37d395afed0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_b7b5f032",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2

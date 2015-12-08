@@ -218,7 +218,7 @@ public class SouthboundHandler extends AbstractHandler
             return;
         }
         SouthboundEvent ev = (SouthboundEvent) abstractEvent;
-        LOG.trace("processEvent: {}", ev);
+        LOG.trace("processEvent ({}): {}", ev, ev.getTransactionId());
         switch (ev.getType()) {
             case NODE:
                 processOvsdbNodeEvent(ev);
@@ -240,6 +240,7 @@ public class SouthboundHandler extends AbstractHandler
                 LOG.warn("Unable to process type {} action {} for node {}", ev.getType(), ev.getAction(), ev.getNode());
                 break;
         }
+        LOG.trace("processEvent exit ({}): {}", ev, ev.getTransactionId());
     }
 
     private void processOvsdbNodeEvent(SouthboundEvent ev) {

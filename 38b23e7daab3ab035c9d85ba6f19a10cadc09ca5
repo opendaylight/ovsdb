@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_585e29eb",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:28:21Z",
+      "side": 0,
+      "message": "this line is needed to get IT reporting correct.",
+      "range": {
+        "startLine": 55,
+        "startChar": 75,
+        "endLine": 55,
+        "endChar": 81
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_7863e5b1",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:28:21Z",
+      "side": 0,
+      "message": "removing this ends up dumping an error when ut is ran - something about not having an slf4j or logger impl.",
+      "range": {
+        "startLine": 247,
+        "startChar": 19,
+        "endLine": 247,
+        "endChar": 24
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_1858b1f9",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:28:21Z",
+      "side": 0,
+      "message": "does this still run checkstyle? I know it is included in the odlparent build section but I thought it had to be in the pom itself. Guess not so this should work.",
+      "range": {
+        "startLine": 269,
+        "startChar": 20,
+        "endLine": 269,
+        "endChar": 21
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b8ff1daa",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:28:21Z",
+      "side": 0,
+      "message": "the listener is used to get line reporting for the tests. meaning in the sonar screen you can click on the line of code that has a test and it will jump to the corresponding test.",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f81cb515",
+        "filename": "openstack/net-virt-sfc/impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:28:21Z",
+      "side": 0,
+      "message": "needed for it sonar reporting",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_98190125",
+        "filename": "openstack/net-virt-sfc/impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:28:21Z",
+      "side": 0,
+      "message": "helps remove an error from test runs",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

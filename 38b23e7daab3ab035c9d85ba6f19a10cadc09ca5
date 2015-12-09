@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_a2e60b43",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T15:29:36Z",
+      "side": 0,
+      "message": "Ok I understand better now, thanks you for the great explanation.",
+      "parentUuid": "1aa4ed85_c2b54732",
+      "range": {
+        "startLine": 55,
+        "startChar": 75,
+        "endLine": 55,
+        "endChar": 81
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_7863e5b1",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 4
@@ -108,6 +132,30 @@
       "side": 0,
       "message": "This is the error you get if there is not a slf4j impl:\n\nRunning org.opendaylight.ovsdb.utils.servicehelper.ServiceHelperTest\nSLF4J: Failed to load class \"org.slf4j.impl.StaticLoggerBinder\".\nSLF4J: Defaulting to no-operation (NOP) logger implementation\nSLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.",
       "parentUuid": "1aa4ed85_7863e5b1",
+      "range": {
+        "startLine": 247,
+        "startChar": 19,
+        "endLine": 247,
+        "endChar": 24
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_42cf17b1",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T15:29:36Z",
+      "side": 0,
+      "message": "ok I\u0027ll investigate that because I don\u0027t even see the class it\u0027s trying to load for ServiceHelperTests here: https://github.com/opendaylight/ovsdb/blob/master/utils/servicehelper/src/test/java/org/opendaylight/ovsdb/utils/servicehelper/ServiceHelperTest.java",
+      "parentUuid": "1aa4ed85_42815749",
       "range": {
         "startLine": 247,
         "startChar": 19,
@@ -238,6 +286,24 @@
       "side": 0,
       "message": "Look at: https://sonar.opendaylight.org/drilldown/measures/12541?metric\u003dcoverage\u0026rids[]\u003d15640\u0026rids[]\u003d45989\n\nWhen you look at the source and see a line that has test coverage it is highlighted in green. If the listener worked correctly you can left-click int he green box on the left and it will show you the test source that covered the line. Sometimes it is flaky, but when it does work it is nice to see the test.",
       "parentUuid": "1aa4ed85_8f68d8f6",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_82ee6f21",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T15:29:36Z",
+      "side": 0,
+      "message": "Oh I see, this is really nice, thanks for the pointer",
+      "parentUuid": "1aa4ed85_82874f61",
       "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

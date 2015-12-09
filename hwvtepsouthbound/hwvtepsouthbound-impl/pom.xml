@@ -21,6 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
+    <!-- project specific dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>hwvtepsouthbound-api</artifactId>
@@ -36,14 +37,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>schema.hardwarevtep</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
@@ -72,5 +71,4 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
     </plugins>
   </build>
-
 </project>

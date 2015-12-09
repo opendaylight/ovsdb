@@ -87,6 +87,24 @@
       "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_853c3995",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T18:17:14Z",
+      "side": 1,
+      "message": "Agreed, which is why that was confusing. Look at getOtherConfig() which I think does the same thing of using key. I know getOtherConfig() is used and works.\n\nIs it possible that the Southbound is doing something wrong when populating the values?",
+      "parentUuid": "1aa4ed85_4573a1b1",
+      "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

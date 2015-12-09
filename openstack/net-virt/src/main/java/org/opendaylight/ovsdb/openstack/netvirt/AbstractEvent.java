@@ -29,7 +29,8 @@ public abstract class AbstractEvent {
         NEUTRON_LOAD_BALANCER,
         NEUTRON_LOAD_BALANCER_POOL,
         NEUTRON_LOAD_BALANCER_POOL_MEMBER,
-        NODE;
+        NODE,
+        NEUTRON_L3_ADAPTER;
 
         public static final int size = HandlerType.values().length;
     }

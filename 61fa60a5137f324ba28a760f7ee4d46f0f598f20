@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_c547914a",
+        "filename": "openstack/net-virt-it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/it/NetvirtIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-09T17:49:26Z",
+      "side": 1,
+      "message": "Yup, I\u0027ll fix that, thanks!",
+      "parentUuid": "1aa4ed85_225a1b84",
+      "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_e5396dd9",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-09T17:38:12Z",
       "side": 1,
       "message": "Did you verify this works? I think I had it this way originally but for some reason only the getKey worked.",
+      "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4573a1b1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-09T17:49:26Z",
+      "side": 1,
+      "message": "I\u0027m not sure how to test it, I\u0027ll see if it\u0027s covered by an existing test otherwise I\u0027ll add one. I changed it because as I understand it the existing code can\u0027t work: Options.getKey() returns an instance of OptionsKey, which can never equal an instance of String...",
+      "parentUuid": "1aa4ed85_e5396dd9",
       "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

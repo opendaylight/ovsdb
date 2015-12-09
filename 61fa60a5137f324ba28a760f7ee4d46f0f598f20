@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_225a1b84",
+        "filename": "openstack/net-virt-it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/it/NetvirtIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T17:38:12Z",
+      "side": 1,
+      "message": "The getFlow should do two reads: one for config and the next for operational for each flow:\n\ngetFlow(config, ingress)\ngetFlow(operational, ingress)\n\ngetFlow(config, egress)\ngetFlow(operational, egress)\n\nAlso the asertNotNull text should match the ingress or egress. This one here has IngressSg in the text and then flowEg in the check.",
+      "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_e5396dd9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T17:38:12Z",
+      "side": 1,
+      "message": "Did you verify this works? I think I had it this way originally but for some reason only the getKey worked.",
+      "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

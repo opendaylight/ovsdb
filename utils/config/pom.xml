@@ -12,10 +12,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>commons</artifactId>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/parent/pom.xml</relativePath>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
   <artifactId>utils.config</artifactId>
@@ -44,16 +44,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
 
+  <properties>
+    <powermock.version>1.5.2</powermock.version>
+  </properties>
+
   <dependencies>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- testing dependencies -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -63,6 +59,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
       <scope>test</scope>
+      <version>${powermock.version}</version>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
@@ -74,18 +71,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
       <scope>test</scope>
+      <version>${powermock.version}</version>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

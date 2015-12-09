@@ -25,14 +25,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>bundle</packaging>
 
   <properties>
-    <networkconfig.neutron.version>0.6.0-SNAPSHOT</networkconfig.neutron.version>
+    <neutron.version>0.6.0-SNAPSHOT</neutron.version>
     <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
     <powermock.version>1.5.2</powermock.version>
-    <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-    <sfc.project.version>0.2.0-SNAPSHOT</sfc.project.version>
+    <sfc.version>0.2.0-SNAPSHOT</sfc.version>
   </properties>
 
   <dependencies>
+    <!-- project specific dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>openstack.net-virt-sfc-api</artifactId>
@@ -69,38 +69,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>utils.servicehelper</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-inventory</artifactId>
-    </dependency>
+    <!-- openflowplugin dependencies -->
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowplugin-extension-nicira</artifactId>
@@ -121,32 +94,30 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>model-flow-service</artifactId>
       <version>${openflowplugin.version}</version>
     </dependency>
+    <!-- mdsal dependencies -->
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-topology</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>iana-if-type-2014-05-08</artifactId>
+    </dependency>
+    <!-- sfc dependencies -->
+    <dependency>
       <groupId>org.opendaylight.sfc</groupId>
       <artifactId>sfc-model</artifactId>
-      <version>${sfc.project.version}</version>
+      <version>${sfc.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.sfc</groupId>
       <artifactId>sfc-provider</artifactId>
-      <version>${sfc.project.version}</version>
+      <version>${sfc.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>concepts</artifactId>
-    </dependency>
+    <!-- testing dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -171,17 +142,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>powermock-api-mockito</artifactId>
       <version>${powermock.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.sonar-plugins.java</groupId>
-      <artifactId>sonar-jacoco-listeners</artifactId>
-      <version>${sonar-jacoco-listeners.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>iana-if-type-2014-05-08</artifactId>
-      <version>2014.05.08.8-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -208,22 +168,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
         </configuration>
       </plugin>-->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.sonar.java.jacoco.JUnitListener</value>
-            </property>
-          </properties>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 </project>

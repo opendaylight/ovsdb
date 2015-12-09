@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -81,7 +82,11 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactionCommand {
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         LocalMcastMacsBuilder mMacLocalBuilder = new LocalMcastMacsBuilder();
-        mMacLocalBuilder.setMacEntryKey(new MacAddress(mMacLocal.getMac()));
+        if (mMacLocal.getMac().equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
+            mMacLocalBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
+        } else {
+            mMacLocalBuilder.setMacEntryKey(new MacAddress(mMacLocal.getMac()));
+        }
         setIpAddress(mMacLocalBuilder, mMacLocal);
         setLocatorSet(mMacLocalBuilder, mMacLocal);
         setLogicalSwitch(mMacLocalBuilder, mMacLocal);

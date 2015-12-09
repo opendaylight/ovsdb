@@ -320,7 +320,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                         if (securityGroup.getSecurityGroupUUID().equals(securityGroupUuid)) {
                             LOG.debug("getVMListForSecurityGroup : adding ports with ips {} "
                                     + "compute port", neutronPort.getFixedIPs());
-                            vmListForSecurityGroup.addAll(neutronPort.getFixedIPs());
+                            if (neutronPort.getFixedIPs() != null) {
+                                vmListForSecurityGroup.addAll(neutronPort.getFixedIPs());
+                            }
                         }
                     }
                 }

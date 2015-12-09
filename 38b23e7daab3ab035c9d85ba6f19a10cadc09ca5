@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_c2b54732",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T15:05:40Z",
+      "side": 0,
+      "message": "Sonar runs analysis in two steps:\n\n1. During the first pass the code is compiled, tests run and a execution report generated.\n2. Second pass sonar references the execution report along with the source and compiled jar to make the output report.\n\nWith UT, the source and tests are in the same dir so sonar has everything it needs. With IT, the tests are outside the source so when that code is ran it produces an execution report, but then the second pass is ran against the impl source so you need to tell jacoco where the IT execution report is located.",
+      "parentUuid": "1aa4ed85_cf8fb0cb",
+      "range": {
+        "startLine": 55,
+        "startChar": 75,
+        "endLine": 55,
+        "endChar": 81
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_7863e5b1",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 4
@@ -60,6 +84,30 @@
       "writtenOn": "2015-12-09T03:28:21Z",
       "side": 0,
       "message": "removing this ends up dumping an error when ut is ran - something about not having an slf4j or logger impl.",
+      "range": {
+        "startLine": 247,
+        "startChar": 19,
+        "endLine": 247,
+        "endChar": 24
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_42815749",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T15:05:40Z",
+      "side": 0,
+      "message": "This is the error you get if there is not a slf4j impl:\n\nRunning org.opendaylight.ovsdb.utils.servicehelper.ServiceHelperTest\nSLF4J: Failed to load class \"org.slf4j.impl.StaticLoggerBinder\".\nSLF4J: Defaulting to no-operation (NOP) logger implementation\nSLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.",
+      "parentUuid": "1aa4ed85_7863e5b1",
       "range": {
         "startLine": 247,
         "startChar": 19,
@@ -119,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_227c5b72",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T15:05:40Z",
+      "side": 0,
+      "message": "That\u0027s fine in this case then. I think only Southbound has checkstyle fail on error currently so this can be removed from places that don\u0027t have the cleaned up code.",
+      "parentUuid": "1aa4ed85_6fbc7c6d",
+      "range": {
+        "startLine": 269,
+        "startChar": 20,
+        "endLine": 269,
+        "endChar": 21
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_b8ff1daa",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 4
@@ -148,6 +220,24 @@
       "side": 0,
       "message": "I tried to look at it but wasn\u0027t able to find what you are mentioning. That being said, I can let it as is if it adds some value.\n\nRegardless, if we leave that there, I think we need the sonar-jacoco-listener dependency",
       "parentUuid": "1aa4ed85_b8ff1daa",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_82874f61",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T15:05:40Z",
+      "side": 0,
+      "message": "Look at: https://sonar.opendaylight.org/drilldown/measures/12541?metric\u003dcoverage\u0026rids[]\u003d15640\u0026rids[]\u003d45989\n\nWhen you look at the source and see a line that has test coverage it is highlighted in green. If the listener worked correctly you can left-click int he green box on the left and it will show you the test source that covered the line. Sometimes it is flaky, but when it does work it is nice to see the test.",
+      "parentUuid": "1aa4ed85_8f68d8f6",
       "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

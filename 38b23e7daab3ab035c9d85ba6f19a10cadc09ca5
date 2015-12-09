@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_58d38938",
+        "filename": "utils/mdsal-node/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T03:33:59Z",
+      "side": 0,
+      "message": "verify this doesn\u0027t cause that warning to pop out during ut",
+      "range": {
+        "startLine": 65,
+        "startChar": 24,
+        "endLine": 65,
+        "endChar": 25
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

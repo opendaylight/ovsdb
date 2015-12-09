@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_e2940346",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-12-09T16:09:12Z",
+      "side": 1,
+      "message": "The callback will happen in the thread context of the arp responder worker. before calling updateExternalRouterMac, we will need to fix that. My current thinking is to expand on the AbstractEvent to accomplish this.\n\nAnybody has a better idea of how we accomplish that?",
+      "range": {
+        "startLine": 170,
+        "startChar": 11,
+        "endLine": 170,
+        "endChar": 16
+      },
+      "revId": "5ed089070f0b803772af12468e941aab9528d57a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

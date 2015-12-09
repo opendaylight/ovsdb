@@ -45,9 +45,11 @@ import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
@@ -931,6 +933,7 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testSetDependencies() throws Exception {
+        EventDispatcher eventDispatcher = mock(EventDispatcher.class);
         TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
         ConfigurationService configurationService = mock(ConfigurationService.class);
         ArpProvider arpProvider = mock(ArpProvider.class);
@@ -942,6 +945,7 @@ public class NeutronL3AdapterTest {
         Southbound southbound = mock(Southbound.class);
 
         PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, neutronL3Adapter)).thenReturn(eventDispatcher);
         PowerMockito.when(ServiceHelper.getGlobalInstance(TenantNetworkManager.class, neutronL3Adapter)).thenReturn(tenantNetworkManager);
         PowerMockito.when(ServiceHelper.getGlobalInstance(ConfigurationService.class, neutronL3Adapter)).thenReturn(configurationService);
         PowerMockito.when(ServiceHelper.getGlobalInstance(ArpProvider.class, neutronL3Adapter)).thenReturn(arpProvider);
@@ -954,6 +958,8 @@ public class NeutronL3AdapterTest {
 
         neutronL3Adapter.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
 
+        assertEquals("Error, did not return the correct object", getAbstractHandlerField("eventDispatcher"),
+                eventDispatcher);
         assertEquals("Error, did not return the correct object", getField("tenantNetworkManager"), tenantNetworkManager);
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
         assertEquals("Error, did not return the correct object", getField("arpProvider"), arpProvider);
@@ -998,6 +1004,12 @@ public class NeutronL3AdapterTest {
         L3ForwardingProvider l3ForwardingProvider = mock(L3ForwardingProvider.class);
         neutronL3Adapter.setDependencies(l3ForwardingProvider);
         assertEquals("Error, did not return the correct object", getField("l3ForwardingProvider"), l3ForwardingProvider);
+    }
+
+    private Object getAbstractHandlerField(String fieldName) throws Exception {
+        Field field = AbstractHandler.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(neutronL3Adapter);
     }
 
     private Object getField(String fieldName) throws Exception {

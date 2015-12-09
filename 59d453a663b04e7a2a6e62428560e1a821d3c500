@@ -16,6 +16,24 @@
       "revId": "59d453a663b04e7a2a6e62428560e1a821d3c500",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_42b077f4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T16:12:06Z",
+      "side": 1,
+      "message": "Depends mostly on how the value is used, but usually the typed value is a better choice. It looks like the MacAddress form is used throughout the code so that is another reason to use the MacAddress rather than string. It would also remove the need to do the getValue() in some places.",
+      "parentUuid": "1aa4ed85_220f7be3",
+      "revId": "59d453a663b04e7a2a6e62428560e1a821d3c500",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -13,10 +13,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.mdsal</groupId>
-        <artifactId>binding-parent</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
-        <relativePath/>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-parent</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+      <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.ovsdb</groupId>
@@ -25,35 +25,17 @@
     <packaging>bundle</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-binding-api</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
+    <!-- project specific dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>utils.mdsal-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+    <!-- neutron dependencies -->
         <dependency>
             <groupId>org.opendaylight.neutron</groupId>
             <artifactId>model</artifactId>
             <version>0.6.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

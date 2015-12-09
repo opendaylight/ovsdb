@@ -28,11 +28,6 @@ module hwvtep {
         type instance-identifier;
     }
 
-    typedef hwvtep-physical-locator-set-ref {
-        description "A reference to a set of endpoints to which logical switch traffic may be encapsulated and forwarded via replication";
-        type instance-identifier;
-    }
-
     typedef hwvtep-global-ref {
         description "A reference to an hwvtep global node";
         type instance-identifier;

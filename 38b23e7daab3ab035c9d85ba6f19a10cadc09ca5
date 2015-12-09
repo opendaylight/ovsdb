@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_cf8fb0cb",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T14:22:55Z",
+      "side": 0,
+      "message": "AFAIK there is no IT tests run under net-virt-providers, they seems the be under net-virt-it.\n\nI see the path here point to net-virt-it, maybe I\u0027m missing something?",
+      "parentUuid": "1aa4ed85_585e29eb",
+      "range": {
+        "startLine": 55,
+        "startChar": 75,
+        "endLine": 55,
+        "endChar": 81
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_7863e5b1",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 4
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_6fbc7c6d",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T14:22:55Z",
+      "side": 0,
+      "message": "Yes without this checkstyle will run, although it won\u0027t fail on error, it will pop up a warning",
+      "parentUuid": "1aa4ed85_1858b1f9",
+      "range": {
+        "startLine": 269,
+        "startChar": 20,
+        "endLine": 269,
+        "endChar": 21
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_b8ff1daa",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 4
@@ -82,6 +130,24 @@
       "writtenOn": "2015-12-09T03:28:21Z",
       "side": 0,
       "message": "the listener is used to get line reporting for the tests. meaning in the sonar screen you can click on the line of code that has a test and it will jump to the corresponding test.",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_8f68d8f6",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T14:22:55Z",
+      "side": 0,
+      "message": "I tried to look at it but wasn\u0027t able to find what you are mentioning. That being said, I can let it as is if it adds some value.\n\nRegardless, if we leave that there, I think we need the sonar-jacoco-listener dependency",
+      "parentUuid": "1aa4ed85_b8ff1daa",
       "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -105,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_0f22a8b9",
+        "filename": "openstack/net-virt-sfc/impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T14:22:55Z",
+      "side": 0,
+      "message": "AFAIK there is no IT tests run under net-virt-sfc, they seems the be under net-virt-sfc-it.\n\nI see the path here point to net-virt-sfc-it, maybe I\u0027m missing something?",
+      "parentUuid": "1aa4ed85_f81cb515",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_98190125",
         "filename": "openstack/net-virt-sfc/impl/pom.xml",
         "patchSetId": 4
@@ -116,6 +200,29 @@
       "writtenOn": "2015-12-09T03:28:21Z",
       "side": 0,
       "message": "helps remove an error from test runs",
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_af2ef4a3",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T14:22:55Z",
+      "side": 0,
+      "message": "likewise",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 95
+      },
       "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

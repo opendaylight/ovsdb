@@ -22,6 +22,30 @@
       "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_6fc79c13",
+        "filename": "utils/mdsal-node/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T13:58:42Z",
+      "side": 0,
+      "message": "I ran a mvn clean install under /utils, all warnings I could see were for javadoc. Not sure what is the kind of warning we\u0027re looking to avoid with this.",
+      "parentUuid": "1aa4ed85_58d38938",
+      "range": {
+        "startLine": 65,
+        "startChar": 24,
+        "endLine": 65,
+        "endChar": 25
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

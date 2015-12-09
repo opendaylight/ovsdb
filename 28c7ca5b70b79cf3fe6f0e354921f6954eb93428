@@ -16,6 +16,24 @@
       "revId": "28c7ca5b70b79cf3fe6f0e354921f6954eb93428",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4fd660c7",
+        "filename": "utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T13:58:42Z",
+      "side": 1,
+      "message": "Really good point, it does add some value. The purpose of this odlparent-lite is mainly to let jenkins know where to publish the artifacts on a mvn deploy. This was added by Thanh to avoid adding the distributionManagement in every pom that was failing to publish the artifact.",
+      "parentUuid": "1aa4ed85_38e24d04",
+      "revId": "28c7ca5b70b79cf3fe6f0e354921f6954eb93428",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

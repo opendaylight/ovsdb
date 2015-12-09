@@ -46,6 +46,30 @@
       "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_6feebc8d",
+        "filename": "utils/mdsal-node/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-09T14:01:53Z",
+      "side": 0,
+      "message": "This should be OK, it\u0027s removing slf4j-impl which can cause issues at runtime. If slf4j-api is needed it causes build errors.",
+      "parentUuid": "1aa4ed85_6fc79c13",
+      "range": {
+        "startLine": 65,
+        "startChar": 24,
+        "endLine": 65,
+        "endChar": 25
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

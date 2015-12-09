@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Wed, 09 Dec 2015 03:54:18 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/30815
+Project: ovsdb
+Branch: refs/heads/pre-boron

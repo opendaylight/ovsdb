@@ -9,11 +9,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <parent>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>it</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
-    <relativePath>../../commons/it</relativePath>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>mdsal-it-parent</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>southbound-it</artifactId>
@@ -40,93 +41,29 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>southbound-artifacts</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>0.4.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  
   <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
-    </dependency>
+    <!-- project specific dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>southbound-features</artifactId>
+      <version>${project.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
+    <!-- AbstractConfigTestBase::getKarafDistro() needs this to find its version -->
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-util</artifactId>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>southbound-karaf</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>utils.southbound-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <!-- Dependencies for pax exam karaf container -->
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-karaf</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit4</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-aether</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.karaf.features</groupId>
-      <artifactId>org.apache.karaf.features.core</artifactId>
-      <version>${karaf.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>compile</scope>
-    </dependency>
+    <!-- external dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -140,37 +77,40 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.codehaus.sonar-plugins.java</groupId>
       <artifactId>sonar-jacoco-listeners</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!-- AbstractConfigTestBase::getKarafDistro() needs this to find its version -->
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>southbound-karaf</artifactId>
-      <version>${project.version}</version>
+      <version>${sonar-jacoco-listeners.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <properties>
+            <property>
+              <name>listener</name>
+              <value>org.sonar.java.jacoco.JUnitListener</value>
+            </property>
+          </properties>
+        </configuration>
       </plugin>
-      <!-- Needed if you use versionAsInProject() -->
       <plugin>
-        <groupId>org.apache.servicemix.tooling</groupId>
-        <artifactId>depends-maven-plugin</artifactId>
-        <version>1.2</version>
+        <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>generate-depends-file</id>
+            <id>prep-jacoco-agent</id>
+            <phase>pre-integration-test</phase>
             <goals>
-              <goal>generate-depends-file</goal>
+              <goal>run</goal>
             </goals>
+            <configuration>
+              <target>
+                <copy file="${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar"
+                      tofile="target/exam/jars/org.jacoco.agent.jar" />
+              </target>
+            </configuration>
           </execution>
         </executions>
       </plugin>

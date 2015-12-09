@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_a54855cd",
+        "filename": "openstack/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-12-09T20:31:43Z",
+      "side": 1,
+      "message": "Should have a relativePath here.",
+      "revId": "ba991416c5f7dc25e38959914902016eba8a0599",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_c54551b4",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-12-09T20:31:43Z",
+      "side": 1,
+      "message": "Should have a \u003crelativePath/\u003e here.",
+      "revId": "ba991416c5f7dc25e38959914902016eba8a0599",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_250c6594",
+        "filename": "schemas/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-12-09T20:31:43Z",
+      "side": 1,
+      "message": "Should have a \u003crelativePath/\u003e here",
+      "revId": "ba991416c5f7dc25e38959914902016eba8a0599",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_451161ab",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-12-09T20:31:43Z",
+      "side": 1,
+      "message": "Should have a \u003crelativePath/\u003e here",
+      "revId": "ba991416c5f7dc25e38959914902016eba8a0599",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

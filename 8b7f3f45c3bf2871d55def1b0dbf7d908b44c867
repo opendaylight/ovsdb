@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_e53e4d29",
+        "filename": "openstack/net-virt-sfc/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-12-09T20:31:43Z",
+      "side": 0,
+      "message": "We need this. Maven\u0027s default relative path is \"..\" so you have to explicitly say \u003crelativePath/\u003e so that Maven knows the parent does not exist in this repo and it should download from Nexus.",
+      "revId": "8b7f3f45c3bf2871d55def1b0dbf7d908b44c867",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

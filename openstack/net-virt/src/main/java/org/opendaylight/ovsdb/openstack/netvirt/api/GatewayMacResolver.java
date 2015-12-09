@@ -42,4 +42,10 @@ public interface GatewayMacResolver {
      * @param gatewayIp
      */
     public void stopPeriodicRefresh(final Ipv4Address gatewayIp);
+
+    /**
+     * Method will register listener with GatewayMacResolver.
+     * @param gatewayMacResolverListener Listener of Resolver. To unregister, use null
+     */
+    public void registerListener(final GatewayMacResolverListener gatewayMacResolverListener);
 }

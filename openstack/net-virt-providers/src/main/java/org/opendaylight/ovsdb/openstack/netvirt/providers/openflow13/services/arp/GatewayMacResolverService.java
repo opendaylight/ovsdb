@@ -7,25 +7,18 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.math.BigInteger;
-import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.openflowplugin.api.OFConstants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -74,14 +67,20 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import javax.annotation.Nullable;
+import java.math.BigInteger;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  *
@@ -89,7 +88,7 @@ import com.google.common.util.concurrent.MoreExecutors;
  *
  */
 public class GatewayMacResolverService extends AbstractServiceInstance
-                                        implements ConfigInterface, GatewayMacResolver,PacketProcessingListener {
+                                        implements ConfigInterface, GatewayMacResolver, PacketProcessingListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(GatewayMacResolverService.class);
     private static final short TABLE_FOR_ARP_FLOW = 0;
@@ -101,6 +100,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     private final AtomicLong flowCookie = new AtomicLong();
     private final ConcurrentMap<Ipv4Address, ArpResolverMetadata> gatewayToArpMetadataMap =
             new ConcurrentHashMap<Ipv4Address, ArpResolverMetadata>();
+    volatile private GatewayMacResolverListener gatewayMacResolverListener;
     private final int ARP_WATCH_BROTHERS = 10;
     private final int WAIT_CYCLES = 3;
     private final int PER_CYCLE_WAIT_DURATION = 1000;
@@ -388,6 +388,15 @@ public class GatewayMacResolverService extends AbstractServiceInstance
             ArpResolverMetadata candidateGatewayIp = gatewayToArpMetadataMap.get(gatewayIpAddress);
             if(candidateGatewayIp != null){
                 LOG.debug("Resolved MAC for Gateway Ip {} is {}",gatewayIpAddress.getValue(),gatewayMacAddress.getValue());
+
+                if (gatewayMacResolverListener != null &&
+                        !candidateGatewayIp.getResolvedGatewayMacAddress().equals(gatewayMacAddress)) {
+                    gatewayMacResolverListener.gatewayMacResolved(
+                            candidateGatewayIp.getExternalNetworkBridgeDpid(),
+                            new IpAddress(candidateGatewayIp.getGatewayIpAddress()),
+                            gatewayMacAddress);
+                }
+
                 candidateGatewayIp.setGatewayMacAddress(gatewayMacAddress);
                 flowService.removeFlow(candidateGatewayIp.getFlowToRemove());
             }
@@ -398,7 +407,6 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     public void setDependencies(BundleContext bundleContext,
             ServiceReference serviceReference) {
         super.setDependencies(bundleContext.getServiceReference(GatewayMacResolver.class.getName()), this);
-
     }
 
     @Override
@@ -410,4 +418,8 @@ public class GatewayMacResolverService extends AbstractServiceInstance
         gatewayToArpMetadataMap.remove(gatewayIp);
     }
 
+    @Override
+    public void registerListener(final GatewayMacResolverListener gatewayMacResolverListener) {
+        this.gatewayMacResolverListener = gatewayMacResolverListener;
+    }
 }

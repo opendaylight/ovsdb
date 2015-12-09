@@ -80,6 +80,19 @@ public final class ArpResolverMetadata {
     }
 
     /**
+     * This method returns the MAC currently resolved from previous request answers, if any.
+     * If none has been resolved, this will return the broadcast MAC address
+     *
+     * @return MAC address used to reach Gateway
+     */
+    public MacAddress getResolvedGatewayMacAddress() {
+        if (gatewayMacAddressResolved && gatewayMacAddress != null) {
+            return gatewayMacAddress;
+        }
+        return ArpUtils.bytesToMac(NetUtils.getBroadcastMACAddr());
+    }
+
+    /**
      * This method is used to determine whether to use the broadcast MAC or the unicast MAC as the destination address
      * for an ARP request packet based on whether one of the last MAX_OUTSTANDING_ARP_REQUESTS requests has been
      * answered.

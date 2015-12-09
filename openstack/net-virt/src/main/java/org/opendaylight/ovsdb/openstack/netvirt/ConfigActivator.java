@@ -160,7 +160,8 @@ public class ConfigActivator implements BundleActivator {
 
         final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter();
         registerService(context,
-                new String[]{NeutronL3Adapter.class.getName()}, null, neutronL3Adapter);
+                new String[]{NeutronL3Adapter.class.getName(),
+                             GatewayMacResolverListener.class.getName()}, null, neutronL3Adapter);
 
         OpenstackRouter openstackRouter = new OpenstackRouter();
         registerService(context,

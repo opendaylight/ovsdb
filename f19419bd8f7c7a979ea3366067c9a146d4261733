@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_3de23f04",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-09T00:24:29Z",
+      "side": 1,
+      "message": "to remove once https://git.opendaylight.org/gerrit/#/c/31020/ is merged",
+      "range": {
+        "startLine": 261,
+        "startChar": 0,
+        "endLine": 269,
+        "endChar": 15
+      },
+      "revId": "f19419bd8f7c7a979ea3366067c9a146d4261733",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

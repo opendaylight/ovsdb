@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_220f7be3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-09T15:41:29Z",
+      "side": 1,
+      "message": "I think might be better to use something like:\npublic static final MacAddress UNKNOWN_DST_MAC \u003d new MacAddress(\"00:00:00:00:00:00\");",
+      "revId": "59d453a663b04e7a2a6e62428560e1a821d3c500",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

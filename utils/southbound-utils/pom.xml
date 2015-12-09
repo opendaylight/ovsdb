@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.opendaylight.mdsal</groupId>
-    <artifactId>binding-parent</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
@@ -16,15 +16,7 @@
   <packaging>bundle</packaging>
 
   <dependencies>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
+    <!-- project specific dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>southbound-api</artifactId>
@@ -40,15 +32,7 @@
       <artifactId>utils.mdsal-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- testing dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -60,14 +44,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>

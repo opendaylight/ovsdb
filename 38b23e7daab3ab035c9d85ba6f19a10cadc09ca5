@@ -168,6 +168,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_821d0f76",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-09T17:34:26Z",
+      "side": 0,
+      "message": "I think it has to do with LOGGER. There has to be an impl in the backend so that is why it isn\u0027t imported to the java code directly. I am sure Stephen has the right answer.",
+      "parentUuid": "1aa4ed85_42cf17b1",
+      "range": {
+        "startLine": 247,
+        "startChar": 19,
+        "endLine": 247,
+        "endChar": 24
+      },
+      "revId": "38b23e7daab3ab035c9d85ba6f19a10cadc09ca5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_1858b1f9",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 4

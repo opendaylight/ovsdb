@@ -24,6 +24,7 @@ import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -56,7 +57,7 @@ import java.util.concurrent.Executors;
  * these events, the abstract router callbacks can be generated to the multi-tenant aware router,
  * as well as the multi-tenant router forwarding provider.
  */
-public class NeutronL3Adapter implements ConfigInterface {
+public class NeutronL3Adapter implements GatewayMacResolverListener, ConfigInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeutronL3Adapter.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -146,6 +147,29 @@ public class NeutronL3Adapter implements ConfigInterface {
         } else {
             LOGGER.debug("OVSDB L3 forwarding is disabled");
         }
+    }
+
+    //
+    // Callbacks from GatewayMacResolverListener
+    //
+
+    @Override
+    public void gatewayMacResolved(Long externalNetworkBridgeDpid, IpAddress gatewayIpAddress, MacAddress macAddress) {
+        LOGGER.info("got gatewayMacResolved callback for ip {} on dpid {} to mac {}",
+                gatewayIpAddress, externalNetworkBridgeDpid, macAddress);
+        if (!this.enabled) {
+            return;
+        }
+
+        if (macAddress == null || macAddress.getValue() == null) {
+            // TODO: handle cases when mac is null
+            return;
+        }
+
+        //
+        // FIXME: enqueue event so update is handled by adapter's thread
+        //
+        updateExternalRouterMac( macAddress.getValue() );
     }
 
     //
@@ -1229,7 +1253,9 @@ public class NeutronL3Adapter implements ConfigInterface {
                         LOGGER.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
 
                         ListenableFuture<MacAddress> gatewayMacAddress =
-                                gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),
+                                gatewayMacResolver.resolveMacAddress(
+                                        this,
+                                        getDpidForExternalBridge(node),
                                         new Ipv4Address(externalSubnet.getGatewayIP()),
                                         new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
                                         new MacAddress(gatewayPort.getMacAddress()),

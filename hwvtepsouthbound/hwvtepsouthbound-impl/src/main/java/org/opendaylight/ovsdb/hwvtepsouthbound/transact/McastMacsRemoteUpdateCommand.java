@@ -129,7 +129,11 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
     private void setMac(McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac,
             Optional<RemoteMcastMacs> inputSwitchOptional) {
         if (inputMac.getMacEntryKey() != null) {
-            mcastMacsRemote.setMac(inputMac.getMacEntryKey().getValue());
+            if (inputMac.getMacEntryKey().getValue().equals(HwvtepSouthboundConstants.UNKNOWN_DST_MAC)) {
+                mcastMacsRemote.setMac(HwvtepSouthboundConstants.UNKNOWN_DST_STRING);
+            } else {
+                mcastMacsRemote.setMac(inputMac.getMacEntryKey().getValue());
+            }
         } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.get().getMacEntryKey() != null) {
             mcastMacsRemote.setMac(inputSwitchOptional.get().getMacEntryKey().getValue());
         }

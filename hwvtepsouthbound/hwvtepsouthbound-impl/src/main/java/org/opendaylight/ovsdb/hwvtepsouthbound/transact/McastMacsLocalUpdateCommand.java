@@ -129,7 +129,11 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
     private void setMac(McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac,
             Optional<LocalMcastMacs> inputSwitchOptional) {
         if (inputMac.getMacEntryKey() != null) {
-            mcastMacsLocal.setMac(inputMac.getMacEntryKey().getValue());
+            if (inputMac.getMacEntryKey().getValue().equals(HwvtepSouthboundConstants.UNKNOWN_DST_MAC)) {
+                mcastMacsLocal.setMac(HwvtepSouthboundConstants.UNKNOWN_DST_STRING);
+            } else {
+                mcastMacsLocal.setMac(inputMac.getMacEntryKey().getValue());
+            }
         } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.get().getMacEntryKey() != null) {
             mcastMacsLocal.setMac(inputSwitchOptional.get().getMacEntryKey().getValue());
         }

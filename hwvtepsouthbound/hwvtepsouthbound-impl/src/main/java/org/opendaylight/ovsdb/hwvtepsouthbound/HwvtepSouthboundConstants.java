@@ -26,4 +26,6 @@ public class HwvtepSouthboundConstants {
     = new ImmutableBiMap.Builder<Class<? extends EncapsulationTypeBase>,String>()
         .put(EncapsulationTypeVxlanOverIpv4.class,"vxlan_over_ipv4")
         .build();
+    public static final String UNKNOWN_DST_MAC = "00:00:00:00:00:00";
+    public static final String UNKNOWN_DST_STRING = "unknown-dst";
 }

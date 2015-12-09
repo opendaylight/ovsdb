@@ -28,7 +28,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <networkconfig.neutron.version>0.6.0-SNAPSHOT</networkconfig.neutron.version>
     <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
     <powermock.version>1.5.2</powermock.version>
-    <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sfc.project.version>0.2.0-SNAPSHOT</sfc.project.version>
   </properties>
 
@@ -173,12 +172,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.sonar-plugins.java</groupId>
-      <artifactId>sonar-jacoco-listeners</artifactId>
-      <version>${sonar-jacoco-listeners.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>iana-if-type-2014-05-08</artifactId>
       <version>2014.05.08.8-SNAPSHOT</version>
@@ -208,22 +201,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
         </configuration>
       </plugin>-->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.sonar.java.jacoco.JUnitListener</value>
-            </property>
-          </properties>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 </project>

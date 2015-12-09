@@ -44,7 +44,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <powermock.version>1.5.2</powermock.version>
-    <sonar.jacoco.itReportPath>../southbound-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
   <dependencies>
@@ -93,12 +92,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.sonar-plugins.java</groupId>
-      <artifactId>sonar-jacoco-listeners</artifactId>
-      <version>${sonar-jacoco-listeners.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -120,22 +113,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <configuration>
           <failsOnError>true</failsOnError>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.sonar.java.jacoco.JUnitListener</value>
-            </property>
-          </properties>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -21,29 +22,23 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LogicalSwitchRemoveCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchRemoveCommand.class);
-
-    public LogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public LogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Collection<LogicalSwitch> deletedLSRows = TyperUtils.extractRowsRemoved(LogicalSwitch.class, getUpdates(),getDbSchema()).values();
-        if(deletedLSRows != null && !deletedLSRows.isEmpty()) {
-            for (LogicalSwitch lSwitch : deletedLSRows) {
-                InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                                .augmentation(HwvtepGlobalAugmentation.class)
-                                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
-                        // TODO Delete any references
-                        transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            }
+        Collection<LogicalSwitch> deletedLSRows =
+                TyperUtils.extractRowsRemoved(LogicalSwitch.class, getUpdates(), getDbSchema()).values();
+        for (LogicalSwitch lSwitch : deletedLSRows) {
+            InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
+            // TODO Delete any references
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
         }
     }
 

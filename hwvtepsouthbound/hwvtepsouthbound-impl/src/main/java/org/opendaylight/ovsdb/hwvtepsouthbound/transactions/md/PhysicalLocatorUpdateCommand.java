@@ -30,29 +30,24 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
 public class PhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalLocatorUpdateCommand.class);
     private Map<UUID, PhysicalLocator> updatedPLocRows;
     private Map<UUID, PhysicalLocator> oldPLocRows;
 
-    public PhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public PhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(),getDbSchema());
-        oldPLocRows = TyperUtils.extractRowsOld(PhysicalLocator.class, getUpdates(),getDbSchema());
+        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        oldPLocRows = TyperUtils.extractRowsOld(PhysicalLocator.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        if ( updatedPLocRows == null
-                || updatedPLocRows.isEmpty()) {
+        if (updatedPLocRows.isEmpty()) {
             return;
         }
         Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
@@ -91,13 +86,13 @@ public class PhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
 
     private void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder, PhysicalLocator pLoc) {
         String encapsType = pLoc.getEncapsulationTypeColumn().getData();
-        if(HwvtepSouthboundMapper.createEncapsulationType(encapsType) != null){
+        if (HwvtepSouthboundMapper.createEncapsulationType(encapsType) != null) {
             tpAugmentationBuilder.setEncapsulationType(HwvtepSouthboundMapper.createEncapsulationType(encapsType));
         }
     }
 
     private void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder, PhysicalLocator pLoc) {
-        IpAddress ip =  new IpAddress(pLoc.getDstIpColumn().getData().toCharArray());
+        IpAddress ip = new IpAddress(pLoc.getDstIpColumn().getData().toCharArray());
         tpAugmentationBuilder.setDstIp(ip);
     }
 

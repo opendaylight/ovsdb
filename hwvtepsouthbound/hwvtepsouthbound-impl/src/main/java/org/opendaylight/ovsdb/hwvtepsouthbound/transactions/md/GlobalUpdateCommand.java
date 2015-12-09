@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -33,21 +32,16 @@ import org.slf4j.LoggerFactory;
 public class GlobalUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalUpdateCommand.class);
-    private Map<UUID, Global> updatedHwvtepRows =
-                    TyperUtils.extractRowsUpdated(Global.class, getUpdates(),getDbSchema());
-    private Map<UUID, Global> oldHwvtepRows =
-                    TyperUtils.extractRowsUpdated(Global.class, getUpdates(),getDbSchema());
+    private final Map<UUID, Global> updatedHwvtepRows =
+            TyperUtils.extractRowsUpdated(Global.class, getUpdates(), getDbSchema());
 
-    public GlobalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
-                super(key, updates, dbSchema);
-            }
+    public GlobalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+        super(key, updates, dbSchema);
+    }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for (Entry<UUID, Global> entry : updatedHwvtepRows.entrySet()) {
-            Global hwvtepGlobal = entry.getValue();
-            Global oldEntry = oldHwvtepRows.get(entry.getKey());
+        for (Global hwvtepGlobal : updatedHwvtepRows.values()) {
             final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(hwvtepGlobal);
             LOG.trace("Processing hardware_vtep update for nodePath: {}", nodePath);
 
@@ -62,7 +56,7 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
 
     private InstanceIdentifier<Node> getInstanceIdentifier(Global hwvtep) {
         InstanceIdentifier<Node> iid = getOvsdbConnectionInstance().getInstanceIdentifier();
-        if(iid == null) {
+        if (iid == null) {
             LOG.warn("InstanceIdentifier was null when it shouldn't be");
             /* This can be case for switch initiated connection */
             iid = HwvtepSouthboundMapper.getInstanceIdentifier(hwvtep);
@@ -72,7 +66,7 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
     }
 
     private NodeId getNodeId(Global hwvtep) {
-        NodeKey nodeKey = getInstanceIdentifier(hwvtep).firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = getInstanceIdentifier(hwvtep).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 }

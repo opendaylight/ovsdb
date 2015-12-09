@@ -18,8 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 public class HwvtepOperationalCommandAggregator implements TransactionCommand {
 
-
-    private List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
+    private List<TransactionCommand> commands = new ArrayList<>();
 
     public HwvtepOperationalCommandAggregator(HwvtepConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {

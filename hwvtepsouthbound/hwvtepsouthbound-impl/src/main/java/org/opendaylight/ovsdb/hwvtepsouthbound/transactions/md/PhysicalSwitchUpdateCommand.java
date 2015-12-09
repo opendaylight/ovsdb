@@ -11,8 +11,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -41,8 +39,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIpsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIpsKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
@@ -57,21 +53,16 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchUpdateCommand.class);
     private Map<UUID, PhysicalSwitch> updatedPSRows;
-    private Map<UUID, PhysicalSwitch> oldPSRows;
 
-    public PhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public PhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(),getDbSchema());
-        oldPSRows = TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(),getDbSchema());
+        updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        if(updatedPSRows != null && !updatedPSRows.isEmpty()) {
-            for (Entry<UUID, PhysicalSwitch> entry : updatedPSRows.entrySet()) {
-                updatePhysicalSwitch(transaction, entry.getValue());
-            }
+        for (PhysicalSwitch physicalSwitch : updatedPSRows.values()) {
+            updatePhysicalSwitch(transaction, physicalSwitch);
         }
     }
 
@@ -79,7 +70,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
-            LOG.debug("Connection {} is present",connection);
+            LOG.debug("Connection {} is present", connection);
             // Update the connection node to let it know it manages this Physical Switch
             Node connectionNode = buildConnectionNode(pSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
@@ -88,7 +79,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(pSwitch);
             Node psNode = buildPhysicalSwitchNode(pSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
-//            TODO: Delete entries that are no longer needed
+            // TODO: Delete entries that are no longer needed
         }
     }
 
@@ -98,7 +89,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
         psNodeBuilder.setNodeId(psNodeId);
         PhysicalSwitchAugmentationBuilder psAugmentationBuilder = new PhysicalSwitchAugmentationBuilder();
         psAugmentationBuilder.setPhysicalSwitchUuid(new Uuid(pSwitch.getUuid().toString()));
-        setManagedBy(psAugmentationBuilder, pSwitch);
+        setManagedBy(psAugmentationBuilder);
         setPhysicalSwitchId(psAugmentationBuilder, pSwitch);
         setManagementIps(psAugmentationBuilder, pSwitch);
         setTunnelIps(psAugmentationBuilder, pSwitch);
@@ -114,26 +105,26 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
         return psNodeBuilder.build();
     }
 
-    private void setManagedBy(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
+    private void setManagedBy(PhysicalSwitchAugmentationBuilder psAugmentationBuilder) {
         InstanceIdentifier<Node> connectionNodePath = getOvsdbConnectionInstance().getInstanceIdentifier();
         psAugmentationBuilder.setManagedBy(new HwvtepGlobalRef(connectionNodePath));
     }
 
     private void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        if(pSwitch.getName() != null) {
+        if (pSwitch.getName() != null) {
             psAugmentationBuilder.setHwvtepNodeName(new HwvtepNodeName(pSwitch.getName()));
         }
-        if(pSwitch.getDescription() != null) {
+        if (pSwitch.getDescription() != null) {
             psAugmentationBuilder.setHwvtepNodeDescription(pSwitch.getDescription());
         }
     }
 
     private void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        if(pSwitch.getManagementIpsColumn() != null 
+        if (pSwitch.getManagementIpsColumn() != null
                 && pSwitch.getManagementIpsColumn().getData() != null
-                && !pSwitch.getManagementIpsColumn().getData().isEmpty() ) {
+                && !pSwitch.getManagementIpsColumn().getData().isEmpty()) {
             List<ManagementIps> mgmtIps = new ArrayList<>();
-            for(String mgmtIp: pSwitch.getManagementIpsColumn().getData()) {
+            for (String mgmtIp : pSwitch.getManagementIpsColumn().getData()) {
                 IpAddress ip = new IpAddress(mgmtIp.toCharArray());
                 mgmtIps.add(new ManagementIpsBuilder()
                         .setKey(new ManagementIpsKey(ip))
@@ -145,11 +136,11 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void setTunnelIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
-        if(pSwitch.getTunnelIpsColumn() != null
-            && pSwitch.getTunnelIpsColumn().getData() != null
-            && !pSwitch.getTunnelIpsColumn().getData().isEmpty()) {
+        if (pSwitch.getTunnelIpsColumn() != null
+                && pSwitch.getTunnelIpsColumn().getData() != null
+                && !pSwitch.getTunnelIpsColumn().getData().isEmpty()) {
             List<TunnelIps> tunnelIps = new ArrayList<>();
-            for(String tunnelIp: pSwitch.getTunnelIpsColumn().getData()) {
+            for (String tunnelIp : pSwitch.getTunnelIpsColumn().getData()) {
                 IpAddress ip = new IpAddress(tunnelIp.toCharArray());
                 tunnelIps.add(new TunnelIpsBuilder()
                         .setKey(new TunnelIpsKey(ip))
@@ -162,22 +153,22 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private void setUcastMacsLocal(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private void setUcastMacsRemote(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private void setMcastMacsLocal(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private void setMcastMacsRemote(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private Node buildConnectionNode(PhysicalSwitch pSwitch) {
@@ -187,11 +178,11 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<Switches> switches = new ArrayList<>();
-        InstanceIdentifier<Node> switchIid = HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                        pSwitch);
+        InstanceIdentifier<Node> switchIid =
+                HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), pSwitch);
         hgAugmentationBuilder.setSwitches(switches);
         Switches physicalSwitch = new SwitchesBuilder().setSwitchRef(
-                        new HwvtepPhysicalSwitchRef(switchIid)).build(); 
+                new HwvtepPhysicalSwitchRef(switchIid)).build();
         switches.add(physicalSwitch);
 
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
@@ -207,7 +198,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     }
 
     private NodeId getNodeId(PhysicalSwitch pSwitch) {
-        NodeKey nodeKey = getInstanceIdentifier(pSwitch).firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = getInstanceIdentifier(pSwitch).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 }

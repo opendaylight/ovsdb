@@ -32,30 +32,22 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
 public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchUpdateCommand.class);
     private Map<UUID, LogicalSwitch> updatedLSRows;
-    private Map<UUID, LogicalSwitch> oldLSRows;
 
-    public LogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public LogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(),getDbSchema());
-        oldLSRows = TyperUtils.extractRowsOld(LogicalSwitch.class, getUpdates(),getDbSchema());
+        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        if(updatedLSRows != null && !updatedLSRows.isEmpty()) {
-            for (Entry<UUID, LogicalSwitch> entry : updatedLSRows.entrySet()) {
-                updateLogicalSwitch(transaction, entry.getValue());
-            }
+        for (Entry<UUID, LogicalSwitch> entry : updatedLSRows.entrySet()) {
+            updateLogicalSwitch(transaction, entry.getValue());
         }
     }
 
@@ -65,7 +57,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(lSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-//            TODO: Delete entries that are no longer needed
+            // TODO: Delete entries that are no longer needed
         }
     }
 
@@ -81,7 +73,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         HwvtepNodeName hwvtepName = new HwvtepNodeName(lSwitch.getName());
         lsBuilder.setHwvtepNodeName(hwvtepName);
         lsBuilder.setKey(new LogicalSwitchesKey(hwvtepName));
-        if(lSwitch.getTunnelKeyColumn().getData()!=null && !lSwitch.getTunnelKeyColumn().getData().isEmpty()){
+        if (lSwitch.getTunnelKeyColumn().getData() != null && !lSwitch.getTunnelKeyColumn().getData().isEmpty()) {
             lsBuilder.setTunnelKey(lSwitch.getTunnelKeyColumn().getData().iterator().next().toString());
         }
         lSwitches.add(lsBuilder.build());

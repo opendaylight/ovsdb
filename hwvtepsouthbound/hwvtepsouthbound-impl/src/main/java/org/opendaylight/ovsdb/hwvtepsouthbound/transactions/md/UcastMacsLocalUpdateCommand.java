@@ -12,7 +12,6 @@ import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -37,32 +36,24 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalUpdateCommand.class);
     private Map<UUID, UcastMacsLocal> updatedUMacsLocalRows;
-    private Map<UUID, UcastMacsLocal> oldUMacsLocalRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
     private Map<UUID, LogicalSwitch> updatedLSRows;
 
-    public UcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public UcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedUMacsLocalRows = TyperUtils.extractRowsUpdated(UcastMacsLocal.class, getUpdates(),getDbSchema());
-        oldUMacsLocalRows = TyperUtils.extractRowsOld(UcastMacsLocal.class, getUpdates(),getDbSchema());
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(),getDbSchema());
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(),getDbSchema());
+        updatedUMacsLocalRows = TyperUtils.extractRowsUpdated(UcastMacsLocal.class, getUpdates(), getDbSchema());
+        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        if(updatedUMacsLocalRows != null && !updatedUMacsLocalRows.isEmpty()) {
-            for (Entry<UUID, UcastMacsLocal> entry : updatedUMacsLocalRows.entrySet()) {
-                updateData(transaction, entry.getValue());
-            }
+        for (UcastMacsLocal ucastMacsLocal : updatedUMacsLocalRows.values()) {
+            updateData(transaction, ucastMacsLocal);
         }
     }
 
@@ -73,7 +64,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
             // Update the connection node to let it know it manages this UCastMacsLocal
             Node connectionNode = buildConnectionNode(ucml);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-//            TODO: Delete entries that are no longer needed
+            // TODO: Delete entries that are no longer needed
         }
     }
 
@@ -84,21 +75,24 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
         InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         LocalUcastMacsBuilder ucmlBuilder = new LocalUcastMacsBuilder();
-        if(ucml.getIpAddr()!=null && !ucml.getIpAddr().isEmpty()){
+        if (ucml.getIpAddr() != null && !ucml.getIpAddr().isEmpty()) {
             ucmlBuilder.setIpaddr(new IpAddress(ucml.getIpAddr().toCharArray()));
         }
         ucmlBuilder.setMacEntryKey(new MacAddress(ucml.getMac()));
-        if(ucml.getLocatorColumn() !=null && ucml.getLocatorColumn().getData() !=null){
+        if (ucml.getLocatorColumn() != null && ucml.getLocatorColumn().getData() != null) {
             UUID plocUUID = ucml.getLocatorColumn().getData();
-            if(updatedPLocRows.get(plocUUID) != null ){
-                InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, updatedPLocRows.get(plocUUID));
+            PhysicalLocator physicalLocator = updatedPLocRows.get(plocUUID);
+            if (physicalLocator != null) {
+                InstanceIdentifier<TerminationPoint> plIid =
+                        HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, physicalLocator);
                 ucmlBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
             }
         }
         if (ucml.getLogicalSwitchColumn() != null && ucml.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = ucml.getLogicalSwitchColumn().getData();
-            if (updatedLSRows.get(lsUUID) != null) {
-                ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(updatedLSRows.get(lsUUID).getName()));
+            LogicalSwitch logicalSwitch = updatedLSRows.get(lsUUID);
+            if (logicalSwitch != null) {
+                ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(logicalSwitch.getName()));
             }
         }
         List<LocalUcastMacs> umclList = new ArrayList<>();

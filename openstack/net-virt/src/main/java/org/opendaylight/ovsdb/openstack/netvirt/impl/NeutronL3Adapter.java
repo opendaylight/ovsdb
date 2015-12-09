@@ -21,12 +21,17 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
+import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.NeutronL3AdapterEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
@@ -52,6 +57,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCR
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronIAwareUtil;
 import org.opendaylight.ovsdb.utils.neutron.utils.NeutronModelsDataStoreHelper;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -75,7 +81,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * these events, the abstract router callbacks can be generated to the multi-tenant aware router,
  * as well as the multi-tenant router forwarding provider.
  */
-public class NeutronL3Adapter implements ConfigInterface {
+public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResolverListener, ConfigInterface {
     private static final Logger LOG = LoggerFactory.getLogger(NeutronL3Adapter.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -175,6 +181,58 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    //
+    // Callbacks from AbstractHandler
+    //
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof NeutronL3AdapterEvent)) {
+            LOG.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        NeutronL3AdapterEvent ev = (NeutronL3AdapterEvent) abstractEvent;
+        switch (ev.getAction()) {
+            case UPDATE:
+                if (ev.getSubType() == NeutronL3AdapterEvent.SubType.SUBTYPE_EXTERNAL_MAC_UPDATE) {
+                    updateExternalRouterMac( ev.getMacAddress().getValue() );
+                } else {
+                    LOG.warn("Received update for an unexpected event " + ev);
+                }
+                break;
+            case ADD:
+                // fall through...
+                // break;
+            case DELETE:
+                // fall through...
+                // break;
+            default:
+                LOG.warn("Unable to process event " + ev);
+                break;
+        }
+    }
+
+    //
+    // Callbacks from GatewayMacResolverListener
+    //
+
+    @Override
+    public void gatewayMacResolved(Long externalNetworkBridgeDpid, IpAddress gatewayIpAddress, MacAddress macAddress) {
+        LOG.info("got gatewayMacResolved callback for ip {} on dpid {} to mac {}",
+                gatewayIpAddress, externalNetworkBridgeDpid, macAddress);
+        if (!this.enabled) {
+            return;
+        }
+
+        if (macAddress == null || macAddress.getValue() == null) {
+            // TODO: handle cases when mac is null
+            return;
+        }
+
+        //
+        // Enqueue event so update is handled by adapter's thread
+        //
+        enqueueEvent( new NeutronL3AdapterEvent(externalNetworkBridgeDpid, gatewayIpAddress, macAddress) );
+    }
 
     private void populateL3ForwardingCaches() {
         if (!this.enabled) {
@@ -1418,7 +1476,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                     gatewayPort.getFixedIPs() != null) {
                     LOG.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
                     ListenableFuture<MacAddress> gatewayMacAddress =
-                        gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),
+                        gatewayMacResolver.resolveMacAddress(this,
+                                                             getDpidForExternalBridge(node),
                                                              new Ipv4Address(externalSubnet.getGatewayIP()),
                                                              new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
                                                              new MacAddress(gatewayPort.getMacAddress()),
@@ -1464,6 +1523,9 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     @Override
     public void setDependencies(ServiceReference serviceReference) {
+        eventDispatcher =
+                (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
         tenantNetworkManager =
                 (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
         configurationService =

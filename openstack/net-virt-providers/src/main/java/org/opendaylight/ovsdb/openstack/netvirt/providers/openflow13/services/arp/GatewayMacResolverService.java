@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.openflowplugin.api.OFConstants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -187,8 +188,10 @@ public class GatewayMacResolverService extends AbstractServiceInstance
      * @return Future object
      */
     @Override
-    public ListenableFuture<MacAddress> resolveMacAddress( final Long externalNetworkBridgeDpid, final Ipv4Address gatewayIp,
-            final Ipv4Address sourceIpAddress, final MacAddress sourceMacAddress, final Boolean periodicRefresh){
+    public ListenableFuture<MacAddress> resolveMacAddress(
+            final GatewayMacResolverListener gatewayMacResolverListener, final Long externalNetworkBridgeDpid,
+            final Ipv4Address gatewayIp, final Ipv4Address sourceIpAddress, final MacAddress sourceMacAddress,
+            final Boolean periodicRefresh){
         Preconditions.checkNotNull(sourceIpAddress);
         Preconditions.checkNotNull(sourceMacAddress);
         Preconditions.checkNotNull(gatewayIp);
@@ -208,7 +211,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                 });
             }
         }else{
-            gatewayToArpMetadataMap.put(gatewayIp,new ArpResolverMetadata(
+            gatewayToArpMetadataMap.put(gatewayIp,new ArpResolverMetadata(gatewayMacResolverListener,
                     externalNetworkBridgeDpid, gatewayIp,sourceIpAddress,sourceMacAddress,periodicRefresh));
         }
 

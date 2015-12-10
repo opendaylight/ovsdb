@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -43,23 +42,20 @@ import com.google.common.base.Optional;
 public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
     private final Map<UUID, UcastMacsRemote> updatedUMacsRemoteRows;
-    private final Map<UUID, UcastMacsRemote> oldUMacsRemoteRows;
     private final Map<UUID, PhysicalLocator> updatedPLocRows;
     private final Map<UUID, LogicalSwitch> updatedLSRows;
 
-    public UcastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public UcastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedUMacsRemoteRows = TyperUtils.extractRowsUpdated(UcastMacsRemote.class, getUpdates(), getDbSchema());
-        oldUMacsRemoteRows = TyperUtils.extractRowsOld(UcastMacsRemote.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
         updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for (Entry<UUID, UcastMacsRemote> umrUpdate : updatedUMacsRemoteRows.entrySet()) {
-            updateUcastMacsRemote(transaction, umrUpdate.getValue());
+        for (UcastMacsRemote ucastMacsRemote : updatedUMacsRemoteRows.values()) {
+            updateUcastMacsRemote(transaction, ucastMacsRemote);
         }
     }
 
@@ -87,16 +83,19 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
         if (uMacRemote.getLocatorColumn() != null
                 && uMacRemote.getLocatorColumn().getData() != null) {
             UUID pLocUUID = uMacRemote.getLocatorColumn().getData();
-            if (updatedPLocRows.get(pLocUUID) != null) {
-                InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, updatedPLocRows.get(pLocUUID));
+            PhysicalLocator physicalLocator = updatedPLocRows.get(pLocUUID);
+            if (physicalLocator != null) {
+                InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid,
+                        physicalLocator);
                 rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
             }
         }
         if (uMacRemote.getLogicalSwitchColumn() != null
                 && uMacRemote.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = uMacRemote.getLogicalSwitchColumn().getData();
-            if (updatedLSRows.get(lsUUID) != null) {
-                rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(updatedLSRows.get(lsUUID).getName()));
+            final LogicalSwitch logicalSwitch = updatedLSRows.get(lsUUID);
+            if (logicalSwitch != null) {
+                rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(logicalSwitch.getName()));
             }
         }
         remoteUMacs.add(rumBuilder.build());

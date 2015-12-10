@@ -42,34 +42,26 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private Map<UUID, McastMacsRemote> updatedMMacsRemoteRows;
-    private Map<UUID, McastMacsRemote> oldMMacsRemoteRows;
     private Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
     private Map<UUID, LogicalSwitch> updatedLSRows;
 
-    public McastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public McastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedMMacsRemoteRows = TyperUtils.extractRowsUpdated(McastMacsRemote.class, getUpdates(),getDbSchema());
-        oldMMacsRemoteRows = TyperUtils.extractRowsOld(McastMacsRemote.class, getUpdates(),getDbSchema());
-        updatedPLocSetRows = TyperUtils.extractRowsUpdated(PhysicalLocatorSet.class, getUpdates(),getDbSchema());
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(),getDbSchema());
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(),getDbSchema());
+        updatedMMacsRemoteRows = TyperUtils.extractRowsUpdated(McastMacsRemote.class, getUpdates(), getDbSchema());
+        updatedPLocSetRows = TyperUtils.extractRowsUpdated(PhysicalLocatorSet.class, getUpdates(), getDbSchema());
+        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        if(updatedMMacsRemoteRows != null && !updatedMMacsRemoteRows.isEmpty()) {
-            for (Entry<UUID, McastMacsRemote> entry : updatedMMacsRemoteRows.entrySet()) {
-                updateData(transaction, entry.getValue());
-            }
+        for (Entry<UUID, McastMacsRemote> entry : updatedMMacsRemoteRows.entrySet()) {
+            updateData(transaction, entry.getValue());
         }
     }
 
@@ -80,7 +72,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
             // Update the connection node to let it know it manages this MCastMacsRemote
             Node connectionNode = buildConnectionNode(mMacRemote);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-//            TODO: Delete entries that are no longer needed
+            // TODO: Delete entries that are no longer needed
         }
     }
 
@@ -88,7 +80,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        RemoteMcastMacsBuilder mMacRemoteBuilder= new RemoteMcastMacsBuilder();
+        RemoteMcastMacsBuilder mMacRemoteBuilder = new RemoteMcastMacsBuilder();
         mMacRemoteBuilder.setMacEntryKey(new MacAddress(mMacRemote.getMac()));
         setIpAddress(mMacRemoteBuilder, mMacRemote);
         setLocatorSet(mMacRemoteBuilder, mMacRemote);
@@ -102,18 +94,17 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void setLogicalSwitch(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
-        LogicalSwitch lSwitch = null;
         if (mMacRemote.getLogicalSwitchColumn() != null && mMacRemote.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = mMacRemote.getLogicalSwitchColumn().getData();
-            if (updatedLSRows.get(lsUUID) != null) {
-                lSwitch = updatedLSRows.get(lsUUID);
+            LogicalSwitch lSwitch = updatedLSRows.get(lsUUID);
+            if (lSwitch != null) {
                 mMacRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitch.getName()));
             }
         }
     }
 
     private void setIpAddress(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
-        if(mMacRemote.getIpAddr() != null && !mMacRemote.getIpAddr().isEmpty()) {
+        if (mMacRemote.getIpAddr() != null && !mMacRemote.getIpAddr().isEmpty()) {
             mMacRemoteBuilder.setIpaddr(new IpAddress(mMacRemote.getIpAddr().toCharArray()));
         }
     }
@@ -121,17 +112,17 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     private void setLocatorSet(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
         if (mMacRemote.getLocatorSetColumn() != null && mMacRemote.getLocatorSetColumn().getData() != null) {
             UUID pLocSetUUID = mMacRemote.getLocatorSetColumn().getData();
-            if (updatedPLocSetRows.get(pLocSetUUID) != null) {
-                PhysicalLocatorSet plSet = updatedPLocSetRows.get(pLocSetUUID);
+            PhysicalLocatorSet plSet = updatedPLocSetRows.get(pLocSetUUID);
+            if (plSet != null) {
                 if (plSet.getLocatorsColumn() != null && plSet.getLocatorsColumn().getData() != null
-                                && !plSet.getLocatorsColumn().getData().isEmpty()) {
+                        && !plSet.getLocatorsColumn().getData().isEmpty()) {
                     List<LocatorSet> plsList = new ArrayList<>();
                     for (UUID pLocUUID : plSet.getLocatorsColumn().getData()) {
                         PhysicalLocator pLoc = updatedPLocRows.get(pLocUUID);
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
-                                        getOvsdbConnectionInstance().getInstanceIdentifier(), pLoc);
+                                getOvsdbConnectionInstance().getInstanceIdentifier(), pLoc);
                         plsList.add(new LocatorSetBuilder()
-                                    .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid)).build());
+                                .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid)).build());
                     }
                     mMacRemoteBuilder.setLocatorSet(plsList);
                 }

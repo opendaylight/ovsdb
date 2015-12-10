@@ -29,17 +29,16 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
     private static final long ONE_CONNECTED_MANAGER = 1;
     private static final long ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE = 1;
 
-    public HwvtepGlobalRemoveCommand(HwvtepConnectionInstance key,TableUpdates updates,DatabaseSchema dbSchema) {
-        super(key,updates,dbSchema);
+    public HwvtepGlobalRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+        super(key, updates, dbSchema);
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
         CheckedFuture<Optional<Node>, ReadFailedException> hwvtepGlobalFuture = transaction.read(
                 LogicalDatastoreType.OPERATIONAL, getOvsdbConnectionInstance().getInstanceIdentifier());
-        Optional<Node> hwvtepGlobalOptional;
         try {
-            hwvtepGlobalOptional = hwvtepGlobalFuture.get();
+            Optional<Node> hwvtepGlobalOptional = hwvtepGlobalFuture.get();
             if (hwvtepGlobalOptional.isPresent()) {
                 Node hwvtepNode = hwvtepGlobalOptional.get();
                 HwvtepGlobalAugmentation hgAugmentation = hwvtepNode.getAugmentation(HwvtepGlobalAugmentation.class);
@@ -65,7 +64,7 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (Exception e) {
-            LOG.warn("Failure to delete ovsdbNode {}",e);
+            LOG.warn("Failure to delete ovsdbNode {}", e);
         }
     }
 

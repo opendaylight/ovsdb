@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_d8fbef45",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-10T21:42:44Z",
+      "side": 1,
+      "message": "Let\u0027s say tenant network A is not present on the node, but A is connected to tenant network B by a gateway, and B is on the node.  Would we also want to install the ARP entries on the node, does this function handle that case?  (I\u0027ll go look, but figured I\u0027d ask the question.)",
+      "revId": "35b366c35ea5c13b9c81583376ffd297e0c41452",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

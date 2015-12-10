@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_366d7905",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-10T09:35:47Z",
+      "side": 1,
+      "message": "Comment says can\u0027t get UUID but we\u0027re not using UUID, we\u0027re using name to delete logical switch. I think UUID might be better field to use as it will always be unique.",
+      "revId": "2017c1cb7398d3f19c9edbd035da5511c8fe29ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

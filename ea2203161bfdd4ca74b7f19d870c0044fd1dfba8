@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_d668a589",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-12-10T07:57:37Z",
+      "side": 1,
+      "message": "Can you put more descriptive comment?",
+      "revId": "ea2203161bfdd4ca74b7f19d870c0044fd1dfba8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_565d95e8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-12-10T07:57:37Z",
+      "side": 1,
+      "message": "no point for new function as only single caller and single line.",
+      "revId": "ea2203161bfdd4ca74b7f19d870c0044fd1dfba8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

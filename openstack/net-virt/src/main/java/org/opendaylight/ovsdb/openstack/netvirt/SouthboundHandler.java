@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import java.util.List;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -170,6 +171,21 @@ public class SouthboundHandler extends AbstractHandler
                 LOGGER.error("Error fetching Interface Rows for node " + node, e);
             }
         }
+        //remove neutronPort from the CleanupCache, if it has the entry.
+        NeutronPort neutronPort = null;
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(ovsdbTerminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId != null) {
+            LOGGER.trace("Clean up the NeutronPortCache for {} ", neutronPortId);
+            neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
+        }
+        if (neutronPort != null) {
+            LOGGER.trace("Clean up the NeutronPortCache ");
+            neutronL3Adapter.removePortFromCleanupCache(neutronPort);
+        } else {
+            LOGGER.trace("Nothing to Clean up in the NeutronPortCache ");
+        }
+
     }
 
     private boolean isInterfaceOfInterest(OvsdbTerminationPointAugmentation terminationPoint, List<String> phyIfName) {

@@ -108,6 +108,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private String externalRouterMac;
     private Boolean enabled = false;
     private Southbound southbound;
+    private Set<NeutronPort> portCleanupCache;
     private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
@@ -146,6 +147,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         } else {
             LOGGER.debug("OVSDB L3 forwarding is disabled");
         }
+        this.portCleanupCache = new HashSet<>();
     }
 
     //
@@ -496,6 +498,7 @@ public class NeutronL3Adapter implements ConfigInterface {
             if (action != Action.DELETE && neutronPortToDpIdCache.get(neutronPortUuid) == null &&
                     dpId != null && interfaceUuid != null) {
                 handleInterfaceEventAdd(neutronPortUuid, dpId, interfaceUuid);
+                storePortInCleanupCache(neutronPort);
             }
 
             handleNeutronPortEvent(neutronPort, action);
@@ -1264,6 +1267,29 @@ public class NeutronL3Adapter implements ConfigInterface {
         }else{
             LOGGER.warn("Neutron network not found for router interface {}",gatewayPort);
         }
+    }
+
+
+    public void storePortInCleanupCache(NeutronPort port) {
+        this.portCleanupCache.add(port);
+    }
+
+
+
+    public void removePortFromCleanupCache(NeutronPort port) {
+        this.portCleanupCache.remove(port);
+    }
+
+    public NeutronPort getPortFromCleanupCache(String portid) {
+        for (NeutronPort neutronPort : this.portCleanupCache) {
+            if (neutronPort.getPortUUID() != null ) {
+                if (neutronPort.getPortUUID().equals(portid)) {
+                    LOGGER.info("getPortFromCleanupCache: Matching NeutronPort found {}", portid);
+                    return neutronPort;
+                    }
+                }
+            }
+        return null;
     }
 
     /**

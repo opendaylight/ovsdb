@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_96d8ed54",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-10T08:12:41Z",
+      "side": 1,
+      "message": "why need to move this up? Agree that this works better as follows order of schema but were there any build/runtime issues? Just curious.",
+      "revId": "ea2203161bfdd4ca74b7f19d870c0044fd1dfba8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_565d95e8",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
         "patchSetId": 1
@@ -30,6 +47,24 @@
       "writtenOn": "2015-12-10T07:57:37Z",
       "side": 1,
       "message": "no point for new function as only single caller and single line.",
+      "revId": "ea2203161bfdd4ca74b7f19d870c0044fd1dfba8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_161ddd0f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-10T08:12:41Z",
+      "side": 1,
+      "message": "Agree. UUID will always be present here so don\u0027t even need a null check. Use functions where either multiple lines to set value or null check is needed.",
+      "parentUuid": "1aa4ed85_565d95e8",
       "revId": "ea2203161bfdd4ca74b7f19d870c0044fd1dfba8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

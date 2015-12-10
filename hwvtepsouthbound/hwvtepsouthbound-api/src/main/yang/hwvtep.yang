@@ -106,7 +106,6 @@ module hwvtep {
 
     grouping hwvtep-physical-switch-attributes {
         uses hwvtep-node-identification;
-
         leaf physical-switch-uuid {
             description "The unique identifier of the physical-switch";
             type yang:uuid;
@@ -273,6 +272,10 @@ module hwvtep {
 
     grouping hwvtep-physical-port-attributes {
         uses hwvtep-node-identification;
+        leaf physical-port-uuid {
+            description "The unique identifier of the physical-port";
+            type yang:uuid;
+        }
         list vlan-bindings {
             description "A map of vlan ID to logical switch pairs";
             key "vlan-id-key";
@@ -283,10 +286,6 @@ module hwvtep {
             leaf logical-switch-ref {
                 description "Reference to logical switch for the vlan";
                 type hwvtep-logical-switch-ref;
-            }
-            leaf physical-port-uuid {
-                description "The unique identifier of the physical-port";
-                type yang:uuid;
             }
         }
     }

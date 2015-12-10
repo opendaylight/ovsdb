@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
@@ -115,6 +116,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
     private void updatePort(
             PhysicalPort portUpdate, HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
         updateVlanBindings(portUpdate, tpAugmentationBuilder);
+        tpAugmentationBuilder.setPhysicalPortUuid(new Uuid(portUpdate.getUuid().toString()));
     }
 
     private void updatePhysicalPortId(

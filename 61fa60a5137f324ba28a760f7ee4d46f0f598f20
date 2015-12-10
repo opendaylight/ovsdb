@@ -105,6 +105,24 @@
       "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f694c145",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-10T08:20:12Z",
+      "side": 1,
+      "message": "Looking at the yang model I get the impression getOption() is the correct method; Options map an \"option\" leaf to a \"value\" leaf, so getOptoin() returns the real key.",
+      "parentUuid": "1aa4ed85_853c3995",
+      "revId": "61fa60a5137f324ba28a760f7ee4d46f0f598f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

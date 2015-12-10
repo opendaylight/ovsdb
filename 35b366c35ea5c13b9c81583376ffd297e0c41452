@@ -34,6 +34,42 @@
       "revId": "35b366c35ea5c13b9c81583376ffd297e0c41452",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_58b61f8c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-12-10T22:01:30Z",
+      "side": 1,
+      "message": "Yes, but that is done on tables 60 and 70.\nI tried to explain the gory details on that in this page:\n\nhttp://www.flaviof.com/blog/work/how-to-odl-with-openstack-part2.html#distributed_virtual_routing\n\nThat table is not affected by bug being fixed by this gerrit.",
+      "parentUuid": "1aa4ed85_b89ab312",
+      "revId": "35b366c35ea5c13b9c81583376ffd297e0c41452",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f88fcbca",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-12-10T22:01:30Z",
+      "side": 1,
+      "message": "it s a good question. ;)\ntable 20 the arp responder table is only applicable to the nodes tenant vm will arp for. When vm is going east/west it will arp for the mac of the router interface that is on the same network as the tenant vm in that node.",
+      "parentUuid": "1aa4ed85_d8fbef45",
+      "revId": "35b366c35ea5c13b9c81583376ffd297e0c41452",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

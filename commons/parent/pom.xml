@@ -119,11 +119,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-all</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-api</artifactId>
         <version>${controller.config.version}</version>

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_1bac26ed",
+        "filename": "library/it/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-10T02:10:32Z",
+      "side": 0,
+      "message": "why remove this and push everything back into the child poms? Everything in here is common for the IT bundles.",
+      "revId": "8d2bdcf0138a252439dac816e0031d8d29ab2173",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

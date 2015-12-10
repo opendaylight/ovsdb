@@ -817,7 +817,10 @@ public class NeutronL3Adapter implements ConfigInterface {
 
                 // Configure distributed ARP responder
                 if (flgDistributedARPEnabled) {
-                    programStaticArpStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
+                    // Arp rule is only needed when segmentation exists in the given node (bug 4752).
+                    boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
+                    final Action actionForNode = arpNeeded ? action : Action.DELETE;
+                    programStaticArpStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
                 }
             }
         }

@@ -12,12 +12,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>commons</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/parent</relativePath>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
+  <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>schema.hardwarevtep</artifactId>
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -47,6 +48,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -60,27 +62,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.4.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>org.opendaylight.ovsdb.schema.hardwarevtep</Export-Package>
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

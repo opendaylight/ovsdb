@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_7eb0a3f4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchRemoveCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-11T12:58:11Z",
+      "side": 1,
+      "message": "Looks like copy paste error. Delete this line.",
+      "revId": "21fc5b14031ef236ea4dbb782db2cb8c7a08f2a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

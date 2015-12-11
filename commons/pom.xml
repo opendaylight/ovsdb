@@ -48,7 +48,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <maven>3.1.1</maven>
   </prerequisites>
   <modules>
-    <module>parent</module>
     <module>it</module>
   </modules>
 </project>

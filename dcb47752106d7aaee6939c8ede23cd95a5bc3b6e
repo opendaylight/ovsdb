@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_29ac37ed",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T15:23:04Z",
+      "side": 1,
+      "message": "If I understand this correctly, your looking for all the instances in macListBefore which are not present in macListUpdated, is that right? But since you removed all of macListUpdated from macListBefore (line 118), this shouldn\u0027t find anything so you can remove the for loop entirely and just treat macListBefore as macListRemoved...",
+      "revId": "dcb47752106d7aaee6939c8ede23cd95a5bc3b6e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

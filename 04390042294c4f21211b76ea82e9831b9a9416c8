@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_beccdb36",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepManagerUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T13:53:08Z",
+      "side": 1,
+      "message": "Since updateManager() only needs the values, it\u0027s better to iterate over updatedMgrRows.values() here:\n\n    for (Manager manager : updatedMgrRows.values()) {\n        updateManager(transaction, manager);\n    }",
+      "revId": "04390042294c4f21211b76ea82e9831b9a9416c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_fee1f39a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepManagerUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T13:53:08Z",
+      "side": 1,
+      "message": "You\u0027ll get a better debug log with connection.get() than plain connection.",
+      "revId": "04390042294c4f21211b76ea82e9831b9a9416c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_5ee8477c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepManagerUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T13:53:08Z",
+      "side": 1,
+      "message": "Since we need the value as well, it\u0027s better to iterate over the entry set:\n\n    for (Map\u003cString, String\u003e otherConfigEntry : ocList.entrySet()) {\n        mocBuilder.setOtherConfigKey(otherConfigEntry.getKey());\n        mocBuilder.setOtherConfigValue(otherConfigEntry.getValue());\n        mocList.add(mocBuilder.build());\n    }",
+      "revId": "04390042294c4f21211b76ea82e9831b9a9416c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_7eed038b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepManagerUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T13:53:08Z",
+      "side": 1,
+      "message": "You could move this up to the end of the previous if block, and even pull mocList into the block (the two sets of if conditions are equivalent).",
+      "revId": "04390042294c4f21211b76ea82e9831b9a9416c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

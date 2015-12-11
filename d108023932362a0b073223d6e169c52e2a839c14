@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_09685bb9",
+        "filename": "schemas/openvswitch/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-11T15:17:16Z",
+      "side": 1,
+      "message": "why use config-parent?",
+      "range": {
+        "startLine": 16,
+        "startChar": 16,
+        "endLine": 16,
+        "endChar": 22
+      },
+      "revId": "d108023932362a0b073223d6e169c52e2a839c14",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_e9ba9f09",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T15:41:41Z",
+      "side": 1,
+      "message": "Since we may want the value too, it\u0027s better to iterate over the entries (internally, HashMap manages Map.Entry instances, so it\u0027s cheaper to iterate over entries even if the values aren\u0027t always used).\n\n    for (Map.Entry\u003cLong, UUID\u003e oldVbEntry : oldVb.entrySet()) {\n        Long key \u003d oldVbEntry.getKey();\n        ...\n    }",
+      "revId": "efe49966a23595faac6457f5f02cc1840eb90961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_6946af25",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-11T15:41:41Z",
+      "side": 1,
+      "message": "Since we don\u0027t care about the stored value here, it\u0027s better to use containsKey():\n\n    if (!updatedVb.containsKey(key)) {",
+      "revId": "efe49966a23595faac6457f5f02cc1840eb90961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

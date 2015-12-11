@@ -12,26 +12,26 @@
 
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
            version='${project.version}'>
-    <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
+    <feature version="${projectversion}">odl-ovsdb-library</feature>
   </feature>
 
   <feature name="odl-ovsdb-schema-openvswitch" description="OVSDB :: Schema :: Open_vSwitch"
-           version='${schema.openvswitch.version}'>
-    <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
+           version='${project.version}'>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
     <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/{{VERSION}}</bundle>
   </feature>
 
   <feature name="odl-ovsdb-schema-hardwarevtep" description="OVSDB :: Schema :: hardware_vtep"
-           version='${schema.hardwarevtep.version}'>
-    <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
+           version='${project.version}'>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
     <bundle>mvn:org.opendaylight.ovsdb/schema.hardwarevtep/{{VERSION}}</bundle>
   </feature>
 
   <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization"
-           version='${openstack.netvirt.version}'>
+           version='${project.version}'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
-    <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
+    <feature version="${neutron.version}">odl-neutron-service</feature>
     <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>

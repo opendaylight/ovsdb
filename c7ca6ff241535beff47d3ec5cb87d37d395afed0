@@ -59,6 +59,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_ef9b7f70",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/EgressAclProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-12-12T13:39:21Z",
+      "side": 1,
+      "message": "Yes, these classes are identical to that of master, expect for the imports of neutron classes.",
+      "parentUuid": "1aa4ed85_e41c06c4",
+      "revId": "c7ca6ff241535beff47d3ec5cb87d37d395afed0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_847992fe",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityGroupCacheManger.java",
         "patchSetId": 2
@@ -70,6 +88,24 @@
       "writtenOn": "2015-12-12T00:01:22Z",
       "side": 1,
       "message": "if this is new file, please remove 2014, it\u0027s created in 2015.",
+      "revId": "c7ca6ff241535beff47d3ec5cb87d37d395afed0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_8f88cb23",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityGroupCacheManger.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-12-12T13:39:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_847992fe",
       "revId": "c7ca6ff241535beff47d3ec5cb87d37d395afed0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -93,6 +129,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_4f82d301",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-12-12T13:39:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_44839acc",
+      "revId": "c7ca6ff241535beff47d3ec5cb87d37d395afed0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_c476aa06",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImplTest.java",
         "patchSetId": 2
@@ -104,6 +158,30 @@
       "writtenOn": "2015-12-12T00:01:22Z",
       "side": 1,
       "message": "please keep the copyright consistent across all your files.",
+      "range": {
+        "startLine": 2,
+        "startChar": 22,
+        "endLine": 2,
+        "endChar": 38
+      },
+      "revId": "c7ca6ff241535beff47d3ec5cb87d37d395afed0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_af8d8733",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityGroupCacheManagerImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-12-12T13:39:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_c476aa06",
       "range": {
         "startLine": 2,
         "startChar": 22,

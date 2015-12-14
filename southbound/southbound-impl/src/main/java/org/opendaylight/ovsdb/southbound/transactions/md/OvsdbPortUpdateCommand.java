@@ -126,7 +126,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     interfaceOldRows.remove(interfaceUUID);
                 }
                 tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-                if (portOldRows.containsKey(portUpdate.getKey())) {
+                if (portOldRows.containsKey(portUpdate.getKey()) && !portQosCleared(portUpdate)) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
                 } else {
@@ -236,6 +236,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateVlan(port, ovsdbTerminationPointBuilder);
         updateVlanTrunks(port, ovsdbTerminationPointBuilder);
         updateVlanMode(port, ovsdbTerminationPointBuilder);
+        updateQos(port, ovsdbTerminationPointBuilder);
         updatePortExternalIds(port, ovsdbTerminationPointBuilder);
         updatePortOtherConfig(port, ovsdbTerminationPointBuilder);
     }
@@ -305,6 +306,19 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             } else {
                 LOG.debug("Invalid vlan mode {}.", vlanType);
             }
+        }
+    }
+
+    private void updateQos(final Port port,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        if (port.getQosColumn() == null) {
+        	return;
+        }
+        Collection<UUID> qosUuidCol = port.getQosColumn().getData();
+        if (!qosUuidCol.isEmpty()) {
+            Iterator<UUID> itr = qosUuidCol.iterator();
+            UUID qosUuid = itr.next();
+            ovsdbTerminationPointBuilder.setQos(new Uuid(qosUuid.toString()));
         }
     }
 
@@ -445,6 +459,23 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+        }
+    }
+
+    private boolean portQosCleared(Entry<UUID, Port> portUpdate) {
+    	if (portUpdate.getValue().getQosColumn() != null) {
+    		return false;
+    	}
+        Collection<UUID> newQos = portUpdate.getValue().getQosColumn().getData();
+        if (portOldRows.get(portUpdate.getKey()).getQosColumn() == null) {
+            return false;
+        }
+        Collection<UUID> oldQos = portOldRows.get(portUpdate.getKey()).getQosColumn().getData();
+
+        if (newQos.isEmpty() && !oldQos.isEmpty()) {
+            return true;
+        } else {
+            return false;
         }
     }
 

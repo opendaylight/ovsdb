@@ -33,10 +33,10 @@ public interface Qos extends TypedBaseTable<GenericTableSchema> {
     void setQueues(Map<Long, UUID> queues) ;
 
     @TypedColumn (name="type", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, Set<String>> getTypeColumn() ;
+    Column<GenericTableSchema, String> getTypeColumn() ;
 
     @TypedColumn (name="type", method= MethodType.SETDATA, fromVersion="1.0.0")
-    void setType(Set<String> type) ;
+    void setType(String type) ;
 
     @TypedColumn (name="other_config", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
     Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn() ;

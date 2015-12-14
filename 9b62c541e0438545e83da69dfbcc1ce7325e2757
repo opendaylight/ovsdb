@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_9e255aad",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-14T08:13:21Z",
+      "side": 1,
+      "message": "Seems to be more confusing than needs to be. Take a look at TerminationPointDeleteCommand.java in southbound-impl for a cleaner reference.",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_aa1d7575",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-14T08:13:21Z",
+      "side": 1,
+      "message": "Why do we need this? Not being used anywhere.",
+      "range": {
+        "startLine": 97,
+        "startChar": 60,
+        "endLine": 97,
+        "endChar": 104
+      },
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_7e097e2b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-14T08:13:21Z",
+      "side": 1,
+      "message": "logical switch?",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

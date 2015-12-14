@@ -38,6 +38,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHfsc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHtb;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import com.google.common.collect.ImmutableBiMap;
@@ -52,6 +55,14 @@ public class SouthboundConstants {
     public static final String DEFAULT_OPENFLOW_PORT = "6653";
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static final String UUID = "uuid";
+    public static final String QOS_LINUX_HTB = "linux-htb";
+    public static final String QOS_LINUX_HFSC = "linux-hfsc";
+    public static final ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
+        = new ImmutableBiMap.Builder<Class<? extends QosTypeBase>,String>()
+            .put(QosTypeLinuxHtb.class,QOS_LINUX_HTB)
+            .put(QosTypeLinuxHfsc.class,QOS_LINUX_HFSC)
+            .build();
+    
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
         = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
             .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")

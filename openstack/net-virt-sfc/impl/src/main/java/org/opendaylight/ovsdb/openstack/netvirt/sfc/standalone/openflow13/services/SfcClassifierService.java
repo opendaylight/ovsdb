@@ -33,7 +33,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setDependencies(bundleContext.getServiceReference(SfcClassifierService.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(ISfcClassifierService.class.getName()), this);
     }
 
     @Override

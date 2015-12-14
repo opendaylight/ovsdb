@@ -141,4 +141,6 @@ public interface ConfigurationService {
      * @return the MacAddress to use for the default gateway; or null if none is configured.
      */
     String getDefaultGatewayMacAddress(Node node);
+
+    boolean isUserSpaceEnabled();
 }

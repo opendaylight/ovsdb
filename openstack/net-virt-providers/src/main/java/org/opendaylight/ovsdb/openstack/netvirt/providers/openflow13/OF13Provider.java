@@ -1014,7 +1014,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             isLastPortinSubnet = false;
             if (isComputePort) {
                 isLastPortinSubnet = securityServicesManager.isLastPortinSubnet(node, intf);
-                srcAddressList = securityServicesManager.getIpAddressList(node, intf);
+                srcAddressList = securityServicesManager.getIpAddressList(intf);
                 if (null == srcAddressList) {
                     LOG.warn("programLocalRules: No Ip address assigned {}", intf);
                     return;

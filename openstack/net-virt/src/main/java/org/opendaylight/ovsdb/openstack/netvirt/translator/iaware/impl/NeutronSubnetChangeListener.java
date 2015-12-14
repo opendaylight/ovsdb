@@ -143,9 +143,15 @@ public class NeutronSubnetChangeListener implements ClusteredDataChangeListener,
         result.setNetworkUUID(subnet.getNetworkId().getValue());
         result.setIpVersion(IPV_MAP.get(subnet.getIpVersion()));
         result.setCidr(subnet.getCidr());
-        result.setGatewayIP(String.valueOf(subnet.getGatewayIp().getValue()));
-        result.setIpV6RaMode(DHCPV6_MAP.get(subnet.getIpv6RaMode()));
-        result.setIpV6AddressMode(DHCPV6_MAP.get(subnet.getIpv6AddressMode()));
+        if (subnet.getGatewayIp() != null) {
+            result.setGatewayIP(String.valueOf(subnet.getGatewayIp().getValue()));
+        }
+        if (subnet.getIpv6RaMode() != null) {
+            result.setIpV6RaMode(DHCPV6_MAP.get(subnet.getIpv6RaMode()));
+        }
+        if (subnet.getIpv6AddressMode() != null) {
+            result.setIpV6AddressMode(DHCPV6_MAP.get(subnet.getIpv6AddressMode()));
+        }
         result.setEnableDHCP(subnet.isEnableDhcp());
         if (subnet.getAllocationPools() != null) {
             List<NeutronSubnetIPAllocationPool> allocationPools = new ArrayList<>();

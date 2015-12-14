@@ -10,140 +10,99 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchAugmentation;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorSetAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.base.Preconditions;
 
+//TODO: need to be optimized, get entry by iid not name
 public class HwvtepOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
     private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    ReadWriteTransaction transaction;
 
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
-        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
-            extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-            //TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+            TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
         if (nodeCreateOrUpdate != null) {
+            transaction = db.newReadWriteTransaction();
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
-                CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
-                        transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey());
-                try {
-                    Optional<Node> nodeOptional = nodeFuture.get();
-                    if (nodeOptional.isPresent()) {
-                        operationalNodes.put(entry.getKey(), nodeOptional.get());
+                Optional<Node> readNode = HwvtepSouthboundUtil.readNode(transaction, entry.getKey());
+                //add related globalNode or physicalSwitchNode to operationalNodes map
+                //for example, when creating physical port, logical switch is needed
+                //but logical switch is in HwvtepGlobalAugmentation rather than PhysicalSwitchAugmentation
+                if (readNode.isPresent()) {
+                    operationalNodes.put(entry.getKey(), readNode.get());
+                    HwvtepGlobalAugmentation hgAugmentation = readNode.get().getAugmentation(HwvtepGlobalAugmentation.class);
+                    PhysicalSwitchAugmentation psAugmentation = readNode.get().getAugmentation(PhysicalSwitchAugmentation.class);
+                    if (hgAugmentation != null) {
+                        for (Switches pswitch : hgAugmentation.getSwitches()) {
+                            @SuppressWarnings("unchecked")
+                            InstanceIdentifier<Node> psNodeIid = (InstanceIdentifier<Node>) pswitch.getSwitchRef().getValue();
+                            Optional<Node> psNode = HwvtepSouthboundUtil.readNode(transaction, psNodeIid);
+                            if (psNode.isPresent()) {
+                                operationalNodes.put(psNodeIid, psNode.get());
+                            }
+                        }
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    LOG.warn("Error reading from datastore",e);
+                    if (psAugmentation != null) {
+                        @SuppressWarnings("unchecked")
+                        InstanceIdentifier<Node> hgNodeIid = (InstanceIdentifier<Node>) psAugmentation.getManagedBy().getValue();
+                        Optional<Node> hgNode = HwvtepSouthboundUtil.readNode(transaction, hgNodeIid);
+                        if (hgNode.isPresent()) {
+                            operationalNodes.put(hgNodeIid, hgNode.get());
+                        }
+                    }
                 }
             }
         }
-        transaction.close();
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE)
-                        && (mod.getDataBefore() == null)){
-            return mod.getDataAfter();
-        }
-        return null;
-    }
-
-    private Node getRemoved(DataObjectModification<Node> mod) {
-        if(mod.getModificationType() == ModificationType.DELETE){
-            return mod.getDataBefore();
-        }
-        return null;
-    }
-
-    private Node getUpdated(DataObjectModification<Node> mod) {
-        Node node = null;
-        switch(mod.getModificationType()) {
-            case SUBTREE_MODIFIED:
-                node = mod.getDataAfter();
-                break;
-            case WRITE:
-                if(mod.getDataBefore() !=  null) {
-                    node = mod.getDataAfter();
-                }
-                break;
-            default:
-                break;
-        }
-        return node;
-    }
-
-    private Node getOriginal(DataObjectModification<Node> mod) {
-        Node node = null;
-        switch(mod.getModificationType()) {
-            case SUBTREE_MODIFIED:
-                node = mod.getDataBefore();
-                break;
-            case WRITE:
-                if(mod.getDataBefore() !=  null) {
-                    node = mod.getDataBefore();
-                }
-                break;
-            case DELETE:
-                node = mod.getDataBefore();
-                break;
-            default:
-                break;
-        }
-        return node;
-    }
-
-    private Map<InstanceIdentifier<Node>, Node> extractCreatedOrUpdatedOrRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<Node> class1) {
-        // TODO Auto-generated method stub
-        Map<InstanceIdentifier<Node>, Node> result = new HashMap<InstanceIdentifier<Node>, Node>();
-        for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-            final DataObjectModification<Node> mod = change.getRootNode();
-            Node created = getCreated(mod);
-            result.put(key, created);
-            Node updated = getUpdated(mod);
-            result.put(key, updated);
-            Node deleted = getRemoved(mod);
-            result.put(key, deleted);
-        }
-        return result;
-    }
-
-    public Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {
+    private Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
         return Optional.fromNullable(operationalNodes.get(nodeIid));
     }
 
-    public Optional<HwvtepLogicalSwitchAugmentation> getLogicalSwitchAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<HwvtepGlobalAugmentation> getHwvtepGlobalAugmentation(InstanceIdentifier<?> iid) {
+        Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepLogicalSwitchAugmentation.class));
+            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepGlobalAugmentation.class));
         }
         return Optional.absent();
     }
 
     public Optional<PhysicalSwitchAugmentation> getPhysicalSwitchAugmentation(InstanceIdentifier<?> iid) {
+        Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent()) {
             return Optional.fromNullable(nodeOptional.get().getAugmentation(PhysicalSwitchAugmentation.class));
@@ -151,24 +110,28 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
-    public Optional<HwvtepPhysicalLocatorSetAugmentation> getPhysicalLocatorSetAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<List<TerminationPoint>> getTerminationPointList(InstanceIdentifier<?> iid) {
+        Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
-        if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepPhysicalLocatorSetAugmentation.class));
+        if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
+            return Optional.fromNullable(nodeOptional.get().getTerminationPoint());
         }
         return Optional.absent();
     }
 
-    public Optional<TerminationPoint> getHwvtepTerminationPoint(InstanceIdentifier<?> iid) {
-        if (iid != null) {
-            Optional<Node> nodeOptional = getGlobalNode(iid);
-            if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
-                TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class, TerminationPointKey.class);
-                if (key != null) {
-                    for (TerminationPoint tp:nodeOptional.get().getTerminationPoint()) {
-                        if (tp.getKey().equals(key)) {
-                            return Optional.of(tp);
-                        }
+    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid, LogicalSwitchesKey logicalSwitchesKey) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<LogicalSwitches> lswitchList = null;
+            if (hgAugmentation != null) {
+                lswitchList = hgAugmentation.getLogicalSwitches();
+            }
+            if (lswitchList != null) {
+                for (LogicalSwitches lswitch: lswitchList) {
+                    if (lswitch.getKey().equals(logicalSwitchesKey)) {
+                        return Optional.fromNullable(lswitch);
                     }
                 }
             }
@@ -176,19 +139,128 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
-    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<?> iid) {
-        Optional<TerminationPoint> nodeOptional = getHwvtepTerminationPoint(iid);
+    public Optional<HwvtepPhysicalPortAugmentation> getPhysicalPortAugmentation(InstanceIdentifier<?> iid,
+            HwvtepNodeName hwvtepNodeName) {
+        Preconditions.checkNotNull(iid);
+        Optional<List<TerminationPoint>> nodeOptional = getTerminationPointList(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
+            List<TerminationPoint> tpList = nodeOptional.get();
+            for (TerminationPoint tp : tpList) {
+                HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                if (hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
+                    return Optional.fromNullable(hppAugmentation);
+                }
+            }
         }
         return Optional.absent();
     }
 
-    public Optional<HwvtepPhysicalPortAugmentation> getPhysycalPortAugmentation(InstanceIdentifier<?> iid) {
-        Optional<TerminationPoint> tpOptional = getHwvtepTerminationPoint(iid);
-        if (tpOptional.isPresent()) {
-            return Optional.fromNullable(tpOptional.get().getAugmentation(HwvtepPhysicalPortAugmentation.class));
+    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<?> iid,
+            IpAddress dstIp, Class<? extends EncapsulationTypeBase> encapType) {
+        Preconditions.checkNotNull(iid);
+        Optional<List<TerminationPoint>> nodeOptional = getTerminationPointList(iid);
+        if (nodeOptional.isPresent()) {
+            List<TerminationPoint> tpList = nodeOptional.get();
+            for (TerminationPoint tp : tpList) {
+                HwvtepPhysicalLocatorAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                if (hppAugmentation.getDstIp().equals(dstIp)
+                        && hppAugmentation.getEncapsulationType().equals(encapType)) {
+                    return Optional.fromNullable(hppAugmentation);
+                }
+            }
         }
         return Optional.absent();
+    }
+
+    public Optional<LocalMcastMacs> getLocalMcastMacs(InstanceIdentifier<?> iid, LocalMcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<LocalMcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getLocalMcastMacs();
+            }
+            if (macList != null) {
+                for (LocalMcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<RemoteMcastMacs> getRemoteMcastMacs(InstanceIdentifier<?> iid, RemoteMcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<RemoteMcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getRemoteMcastMacs();
+            }
+            if (macList != null) {
+                for (RemoteMcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<LocalUcastMacs> getLocalUcastMacs(InstanceIdentifier<?> iid, LocalUcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<LocalUcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getLocalUcastMacs();
+            }
+            if (macList != null) {
+                for (LocalUcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<RemoteUcastMacs> getRemoteUcastMacs(InstanceIdentifier<?> iid, RemoteUcastMacsKey key) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<RemoteUcastMacs> macList = null;
+            if (hgAugmentation != null) {
+                macList = hgAugmentation.getRemoteUcastMacs();
+            }
+            if (macList != null) {
+                for (RemoteUcastMacs mac: macList) {
+                    if (mac.getKey().equals(key)) {
+                        return Optional.fromNullable(mac);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
+        Optional<TerminationPoint> tp = HwvtepSouthboundUtil.readNode(transaction, iid);
+        if (tp.isPresent()) {
+            return Optional.fromNullable(tp.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
+        }
+        return Optional.absent();
+    }
+    
+    public ReadWriteTransaction getReadWriteTransaction() {
+        return transaction;
     }
 }

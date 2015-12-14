@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="ovsdb-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension-li/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-li/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.neutron/features-neutron/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.1-SNAPSHOT/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/library-features/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
+
+  <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
+           version='${project.version}'>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
+  </feature>
+
+  <feature name="odl-ovsdb-schema-openvswitch" description="OVSDB :: Schema :: Open_vSwitch"
+           version='${project.version}'>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/{{VERSION}}</bundle>
+  </feature>
+
+  <feature name="odl-ovsdb-schema-hardwarevtep" description="OVSDB :: Schema :: hardware_vtep"
+           version='${project.version}'>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/schema.hardwarevtep/{{VERSION}}</bundle>
+  </feature>
+
+  <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization"
+           version='${project.version}'>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model-li</feature>
+    <feature version="${neutron.version}">odl-neutron-service</feature>
+    <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services-li</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions-li</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.neutron/dummyprovider/{{VERSION}}</bundle>
+    <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}/xml/config</configfile>
+    <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}/xml/config</configfile>
+  </feature>
+  <feature name="odl-ovsdb-ui" description="OpenDaylight :: OVSDB :: DLUX Integration Plugin" version='${ovsdb.ui.version}'>
+    <feature version="${dlux.version}">odl-dlux-core</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/ovsdb-ui-bundle/{{VERSION}}</bundle>
+  </feature>
+</features>

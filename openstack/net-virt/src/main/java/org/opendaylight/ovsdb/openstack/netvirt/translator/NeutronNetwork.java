@@ -60,9 +60,6 @@ public class NeutronNetwork implements Serializable, INeutronObject {
     @XmlElement (name = "status")
     String status;
 
-    @XmlElement (name = "subnets")
-    List<String> subnets;
-
     @XmlElement (name="segments")
     List<NeutronNetwork_Segment> segments;
 
@@ -80,7 +77,6 @@ public class NeutronNetwork implements Serializable, INeutronObject {
     }
 
     public void initDefaults() {
-        subnets = new ArrayList<>();
         if (status == null) {
             status = "ACTIVE";
         }
@@ -184,22 +180,6 @@ public class NeutronNetwork implements Serializable, INeutronObject {
         this.status = status;
     }
 
-    public List<String> getSubnets() {
-        return subnets;
-    }
-
-    public void setSubnets(List<String> subnets) {
-        this.subnets = subnets;
-    }
-
-    public void addSubnet(String uuid) {
-        subnets.add(uuid);
-    }
-
-    public void removeSubnet(String uuid) {
-        subnets.remove(uuid);
-    }
-
     public void setSegments(List<NeutronNetwork_Segment> segments) {
         this.segments = segments;
     }
@@ -250,11 +230,6 @@ public class NeutronNetwork implements Serializable, INeutronObject {
                 case "status":
                     ans.setStatus(this.getStatus());
                     break;
-                case "subnets":
-                    List<String> subnetList = new ArrayList<>();
-                    subnetList.addAll(this.getSubnets());
-                    ans.setSubnets(subnetList);
-                    break;
                 case "shared":
                     ans.setShared(shared);
                     break;
@@ -284,7 +259,7 @@ public class NeutronNetwork implements Serializable, INeutronObject {
                 + adminStateUp + ", shared=" + shared + ", tenantID=" + tenantID + ", routerExternal=" + routerExternal
                 + ", providerNetworkType=" + providerNetworkType + ", providerPhysicalNetwork="
                 + providerPhysicalNetwork + ", providerSegmentationID=" + providerSegmentationID + ", status=" + status
-                + ", subnets=" + subnets + ", segments = " + segments + "]";
+                + ", segments = " + segments + "]";
     }
 }
 

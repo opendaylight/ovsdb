@@ -129,13 +129,6 @@ public class NeutronNetworkChangeListener implements ClusteredDataChangeListener
         result.setNetworkName(network.getName());
         result.setShared(network.isShared());
         result.setStatus(network.getStatus());
-        if (network.getSubnets() != null) {
-            List<String> neutronSubnets = new ArrayList<>();
-            for( Uuid subnet : network.getSubnets()) {
-               neutronSubnets.add(subnet.getValue());
-            }
-            result.setSubnets(neutronSubnets);
-        }
 
         // todo remove '-' chars as tenant id doesn't use them
         result.setTenantID(network.getTenantId().getValue());

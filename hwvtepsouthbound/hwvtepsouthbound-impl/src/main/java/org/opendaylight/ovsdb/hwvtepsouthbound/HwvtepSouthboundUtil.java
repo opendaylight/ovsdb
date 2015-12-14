@@ -102,25 +102,7 @@ public class HwvtepSouthboundUtil {
         return result;
     }
 
-    public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db,
-                    HwvtepLogicalSwitchAttributes lNode) {
-        Preconditions.checkNotNull(lNode);
-        Optional<HwvtepGlobalAugmentation> result = null;
-
-        HwvtepGlobalRef ref = lNode.getLogicalSwitchManagedBy();
-        if (ref != null && ref.getValue() != null) {
-            result = getManagingNode(db, ref);
-        } else {
-            LOG.warn("Cannot find client for LogicalSwitch without a specified ManagedBy {}", lNode);
-            return Optional.absent();
-        }
-        if(!result.isPresent()) {
-            LOG.warn("Failed to find managing node for PhysicalSwitch {}",lNode);
-        }
-        return result;
-    }
-
-    private static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
+    public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
         try {
             ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
             @SuppressWarnings("unchecked")

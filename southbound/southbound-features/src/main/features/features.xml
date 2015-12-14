@@ -48,4 +48,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
+  <feature name='odl-ovsdb-southbound-test' version='${project.version}' description='OpenDaylight :: southbound :: test'>
+    <feature version="${project.version}">odl-ovsdb-southbound-impl</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
+  </feature>
 </features>

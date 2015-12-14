@@ -46,79 +46,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <neutron.model.version>0.6.0-SNAPSHOT</neutron.model.version>
-    <ovsdb.utils.config.version>1.2.1-SNAPSHOT</ovsdb.utils.config.version>
-    <ovsdb.utils.servicehelper.version>1.2.1-SNAPSHOT</ovsdb.utils.servicehelper.version>
     <powermock.version>1.5.2</powermock.version>
     <sonar.jacoco.itReportPath>../net-virt-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.opendaylight.mdsal</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.mdsal.model</groupId>
-        <artifactId>mdsal-model-artifacts</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
+    <!-- project specific dependencies -->
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>southbound-api</artifactId>
-      <version>1.2.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.neutron</groupId>
-      <artifactId>model</artifactId>
-      <version>${neutron.model.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>utils.config</artifactId>
-      <version>${ovsdb.utils.config.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>utils.servicehelper</artifactId>
-      <version>${ovsdb.utils.servicehelper.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -126,13 +73,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-common</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>utils.neutron-utils</artifactId>
+      <version>${project.version}</version>
     </dependency>
+    <!-- neutron dependencies -->
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>concepts</artifactId>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>model</artifactId>
+      <version>${neutron.model.version}</version>
     </dependency>
+    <!-- mdsal dependencies -->
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-inet-types</artifactId>
@@ -153,14 +104,23 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-yang-types</artifactId>
     </dependency>
-    <dependency>
+    <!-- external dependencies -->
+   <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <groupId>org.codehaus.sonar-plugins.java</groupId>
+      <artifactId>sonar-jacoco-listeners</artifactId>
+      <version>${sonar-jacoco-listeners.version}</version>
+      <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- testing dependencies -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -201,17 +161,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.sonar-plugins.java</groupId>
-      <artifactId>sonar-jacoco-listeners</artifactId>
-      <version>${sonar-jacoco-listeners.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -233,10 +182,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <properties>
@@ -246,10 +191,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             </property>
           </properties>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

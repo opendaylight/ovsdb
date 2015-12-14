@@ -130,18 +130,30 @@ public class NeutronLoadBalancerPoolChangeListener implements ClusteredDataChang
         NeutronLoadBalancerPool result = new NeutronLoadBalancerPool();
 
         result.setID(pool.getUuid().getValue());
-        result.setLoadBalancerPoolTenantID(pool.getTenantId().getValue());
-        result.setLoadBalancerPoolName(pool.getName());
-        result.setLoadBalancerPoolDescription(pool.getDescr());
-        result.setLoadBalancerPoolProtocol(PROTOCOL_MAP.get(pool.getProtocol()));
-        result.setLoadBalancerPoolLbAlgorithm(pool.getLbAlgorithm());
+        if (pool.getTenantId() != null) {
+            result.setLoadBalancerPoolTenantID(pool.getTenantId().getValue());
+        }
+        if (pool.getName() != null) {
+            result.setLoadBalancerPoolName(pool.getName());
+        }
+        if (pool.getDescr() != null) {
+            result.setLoadBalancerPoolDescription(pool.getDescr());
+        }
+        if (pool.getProtocol() != null) {
+            result.setLoadBalancerPoolProtocol(PROTOCOL_MAP.get(pool.getProtocol()));
+        }
+        if (pool.getLbAlgorithm() != null) {
+            result.setLoadBalancerPoolLbAlgorithm(pool.getLbAlgorithm());
+        }
 
         // TODO: setNeutronLoadBalancerPoolHealthMonitorID is a list? Fill in, when its needed.
         if (pool.getHealthmonitorId() != null) {
         	result.setNeutronLoadBalancerPoolHealthMonitorID(pool.getHealthmonitorId().getValue());
         }
 
-        result.setLoadBalancerPoolAdminStateIsUp(pool.isAdminStateUp());
+        if (pool.isAdminStateUp() != null) {
+            result.setLoadBalancerPoolAdminStateIsUp(pool.isAdminStateUp());
+        }
 
         List<Neutron_ID> listeners = new ArrayList();
         if (pool.getListeners() != null) {

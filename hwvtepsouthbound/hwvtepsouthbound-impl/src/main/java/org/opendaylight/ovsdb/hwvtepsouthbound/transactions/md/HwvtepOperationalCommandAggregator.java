@@ -18,12 +18,10 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 public class HwvtepOperationalCommandAggregator implements TransactionCommand {
 
-
-    private List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
+    private List<TransactionCommand> commands = new ArrayList<>();
 
     public HwvtepOperationalCommandAggregator(HwvtepConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {
-        //TODO: Add commands in here
         commands.add(new GlobalUpdateCommand(key, updates, dbSchema));
         commands.add(new PhysicalSwitchUpdateCommand(key, updates, dbSchema));
         commands.add(new PhysicalSwitchRemoveCommand(key, updates, dbSchema));
@@ -34,11 +32,12 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         commands.add(new PhysicalPortRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepTunnelUpdateCommand(key, updates, dbSchema));
         commands.add(new PhysicalLocatorUpdateCommand(key, updates, dbSchema));
-        commands.add(new PhysicalLocatorSetUpdateCommand(key, updates, dbSchema));
+        commands.add(new PhysicalLocatorRemoveCommand(key, updates, dbSchema));
         commands.add(new UcastMacsLocalUpdateCommand(key, updates, dbSchema));
         commands.add(new UcastMacsRemoteUpdateCommand(key, updates, dbSchema));
         commands.add(new McastMacsLocalUpdateCommand(key, updates, dbSchema));
         commands.add(new McastMacsRemoteUpdateCommand(key, updates, dbSchema));
+        commands.add(new MacEntriesRemoveCommand(key, updates, dbSchema));
     }
 
     @Override

@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -31,10 +30,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.PhysicalSwitchRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -58,20 +54,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoCloseable{
-    private Map<ConnectionInfo, HwvtepConnectionInstance> clients =
-                    new ConcurrentHashMap<ConnectionInfo,HwvtepConnectionInstance>();
+    private Map<ConnectionInfo, HwvtepConnectionInstance> clients = new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionManager.class);
     private static final String ENTITY_TYPE = "hwvtep";
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
-    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
-                    new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
-    private Map<Entity, HwvtepConnectionInstance> entityConnectionMap =
-                    new ConcurrentHashMap<>();
+    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
+    private Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private EntityOwnershipService entityOwnershipService;
     private HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
 
@@ -193,31 +185,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
         PhysicalSwitchAugmentation pSwitchNode = node.getAugmentation(PhysicalSwitchAugmentation.class);
         if (hwvtepGlobal != null) {
-            return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
+            if(hwvtepGlobal.getConnectionInfo() != null) {
+                return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
+            } else {
+                // TODO: Case of user configured connection
+                return null; //for now
+            }
         } //TODO: We could get it from Managers also.
         else if(pSwitchNode != null){
             return getConnectionInstance(pSwitchNode);
         } else {
             LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
-            return null;
-        }
-    }
-
-    public HwvtepConnectionInstance getConnectionInstance(InstanceIdentifier<Node> nodePath) {
-        try {
-            ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-            CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(
-                    LogicalDatastoreType.OPERATIONAL, nodePath);
-            transaction.close();
-            Optional<Node> optional = nodeFuture.get();
-            if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
-                return this.getConnectionInstance(optional.get());
-            } else {
-                LOG.warn("Found non-topological node {} on path {}",optional);
-                return null;
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to get Hwvtep Node {}",nodePath, e);
             return null;
         }
     }
@@ -244,8 +222,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
-        InstanceIdentifier<Node> iid = instanceIdentifiers.get(connectionInfo);
-        return iid;
+        return instanceIdentifiers.get(connectionInfo);
     }
 
     private void removeInstanceIdentifier(ConnectionInfo key) {
@@ -304,18 +281,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         if (dbSchema != null) {
             GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, Global.class);
 
-            List<String> hwvtepTableColumn = new ArrayList<String>();
+            List<String> hwvtepTableColumn = new ArrayList<>();
             hwvtepTableColumn.addAll(hwvtepSchema.getColumns());
             Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-            selectOperation.setColumns(hwvtepTableColumn);;
+            selectOperation.setColumns(hwvtepTableColumn);
 
-            ArrayList<Operation> operations = new ArrayList<Operation>();
+            ArrayList<Operation> operations = new ArrayList<>();
             operations.add(selectOperation);
             operations.add(op.comment("Fetching hardware_vtep table rows"));
 
-            List<OperationResult> results = null;
             try {
-                results = connectionInstance.transact(dbSchema, operations).get();
+                List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
                 if (results != null ) {
                     OperationResult selectResult = results.get(0);
                     globalRow = TyperUtils.getTypedRowWrapper(
@@ -331,7 +307,6 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     private Entity getEntityFromConnectionInstance(@Nonnull HwvtepConnectionInstance hwvtepConnectionInstance) {
-        YangInstanceIdentifier entityId = null;
         InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();
         if ( iid == null ) {
             //TODO: Is Global the right one?
@@ -343,7 +318,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     + "connection {}",iid, hwvtepConnectionInstance.getConnectionInfo());
 
         }
-        entityId = HwvtepSouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
+        YangInstanceIdentifier entityId =
+                HwvtepSouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
         Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
         LOG.debug("Entity {} created for device connection {}",
                 deviceEntity, hwvtepConnectionInstance.getConnectionInfo());
@@ -424,10 +400,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
         final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, nodeIid);
-        if (node.isPresent()) {
-            HwvtepSouthboundUtil.deleteNode(transaction, nodeIid);
-        }
+        HwvtepSouthboundUtil.deleteNode(transaction, nodeIid);
     }
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {

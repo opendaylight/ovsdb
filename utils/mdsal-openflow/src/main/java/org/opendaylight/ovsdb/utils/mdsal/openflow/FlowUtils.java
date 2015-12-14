@@ -19,7 +19,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -101,17 +100,31 @@ public class FlowUtils {
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(new MatchBuilder().build());
 
-        String flowId = "DEFAULT_PIPELINE_FLOW_" + table;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(table);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setPriority(0);
+        String flowName = "DEFAULT_PIPELINE_FLOW_" + table;
+        return initFlowBuilder(flowBuilder, flowName, table)
+                .setPriority(0);
+    }
+
+    /**
+     * Sets up common defaults for the given flow builder: a flow identifier and key based on the given flow name,
+     * strict, no barrier, the given table identifier, no hard timeout and no idle timeout.
+     *
+     * @param flowBuilder The flow builder.
+     * @param flowName The flow name.
+     * @param table The table.
+     * @return The flow builder.
+     */
+    public static FlowBuilder initFlowBuilder(FlowBuilder flowBuilder, String flowName, short table) {
+        final FlowId flowId = new FlowId(flowName);
+        flowBuilder
+                .setId(flowId)
+                .setStrict(true)
+                .setBarrier(false)
+                .setTableId(table)
+                .setKey(new FlowKey(flowId))
+                .setFlowName(flowName)
+                .setHardTimeout(0)
+                .setIdleTimeout(0);
         return flowBuilder;
     }
 }

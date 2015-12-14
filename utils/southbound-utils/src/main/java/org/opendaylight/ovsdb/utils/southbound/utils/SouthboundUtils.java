@@ -56,10 +56,8 @@ import org.slf4j.LoggerFactory;
 public class SouthboundUtils {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtils.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
-    private static final String DEFAULT_OPENFLOW_PORT = "6653";
-    private static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
-    private MdsalUtils mdsalUtils;
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
+    private final MdsalUtils mdsalUtils;
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
@@ -84,31 +82,31 @@ public class SouthboundUtils {
             .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
             .build();
 
-    public NodeId createNodeId(IpAddress ip, PortNumber port) {
+    public static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
-                + new String(ip.getValue()) + ":" + port.getValue();
+                + String.valueOf(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         return new NodeId(uri);
     }
 
-    public Node createNode(ConnectionInfo key) {
+    public static Node createNode(ConnectionInfo key) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setNodeId(createNodeId(key.getRemoteIp(), key.getRemotePort()));
         nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(key));
         return nodeBuilder.build();
     }
 
-    public OvsdbNodeAugmentation createOvsdbAugmentation(ConnectionInfo key) {
+    public static OvsdbNodeAugmentation createOvsdbAugmentation(ConnectionInfo key) {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
         ovsdbNodeBuilder.setConnectionInfo(key);
         return ovsdbNodeBuilder.build();
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
         return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -117,7 +115,7 @@ public class SouthboundUtils {
         return path;
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
         return SouthboundMapper.createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
@@ -133,20 +131,25 @@ public class SouthboundUtils {
         return terminationPointPath;
     }
 
-    public NodeKey createNodeKey(IpAddress ip, PortNumber port) {
+    public static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
         return new NodeKey(createNodeId(ip, port));
     }
 
-    public NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
+    public static NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
         return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), bridgeName);
     }
 
-    public NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
+    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
         return new NodeId(createNodeId(ip,port).getValue()
                 + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
-    public ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+        NodeKey nodeKey = iid.firstKeyOf(Node.class);
+        return nodeKey.getNodeId();
+    }
+
+    public static ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(addressStr);
@@ -167,8 +170,9 @@ public class SouthboundUtils {
                 .build();
     }
 
-    public String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return new String(connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+    public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
+        return String.valueOf(
+                connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
     }
 
     public boolean addOvsdbNode(final ConnectionInfo connectionInfo) {
@@ -356,38 +360,26 @@ public class SouthboundUtils {
         return result;
     }
 
-    public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
-                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-                             final Class<? extends DatapathTypeBase> dpType,
-                             final List<BridgeExternalIds> externalIds,
-                             final List<ControllerEntry> controllerEntries,
-                             final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
-        return addBridge(connectionInfo, bridgeIid, bridgeName, bridgeNodeId, setProtocolEntries,
-                failMode, setManagedBy, dpType, externalIds, controllerEntries,
-                otherConfigs, null);
-    }
-
-    public boolean addBridge(final ConnectionInfo connectionInfo, final String bridgeName)
-            throws InterruptedException {
-
-        return addBridge(connectionInfo, null, bridgeName, null, true,
-                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null, null);
-    }
-
     private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
-                                       String type, Map<String, String> options,
-                                       Map<String, String> externalIds) {
+    public boolean addTerminationPoint(
+            Node bridgeNode, String portName, String type, Map<String, String> options,
+            Map<String, String> externalIds) {
+        return addTerminationPoint(bridgeNode, portName, type, options, externalIds, null);
+    }
+
+    public boolean addTerminationPoint(
+            Node bridgeNode, String portName, String type, Map<String, String> options, Map<String, String> externalIds,
+            Long ofPort) {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
 
         tpAugmentationBuilder.setName(portName);
+        tpAugmentationBuilder.setOfport(ofPort);
         if (type != null) {
             tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
@@ -423,18 +415,7 @@ public class SouthboundUtils {
         return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
-    public TerminationPoint readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
-        InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(
-                bridgeNode, portName);
-        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpIid);
-    }
-
-    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
-        return addTerminationPoint(bridgeNode, bridgeName, portName, type, null, null);
-    }
-
-    public Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
-                                             Map<String, String> options) {
-        return addTerminationPoint(bridgeNode, bridgeName, portName, type, options, null);
+    public Boolean addTerminationPoint(Node bridgeNode, String portName, String type) {
+        return addTerminationPoint(bridgeNode, portName, type, null, null);
     }
 }

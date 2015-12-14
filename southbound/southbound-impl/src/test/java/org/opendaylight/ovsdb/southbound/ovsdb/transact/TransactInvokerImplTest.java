@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -45,7 +44,7 @@ public class TransactInvokerImplTest {
 
     @Before
     public void setUp() throws Exception {
-        transactInvokerImpl = PowerMockito.mock(TransactInvokerImpl.class, Mockito.CALLS_REAL_METHODS);
+        transactInvokerImpl = new TransactInvokerImpl(connectionInstance, dbSchema);
         MemberModifier.field(TransactInvokerImpl.class, "connectionInstance").set(transactInvokerImpl, connectionInstance);
         MemberModifier.field(TransactInvokerImpl.class, "dbSchema").set(transactInvokerImpl, dbSchema);
     }

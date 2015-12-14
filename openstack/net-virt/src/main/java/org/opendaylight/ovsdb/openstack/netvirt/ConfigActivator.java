@@ -87,7 +87,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronRouter
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityGroupAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityRuleAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSubnetAware;
-import org.opendaylight.ovsdb.utils.mdsal.utils.NeutronModelsDataStoreHelper;
+import org.opendaylight.ovsdb.utils.neutron.utils.NeutronModelsDataStoreHelper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

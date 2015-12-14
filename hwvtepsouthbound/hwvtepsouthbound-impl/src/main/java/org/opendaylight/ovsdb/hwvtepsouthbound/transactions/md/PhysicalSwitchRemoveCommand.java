@@ -23,32 +23,26 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PhysicalSwitchRemoveCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchRemoveCommand.class);
-
-    public PhysicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public PhysicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Collection<PhysicalSwitch> deletedPSRows = TyperUtils.extractRowsRemoved(PhysicalSwitch.class, getUpdates(),getDbSchema()).values();
-        if(deletedPSRows != null && !deletedPSRows.isEmpty()) {
-            for (PhysicalSwitch pSwitch : deletedPSRows) {
-                InstanceIdentifier<Node> nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(
-                                getOvsdbConnectionInstance(), pSwitch);
-                InstanceIdentifier<Switches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                                .augmentation(HwvtepGlobalAugmentation.class)
-                                .child(Switches.class, new SwitchesKey(new HwvtepPhysicalSwitchRef(nodeIid)));
-                        // TODO handle removal of reference to managed switch from model
-                        transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
-                        transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            }
+        Collection<PhysicalSwitch> deletedPSRows =
+                TyperUtils.extractRowsRemoved(PhysicalSwitch.class, getUpdates(), getDbSchema()).values();
+        for (PhysicalSwitch pSwitch : deletedPSRows) {
+            InstanceIdentifier<Node> nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(
+                    getOvsdbConnectionInstance(), pSwitch);
+            InstanceIdentifier<Switches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(Switches.class, new SwitchesKey(new HwvtepPhysicalSwitchRef(nodeIid)));
+            // TODO handle removal of reference to managed switch from model
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
         }
     }
 

@@ -12,14 +12,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>commons</artifactId>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../commons/parent/pom.xml</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>1.6.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
+  <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>utils</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <packaging>pom</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
@@ -51,8 +52,29 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>config</module>
     <module>mdsal-node</module>
     <module>mdsal-openflow</module>
-    <module>servicehelper</module>
     <module>mdsal-utils</module>
+    <module>neutron-utils</module>
+    <module>servicehelper</module>
     <module>southbound-utils</module>
   </modules>
+
+<!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

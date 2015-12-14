@@ -35,10 +35,6 @@ public abstract class AbstractTransactionCommand implements TransactionCommand{
         return key;
     }
 
-    protected AbstractTransactionCommand() {
-        // NO OP
-    }
-
     public AbstractTransactionCommand(HwvtepConnectionInstance key,TableUpdates updates, DatabaseSchema dbSchema) {
         this.updates = updates;
         this.dbSchema = dbSchema;

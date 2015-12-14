@@ -268,7 +268,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     LogicalDatastoreType.OPERATIONAL, nodePath);
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
-            if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
+            if (optional != null && optional.isPresent() && optional.get() != null) {
                 return this.getConnectionInstance(optional.get());
             } else {
                 LOG.warn("Found non-topological node {} on path {}",optional);
@@ -298,13 +298,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             return Boolean.FALSE;
         }
         return ovsdbConnectionInstance.getHasDeviceOwnership();
-    }
-
-    public void setHasDeviceOwnership(ConnectionInfo connectionInfo, Boolean hasDeviceOwnership) {
-        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(connectionInfo);
-        if (ovsdbConnectionInstance != null) {
-            ovsdbConnectionInstance.setHasDeviceOwnership(hasDeviceOwnership);
-        }
     }
 
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
@@ -375,10 +368,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
         final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        Optional<Node> node = SouthboundUtil.readNode(transaction, nodeIid);
-        if (node.isPresent()) {
-            SouthboundUtil.deleteNode(transaction, nodeIid);
-        }
+        SouthboundUtil.deleteNode(transaction, nodeIid);
     }
 
     private OpenVSwitch getOpenVswitchTableEntry(OvsdbConnectionInstance connectionInstance) {

@@ -491,6 +491,9 @@ public class NeutronL3AdapterTest {
         when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
         List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
+        TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
+        MemberModifier.field(NeutronL3Adapter.class, "tenantNetworkManager").set(neutronL3Adapter , tenantNetworkManager);
+        when(tenantNetworkManager.isTenantNetworkPresentInNode(any(Node.class), eq(ID))).thenReturn(true);
         PowerMockito.doReturn(15L).when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class));
 
         // init instance variables

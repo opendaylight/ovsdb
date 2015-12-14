@@ -17,11 +17,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
@@ -119,7 +121,21 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
         updatePortVlanTrunk(terminationPoint, port);
         updatePortVlanMode(terminationPoint, port);
         updatePortExternalIds(terminationPoint, port);
+        updatePortQos(terminationPoint, port);
     }
+
+    private void updatePortQos(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port) {
+
+        Set<UUID> uuidSet = Sets.newHashSet();
+        Uuid qosUuid = terminationPoint.getQos();
+        if (qosUuid != null) {
+            uuidSet.add(new UUID(qosUuid.getValue()));
+        }
+        port.setQos(uuidSet);
+    }
+
 
     private void updateOfPort(
             final OvsdbTerminationPointAugmentation terminationPoint,

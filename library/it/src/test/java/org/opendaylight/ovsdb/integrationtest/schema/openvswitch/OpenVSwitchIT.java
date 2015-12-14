@@ -1019,7 +1019,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         Qos qos = getClient().createTypedRowWrapper(Qos.class);
         qos.setOtherConfig(ImmutableMap.of("mmm", "kay"));
-        qos.setType(ImmutableSet.of("404"));
+        qos.setType("404");
 
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
 
@@ -1076,7 +1076,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         Row qosRow = getTableCache().get(qos.getSchema().getName()).get(testQosUuid);
         Qos monitoredQos = getClient().getTypedRowWrapper(Qos.class, qosRow);
-        assertEquals(qos.getTypeColumn().getData().toArray()[0], monitoredQos.getTypeColumn().getData());
+        assertEquals(qos.getTypeColumn().getData(), monitoredQos.getTypeColumn().getData());
     }
 
     private void qosDelete () throws ExecutionException, InterruptedException {

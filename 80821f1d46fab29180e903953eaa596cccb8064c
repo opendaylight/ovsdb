@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_0a25a9c1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepManagerUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-14T07:58:55Z",
+      "side": 1,
+      "message": "nitpick: There should be space between ) and {. Check your codestyle settings, looks like you\u0027re missing this one. This applies to all files.",
+      "revId": "80821f1d46fab29180e903953eaa596cccb8064c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_2a22e5b9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepManagerUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-14T07:58:55Z",
+      "side": 1,
+      "message": "Add a TODO. I don\u0027t believe this code handles deletion of other config.",
+      "revId": "80821f1d46fab29180e903953eaa596cccb8064c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4a3ba1eb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-14T07:58:55Z",
+      "side": 1,
+      "message": "since you already got oldVbEntry, you should use odlVbEntry.getValue() This will save another lookup in oldVb.",
+      "revId": "80821f1d46fab29180e903953eaa596cccb8064c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

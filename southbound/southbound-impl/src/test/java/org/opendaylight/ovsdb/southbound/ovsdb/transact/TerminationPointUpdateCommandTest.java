@@ -83,9 +83,10 @@ public class TerminationPointUpdateCommandTest {
         when(terminationPointUpdateCommand.getChanges()).thenReturn(mock(AsyncDataChangeEvent.class));
         PowerMockito.when(TransactUtils.extractCreated(any(AsyncDataChangeEvent.class), eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
-                TransactionBuilder.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class));
+                TransactionBuilder.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class, OvsdbTerminationPointAugmentation.class));
         doNothing().when(terminationPointUpdateCommand)
-                .updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
+                .updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class),
+                        any(OvsdbTerminationPointAugmentation.class));
 
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated = new HashMap<>();
         updated.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
@@ -94,7 +95,8 @@ public class TerminationPointUpdateCommandTest {
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
         terminationPointUpdateCommand.execute(transactionBuilder);
         verify(terminationPointUpdateCommand, times(2)).
-                updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
+                updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class),
+                        any(OvsdbTerminationPointAugmentation.class));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -140,7 +142,7 @@ public class TerminationPointUpdateCommandTest {
         when(op.update(any(Port.class))).thenReturn(update);
         when(extraPort.getNameColumn()).thenReturn(column);
 
-        terminationPointUpdateCommand.updateTerminationPoint(transaction, iid, terminationPoint);
+        terminationPointUpdateCommand.updateTerminationPoint(transaction, iid, terminationPoint, terminationPoint);
         verify(transaction, times(2)).add(any(Operation.class));
     }
 

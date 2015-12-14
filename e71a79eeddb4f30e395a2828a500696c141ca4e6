@@ -22,6 +22,30 @@
       "revId": "e71a79eeddb4f30e395a2828a500696c141ca4e6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_61d803f0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1480,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-12-14T14:58:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_c1045780",
+      "range": {
+        "startLine": 1480,
+        "startChar": 0,
+        "endLine": 1480,
+        "endChar": 12
+      },
+      "revId": "e71a79eeddb4f30e395a2828a500696c141ca4e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

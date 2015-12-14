@@ -457,7 +457,7 @@ module ovsdb {
                in the datapath.
 
              other_config : enable-statistics: optional string
-            	either ture or false. Set this value to true to enable populating the
+                either ture or false. Set this value to true to enable populating the
                 statistics column or to false to explicitly disable it.";
 
             key "other-config-key";
@@ -488,7 +488,11 @@ module ovsdb {
         }
 
         list qos-entries {
-            key "qos-uuid";
+            key "qos-id";
+            leaf qos-id {
+                description "An identifier used for QoS entries in the MD-SAL.";
+                type inet:uri;
+            }
             leaf qos-uuid {
                 description "The unique identifier of the QoS.";
                 type yang:uuid;
@@ -500,9 +504,13 @@ module ovsdb {
             }
             list queue-list {
                 description "The list of queues used by the QoS";
-                key "queue-uuid";
+                key "queue-number";
+                leaf queue-number {
+                	description "The queue number of the record in the QoS entry";
+                	type uint32;
+                }
                 leaf queue-uuid {
-                    description "The unique identifier of the queue.";
+                    description "The unique identifier of the queue record.";
                     type yang:uuid;
                 }
             }
@@ -537,13 +545,30 @@ module ovsdb {
         }
 
         list queues {
-            key "queue-uuid";
+            key "queue-id";
+            leaf queue-id {
+                description "An identifier used for Queue entries in the MD-SAL.";
+                type inet:uri;
+            }
             leaf queue-uuid {
                 description "The unique identifier of the queue.";
                 type yang:uuid;
             }
             leaf dscp {
                 type uint8;
+            }
+            list queues-external-ids {
+                key "queues-external-id-key";
+                leaf queues-external-id-key {
+                    description "queues external-id name/key";
+                    type string;
+                    mandatory true;
+                }
+                leaf queues-external-id-value {
+                    description "queues-external-id value";
+                    type string;
+                    mandatory true;
+                }
             }
             list queues-other-config {
                 description "
@@ -821,7 +846,7 @@ module ovsdb {
 
             other_config : lacp-fallback-ab: optional string
                 either true or false Determines the behavior of openvswitch bond in LACP mode.
-            	If the partner switch does not support LACP, setting this
+                If the partner switch does not support LACP, setting this
                 option to true allows openvswitch to fallback to active-backup.
                 If the option is set to false, the bond will be disabled.
                 In both the cases, once the partner switch is configured

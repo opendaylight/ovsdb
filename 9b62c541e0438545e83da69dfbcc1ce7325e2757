@@ -42,6 +42,23 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_b24de774",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-12-14T23:25:22Z",
+      "side": 1,
+      "message": "result.put(key, lswitchListRemoved);\nbreak;",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_7e097e2b",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
         "patchSetId": 1
@@ -53,6 +70,23 @@
       "writtenOn": "2015-12-14T08:13:21Z",
       "side": 1,
       "message": "logical switch?",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_77120164",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-12-14T23:25:22Z",
+      "side": 1,
+      "message": "portListBefore.removeIf(...);\nresult.put(key, portBefore);",
       "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

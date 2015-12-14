@@ -31,7 +31,7 @@ import org.powermock.reflect.Whitebox;
 @PrepareForTest({})
 @RunWith(PowerMockRunner.class)
 public class OvsdbOperationalCommandAggregatorTest {
-    private static final int NUMBER_OF_COMMANDS = 9;
+    private static final int NUMBER_OF_COMMANDS = 13;
     private List<TransactionCommand> commands = new ArrayList<>();
     private OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator;
 
@@ -43,6 +43,10 @@ public class OvsdbOperationalCommandAggregatorTest {
         commands.add(mock(OpenVSwitchUpdateCommand.class));
         commands.add(mock(OvsdbManagersUpdateCommand.class));
         commands.add(mock(OvsdbManagersRemovedCommand.class));
+        commands.add(mock(OvsdbQosUpdateCommand.class));
+        commands.add(mock(OvsdbQosRemovedCommand.class));
+        commands.add(mock(OvsdbQueueUpdateCommand.class));
+        commands.add(mock(OvsdbQueueRemovedCommand.class));
         commands.add(mock(OvsdbBridgeUpdateCommand.class));
         commands.add(mock(OvsdbBridgeRemovedCommand.class));
         commands.add(mock(OvsdbControllerUpdateCommand.class));

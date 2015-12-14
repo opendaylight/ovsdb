@@ -488,7 +488,11 @@ module ovsdb {
         }
 
         list qos-entries {
-            key "qos-uuid";
+            key "qos-id";
+            leaf qos-id {
+            	description "An identifier used for QoS entries in the MD-SAL.";
+            	type inet:uri;
+            }
             leaf qos-uuid {
                 description "The unique identifier of the QoS.";
                 type yang:uuid;
@@ -537,13 +541,30 @@ module ovsdb {
         }
 
         list queues {
-            key "queue-uuid";
+            key "queue-id";
+            leaf queue-id {
+            	description "An identifier used for Queue entries in the MD-SAL.";
+            	type inet:uri;
+            }
             leaf queue-uuid {
                 description "The unique identifier of the queue.";
                 type yang:uuid;
             }
             leaf dscp {
                 type uint8;
+            }
+            list queues-external-ids {
+                key "queues-external-id-key";
+                leaf queues-external-id-key {
+                    description "queues external-id name/key";
+                    type string;
+                    mandatory true;
+                }
+                leaf queues-external-id-value {
+                    description "queues-external-id value";
+                    type string;
+                    mandatory true;
+                }
             }
             list queues-other-config {
                 description "

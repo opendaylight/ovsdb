@@ -164,9 +164,13 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{EventDispatcher.class.getName()}, null, eventDispatcher);
 
+        Dictionary<String, Object> neutronL3AdapterProperties = new Hashtable<>();
+        neutronL3AdapterProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.NEUTRON_L3_ADAPTER);
         final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter();
         registerService(context,
-                new String[]{NeutronL3Adapter.class.getName()}, null, neutronL3Adapter);
+                new String[]{NeutronL3Adapter.class.getName(), GatewayMacResolverListener.class.getName()},
+                neutronL3AdapterProperties, neutronL3Adapter);
 
         OpenstackRouter openstackRouter = new OpenstackRouter();
         registerService(context,

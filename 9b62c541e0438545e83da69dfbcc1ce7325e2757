@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_2d4bda2c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T06:47:44Z",
+      "side": 1,
+      "message": "This is due to the difference between AsyncDataChangeEvent\u003cInstanceIdentifier\u003c?\u003e, DataObject\u003e and DataTreeModification\u003cNode\u003e. For DataTreeModification, I always get the changed node, than get changed subtree of the node. Is there any sample code to analyze DataTreeModification and get all  identifer to all changed entities?",
+      "parentUuid": "1aa4ed85_9e255aad",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_aa1d7575",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2015-12-14T08:13:21Z",
       "side": 1,
       "message": "Why do we need this? Not being used anywhere.",
+      "range": {
+        "startLine": 97,
+        "startChar": 60,
+        "endLine": 97,
+        "endChar": 104
+      },
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_12039b10",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T06:47:44Z",
+      "side": 1,
+      "message": "Let\u0027s keep them for function generalization in code optimization.",
+      "parentUuid": "1aa4ed85_aa1d7575",
       "range": {
         "startLine": 97,
         "startChar": 60,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_4d10964e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T06:47:44Z",
+      "side": 1,
+      "message": "There are maybe multiple physical ports being deleted, so I first put all of them in a list, than put the list into result.",
+      "parentUuid": "1aa4ed85_b24de774",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_7e097e2b",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
         "patchSetId": 1
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_ed1ce26c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T06:47:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_7e097e2b",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_77120164",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
         "patchSetId": 1
@@ -87,6 +165,24 @@
       "writtenOn": "2015-12-14T23:25:22Z",
       "side": 1,
       "message": "portListBefore.removeIf(...);\nresult.put(key, portBefore);",
+      "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4ddad679",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T06:47:44Z",
+      "side": 1,
+      "message": "The \"key\" is an identifier to a node. \"portListRemoved\" is all removed ports of the node which \"key\" refer to.",
+      "parentUuid": "1aa4ed85_77120164",
       "revId": "9b62c541e0438545e83da69dfbcc1ce7325e2757",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

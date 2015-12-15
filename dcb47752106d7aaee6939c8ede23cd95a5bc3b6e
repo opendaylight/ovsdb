@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_d2366303",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T03:27:33Z",
+      "side": 1,
+      "message": "Not exactly. If there are no macEntries being updated, macListBefore.removeAll(macListUpdated) will get all macEntries being deleted. But, if there is a macEntry being updated, macListBefore.removeAll(macListUpdated) will include the updated one. Because the macEntry before is different with updated.",
+      "parentUuid": "1aa4ed85_29ac37ed",
+      "revId": "dcb47752106d7aaee6939c8ede23cd95a5bc3b6e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_72a52f03",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/MacEntriesRemoveCommand.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-14T23:43:51Z",
       "side": 1,
       "message": "Don\u0027t UcastMacsLocalUpdateCommand.java and UcastMacsRemoteUpdateCommand.java need similar check?",
+      "revId": "dcb47752106d7aaee6939c8ede23cd95a5bc3b6e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_522273ba",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/MacEntriesRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-15T03:27:33Z",
+      "side": 1,
+      "message": "No, UcastMacs do not need. Code has been updaed.",
+      "parentUuid": "1aa4ed85_72a52f03",
       "revId": "dcb47752106d7aaee6939c8ede23cd95a5bc3b6e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -55,6 +56,7 @@ import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronSubnet;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
@@ -578,7 +580,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             LOG.info("other_config is not present");
         }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
-        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
@@ -764,12 +765,28 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     @Test
     public void testNetVirtFixedSG() throws InterruptedException {
+        final Version minSGOvsVersion = Version.fromString("1.10.2");
+
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
 
-        Thread.sleep(30000);
+        // Verify the minimum version required for this test
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        Assert.assertNotNull(ovsdbNodeAugmentation);
+        assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
+        String ovsVersion = ovsdbNodeAugmentation.getOvsVersion();
+        Version version = Version.fromString(ovsVersion);
+        if (version.compareTo(minSGOvsVersion) < 0) {
+            LOG.warn("{} minimum version is required", minSGOvsVersion);
+            Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+            Thread.sleep(10000);
+            Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+            return;
+        }
+
+        Thread.sleep(10000);
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
         assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
@@ -780,7 +797,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         NeutronPort nport = createNeutronPort(NETWORK_ID, SUBNET_ID, PORT1_ID, "compute", "10.0.0.10", "f6:00:00:0f:00:01");
         NeutronPort dhcp = createNeutronPort(NETWORK_ID, SUBNET_ID, DHCPPORT_ID, "dhcp", "10.0.0.1", "f6:00:00:0f:00:02");
 
-        Thread.sleep(30000);
+        Thread.sleep(10000);
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
         externalIds.put("iface-id", PORT1_ID);
@@ -805,7 +822,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         assertNotNull("EgressSG Operational : Could not find flow in config", flow1);
 
         testDefaultsSG(nport, datapathId, nn);
-        Thread.sleep(30000);
+        Thread.sleep(10000);
         Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
         Thread.sleep(10000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
@@ -863,7 +880,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         iNeutronPortCRUD.update(PORT1_ID, nport);
 
-        Thread.sleep(20000);
+        Thread.sleep(10000);
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilderEg =
                 FlowUtils.createNodeBuilder(datapathId);
         MatchBuilder matchBuilderEg = new MatchBuilder();
@@ -885,7 +902,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         assertNotNull("IngressSG : Could not find flow in configuration ", flowIng);
         flowIng = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.OPERATIONAL);
         assertNotNull("IngressSG Operational : Could not find flow in config", flowIng);
-
     }
 
     private NeutronPort createNeutronPort(String networkId, String subnetId,

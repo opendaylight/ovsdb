@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_370c8942",
+        "filename": "openstack/net-virt-it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/it/NetvirtIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-15T01:57:05Z",
+      "side": 1,
+      "message": "At this point we don\u0027t have a way to call ovs-ofctl or ovs-vsctl commands like the neutron methods. Guess we could issue the openflowplugin writes and see what happens.\n\nThese are IT tests so the docker containers are well-known as to what OVS version is in it.",
+      "parentUuid": "1aa4ed85_b7ee398a",
+      "revId": "693f9a83c54a6dd44a3e72bcc7a4496af23dabc5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_d7f3b571",
         "filename": "openstack/net-virt-it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/it/NetvirtIT.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-14T22:28:03Z",
       "side": 1,
       "message": "Can you please explain those timeout change?",
+      "revId": "693f9a83c54a6dd44a3e72bcc7a4496af23dabc5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_7209af2b",
+        "filename": "openstack/net-virt-it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/it/NetvirtIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-15T01:57:05Z",
+      "side": 1,
+      "message": "This was just reducing the value. This test was copied from a different one where the value was reduced. These tests all need to be rewritten to listen for the dataChange updates from mdsal rather than sleeping.",
+      "parentUuid": "1aa4ed85_d7f3b571",
       "revId": "693f9a83c54a6dd44a3e72bcc7a4496af23dabc5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

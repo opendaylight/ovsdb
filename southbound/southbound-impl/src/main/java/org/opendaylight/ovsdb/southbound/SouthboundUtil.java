@@ -172,4 +172,9 @@ public class SouthboundUtil {
 
         return target;
     }
+
+    public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
+        return String.valueOf(
+                connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+    }
 }

@@ -46,6 +46,10 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
     public void portAdded(String securityGroupUuid, String portUuid) {
         LOG.debug("In portAdded securityGroupUuid:" + securityGroupUuid + " portUuid:" + portUuid);
         NeutronPort port = neutronPortCache.getPort(portUuid);
+        if (port == null) {
+            LOG.debug("In portAdded no neutron port found:" + " portUuid:" + portUuid);
+            return;
+        }
         processPortAdded(securityGroupUuid,port);
     }
 
@@ -53,6 +57,10 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
     public void portRemoved(String securityGroupUuid, String portUuid) {
         LOG.debug("In portRemoved securityGroupUuid:" + securityGroupUuid + " portUuid:" + portUuid);
         NeutronPort port = neutronPortCache.getPort(portUuid);
+        if (port == null) {
+            LOG.debug("In portRemoved no neutron port found:" + " portUuid:" + portUuid);
+            return;
+        }
         processPortRemoved(securityGroupUuid,port);
     }
 

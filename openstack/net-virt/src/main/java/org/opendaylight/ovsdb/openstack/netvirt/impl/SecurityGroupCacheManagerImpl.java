@@ -106,6 +106,9 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
             for (NeutronSecurityRule securityRule : remoteSecurityRules) {
+                if (port.getFixedIPs() == null) {
+                    continue;
+                }
                 for (Neutron_IPs vmIp : port.getFixedIPs()) {
                     securityServicesManager.syncSecurityRule(cachedport, securityRule, vmIp, true);
                 }
@@ -133,6 +136,9 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
             for (NeutronSecurityRule securityRule : remoteSecurityRules) {
+                if (port.getFixedIPs() == null) {
+                    continue;
+                }
                 for (Neutron_IPs vmIp : port.getFixedIPs()) {
                     securityServicesManager.syncSecurityRule(cachedport, securityRule, vmIp, false);
                 }

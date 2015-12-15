@@ -105,6 +105,40 @@
       "revId": "749460466434dedc45a2a230c371a59ba899fd74",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_add34a37",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-12-15T07:42:54Z",
+      "side": 1,
+      "message": "What\u0027s the point of very specific function?\nDoes\u0027t it work to convert ip address to node (or its augumentated value) itself?\nthen caller can check if the node supports the desired features or not.",
+      "revId": "749460466434dedc45a2a230c371a59ba899fd74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_2d20ba48",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-12-15T07:42:54Z",
+      "side": 1,
+      "message": "break;",
+      "revId": "749460466434dedc45a2a230c371a59ba899fd74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

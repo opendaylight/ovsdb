@@ -114,7 +114,9 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
         NeutronRouter result = new NeutronRouter();
         result.setID(String.valueOf(router.getUuid().getValue()));
         result.setName(router.getName());
-        result.setTenantID(String.valueOf(router.getTenantId().getValue()));
+        if (router.getTenantId() != null) {
+            result.setTenantID(String.valueOf(router.getTenantId().getValue()));
+        }
         result.setAdminStateUp(router.isAdminStateUp());
         result.setStatus(router.getStatus());
         result.setDistributed(router.isDistributed());
@@ -152,7 +154,9 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
                 NeutronRouter_Interface pojoInterface = new NeutronRouter_Interface();
                 String id = String.valueOf(mdInterface.getUuid().getValue());
                 pojoInterface.setID(id);
-                pojoInterface.setTenantID(String.valueOf(mdInterface.getTenantId().getValue()));
+                if (mdInterface.getTenantId() != null) {
+                     pojoInterface.setTenantID(String.valueOf(mdInterface.getTenantId().getValue()));
+                }
                 pojoInterface.setSubnetUUID(String.valueOf(mdInterface.getSubnetId().getValue()));
                 pojoInterface.setPortUUID(String.valueOf(mdInterface.getPortId().getValue()));
                 interfaces.put(id, pojoInterface);

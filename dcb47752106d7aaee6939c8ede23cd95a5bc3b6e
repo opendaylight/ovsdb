@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_adb6eada",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-15T08:17:49Z",
+      "side": 1,
+      "message": "Ah yes, thanks for clarifying.",
+      "parentUuid": "1aa4ed85_d2366303",
+      "revId": "dcb47752106d7aaee6939c8ede23cd95a5bc3b6e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_72a52f03",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/MacEntriesRemoveCommand.java",
         "patchSetId": 1

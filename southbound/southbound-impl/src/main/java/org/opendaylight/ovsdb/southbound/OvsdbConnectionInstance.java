@@ -99,13 +99,19 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             try {
                 List<String> databases = getDatabases().get();
-                this.callback = new OvsdbMonitorCallback(this,txInvoker);
                 for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        monitorAllTables(database, dbSchema);
+                    if (database.equals(SouthboundConstants.OPEN_V_SWITCH)) {
+                        DatabaseSchema dbSchema = getSchema(database).get();
+                        if (dbSchema != null) {
+                            LOG.info("Monitoring database: {}", database);
+                            callback = new OvsdbMonitorCallback(this, txInvoker);
+                            monitorAllTables(database, dbSchema, SouthboundConstants.OPEN_V_SWITCH);
+                            break;
+                        } else {
+                            LOG.warn("No schema reported for database {} for key {}", database, connectionInfo);
+                        }
                     } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
+                        LOG.info("Ignoring database: {}", database);
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -131,11 +137,16 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         }
     }
 
-    private void monitorAllTables(String database, DatabaseSchema dbSchema) {
+    private void monitorAllTables(String database, DatabaseSchema dbSchema, String filter) {
+        if((filter != null) && (!dbSchema.getName().equals(filter))) {
+            LOG.debug("Not monitoring tables in {}, filter: {}", dbSchema.getName(), filter);
+            return;
+        }
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
+                LOG.info("Southbound monitoring table {} in {}", tableName, dbSchema.getName());
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                 Set<String> columns = tableSchema.getColumns();
                 MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);

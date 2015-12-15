@@ -39,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -59,6 +60,7 @@ public class OvsdbConnectionManagerTest {
     @Mock private TransactionInvoker txInvoker;
     @Mock private EntityOwnershipService entityOwnershipService;
     @Mock private OvsdbConnection ovsdbConnection;
+    @Mock private OvsdbClient externalClient;
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
@@ -74,11 +76,19 @@ public class OvsdbConnectionManagerTest {
         MemberModifier.field(OvsdbConnectionManager.class, "ovsdbConnection")
                 .set(ovsdbConnectionManager, ovsdbConnection);
         entityConnectionMap = new ConcurrentHashMap<>();
+
+        externalClient = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);
+        when(externalClient.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
+        when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(8080);
+        when(externalClient.getConnectionInfo().getLocalAddress()).thenReturn(mock(InetAddress.class));
+        when(externalClient.getConnectionInfo().getLocalPort()).thenReturn(8080);
+
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        when(SouthboundUtil.connectionInfoToString(any(ConnectionInfo.class))).thenReturn("192.18.120.31:8080");
     }
     @Test
     public void testConnected() throws Exception {
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
-        OvsdbClient externalClient = mock(OvsdbClient.class);
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered", OvsdbClient.class));
         when(ovsdbConnectionManager.connectedButCallBacksNotRegistered(any(OvsdbClient.class))).thenReturn(client);
         doNothing().when(client).registerCallbacks();
@@ -97,15 +107,9 @@ public class OvsdbConnectionManagerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testConnectedButCallBacksNotRegistered() throws Exception {
-        OvsdbClient externalClient = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
-
-        InetAddress ip = mock(InetAddress.class);
-
-        when(externalClient.getConnectionInfo().getRemoteAddress()).thenReturn(ip);
-        when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(8080);
-
         ConnectionInfo key = mock(ConnectionInfo.class);
+
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
 
@@ -127,11 +131,7 @@ public class OvsdbConnectionManagerTest {
 
     @Test
     public void testDisconnected() throws Exception {
-        OvsdbClient client = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
-        InetAddress ip = mock(InetAddress.class);
-        when(client.getConnectionInfo().getRemoteAddress()).thenReturn(ip);
-        when(client.getConnectionInfo().getRemotePort()).thenReturn(8080);
 
         ConnectionInfo key = mock(ConnectionInfo.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -149,7 +149,7 @@ public class OvsdbConnectionManagerTest {
 
       //TODO: Write unit tests for EntityOwnershipService
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "unregisterEntityForOwnership", OvsdbConnectionInstance.class));
-        ovsdbConnectionManager.disconnected(client);
+        ovsdbConnectionManager.disconnected(externalClient);
         Map<ConnectionInfo,OvsdbConnectionInstance> testClients = Whitebox.getInternalState(ovsdbConnectionManager, "clients");
         assertEquals("Error, size of the hashmap is incorrect", 0, testClients.size());
     }

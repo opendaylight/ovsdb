@@ -86,7 +86,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void connected(@Nonnull final OvsdbClient externalClient) {
-
+        LOG.info("Library connected {} from {}:{} to {}:{}",
+                externalClient.getConnectionInfo().getType(),
+                externalClient.getConnectionInfo().getRemoteAddress(),
+                externalClient.getConnectionInfo().getRemotePort(),
+                externalClient.getConnectionInfo().getLocalAddress(),
+                externalClient.getConnectionInfo().getLocalPort());
         OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
 
         // Register Cluster Ownership for ConnectionInfo
@@ -125,9 +130,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void disconnected(OvsdbClient client) {
-        LOG.info("OVSDB Disconnected from {}:{}. Cleaning up the operational data store"
-                ,client.getConnectionInfo().getRemoteAddress(),
-                client.getConnectionInfo().getRemotePort());
+        LOG.info("Library disconnected {} from {}:{} to {}:{}. Cleaning up the operational data store",
+                client.getConnectionInfo().getType(),
+                client.getConnectionInfo().getRemoteAddress(),
+                client.getConnectionInfo().getRemotePort(),
+                client.getConnectionInfo().getLocalAddress(),
+                client.getConnectionInfo().getLocalPort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(key);
         if (ovsdbConnectionInstance != null) {
@@ -143,11 +151,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         } else {
             LOG.warn("disconnected : Connection instance not found for OVSDB Node {} ", key);
         }
-        LOG.trace("OvsdbConnectionManager: disconnected exit");
+        LOG.trace("OvsdbConnectionManager: exit disconnected client: {}", client);
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,
             OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+        LOG.info("Connecting to {}", SouthboundUtil.connectionInfoToString(ovsdbNode.getConnectionInfo()));
+
         // TODO handle case where we already have a connection
         // TODO use transaction chains to handle ordering issues between disconnected
         // TODO and connected when writing to the operational store
@@ -170,6 +180,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+        LOG.info("Disconnecting from {}", SouthboundUtil.connectionInfoToString(ovsdbNode.getConnectionInfo()));
         OvsdbConnectionInstance client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {
             // Unregister Cluster Onwership for ConnectionInfo

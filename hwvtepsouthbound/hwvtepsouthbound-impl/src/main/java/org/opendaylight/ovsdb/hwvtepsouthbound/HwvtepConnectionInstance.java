@@ -89,13 +89,19 @@ public class HwvtepConnectionInstance implements OvsdbClient{
 
             try {
                 List<String> databases = getDatabases().get();
-                this.callback = new HwvtepMonitorCallback(this,txInvoker);
                 for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        monitorAllTables(database, dbSchema, HwvtepSchemaConstants.databaseName);
+                    if (database.equals(HwvtepSchemaConstants.HARDWARE_VTEP)) {
+                        DatabaseSchema dbSchema = getSchema(database).get();
+                        if (dbSchema != null) {
+                            LOG.info("Monitoring database: {}", database);
+                            callback = new HwvtepMonitorCallback(this,txInvoker);
+                            monitorAllTables(database, dbSchema, HwvtepSchemaConstants.HARDWARE_VTEP);
+                            break;
+                        } else {
+                            LOG.warn("No schema reported for database {} for key {}", database, connectionInfo);
+                        }
                     } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
+                        LOG.info("Ignoring database: {}", database);
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -108,7 +114,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.databaseName).get();
+                DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
                 if(dbSchema != null) {
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }

@@ -43,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import com.google.common.collect.ImmutableBiMap;
 
 public class SouthboundConstants {
+    public static final String OPEN_V_SWITCH = "Open_vSwitch";
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";

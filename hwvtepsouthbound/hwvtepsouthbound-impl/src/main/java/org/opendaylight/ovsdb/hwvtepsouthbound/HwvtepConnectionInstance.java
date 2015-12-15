@@ -88,18 +88,17 @@ public class HwvtepConnectionInstance implements OvsdbClient{
             }
 
             try {
-                List<String> databases = getDatabases().get();
-                this.callback = new HwvtepMonitorCallback(this,txInvoker);
-                for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        monitorAllTables(database, dbSchema, HwvtepSchemaConstants.databaseName);
-                    } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
-                    }
+                String database = HwvtepSchemaConstants.HARDWARE_VTEP;
+                DatabaseSchema dbSchema = getSchema(database).get();
+                if (dbSchema != null) {
+                    LOG.info("Monitoring database: {}", database);
+                    callback = new HwvtepMonitorCallback(this, txInvoker);
+                    monitorAllTables(database, dbSchema);
+                } else {
+                    LOG.info("No database {} found on {}", database, connectionInfo);
                 }
             } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Exception attempting to registerCallbacks {}: {}",connectionInfo,e);
+                LOG.warn("Exception attempting to registerCallbacks {}: ", connectionInfo, e);
             }
         }
     }
@@ -108,7 +107,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.databaseName).get();
+                DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
                 if(dbSchema != null) {
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }
@@ -118,11 +117,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         }
     }
 
-    private void monitorAllTables(String database, DatabaseSchema dbSchema, String filter) {
-        if((filter != null) && (!dbSchema.getName().equals(filter))) {
-            LOG.debug("Not monitoring tables in {}, filter: {}", dbSchema.getName(), filter);
-            return;
-        }
+    private void monitorAllTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest> monitorRequests = Lists.newArrayList();

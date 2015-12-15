@@ -88,16 +88,24 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     @Override
     public void connected(@Nonnull final OvsdbClient client) {
+        LOG.info("Library connected {} from {}:{} to {}:{}",
+                client.getConnectionInfo().getType(),
+                client.getConnectionInfo().getRemoteAddress(),
+                client.getConnectionInfo().getRemotePort(),
+                client.getConnectionInfo().getLocalAddress(),
+                client.getConnectionInfo().getLocalPort());
         HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(client);
         registerEntityForOwnership(hwClient);
-        LOG.trace("connected client: {}", client);
     }
 
     @Override
     public void disconnected(OvsdbClient client) {
-        LOG.info("HWVTEP Disconnected from {}:{}. Cleaning up the operational data store"
-                        ,client.getConnectionInfo().getRemoteAddress(),
-                        client.getConnectionInfo().getRemotePort());
+        LOG.info("Library disconnected {} from {}:{} to {}:{}. Cleaning up the operational data store",
+                client.getConnectionInfo().getType(),
+                client.getConnectionInfo().getRemoteAddress(),
+                client.getConnectionInfo().getRemotePort(),
+                client.getConnectionInfo().getLocalAddress(),
+                client.getConnectionInfo().getLocalPort());
         ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstance(key);
         if (hwvtepConnectionInstance != null) {
@@ -110,10 +118,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         } else {
             LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
         }
-        LOG.trace("disconnected client: {}", client);
+        LOG.trace("HwvtepConnectionManager exit disconnected client: {}", client);
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid, HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException {
+        LOG.info("Connecting to {}", HwvtepSouthboundUtil.connectionInfoToString(hwvtepGlobal.getConnectionInfo()));
         InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
         OvsdbClient client = OvsdbConnectionService.getService()
                         .connect(ip, hwvtepGlobal.getConnectionInfo().getRemotePort().getValue());
@@ -131,6 +140,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return client;
     }
     public void disconnect(HwvtepGlobalAugmentation ovsdbNode) throws UnknownHostException {
+        LOG.info("Diconnecting from {}", HwvtepSouthboundUtil.connectionInfoToString(ovsdbNode.getConnectionInfo()));
         HwvtepConnectionInstance client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {
             client.disconnect();
@@ -272,10 +282,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         Global globalRow = null;
 
         try {
-            dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.databaseName).get();
+            dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Not able to fetch schema for database {} from device {}",
-                    HwvtepSchemaConstants.databaseName,connectionInstance.getConnectionInfo(),e);
+                    HwvtepSchemaConstants.HARDWARE_VTEP,connectionInstance.getConnectionInfo(),e);
         }
 
         if (dbSchema != null) {

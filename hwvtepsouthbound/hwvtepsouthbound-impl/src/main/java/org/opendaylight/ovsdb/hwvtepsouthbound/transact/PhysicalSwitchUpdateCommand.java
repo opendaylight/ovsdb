@@ -19,9 +19,12 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
@@ -33,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchUpdateCommand.class);
@@ -74,8 +78,18 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         setTunnuleIps(physicalSwitch, physicalSwitchAugmentation);
         setTunnels(physicalSwitch, physicalSwitchAugmentation);
         if (!operationalPhysicalSwitchOptional.isPresent()) {
+            //create a physical switch
             setName(physicalSwitch, physicalSwitchAugmentation, operationalPhysicalSwitchOptional);
-            transaction.add(op.insert(physicalSwitch));
+            String pswitchUuid = "PhysicalSwitch_" + HwvtepSouthboundMapper.getRandomUUID();
+            transaction.add(op.insert(physicalSwitch).withId(pswitchUuid));
+            //update global table
+            Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Global.class);
+            global.setSwitches(Sets.newHashSet(new UUID(pswitchUuid)));
+
+            LOG.debug("execute: physical switch: {}", physicalSwitch);
+            transaction.add(op.mutate(global)
+                    .addMutation(global.getSwitchesColumn().getSchema(), Mutator.INSERT,
+                            global.getSwitchesColumn().getData()));
         } else {
             PhysicalSwitchAugmentation updatedPhysicalSwitch = operationalPhysicalSwitchOptional.get();
             String existingPhysicalSwitchName = updatedPhysicalSwitch.getHwvtepNodeName().getValue();

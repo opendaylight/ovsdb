@@ -108,6 +108,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_0d1859d2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3225
+      },
+      "writtenOn": "2015-12-16T08:09:30Z",
+      "side": 1,
+      "message": "Still waiting for the generic API to merge, then will upload new version of patch.",
+      "parentUuid": "1aa4ed85_206a131b",
+      "revId": "749460466434dedc45a2a230c371a59ba899fd74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_add34a37",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
         "patchSetId": 4
@@ -125,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_2d4995d0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 3225
+      },
+      "writtenOn": "2015-12-16T08:09:30Z",
+      "side": 1,
+      "message": "Currently, we use IP address for query. We are trying to figure out an useful method to convert node\u0027s hostname to its IP address, then we can return the feature for node.",
+      "parentUuid": "1aa4ed85_add34a37",
+      "revId": "749460466434dedc45a2a230c371a59ba899fd74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_2d20ba48",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
         "patchSetId": 4
@@ -136,6 +172,24 @@
       "writtenOn": "2015-12-15T07:42:54Z",
       "side": 1,
       "message": "break;",
+      "revId": "749460466434dedc45a2a230c371a59ba899fd74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4d4651c1",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbSouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 3225
+      },
+      "writtenOn": "2015-12-16T08:09:30Z",
+      "side": 1,
+      "message": "yes, thanks!",
+      "parentUuid": "1aa4ed85_2d20ba48",
       "revId": "749460466434dedc45a2a230c371a59ba899fd74",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

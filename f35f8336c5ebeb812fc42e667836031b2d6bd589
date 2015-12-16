@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_f6826a51",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T17:11:29Z",
+      "side": 1,
+      "message": "The main thing I was driving at here is that since the first part checks that filter is not null, the second should use that and dereference filter rather than dbSchema.getName() (which probably shouldn\u0027t be null but that hasn\u0027t been checked here).",
+      "parentUuid": "1aa4ed85_bb6dbb06",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_0dcdb931",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstanceTest.java",
         "patchSetId": 3
@@ -135,6 +153,24 @@
       "side": 1,
       "message": "This is what I was pinging you about late yesterday. I had started with ConnectionInfoBuilder, then went with the DEEP_STUBS since having all the ConnectionInfoBuilder code was distracting.",
       "parentUuid": "1aa4ed85_6ddb0dee",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_16886670",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T17:11:29Z",
+      "side": 1,
+      "message": "OK, if it\u0027s more compact let\u0027s go with the mocks!",
+      "parentUuid": "1aa4ed85_1b508f31",
       "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

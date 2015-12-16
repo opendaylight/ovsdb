@@ -37,6 +37,41 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_56733e4d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-16T18:05:08Z",
+      "side": 1,
+      "message": "I do have this change in works as part of UTs that I am writing. So if you don\u0027t I will do it.",
+      "parentUuid": "1aa4ed85_1bc2cfe9",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d69e4e56",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSchemaConstants.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-16T18:05:08Z",
+      "side": 1,
+      "message": "Can we just call it HWVTEP?",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_4d4bb1b0",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
         "patchSetId": 3
@@ -118,6 +153,23 @@
       "writtenOn": "2015-12-16T08:49:37Z",
       "side": 1,
       "message": "SouthboundConstants.OPEN_V_SWITCH maybe?",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d6e2ce02",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstanceTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-16T18:05:08Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we add a verification to ensure it doesn\u0027t get called for \"hardware_vtep\"? Test seems incomplete without it.",
       "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

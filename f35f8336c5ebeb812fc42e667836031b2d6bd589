@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_1bc2cfe9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-16T16:28:46Z",
+      "side": 1,
+      "message": "good idea. I will do that for the next patch",
+      "parentUuid": "1aa4ed85_cd5fa171",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_4d4bb1b0",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
         "patchSetId": 3
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_bb6dbb06",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-16T16:28:46Z",
+      "side": 1,
+      "message": "agreed, there is a lot of spacing issues that sonar will tag. This was existing code I copied from hwvtep so I left it so it woudl look the same with the idea I would clean this up with a sonar/checkstyle fix. Guess I could clean it now though",
+      "parentUuid": "1aa4ed85_edc7fd10",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_0dcdb931",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstanceTest.java",
         "patchSetId": 3
@@ -81,6 +117,24 @@
       "writtenOn": "2015-12-16T08:49:37Z",
       "side": 1,
       "message": "You could also create a real instance of ConnectionInfo using ConnectionInfoBuilder instead of deep-mocking OvsdbClient, then mcok externalClient.getConnectionInfo() to return that.",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_1b508f31",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-16T16:28:46Z",
+      "side": 1,
+      "message": "This is what I was pinging you about late yesterday. I had started with ConnectionInfoBuilder, then went with the DEEP_STUBS since having all the ConnectionInfoBuilder code was distracting.",
+      "parentUuid": "1aa4ed85_6ddb0dee",
       "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

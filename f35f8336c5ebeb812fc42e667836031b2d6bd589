@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_cd5fa171",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T08:49:37Z",
+      "side": 1,
+      "message": "Since we\u0027re only interested in the hwvtep database here, why not look for that instead of explicitly looping over everything? Something like\n\n    if (getDatabases().contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {\n        DatabaseSchema dbSchema \u003d getSchema(HwvtepSchemaConstants.HARDWARE_VTEP);\n    ...\n\nor even skipping the first if entirely:\n\n    DatabaseSchema dbSchema \u003d getSchema(HwvtepSchemaConstants.HARDWARE_VTEP);\n    if (dbSchema !\u003d null) {\n        ...\n    } else {\n        LOG.warn(\"No hwvtep database found on connection {}\", connectionInfo);\n    }",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4d4bb1b0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T08:49:37Z",
+      "side": 1,
+      "message": "Same as HwvtepConnectionInstance.java, I\u0027d just go for the target database directly:\n\n    DatabaseSchema dbSchema \u003d getSchema(SouthboundConstants.OPEN_V_SWITCH);\n    if (dbSchema !\u003d null) {\n        ...\n    } else {\n        LOG.warn(\"No OVS database found on connection {}\", connectionInfo);\n    }",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_edc7fd10",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T08:49:37Z",
+      "side": 1,
+      "message": "Spacing nit-picking (and paranoid android mode):\n\n    if (filter !\u003d null \u0026\u0026 !filter.equals(dbSchema.getName())) {",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_0dcdb931",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstanceTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T08:49:37Z",
+      "side": 1,
+      "message": "SouthboundConstants.OPEN_V_SWITCH maybe?",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_6ddb0dee",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T08:49:37Z",
+      "side": 1,
+      "message": "You could also create a real instance of ConnectionInfo using ConnectionInfoBuilder instead of deep-mocking OvsdbClient, then mcok externalClient.getConnectionInfo() to return that.",
+      "revId": "f35f8336c5ebeb812fc42e667836031b2d6bd589",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

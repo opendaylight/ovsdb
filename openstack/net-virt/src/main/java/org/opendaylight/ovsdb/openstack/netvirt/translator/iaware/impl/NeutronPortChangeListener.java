@@ -137,7 +137,6 @@ public class NeutronPortChangeListener implements ClusteredDataChangeListener, A
                 NeutronPort_AllowedAddressPairs pair = new NeutronPort_AllowedAddressPairs();
                 pair.setIpAddress(mdPair.getIpAddress());
                 pair.setMacAddress(mdPair.getMacAddress());
-                pair.setPortID(mdPair.getPortId());
                 pairs.add(pair);
             }
             result.setAllowedAddressPairs(pairs);

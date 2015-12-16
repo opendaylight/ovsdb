@@ -35,12 +35,14 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
     private Map<UUID, OpenVSwitch> oldOpenVSwitchRows;
     private Map<UUID, Manager> removedManagerRows;
     private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
+    private Map<UUID, Manager> updatedManagerRows;
 
     public OvsdbManagersRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
         oldOpenVSwitchRows = TyperUtils.extractRowsOld(OpenVSwitch.class, getUpdates(), getDbSchema());
+        updatedManagerRows = TyperUtils.extractRowsUpdated(Manager.class, getUpdates(), getDbSchema());
         removedManagerRows = TyperUtils.extractRowsRemoved(Manager.class,
                 getUpdates(), getDbSchema());
     }
@@ -67,7 +69,7 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         Preconditions.checkNotNull(openVSwitch);
 
         List<InstanceIdentifier<ManagerEntry>> result =
-                new ArrayList<InstanceIdentifier<ManagerEntry>>();
+                new ArrayList<>();
         OpenVSwitch oldOvsdbNode = oldOpenVSwitchRows.get(openVSwitch.getUuid());
 
         if (oldOvsdbNode != null && oldOvsdbNode.getManagerOptionsColumn() != null) {
@@ -75,13 +77,16 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
                 if (openVSwitch.getManagerOptionsColumn() == null
                         || !openVSwitch.getManagerOptionsColumn().getData().contains(managerUuid)) {
                     Manager manager = removedManagerRows.get(managerUuid);
-                    if (manager != null && manager.getTargetColumn() != null) {
-                        InstanceIdentifier<ManagerEntry> iid = ovsdbNodeIid
-                                .augmentation(OvsdbNodeAugmentation.class)
-                                .child(ManagerEntry.class,
-                                        new ManagerEntryKey(
-                                                new Uri(manager.getTargetColumn().getData())));
-                        result.add(iid);
+                    if (!checkIfManagerPresentInUpdatedManagersList(manager)) {
+                        if (manager != null && manager.getTargetColumn() != null) {
+                            InstanceIdentifier<ManagerEntry> iid = ovsdbNodeIid
+                                    .augmentation(OvsdbNodeAugmentation.class)
+                                    .child(ManagerEntry.class,
+                                            new ManagerEntryKey(
+                                                    new Uri(manager.getTargetColumn().getData())));
+                            result.add(iid);
+                        }
+
                     }
                 }
             }
@@ -89,5 +94,14 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         return result;
     }
 
+    private boolean checkIfManagerPresentInUpdatedManagersList(Manager removedManager) {
+        for (Map.Entry<UUID, Manager> updatedManager : updatedManagerRows.entrySet()) {
+            if (updatedManager.getValue().getTargetColumn().getData()
+                    .equals(removedManager.getTargetColumn().getData())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

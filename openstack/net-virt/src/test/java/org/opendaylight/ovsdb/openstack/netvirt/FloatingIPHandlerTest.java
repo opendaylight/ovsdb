@@ -21,12 +21,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.opendaylight.neutron.spi.NeutronFloatingIP;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -64,16 +63,16 @@ public class FloatingIPHandlerTest {
         when(ev.getNeutronFloatingIP()).thenReturn(mock(NeutronFloatingIP.class));
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
-        floatingHandler.processEvent((AbstractEvent) ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent(ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
 
         when(ev.getAction()).thenReturn(Action.ADD);
-        floatingHandler.processEvent((AbstractEvent) ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent(ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
 
         when(ev.getAction()).thenReturn(Action.DELETE);
-        floatingHandler.processEvent((AbstractEvent) ev);
-        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent(ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
     }
 
     @Test
@@ -85,7 +84,7 @@ public class FloatingIPHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, floatingHandler)).thenReturn(eventDispatcher);
         PowerMockito.when(ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, floatingHandler)).thenReturn(neutronL3Adapter);
 
-        floatingHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        floatingHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", floatingHandler.eventDispatcher, eventDispatcher);
         assertEquals("Error, did not return the correct object", getNeutronL3Adapter(), neutronL3Adapter);

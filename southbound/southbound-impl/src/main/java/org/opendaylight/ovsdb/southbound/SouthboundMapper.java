@@ -64,6 +64,7 @@ import com.google.common.collect.ImmutableBiMap;
 
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
+    private static final String N_CONNECTIONS_STR = "n_connections";
 
     private static NodeId createNodeId(OvsdbConnectionInstance client) {
         NodeKey key = client.getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
@@ -92,11 +93,10 @@ public class SouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        InstanceIdentifier<Node> nodePath = InstanceIdentifier
+        return InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
-        return nodePath;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbConnectionInstance client,Bridge bridge) {
@@ -177,14 +177,12 @@ public class SouthboundMapper {
     }
 
     public static String createDatapathType(OvsdbBridgeAugmentation mdsalbridge) {
-        String datapathtype = new String(SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class));
+        String datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
 
-        if (mdsalbridge.getDatapathType() != null) {
-            if (SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()) != null) {
-                datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
-            } else {
-                throw new IllegalArgumentException("Unknown datapath type "
-                        + SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()));
+        if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.class)) {
+            datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
+            if (datapathtype == null) {
+                throw new IllegalArgumentException("Unknown datapath type " + mdsalbridge.getDatapathType().getName());
             }
         }
         return datapathtype;
@@ -245,16 +243,17 @@ public class SouthboundMapper {
         try {
             protocols = bridge.getProtocolsColumn().getData();
         } catch (SchemaVersionMismatchException e) {
-            LOG.warn("protocols not supported by this version of ovsdb", e);
+            // We don't care about the exception stack trace here
+            LOG.warn("protocols not supported by this version of ovsdb: {}", e.getMessage());
         }
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         if (protocols != null && protocols.size() > 0) {
             ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                     SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
             for (String protocol : protocols) {
                 if (protocol != null && mapper.get(protocol) != null) {
                     protocolList.add(new ProtocolEntryBuilder().
-                            setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get(protocol)).build());
+                            setProtocol(mapper.get(protocol)).build());
                 }
             }
         }
@@ -275,7 +274,7 @@ public class SouthboundMapper {
         LOG.debug("createControllerEntries Bridge: {}\n, updatedControllerRows: {}",
                 bridge, updatedControllerRows);
         final Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
-        final List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        final List<ControllerEntry> controllerEntries = new ArrayList<>();
         for (UUID controllerUUID : controllerUUIDs ) {
             final Controller controller = updatedControllerRows.get(controllerUUID);
             addControllerEntries(controllerEntries, controller);
@@ -297,7 +296,7 @@ public class SouthboundMapper {
 
         LOG.debug("createControllerEntries Bridge 2: {}\n, updatedControllerRows: {}",
                 bridgeNode, updatedControllerRows);
-        final List<ControllerEntry> controllerEntriesCreated = new ArrayList<ControllerEntry>();
+        final List<ControllerEntry> controllerEntriesCreated = new ArrayList<>();
         final OvsdbBridgeAugmentation ovsdbBridgeAugmentation =
                 bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation == null) {
@@ -385,7 +384,7 @@ public class SouthboundMapper {
         LOG.debug("createManagerEntries OpenVSwitch: {}\n, updatedManagerRows: {}",
                 ovsdbNode, updatedManagerRows);
         final Set<UUID> managerUUIDs = ovsdbNode.getManagerOptionsColumn().getData();
-        final List<ManagerEntry> managerEntries = new ArrayList<ManagerEntry>();
+        final List<ManagerEntry> managerEntries = new ArrayList<>();
         for (UUID managerUUID : managerUUIDs ) {
             final Manager manager = updatedManagerRows.get(managerUUID);
             addManagerEntries(managerEntries, manager);
@@ -407,7 +406,7 @@ public class SouthboundMapper {
 
         LOG.debug("createManagerEntries based on OVSDB Node: {}\n, updatedManagerRows: {}",
                 ovsdbNode, updatedManagerRows);
-        final List<ManagerEntry> managerEntriesCreated = new ArrayList<ManagerEntry>();
+        final List<ManagerEntry> managerEntriesCreated = new ArrayList<>();
         final OvsdbNodeAugmentation ovsdbNodeAugmentation =
                 ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         if (ovsdbNodeAugmentation == null) {
@@ -435,11 +434,43 @@ public class SouthboundMapper {
                                             final Manager manager) {
 
         if (manager != null && manager.getTargetColumn() != null) {
-            final String targetString = (String)manager.getTargetColumn().getData();
+            long numberOfConnections = 0;
+            final String targetString = manager.getTargetColumn().getData();
+
+            final Map<String, String> statusAttributeMap = manager.getStatusColumn().getData();
+            if (statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
+                String numberOfConnectionValueStr = statusAttributeMap.get(N_CONNECTIONS_STR);
+                numberOfConnections = Integer.parseInt(numberOfConnectionValueStr);
+            } else {
+                final boolean isConnected = manager.getIsConnectedColumn().getData();
+                if (isConnected) {
+                    numberOfConnections = 1;
+                }
+            }
             managerEntries.add(new ManagerEntryBuilder()
                     .setTarget(new Uri(targetString))
-                    .setIsConnected(manager.getIsConnectedColumn().getData()).build());
+                    .setNumberOfConnections(numberOfConnections)
+                    .setConnected(manager.getIsConnectedColumn().getData()).build());
         }
     }
 
+    public static InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
+        InstanceIdentifier<Node> iid = null;
+        if (ovs.getExternalIdsColumn() != null
+                && ovs.getExternalIdsColumn().getData() != null
+                && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+        } else {
+            String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
+                    + ovs.getUuid().toString();
+            NodeId nodeId = new NodeId(new Uri(nodeString));
+            NodeKey nodeKey = new NodeKey(nodeId);
+            iid = InstanceIdentifier.builder(NetworkTopology.class)
+                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                    .child(Node.class,nodeKey)
+                    .build();
+        }
+        return iid;
+    }
 }

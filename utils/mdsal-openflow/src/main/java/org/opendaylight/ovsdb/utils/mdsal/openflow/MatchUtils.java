@@ -80,6 +80,8 @@ public class MatchUtils {
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
+    public static final String ICMP = "icmp";
+    public static final short ALL_ICMP = -1;
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -93,6 +95,17 @@ public class MatchUtils {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + inPort);
         LOG.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, inPort);
+        matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
+        matchBuilder.setInPort(ncid);
+
+        return matchBuilder;
+    }
+
+    public static MatchBuilder createInPortReservedMatch(MatchBuilder matchBuilder, Long dpidLong, String inPort) {
+
+        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + inPort);
+        LOG.debug("createInPortResrevedMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
+                dpidLong, inPort);
         matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
         matchBuilder.setInPort(ncid);
 
@@ -193,18 +206,12 @@ public class MatchUtils {
     /**
      * Match ICMP code and type
      *
-     * @param matchBuilder MatchBuilder Object without a match yet
+     * @param matchBuilder MatchBuilder Object
      * @param type         short representing an ICMP type
      * @param code         short representing an ICMP code
      * @return matchBuilder Map MatchBuilder Object with a match
      */
     public static MatchBuilder createICMPv4Match(MatchBuilder matchBuilder, short type, short code) {
-
-        EthernetMatchBuilder eth = new EthernetMatchBuilder();
-        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
-        ethTypeBuilder.setType(new EtherType(0x0800L));
-        eth.setEthernetType(ethTypeBuilder.build());
-        matchBuilder.setEthernetMatch(eth.build());
 
         // Build the IPv4 Match requied per OVS Syntax
         IpMatchBuilder ipmatch = new IpMatchBuilder();
@@ -213,8 +220,10 @@ public class MatchUtils {
 
         // Build the ICMPv4 Match
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
-        icmpv4match.setIcmpv4Type(type);
-        icmpv4match.setIcmpv4Code(code);
+        if (type != ALL_ICMP || code != ALL_ICMP) {
+            icmpv4match.setIcmpv4Type(type);
+            icmpv4match.setIcmpv4Code(code);
+        }
         matchBuilder.setIcmpv4Match(icmpv4match.build());
 
         return matchBuilder;
@@ -249,7 +258,8 @@ public class MatchUtils {
      */
     public static MatchBuilder createArpDstIpv4Match(MatchBuilder matchBuilder, Ipv4Prefix dstip) {
         ArpMatchBuilder arpDstMatch = new ArpMatchBuilder();
-        arpDstMatch.setArpTargetTransportAddress(dstip);
+        arpDstMatch.setArpTargetTransportAddress(dstip)
+                .setArpOp(FlowUtils.ARP_OP_REQUEST);
         matchBuilder.setLayer3Match(arpDstMatch.build());
 
         return matchBuilder;
@@ -1080,8 +1090,7 @@ public class MatchUtils {
         }
     }
 
-    public static void addNxRegMatch(MatchBuilder match,
-                                     RegMatch... matches) {
+    public static MatchBuilder addNxRegMatch(MatchBuilder matchBuilder, RegMatch... matches) {
         List<ExtensionList> extensions = new ArrayList<>();
         for (RegMatch rm : matches) {
             Class<? extends ExtensionKey> key;
@@ -1104,67 +1113,68 @@ public class MatchUtils {
             }
             NxAugMatchNodesNodeTableFlow am =
                     new NxAugMatchNodesNodeTableFlowBuilder()
-                .setNxmNxReg(new NxmNxRegBuilder()
-                    .setReg(rm.reg)
-                    .setValue(rm.value)
-                    .build())
-                .build();
+                            .setNxmNxReg(new NxmNxRegBuilder()
+                                    .setReg(rm.reg)
+                                    .setValue(rm.value)
+                                    .build())
+                            .build();
             extensions.add(new ExtensionListBuilder()
-                .setExtensionKey(key)
-                .setExtension(new ExtensionBuilder()
-                     .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
-                     .build())
-                .build());
+                    .setExtensionKey(key)
+                    .setExtension(new ExtensionBuilder()
+                            .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
+                            .build())
+                    .build());
         }
-        GeneralAugMatchNodesNodeTableFlow m =
-                new GeneralAugMatchNodesNodeTableFlowBuilder()
-            .setExtensionList(extensions)
-            .build();
-        match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+        GeneralAugMatchNodesNodeTableFlow m = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(extensions)
+                .build();
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+        return matchBuilder;
     }
 
-    public static void addNxTunIdMatch(MatchBuilder match,
-                                       int tunId) {
-        NxAugMatchNodesNodeTableFlow am =
-               new NxAugMatchNodesNodeTableFlowBuilder()
-                   .setNxmNxTunId(new NxmNxTunIdBuilder()
-                       .setValue(BigInteger.valueOf(tunId))
-                       .build())
-                   .build();
+    public static MatchBuilder addNxTunIdMatch(MatchBuilder matchBuilder, int tunId) {
+        NxAugMatchNodesNodeTableFlow am = new NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmNxTunId(new NxmNxTunIdBuilder()
+                        .setValue(BigInteger.valueOf(tunId))
+                        .build())
+                .build();
         GeneralAugMatchNodesNodeTableFlow m =
                 new GeneralAugMatchNodesNodeTableFlowBuilder()
-            .setExtensionList(ImmutableList.of(new ExtensionListBuilder()
-                .setExtensionKey(NxmNxTunIdKey.class)
-                .setExtension(new ExtensionBuilder()
-                    .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
-                    .build())
-                .build()))
-            .build();
-        match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+                        .setExtensionList(ImmutableList.of(new ExtensionListBuilder()
+                                .setExtensionKey(NxmNxTunIdKey.class)
+                                .setExtension(new ExtensionBuilder()
+                                        .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
+                                        .build())
+                                .build()))
+                        .build();
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+        return matchBuilder;
     }
 
-    public static void addNxNsp(MatchBuilder match, long nsp) {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow am =
-                new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
+    public static MatchBuilder addNxNspMatch(MatchBuilder matchBuilder, long nsp) {
+        NxAugMatchNodesNodeTableFlow am = new NxAugMatchNodesNodeTableFlowBuilder()
                 .setNxmNxNsp(new NxmNxNspBuilder()
-                .setValue(nsp)
-                .build())
+                        .setValue(nsp)
+                        .build())
                 .build();
-        addExtension(match, NxmNxNspKey.class, am);
+        addExtension(matchBuilder, NxmNxNspKey.class, am);
+        return matchBuilder;
     }
 
-    public static void addNxNsi(MatchBuilder match, short nsi) {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow am =
-                new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
+    public static MatchBuilder addNxNsiMatch(MatchBuilder matchBuilder, short nsi) {
+        NxAugMatchNodesNodeTableFlow am = new NxAugMatchNodesNodeTableFlowBuilder()
                 .setNxmNxNsi(new NxmNxNsiBuilder()
-                .setNsi(nsi)
-                .build())
+                        .setNsi(nsi)
+                        .build())
                 .build();
-        addExtension(match, NxmNxNsiKey.class, am);
+        addExtension(matchBuilder, NxmNxNsiKey.class, am);
+        return matchBuilder;
     }
 
-    private static void addExtension (MatchBuilder match, Class<? extends ExtensionKey> extensionKey, org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow am) {
-        GeneralAugMatchNodesNodeTableFlow existingAugmentations = match.getAugmentation(GeneralAugMatchNodesNodeTableFlow.class);
+    private static void addExtension(MatchBuilder matchBuilder, Class<? extends ExtensionKey> extensionKey,
+                                     NxAugMatchNodesNodeTableFlow am) {
+        GeneralAugMatchNodesNodeTableFlow existingAugmentations =
+                matchBuilder.getAugmentation(GeneralAugMatchNodesNodeTableFlow.class);
         List<ExtensionList> extensions = null;
         if (existingAugmentations != null ) {
             extensions = existingAugmentations.getExtensionList();
@@ -1174,16 +1184,16 @@ public class MatchUtils {
         }
 
         extensions.add(new ExtensionListBuilder()
-                           .setExtensionKey(extensionKey)
-                           .setExtension(new ExtensionBuilder()
-                           .addAugmentation(org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow.class, am)
-                           .build())
-                           .build());
+                .setExtensionKey(extensionKey)
+                .setExtension(new ExtensionBuilder()
+                        .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
+                        .build())
+                .build());
 
         GeneralAugMatchNodesNodeTableFlow m = new GeneralAugMatchNodesNodeTableFlowBuilder()
-        .setExtensionList(extensions)
-        .build();
-        match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+                .setExtensionList(extensions)
+                .build();
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
     }
 
     public static EthernetMatch ethernetMatch(MacAddress srcMac,

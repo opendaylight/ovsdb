@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2015 Inocybe Technologies and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
@@ -73,9 +81,9 @@ public class OvsdbConnectionInstanceTest {
     public void setUp() throws Exception {
         ovsdbConnectionInstance = PowerMockito.mock(OvsdbConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
         MemberModifier.field(OvsdbConnectionInstance.class, "txInvoker").set(ovsdbConnectionInstance, txInvoker);
-        MemberModifier.field(OvsdbConnectionInstance.class, "key").set(ovsdbConnectionInstance, key);
         MemberModifier.field(OvsdbConnectionInstance.class, "connectionInfo").set(ovsdbConnectionInstance, key);
         MemberModifier.field(OvsdbConnectionInstance.class, "instanceIdentifier").set(ovsdbConnectionInstance, instanceIdentifier);
+        MemberModifier.field(OvsdbConnectionInstance.class, "hasDeviceOwnership").set(ovsdbConnectionInstance, false);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -108,7 +116,7 @@ public class OvsdbConnectionInstanceTest {
         //callback null case
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , null);
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
-        List<String> databases = new ArrayList<String>();
+        List<String> databases = new ArrayList<>();
         databases.add("Open_vSwitch");
         databases.add("");
         doReturn(listenableFuture).when(ovsdbConnectionInstance).getDatabases();
@@ -136,7 +144,7 @@ public class OvsdbConnectionInstanceTest {
         //transactInvokers null case
         MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
-        List<String> databases = new ArrayList<String>();
+        List<String> databases = new ArrayList<>();
         databases.add("database1");
         databases.add("database2");
         doReturn(listenableFuture).when(ovsdbConnectionInstance).getDatabases();
@@ -159,7 +167,7 @@ public class OvsdbConnectionInstanceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testMonitorAllTables() throws Exception {
-        Set<String> tables = new HashSet<String>();
+        Set<String> tables = new HashSet<>();
         tables.add("tableName1");
         tables.add("tableName2");
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
@@ -167,7 +175,7 @@ public class OvsdbConnectionInstanceTest {
         GenericTableSchema tableSchema = mock(GenericTableSchema.class);
         when(dbSchema.table(anyString(), eq(GenericTableSchema.class))).thenReturn(tableSchema);
 
-        Set<String> columns = new HashSet<String>();
+        Set<String> columns = new HashSet<>();
         columns.add("columnName1");
         columns.add("columnName2");
         when(tableSchema.getColumns()).thenReturn(columns);
@@ -175,7 +183,7 @@ public class OvsdbConnectionInstanceTest {
         PowerMockito.mockStatic(MonitorRequestBuilder.class);
         when(MonitorRequestBuilder.builder(any(GenericTableSchema.class))).thenReturn(monitorBuilder);
         when(monitorBuilder.addColumn(anyString())).thenReturn(monitorBuilder);
-        MonitorRequest<GenericTableSchema> monitorReq = mock(MonitorRequest.class);
+        MonitorRequest monitorReq = mock(MonitorRequest.class);
         when(monitorBuilder.with(any(MonitorSelect.class))).thenReturn(monitorBuilder);
         when(monitorBuilder.build()).thenReturn(monitorReq);
 
@@ -288,7 +296,7 @@ public class OvsdbConnectionInstanceTest {
 
         //test setMDConnectionInfo()
         ovsdbConnectionInstance.setMDConnectionInfo(key);
-        assertEquals("Error, incorrect ConnectionInfo", key, Whitebox.getInternalState(ovsdbConnectionInstance, "key"));
+        assertEquals("Error, incorrect ConnectionInfo", key, Whitebox.getInternalState(ovsdbConnectionInstance, "connectionInfo"));
 
         //test getInstanceIdentifier()
         assertEquals("Error, incorrect instanceIdentifier", instanceIdentifier, ovsdbConnectionInstance.getInstanceIdentifier());

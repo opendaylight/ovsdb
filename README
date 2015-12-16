@@ -3,7 +3,6 @@ DIRECTORY ORGANIZATION
 
 - commons
   +-- parent : Contains Parent pom.xml for all the ovsdb modules.
-  +-- integrationtest : Contains the parent pom.xml for all the integrationtest needs.
 
 - distribution : Builds a working controller distribution based on the controller + ovsdb modules and other
                  dependant modules such as openflowplugin
@@ -12,15 +11,9 @@ DIRECTORY ORGANIZATION
 
 - features : This folder contains all the Karaf related files.
 
-- integrationtest : Contains all the PAX-Exam based integrationTests that covers IT for all the modules.
-
 - library : Contains Schema-independent library that is a reference implementation for RFC 7047.
             This module doesn't depend on any of the Opendaylight components.
             This library module can also be used independently in a non-OSGi environment.
-
-- northbound : Provides AD-SAL style Northbound REST APIs.
-               Supports the legacy v2 APIs to provide backward compatibility for Hydrogen Release
-               Also supports the newer v3 APIs to provide schema-independent access to the OVSDB protocol.
 
 - openstack
   +-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
@@ -67,7 +60,7 @@ Pre-requisites : JDK 1.7+, Maven 3+
 
    4. Once karaf has started and you see the Opendaylight ascii art in the console, the last step
       is to start the OVSDB plugin framework with the following command in the karaf console:
-      "feature:install odl-ovsdb-openstack odl-ovsdb-northbound" (without quotation marks).
+      "feature:install odl-ovsdb-openstack" (without quotation marks).
 
    Sample output from Karaf console :
 
@@ -76,8 +69,6 @@ Pre-requisites : JDK 1.7+, Maven 3+
    odl-ovsdb-library                | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OVSDB :: Library
    odl-ovsdb-schema-openvswitch     | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OVSDB :: Schema :: Open_vSwitch
    odl-ovsdb-schema-hardwarevtep    | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OVSDB :: Schema :: hardware_vtep
-   odl-ovsdb-plugin                 | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: Plugin
-   odl-ovsdb-northbound             | 0.6.0-SNAPSHOT      |           | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: Northbound
    odl-ovsdb-openstack              | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: OpenStack Network Virtual
    odl-ovsdb-ovssfc                 | 0.0.1-SNAPSHOT      |           | ovsdb-0.0.1-SNAPSHOT                  | OpenDaylight :: OVSDB :: OVS Service Function Chai
 

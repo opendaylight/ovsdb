@@ -13,6 +13,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
@@ -90,7 +91,8 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
                       address);
             return new Status(StatusCode.NOTIMPLEMENTED);
         }
-        final String prefixString = address.getHostAddress() + "/" + mask;
+        SubnetUtils addressSubnetInfo = new SubnetUtils(address.getHostAddress() + "/" + mask);
+        final String prefixString = addressSubnetInfo.getInfo().getNetworkAddress() + "/" + mask;
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
 
         // Set source Mac address

@@ -185,7 +185,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            LOG.warn("protocol not supported by this version of ovsdb", e);
+            // We don't care about the exception stack trace here
+            LOG.warn("protocol not supported by this version of ovsdb: {}", e.getMessage());
         }
         return result;
     }

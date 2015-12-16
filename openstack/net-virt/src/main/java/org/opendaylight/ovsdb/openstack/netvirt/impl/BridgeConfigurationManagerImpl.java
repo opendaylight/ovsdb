@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -19,8 +19,12 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -29,11 +33,11 @@ import com.google.common.collect.Lists;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,6 +202,34 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         }
         return isCreated;
     }
+
+
+
+    @Override
+    public String getExternalInterfaceName (Node node, String extNetwork) {
+        String phyIf = null;
+        String providerMaps = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
+                configurationService.getProviderMappingsKey());
+        if (providerMaps != null) {
+            for (String map : providerMaps.split(",")) {
+                String[] pair = map.split(":");
+                if (pair[0].equals(extNetwork)) {
+                    phyIf = pair[1];
+                    break;
+                }
+            }
+        }
+        if (phyIf == null) {
+            LOG.error("External interface not found for Node: {}, Network {}",
+                    node, extNetwork);
+        }
+        else {
+            LOG.info("External interface found for Node: {}, Network {} is {}",node,extNetwork,phyIf);
+        }
+        return phyIf;
+    }
+
+
 
     @Override
     public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
@@ -377,8 +409,15 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 LOG.error("Add Port {} to Bridge {} failed", portNameExt, brExt);
                 return false;
             }
+            String extNetName = getExternalInterfaceName(extBridgeNode, brExt);
+            if ( extNetName != null) {
+                if (!addPortToBridge(extBridgeNode, brExt, extNetName)) {
+                    LOG.error("Add External Port {} to Bridge {} failed", extNetName, brExt);
+                    return false;
+                }
+            LOG.info("Add External Port {} to Ext Bridge {} success", extNetName, brExt);
+            }
         }
-
         /* For vlan network types add physical port to br-int. */
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             String phyNetName = this.getPhysicalInterfaceName(bridgeNode, network.getProviderPhysicalNetwork());
@@ -388,7 +427,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             }
         }
 
-        LOG.debug("createBridges: node: {}, status: success", bridgeNode);
+        LOG.info("createBridges: node: {}, status: success", bridgeNode);
         return true;
     }
 
@@ -447,7 +486,11 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         boolean rv = true;
         if ((!southbound.isBridgeOnOvsdbNode(ovsdbNode, bridgeName)) ||
                 (southbound.getBridgeFromConfig(ovsdbNode, bridgeName) == null)) {
-            rv = southbound.addBridge(ovsdbNode, bridgeName, getControllerTarget(ovsdbNode));
+            Class<? extends DatapathTypeBase> dpType = null;
+            if (configurationService.isUserSpaceEnabled()) {
+                dpType = DatapathTypeNetdev.class;
+            }
+            rv = southbound.addBridge(ovsdbNode, bridgeName, getControllersFromOvsdbNode(ovsdbNode), dpType);
         }
         return rv;
     }
@@ -492,42 +535,70 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return openFlowPort;
     }
 
-    private String getControllerTarget(Node node) {
-        String setControllerStr = null;
-        short openflowPort = Constants.OPENFLOW_PORT;
-        //Look at user configuration.
-        //TODO: In case we move to config subsystem to expose these user facing parameter,
-        // we will have to modify this code.
+    private List<String> getControllersFromOvsdbNode(Node node) {
+        List<String> controllersStr = new ArrayList<>();
 
         String controllerIpStr = getControllerIPAddress();
-
-        if(controllerIpStr == null){
-            // Check if ovsdb node has connection info
+        if (controllerIpStr != null) {
+            // If codepath makes it here, the ip address to be used was explicitly provided.
+            // Being so, also fetch openflowPort provided via ConfigProperties.
+            controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                    + ":" + controllerIpStr + ":" + getControllerOFPort());
+        } else {
+            // Check if ovsdb node has manager entries
             OvsdbNodeAugmentation ovsdbNodeAugmentation = southbound.extractOvsdbNode(node);
             if (ovsdbNodeAugmentation != null) {
-                ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-                if(connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                    controllerIpStr = new String(connectionInfo.getLocalIp().getValue());
-                }else{
-                    LOG.warn("Ovsdb Node does not contains connection info : {}", node);
+                List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
+                if (managerEntries != null && !managerEntries.isEmpty()) {
+                    for (ManagerEntry managerEntry : managerEntries) {
+                        if (managerEntry == null || managerEntry.getTarget() == null) {
+                            continue;
+                        }
+                        String[] tokens = managerEntry.getTarget().getValue().split(":");
+                        if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
+                            controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                                    + ":" + tokens[1] + ":" + getControllerOFPort());
+                        } else if (tokens[0].equalsIgnoreCase("ptcp")) {
+                            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
+                                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
+                            } else {
+                                LOG.warn("Ovsdb Node does not contain connection info: {}", node);
+                            }
+                        } else {
+                            LOG.trace("Skipping manager entry {} for node {}",
+                                    managerEntry.getTarget(), node.getNodeId().getValue());
+                        }
+                    }
+                } else {
+                    LOG.warn("Ovsdb Node does not contain manager entries : {}", node);
                 }
             }
-        }else {
-            openflowPort = getControllerOFPort();
         }
 
-        if(controllerIpStr == null) {
-            // Neither user provided ip nor ovsdb node has controller ip, Lets use local machine ip address
+        if (controllersStr.isEmpty()) {
+            // Neither user provided ip nor ovsdb node has manager entries. Lets use local machine ip address.
             LOG.debug("Use local machine ip address as a OpenFlow Controller ip address");
             controllerIpStr = getLocalControllerHostIpAddress();
+            if (controllerIpStr != null) {
+                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
+                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
+            }
         }
-        if(controllerIpStr != null){
-            LOG.debug("Targe OpenFlow Controller found : {}", controllerIpStr);
-            setControllerStr = Constants.OPENFLOW_CONNECTION_PROTOCOL + ":" + controllerIpStr + ":" + openflowPort;
-        }else {
+
+        if (controllersStr.isEmpty()) {
             LOG.warn("Failed to determine OpenFlow controller ip address");
+        } else if (LOG.isDebugEnabled()) {
+            controllerIpStr = "";
+            for (String currControllerIpStr : controllersStr) {
+                controllerIpStr += " " + currControllerIpStr;
+            }
+            LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(), controllerIpStr);
         }
-        return setControllerStr;
+
+        return controllersStr;
     }
 
     private String getLocalControllerHostIpAddress() {
@@ -551,7 +622,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         configurationService =
                 (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
         networkingProviderManager =

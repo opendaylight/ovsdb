@@ -12,11 +12,82 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.neutron.spi.*;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
-import org.opendaylight.ovsdb.openstack.netvirt.impl.*;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityGroupCacheManger;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NodeCacheManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.OvsdbInventoryServiceImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityGroupCacheManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SouthboundImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFirewallInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFirewallPolicyInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFirewallRuleInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronFloatingIPInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerHealthMonitorInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerListenerInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerPoolInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronLoadBalancerPoolMemberInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronNetworkInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronPortInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronRouterInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronSecurityGroupInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronSecurityRuleInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl.NeutronSubnetInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallPolicyAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFirewallRuleAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFloatingIPAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronLoadBalancerAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronLoadBalancerPoolAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronLoadBalancerPoolMemberAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronNetworkAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronPortAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronRouterAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityGroupAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSecurityRuleAware;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSubnetAware;
+import org.opendaylight.ovsdb.utils.neutron.utils.NeutronModelsDataStoreHelper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -27,8 +98,8 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
-    private List<ServiceRegistration<?>> registrations = new ArrayList<>();
-    private List<Object> services = new ArrayList<>();
+    private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<>();
+    private List<Pair<Object, ServiceRegistration>> servicesAndRegistrations = new ArrayList<>();
     private ProviderContext providerContext;
 
     public ConfigActivator(ProviderContext providerContext) {
@@ -38,6 +109,7 @@ public class ConfigActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         LOG.info("ConfigActivator start:");
+        registerCRUDServiceProviders(context, this.providerContext);
 
         ConfigurationServiceImpl configurationService = new ConfigurationServiceImpl();
         registerService(context, new String[] {ConfigurationService.class.getName()},
@@ -100,6 +172,13 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
+        final SecurityGroupCacheManger securityGroupCacheManger = new SecurityGroupCacheManagerImpl();
+        registerService(context,
+                        new String[]{SecurityGroupCacheManger.class.getName()}, null, securityGroupCacheManger);
+
+        registerService(context,
+                new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
+
         FWaasHandler fWaasHandler = new FWaasHandler();
         registerAbstractHandlerService(context,
                 new Class[] {INeutronFirewallAware.class, INeutronFirewallRuleAware.class, INeutronFirewallPolicyAware.class},
@@ -113,7 +192,8 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{EventDispatcher.class.getName()}, null, eventDispatcher);
 
-        final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter();
+        final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter(
+                new NeutronModelsDataStoreHelper(this.providerContext.getSALService(DataBroker.class)));
         registerService(context,
                 new String[]{NeutronL3Adapter.class.getName()}, null, neutronL3Adapter);
 
@@ -134,10 +214,18 @@ public class ConfigActivator implements BundleActivator {
                 new String[] {OvsdbInventoryService.class.getName()}, null, ovsdbInventoryService);
 
         // Call .setDependencies() starting with the last service registered
-        for (int i = services.size() - 1; i >= 0; i--) {
-            Object service = services.get(i);
+        for (int i = servicesAndRegistrations.size() - 1; i >= 0; i--) {
+            Pair<Object, ServiceRegistration> serviceAndRegistration = servicesAndRegistrations.get(i);
+            Object service = serviceAndRegistration.getLeft();
+            ServiceRegistration<?> serviceRegistration = serviceAndRegistration.getRight();
+            LOG.info("Setting dependencies on service {}/{}, {}", i, servicesAndRegistrations.size(),
+                    service.getClass());
             if (service instanceof ConfigInterface) {
-                ((ConfigInterface) service).setDependencies(context, null);
+                ((ConfigInterface) service).setDependencies(
+                        serviceRegistration != null ? serviceRegistration.getReference() : null);
+                LOG.info("Dependencies set");
+            } else {
+                LOG.warn("Service isn't a ConfigInterface");
             }
         }
 
@@ -150,6 +238,7 @@ public class ConfigActivator implements BundleActivator {
                 securityServices, neutronL3Adapter);
         trackService(context, INeutronPortCRUD.class, tenantNetworkManager, lBaaSHandler, lBaaSPoolHandler,
                 lBaaSPoolMemberHandler, securityServices, neutronL3Adapter);
+        trackService(context, INeutronFloatingIPCRUD.class, neutronL3Adapter);
         trackService(context, INeutronLoadBalancerCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
         trackService(context, INeutronLoadBalancerPoolCRUD.class, lBaaSHandler, lBaaSPoolMemberHandler);
         trackService(context, LoadBalancerProvider.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
@@ -159,9 +248,31 @@ public class ConfigActivator implements BundleActivator {
         trackService(context, RoutingProvider.class, neutronL3Adapter);
         trackService(context, L3ForwardingProvider.class, neutronL3Adapter);
         trackService(context, GatewayMacResolver.class, neutronL3Adapter);
+        trackService(context, IngressAclProvider.class, securityServices);
+        trackService(context, EgressAclProvider.class, securityServices);
 
         // We no longer need to track the services, avoid keeping references around
-        services.clear();
+        servicesAndRegistrations.clear();
+    }
+
+    private void registerCRUDServiceProviders(BundleContext context,
+            ProviderContext providerContext) {
+        LOG.debug("Registering CRUD service providers");
+        NeutronRouterInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronPortInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronSubnetInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronNetworkInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronSecurityGroupInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronSecurityRuleInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFirewallInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFirewallPolicyInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFirewallRuleInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerPoolInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerListenerInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerHealthMonitorInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronLoadBalancerPoolMemberInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
+        NeutronFloatingIPInterface.registerNewInterface(context, providerContext, translatorCRUDRegistrations);
     }
 
     private void trackService(BundleContext context, final Class<?> clazz, final ConfigInterface... dependents) {
@@ -204,11 +315,11 @@ public class ConfigActivator implements BundleActivator {
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,
                                                    Dictionary<String, Object> properties, Object impl) {
-        services.add(impl);
-        ServiceRegistration<?> serviceRegistration = bundleContext.registerService(interfaces, impl, properties);
-        if (serviceRegistration != null) {
-            registrations.add(serviceRegistration);
+        ServiceRegistration serviceRegistration = bundleContext.registerService(interfaces, impl, properties);
+        if (serviceRegistration == null) {
+            LOG.warn("Service registration for {} failed to return a ServiceRegistration instance", impl.getClass());
         }
+        servicesAndRegistrations.add(Pair.of(impl, serviceRegistration));
         return serviceRegistration;
     }
 }

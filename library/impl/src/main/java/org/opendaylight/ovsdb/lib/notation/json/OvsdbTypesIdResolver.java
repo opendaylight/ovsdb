@@ -10,13 +10,13 @@ package org.opendaylight.ovsdb.lib.notation.json;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
-public  class OvsdbTypesIdResolver implements TypeIdResolver {
+public  class OvsdbTypesIdResolver extends TypeIdResolverBase {
 
     private JavaType baseType;
 

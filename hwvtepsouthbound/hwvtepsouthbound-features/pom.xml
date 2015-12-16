@@ -14,7 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>hwvtepsouthbound-features</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
@@ -103,6 +103,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>hwvtepsouthbound-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>library-features</artifactId>
+      <type>xml</type>
+      <classifier>features</classifier>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

@@ -34,8 +34,9 @@ public class OvsdbSchemaContants {
         private final String parentTableName;
         private final String columnNameInParentTable;
 
-        private OVSDBSCHEMATABLES(final String tableName, final String parentTableName,
-                                  final String columnNameInParentTable) {
+        OVSDBSCHEMATABLES(
+                final String tableName, final String parentTableName,
+                final String columnNameInParentTable) {
             this.tableName = tableName;
             this.parentTableName = parentTableName;
             this.columnNameInParentTable = columnNameInParentTable;

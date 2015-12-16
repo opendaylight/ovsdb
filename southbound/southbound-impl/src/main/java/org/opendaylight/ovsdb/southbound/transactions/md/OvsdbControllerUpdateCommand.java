@@ -184,9 +184,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                 .child(Node.class,nodeKey)
                 .build();
 
-        InstanceIdentifier<ControllerEntry> iid = bridgeIid
+        return bridgeIid
                 .augmentation(OvsdbBridgeAugmentation.class)
                 .child(ControllerEntry.class, controllerEntry.getKey());
-        return iid;
     }
 }

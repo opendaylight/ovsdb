@@ -61,15 +61,16 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         return serialize(normalizedIid);
     }
 
+    public YangInstanceIdentifier getYangInstanceIdentifier(InstanceIdentifier<?> iid) {
+        return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
+    }
+
     public  InstanceIdentifier<?> bindingDeserializer(String iidString) throws DeserializationException {
         YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
-        InstanceIdentifier<?> iid = bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
-        return iid;
+        return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
     }
 
     public InstanceIdentifier<?> bindingDeserializer(YangInstanceIdentifier yangIID) {
-        InstanceIdentifier<?> iid = bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
-        return iid;
+        return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
     }
-
 }

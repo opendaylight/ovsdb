@@ -67,7 +67,7 @@ public class TableUpdate<E extends TableSchema<E>> {
     }
 
     public void addRow(UUID uuid, Row<E> oldRow, Row<E> newRow) {
-        rows.put(uuid, new RowUpdate<E>(uuid, oldRow, newRow));
+        rows.put(uuid, new RowUpdate<>(uuid, oldRow, newRow));
     }
 
     public Row<E> getOld(UUID uuid) {

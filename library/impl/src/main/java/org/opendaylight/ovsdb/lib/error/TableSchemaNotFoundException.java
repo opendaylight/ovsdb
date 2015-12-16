@@ -22,8 +22,7 @@ public class TableSchemaNotFoundException extends RuntimeException {
     }
 
     public static String createMessage(String tableName, String schemaName) {
-        String message = "Unable to locate TableSchema for " +  tableName + " in " + schemaName;
-        return message;
+        return "Unable to locate TableSchema for " +  tableName + " in " + schemaName;
     }
 
 }

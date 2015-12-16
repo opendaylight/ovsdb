@@ -44,72 +44,35 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
 
   <properties>
-    <networkconfig.neutron.version>0.6.0-SNAPSHOT</networkconfig.neutron.version>
-    <openflowjava-nicira.version>0.2.0-SNAPSHOT</openflowjava-nicira.version>
-    <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
-    <ovsdb.utils.config.version>1.2.1-SNAPSHOT</ovsdb.utils.config.version>
-    <ovsdb.utils.mdsal.openflow.version>1.2.1-SNAPSHOT</ovsdb.utils.mdsal.openflow.version>
-    <ovsdb.utils.servicehelper.version>1.2.1-SNAPSHOT</ovsdb.utils.servicehelper.version>
-    <powermock.version>1.5.2</powermock.version>
-    <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
     <liblldp.version>0.10.0-SNAPSHOT</liblldp.version>
-    <root.directory>${env.PWD}</root.directory>
-    <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
+    <powermock.version>1.5.2</powermock.version>
+    <sonar.jacoco.itReportPath>../net-virt-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.opendaylight.mdsal</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.mdsal.model</groupId>
-        <artifactId>mdsal-model-artifacts</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
+    <!-- project specific dependencies -->
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>openstack.net-virt</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.mdsal-openflow</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>southbound-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.servicehelper</artifactId>
+      <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-inventory</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.neutron</groupId>
-      <artifactId>neutron-spi</artifactId>
-      <version>${networkconfig.neutron.version}</version>
-    </dependency>
+    <!-- openflowplugin dependencies -->
     <dependency>
       <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-base</artifactId>
@@ -123,7 +86,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowjava-extension-nicira</artifactId>
-      <version>${openflowjava-nicira.version}</version>
+      <version>${openflowplugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
@@ -131,19 +94,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${openflowplugin.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>openstack.net-virt</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin-api</artifactId>
+      <version>${openflowplugin.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>utils.mdsal-openflow</artifactId>
-      <version>${ovsdb.utils.mdsal.openflow.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>yang-binding</artifactId>
-    </dependency>
+    <!-- mdsal dependencies -->
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-inet-types</artifactId>
@@ -157,37 +112,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>utils.servicehelper</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>concepts</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-topology</artifactId>
     </dependency>
+    <!-- controller dependencies -->
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>southbound-api</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>liblldp</artifactId>
+      <version>${liblldp.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>openflowplugin-api</artifactId>
-      <version>${openflowplugin.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-       <groupId>org.opendaylight.controller</groupId>
-       <artifactId>liblldp</artifactId>
-       <version>${liblldp.version}</version>
-     </dependency>
+    <!-- external dependencies -->
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
@@ -195,13 +129,23 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-buffer</artifactId>
-      <!-- Should be in a parent POM -->
-      <version>4.0.26.Final</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.sonar-plugins.java</groupId>
+      <artifactId>sonar-jacoco-listeners</artifactId>
+      <version>${sonar-jacoco-listeners.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- testing dependencies -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -242,17 +186,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.sonar-plugins.java</groupId>
-      <artifactId>sonar-jacoco-listeners</artifactId>
-      <version>${sonar-jacoco-listeners.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -265,87 +198,27 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <instructions>
             <Embed-Dependency>utils.config,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
+            <Export-Package>
+              org.opendaylight.ovsdb.openstack.netvirt.providers,
+              org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13
+            </Export-Package>
           </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <!-- Specific to generate mapping between tests and covered code -->
-          <!--<argLine>${jacoco.agent.it.arg}</argLine>-->
-          <properties>
-          <property>
-          <name>listener</name>
-          <value>org.sonar.java.jacoco.JUnitListener</value>
-          </property>
-          </properties>
-          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
-          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!-- Specific to generate mapping between tests and covered code -->
-          <!--<argLine>${jacoco.agent.ut.arg}</argLine>-->
+          <excludes>
+            <exclude>**/services/*Test.java</exclude>
+          </excludes>
           <properties>
             <property>
               <name>listener</name>
               <value>org.sonar.java.jacoco.JUnitListener</value>
             </property>
           </properties>
-          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
-          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>prepare-ut-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.reportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>prepare-it-agent</id>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <append>true</append>
-              <destFile>${sonar.jacoco.itReportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.reportPath}</dataFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report-integration</id>
-            <goals>
-              <goal>report-integration</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

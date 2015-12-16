@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -32,6 +33,11 @@ import com.google.common.collect.Maps;
 
 public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListener, PipelineOrchestrator {
     private static final Logger LOG = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
+
+    public List<Service> getStaticPipeline() {
+        return staticPipeline;
+    }
+
     private List<Service> staticPipeline = Lists.newArrayList(
             Service.CLASSIFIER,
             Service.ARP_RESPONDER,
@@ -45,6 +51,11 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
             Service.OUTBOUND_NAT,
             Service.L2_FORWARDING
     );
+
+    public Map<Service, AbstractServiceInstance> getServiceRegistry() {
+        return serviceRegistry;
+    }
+
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
     private volatile BlockingQueue<Node> queue;
     private ExecutorService eventHandler;
@@ -61,6 +72,23 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
         Service service = (Service)ref.getProperty(AbstractServiceInstance.SERVICE_PROPERTY);
         LOG.info("registerService {} - {}", serviceInstance, service);
         serviceRegistry.put(service, serviceInstance);
+        // insert the service if not already there. The list is ordered based of table ID.
+        if (!staticPipeline.contains(service) && !isTableInPipeline(service.getTable())) {
+            staticPipeline.add(service);
+            Collections.sort(staticPipeline, Service.insertComparator);
+        }
+        LOG.info("registerService: {}", staticPipeline);
+    }
+
+    private boolean isTableInPipeline (short tableId) {
+        boolean found = false;
+        for (Service service : staticPipeline) {
+            if (service.getTable() == tableId) {
+                found = true;
+                break;
+            }
+        }
+        return found;
     }
 
     public void unregisterService(final ServiceReference ref) {

@@ -1,0 +1,123 @@
+<!--
+ * Copyright (c) 2015 Inocybe Technologies and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<div id="ovsdb_contain">
+  <!--
+<div class="row">
+  <div class="col-md-2 form-inline">
+    <label class="switch-light well">
+      <input type="checkbox" ng-model="opt.layer" ng-change="toggleLayer();">
+      <span>
+        Layer 3
+        <span>Off</span>
+        <span>On</span>
+      </span>
+
+      <a  class="btn btn-orange"></a>
+    </label>
+  </div>
+  <div class="col-md-2 form-inline">
+    <label class="switch-light well">
+      <input type="checkbox" ng-model="opt.underlay" ng-change="toggleUnderlay();">
+      <span>
+        Underlay
+        <span>Off</span>
+        <span>On</span>
+      </span>
+
+      <a class="btn btn-orange"></a>
+    </label>
+  </div>
+</div>
+-->
+  <div class="row">
+    <div class="col-md-12">
+      <div id="tabs">
+        <ul class="nav nav-tabs tabsHeader" style="margin-bottom:15px;">
+          <li><a href="#logical_view">Logical View</a></li>
+          <li><a href="#2d_view">2D View</a></li>
+        </ul>
+        <div id="logical_view" style="background-color:white; position:relative;">
+          <div id="l_graph" style="position:relative; height:580px;" logical-graph></div>
+
+          <div id="lDialog" class="ovsDialog arrow-left">
+            <div style="height:10px;">
+              <i data-ng-click="hideLogicalDialog()" class="window-icon icon-remove"></i>
+            </div>
+            <div class="window_content">
+              <ul class="nav nav-tabs tabsHeader">
+                <li ng-repeat="tab in lDialogData.tabs track by $index">
+                  <a href="#lDialogTab_{{$index}}" class="active">{{tab}}</a>
+                </li>
+              </ul>
+              <div ng-repeat="tabContaint in lDialogData.containts track by $index" id="lDialogTab_{{$index}}">
+                <table ng-if="!tabContaint.hasHeader" class="table table-bordered" style="margin-bottom:0;">
+                  <tr ng-repeat="info in tabContaint.datas track by $index">
+                    <td> {{info.key}} </td>
+                    <td> {{ info.value }} </td>
+                  </tr>
+                </table>
+                <table ng-if="tabContaint.hasHeader" class="table table-bordered" style="margin-bottom:0;">
+                  <tr>
+                    <th ng-repeat=" h in tabContaint.header track by $index">{{h}}</th>
+                  </tr>
+                  <tr ng-repeat="item in tabContaint.datas track by $index">
+                    <td ng-repeat="value in item track by $index"> {{ value }} </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div id="2d_view">
+          <div class="row">
+            <div class="col-md-4 col-md-offset-1 form-inline">
+              <span>Tenant</span>
+              <select id="tenantSelect" ng-model="selectedTenant" ng-change="fiterByTenant()" ng-options="tenant.name for tenant in tenants track by tenant.id">
+                <option value="">---All---</option>
+              </select>
+            </div>
+            <div class="col-md-4 form-inline">
+              <span>Subnet</span>
+              <select id="tagPicker" multiple="multiple" ng-model="selectedSubnet" ng-change="filterBySubnet()" ng-options="subnet.name for subnet in subnets track by subnet.id">
+              </select>
+            </div>
+          </div>
+          <div id="nv_graph" style="position:relative; height:580px;" physical-graph></div>
+          <div id="pDialog" class="ovsDialog arrow-left">
+            <div style="height:10px">
+              <i data-ng-click="hidePhysicalDialog()" class="window-icon icon-remove"></i>
+            </div>
+            <div class="window_content">
+              <ul class="nav nav-tabs tabsHeader">
+                <li ng-repeat="tab in pDialogData.tabs track by $index">
+                  <a href="#pDialogTab_{{$index}}" class="active">{{tab}}</a>
+                </li>
+              </ul>
+              <div ng-repeat="tabContaint in pDialogData.containts track by $index" id="pDialogTab_{{$index}}">
+                <table ng-if="!tabContaint.hasHeader" class="table table-bordered" style="margin-bottom:0;">
+                  <tr ng-repeat="info in tabContaint.datas track by $index">
+                    <td> {{info.key}} </td>
+                    <td> {{ info.value }} </td>
+                  </tr>
+                </table>
+                <table ng-if="tabContaint.hasHeader" class="table table-bordered" style="margin-bottom:0;">
+                  <tr>
+                    <th ng-repeat=" h in tabContaint.header track by $index">{{h}}</th>
+                  </tr>
+                  <tr ng-repeat="item in tabContaint.datas track by $index">
+                    <td ng-repeat="value in item track by $index"> {{ value }} </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- tab -->
+    </div>

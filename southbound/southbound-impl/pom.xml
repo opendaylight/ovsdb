@@ -44,9 +44,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <powermock.version>1.5.2</powermock.version>
+    <sonar.jacoco.itReportPath>../southbound-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
   <dependencies>
+    <!-- project specific dependencies -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>southbound-api</artifactId>
@@ -58,18 +60,27 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>schema.openvswitch</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-core-api</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
+    <!-- external dependencies -->
+    <dependency>
+      <groupId>org.codehaus.sonar-plugins.java</groupId>
+      <artifactId>sonar-jacoco-listeners</artifactId>
+      <version>${sonar-jacoco-listeners.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- testing dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -95,8 +106,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Private-Package>!org.opendaylight.ovsdb.lib.osgi,org.opendaylight.ovsdb.lib.*,org.opendaylight.ovsdb.schema.openvswitch</Private-Package>
-            <Export-Package>org.opendaylight.ovsdb.southbound.*,org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southbound.impl.rev141210</Export-Package>
+            <Export-Package>
+              org.opendaylight.ovsdb.southbound,
+              org.opendaylight.ovsdb.southbound.*,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southbound.impl.rev141210.*</Export-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -104,57 +117,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
-          <configLocation>
-            ${project.basedir}/../../commons/parent/src/main/resources/ovsdb_checks.xml
-          </configLocation>
           <failsOnError>true</failsOnError>
-          <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
-          <excludes>**/yang/</excludes>
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>prepare-ut-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.reportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>prepare-it-agent</id>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.itReportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.reportPath}</dataFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report-integration</id>
-            <goals>
-              <goal>report-integration</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <properties>
+            <property>
+              <name>listener</name>
+              <value>org.sonar.java.jacoco.JUnitListener</value>
+            </property>
+          </properties>
+        </configuration>
       </plugin>
     </plugins>
   </build>
-
 </project>

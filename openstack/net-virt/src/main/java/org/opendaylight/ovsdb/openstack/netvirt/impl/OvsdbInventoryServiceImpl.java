@@ -8,7 +8,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.collect.Sets;
+
 import java.util.Set;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -16,6 +18,15 @@ import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronFloatingIPChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronNetworkChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronPortChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronRouterChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronSecurityRuleDataChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronSubnetChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronLoadBalancerPoolChangeListener;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronLoadBalancerPoolMemberChangeListener;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -23,7 +34,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +72,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     @Override
     public void providersReady() {
         ovsdbDataChangeListener.start();
+        initializeNeutronModelsDataChangeListeners(dataBroker);
         initializeNetvirtTopology();
     }
 
@@ -70,7 +81,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {}
+    public void setDependencies(ServiceReference serviceReference) {}
 
     @Override
     public void setDependencies(Object impl) {}
@@ -85,4 +96,17 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
             LOG.error("Error initializing netvirt topology");
         }
     }
+
+    private void initializeNeutronModelsDataChangeListeners(
+            DataBroker db) {
+        new NeutronNetworkChangeListener(db);
+        new NeutronSubnetChangeListener(db);
+        new NeutronPortChangeListener(db);
+        new NeutronRouterChangeListener(db);
+        new NeutronFloatingIPChangeListener(db);
+        new NeutronLoadBalancerPoolChangeListener(db);
+        new NeutronLoadBalancerPoolMemberChangeListener(db);
+        new NeutronSecurityRuleDataChangeListener(db);
+    }
+
 }

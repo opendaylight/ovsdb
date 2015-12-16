@@ -11,9 +11,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import org.opendaylight.neutron.spi.INeutronNetworkAware;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronNetworkAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
@@ -24,7 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +55,8 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
      */
     @Override
     public int canCreateNetwork(NeutronNetwork network) {
-        if (network.isShared()) {
-            LOG.error(" Network shared attribute not supported ");
+        if (network.isShared() && !network.getRouterExternal()) {
+            LOG.error("Shared attribute is only supported on external networks");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
@@ -89,8 +89,8 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     @Override
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
-        if (delta.isShared()) {
-            LOG.error(" Network shared attribute not supported ");
+        if (delta.isShared() && !delta.getRouterExternal()) {
+            LOG.error("Shared attribute is only supported on external networks");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
@@ -194,7 +194,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         tenantNetworkManager =
                 (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
         bridgeConfigurationManager =
@@ -207,8 +207,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(INeutronNetworkAware.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
     }
 
     @Override

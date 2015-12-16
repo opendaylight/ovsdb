@@ -40,6 +40,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
 
     @Override
     public void close() throws Exception {
+        LOG.info("NetvirtProvidersProvider closed");
         activator.stop(bundleContext);
     }
 

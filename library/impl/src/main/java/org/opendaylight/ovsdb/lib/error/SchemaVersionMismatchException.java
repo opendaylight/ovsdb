@@ -24,19 +24,8 @@ public class SchemaVersionMismatchException extends RuntimeException {
         super(message, cause);
     }
 
-    public static String createMessage(Version currentVersion, Version requiredVersion) {
-        String message =
-                "The schema version used to access this Table/Column does not match the required version.\n"
-                + "Current Version: " + currentVersion.toString() + "\n";
-
-        if (currentVersion.compareTo(requiredVersion) > 1) {
-            message += "Removed in Version: " + requiredVersion.toString();
-
-        } else {
-            message += "Added in Version: " + requiredVersion.toString();
-
-        }
-
-        return message;
+    public SchemaVersionMismatchException(Version schemaVersion, Version fromVersion, Version untilVersion) {
+        this("The schema version used to access the table/column (" + schemaVersion + ") does not match the required " +
+                "version (from " + fromVersion + " to " + untilVersion + ")");
     }
 }

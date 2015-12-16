@@ -40,7 +40,7 @@ public class ArpFlowFactory {
      */
     public static EthernetMatch createEthernetMatch(MacAddress destinationMacAddress) {
         return new EthernetMatchBuilder().setEthernetType(
-                new EthernetTypeBuilder().setType(new EtherType(Long.valueOf(EtherTypes.ARP.intValue()))).build())
+                new EthernetTypeBuilder().setType(new EtherType((long) EtherTypes.ARP.intValue())).build())
             .setEthernetDestination(new EthernetDestinationBuilder().setAddress(destinationMacAddress).build())
             .build();
     }

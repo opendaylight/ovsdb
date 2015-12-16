@@ -15,13 +15,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>hwvtepsouthbound-karaf</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
   <properties>
-    <karaf.localFeature>odl-hwvtepsouthbound-ui</karaf.localFeature>
+    <karaf.localFeature>odl-ovsdb-hwvtepsouthbound-ui</karaf.localFeature>
   </properties>
   <dependencyManagement>
     <dependencies>

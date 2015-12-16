@@ -9,7 +9,7 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.library
 
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.ovsdb.lib.impl.LibraryProvider;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.osgi.framework.BundleContext;
 
 import com.google.common.base.Preconditions;
@@ -33,9 +33,7 @@ public class LibraryModule extends org.opendaylight.yang.gen.v1.urn.opendaylight
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        LibraryProvider provider = new LibraryProvider(bundleContext);
-        getBrokerDependency().registerProvider(provider);
-        return provider;
+        return new OvsdbConnectionService();
     }
 
     public void setBundleContext(BundleContext bundleContext) {

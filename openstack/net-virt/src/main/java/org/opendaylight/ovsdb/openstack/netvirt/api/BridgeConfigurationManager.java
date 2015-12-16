@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import java.util.List;
@@ -74,7 +74,7 @@ public interface BridgeConfigurationManager {
      * For OpenFlow 1.3 the Integration Bridge is required and must have a physical device connected.
      * @param bridgeNode the {@link Node} that represents bridge
      * @param ovsdbNode the {@link Node} where the bridge is configured
-     * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
+     * @param network the {@link org.opendaylight.ovsdb.openstack.netvirt.translator}
      * @return True or False
      */
     boolean isNodeVlanReady(Node bridgeNode, Node ovsdbNode, NeutronNetwork network);
@@ -92,7 +92,7 @@ public interface BridgeConfigurationManager {
      * Returns true if the bridges required for the provider network type are created
      * If the bridges are not created, this method will attempt to create them
      * @param node the {@link Node} to query
-     * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
+     * @param network the {@link org.opendaylight.ovsdb.openstack.netvirt.translator}
      * @return True or False
      */
     boolean createLocalNetwork(Node node, NeutronNetwork network);
@@ -105,9 +105,9 @@ public interface BridgeConfigurationManager {
 
     /**
      * Returns the physical interface mapped to the given neutron physical network.
-     * @param node
-     * @param physicalNetwork
-     * @return
+     * @param node the {@link Node} to query
+     * @param physicalNetwork neutron physical network
+     * @return name of the physical interface
      */
     String getPhysicalInterfaceName(Node node, String physicalNetwork);
 
@@ -117,4 +117,14 @@ public interface BridgeConfigurationManager {
      * @return a List in the format {eth1, eth2} given bridge_mappings=physnet1:eth1,physnet2:eth2
      */
     List<String> getAllPhysicalInterfaceNames(Node node);
+
+   /*
+     * Return br-ex interface configured in the bridge_mappings.
+     * Return null if br-ex is not configured in bridge_mappings.
+     * @param node the {@link Node} to query
+     * @param externalNetwork
+     * @return the interface as a string like eth3 given bridge_mappings=br-ex:eth3
+   */
+     String getExternalInterfaceName (Node node, String externalNetwork);
+
 }

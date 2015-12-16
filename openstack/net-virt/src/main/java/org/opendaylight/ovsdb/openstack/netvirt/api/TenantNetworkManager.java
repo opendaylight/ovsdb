@@ -8,8 +8,8 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -55,16 +55,22 @@ public interface TenantNetworkManager {
 
     /**
      * Get the Neutron Network ID for a given Segmentation ID
+     * @param segmentationId segmentation id of the neutron network
+     * @return Neutron network id associated with the given segmentation id
      */
     String getNetworkId(String segmentationId);
 
     /**
      * Network Created Callback
+     * @param node target node
+     * @param networkId Id of neutron network
+     * @return vlan assigned to the network
      */
     int networkCreated(Node node, String networkId);
 
     /**
      * Network Deleted Callback
+     * @param id Id of the neutron network
      */
     void networkDeleted(String id);
     NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation);

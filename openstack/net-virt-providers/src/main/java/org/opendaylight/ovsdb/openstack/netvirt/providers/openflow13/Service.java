@@ -8,11 +8,14 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import java.util.Comparator;
+
 public enum Service {
 
     CLASSIFIER ((short) 0, "Classifier"),
     GATEWAY_RESOLVER((short) 0, "External Network Gateway Resolver"),
     DIRECTOR ((short) 10, "Director"),
+    SFC_CLASSIFIER ((short) 10, "SFC Classifier"),
     ARP_RESPONDER ((short) 20, "Distributed ARP Responder"),
     INBOUND_NAT ((short) 30, "DNAT for inbound floating-ip traffic"),
     EGRESS_ACL ((short) 40, "Egress Acces-control"),
@@ -27,7 +30,7 @@ public enum Service {
     short table;
     String description;
 
-    private Service (short table, String description)  {
+    Service(short table, String description)  {
         this.table = table;
         this.description = description;
     }
@@ -39,4 +42,12 @@ public enum Service {
     public String getDescription() {
         return description;
     }
+
+    public static Comparator<Service> insertComparator = new Comparator<Service>() {
+
+        @Override
+        public int compare(Service service1, Service service2) {
+            return service1.getTable() - service2.getTable();
+        }
+    };
 }

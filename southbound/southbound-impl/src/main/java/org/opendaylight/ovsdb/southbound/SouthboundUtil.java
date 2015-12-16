@@ -10,14 +10,17 @@ package org.opendaylight.ovsdb.southbound;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -40,6 +43,10 @@ public class SouthboundUtil {
 
     public static void setInstanceIdentifierCodec(InstanceIdentifierCodec iidc) {
         instanceIdentifierCodec = iidc;
+    }
+
+    public static InstanceIdentifierCodec getInstanceIdentifierCodec() {
+        return instanceIdentifierCodec;
     }
 
     public static String serializeInstanceIdentifier(InstanceIdentifier<?> iid) {
@@ -110,6 +117,20 @@ public class SouthboundUtil {
         return node;
     }
 
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean deleteNode(
+            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
+        boolean result = false;
+        transaction.delete(LogicalDatastoreType.OPERATIONAL, connectionIid);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete {} ", connectionIid, e);
+        }
+        return result;
+    }
+
     private static String getLocalControllerHostIpAddress() {
         String ipaddress = null;
         try {
@@ -138,7 +159,7 @@ public class SouthboundUtil {
         ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
         LOG.info("connectionInfo: {}", connectionInfo);
         if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-            ipAddr = new String(connectionInfo.getLocalIp().getValue());
+            ipAddr = String.valueOf(connectionInfo.getLocalIp().getValue());
         }
         if (ipAddr == null) {
             ipAddr = getLocalControllerHostIpAddress();

@@ -22,52 +22,57 @@ import org.apache.commons.lang3.tuple.Pair;
 public interface ConfigurationService {
 
     /**
-     * Returns the name configured name of the Integration Bridge
+     * @return the name configured name of the Integration Bridge
      */
     String getIntegrationBridgeName();
 
     /**
      * Configures the name of the Integration Bridge
+     * @param integrationBridgeName name of integration bridge
      */
     void setIntegrationBridgeName(String integrationBridgeName);
 
     /**
-     * Returns the name configured name of the Network Bridge
+     * @return the name configured name of the Network Bridge
      */
     String getNetworkBridgeName();
 
     /**
      * Configures the name of the Network Bridge
+     * @param networkBridgeName Name of the network bridge
      */
     void setNetworkBridgeName(String networkBridgeName);
 
     /**
-     * Returns the name configured name of the ExternalBridge
+     * @return the name configured name of the ExternalBridge
      */
     String getExternalBridgeName();
 
     /**
      * Configures the name of the External Bridge
+     * @param externalBridgeName Name of external bridge
      */
     void setExternalBridgeName(String externalBridgeName);
 
     /**
-     * Returns the key used to access the Tunnel Endpoint configuration from Open vSwitch
+     * @return the key used to access the Tunnel Endpoint configuration from Open vSwitch
      */
     String getTunnelEndpointKey();
 
     /**
      * Sets the key used to access the Tunnel Endpoint configuration from Open vSwitch
+     * @param tunnelEndpointKey key of tunnel end point
      */
     void setTunnelEndpointKey(String tunnelEndpointKey);
 
     /**
-     * Returns a Map of patch port names where the key is a tuple of source bridge and destination bridge
+     * @return a Map of patch port names where the key is a tuple of source bridge and destination bridge
      */
     Map<Pair<String, String>, String> getPatchPortNames();
 
     /**
      * Sets the Map of source/destination bridges to patch port name
+     * @param patchPortNames Map of source/destination bridges to patch port name
      */
     void setPatchPortNames(Map<Pair<String, String>, String> patchPortNames);
 
@@ -80,22 +85,24 @@ public interface ConfigurationService {
     String getPatchPortName(Pair portTuple);
 
     /**
-     * Returns the key used to access the Tunnel Endpoint configuration from Open vSwitch
+     * @return the key used to access the Tunnel Endpoint configuration from Open vSwitch
      */
     String getProviderMappingsKey();
 
     /**
      * Sets the key used to access the Tunnel Endpoint configuration from Open vSwitch
+     * @param providerMappingsKey provide mapping key
      */
     void setProviderMappingsKey(String providerMappingsKey);
 
     /**
-     * Gets the default provider mapping
+     * @return Gets the default provider mapping
      */
     String getDefaultProviderMapping();
 
     /**
      * Sets the default provider mapping
+     * @param providerMapping provider mapping
      */
     void setDefaultProviderMapping(String providerMapping);
 
@@ -134,4 +141,6 @@ public interface ConfigurationService {
      * @return the MacAddress to use for the default gateway; or null if none is configured.
      */
     String getDefaultGatewayMacAddress(Node node);
+
+    boolean isUserSpaceEnabled();
 }

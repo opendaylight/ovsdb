@@ -146,10 +146,9 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
                 .child(Node.class,nodeKey)
                 .build();
 
-        InstanceIdentifier<ManagerEntry> iid = ovsdbNodeIid
+        return ovsdbNodeIid
                 .augmentation(OvsdbNodeAugmentation.class)
                 .child(ManagerEntry.class, managerEntry.getKey());
-        return iid;
     }
 
     private Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {

@@ -11,6 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <required-capabilities>
     <!--  <capability>urn:opendaylight:params:xml:ns:yang:hwvtepsouthbound:impl?module=hwvtepsouthbound-impl&amp;revision=2015-09-01</capability> -->
       <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:library:impl?module=library&amp;revision=2014-12-10</capability>
   </required-capabilities>
   <configuration>
 
@@ -23,6 +24,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>
           </broker>
+          <schema-service>
+            <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+            <name>yang-schema-service</name>
+          </schema-service>
+          <binding-normalized-node-serializer>
+            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-normalized-node-serializer</type>
+            <name>runtime-mapping-singleton</name>
+          </binding-normalized-node-serializer>
+          <clustering-entity-ownership-service>
+             <type xmlns:ns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:entity-ownership-service">ns:entity-ownership-service</type>
+             <name>entity-ownership-service</name>
+          </clustering-entity-ownership-service>
+          <connection-service>
+            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:library:impl">prefix:connection-service</type>
+            <name>connection-service</name>
+          </connection-service>
         </module>
       </modules>
     </data>

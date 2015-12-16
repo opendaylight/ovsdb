@@ -19,11 +19,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>hwvtepsouthbound-it</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <properties>
-    <skipITs>false</skipITs>
     <karaf.distro.groupId>org.opendaylight.ovsdb</karaf.distro.groupId>
     <karaf.distro.artifactId>hwvtepsouthbound-karaf</karaf.distro.artifactId>
     <karaf.distro.version>1.2.0-SNAPSHOT</karaf.distro.version>
@@ -38,4 +37,24 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <skipITs>true</skipITs>
+      </properties>
+    </profile>
+    <profile>
+      <id>integrationtest</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skipITs>false</skipITs>
+      </properties>
+    </profile>
+  </profiles>
 </project>

@@ -20,19 +20,12 @@ import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdk;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
@@ -70,9 +63,9 @@ import com.google.common.collect.ImmutableBiMap;
  */
 public class SouthboundImpl implements Southbound {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundImpl.class);
-    private DataBroker databroker = null;
+    private final DataBroker databroker;
     private static final String PATCH_PORT_TYPE = "patch";
-    private MdsalUtils mdsalUtils = null;
+    private final MdsalUtils mdsalUtils;
 
     /**
      * Class constructor setting the data broker.
@@ -128,6 +121,21 @@ public class SouthboundImpl implements Southbound {
         return ovsdbNodes;
     }
 
+    public List<Node> readOvsdbTopologyBridgeNodes() {
+        List<Node> ovsdbNodes = new ArrayList<>();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = MdsalHelper.createInstanceIdentifier();
+        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Node node : topology.getNode()) {
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+                if (ovsdbBridgeAugmentation != null) {
+                    ovsdbNodes.add(node);
+                }
+            }
+        }
+        return ovsdbNodes;
+    }
+
     public Node readOvsdbNode(Node bridgeNode) {
         Node ovsdbNode = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
@@ -165,10 +173,11 @@ public class SouthboundImpl implements Southbound {
         return value;
     }
 
-    public boolean addBridge(Node ovsdbNode, String bridgeName, String target) {
-        boolean result = false;
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
+                             final Class<? extends DatapathTypeBase> dpType) {
+        boolean result;
 
-        LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
+        LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -177,12 +186,22 @@ public class SouthboundImpl implements Southbound {
             NodeId bridgeNodeId = MdsalHelper.createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(target));
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(controllersStr));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
                     MdsalHelper.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
+            BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
+            bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(MdsalHelper.DISABLE_IN_BAND);
+            bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
+            bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(MdsalHelper.DISABLE_IN_BAND);
+            List<BridgeOtherConfigs> bridgeOtherConfigsList = new ArrayList<>();
+            bridgeOtherConfigsList.add(bridgeOtherConfigsBuilder.build());
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(bridgeOtherConfigsList);
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
+            if (dpType != null) {
+                ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
+            }
             if (isOvsdbNodeDpdk(ovsdbNode)) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(DatapathTypeNetdev.class);
             }
@@ -197,11 +216,10 @@ public class SouthboundImpl implements Southbound {
     }
 
     public boolean deleteBridge(Node ovsdbNode) {
-        boolean result = false;
         InstanceIdentifier<Node> bridgeIid =
                 MdsalHelper.createInstanceIdentifier(ovsdbNode.getNodeId());
 
-        result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
+        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
         LOG.info("deleteBridge node: {}, bridgeName: {} result : {}", ovsdbNode, ovsdbNode.getNodeId(),result);
         return result;
     }
@@ -224,6 +242,9 @@ public class SouthboundImpl implements Southbound {
         Node ovsdbNode = node;
         if (extractNodeAugmentation(ovsdbNode) == null) {
             ovsdbNode = readOvsdbNode(node);
+            if (ovsdbNode == null) {
+                return null;
+            }
         }
         Node bridgeNode = null;
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
@@ -236,15 +257,12 @@ public class SouthboundImpl implements Southbound {
     }
 
     public Node getBridgeNode(Node node, String bridgeName) {
-        Node bridgeNode = null;
         OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
         if (bridge != null && bridge.getBridgeName().getValue().equals(bridgeName)) {
-                bridgeNode = node;
+            return node;
         } else {
-            bridgeNode = readBridgeNode(node, bridgeName);
+            return readBridgeNode(node, bridgeName);
         }
-
-        return bridgeNode;
     }
 
     public String getBridgeUuid(Node node, String name) {
@@ -262,35 +280,24 @@ public class SouthboundImpl implements Southbound {
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private void setControllerForBridge(Node ovsdbNode, String bridgeName, String targetString) {
-        ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
-        if (connectionInfo != null) {
-            for (ControllerEntry controllerEntry: createControllerEntries(targetString)) {
-                InstanceIdentifier<ControllerEntry> iid =
-                        MdsalHelper.createInstanceIdentifier(ovsdbNode.getKey(), bridgeName)
-                                .augmentation(OvsdbBridgeAugmentation.class)
-                                .child(ControllerEntry.class, controllerEntry.getKey());
-
-                boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, iid, controllerEntry);
-                LOG.info("addController: result: {}", result);
+    private List<ControllerEntry> createControllerEntries(List<String> controllersStr) {
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
+        if (controllersStr != null) {
+            for (String controllerStr : controllersStr) {
+                ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
+                controllerEntryBuilder.setTarget(new Uri(controllerStr));
+                controllerEntries.add(controllerEntryBuilder.build());
             }
         }
-    }
-
-    private List<ControllerEntry> createControllerEntries(String targetString) {
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
-        ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
-        controllerEntryBuilder.setTarget(new Uri(targetString));
-        controllerEntries.add(controllerEntryBuilder.build());
         return controllerEntries;
     }
 
     private List<ProtocolEntry> createMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        List<ProtocolEntry> protocolList = new ArrayList<>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 MdsalHelper.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().
-                setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
+                setProtocol(mapper.get("OpenFlow13")).build());
         return protocolList;
     }
 
@@ -353,7 +360,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public List<Node> getAllBridgesOnOvsdbNode(Node node) {
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         List<ManagedNodeEntry> managedNodes = node.getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
         for (ManagedNodeEntry managedNode : managedNodes) {
             InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
@@ -407,8 +414,8 @@ public class SouthboundImpl implements Southbound {
     /**
      * Method read ports from bridge node. Method will check if the provided node
      * has the ports details, if not, it will read from Operational data store.
-     * @param node
-     * @return
+     * @param node Target bridge to getch termination points from.
+     * @return List of termination points on the given bridge
      */
     public List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node) {
         List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(node);
@@ -446,7 +453,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public List<TerminationPoint> extractTerminationPoints(Node node) {
-        List<TerminationPoint> terminationPoints = new ArrayList<TerminationPoint>();
+        List<TerminationPoint> terminationPoints = new ArrayList<>();
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation != null) {
             terminationPoints.addAll(node.getTerminationPoint());
@@ -455,7 +462,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public List<OvsdbTerminationPointAugmentation> extractTerminationPointAugmentations( Node node ) {
-        List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<>();
         List<TerminationPoint> terminationPoints = node.getTerminationPoint();
         if(terminationPoints != null && !terminationPoints.isEmpty()){
             for(TerminationPoint tp : terminationPoints){
@@ -475,7 +482,7 @@ public class SouthboundImpl implements Southbound {
         if(operNode != null){
             return extractTerminationPointAugmentations(operNode);
         }
-        return new ArrayList<OvsdbTerminationPointAugmentation>();
+        return new ArrayList<>();
     }
 
     public String getInterfaceExternalIdsValue(
@@ -526,7 +533,7 @@ public class SouthboundImpl implements Southbound {
             tpAugmentationBuilder.setInterfaceType(MdsalHelper.OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
 
-        List<Options> optionsList = new ArrayList<Options>();
+        List<Options> optionsList = new ArrayList<>();
         for (Map.Entry<String, String> entry : options.entrySet()) {
             OptionsBuilder optionsBuilder = new OptionsBuilder();
             optionsBuilder.setKey(new OptionsKey(entry.getKey()));
@@ -559,7 +566,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
-        Map<String, String> option = new HashMap<String, String>();
+        Map<String, String> option = new HashMap<>();
         option.put("peer", peerPortName);
         return addTerminationPoint(node, bridgeName, portName, PATCH_PORT_TYPE, option);
     }
@@ -583,7 +590,9 @@ public class SouthboundImpl implements Southbound {
             OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
             if (ovsdbNode == null) {
                 Node nodeFromReadOvsdbNode = readOvsdbNode(node);
-                ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                if (nodeFromReadOvsdbNode != null) {
+                    ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                }
             }
             if (ovsdbNode != null && ovsdbNode.getOpenvswitchExternalIds() != null) {
                 for (OpenvswitchExternalIds openvswitchExternalIds : ovsdbNode.getOpenvswitchExternalIds()) {
@@ -632,7 +641,9 @@ public class SouthboundImpl implements Southbound {
                 OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
                 if (ovsdbNode == null) {
                     Node nodeFromReadOvsdbNode = readOvsdbNode(node);
-                    ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                    if (nodeFromReadOvsdbNode != null) {
+                        ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+                    }
                 }
                 if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
                     for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {
@@ -681,7 +692,7 @@ public class SouthboundImpl implements Southbound {
     public String getOptionsValue(List<Options> options, String key) {
         String value = null;
         for (Options option : options) {
-            if (option.getKey().equals(key)) {
+            if (option.getOption().equals(key)) {
                 value = option.getValue();
             }
         }
@@ -693,8 +704,7 @@ public class SouthboundImpl implements Southbound {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(MdsalHelper.OVSDB_TOPOLOGY_ID));
 
-        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
-        return topology;
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
     }
 
     public Long getOFPort(OvsdbTerminationPointAugmentation port) {

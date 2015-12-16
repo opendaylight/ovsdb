@@ -12,12 +12,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>commons</artifactId>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/parent/pom.xml</relativePath>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
+  <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>utils.servicehelper</artifactId>
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -43,6 +44,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
 
+  <properties>
+    <powermock.version>1.5.2</powermock.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -66,16 +71,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
       <scope>test</scope>
+      <version>${powermock.version}</version>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-core</artifactId>
       <scope>test</scope>
+      <version>${powermock.version}</version>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
       <scope>test</scope>
+      <version>${powermock.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.osgi</groupId>
@@ -95,14 +103,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.opendaylight.ovsdb.utils.servicehelper
+            </Export-Package>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>

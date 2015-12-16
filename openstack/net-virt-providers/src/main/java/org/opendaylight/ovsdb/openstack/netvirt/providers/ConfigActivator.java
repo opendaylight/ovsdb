@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
-    private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+    private List<ServiceRegistration<?>> registrations = new ArrayList<>();
     private ProviderContext providerContext;
 
     public ConfigActivator(ProviderContext providerContext) {

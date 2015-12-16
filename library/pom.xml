@@ -10,8 +10,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>odlparent</artifactId>
+    <artifactId>odlparent-lite</artifactId>
     <version>1.6.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
@@ -37,6 +38,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>artifacts</module>
     <module>it</module>
   </modules>
+
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
   <build>
     <plugins>

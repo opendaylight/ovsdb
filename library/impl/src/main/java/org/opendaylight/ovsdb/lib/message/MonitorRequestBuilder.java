@@ -17,7 +17,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 public class MonitorRequestBuilder<E extends TableSchema<E>> {
 
     E tableSchema;
-    MonitorRequest<E> monitorRequest;
+    MonitorRequest monitorRequest;
 
     MonitorRequestBuilder(E tableSchema) {
         this.tableSchema = tableSchema;
@@ -27,9 +27,9 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return new MonitorRequestBuilder<>(tableSchema);
     }
 
-    MonitorRequest<E> getMonitorRequest() {
+    MonitorRequest getMonitorRequest() {
         if (monitorRequest == null) {
-            monitorRequest = new MonitorRequest<>();
+            monitorRequest = new MonitorRequest();
         }
         return monitorRequest;
     }
@@ -60,8 +60,8 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return this;
     }
 
-    public MonitorRequest<E> build() {
-        MonitorRequest<E> monitorRequest = getMonitorRequest();
+    public MonitorRequest build() {
+        MonitorRequest monitorRequest = getMonitorRequest();
         if (monitorRequest.getSelect() == null) {
             monitorRequest.setSelect(new MonitorSelect());
         }

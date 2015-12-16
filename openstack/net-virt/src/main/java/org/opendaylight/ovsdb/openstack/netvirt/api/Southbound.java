@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -31,11 +32,13 @@ public interface Southbound {
     OvsdbNodeAugmentation extractOvsdbNode(Node node);
     NodeId extractBridgeOvsdbNodeId(Node bridgeNode);
     List<Node> readOvsdbTopologyNodes();
+    List<Node> readOvsdbTopologyBridgeNodes();
     Node readOvsdbNode(Node bridgeNode);
     boolean isBridgeOnOvsdbNode(Node node, String bridgeName);
     String getOvsdbNodeUUID(Node node);
     String getOsdbNodeExternalIdsValue(OvsdbNodeAugmentation ovsdbNodeAugmentation, String key);
-    boolean addBridge(Node ovsdbNode, String bridgeName, String target);
+    boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
+                      final Class<? extends DatapathTypeBase> dpType);
     boolean deleteBridge(Node ovsdbNode);
     OvsdbBridgeAugmentation readBridge(Node node, String name);
     Node readBridgeNode(Node node, String name);

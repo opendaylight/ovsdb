@@ -28,7 +28,7 @@ import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -96,7 +96,7 @@ public class ConfigurationServiceImplTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, configurationServiceImpl)).thenReturn(southbound);
 
-        configurationServiceImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        configurationServiceImpl.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
     }

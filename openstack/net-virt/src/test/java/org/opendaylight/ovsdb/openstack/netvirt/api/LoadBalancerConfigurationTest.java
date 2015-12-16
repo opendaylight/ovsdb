@@ -25,7 +25,7 @@ public class LoadBalancerConfigurationTest {
             {"10.10.1.343", "10.10.1.391", "10.10.1.31"},
             {"D5:6B:59:E8:F4:84", "D5:4B:60:E8:F5:84", "D5:4B:60:E8:F6:84"},
             {"tcp", "tcp", "http"},
-            {Integer.valueOf(125304), Integer.valueOf(125304), Integer.valueOf(1204)}};
+            {125304, 125304, 1204}};
 
     @Before
     public void setUp() throws Exception {

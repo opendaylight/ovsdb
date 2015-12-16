@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Red Hat, Inc.
+ *  Copyright (C) 2014 Red Hat, Inc. and others.  All rights reserved.
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -214,7 +214,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
      *
      * @return MonitorRequest that includes all the Bridge Columns including _uuid
      */
-    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest<GenericTableSchema> getAllColumnsMonitorRequest (Class <T> klazz) {
+    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest (Class <T> klazz) {
         TypedBaseTable<GenericTableSchema> table = getClient().createTypedRowWrapper(klazz);
         GenericTableSchema tableSchema = table.getSchema();
         Set<String> columns = tableSchema.getColumns();
@@ -225,7 +225,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         return bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public <T extends TableSchema<T>> MonitorRequest<T> getAllColumnsMonitorRequest (T tableSchema) {
+    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
         MonitorRequestBuilder<T> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
         for (String column : columns) {
@@ -242,7 +242,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         assertNotNull(getDbSchema());
 
-        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = Lists.newArrayList();
         Set<String> tables = getDbSchema().getTables();
         assertNotNull("ovsdb tables should not be null", tables);
 
@@ -470,18 +470,12 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         bridgeDelete(testBridgeUuid);
     }
 
-    @Test
+    @Test(expected = SchemaVersionMismatchException.class)
     public void testFlowSampleCollectorSetTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) < 0);
 
-        boolean isExceptionRaised = false;
-        try {
-            getClient().createTypedRowWrapper(FlowSampleCollectorSet.class);
-        } catch (SchemaVersionMismatchException e) {
-            isExceptionRaised = true;
-        }
-        assertTrue(isExceptionRaised);
+        getClient().createTypedRowWrapper(FlowSampleCollectorSet.class);
     }
 
     public void flowSampleCollectorSetInsert () throws ExecutionException, InterruptedException {
@@ -540,18 +534,12 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         bridgeDelete(testBridgeUuid);
     }
 
-    @Test
+    @Test(expected = SchemaVersionMismatchException.class)
     public void testFlowTableTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) < 0);
 
-        boolean isExceptionRaised = false;
-        try {
-            getClient().createTypedRowWrapper(FlowTable.class);
-        } catch (SchemaVersionMismatchException e) {
-            isExceptionRaised = true;
-        }
-        assertTrue(isExceptionRaised);
+        getClient().createTypedRowWrapper(FlowTable.class);
     }
 
     public void flowTableInsert () throws ExecutionException, InterruptedException {
@@ -632,18 +620,12 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         bridgeDelete(testBridgeUuid);
     }
 
-    @Test
+    @Test(expected = SchemaVersionMismatchException.class)
     public void testIpfixTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) < 0);
 
-        boolean isExceptionRaised = false;
-        try {
-            getClient().createTypedRowWrapper(IPFIX.class);
-        } catch (SchemaVersionMismatchException e) {
-            isExceptionRaised = true;
-        }
-        assertTrue(isExceptionRaised);
+        getClient().createTypedRowWrapper(IPFIX.class);
     }
 
     public void ipfixInsert () throws ExecutionException, InterruptedException {

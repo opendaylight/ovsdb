@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,7 +179,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public boolean isUserSpaceEnabled() {
+        final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.userspace.enabled");
+        return enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes");
+    }
+
+    @Override
+    public void setDependencies(ServiceReference serviceReference) {
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }

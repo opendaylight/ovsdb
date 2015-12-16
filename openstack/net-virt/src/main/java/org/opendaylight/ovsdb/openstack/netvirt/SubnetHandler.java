@@ -10,13 +10,12 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
 
-import org.opendaylight.neutron.spi.INeutronSubnetAware;
-import org.opendaylight.neutron.spi.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronSubnetAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,13 +88,12 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(INeutronSubnetAware.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
     }
 
     @Override

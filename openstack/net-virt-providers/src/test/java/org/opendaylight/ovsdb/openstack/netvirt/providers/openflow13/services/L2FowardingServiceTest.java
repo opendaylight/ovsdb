@@ -53,10 +53,10 @@ public class L2FowardingServiceTest {
 
     private static final String SEGMENTATION_ID = "2";
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B8";
-    private static final Long DPID = Long.valueOf(122);
-    private static final Long LOCAL_PORT = Long.valueOf(451);
-    private static final Long ETH_PORT = Long.valueOf(564);
-    private static final Long OF_PORT_OUT = Long.valueOf(5698);
+    private static final Long DPID = 122L;
+    private static final Long LOCAL_PORT = 451L;
+    private static final Long ETH_PORT = 564L;
+    private static final Long OF_PORT_OUT = 5698L;
 
     @Before
     public void setUp() throws Exception {

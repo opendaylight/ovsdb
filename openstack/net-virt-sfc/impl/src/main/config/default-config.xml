@@ -10,6 +10,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <required-capabilities>
     <capability>urn:opendaylight:params:xml:ns:yang:netvirt:sfc?module=netvirt-sfc&amp;revision=2014-12-10</capability>
     <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:southbound:impl?module=southbound-impl&amp;revision=2014-12-10</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:netvirt:impl?module=netvirt-impl&amp;revision=2015-05-13</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:netvirt:providers:impl?module=netvirt-providers-impl&amp;revision=2015-05-13</capability>
   </required-capabilities>
   <configuration>
 
@@ -18,6 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <module>
           <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:sfc">prefix:netvirt-sfc</type>
           <name>netvirt-sfc-default</name>
+          <of13provider>workaround</of13provider>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>

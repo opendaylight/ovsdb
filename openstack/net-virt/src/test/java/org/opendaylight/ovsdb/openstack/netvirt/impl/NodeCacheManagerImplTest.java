@@ -30,7 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -69,7 +69,7 @@ public class NodeCacheManagerImplTest {
     @Test
     public void testCacheListenerAddedAndRemoved() {
         ServiceReference ref = mock(ServiceReference.class);
-        when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(Long.valueOf(1));
+        when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(1L);
 
         // add
         nodeCacheManagerImpl.cacheListenerAdded(ref, mock(NodeCacheListener.class));
@@ -123,7 +123,7 @@ public class NodeCacheManagerImplTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, nodeCacheManagerImpl)).thenReturn(southbound);
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, nodeCacheManagerImpl)).thenReturn(eventDispatcher);
 
-        nodeCacheManagerImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        nodeCacheManagerImpl.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
         assertEquals("Error, did not return the correct object", getSuperField("eventDispatcher"), eventDispatcher);

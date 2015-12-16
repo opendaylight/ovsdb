@@ -12,15 +12,15 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
-import org.opendaylight.neutron.spi.INeutronLoadBalancerAware;
-import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
-import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.INeutronPortCRUD;
-import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.neutron.spi.NeutronLoadBalancer;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronLoadBalancerAware;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
@@ -29,7 +29,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,6 +166,8 @@ public class LBaaSHandler extends AbstractHandler
     /**
      * Useful utility for extracting the loadbalancer instance
      * configuration from the neutron LB cache
+     * @param neutronLB neutron load balancer object
+     * @return returns load balancer configuration
      */
     public LoadBalancerConfiguration extractLBConfiguration(NeutronLoadBalancer neutronLB) {
         String loadBalancerName = neutronLB.getLoadBalancerName();
@@ -247,17 +249,15 @@ public class LBaaSHandler extends AbstractHandler
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         loadBalancerProvider =
                 (LoadBalancerProvider) ServiceHelper.getGlobalInstance(LoadBalancerProvider.class, this);
         nodeCacheManager =
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-        nodeCacheManager.cacheListenerAdded(
-                bundleContext.getServiceReference(INeutronLoadBalancerAware.class.getName()), this);
+        nodeCacheManager.cacheListenerAdded(serviceReference, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(INeutronLoadBalancerAware.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
     }
 
     @Override

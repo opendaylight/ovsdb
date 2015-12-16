@@ -22,13 +22,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.opendaylight.neutron.spi.NeutronFirewall;
-import org.opendaylight.neutron.spi.NeutronFirewallPolicy;
-import org.opendaylight.neutron.spi.NeutronFirewallRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFirewall;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFirewallPolicy;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFirewallRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
-import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -152,7 +150,7 @@ public class FWaasHandlerTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, fwaasHandler)).thenReturn(eventDispatcher);
 
-        fwaasHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        fwaasHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", fwaasHandler.eventDispatcher, eventDispatcher);
     }

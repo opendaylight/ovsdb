@@ -196,13 +196,9 @@ public class TyperUtils {
     }
 
     private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion) {
-        if (!fromVersion.equals(Version.NULL) && schemaVersion.compareTo(fromVersion) < 0) {
-            String message = SchemaVersionMismatchException.createMessage(schemaVersion, fromVersion);
-            throw new SchemaVersionMismatchException(message);
-        }
-        if (!untilVersion.equals(Version.NULL) && schemaVersion.compareTo(untilVersion) > 0) {
-            String message = SchemaVersionMismatchException.createMessage(schemaVersion, untilVersion);
-            throw new SchemaVersionMismatchException(message);
+        if ((!fromVersion.equals(Version.NULL) && schemaVersion.compareTo(fromVersion) < 0) || (!untilVersion.equals(
+                Version.NULL) && schemaVersion.compareTo(untilVersion) > 0)) {
+            throw new SchemaVersionMismatchException(schemaVersion, fromVersion, untilVersion);
         }
     }
 
@@ -304,7 +300,7 @@ public class TyperUtils {
                 // When the row is null, that might indicate that the user maybe interested
                 // only in the ColumnSchema and not on the Data.
                 if (row == null) {
-                    return new Column<GenericTableSchema, Object>(columnSchema, null);
+                    return new Column<>(columnSchema, null);
                 }
                 return row.getColumn(columnSchema);
             }

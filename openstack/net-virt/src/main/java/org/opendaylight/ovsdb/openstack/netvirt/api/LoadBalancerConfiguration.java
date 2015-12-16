@@ -182,7 +182,7 @@ public class LoadBalancerConfiguration {
          */
         int index = 0;
         for(Map.Entry<String, LoadBalancerPoolMember> entry : this.getMembers().entrySet()) {
-            ((LoadBalancerPoolMember) entry.getValue()).setIndex(index++);
+            entry.getValue().setIndex(index++);
         }
         return this.members;
     }

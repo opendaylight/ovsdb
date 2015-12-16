@@ -19,7 +19,7 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
 
-    private List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
+    private List<TransactionCommand> commands = new ArrayList<>();
 
     public OvsdbOperationalCommandAggregator(OvsdbConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {

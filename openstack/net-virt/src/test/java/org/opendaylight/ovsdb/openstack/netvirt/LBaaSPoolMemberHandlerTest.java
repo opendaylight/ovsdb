@@ -30,14 +30,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
-import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
-import org.opendaylight.neutron.spi.INeutronPortCRUD;
-import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.neutron.spi.NeutronLoadBalancer;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
-import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
@@ -46,7 +46,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -85,7 +85,7 @@ public class LBaaSPoolMemberHandlerTest {
         when(NeutronCacheUtils.getMacAddress(any(INeutronPortCRUD.class), anyString(), anyString())).thenReturn("mac_address");
         when(NeutronCacheUtils.getProviderInformation(any(INeutronNetworkCRUD.class), any(INeutronSubnetCRUD.class), anyString())).thenReturn(providerInfo);
 
-        List<NeutronLoadBalancerPoolMember> members = new ArrayList<NeutronLoadBalancerPoolMember>();
+        List<NeutronLoadBalancerPoolMember> members = new ArrayList<>();
         NeutronLoadBalancerPoolMember neutronLBPoolMember = mock(NeutronLoadBalancerPoolMember.class);
         when(neutronLBPoolMember.getPoolMemberAdminStateIsUp()).thenReturn(true);
         when(neutronLBPoolMember.getPoolMemberSubnetID()).thenReturn("subnetID");
@@ -98,7 +98,7 @@ public class LBaaSPoolMemberHandlerTest {
         when(neutronLBPool.getLoadBalancerPoolMembers()).thenReturn(members);
         when(neutronLBPoolCache.getNeutronLoadBalancerPool(anyString())).thenReturn(neutronLBPool);
 
-        List<NeutronLoadBalancer> list_neutronLB = new ArrayList<NeutronLoadBalancer>();
+        List<NeutronLoadBalancer> list_neutronLB = new ArrayList<>();
         NeutronLoadBalancer neutronLB = mock(NeutronLoadBalancer.class);
         when(neutronLB.getLoadBalancerName()).thenReturn("load_balancer_name");
         when(neutronLB.getLoadBalancerVipAddress()).thenReturn("vip_address");
@@ -169,7 +169,7 @@ public class LBaaSPoolMemberHandlerTest {
         NorthboundEvent ev = mock(NorthboundEvent.class);
         when(ev.getLoadBalancerPoolMember()).thenReturn(neutronLBMember);
 
-        List<Node> list_node = new ArrayList<Node>();
+        List<Node> list_node = new ArrayList<>();
         list_node .add(mock(Node.class));
         when(nodeCacheManager.getBridgeNodes()).thenReturn(list_node);
 
@@ -220,7 +220,7 @@ public class LBaaSPoolMemberHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(LoadBalancerProvider.class, lBaaSPoolMemberHandler)).thenReturn(loadBalancerProvider);
         PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, lBaaSPoolMemberHandler)).thenReturn(nodeCacheManager);
 
-        lBaaSPoolMemberHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        lBaaSPoolMemberHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", lBaaSPoolMemberHandler.eventDispatcher, eventDispatcher);
         assertEquals("Error, did not return the correct object", getField("loadBalancerProvider"), loadBalancerProvider);

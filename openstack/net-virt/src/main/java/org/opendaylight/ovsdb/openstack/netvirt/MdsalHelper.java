@@ -58,6 +58,7 @@ public class MdsalHelper {
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "termination-point";
+    public static final String DISABLE_IN_BAND = "disable-in-band";
 
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
             = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()

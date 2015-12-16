@@ -89,7 +89,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                                         implements ConfigInterface, GatewayMacResolver,PacketProcessingListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(GatewayMacResolverService.class);
-    private static final short TABEL_FOR_ARP_FLOW = 0;
+    private static final short TABLE_FOR_ARP_FLOW = 0;
     private static final String ARP_REPLY_TO_CONTROLLER_FLOW_NAME = "GatewayArpReplyRouter";
     private static final int ARP_REPLY_TO_CONTROLLER_FLOW_PRIORITY = 10000;
     private static final Instruction SEND_TO_CONTROLLER_INSTRUCTION;
@@ -157,9 +157,9 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                                     }
 
                                     LOG.debug("Refresh Gateway Mac for gateway {} using source ip {} and mac {} for ARP request",
-                                            gatewayIp.getValue(),gatewayMetaData.getArpRequestSourceIp().getValue(),gatewayMetaData.getArpRequestMacAddress().getValue());
+                                            gatewayIp.getValue(),gatewayMetaData.getArpRequestSourceIp().getValue(),gatewayMetaData.getArpRequestSourceMacAddress().getValue());
 
-                                    sendGatewayArpRequest(externalNetworkBridge,gatewayIp,gatewayMetaData.getArpRequestSourceIp(), gatewayMetaData.getArpRequestMacAddress());
+                                    sendGatewayArpRequest(externalNetworkBridge,gatewayIp,gatewayMetaData.getArpRequestSourceIp(), gatewayMetaData.getArpRequestSourceMacAddress());
                                 }
                             }, 1, TimeUnit.SECONDS);
                         }
@@ -256,16 +256,24 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                 }
                 LOG.debug("Flow to route ARP Reply to Controller installed successfully : {}", flowIid);
 
-                //cache metadata
-                gatewayToArpMetadataMap.get(gatewayIp).setFlowToRemove(
-                        new RemoveFlowInputBuilder(arpReplyToControllerFlow).setNode(nodeRef).build());
+                ArpResolverMetadata gatewayArpMetadata = gatewayToArpMetadataMap.get(gatewayIp);
+                if (gatewayArpMetadata == null) {
+                    LOG.warn("No metadata found for gatewayIp: {}", gatewayIp);
+                    return;
+                }
 
-                //Broadcast ARP request packets
+                //cache metadata
+                gatewayArpMetadata.setFlowToRemove(new RemoveFlowInputBuilder(arpReplyToControllerFlow).setNode(nodeRef).build());
+
+                //get MAC DA for ARP packets
+                MacAddress arpRequestDestMacAddress = gatewayArpMetadata.getArpRequestDestMacAddress();
+
+                //Send ARP request packets
                 for (NodeConnector egressNc : externalNetworkBridge.getNodeConnector()) {
                     KeyedInstanceIdentifier<NodeConnector, NodeConnectorKey> egressNcIid = nodeIid.child(
                             NodeConnector.class, new NodeConnectorKey(egressNc.getId()));
                     ListenableFuture<RpcResult<Void>> futureSendArpResult = arpSender.sendArp(
-                            senderAddress, gatewayIp, egressNcIid);
+                            senderAddress, gatewayIp, arpRequestDestMacAddress, egressNcIid);
                     Futures.addCallback(futureSendArpResult, logResult(gatewayIp, egressNcIid));
                 }
             }
@@ -304,7 +312,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     private Flow createArpReplyToControllerFlow(final ArpMessageAddress senderAddress, final Ipv4Address ipForRequestedMac) {
         checkNotNull(senderAddress);
         checkNotNull(ipForRequestedMac);
-        FlowBuilder arpFlow = new FlowBuilder().setTableId(TABEL_FOR_ARP_FLOW)
+        FlowBuilder arpFlow = new FlowBuilder().setTableId(TABLE_FOR_ARP_FLOW)
             .setFlowName(ARP_REPLY_TO_CONTROLLER_FLOW_NAME)
             .setPriority(ARP_REPLY_TO_CONTROLLER_FLOW_PRIORITY)
             .setBufferId(OFConstants.OFP_NO_BUFFER)

@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class TransactCommandAggregator implements TransactCommand {
 
-    private List<TransactCommand> commands = new ArrayList<TransactCommand>();
+    private List<TransactCommand> commands = new ArrayList<>();
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private BridgeOperationalState operationalState;
 

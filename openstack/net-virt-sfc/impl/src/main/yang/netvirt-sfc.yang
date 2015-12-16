@@ -4,7 +4,7 @@ module netvirt-sfc {
     prefix "netvirt-sfc";
 
     import config { prefix config; revision-date 2013-04-05; }
-    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28;}
 
     description
         "Service definition for netvirt sfc project";
@@ -26,9 +26,13 @@ module netvirt-sfc {
                 uses config:service-ref {
                     refine type {
                         mandatory true;
-                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                        config:required-identity mdsal:binding-broker-osgi-registry;
                     }
                 }
+            }
+
+            leaf of13provider {
+                type string;
             }
         }
     }

@@ -89,7 +89,7 @@ public class LoadBalancerServiceTest {
         when(member.getMAC()).thenReturn(MAC_ADDRESS);
 
         Southbound southbound = mock(Southbound.class);
-        when(southbound.getDataPathId(any(Node.class))).thenReturn(Long.valueOf(123));
+        when(southbound.getDataPathId(any(Node.class))).thenReturn(123L);
         MemberModifier.field(LoadBalancerService.class, "southbound").set(loadBalancerService, southbound);
     }
     /**

@@ -41,7 +41,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
     private Map<InstanceIdentifier<?>, DataObject> filter(Map<InstanceIdentifier<?>,
             DataObject> data) {
         Map<InstanceIdentifier<?>, DataObject> result
-            = new HashMap<InstanceIdentifier<?>, DataObject>();
+            = new HashMap<>();
         for (Entry<InstanceIdentifier<?>, DataObject> entry: data.entrySet()) {
             if (isManagedBy(entry.getKey())) {
                 result.put(entry.getKey(),entry.getValue());
@@ -76,7 +76,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
     @Override
     public Set<InstanceIdentifier<?>> getRemovedPaths() {
         if (this.removedPaths == null) {
-            this.removedPaths = new HashSet<InstanceIdentifier<?>>();
+            this.removedPaths = new HashSet<>();
             for (InstanceIdentifier<?> path: event.getRemovedPaths()) {
                 if (isManagedBy(path)) {
                     this.removedPaths.add(path);

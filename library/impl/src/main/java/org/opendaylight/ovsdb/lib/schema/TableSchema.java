@@ -26,7 +26,6 @@ import org.opendaylight.ovsdb.lib.schema.ColumnType.AtomicColumnType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Lists;
 
 
 public abstract class TableSchema<E extends TableSchema<E>> {
@@ -138,7 +137,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     }
 
     public Row<E> createRow(ObjectNode rowNode) {
-        List<Column<E, ?>> columns = Lists.newArrayList();
+        List<Column<E, ?>> columns = new ArrayList<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
             Map.Entry<String, JsonNode> next = iter.next();
             ColumnSchema<E, Object> schema = column(next.getKey(), Object.class);
@@ -156,8 +155,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return new Row<>(this, columns);
     }
 
-    public ArrayList<Row<E>> createRows(JsonNode rowsNode) {
-        ArrayList<Row<E>> rows = Lists.newArrayList();
+    public List<Row<E>> createRows(JsonNode rowsNode) {
+        List<Row<E>> rows = new ArrayList<>();
         for (JsonNode rowNode : rowsNode.get("rows")) {
             rows.add(createRow((ObjectNode)rowNode));
         }

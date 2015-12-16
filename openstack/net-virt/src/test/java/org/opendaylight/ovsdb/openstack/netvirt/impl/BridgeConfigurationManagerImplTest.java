@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_MOCKS;
@@ -33,17 +34,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -222,7 +224,7 @@ public class BridgeConfigurationManagerImplTest {
         PowerMockito.mockStatic(ConfigProperties.class);
         when(ConfigProperties.getProperty(any(Class.class), anyString())).thenReturn(ADDRESS);
 
-        when(southbound.addBridge(any(Node.class), anyString(), anyString())).thenReturn(true);
+        when(southbound.addBridge(any(Node.class), anyString(), anyList(), eq(DatapathTypeSystem.class))).thenReturn(true);
         when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
 
         bridgeConfigurationManagerImpl.prepareNode(node);
@@ -262,12 +264,16 @@ public class BridgeConfigurationManagerImplTest {
 
             assertTrue("Error, isCreated is not true for " + networkType,
                     bridgeConfigurationManagerImplSpy.createLocalNetwork(node, neutronNetworkMock));
-            if (networkType.equals("vlan")) {
-                verify(neutronNetworkMock, times(1)).getProviderNetworkType();
-            } else if (networkType.equals("vxlan")) {
-                verify(neutronNetworkMock, times(2)).getProviderNetworkType();
-            } else if (networkType.equals("gre")) {
-                verify(neutronNetworkMock, times(3)).getProviderNetworkType();
+            switch (networkType) {
+                case "vlan":
+                    verify(neutronNetworkMock, times(1)).getProviderNetworkType();
+                    break;
+                case "vxlan":
+                    verify(neutronNetworkMock, times(2)).getProviderNetworkType();
+                    break;
+                case "gre":
+                    verify(neutronNetworkMock, times(3)).getProviderNetworkType();
+                    break;
             }
             reset(neutronNetworkMock);
             reset(node);
@@ -338,7 +344,7 @@ public class BridgeConfigurationManagerImplTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, bridgeConfigurationManagerImpl)).thenReturn(networkingProviderManager);
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, bridgeConfigurationManagerImpl)).thenReturn(southbound);
 
-        bridgeConfigurationManagerImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        bridgeConfigurationManagerImpl.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
         assertEquals("Error, did not return the correct object", getField("networkingProviderManager"), networkingProviderManager);

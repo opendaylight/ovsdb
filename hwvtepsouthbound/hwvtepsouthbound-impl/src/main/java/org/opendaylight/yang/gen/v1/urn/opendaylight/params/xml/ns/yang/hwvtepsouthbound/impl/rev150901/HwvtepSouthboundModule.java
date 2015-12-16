@@ -8,7 +8,9 @@
 
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.hwvtepsouthbound.impl.rev150901;
 
-import org.opendaylight.ovsdb.hwvtepsouthbound.impl.HwvtepSouthboundProvider;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProvider;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.hwvtepsouthbound.InstanceIdentifierCodec;
 
 public class HwvtepSouthboundModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.hwvtepsouthbound.impl.rev150901.AbstractHwvtepSouthboundModule {
     public HwvtepSouthboundModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -26,7 +28,10 @@ public class HwvtepSouthboundModule extends org.opendaylight.yang.gen.v1.urn.ope
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        HwvtepSouthboundProvider provider = new HwvtepSouthboundProvider();
+        HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(getSchemaServiceDependency(),
+                        getBindingNormalizedNodeSerializerDependency()));
+        HwvtepSouthboundProvider provider = new HwvtepSouthboundProvider(getClusteringEntityOwnershipServiceDependency(),
+                        getConnectionServiceDependency());
         getBrokerDependency().registerProvider(provider);
         return provider;
     }

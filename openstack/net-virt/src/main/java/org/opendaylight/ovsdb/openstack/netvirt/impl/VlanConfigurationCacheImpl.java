@@ -20,7 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +112,7 @@ public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigur
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         tenantNetworkManager =
                 (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
         southbound =

@@ -16,7 +16,7 @@ public enum ArpOperation {
 
     private final int intOperation;
 
-    private ArpOperation(int operationNumber) {
+    ArpOperation(int operationNumber) {
         this.intOperation = operationNumber;
     }
 

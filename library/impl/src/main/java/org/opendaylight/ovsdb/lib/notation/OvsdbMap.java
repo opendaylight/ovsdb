@@ -38,6 +38,6 @@ public class OvsdbMap<K, V> extends ForwardingMap<K, V> {
     }
 
     public static <K,V> OvsdbMap<K,V> fromMap(Map<K, V> value) {
-        return new OvsdbMap<K,V>(value);
+        return new OvsdbMap<>(value);
     }
 }

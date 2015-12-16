@@ -25,6 +25,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </broker>
         </module>
       </modules>
+      <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+        <service>
+          <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:library:impl">prefix:connection-service</type>
+          <instance>
+            <name>connection-service</name>
+            <provider>/modules/module[type='library'][name='library-default']</provider>
+          </instance>
+        </service>
+      </services>
     </data>
   </configuration>
 </snapshot>

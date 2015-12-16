@@ -74,7 +74,7 @@ import com.google.common.collect.Sets;
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
  * and a Singleton object in a non-OSGi environment.
  */
-public class OvsdbConnectionService implements OvsdbConnection {
+public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
     private static final int NUM_THREADS = 3;
 
@@ -124,9 +124,8 @@ public class OvsdbConnectionService implements OvsdbConnection {
 
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
-            OvsdbClient client = getChannelClient(channel, ConnectionType.ACTIVE,
+            return getChannelClient(channel, ConnectionType.ACTIVE,
                     Executors.newFixedThreadPool(NUM_THREADS));
-            return client;
         } catch (InterruptedException e) {
             LOG.warn("Thread was interrupted during connect", e);
         } catch (Exception e) {
@@ -149,6 +148,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
 
     @Override
     public void registerConnectionListener(OvsdbConnectionListener listener) {
+        LOG.info("registerConnectionListener: registering {}", listener.getClass().getSimpleName());
         connectionListeners.add(listener);
     }
 
@@ -184,6 +184,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
     @Override
     public synchronized boolean startOvsdbManager(final int ovsdbListenPort) {
         if (!singletonCreated) {
+            LOG.info("startOvsdbManager: Starting");
             new Thread() {
                 @Override
                 public void run() {
@@ -388,5 +389,10 @@ public class OvsdbConnectionService implements OvsdbConnection {
     @Override
     public Collection<OvsdbClient> getConnections() {
         return connections.keySet();
+    }
+
+    @Override
+    public void close() throws Exception {
+        LOG.info("OvsdbConnectionService closed");
     }
 }

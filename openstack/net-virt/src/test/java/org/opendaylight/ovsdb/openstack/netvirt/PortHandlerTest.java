@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
@@ -35,7 +35,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -90,11 +90,11 @@ public class PortHandlerTest {
         portHandlerSpy.processEvent(ev);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.UPDATE);
 
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         when(nodeCacheManager.getNodes()).thenReturn(nodes);
 
-        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<>();
         OvsdbTerminationPointAugmentation port = mock(OvsdbTerminationPointAugmentation.class);
         ports.add(port);
         when(southbound.getTerminationPointsOfBridge(any(Node.class))).thenReturn(ports);
@@ -120,7 +120,7 @@ public class PortHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, portHandler)).thenReturn(southbound);
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, portHandler)).thenReturn(eventDispatcher);
 
-        portHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        portHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("nodeCacheManager"), nodeCacheManager);
         assertEquals("Error, did not return the correct object", getField("neutronL3Adapter"), neutronL3Adapter);

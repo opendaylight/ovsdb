@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.osgi.framework.BundleContext;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         }
         nodeCache.put(nodeId, node);
 
-        LOG.debug("processNodeUpdate: {} Node type {} {}: {}",
+        LOG.debug("processNodeUpdate: size= {}, Node type= {}, action= {}, node= {}",
                 nodeCache.size(),
                 southbound.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
                 action == Action.ADD ? "ADD" : "UPDATE",
@@ -164,14 +164,27 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         return nodes;
     }
 
+    private void populateNodeCache() {
+        LOG.debug("populateNodeCache : Populating the node cache");
+        List<Node> nodes = southbound.readOvsdbTopologyNodes();
+        for(Node ovsdbNode : nodes) {
+            this.nodeCache.put(ovsdbNode.getNodeId(), ovsdbNode);
+        }
+        nodes = southbound.readOvsdbTopologyBridgeNodes();
+        for(Node bridgeNode : nodes) {
+            this.nodeCache.put(bridgeNode.getNodeId(), bridgeNode);
+        }
+        LOG.debug("populateNodeCache : Node cache population is done. Total nodes : {}",this.nodeCache.size());
+    }
+
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    public void setDependencies(ServiceReference serviceReference) {
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
-        eventDispatcher.eventHandlerAdded(
-                bundleContext.getServiceReference(NodeCacheManager.class.getName()), this);
+        eventDispatcher.eventHandlerAdded(serviceReference, this);
+        populateNodeCache();
     }
 
     @Override

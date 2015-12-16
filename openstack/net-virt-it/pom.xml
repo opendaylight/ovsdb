@@ -9,10 +9,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>mdsal-it-parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
-    <relativePath/>
+    <groupId>org.opendaylight.ovsdb</groupId>
+    <artifactId>it</artifactId>
+    <version>1.2.1-SNAPSHOT</version>
+    <relativePath>../../commons/it</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
@@ -40,12 +40,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
+
   <properties>
-    <skip.integrationtest>true</skip.integrationtest>
-    <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
-    <root.directory>${env.PWD}</root.directory>
-    <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <karaf.distro.groupId>org.opendaylight.ovsdb</karaf.distro.groupId>
+    <karaf.distro.artifactId>karaf</karaf.distro.artifactId>
+    <karaf.distro.version>${project.version}</karaf.distro.version>
+    <karaf.distro.type>zip</karaf.distro.type>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -91,190 +93,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-util</artifactId>
     </dependency>
-    <!-- Dependencies for pax exam karaf container -->
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-karaf</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit4</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-aether</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.karaf.features</groupId>
-      <artifactId>org.apache.karaf.features.core</artifactId>
-      <version>${karaf.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>compile</scope>
-    </dependency>
     <dependency>
       <groupId>org.codehaus.sonar-plugins.java</groupId>
       <artifactId>sonar-jacoco-listeners</artifactId>
-      <version>${sonar-jacoco-listeners.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- AbstractConfigTestBase::getKarafDistro() needs this to find its version -->
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>karaf</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <!-- Specific to generate mapping between tests and covered code -->
-          <!--<argLine>${jacoco.agent.it.arg}</argLine>-->
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.sonar.java.jacoco.JUnitListener</value>
-            </property>
-          </properties>
-          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
-          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-              <skipTests>${skip.integrationtest}</skipTests>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Needed if you use versionAsInProject() -->
-      <plugin>
-        <groupId>org.apache.servicemix.tooling</groupId>
-        <artifactId>depends-maven-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <id>generate-depends-file</id>
-            <goals>
-              <goal>generate-depends-file</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!--<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <configLocation>
-            ${project.basedir}/../../commons/parent/src/main/resources/ovsdb_checks.xml
-          </configLocation>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <failsOnError>true</failsOnError>
-          <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
-          <excludes>**/yang/</excludes>
-        </configuration>
-      </plugin>-->
-      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>prepare-ut-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.reportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>prepare-it-agent</id>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <append>true</append>
-              <destFile>${sonar.jacoco.itReportPath}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.reportPath}</dataFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>default-report-integration</id>
-            <goals>
-              <goal>report-integration</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <!-- Specific to generate mapping between tests and covered code -->
-          <!--<argLine>${jacoco.agent.ut.arg}</argLine>-->
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.sonar.java.jacoco.JUnitListener</value>
-            </property>
-          </properties>
-          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
-          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
-        </configuration>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>integrationtest</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-        <skip.integrationtest>false</skip.integrationtest>
-      </properties>
-    </profile>
-  </profiles>
 </project>

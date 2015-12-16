@@ -21,12 +21,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.neutron.spi.NeutronSecurityRule;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -41,6 +41,7 @@ public class PortSecurityHandlerTest {
 
     @InjectMocks private PortSecurityHandler portSecurityHandler;
     private PortSecurityHandler posrtSecurityHandlerSpy;
+    @Mock EventDispatcher eventDispatcher;
 
     @Before
     public void setUp() {
@@ -73,7 +74,7 @@ public class PortSecurityHandlerTest {
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, portSecurityHandler.canCreateNeutronSecurityRule(mock(NeutronSecurityRule.class)));
 
         posrtSecurityHandlerSpy.neutronSecurityRuleCreated(any(NeutronSecurityRule.class));
-        verify(posrtSecurityHandlerSpy, times(1)).canCreateNeutronSecurityRule(any(NeutronSecurityRule.class));
+        verify(posrtSecurityHandlerSpy, times(1)).enqueueEvent(any(AbstractEvent.class));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class PortSecurityHandlerTest {
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, portSecurityHandler.canDeleteNeutronSecurityRule(mock(NeutronSecurityRule.class)));
 
         posrtSecurityHandlerSpy.neutronSecurityRuleDeleted(any(NeutronSecurityRule.class));
-        verify(posrtSecurityHandlerSpy, times(1)).canDeleteNeutronSecurityRule(any(NeutronSecurityRule.class));
+        verify(posrtSecurityHandlerSpy, times(1)).enqueueEvent(any(AbstractEvent.class));
    }
 
     @Test
@@ -101,7 +102,7 @@ public class PortSecurityHandlerTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, portSecurityHandler)).thenReturn(eventDispatcher);
 
-        portSecurityHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        portSecurityHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", portSecurityHandler.eventDispatcher, eventDispatcher);
     }

@@ -18,7 +18,7 @@ public enum Function {
     INCLUDES("includes"),
     EXCLUDES("excludes");
 
-    private Function(String name) {
+    Function(String name) {
         this.name = name;
     }
 

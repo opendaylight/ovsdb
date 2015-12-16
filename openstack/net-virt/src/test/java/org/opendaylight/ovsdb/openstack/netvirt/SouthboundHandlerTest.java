@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.SouthboundEvent.Type;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -46,7 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -82,12 +81,13 @@ public class SouthboundHandlerTest {
         Node node = mock(Node.class);
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(mock(OvsdbNodeAugmentation.class));
 
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         when(southbound.readOvsdbTopologyNodes()).thenReturn(nodes);
 
         southboundHandlerSpy.triggerUpdates();
-        verify(southboundHandlerSpy, times(1)).ovsdbUpdate(any(Node.class), any(DataObject.class), any(OvsdbType.class), any(Action.class));;
+        verify(southboundHandlerSpy, times(1)).ovsdbUpdate(any(Node.class), any(DataObject.class), any(OvsdbType.class), any(Action.class));
+
     }
 
     @Test
@@ -219,7 +219,7 @@ public class SouthboundHandlerTest {
         when(ev.getType()).thenReturn(Type.OPENVSWITCH);
 
         when(ovsdbTerminationPointAugmentation.getName()).thenReturn("network");
-        List<TerminationPoint> terminationPoints = new ArrayList<TerminationPoint>();
+        List<TerminationPoint> terminationPoints = new ArrayList<>();
         terminationPoints.add(mock(TerminationPoint.class));
         when(southbound.extractTerminationPoints(any(Node.class))).thenReturn(terminationPoints);
 
@@ -254,7 +254,7 @@ public class SouthboundHandlerTest {
         PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, southboundHandler)).thenReturn(eventDispatcher);
         PowerMockito.when(ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, southboundHandler)).thenReturn(ovsdbInventoryService);
 
-        southboundHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+        southboundHandler.setDependencies(mock(ServiceReference.class));
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
         assertEquals("Error, did not return the correct object", getField("networkingProviderManager"), networkingProviderManager);
         assertEquals("Error, did not return the correct object", getField("tenantNetworkManager"), tenantNetworkManager);

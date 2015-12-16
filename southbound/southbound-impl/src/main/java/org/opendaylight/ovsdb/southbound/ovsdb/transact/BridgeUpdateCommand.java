@@ -124,7 +124,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
     private void setOpenDaylightExternalIds(Bridge bridge, InstanceIdentifier<OvsdbBridgeAugmentation> iid,
             OvsdbBridgeAugmentation ovsdbManagedNode) {
         // Set the iid external_id
-        Map<String, String> externalIdMap = new HashMap<String, String>();
+        Map<String, String> externalIdMap = new HashMap<>();
         externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, SouthboundUtil.serializeInstanceIdentifier(iid));
         // Set user provided external ids
         List<BridgeExternalIds> bridgeExternalId = ovsdbManagedNode.getBridgeExternalIds();
@@ -145,7 +145,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
     private void setOpenDaylightOtherConfig(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode) {
         List<BridgeOtherConfigs> bridgeOtherConfig = ovsdbManagedNode.getBridgeOtherConfigs();
         if (bridgeOtherConfig != null) {
-            Map<String, String> otherConfigMap = new HashMap<String, String>();
+            Map<String, String> otherConfigMap = new HashMap<>();
             for (BridgeOtherConfigs otherConf : bridgeOtherConfig) {
                 otherConfigMap.put(otherConf.getBridgeOtherConfigKey(), otherConf.getBridgeOtherConfigValue());
             }

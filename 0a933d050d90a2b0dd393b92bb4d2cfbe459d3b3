@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_0d7ff9e1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-16T08:27:51Z",
+      "side": 1,
+      "message": "For future reference, the commit message is what stays forever to describe this change; it shouldn\u0027t refer to comments made during the Gerrit reviews.",
+      "revId": "0a933d050d90a2b0dd393b92bb4d2cfbe459d3b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

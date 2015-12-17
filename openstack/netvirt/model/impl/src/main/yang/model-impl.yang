@@ -1,0 +1,35 @@
+module model-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:model:impl";
+    prefix "model-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+
+    description
+        "Service definition for model project";
+
+    revision "2014-12-10" {
+        description
+            "Initial revision";
+    }
+
+    identity model {
+        base config:module-type;
+        config:java-name-prefix Model;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case model {
+            when "/config:modules/config:module/config:type = 'model'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_b05cf526",
+        "filename": "openstack/netvirt/api/src/main/yang/netvirt.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-17T03:26:58Z",
+      "side": 1,
+      "message": "I think all the api dir can be removed. The api is covered in the model. We can keep the feature, karaf, artifacts and it dirs since those would cover the new netvirt.",
+      "range": {
+        "startLine": 1,
+        "startChar": 15,
+        "endLine": 1,
+        "endChar": 16
+      },
+      "revId": "7c95ae2d1113e9f82bc39ea47e04934ae86b23a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_703e7dba",
+        "filename": "openstack/netvirt/model/api/src/main/yang/model.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-17T03:26:58Z",
+      "side": 1,
+      "message": "should have netvirt:model since model is generic",
+      "revId": "7c95ae2d1113e9f82bc39ea47e04934ae86b23a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_906e99c8",
+        "filename": "openstack/netvirt/model/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/model/impl/rev141210/ModelModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-17T03:26:58Z",
+      "side": 1,
+      "message": "we can also add netvirt in as part of the package",
+      "revId": "7c95ae2d1113e9f82bc39ea47e04934ae86b23a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b07395b0",
+        "filename": "openstack/netvirt/model/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/model/impl/rev141210/ModelModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-17T03:26:58Z",
+      "side": 1,
+      "message": "Same here, might want Netvirt in the name",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 28,
+        "endChar": 21
+      },
+      "revId": "7c95ae2d1113e9f82bc39ea47e04934ae86b23a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_506821ba",
+        "filename": "openstack/netvirt/model/impl/src/main/yang/model-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-17T03:26:58Z",
+      "side": 1,
+      "message": "same thing, Netvirt profix. And that would apply to the rest of the places where model is used below",
+      "range": {
+        "startLine": 19,
+        "startChar": 32,
+        "endLine": 19,
+        "endChar": 37
+      },
+      "revId": "7c95ae2d1113e9f82bc39ea47e04934ae86b23a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_3031e5ec",
+        "filename": "openstack/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-17T03:26:58Z",
+      "side": 1,
+      "message": "Can you leave this as it was?",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 11
+      },
+      "revId": "7c95ae2d1113e9f82bc39ea47e04934ae86b23a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsBuilder;
@@ -179,8 +180,11 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
-        if (lSwitchUpdatedRows.get(switchUUID) != null) {
-            return new HwvtepLogicalSwitchRef(lSwitchUpdatedRows.get(switchUUID).getName());
+        LogicalSwitch logicalSwitch = lSwitchUpdatedRows.get(switchUUID);
+        if (logicalSwitch != null) {
+            InstanceIdentifier<LogicalSwitches> lSwitchIid =
+                    HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
+            return new HwvtepLogicalSwitchRef(lSwitchIid);
         }
         return null;
     }

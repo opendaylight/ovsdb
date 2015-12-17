@@ -74,7 +74,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
             setIpAddress(ucastMacsRemote, remoteUcastMac);
             setLocator(transaction, ucastMacsRemote, remoteUcastMac);
-            setLogicalSwitch(instanceIdentifier, ucastMacsRemote, remoteUcastMac);
+            setLogicalSwitch(ucastMacsRemote, remoteUcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(ucastMacsRemote, remoteUcastMac, operationalMacOptional);
                 transaction.add(op.insert(ucastMacsRemote));
@@ -90,18 +90,19 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setLogicalSwitch(InstanceIdentifier<Node> iid, UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
+    private void setLogicalSwitch(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
-            HwvtepNodeName lswitchName = new HwvtepNodeName(inputMac.getLogicalSwitchRef().getValue());
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
-                    getOperationalState().getLogicalSwitches(iid, new LogicalSwitchesKey(lswitchName));
+                    getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
                 Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 ucastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update remoteUcastMac: No logical switch named {} found in operational datastore!",
-                        lswitchName);
+                LOG.warn("Create or update remoteUcastMac: No logical switch with iid {} found in operational datastore!",
+                        lswitchIid);
             }
         }
     }

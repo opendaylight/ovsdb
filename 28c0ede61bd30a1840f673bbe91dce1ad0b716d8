@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_73e4470d",
+        "filename": "resources/commons/Ovsdb-HwvtepSouthbound-Collection.json.postman_collection",
+        "patchSetId": 5
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-17T13:03:53Z",
+      "side": 1,
+      "message": "this should be tunnelIp",
+      "revId": "28c0ede61bd30a1840f673bbe91dce1ad0b716d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_73920759",
+        "filename": "resources/commons/Ovsdb-HwvtepSouthbound-Collection.json.postman_collection",
+        "patchSetId": 5
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-17T13:03:53Z",
+      "side": 1,
+      "message": "should be %2Fphysical",
+      "range": {
+        "startLine": 273,
+        "startChar": 158,
+        "endLine": 273,
+        "endChar": 166
+      },
+      "revId": "28c0ede61bd30a1840f673bbe91dce1ad0b716d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_53ceeb84",
+        "filename": "resources/commons/Ovsdb-HwvtepSouthbound-Collection.json.postman_collection",
+        "patchSetId": 5
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-17T13:03:53Z",
+      "side": 1,
+      "message": "tunnelIp, not tunnleIp",
+      "revId": "28c0ede61bd30a1840f673bbe91dce1ad0b716d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d3a17baa",
+        "filename": "resources/commons/Ovsdb-HwvtepSouthbound-Collection.json.postman_collection",
+        "patchSetId": 5
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-17T13:03:53Z",
+      "side": 1,
+      "message": "should be: \"6640:%2Fphysicalswitch\" 2F missing and typo in physicalswitch.",
+      "revId": "28c0ede61bd30a1840f673bbe91dce1ad0b716d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f3a6f7c0",
+        "filename": "resources/commons/Ovsdb-HwvtepSouthbound-Collection.json.postman_collection",
+        "patchSetId": 5
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-17T13:03:53Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "28c0ede61bd30a1840f673bbe91dce1ad0b716d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

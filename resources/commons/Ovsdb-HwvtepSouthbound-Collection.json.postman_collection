@@ -264,13 +264,13 @@
             "time": 1447909152443,
             "preRequestScript": "",
             "tests": "",
-            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/ps0\",\n            \"hwvtep-node-name\": \"ps0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnleIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
+            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/br0\",\n            \"hwvtep-node-name\": \"br0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnelIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
             "id": "e25f67e4-3a3f-5da7-f7c8-41b371156719",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%phsicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "preRequestScript": "",
             "pathVariables": {},
             "method": "PUT",
@@ -283,13 +283,13 @@
             "time": 1448552632013,
             "name": "Update Specific Config Physical Switch",
             "description": "Fire this Restconf request if you want to update a exsiting physical switch.",
-            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/ps0\",\n            \"hwvtep-node-name\": \"ps0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnleIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
+            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/br0\",\n            \"hwvtep-node-name\": \"br0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnelIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
             "id": "f7d33d50-7c8e-69e2-6d60-5c6155c5d210",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%phsicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "preRequestScript": "",
             "pathVariables": {},
             "method": "GET",
@@ -307,7 +307,7 @@
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
             "id": "233b5ab5-8177-4416-6912-2477520a0654",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%phsicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "preRequestScript": "",
             "pathVariables": {},
             "method": "DELETE",
@@ -327,7 +327,7 @@
             "id": "a13e6877-997e-84e1-c8e8-e83ef5e9a002",
             "name": "Get Specific Operational Physical Switch",
             "description": "",
-            "url": "http://{{controllerHost}}:8181/restconf/operational/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/operational/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "method": "GET",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\n",
             "data": [],

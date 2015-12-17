@@ -259,6 +259,11 @@ public class HwvtepOperationalState {
         }
         return Optional.absent();
     }
+
+    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<LogicalSwitches> iid) {
+        Optional<LogicalSwitches> lswitch = HwvtepSouthboundUtil.readNode(transaction, iid);
+        return lswitch;
+    }
     
     public ReadWriteTransaction getReadWriteTransaction() {
         return transaction;

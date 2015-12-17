@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_70f51d82",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "If you don\u0027t need the functionality provided by Mockito here (as in, it\u0027s just passing the method calls through and you\u0027re not doing anything else with it), it\u0027s better to simply instantiate a real InstanceIdentifierCodec (with the mock schemaService and bindingNormalizedNodeSerializer), and set up the context using onGlobalContextUpdated().",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_10f2a99a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "This bothers me somewhat: context is shared, but this setup is specific to the test being performed. It might be better to use a test-specific instance of InstanceIdentifierCodec.\n\nFurthermore, the test doesn\u0027t check the behaviour of InstanceIdentifierCodec. Obviously with the current implementation it\u0027s sufficient, since moduleForPrefix() is just a pass-through, but the test should really cover the various cases you\u0027d expect: null prefix, prefix matching a module, prefix matching no module (without making it a test of SchemaContext, which is a fine line to draw).",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_703c3d30",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "I find successive thenReturn() constructs hard to reason about: it makes the end of the test here very surprising, since it makes two successive calls to prefixForNamespace() return different values (which shouldn\u0027t happen if the context hasn\u0027t changed in the mean-time).\n\nUsing mocks like this here makes the test completely tied to the implementation. It should be possible to re-write InstanceIdentifierCodec so that it finds a module without using findModuleByNamespaceAndRevision(), without changing the test...",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_104949d0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "Reading this, I get: assert that the return value of prefixForNamespace() equals any string. The test should assert something meaningful... (Plus it only works by \"accident\", since Mockito\u0027s HandyReturnValues defines anyString() as \"\".)",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_90fe996a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "This just verifies that the test ran correctly, it doesn\u0027t tell you anything about the correctness of InstanceIdentifierCodec (apart from the fact that it runs without throwing an exception).\n\nIdeally to test onGlobalContextUpdated() without tying the test to the implementation, you\u0027d test the side-effects of the call from the point of view of the caller (ask yourself \"What does the caller expect from calling this method?\"); something like\n\n    SchemaContext context1 \u003d ... // set up a context which returns a specific module for a known namespace\n    instancesIdentifierCodec.onGlobalContextUpdated(context1);\n    // Now call prefixForNamespace and make sure the expected value is returned\n    // Change the context, with a different module\n    instancesIdentifierCodec.onGlobalContextUpdated(context2);\n    // Do the test again and check that the new expected prefix is returned",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d012d1b3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "Same as above, anyString() should never be used as an expected value for an assertion.",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f017cda1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodecTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "Likewise, give the actual expected value, not any().",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_7023dd05",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/AbstractTransactCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "Since this is just a DTO, there doesn\u0027t seem to be much point in testing it. If you want coverage in the UTs, use real instances of AbstractTransactCommand in other tests (involving AbstractTransactCommand) rather than mocks.",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_301d65be",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/AbstractTransactionCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-17T10:25:14Z",
+      "side": 1,
+      "message": "Again, just a DTO, so it wouldn\u0027t get a specific UT class in my book.",
+      "revId": "6d7369e59a4509da2e593808d02dc92388d0751c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

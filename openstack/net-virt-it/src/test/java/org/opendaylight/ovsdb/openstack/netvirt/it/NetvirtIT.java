@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -49,15 +48,14 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.INeutronSecurityGroupCRUD;
 import org.opendaylight.neutron.spi.INeutronSecurityRuleCRUD;
-import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
@@ -65,22 +63,15 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
-import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
@@ -124,13 +115,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     private static MdsalUtils mdsalUtils = null;
     private static Southbound southbound = null;
     private static SouthboundUtils southboundUtils;
+    private static NeutronUtils neutronUtils = new NeutronUtils();
     private static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
-    private static final String SDPLNAME = "sg1";
-    private static final String NETWORK_ID = "521e29d6-67b8-4b3c-8633-027d21195111";
-    private static final String TENANT_ID = "521e29d6-67b8-4b3c-8633-027d21195100";
-    private static final String SUBNET_ID = "521e29d6-67b8-4b3c-8633-027d21195112";
-    private static final String PORT1_ID = "521e29d6-67b8-4b3c-8633-027d21195113";
-    private static final String DHCPPORT_ID ="521e29d6-67b8-4b3c-8633-027d21195115";
 
     @Override
     public String getModuleName() {
@@ -210,6 +196,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                         LogLevelOption.LogLevel.INFO.name()),
                 editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.lib",
+                        LogLevelOption.LogLevel.INFO.name()),
+                editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.openflowjava",
+                        LogLevelOption.LogLevel.INFO.name()),
+                editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.openflowplugin",
                         LogLevelOption.LogLevel.INFO.name()),
                 super.getLoggingOption());
     }
@@ -338,231 +330,75 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         }
     }
 
-    private ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
-        InetAddress inetAddress = null;
-        try {
-            inetAddress = InetAddress.getByName(addressStr);
-        } catch (UnknownHostException e) {
-            fail("Could not allocate InetAddress: " + e);
-        }
-
-        IpAddress address = SouthboundMapper.createIpAddress(inetAddress);
-        PortNumber port = new PortNumber(Integer.parseInt(portStr));
-
-        LOG.info("connectionInfo: {}", new ConnectionInfoBuilder()
-                .setRemoteIp(address)
-                .setRemotePort(port)
-                .build());
-        return new ConnectionInfoBuilder()
-                       .setRemoteIp(address)
-                       .setRemotePort(port)
-                       .build();
-    }
-
-    private String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return String.valueOf(connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
-    }
-
-    private boolean addOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
-                SouthboundUtils.createInstanceIdentifier(connectionInfo),
-                SouthboundUtils.createNode(connectionInfo));
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
-    private Node getOvsdbNode(final ConnectionInfo connectionInfo) {
-        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
-                SouthboundUtils.createInstanceIdentifier(connectionInfo));
-    }
-
-    private boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                SouthboundUtils.createInstanceIdentifier(connectionInfo));
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
     private Node connectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        Assert.assertTrue(addOvsdbNode(connectionInfo));
-        Node node = getOvsdbNode(connectionInfo);
+        LOG.info("connectOvsdbNode enter");
+        Assert.assertTrue(southboundUtils.addOvsdbNode(connectionInfo));
+        Node node = southboundUtils.getOvsdbNode(connectionInfo);
         Assert.assertNotNull("Should find OVSDB node after connect", node);
-        LOG.info("Connected to {}", connectionInfoToString(connectionInfo));
+        LOG.info("Connected to {}", SouthboundUtils.connectionInfoToString(connectionInfo));
         return node;
     }
 
     private boolean disconnectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        Assert.assertTrue(deleteOvsdbNode(connectionInfo));
-        Node node = getOvsdbNode(connectionInfo);
+        LOG.info("disconnectOvsdbNode enter");
+        Assert.assertTrue(southboundUtils.deleteOvsdbNode(connectionInfo));
+        Node node = southboundUtils.getOvsdbNode(connectionInfo);
         Assert.assertNull("Should not find OVSDB node after disconnect", node);
-        //Assume.assumeNotNull(node); // Using assumeNotNull because there is no assumeNull
-        LOG.info("Disconnected from {}", connectionInfoToString(connectionInfo));
+        LOG.info("Disconnected from {}", SouthboundUtils.connectionInfoToString(connectionInfo));
         return true;
-    }
-
-    private String getControllerIPAddress() {
-        String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
-        if (addressString != null) {
-            try {
-                if (InetAddress.getByName(addressString) != null) {
-                    return addressString;
-                }
-            } catch (UnknownHostException e) {
-                LOG.error("Host {} is invalid", addressString);
-            }
-        }
-
-        addressString = ConfigProperties.getProperty(this.getClass(), "of.address");
-        if (addressString != null) {
-            try {
-                if (InetAddress.getByName(addressString) != null) {
-                    return addressString;
-                }
-            } catch (UnknownHostException e) {
-                LOG.error("Host {} is invalid", addressString);
-            }
-        }
-
-        return null;
-    }
-
-    private short getControllerOFPort() {
-        short openFlowPort = Constants.OPENFLOW_PORT;
-        String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
-        if (portString != null) {
-            try {
-                openFlowPort = Short.parseShort(portString);
-            } catch (NumberFormatException e) {
-                LOG.warn("Invalid port:{}, use default({})", portString,
-                        openFlowPort);
-            }
-        }
-        return openFlowPort;
-    }
-
-    private List<String> getControllersFromOvsdbNode(Node node) {
-        List<String> controllersStr = new ArrayList<>();
-
-        String controllerIpStr = getControllerIPAddress();
-        if (controllerIpStr != null) {
-            // If codepath makes it here, the ip address to be used was explicitly provided.
-            // Being so, also fetch openflowPort provided via ConfigProperties.
-            controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
-                    + ":" + controllerIpStr + ":" + getControllerOFPort());
-        } else {
-            // Check if ovsdb node has manager entries
-            OvsdbNodeAugmentation ovsdbNodeAugmentation = southbound.extractOvsdbNode(node);
-            if (ovsdbNodeAugmentation != null) {
-                List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
-                if (managerEntries != null && !managerEntries.isEmpty()) {
-                    for (ManagerEntry managerEntry : managerEntries) {
-                        if (managerEntry == null || managerEntry.getTarget() == null) {
-                            continue;
-                        }
-                        String[] tokens = managerEntry.getTarget().getValue().split(":");
-                        if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
-                            controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
-                                    + ":" + tokens[1] + ":" + getControllerOFPort());
-                        } else if (tokens[0].equalsIgnoreCase("ptcp")) {
-                            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
-                                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
-                                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
-                            } else {
-                                LOG.warn("Ovsdb Node does not contain connection info: {}", node);
-                            }
-                        } else {
-                            LOG.trace("Skipping manager entry {} for node {}",
-                                    managerEntry.getTarget(), node.getNodeId().getValue());
-                        }
-                    }
-                } else {
-                    LOG.warn("Ovsdb Node does not contain manager entries : {}", node);
-                }
-            }
-        }
-
-        if (controllersStr.isEmpty()) {
-            // Neither user provided ip nor ovsdb node has manager entries. Lets use local machine ip address.
-            LOG.debug("Use local machine ip address as a OpenFlow Controller ip address");
-            controllerIpStr = getLocalControllerHostIpAddress();
-            if (controllerIpStr != null) {
-                controllersStr.add(Constants.OPENFLOW_CONNECTION_PROTOCOL
-                        + ":" + controllerIpStr + ":" + Constants.OPENFLOW_PORT);
-            }
-        }
-
-        if (controllersStr.isEmpty()) {
-            LOG.warn("Failed to determine OpenFlow controller ip address");
-        } else if (LOG.isDebugEnabled()) {
-            controllerIpStr = "";
-            for (String currControllerIpStr : controllersStr) {
-                controllerIpStr += " " + currControllerIpStr;
-            }
-            LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(), controllerIpStr);
-        }
-
-        return controllersStr;
-    }
-
-    private String getLocalControllerHostIpAddress() {
-        String ipaddress = null;
-        try{
-            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();ifaces.hasMoreElements();){
-                NetworkInterface iface = ifaces.nextElement();
-
-                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                    InetAddress inetAddr = inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
-                        ipaddress = inetAddr.getHostAddress();
-                        break;
-                    }
-                }
-            }
-        }catch (Exception e){
-            LOG.warn("Exception while fetching local host ip address ", e);
-        }
-        return ipaddress;
-    }
-
-    private String getControllerTarget(Node ovsdbNode) {
-        return getControllersFromOvsdbNode(ovsdbNode).get(0);
     }
 
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
-        LOG.info("testAddDeleteOvsdbNode enter 3");
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        LOG.info("testAddDeleteOvsdbNode enter");
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
+
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+                + " is not connected", isControllerConnected(connectionInfo));
+
+        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+        Thread.sleep(1000);
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        LOG.info("testAddDeleteOvsdbNode exit");
+    }
+
+    private boolean isControllerConnected(ConnectionInfo connectionInfo) throws InterruptedException {
+        LOG.info("isControllerConnected enter");
+        Boolean connected = false;
         ControllerEntry controllerEntry;
+        Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
+        assertNotNull("ovsdb node not found", ovsdbNode);
+
+        BridgeConfigurationManager bridgeConfigurationManager =
+                (BridgeConfigurationManager) ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, this);
+        assertNotNull("Could not find PipelineOrchestrator Service", bridgeConfigurationManager);
+        String controllerTarget = bridgeConfigurationManager.getControllersFromOvsdbNode(ovsdbNode).get(0);
+        Assert.assertNotNull("Failed to get controller target", controllerTarget);
+
         for (int i = 0; i < 10; i++) {
-            LOG.info("testAddDeleteOvsdbNode ({}): looking for controller", i);
-            Node ovsdbNode = getOvsdbNode(connectionInfo);
-            Assert.assertNotNull("ovsdb node not found", ovsdbNode);
-            String controllerTarget = getControllerTarget(ovsdbNode);
-            Assert.assertNotNull("Failed to get controller target", controllerTarget);
-            OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
+            LOG.info("isControllerConnected try {}: looking for controller", i);
+            OvsdbBridgeAugmentation bridge =
+                    southboundUtils.getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
             Assert.assertNotNull(bridge);
             Assert.assertNotNull(bridge.getControllerEntry());
             controllerEntry = bridge.getControllerEntry().iterator().next();
             Assert.assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
             if (controllerEntry.isIsConnected()) {
-                Assert.assertTrue(controllerEntry.isIsConnected());
+                Assert.assertTrue("Controller is not connected", controllerEntry.isIsConnected());
+                connected = true;
                 break;
             }
             Thread.sleep(1000);
         }
-
-        Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
-        Thread.sleep(1000);
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        LOG.info("isControllerConnected exit: {}", connected);
+        return connected;
     }
 
     @Ignore
     @Test
     public void testOpenVSwitchOtherConfig() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
@@ -582,114 +418,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
-    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
-                new OvsdbTerminationPointAugmentationBuilder();
-        ovsdbTerminationPointAugmentationBuilder.setInterfaceType(
-                new InterfaceTypeEntryBuilder()
-                        .setInterfaceType(
-                                SouthboundMapper.createInterfaceType("internal"))
-                        .build().getInterfaceType());
-        return ovsdbTerminationPointAugmentationBuilder;
-    }
-
-    private boolean addTerminationPoint(final NodeId bridgeNodeId, final String portName,
-            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder)
-        throws InterruptedException {
-
-        InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(bridgeNodeId);
-        NodeBuilder portNodeBuilder = new NodeBuilder();
-        NodeId portNodeId = SouthboundMapper.createManagedNodeId(portIid);
-        portNodeBuilder.setNodeId(portNodeId);
-        TerminationPointBuilder entry = new TerminationPointBuilder();
-        entry.setKey(new TerminationPointKey(new TpId(portName)));
-        entry.addAugmentation(
-                OvsdbTerminationPointAugmentation.class,
-                ovsdbTerminationPointAugmentationBuilder.build());
-        portNodeBuilder.setTerminationPoint(Lists.newArrayList(entry.build()));
-        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                portIid, portNodeBuilder.build());
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
-    /**
-     * Extract the <code>store</code> type data store contents for the particular bridge identified by
-     * <code>bridgeName</code>.
-     *
-     * @param connectionInfo The connection information.
-     * @param bridgeName The bridge name.
-     * @param store defined by the <code>LogicalDatastoreType</code> enumeration
-     * @return <code>store</code> type data store contents
-     */
-    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName,
-            LogicalDatastoreType store) {
-        Node bridgeNode = getBridgeNode(connectionInfo, bridgeName, store);
-        Assert.assertNotNull(bridgeNode);
-        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
-        Assert.assertNotNull(ovsdbBridgeAugmentation);
-        return ovsdbBridgeAugmentation;
-    }
-
-    /**
-     * extract the <code>LogicalDataStoreType.OPERATIONAL</code> type data store contents for the particular bridge
-     * identified by <code>bridgeName</code>
-     *
-     * @param connectionInfo The connection information.
-     * @param bridgeName The bridge name.
-     * @see <code>NetvirtIT.getBridge(ConnectionInfo, String, LogicalDatastoreType)</code>
-     * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
-     */
-    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName) {
-        return getBridge(connectionInfo, bridgeName, LogicalDatastoreType.OPERATIONAL);
-    }
-
-    /**
-     * Extract the node contents from <code>store</code> type data store for the
-     * bridge identified by <code>bridgeName</code>
-     *
-     * @param connectionInfo The connection information.
-     * @param bridgeName The bridge name.
-     * @param store defined by the <code>LogicalDatastoreType</code> enumeration
-     * @return <code>store</code> type data store contents
-     */
-    private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName, LogicalDatastoreType store) {
-        InstanceIdentifier<Node> bridgeIid =
-                SouthboundUtils.createInstanceIdentifier(connectionInfo,
-                    new OvsdbBridgeName(bridgeName));
-        return mdsalUtils.read(store, bridgeIid);
-    }
-
-    private boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName)
-        throws InterruptedException {
-
-        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                SouthboundUtils.createInstanceIdentifier(connectionInfo,
-                        new OvsdbBridgeName(bridgeName)));
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        return result;
-    }
-
-    private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
-        return SouthboundUtils.createInstanceIdentifier(connectionInfo,
-            bridge.getBridgeName());
-    }
-
-    private void netVirtAddPort(ConnectionInfo connectionInfo) throws InterruptedException {
-        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
-        Assert.assertNotNull(bridge);
-        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                createGenericOvsdbTerminationPointAugmentationBuilder();
-        String portName = NetvirtITConstants.PORT_NAME;
-        ovsdbTerminationBuilder.setName(portName);
-        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-        InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
-        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
-        Assert.assertNotNull(terminationPointNode);
-    }
-
     /**
      * Test for basic southbound events to netvirt.
      * <pre>The test will:
@@ -703,13 +431,14 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      */
     @Test
     public void testNetVirt() throws InterruptedException {
-        LOG.info("testNetVirt: starting test 2");
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        LOG.info("testNetVirt: starting test");
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         LOG.info("testNetVirt: should be connected");
 
-        Thread.sleep(10000);
-        LOG.info("testNetVirt: should really be connected after sleep");
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+                + " is not connected", isControllerConnected(connectionInfo));
+
         // Verify the pipeline flows were installed
         PipelineOrchestrator pipelineOrchestrator =
                 (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
@@ -720,54 +449,40 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         long datapathId = southbound.getDataPathId(bridgeNode);
         assertNotEquals("datapathId was not found", datapathId, 0);
 
-        //TODO add check for controller connection
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
-                FlowUtils.createNodeBuilder(datapathId);
-
         List<Service> staticPipeline = pipelineOrchestrator.getStaticPipeline();
         List<Service> staticPipelineFound = Lists.newArrayList();
         for (Service service : pipelineOrchestrator.getServiceRegistry().keySet()) {
             if (staticPipeline.contains(service)) {
                 staticPipelineFound.add(service);
             }
-            FlowBuilder flowBuilder = FlowUtils.getPipelineFlow(service.getTable(), (short)0);
-            Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-            assertNotNull("Could not find flow in config", flow);
-            Thread.sleep(1000);
-            flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-            assertNotNull("Could not find flow in operational", flow);
+            String flowId = "DEFAULT_PIPELINE_FLOW_" + service.getTable();
+            verifyFlow(datapathId, flowId, service.getTable());
         }
         assertEquals("did not find all expected flows in static pipeline",
                 staticPipeline.size(), staticPipelineFound.size());
 
-        netVirtAddPort(connectionInfo);
-        Thread.sleep(10000);
-        Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
-        Thread.sleep(10000);
+        southboundUtils.addTerminationPoint(bridgeNode, NetvirtITConstants.PORT_NAME, "internal", null, null, 0L);
+        Thread.sleep(1000);
+        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                southbound.getTerminationPointOfBridge(bridgeNode, NetvirtITConstants.PORT_NAME);
+        Assert.assertNotNull("Did not find " + NetvirtITConstants.PORT_NAME, ovsdbTerminationPointAugmentation);
+        Thread.sleep(1000);
+        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+        Thread.sleep(1000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
-    }
-
-    @Ignore
-    @Test
-    public void testNetVirt2() throws InterruptedException {
-        Thread.sleep(60000);
-    }
-
-    @Ignore
-    @Test
-    public void testReadOvsdbTopologyNodes() throws InterruptedException {
-        Thread.sleep(10000);
-        List<Node> ovsdbNodes = southbound.readOvsdbTopologyNodes();
-        for (Node node : ovsdbNodes) {
-            LOG.info(">>>>> node: {}", node);
-        }
     }
 
     @Test
     public void testNetVirtFixedSG() throws InterruptedException {
         final Version minSGOvsVersion = Version.fromString("1.10.2");
+        final String portName = "sg1";
+        final String networkId = "521e29d6-67b8-4b3c-8633-027d21195111";
+        final String tenantId = "521e29d6-67b8-4b3c-8633-027d21195100";
+        final String subnetId = "521e29d6-67b8-4b3c-8633-027d21195112";
+        final String portId = "521e29d6-67b8-4b3c-8633-027d21195113";
+        final String dhcpPortId ="521e29d6-67b8-4b3c-8633-027d21195115";
 
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
@@ -780,28 +495,34 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Version version = Version.fromString(ovsVersion);
         if (version.compareTo(minSGOvsVersion) < 0) {
             LOG.warn("{} minimum version is required", minSGOvsVersion);
-            Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
-            Thread.sleep(10000);
+            Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo,
+                    NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+            Thread.sleep(1000);
             Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
             return;
         }
 
-        Thread.sleep(10000);
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+                + " is not connected", isControllerConnected(connectionInfo));
+
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
         assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
         assertNotEquals("datapathId was not found", datapathId, 0);
 
-        NeutronNetwork nn = createNeutronNetwork(NETWORK_ID, TENANT_ID,NetworkHandler.NETWORK_TYPE_VXLAN, "100");
-        NeutronSubnet ns = createNeutronSubnet(SUBNET_ID, TENANT_ID, NETWORK_ID, "10.0.0.0/24");
-        NeutronPort nport = createNeutronPort(NETWORK_ID, SUBNET_ID, PORT1_ID, "compute", "10.0.0.10", "f6:00:00:0f:00:01");
-        NeutronPort dhcp = createNeutronPort(NETWORK_ID, SUBNET_ID, DHCPPORT_ID, "dhcp", "10.0.0.1", "f6:00:00:0f:00:02");
+        NeutronNetwork nn = neutronUtils.createNeutronNetwork(networkId, tenantId,
+                NetworkHandler.NETWORK_TYPE_VXLAN, "100");
+        NeutronSubnet ns = neutronUtils.createNeutronSubnet(subnetId, tenantId, networkId, "10.0.0.0/24");
+        NeutronPort nport = neutronUtils.createNeutronPort(networkId, subnetId, portId,
+                "compute", "10.0.0.10", "f6:00:00:0f:00:01");
+        NeutronPort dhcp = neutronUtils.createNeutronPort(networkId, subnetId, dhcpPortId,
+                "dhcp", "10.0.0.1", "f6:00:00:0f:00:02");
 
-        Thread.sleep(10000);
+        Thread.sleep(1000);
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
-        externalIds.put("iface-id", PORT1_ID);
-        southboundUtils.addTerminationPoint(bridgeNode, SDPLNAME, "internal", null, externalIds, 3L);
+        externalIds.put("iface-id", portId);
+        southboundUtils.addTerminationPoint(bridgeNode, portName, "internal", null, externalIds, 3L);
         southboundUtils.addTerminationPoint(bridgeNode, "vm1", "internal", null, null, 0L);
         southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal", null, null, 0L);
         Map<String, String> options = Maps.newHashMap();
@@ -810,25 +531,17 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null, 4L);
         Thread.sleep(1000);
 
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
-                FlowUtils.createNodeBuilder(datapathId);
-        MatchBuilder matchBuilder1 = new MatchBuilder();
-        matchBuilder1 = MatchUtils.createDhcpMatch(matchBuilder1, 68, 67);
-        String flowId1 = "Egress_DHCP_Client"  + "_Permit_";
-        FlowBuilder flowBuilder1 = initFlowBuilder(matchBuilder1, flowId1, (short)40);
-        Flow flow1 = getFlow(flowBuilder1, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("EgressSG : Could not find flow in configuration ", flow1);
-        flow1 = getFlow(flowBuilder1, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("EgressSG Operational : Could not find flow in config", flow1);
+        String flowId = "Egress_DHCP_Client"  + "_Permit_";
+        verifyFlow(datapathId, flowId, Service.EGRESS_ACL.getTable());
 
-        testDefaultsSG(nport, datapathId, nn);
-        Thread.sleep(10000);
-        Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
-        Thread.sleep(10000);
+        testDefaultSG(nport, datapathId, nn, tenantId, portId);
+        Thread.sleep(1000);
+        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+        Thread.sleep(1000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
-    private void testDefaultsSG(NeutronPort nport, long datapathId, NeutronNetwork nn)
+    private void testDefaultSG(NeutronPort nport, long datapathId, NeutronNetwork nn, String tenantId, String portId)
             throws InterruptedException {
         INeutronSecurityGroupCRUD ineutronSecurityGroupCRUD =
                 (INeutronSecurityGroupCRUD) ServiceHelper.getGlobalInstance(INeutronSecurityGroupCRUD.class, this);
@@ -841,7 +554,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         neutronSG.setSecurityGroupDescription("testig defaultSG-IT");
         neutronSG.setSecurityGroupName("DefaultSG");
         neutronSG.setSecurityGroupUUID("d3329053-bae5-4bf4-a2d1-7330f11ba5db");
-        neutronSG.setTenantID(TENANT_ID);
+        neutronSG.setTenantID(tenantId);
 
         List<NeutronSecurityRule> nsrs = new ArrayList<>();
         NeutronSecurityRule nsrIN = new NeutronSecurityRule();
@@ -852,7 +565,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         nsrIN.setSecurityRuleProtocol("TCP");
         nsrIN.setSecurityRuleRemoteIpPrefix("10.0.0.0/24");
         nsrIN.setSecurityRuleUUID("823faaf7-175d-4f01-a271-0bf56fb1e7e6");
-        nsrIN.setTenantID(TENANT_ID);
+        nsrIN.setTenantID(tenantId);
 
         NeutronSecurityRule nsrEG = new NeutronSecurityRule();
         nsrEG.setSecurityRemoteGroupID(null);
@@ -862,7 +575,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         nsrEG.setSecurityRuleProtocol("TCP");
         nsrEG.setSecurityRuleRemoteIpPrefix("10.0.0.0/24");
         nsrEG.setSecurityRuleUUID("823faaf7-175d-4f01-a271-0bf56fb1e7e1");
-        nsrEG.setTenantID(TENANT_ID);
+        nsrEG.setTenantID(tenantId);
 
         nsrs.add(nsrIN);
         nsrs.add(nsrEG);
@@ -878,111 +591,43 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
         INeutronPortCRUD iNeutronPortCRUD =
                 (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
-        iNeutronPortCRUD.update(PORT1_ID, nport);
+        iNeutronPortCRUD.update(portId, nport);
 
         Thread.sleep(10000);
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilderEg =
-                FlowUtils.createNodeBuilder(datapathId);
-        MatchBuilder matchBuilderEg = new MatchBuilder();
-        matchBuilderEg = MatchUtils.createEtherMatchWithType(matchBuilderEg, null, nport.getMacAddress());
-        String flowIdEg = "Egress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
-        FlowBuilder flowBuilderEg = initFlowBuilder(matchBuilderEg, flowIdEg, (short)40);
-        Flow flowEg = getFlow(flowBuilderEg, nodeBuilderEg, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("EgressSG : Could not find flow in configuration ", flowEg);
-        flowEg = getFlow(flowBuilderEg, nodeBuilderEg, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("EgressSG Operational : Could not find flow in config", flowEg);
+        String flowId = "Egress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
+        verifyFlow(datapathId, flowId, Service.EGRESS_ACL.getTable());
 
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilderIng =
-                FlowUtils.createNodeBuilder(datapathId);
-        MatchBuilder matchBuilderIng = new MatchBuilder();
-        matchBuilderIng = MatchUtils.createEtherMatchWithType(matchBuilderIng,null, nport.getMacAddress());
-        String flowIdIng = "Ingress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
-        FlowBuilder flowBuilderIng = initFlowBuilder(matchBuilderIng, flowIdIng, (short)90);
-        Flow flowIng = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("IngressSG : Could not find flow in configuration ", flowIng);
-        flowIng = getFlow(flowBuilderIng, nodeBuilderIng, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("IngressSG Operational : Could not find flow in config", flowIng);
-    }
-
-    private NeutronPort createNeutronPort(String networkId, String subnetId,
-             String id, String owner, String ipaddr, String mac) {
-        INeutronPortCRUD iNeutronPortCRUD =
-                (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
-        NeutronPort np = new NeutronPort();
-        np.initDefaults();
-        np.setID(id);
-        np.setDeviceOwner(owner);
-        np.setMacAddress(mac);
-        np.setNetworkUUID(networkId);
-        List<org.opendaylight.neutron.spi.Neutron_IPs> srcAddressList =
-                new ArrayList<>();
-        org.opendaylight.neutron.spi.Neutron_IPs nip = new org.opendaylight.neutron.spi.Neutron_IPs();
-        nip.setIpAddress(ipaddr);
-        nip.setSubnetUUID(subnetId);
-        srcAddressList.add(nip);
-        np.setFixedIPs(srcAddressList);
-        List<NeutronSecurityGroup> nsgs = new ArrayList<>();
-        np.setSecurityGroups(nsgs);
-        iNeutronPortCRUD.add(np);
-        return np;
-    }
-
-    private NeutronSubnet createNeutronSubnet(String subnetId, String tenantId,
-              String networkId, String cidr) {
-        INeutronSubnetCRUD iNeutronSubnetCRUD =
-                (INeutronSubnetCRUD) ServiceHelper.getGlobalInstance(INeutronSubnetCRUD.class, this);
-        NeutronSubnet ns = new NeutronSubnet();
-        ns.setID(subnetId);
-        ns.setCidr(cidr);
-        ns.initDefaults();
-        ns.setNetworkUUID(networkId);
-        ns.setTenantID(tenantId);
-        iNeutronSubnetCRUD.add(ns);
-        return ns;
-    }
-
-    private NeutronNetwork createNeutronNetwork(String uuid, String tenantID, String networkTypeVxlan, String segId) {
-        INeutronNetworkCRUD iNeutronNetworkCRUD =
-                (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
-        NeutronNetwork nn = new NeutronNetwork();
-        nn.setID(uuid);
-        nn.initDefaults();
-        nn.setTenantID(tenantID);
-        nn.setProviderNetworkType(networkTypeVxlan);
-        nn.setProviderSegmentationID(segId);
-        iNeutronNetworkCRUD.addNetwork(nn);
-        return nn;
-    }
-
-    private FlowBuilder initFlowBuilder(MatchBuilder matchBuilder, String flowId, short tableId) {
-        FlowBuilder flowBuilder = new FlowBuilder();
-        flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setId(new FlowId(flowId));
-        flowBuilder.setFlowName(flowId);
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setTableId(tableId);
-        flowBuilder.setKey(key);
-        return flowBuilder;
+        flowId = "Ingress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
+        verifyFlow(datapathId, flowId, Service.INGRESS_ACL.getTable());
     }
 
     private Flow getFlow (
             FlowBuilder flowBuilder,
             org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder,
-            LogicalDatastoreType store)
-            throws InterruptedException {
+            LogicalDatastoreType store) throws InterruptedException {
 
         Flow flow = null;
         for (int i = 0; i < 10; i++) {
-            LOG.info("getFlow {}-{}: looking for flowBuilder: {}, nodeBuilder: {}",
+            LOG.info("getFlow try {} from {}: looking for flow: {}, node: {}",
                     i, store, flowBuilder.build(), nodeBuilder.build());
             flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
             if (flow != null) {
-                LOG.info("getFlow: found flow({}): {}", store, flow);
+                LOG.info("getFlow try {} from {}: found flow: {}", i, store, flow);
                 break;
             }
             Thread.sleep(1000);
         }
         return flow;
+    }
+
+    private void verifyFlow(long datapathId, String flowId, short table) throws InterruptedException {
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
+                FlowUtils.createNodeBuilder(datapathId);
+        FlowBuilder flowBuilder =
+                FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, table);
+        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("Could not find flow in config: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
+        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("Could not find flow in operational: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
     }
 }

@@ -355,13 +355,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void teardown() {
         testMethodsRemaining--;
         LOG.info("{} test methods remaining", testMethodsRemaining);
-        if (testMethodsRemaining == 0) {
-            try {
-                disconnectOvsdbNode(getConnectionInfo(addressStr, portNumber));
-            } catch (InterruptedException e) {
-                LOG.warn("Interrupted while disconnecting", e);
-            }
-        }
     }
 
     /**

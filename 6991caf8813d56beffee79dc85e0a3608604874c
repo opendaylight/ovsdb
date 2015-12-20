@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_ffb6b189",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 4730
+      },
+      "writtenOn": "2015-12-20T10:44:18Z",
+      "side": 1,
+      "message": "@Vishal. Need your help. If only one physical port is created, no exception is throw. But when the second port is created, a nullpoiter exception is throwed.",
+      "range": {
+        "startLine": 109,
+        "startChar": 20,
+        "endLine": 109,
+        "endChar": 118
+      },
+      "revId": "6991caf8813d56beffee79dc85e0a3608604874c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

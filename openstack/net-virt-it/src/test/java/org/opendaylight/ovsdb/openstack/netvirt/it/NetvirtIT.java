@@ -377,7 +377,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Assert.assertNotNull("Failed to get controller target", controllerTarget);
 
         for (int i = 0; i < 10; i++) {
-            LOG.info("isControllerConnected try {}: looking for controller", i);
+            LOG.info("isControllerConnected try {}: looking for controller: {}", i, controllerTarget);
             OvsdbBridgeAugmentation bridge =
                     southboundUtils.getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
             Assert.assertNotNull(bridge);
@@ -391,7 +391,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             }
             Thread.sleep(1000);
         }
-        LOG.info("isControllerConnected exit: {}", connected);
+        LOG.info("isControllerConnected exit: {} - {}", connected, controllerTarget);
         return connected;
     }
 
@@ -436,6 +436,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         LOG.info("testNetVirt: should be connected");
 
+        //TODO use controller value rather that ovsdb connectionInfo or change log
         assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
                 + " is not connected", isControllerConnected(connectionInfo));
 

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_6e6211da",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-21T22:00:08Z",
+      "side": 1,
+      "message": "The archetype joined these lines.  I\u0027ll undo the change.",
+      "revId": "b6c0d81a530d33e2e30149e9a420d711048ebcc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

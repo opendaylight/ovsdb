@@ -22,6 +22,30 @@
       "revId": "6991caf8813d56beffee79dc85e0a3608604874c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_02133667",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-21T07:25:28Z",
+      "side": 1,
+      "message": "I\u0027ll take a look.",
+      "parentUuid": "1aa4ed85_ffb6b189",
+      "range": {
+        "startLine": 109,
+        "startChar": 20,
+        "endLine": 109,
+        "endChar": 118
+      },
+      "revId": "6991caf8813d56beffee79dc85e0a3608604874c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

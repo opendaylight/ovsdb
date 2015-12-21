@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_ed584bfc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-21T09:10:44Z",
+      "side": 1,
+      "message": "Is it guaranteed that updatedTunnelRows will only contain tunnels for switched in updatedPSRows, and likewise updatedPLocRows will only contain locators for tunnels in updatedTunnelRows?",
+      "revId": "24a72fbb3e0f2929de9abc14f88467e43a59b4f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

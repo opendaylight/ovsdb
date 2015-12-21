@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright (c) 2015 Red Hat, Inc.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-netvirt-{{VERSION}}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-restconf/{{VERSION}}/xml/features</repository>
+  <feature name='odl-netvirt-api' version='{{VERSION}}' description='OpenDaylight :: netvirt :: api'>
+    <feature version='{{VERSION}}'>odl-yangtools-models</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/netvirt-api/{{VERSION}}</bundle>
+  </feature>
+  <feature name='odl-netvirt' version='{{VERSION}}' description='OpenDaylight :: netvirt'>
+    <feature version='{{VERSION}}'>odl-mdsal-broker</feature>
+    <feature version='{{VERSION}}'>odl-netvirt-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/netvirt-impl/{{VERSION}}</bundle>
+    <configfile finalname="${configfile.directory}/netvirt.xml">mvn:org.opendaylight.ovsdb/netvirt-impl/{{VERSION}}/xml/config</configfile>
+  </feature>
+  <feature name='odl-netvirt-rest' version='{{VERSION}}' description='OpenDaylight :: netvirt :: REST'>
+    <feature version="{{VERSION}}">odl-netvirt</feature>
+    <feature version="{{VERSION}}">odl-restconf</feature>
+  </feature>
+  <feature name='odl-netvirt-ui' version='{{VERSION}}' description='OpenDaylight :: netvirt :: UI'>
+    <feature version="{{VERSION}}">odl-netvirt-rest</feature>
+    <feature version="{{VERSION}}">odl-mdsal-apidocs</feature>
+    <feature version="{{VERSION}}">odl-mdsal-xsql</feature>
+  </feature>
+
+</features>

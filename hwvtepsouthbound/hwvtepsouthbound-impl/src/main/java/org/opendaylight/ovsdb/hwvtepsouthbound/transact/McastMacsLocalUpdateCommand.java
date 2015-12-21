@@ -25,10 +25,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -73,7 +71,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
             McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), McastMacsLocal.class);
             setIpAddress(mcastMacsLocal, localMcastMac);
             setLocatorSet(transaction, mcastMacsLocal, localMcastMac);
-            setLogicalSwitch(instanceIdentifier, mcastMacsLocal, localMcastMac);
+            setLogicalSwitch(mcastMacsLocal, localMcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(mcastMacsLocal, localMcastMac, operationalMacOptional);
                 transaction.add(op.insert(mcastMacsLocal));
@@ -89,18 +87,19 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setLogicalSwitch(InstanceIdentifier<Node> iid, McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
+    private void setLogicalSwitch(McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
-            HwvtepNodeName lswitchName = new HwvtepNodeName(inputMac.getLogicalSwitchRef().getValue());
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
-                    getOperationalState().getLogicalSwitches(iid, new LogicalSwitchesKey(lswitchName));
+                    getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
                 Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 mcastMacsLocal.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update localMcastMac: No logical switch named {} found in operational datastore!",
-                        lswitchName);
+                LOG.warn("Create or update localMcastMac: No logical switch with iid {} found in operational datastore!",
+                        lswitchIid);
             }
         }
     }

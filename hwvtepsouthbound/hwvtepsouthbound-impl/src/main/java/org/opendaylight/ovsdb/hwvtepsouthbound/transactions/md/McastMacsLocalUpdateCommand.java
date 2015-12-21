@@ -37,6 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSetBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -103,7 +104,9 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactionCommand {
             UUID lsUUID = mMacLocal.getLogicalSwitchColumn().getData();
             LogicalSwitch lSwitch = updatedLSRows.get(lsUUID);
             if (lSwitch != null) {
-                mMacLocalBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitch.getName()));
+                InstanceIdentifier<LogicalSwitches> lSwitchIid =
+                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), lSwitch);
+                mMacLocalBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitchIid));
             }
         }
     }

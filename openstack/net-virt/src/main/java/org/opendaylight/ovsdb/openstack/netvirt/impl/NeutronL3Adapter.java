@@ -1172,7 +1172,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                          " action {}",
                          node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          macAddress, ipStr, mask, actionForNode);
-            return;
         }
         if (actionForNode == Action.ADD) {
             LOG.trace("Adding Flow : programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +

@@ -100,7 +100,7 @@ public class NetUtils {
     /**
      * Converts an integer number into a 4 bytes array
      *
-     * @param i the integer number
+     * @param ival the integer number
      * @return the byte array 
      */
     public static byte[] intToByteArray4(int ival) {
@@ -133,7 +133,7 @@ public class NetUtils {
      *
      * @param prefixMaskLength integer representing the length of the prefix network mask
      * @param isV6             boolean representing the IP version of the returned address
-     * @return
+     * @return the inet address
      */
     public static InetAddress getInetNetworkMask(int prefixMaskLength, boolean isV6) {
         if (prefixMaskLength < 0 || (!isV6 && prefixMaskLength > 32) || (isV6 && prefixMaskLength > 128)) {
@@ -236,27 +236,27 @@ public class NetUtils {
     /**
      * Checks if the test address and mask conflicts with the filter address and
      * mask
-     * <p/>
+     *
      * For example:
      * testAddress: 172.28.2.23
      * testMask: 255.255.255.0
      * filterAddress: 172.28.1.10
      * testMask: 255.255.255.0
      * do conflict
-     * <p/>
+     *
      * testAddress: 172.28.2.23
      * testMask: 255.255.255.0
      * filterAddress: 172.28.1.10
      * testMask: 255.255.0.0
      * do not conflict
-     * <p/>
+     *
      * Null parameters are permitted
      *
-     * @param testAddress
-     * @param filterAddress
-     * @param testMask
-     * @param filterMask
-     * @return
+     * @param testAddress test address
+     * @param filterAddress filter address
+     * @param testMask test mask
+     * @param filterMask filter mask
+     * @return true if there is an address confict
      */
     public static boolean inetAddressConflict(InetAddress testAddress, InetAddress filterAddress, InetAddress testMask,
                           InetAddress filterMask) {
@@ -305,8 +305,8 @@ public class NetUtils {
      * Returns true if the MAC address is the broadcast MAC address and false
      * otherwise.
      *
-     * @param MACAddress
-     * @return
+     * @param macAddress MAC Address
+     * @return true if the MAC address is the broadcast MAC address
      */
     public static boolean isBroadcastMACAddr(byte[] macAddress) {
         if (macAddress.length == MACAddrLengthInBytes) {
@@ -324,8 +324,8 @@ public class NetUtils {
      * Returns true if the MAC address is a unicast MAC address and false
      * otherwise.
      *
-     * @param MACAddress
-     * @return
+     * @param macAddress MAC Address
+     * @return true if the MAC address is the unicast MAC address
      */
     public static boolean isUnicastMACAddr(byte[] macAddress) {
         if (macAddress.length == MACAddrLengthInBytes) {
@@ -339,8 +339,8 @@ public class NetUtils {
      * otherwise. Note that this explicitly returns false for the broadcast MAC
      * address.
      *
-     * @param MACAddress
-     * @return
+     * @param macAddress MAC Address
+     * @return true if the MAC address is the multicast MAC address
      */
     public static boolean isMulticastMACAddr(byte[] macAddress) {
         if (macAddress.length == MACAddrLengthInBytes && !isBroadcastMACAddr(macAddress)) {
@@ -386,7 +386,7 @@ public class NetUtils {
      * may specify a mask at the end as "/MM"
      *
      * @param cidr the v4 address as A.B.C.D/MM
-     * @return
+     * @return true if the passed IP v4 address in string form is valid
      */
     public static boolean isIPv4AddressValid(String cidr) {
         if (cidr == null) {
@@ -414,7 +414,7 @@ public class NetUtils {
      * may specify a mask at the end as "/MMM"
      *
      * @param cidr the v6 address as A::1/MMM
-     * @return
+     * @return true if the passed IP v6 address in string form is valid
      */
     public static boolean isIPv6AddressValid(String cidr) {
         if (cidr == null) {
@@ -447,7 +447,7 @@ public class NetUtils {
      * address. The address may specify a mask at the end as "/MMM"
      *
      * @param cidr the v4 or v6 address as IP/MMM
-     * @return
+     * @return true if the passed IP address in string form is a valid v4 or v6
      */
     public static boolean isIPAddressValid(String cidr) {
         return NetUtils.isIPv4AddressValid(cidr) || NetUtils.isIPv6AddressValid(cidr);
@@ -461,7 +461,7 @@ public class NetUtils {
     /**
      * Returns the unsigned value of the passed byte variable
      *
-     * @param b the byte value
+     * @param ival the byte value
      * @return the int variable containing the unsigned byte value
      */
     public static int getUnsignedByte(byte ival) {
@@ -471,7 +471,7 @@ public class NetUtils {
     /**
      * Return the unsigned value of the passed short variable
      *
-     * @param s the short value
+     * @param ival the short value
      * @return the int variable containing the unsigned short value
      */
     public static int getUnsignedShort(short ival) {

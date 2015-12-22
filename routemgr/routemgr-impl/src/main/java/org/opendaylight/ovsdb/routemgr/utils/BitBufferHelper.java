@@ -36,7 +36,7 @@ public class BitBufferHelper {
     /**
      * Returns the first byte from the byte array
      *
-     * @param byte[] data
+     * @param data data
      * @return byte value
      */
     public static byte getByte(byte[] data) {
@@ -54,7 +54,7 @@ public class BitBufferHelper {
      * Returns the short value for the byte array passed.
      * Size of byte array is restricted to Short.SIZE
      *
-     * @param byte[] data
+     * @param data data
      * @return short value
      */
     public static short getShort(byte[] data) {
@@ -72,7 +72,7 @@ public class BitBufferHelper {
      * Returns the int value for the byte array passed.
      * Size of byte array is restricted to Integer.SIZE
      *
-     * @param byte[] data
+     * @param data data
      * @return int - the integer value of byte array
      */
     public static int getInt(byte[] data) {
@@ -90,7 +90,7 @@ public class BitBufferHelper {
      * Returns the long value for the byte array passed.
      * Size of byte array is restricted to Long.SIZE
      *
-     * @param byte[] data
+     * @param data data
      * @return long - the integer value of byte array
      */
     public static long getLong(byte[] data) {
@@ -108,8 +108,8 @@ public class BitBufferHelper {
      * Returns the short value for the last numBits of the byte array passed.
      * Size of numBits is restricted to Short.SIZE
      *
-     * @param byte[] data
-     * @param int    - numBits
+     * @param data data
+     * @param numBits number of bits
      * @return short - the short value of byte array
      */
     public static short getShort(byte[] data, int numBits) {
@@ -134,8 +134,8 @@ public class BitBufferHelper {
      * Returns the int value for the last numBits of the byte array passed.
      * Size of numBits is restricted to Integer.SIZE
      *
-     * @param byte[] data
-     * @param int    - numBits
+     * @param data data
+     * @param numBits number of bits
      * @return int - the integer value of byte array
      */
     public static int getInt(byte[] data, int numBits) {
@@ -160,8 +160,8 @@ public class BitBufferHelper {
      * Returns the long value for the last numBits of the byte array passed.
      * Size of numBits is restricted to Long.SIZE
      *
-     * @param byte[] data
-     * @param int    - numBits
+     * @param data data
+     * @param numBits number of bits
      * @return long - the integer value of byte array
      */
     public static long getLong(byte[] data, int numBits) {
@@ -195,16 +195,16 @@ public class BitBufferHelper {
      * The bits read are stored in a byte array which size is dictated
      * by the number of bits to be stored.
      * The bits are stored in the byte array LSB aligned.
-     * <p/>
+     *
      * Ex.
      * Read 7 bits at offset 10
      * 0         9 10     16 17
      * 0101000010 | 0000101 | 1111001010010101011
      * will be returned as {0,0,0,0,0,1,0,1}
      *
-     * @param byte[] data
-     * @param int    startOffset - offset to start fetching bits from data from
-     * @param int    numBits - number of bits to be fetched from data
+     * @param data data
+     * @param startOffset offset to start fetching bits from data from
+     * @param numBits number of bits to be fetched from data
      * @return byte [] - LSB aligned bits
      * @throws BufferException when the startOffset and numBits parameters are not congruent
      *                         with the data buffer size
@@ -245,8 +245,8 @@ public class BitBufferHelper {
                         & getLSBMask(NetUtils.NumBitsInAByte - extraOffsetBits);
                 valfromnext = (data[startByteOffset + ival + 1])
                         & getMSBMask(extraOffsetBits);
-                bytes[ival] = (byte) (valfromcurr << (extraOffsetBits) 
-                       | (valfromnext >> (NetUtils.NumBitsInAByte - extraOffsetBits)));
+                bytes[ival] = (byte) (valfromcurr << (extraOffsetBits)
+                        | (valfromnext >> (NetUtils.NumBitsInAByte - extraOffsetBits)));
             }
             // Now adding the rest of the bits if any
             if (extranumBits != 0) {
@@ -267,7 +267,7 @@ public class BitBufferHelper {
                             & (getMSBMask(extranumBits
                             - (NetUtils.NumBitsInAByte - extraOffsetBits)));
                     bytes[ival] = (byte) (valfromcurr << (extraOffsetBits)
-                                  | (valfromnext >> (NetUtils.NumBitsInAByte - extraOffsetBits)));
+                            | (valfromnext >> (NetUtils.NumBitsInAByte - extraOffsetBits)));
                 }
 
             }
@@ -286,10 +286,10 @@ public class BitBufferHelper {
     /**
      * Bits are expected to be stored in the input byte array from LSB
      *
-     * @param byte[]      - data to set the input byte
-     * @param byte        - input byte to be inserted
-     * @param startOffset - offset of data[] to start inserting byte from
-     * @param numBits     - number of bits of input to be inserted into data[]
+     * @param data data to set the input byte
+     * @param input byte to be inserted
+     * @param startOffset offset of data[] to start inserting byte from
+     * @param numBits number of bits of input to be inserted into data[]
      * @throws BufferException when the input, startOffset and numBits are not congruent
      *                         with the data buffer size
      */
@@ -303,11 +303,10 @@ public class BitBufferHelper {
     /**
      * Bits are expected to be stored in the input byte array from LSB
      *
-     * @param byte[]      - data to set the input byte
-     * @param byte[]      - input bytes to be inserted
-     * @param startOffset - offset of data[] to start inserting byte from
-     * @param numBits     - number of bits of input to be inserted into data[]
-     * @return void
+     * @param data data to set the input byte
+     * @param input bytes to be inserted
+     * @param startOffset offset of data[] to start inserting byte from
+     * @param numBits number of bits of input to be inserted into data[]
      * @throws BufferException when the startOffset and numBits parameters are not congruent
      *                         with data and input buffers' size
      */
@@ -320,8 +319,8 @@ public class BitBufferHelper {
     /**
      * Returns numBits 1's in the MSB position
      *
-     * @param numBits
-     * @return
+     * @param numBits number of bits
+     * @return numBits 1's in the MSB position
      */
     public static int getMSBMask(int numBits) {
         int mask = 0;
@@ -334,8 +333,8 @@ public class BitBufferHelper {
     /**
      * Returns numBits 1's in the LSB position
      *
-     * @param numBits
-     * @return
+     * @param numBits number of bits
+     * @return numBits 1's in the LSB position
      */
     public static int getLSBMask(int numBits) {
         int mask = 0;
@@ -348,8 +347,8 @@ public class BitBufferHelper {
     /**
      * Returns the numerical value of the byte array passed
      *
-     * @param byte[] - array
-     * @return long - numerical value of byte array passed
+     * @param array data array
+     * @return numerical value of byte array passed
      */
     public static long toNumber(byte[] array) {
         long ret = 0;
@@ -369,9 +368,9 @@ public class BitBufferHelper {
      * Returns the numerical value of the last numBits (LSB bits) of the byte
      * array passed
      *
-     * @param byte[] - array
-     * @param int    - numBits
-     * @return long - numerical value of byte array passed
+     * @param array data array
+     * @param numBits number of bits
+     * @return numerical value of byte array passed
      */
     public static long toNumber(byte[] array, int numBits) {
         int length = numBits / NetUtils.NumBitsInAByte;
@@ -402,10 +401,9 @@ public class BitBufferHelper {
      * aligned form example: input = 5000 [1001110001000] bytes = 19, -120
      * [00010011] [10001000]
      *
-     * @param Number
-     * @return byte[]
+     * @param input Number as input
+     * @return input value in byte form in LSB aligned
      */
-
     public static byte[] toByteArray(Number input) {
         Class<? extends Number> dataType = input.getClass();
         short size = 0;
@@ -439,9 +437,9 @@ public class BitBufferHelper {
      * aligned form example: input = 5000 [1001110001000] bytes = -114, 64
      * [10011100] [01000000]
      *
-     * @param Number input
-     * @param int    numBits - the number of bits to be returned
-     * @return byte[]
+     * @param input Number as input
+     * @param numBits number of bits
+     * @return input value in byte form in MSB aligned
      */
     public static byte[] toByteArray(Number input, int numBits) {
         Class<? extends Number> dataType = input.getClass();
@@ -495,19 +493,19 @@ public class BitBufferHelper {
      * aligned byte array
      *
      * @param inputbytes
-     * @param numBits
+     * @param numBits number of bits to be left aligned
      * @return
      */
     /**
      * It aligns the last numBits bits to the head of the byte array following
      * them with numBits % 8 zero bits.
-     * <p/>
+     *
      * Example: For inputbytes = [00000111][01110001] and numBits = 12 it
      * returns: shiftedBytes = [01110111][00010000]
      *
-     * @param byte[] inputBytes
-     * @param int    numBits - number of bits to be left aligned
-     * @return byte[]
+     * @param inputBytes input bytes
+     * @param numBits number of bits to be left aligned
+     * @return numBits bits to the head of the byte array
      */
     public static byte[] shiftBitsToMSB(byte[] inputBytes, int numBits) {
         int numBitstoShiftBy = 0;
@@ -527,7 +525,7 @@ public class BitBufferHelper {
         if (numBits % NetUtils.NumBitsInAByte == 0) {
             numBitstoShiftBy = 0;
         } else {
-            numBitstoShiftBy = ((NetUtils.NumBitsInAByte - (numBits % NetUtils.NumBitsInAByte)) < leadZeroesMSB) 
+            numBitstoShiftBy = ((NetUtils.NumBitsInAByte - (numBits % NetUtils.NumBitsInAByte)) < leadZeroesMSB)
                     ? (NetUtils.NumBitsInAByte - (numBits % NetUtils.NumBitsInAByte))
                     : leadZeroesMSB;
         }
@@ -546,20 +544,20 @@ public class BitBufferHelper {
             for (ival = 0; ival < (size - 1); ival++) {
                 if ((ival + 1) == (size - 1)) {
                     if (numEndRestBits > numBitstoShiftBy) {
-                        shiftedBytes[ival] = (byte) ((inputBytes[ival] << numBitstoShiftBy) 
-                                 | ((inputBytes[ival + 1] & getMSBMask(numBitstoShiftBy)) 
-                                 >> (numEndRestBits - numBitstoShiftBy)));
+                        shiftedBytes[ival] = (byte) ((inputBytes[ival] << numBitstoShiftBy)
+                                | ((inputBytes[ival + 1] & getMSBMask(numBitstoShiftBy))
+                                >> (numEndRestBits - numBitstoShiftBy)));
                         shiftedBytes[ival + 1] = (byte) ((inputBytes[ival + 1] & getLSBMask(numEndRestBits
                                 - numBitstoShiftBy)) << numBitstoShiftBy);
                     } else {
-                        shiftedBytes[ival] = (byte) ((inputBytes[ival] << numBitstoShiftBy) 
-                              | ((inputBytes[ival + 1] & getMSBMask(numEndRestBits)) 
-                              >> (NetUtils.NumBitsInAByte - numEndRestBits)));
+                        shiftedBytes[ival] = (byte) ((inputBytes[ival] << numBitstoShiftBy)
+                                | ((inputBytes[ival + 1] & getMSBMask(numEndRestBits))
+                                >> (NetUtils.NumBitsInAByte - numEndRestBits)));
                     }
                 }
-                shiftedBytes[ival] = (byte) ((inputBytes[ival] << numBitstoShiftBy) 
-                      | (inputBytes[ival + 1] & getMSBMask(numBitstoShiftBy)) 
-                      >> (NetUtils.NumBitsInAByte - numBitstoShiftBy));
+                shiftedBytes[ival] = (byte) ((inputBytes[ival] << numBitstoShiftBy)
+                        | (inputBytes[ival + 1] & getMSBMask(numBitstoShiftBy))
+                        >> (NetUtils.NumBitsInAByte - numBitstoShiftBy));
             }
 
         }
@@ -569,13 +567,13 @@ public class BitBufferHelper {
     /**
      * It aligns the first numBits bits to the right end of the byte array
      * preceding them with numBits % 8 zero bits.
-     * <p/>
+     *
      * Example: For inputbytes = [01110111][00010000] and numBits = 12 it
      * returns: shiftedBytes = [00000111][01110001]
      *
-     * @param byte[] inputBytes
-     * @param int    numBits - number of bits to be right aligned
-     * @return byte[]
+     * @param inputBytes input bytes
+     * @param numBits number of bits to be right aligned
+     * @return aligns the first numBits bits to the right end of inputBytes
      */
     public static byte[] shiftBitsToLSB(byte[] inputBytes, int numBits) {
         int numBytes = inputBytes.length;
@@ -595,8 +593,8 @@ public class BitBufferHelper {
             inputMsb = inputBytes[ival] & getMSBMask(numBitstoShift);
             inputMsb = (inputBytes[ival] < 0) ? (inputBytes[ival] + 256)
                     : inputBytes[ival];
-            shiftedBytes[ival] = (byte) ((inputLsb << numBitstoShift) 
-                 | (inputMsb >> (NetUtils.NumBitsInAByte - numBitstoShift)));
+            shiftedBytes[ival] = (byte) ((inputLsb << numBitstoShift)
+                    | (inputMsb >> (NetUtils.NumBitsInAByte - numBitstoShift)));
         }
         inputMsb = inputBytes[0] & (getMSBMask(numBitstoShift));
         inputMsb = (inputMsb < 0) ? (inputMsb + 256) : inputMsb;
@@ -609,10 +607,10 @@ public class BitBufferHelper {
      * of bits specified from the input data byte array. The input byte array
      * has the bits stored starting from the LSB
      *
-     * @param byte[] data
-     * @param byte[] inputdata
-     * @param int    startOffset
-     * @param int    numBits
+     * @param data data
+     * @param inputdataLSB input data
+     * @param startOffset start offset
+     * @param numBits number of bits
      */
     public static void insertBits(byte[] data, byte[] inputdataLSB,
                                   int startOffset, int numBits) {
@@ -652,7 +650,7 @@ public class BitBufferHelper {
                 inputMSBbits = (inputMSBbits >= 0) ? inputMSBbits
                         : inputMSBbits + 256;
                 data[startByteOffset + ival] = (byte) (data[startByteOffset + ival]
-                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits)) 
+                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits))
                         | (inputMSBbits >> extraOffsetBits));
                 inputMSBbits = inputLSBbits = 0;
             }
@@ -664,7 +662,7 @@ public class BitBufferHelper {
                 inputMSBbits = (inputMSBbits >= 0) ? inputMSBbits
                         : inputMSBbits + 256;
                 data[startByteOffset + ival] = (byte) ((data[startByteOffset + ival])
-                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits)) 
+                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits))
                         | (inputMSBbits >> extraOffsetBits));
             } else if (restBits == (NetUtils.NumBitsInAByte - extraOffsetBits)) {
                 if (numBytes != 0) {
@@ -675,7 +673,7 @@ public class BitBufferHelper {
                 inputMSBbits = (inputMSBbits >= 0) ? inputMSBbits
                         : inputMSBbits + 256;
                 data[startByteOffset + ival] = (byte) (data[startByteOffset + ival]
-                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits)) 
+                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits))
                         | (inputMSBbits >> extraOffsetBits));
             } else {
                 if (numBytes != 0) {
@@ -686,7 +684,7 @@ public class BitBufferHelper {
                 inputMSBbits = (inputMSBbits >= 0) ? inputMSBbits
                         : inputMSBbits + 256;
                 data[startByteOffset + ival] = (byte) (data[startByteOffset + ival]
-                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits)) 
+                        | (inputLSBbits << (NetUtils.NumBitsInAByte - extraOffsetBits))
                         | (inputMSBbits >> extraOffsetBits));
 
                 inputLSBbits = (inputdata[ival] & (getLSBMask(restBits
@@ -700,10 +698,10 @@ public class BitBufferHelper {
     /**
      * Checks for overflow and underflow exceptions
      *
-     * @param data
-     * @param startOffset
-     * @param numBits
-     * @throws PacketException when the startOffset and numBits parameters
+     * @param data data
+     * @param startOffset start offset
+     * @param numBits number of bits
+     * @throws BufferException when the startOffset and numBits parameters
      *                         are not congruent with the data buffer's size
      */
     public static void checkExceptions(byte[] data, int startOffset, int numBits) throws BufferException {

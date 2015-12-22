@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 public class HwvtepSchemaConstants {
-    public static final String databaseName = "hardware_vtep";
+    public static final String HARDWARE_VTEP = "hardware_vtep";
     public enum HWVTEPSCHEMATABLES {
         GLOBAL("Global", null, null),
         MANAGER("Manager","Global","managers"),

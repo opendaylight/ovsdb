@@ -70,7 +70,9 @@ public class NeutronIAwareUtil {
         NeutronRouter_Interface neutronInterface = new NeutronRouter_Interface();
         String id = String.valueOf(routerInterface.getUuid().getValue());
         neutronInterface.setID(id);
-        neutronInterface.setTenantID(routerInterface.getTenantId().getValue());
+        if (routerInterface.getTenantId() != null) {
+            neutronInterface.setTenantID(routerInterface.getTenantId().getValue());
+        }
         neutronInterface.setSubnetUUID(routerInterface.getFixedIps().get(0).getSubnetId().getValue());
         neutronInterface.setPortUUID(routerInterface.getUuid().getValue());
         return neutronInterface;

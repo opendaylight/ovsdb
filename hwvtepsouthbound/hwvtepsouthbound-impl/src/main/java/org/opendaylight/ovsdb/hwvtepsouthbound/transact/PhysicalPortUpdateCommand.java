@@ -27,11 +27,9 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -151,9 +149,11 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
             //get UUID by LogicalSwitchRef
             Map<Long, UUID> bindingMap = new HashMap<Long, UUID>();
             for (VlanBindings vlanBinding: inputPhysicalPort.getVlanBindings()) {
-                HwvtepNodeName lswitchName = new HwvtepNodeName(vlanBinding.getLogicalSwitchRef().getValue());
+                @SuppressWarnings("unchecked")
+                InstanceIdentifier<LogicalSwitches> lswitchIid =
+                        (InstanceIdentifier<LogicalSwitches>) vlanBinding.getLogicalSwitchRef().getValue();
                 Optional<LogicalSwitches> operationalSwitchOptional =
-                        getOperationalState().getLogicalSwitches(globalNodeIid, new LogicalSwitchesKey(lswitchName));
+                        getOperationalState().getLogicalSwitches(lswitchIid);
                 if (operationalSwitchOptional.isPresent()) {
                     Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                     bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), new UUID(logicalSwitchUuid.getValue()));

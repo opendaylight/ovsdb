@@ -127,4 +127,11 @@ public interface BridgeConfigurationManager {
    */
      String getExternalInterfaceName (Node node, String externalNetwork);
 
+
+    /**
+     *
+     * @param node the {@link Node} to query
+     * @return a list of controllers
+     */
+    List<String> getControllersFromOvsdbNode(Node node);
 }

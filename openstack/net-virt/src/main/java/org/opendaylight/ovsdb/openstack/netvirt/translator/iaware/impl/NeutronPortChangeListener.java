@@ -136,7 +136,6 @@ public class NeutronPortChangeListener implements DataChangeListener, AutoClosea
                 NeutronPort_AllowedAddressPairs pair = new NeutronPort_AllowedAddressPairs();
                 pair.setIpAddress(mdPair.getIpAddress());
                 pair.setMacAddress(mdPair.getMacAddress());
-                pair.setPortID(mdPair.getPortId());
                 pairs.add(pair);
             }
             result.setAllowedAddressPairs(pairs);

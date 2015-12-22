@@ -129,7 +129,7 @@ public class OvsdbConnectionInstanceTest {
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorAllTables", String.class,DatabaseSchema.class));
         ovsdbConnectionInstance.registerCallbacks();
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(2)).invoke("monitorAllTables", anyString(), any(DatabaseSchema.class));
+        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(), any(DatabaseSchema.class));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -171,6 +171,7 @@ public class OvsdbConnectionInstanceTest {
         tables.add("tableName1");
         tables.add("tableName2");
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
+        when(dbSchema.getName()).thenReturn(SouthboundConstants.OPEN_V_SWITCH);
         when(dbSchema.getTables()).thenReturn(tables);
         GenericTableSchema tableSchema = mock(GenericTableSchema.class);
         when(dbSchema.table(anyString(), eq(GenericTableSchema.class))).thenReturn(tableSchema);

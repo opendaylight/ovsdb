@@ -8,10 +8,9 @@
 
 package org.opendaylight.ovsdb.routemgr.net;
 
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.subnets.rev150712.subnet.attributes.AllocationPools;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class IfMgr  {
+public class IfMgr {
 
     /**
      * Logger instance.
@@ -27,28 +26,36 @@ public class IfMgr  {
     static final Logger logger = LoggerFactory.getLogger(IfMgr.class);
 
     // router objects - routers, subnets, interfaces
-    private HashMap<Uuid, VirtualRouter>      vrouters;
-    private HashMap<Uuid, VirtualSubnet>      vsubnets;
-    private HashMap<Uuid, VirtualPort>        vintfs;
-    private HashMap<Uuid, List<VirtualPort>>  unprocessedRouterIntfs;
-    private HashMap<Uuid, List<VirtualPort>>  unprocessedSubnetIntfs;
+    private HashMap<Uuid, VirtualRouter> vrouters;
+    private HashMap<Uuid, VirtualSubnet> vsubnets;
+    private HashMap<Uuid, VirtualPort> vintfs;
+    private HashMap<Uuid, List<VirtualPort>> unprocessedRouterIntfs;
+    private HashMap<Uuid, List<VirtualPort>> unprocessedSubnetIntfs;
 
     void init() {
-        this.vrouters               = new HashMap<>();
-        this.vsubnets               = new HashMap<>();
-        this.vintfs                 = new HashMap<>();
+        this.vrouters = new HashMap<>();
+        this.vsubnets = new HashMap<>();
+        this.vintfs = new HashMap<>();
         this.unprocessedRouterIntfs = new HashMap<>();
         this.unprocessedSubnetIntfs = new HashMap<>();
         logger.info("IfMgr is enabled");
     }
 
+    /**
+     * Add router
+     *
+     * @param rtrUuid router uuid
+     * @param rtrName router name
+     * @param tenantId tenant id
+     * @param isAdminStateUp admin up
+     */
     public void addRouter(Uuid rtrUuid, String rtrName, Uuid tenantId, Boolean isAdminStateUp) {
 
         VirtualRouter rtr = new VirtualRouter();
         if (rtr != null) {
             rtr.setTenantID(tenantId)
-                .setRouterUUID(rtrUuid)
-                .setName(rtrName);
+                    .setRouterUUID(rtrUuid)
+                    .setName(rtrName);
             vrouters.put(rtrUuid, rtr);
 
             List<VirtualPort> intfList = unprocessedRouterIntfs.get(rtrUuid);
@@ -74,6 +81,11 @@ public class IfMgr  {
         return;
     }
 
+    /**
+     * Remove Router
+     *
+     * @param rtrUuid router uuid
+     */
     public void removeRouter(Uuid rtrUuid) {
 
         VirtualRouter rtr = vrouters.get(rtrUuid);
@@ -88,6 +100,16 @@ public class IfMgr  {
         return;
     }
 
+    /**
+     * Add Subnet
+     *
+     * @param snetId subnet id
+     * @param name subnet name
+     * @param networkId network id
+     * @param tenantId tenant id
+     * @param gatewayIp gateway ip address
+     * @param poolsList pools list
+     */
     public void addSubnet(Uuid snetId, String name, Uuid networkId, Uuid tenantId,
                           IpAddress gatewayIp, List<AllocationPools> poolsList) {
 
@@ -127,6 +149,11 @@ public class IfMgr  {
         return;
     }
 
+    /**
+     * Remove Subnet
+     *
+     * @param snetId subnet id
+     */
     public void removeSubnet(Uuid snetId) {
 
         VirtualSubnet snet = vsubnets.get(snetId);
@@ -148,7 +175,7 @@ public class IfMgr  {
             intf = new VirtualPort();
             if (intf != null) {
                 vintfs.put(portId, intf);
-            }  else {
+            } else {
                 logger.error("Create rtr intf failed for :{}", portId);
             }
         }
@@ -187,7 +214,7 @@ public class IfMgr  {
             intf = new VirtualPort();
             if (intf != null) {
                 vintfs.put(portId, intf);
-            }  else {
+            } else {
                 logger.error("Create host intf failed for :{}", portId);
             }
         }
@@ -219,7 +246,7 @@ public class IfMgr  {
             intf = new VirtualPort();
             if (intf != null) {
                 vintfs.put(portId, intf);
-            }  else {
+            } else {
                 logger.error("updateInterface failed for :{}", portId);
             }
         }

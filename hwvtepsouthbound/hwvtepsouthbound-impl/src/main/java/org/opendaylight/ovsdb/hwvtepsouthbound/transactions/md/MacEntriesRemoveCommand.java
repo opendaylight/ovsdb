@@ -13,6 +13,7 @@ import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -74,7 +75,7 @@ public class MacEntriesRemoveCommand extends AbstractTransactionCommand {
         for (McastMacsLocal lmm : deletedLMMRows) {
             InstanceIdentifier<LocalMcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LocalMcastMacs.class, new LocalMcastMacsKey(new MacAddress(lmm.getMac())));
+                    .child(LocalMcastMacs.class, new LocalMcastMacsKey(getMacAddress(lmm.getMac())));
             transaction.delete(LogicalDatastoreType.OPERATIONAL, lumId);
         }
     }
@@ -85,9 +86,16 @@ public class MacEntriesRemoveCommand extends AbstractTransactionCommand {
         for (McastMacsRemote lum : deletedMMRRows) {
             InstanceIdentifier<RemoteMcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(new MacAddress(lum.getMac())));
+                    .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(getMacAddress(lum.getMac())));
             transaction.delete(LogicalDatastoreType.OPERATIONAL, lumId);
         }
     }
 
+    private MacAddress getMacAddress(String mac) {
+        if (mac.equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
+            return HwvtepSouthboundConstants.UNKNOWN_DST_MAC;
+        } else {
+            return new MacAddress(mac);
+        }
+    }
 }

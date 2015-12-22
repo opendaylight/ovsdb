@@ -1114,7 +1114,6 @@ public class NeutronL3Adapter implements ConfigInterface {
                          " action {}",
                          node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          macAddress, ipStr, mask, actionForNode);
-            return;
         }
         if (actionForNode == Action.ADD) {
             LOG.trace("Adding Flow : programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +

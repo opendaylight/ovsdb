@@ -72,28 +72,19 @@ public class SfcClassifier {
      */
     public void programSfcClassiferFlows(Long dpidLong, short writeTable, String ruleName, Matches match,
                                          NshUtils nshHeader, long tunnelOfPort, boolean write) {
-        String nodeName = OPENFLOW + dpidLong;
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcClass_" + ruleName + "_" + nshHeader.getNshNsp();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, writeTable);
 
         MatchBuilder matchBuilder = buildMatch(match);
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcClass_" + ruleName + "_" + nshHeader.getNshNsp();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (write) {
             List<Action> actionList = getNshAction(nshHeader);
             ActionBuilder ab = new ActionBuilder();
 
-            ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(tunnelOfPort, nodeName)));
+            ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dpidLong, tunnelOfPort)));
             ab.setOrder(actionList.size());
             ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
@@ -122,6 +113,8 @@ public class SfcClassifier {
                                                long tunnelOfPort, long outOfPort, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "egressSfcClass_" + ruleName + "_" + nshHeader.getNshNsp() + "_" + nshHeader.getNshNsi();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, writeTable);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, tunnelOfPort).build());
@@ -129,16 +122,6 @@ public class SfcClassifier {
                 MatchUtils.createTunnelIDMatch(matchBuilder, BigInteger.valueOf(nshHeader.getNshMetaC2())).build());
         flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nshHeader.getNshNsp()).build());
         flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nshHeader.getNshNsi()).build());
-
-        String flowId = "egressSfcClass_" + ruleName + "_" + nshHeader.getNshNsp() + "_" + nshHeader.getNshNsi();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (write) {
             List<Action> actionList = new ArrayList<>();
@@ -204,24 +187,14 @@ public class SfcClassifier {
 
     public void programLocalInPort(Long dpidLong, String segmentationId, Long inPort,
                                    short writeTable, short goToTableId, Matches match, boolean write) {
-        String nodeName = OPENFLOW + dpidLong;
-
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcIngress_" + segmentationId + "_" + inPort;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, writeTable);
 
         MatchBuilder matchBuilder = buildMatch(match);
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
-        String flowId = "sfcIngress_" + segmentationId + "_" + inPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (write) {
             InstructionBuilder ib = new InstructionBuilder();

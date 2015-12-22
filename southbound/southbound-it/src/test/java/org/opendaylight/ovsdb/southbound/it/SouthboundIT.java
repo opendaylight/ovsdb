@@ -19,6 +19,8 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -31,8 +33,10 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -133,6 +137,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
+    private static int testMethodsRemaining;
 
     @Inject
     private BundleContext bundleContext;
@@ -324,7 +329,39 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
 
+        // Let's count the test methods (we need to use this instead of @AfterClass on teardown() since the latter is
+        // useless with pax-exam)
+        for (Method method : getClass().getMethods()) {
+            boolean testMethod = false;
+            boolean ignoreMethod = false;
+            for (Annotation annotation : method.getAnnotations()) {
+                if (Test.class.equals(annotation.annotationType())) {
+                    testMethod = true;
+                }
+                if (Ignore.class.equals(annotation.annotationType())) {
+                    ignoreMethod = true;
+                }
+            }
+            if (testMethod && !ignoreMethod) {
+                testMethodsRemaining++;
+            }
+        }
+        LOG.info("{} test methods to run", testMethodsRemaining);
+
         setup = true;
+    }
+
+    @After
+    public void teardown() {
+        testMethodsRemaining--;
+        LOG.info("{} test methods remaining", testMethodsRemaining);
+        if (testMethodsRemaining == 0) {
+            try {
+                disconnectOvsdbNode(getConnectionInfo(addressStr, portNumber));
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted while disconnecting", e);
+            }
+        }
     }
 
     /**
@@ -341,7 +378,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private ConnectionInfo getConnectionInfo(final String addressStr, final int portNumber) {
+    private static ConnectionInfo getConnectionInfo(final String addressStr, final int portNumber) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(addressStr);

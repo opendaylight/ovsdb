@@ -138,7 +138,9 @@ public class NeutronSubnetChangeListener implements DataChangeListener, AutoClos
     private NeutronSubnet fromMd(Subnet subnet) {
         NeutronSubnet result = new NeutronSubnet();
         result.setName(subnet.getName());
-        result.setTenantID(String.valueOf(subnet.getTenantId().getValue()).replace("-",""));
+        if (subnet.getTenantId() != null) {
+            result.setTenantID(String.valueOf(subnet.getTenantId().getValue()).replace("-",""));
+        }
         result.setNetworkUUID(subnet.getNetworkId().getValue());
         result.setIpVersion(IPV_MAP.get(subnet.getIpVersion()));
         result.setCidr(subnet.getCidr());

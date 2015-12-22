@@ -98,18 +98,17 @@ public class OvsdbConnectionInstance implements OvsdbClient {
             }
 
             try {
-                List<String> databases = getDatabases().get();
-                this.callback = new OvsdbMonitorCallback(this,txInvoker);
-                for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        monitorAllTables(database, dbSchema);
-                    } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
-                    }
+                String database = SouthboundConstants.OPEN_V_SWITCH;
+                DatabaseSchema dbSchema = getSchema(database).get();
+                if (dbSchema != null) {
+                    LOG.info("Monitoring database: {}", database);
+                    callback = new OvsdbMonitorCallback(this, txInvoker);
+                    monitorAllTables(database, dbSchema);
+                } else {
+                    LOG.info("No database {} found on {}", database, connectionInfo);
                 }
             } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Exception attempting to registerCallbacks {}: {}",connectionInfo,e);
+                LOG.warn("Exception attempting to registerCallbacks {}: ", connectionInfo, e);
             }
         }
     }
@@ -136,6 +135,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         if (tables != null) {
             List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
+                LOG.info("Southbound monitoring table {} in {}", tableName, dbSchema.getName());
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                 Set<String> columns = tableSchema.getColumns();
                 MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);

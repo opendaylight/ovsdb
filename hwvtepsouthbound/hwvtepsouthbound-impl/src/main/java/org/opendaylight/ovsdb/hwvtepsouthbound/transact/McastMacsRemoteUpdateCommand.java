@@ -25,9 +25,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -73,7 +71,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), McastMacsRemote.class);
             setIpAddress(mcastMacsRemote, mac);
             setLocatorSet(transaction, mcastMacsRemote, mac);
-            setLogicalSwitch(instanceIdentifier, mcastMacsRemote, mac);
+            setLogicalSwitch(mcastMacsRemote, mac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(mcastMacsRemote, mac, operationalMacOptional);
                 transaction.add(op.insert(mcastMacsRemote));
@@ -89,18 +87,19 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setLogicalSwitch(InstanceIdentifier<Node> iid, McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac) {
+    private void setLogicalSwitch(McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
-            HwvtepNodeName lswitchName = new HwvtepNodeName(inputMac.getLogicalSwitchRef().getValue());
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
-                    getOperationalState().getLogicalSwitches(iid, new LogicalSwitchesKey(lswitchName));
+                    getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
                 Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 mcastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update remoteMcastMac: NO logical switch named {} found in operational datastore!",
-                        lswitchName);
+                LOG.warn("Create or update remoteMcastMac: NO logical switch with iid {} found in operational datastore!",
+                        lswitchIid);
             }
         }
     }

@@ -625,7 +625,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     @Test
     public void testNetvirtSfc() throws InterruptedException {
         String bridgeName = INTEGRATION_BRIDGE_NAME;
-        ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
         Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);

@@ -260,7 +260,7 @@ public abstract class AbstractServiceInstance {
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setPriority(0);
-        flowBuilder.setBarrier(true);
+        flowBuilder.setBarrier(false);
         flowBuilder.setTableId(service.getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);

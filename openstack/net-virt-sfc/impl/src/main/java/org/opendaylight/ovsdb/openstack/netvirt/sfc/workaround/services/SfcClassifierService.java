@@ -293,11 +293,20 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         }
     }
 
+    private FlowBuilder initFlowBuilder(FlowBuilder flowBuilder, String flowName, short table, FlowID flowID) {
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, table)
+                .setCookie(new FlowCookie(getCookie(flowID)))
+                .setCookieMask(new FlowCookie(getCookie(flowID)));
+        return flowBuilder;
+    }
+
     @Override
     public void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
                                               long sfOfPort, int tunnelId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcEgressClassBypass_" + nsp + "_" + + nsi + "_"  + sfOfPort;
+        initFlowBuilder(flowBuilder, flowName, TABLE_0, FlowID.FLOW_EGRESSCLASSBYPASS).setPriority(40000);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, sfOfPort);
@@ -306,19 +315,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         MatchUtils.addNxNspMatch(matchBuilder, nsp);
         MatchUtils.addNxNsiMatch(matchBuilder, nsi);
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcEgressClassBypass_" + nsp + "_" + + nsi + "_"  + sfOfPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(TABLE_0);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_EGRESSCLASSBYPASS)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_EGRESSCLASSBYPASS)));
-        flowBuilder.setPriority(40000); //Needs to be above default priority of 32768
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -343,6 +339,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     public void program_sfEgress(long dataPathId, int dstPort, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfEgress_" + dstPort;
+        initFlowBuilder(flowBuilder, flowName, getTable(), FlowID.FLOW_SFEGRESS);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createIpProtocolMatch(matchBuilder, UDP_SHORT);
@@ -350,18 +348,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         MatchUtils.addNxRegMatch(matchBuilder,
                 MatchUtils.RegMatch.of(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL));
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfEgress_" + dstPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_SFEGRESS)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_SFEGRESS)));
 
         if (write) {
             InstructionBuilder ib = new InstructionBuilder();
@@ -386,6 +372,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                                   String ipAddress, String sfDplName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfIngress_" + dstPort + "_" + ipAddress;
+        initFlowBuilder(flowBuilder, flowName, TABLE_0, FlowID.FLOW_SFINGRESS);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createIpProtocolMatch(matchBuilder, UDP_SHORT);
@@ -393,18 +381,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(ipCidr));
         MatchUtils.addLayer4Match(matchBuilder, UDP_SHORT, 0, dstPort);
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfIngress_" + dstPort + "_" + ipAddress;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(TABLE_0);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_SFINGRESS)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_SFINGRESS)));
 
         if (write) {
             InstructionBuilder ib = new InstructionBuilder();
@@ -429,6 +405,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                                       String ipAddress, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "ArpResponder_" + ipAddress;
+        initFlowBuilder(flowBuilder, flowName, TABLE_0, FlowID.FLOW_SFARP).setPriority(1024);
 
         MacAddress macAddress = new MacAddress(macAddressStr);
 
@@ -437,19 +415,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));
         MatchUtils.createArpDstIpv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress));
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "ArpResponder_" + ipAddress;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(TABLE_0);
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(1024);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_SFARP)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_SFARP)));
 
         if (write) {
             InstructionBuilder ib = new InstructionBuilder();

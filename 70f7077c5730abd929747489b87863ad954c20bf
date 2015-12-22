@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_b8a04a91",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepSouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:09:51Z",
+      "side": 1,
+      "message": "I\u0027m not sure you need an AtomicBoolean instead of a plain boolean here. setup() shouldn\u0027t ever be called in multiple threads in parallel.",
+      "revId": "70f7077c5730abd929747489b87863ad954c20bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_78aad271",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:09:51Z",
+      "side": 1,
+      "message": "Why was the disconnection removed?",
+      "revId": "70f7077c5730abd929747489b87863ad954c20bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

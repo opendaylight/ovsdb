@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_78e2d2a0",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "This actually needs to go in the \u003cdependencyManagement/\u003e section above, in the same way as the mdsal-artifacts import.",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_98022e3d",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "This isn\u0027t supported yet, so it needs to stay ${project.version}.",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d8e8a67e",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "Unfortunately features-parent doesn\u0027t support {{VERSION}} for features, yet, so this needs to stay ${project.version}.",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f8ed628c",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "As above, the needs to stay ${yangtools.version}.",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d89f4602",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${project.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f8a48258",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${mdsal.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_9889cecc",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${project.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b8860ab8",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${project.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_589356fa",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${project.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_38c21aea",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${mdsal.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_789092ec",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${project.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_18bdde68",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${project.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d8b6668a",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${mdsal.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f8bb2270",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-12-22T16:55:26Z",
+      "side": 1,
+      "message": "${mdsal.version}",
+      "revId": "630209085dc5d7e27f72fea8933d845866d95911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

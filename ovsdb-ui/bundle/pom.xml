@@ -74,7 +74,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                    <artifactItem>
                       <groupId>org.opendaylight.ovsdb</groupId>
                       <artifactId>ovsdb-ui-module</artifactId>
-                      <version>${ovsdb.ui.version}</version>
+                      <version>${project.version}</version>
                       <overWrite>true</overWrite>
                       <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
                     </artifactItem>

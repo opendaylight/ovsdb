@@ -20,7 +20,7 @@ module hwvtep {
 
     typedef hwvtep-logical-switch-ref {
         description "A reference to a logical switch in hwvtep based switches";
-        type hwvtep-node-name;
+        type instance-identifier;
     }
 
     typedef hwvtep-physical-locator-ref {

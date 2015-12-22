@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -92,7 +93,9 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
             UUID lsUUID = ucml.getLogicalSwitchColumn().getData();
             LogicalSwitch logicalSwitch = updatedLSRows.get(lsUUID);
             if (logicalSwitch != null) {
-                ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(logicalSwitch.getName()));
+                InstanceIdentifier<LogicalSwitches> lSwitchIid =
+                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
+                ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitchIid));
             }
         }
         List<LocalUcastMacs> umclList = new ArrayList<>();

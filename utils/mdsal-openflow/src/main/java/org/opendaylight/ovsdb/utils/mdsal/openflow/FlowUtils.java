@@ -118,7 +118,7 @@ public class FlowUtils {
         final FlowId flowId = new FlowId(flowName);
         flowBuilder
                 .setId(flowId)
-                .setStrict(true)
+                .setStrict(false)
                 .setBarrier(false)
                 .setTableId(table)
                 .setKey(new FlowKey(flowId))

@@ -8,6 +8,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp;
 
 import org.opendaylight.controller.liblldp.NetUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInput;
@@ -20,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Remo
 
 public final class ArpResolverMetadata {
 
+    private final GatewayMacResolverListener gatewayMacResolverListener;
     private final Ipv4Address gatewayIpAddress;
     private final Long externalNetworkBridgeDpid;
     private final Ipv4Address arpRequestSourceIp;
@@ -31,9 +34,11 @@ public final class ArpResolverMetadata {
     private int numberOfOutstandingArpRequests;
     private static final int MAX_OUTSTANDING_ARP_REQUESTS = 2;
 
-    public ArpResolverMetadata(final Long externalNetworkBridgeDpid,
+    public ArpResolverMetadata(final GatewayMacResolverListener gatewayMacResolverListener,
+                               final Long externalNetworkBridgeDpid,
             final Ipv4Address gatewayIpAddress, final Ipv4Address arpRequestSourceIp,
             final MacAddress arpRequestMacAddress, final boolean periodicRefresh){
+        this.gatewayMacResolverListener = gatewayMacResolverListener;
         this.externalNetworkBridgeDpid = externalNetworkBridgeDpid;
         this.gatewayIpAddress = gatewayIpAddress;
         this.arpRequestSourceIp = arpRequestSourceIp;
@@ -61,6 +66,11 @@ public final class ArpResolverMetadata {
     }
     public void setGatewayMacAddress(MacAddress gatewayMacAddress) {
         if (gatewayMacAddress != null) {
+            if (gatewayMacResolverListener != null &&
+                    !gatewayMacAddress.equals(this.gatewayMacAddress)) {
+                gatewayMacResolverListener.gatewayMacResolved(externalNetworkBridgeDpid,
+                        new IpAddress(gatewayIpAddress), gatewayMacAddress);
+            }
             gatewayMacAddressResolved = true;
             numberOfOutstandingArpRequests = 0;
         } else {

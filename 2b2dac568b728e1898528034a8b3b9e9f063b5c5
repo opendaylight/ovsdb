@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_25199788",
+        "filename": "netvirt/api/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_8573ab4c",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_2590b742",
         "filename": "netvirt/api/pom.xml",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This should be 1.2.1-SNAPSHOT to match the main ovsdb version.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_451e1372",
+        "filename": "netvirt/api/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_2590b742",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_b83e0ab7",
+        "filename": "netvirt/artifacts/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "I\u0027m not sure if I fixed this right, so please check.",
+      "parentUuid": "1aa4ed85_e5993f6f",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_4595b331",
         "filename": "netvirt/artifacts/pom.xml",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "1.2.1-SNAPSHOT.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_584b5659",
+        "filename": "netvirt/artifacts/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_4595b331",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_9868eebb",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_e5ab7f87",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_05b1fbf7",
         "filename": "netvirt/features/pom.xml",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This should match the version of ovsdb, 1.2.1-SNAPSHOT. (It\u0027s technically possible to use different versions for Maven modules inside a single project, but it means that version tags in the repository are meaningless and it prevents the use of the release plugin should that ever become possible.)",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b865aae2",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_05b1fbf7",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_785f320f",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_a5958741",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_c5920357",
         "filename": "netvirt/features/pom.xml",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This should be 0.8.0-SNAPSHOT for master.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_189cfebf",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_c5920357",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_58903695",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "I added mdsal-artifacts, but not sure if it\u0027s correct.",
+      "parentUuid": "1aa4ed85_45a7f3bd",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_a5cee781",
         "filename": "netvirt/features/pom.xml",
         "patchSetId": 3
@@ -166,6 +328,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This is defined in mdsal-artifacts, so the \u003cversion/\u003e and \u003cscope/\u003e elements here can be dropped.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_38ef7a20",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_a5cee781",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_d8f3c608",
+        "filename": "netvirt/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_c5cbe370",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_859c0b6b",
         "filename": "netvirt/features/src/main/features/features.xml",
         "patchSetId": 3
@@ -200,6 +398,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "${yangtools.version} should be replaced with {{VERSION}} (since this is a features-parent-based module).",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d8b0a6df",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_859c0b6b",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_f8b562cd",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_25899726",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_458e1330",
         "filename": "netvirt/features/src/main/features/features.xml",
         "patchSetId": 3
@@ -234,6 +468,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "${mdsal.version} -\u003e {{VERSION}}",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_98ca2e4e",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_458e1330",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_b8c7ea44",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_e5829fff",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_a57ca721",
         "filename": "netvirt/features/src/main/features/features.xml",
         "patchSetId": 3
@@ -268,6 +538,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "${project.version} -\u003e {{VERSION}}",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_58c4b63f",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_a57ca721",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_78c1722d",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_05881b1e",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_c579a330",
         "filename": "netvirt/impl/pom.xml",
         "patchSetId": 3
@@ -302,6 +608,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This should be 0.4.0-SNAPSHOT for master.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_18de3e12",
+        "filename": "netvirt/impl/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_c579a330",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_38e3fada",
+        "filename": "netvirt/impl/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_6576af40",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_a5a3479d",
         "filename": "netvirt/karaf/pom.xml",
         "patchSetId": 3
@@ -336,6 +678,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This should be 1.6.0-SNAPSHOT for master.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f8ec82c9",
+        "filename": "netvirt/karaf/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_a5a3479d",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_b8ce0a59",
+        "filename": "netvirt/karaf/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_c5a0c392",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_65ad4f88",
         "filename": "netvirt/pom.xml",
         "patchSetId": 3
@@ -370,6 +748,24 @@
       "writtenOn": "2015-12-22T13:07:21Z",
       "side": 1,
       "message": "This should be 1.2.1-SNAPSHOT.",
+      "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_584ef6c2",
+        "filename": "netvirt/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-22T16:44:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_65ad4f88",
       "revId": "2b2dac568b728e1898528034a8b3b9e9f063b5c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

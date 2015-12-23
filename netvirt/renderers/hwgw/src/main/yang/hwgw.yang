@@ -1,0 +1,35 @@
+module hwgw {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:hwgw";
+    prefix "hwgw";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+
+    description
+        "Service definition for hwgw project";
+
+    revision "2014-12-10" {
+        description
+            "Initial revision";
+    }
+
+    identity hwgw {
+        base config:module-type;
+        config:java-name-prefix Hwgw;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case hwgw {
+            when "/config:modules/config:module/config:type = 'hwgw'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}

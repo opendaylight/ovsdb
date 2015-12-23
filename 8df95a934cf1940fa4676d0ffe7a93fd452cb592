@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "1aa4ed85_16bb6fe6",
+        "filename": "netvirt/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "should fix this comment",
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_f62b332e",
         "filename": "netvirt/renderers/hwgw/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/hwgw/impl/HwgwProvider.java",
         "patchSetId": 2
@@ -13,6 +30,185 @@
       "writtenOn": "2015-12-23T01:31:55Z",
       "side": 1,
       "message": "Should we delete the \".impl\" (here and elsewhere)?  Though, \"impl/Impl\" shows up a lot of places.",
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_76ee63ee",
+        "filename": "netvirt/renderers/hwgw/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/hwgw/impl/HwgwProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "yes, remove the impl dir. It doesn\u0027t add any value since this is all the impl for hwgw.",
+      "parentUuid": "1aa4ed85_f62b332e",
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_d6b4f7f3",
+        "filename": "netvirt/renderers/hwgw/src/main/yang/hwgw-impl.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "no need for impl here",
+      "range": {
+        "startLine": 1,
+        "startChar": 12,
+        "endLine": 1,
+        "endChar": 16
+      },
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f6b9f3e9",
+        "filename": "netvirt/renderers/hwgw/src/main/yang/hwgw-impl.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "here we should probably add netvirt:hwgw",
+      "range": {
+        "startLine": 3,
+        "startChar": 46,
+        "endLine": 3,
+        "endChar": 50
+      },
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_96ce7f82",
+        "filename": "netvirt/renderers/hwgw/src/main/yang/hwgw-impl.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "make just hwgw",
+      "range": {
+        "startLine": 4,
+        "startChar": 17,
+        "endLine": 4,
+        "endChar": 21
+      },
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_56c80774",
+        "filename": "netvirt/renderers/hwgw/src/test/java/org/opendaylight/ovsdb/netvirt/renderers/hwgw/impl/HwgwProviderTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "not needed",
+      "range": {
+        "startLine": 8,
+        "startChar": 54,
+        "endLine": 8,
+        "endChar": 58
+      },
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_76c5035a",
+        "filename": "netvirt/renderers/hwgw/src/test/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/hwgw/impl/rev141210/HwgwModuleFactoryTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 8,
+        "startChar": 78,
+        "endLine": 8,
+        "endChar": 82
+      },
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_16a28fae",
+        "filename": "netvirt/renderers/hwgw/src/test/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/hwgw/impl/rev141210/HwgwModuleTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 8,
+        "startChar": 78,
+        "endLine": 8,
+        "endChar": 82
+      },
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_36a78bbf",
+        "filename": "netvirt/renderers/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-12-23T02:46:48Z",
+      "side": 1,
+      "message": "comment",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 4
+      },
       "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
-
 import com.google.common.collect.Lists;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
@@ -21,6 +20,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -49,10 +49,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
-
-
 public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider, ConfigInterface {
-
     private static final Logger LOG = LoggerFactory.getLogger(IngressAclService.class);
     private volatile SecurityServicesManager securityServicesManager;
     private volatile SecurityGroupCacheManger securityGroupCacheManger;
@@ -218,8 +215,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
               matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
                                         new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()),null);
           }
-          String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-          NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+          NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
           flowId = flowId + "_Permit";
           syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
@@ -245,9 +241,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
      */
     private void ingressAclIPv4(Long dpidLong, String segmentationId, String dstMac,
                                 boolean write, Integer protoPortMatchPriority ) {
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         String flowId = "Ingress_IP" + segmentationId + "_" + dstMac + "_Permit_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
@@ -270,7 +265,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                Integer protoPortMatchPriority ) {
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        FlowBuilder flowBuilder = new FlowBuilder();
         String flowId = "Ingress_TCP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
 
@@ -288,7 +282,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
             }
             /*TODO TCP PortRange Match*/
-
         }
 
         if (null != srcAddress) {
@@ -302,11 +295,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()),null);
         }
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
-
     }
 
     /**
@@ -356,11 +347,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()),null);
         }
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
-
     }
 
     /**
@@ -406,8 +395,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()),null);
         }
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         flowId = flowId + "_Permit";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
@@ -677,11 +665,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     private void ingressAclDhcpAllowServerTraffic(Long dpidLong, String segmentationId, String dhcpMacAddress,
                                                   boolean write, Integer protoPortMatchPriority) {
 
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         MatchUtils.createDhcpServerMatch(matchBuilder, dhcpMacAddress, 67, 68).build();
-        LOG.debug("ingressAclDHCPAllowServerTraffic: MatchBuilder contains: {}", matchBuilder);
         String flowId = "Ingress_DHCP_Server" + segmentationId + "_" + dhcpMacAddress + "_Permit_";
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
@@ -689,31 +675,21 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     /**
      * Add or remove flow to the node.
      *
-     * @param flowId the the flow id
+     * @param flowName the the flow id
      * @param nodeBuilder the node builder
      * @param matchBuilder the matchbuilder
-     * @param protoPortMatchPriority the protocol priority
+     * @param priority the protocol priority
      * @param write whether it is a write
      * @param drop whether it is a drop or forward
      */
-    private void syncFlow(String flowId, NodeBuilder nodeBuilder,
-                          MatchBuilder matchBuilder,Integer protoPortMatchPriority,
-                          boolean write,boolean drop) {
+    private void syncFlow(String flowName, NodeBuilder nodeBuilder,
+                          MatchBuilder matchBuilder, Integer priority,
+                          boolean write, boolean drop) {
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
             InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             if (drop) {
                 InstructionUtils.createDropInstructions(ib);
@@ -729,7 +705,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
-
     }
 
     @Override

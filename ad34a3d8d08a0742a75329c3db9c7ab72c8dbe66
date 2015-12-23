@@ -16,6 +16,24 @@
       "revId": "ad34a3d8d08a0742a75329c3db9c7ab72c8dbe66",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b1c70545",
+        "filename": "netvirt/renderers/hwgw/src/main/yang/hwgw.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-23T13:09:45Z",
+      "side": 1,
+      "message": "Ok.  We can also add some descriptions in the POMs if that\u0027s useful.",
+      "parentUuid": "1aa4ed85_11005900",
+      "revId": "ad34a3d8d08a0742a75329c3db9c7ab72c8dbe66",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

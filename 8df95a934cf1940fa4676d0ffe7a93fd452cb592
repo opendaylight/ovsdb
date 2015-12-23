@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_f62b332e",
+        "filename": "netvirt/renderers/hwgw/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/hwgw/impl/HwgwProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2015-12-23T01:31:55Z",
+      "side": 1,
+      "message": "Should we delete the \".impl\" (here and elsewhere)?  Though, \"impl/Impl\" shows up a lot of places.",
+      "revId": "8df95a934cf1940fa4676d0ffe7a93fd452cb592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

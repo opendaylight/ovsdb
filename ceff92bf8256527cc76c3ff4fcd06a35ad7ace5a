@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_d1a5e104",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-23T10:25:59Z",
+      "side": 1,
+      "message": "should be a whitespace here, checkstyle will crib about it.\n\ncombine both if in a single statement as you don\u0027t really have an else for this one.",
+      "revId": "ceff92bf8256527cc76c3ff4fcd06a35ad7ace5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

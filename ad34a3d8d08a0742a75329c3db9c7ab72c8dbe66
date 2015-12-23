@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_11005900",
+        "filename": "netvirt/renderers/hwgw/src/main/yang/hwgw.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2015-12-23T09:28:25Z",
+      "side": 1,
+      "message": "Can we use hardware gateway here? This might be the only place in code where we get to explain what hwgw means. \"Service definition for hardware gateway renderer in netvirt project\"",
+      "revId": "ad34a3d8d08a0742a75329c3db9c7ab72c8dbe66",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

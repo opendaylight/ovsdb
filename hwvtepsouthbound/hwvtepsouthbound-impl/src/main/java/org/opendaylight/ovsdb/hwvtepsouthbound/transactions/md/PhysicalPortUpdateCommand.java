@@ -105,17 +105,19 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
                 }
                 // Update with Deleted VlanBindings
                 if (oldPPRows.get(pPortUpdateEntry.getKey()) != null) {
-                    List<InstanceIdentifier<VlanBindings>> vBIiList = new ArrayList<>();
-                    Map<Long, UUID> oldVb = oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn().getData();
-                    Map<Long, UUID> updatedVb = pPortUpdateEntry.getValue().getVlanBindingsColumn().getData();
-                    for (Map.Entry<Long, UUID> oldVbEntry : oldVb.entrySet()) {
-                        Long key = oldVbEntry.getKey();
-                        if (!updatedVb.containsKey(key)) {
-                            VlanBindings vBindings = createVlanBinding(key, oldVbEntry.getValue());
-                            InstanceIdentifier<VlanBindings> vBid = getInstanceIdentifier(tpPath, vBindings);
-                            vBIiList.add(vBid);
+                    if(oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn() != null){
+                        List<InstanceIdentifier<VlanBindings>> vBIiList = new ArrayList<>();
+                        Map<Long, UUID> oldVb = oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn().getData();
+                        Map<Long, UUID> updatedVb = pPortUpdateEntry.getValue().getVlanBindingsColumn().getData();
+                        for (Map.Entry<Long, UUID> oldVbEntry : oldVb.entrySet()) {
+                            Long key = oldVbEntry.getKey();
+                            if (!updatedVb.containsKey(key)) {
+                                VlanBindings vBindings = createVlanBinding(key, oldVbEntry.getValue());
+                                InstanceIdentifier<VlanBindings> vBid = getInstanceIdentifier(tpPath, vBindings);
+                                vBIiList.add(vBid);
+                            }
+                            deleteEntries(transaction, vBIiList);
                         }
-                        deleteEntries(transaction, vBIiList);
                     }
                 }
             }

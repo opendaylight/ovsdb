@@ -79,7 +79,7 @@ public class HwvtepSouthboundMapper {
     }
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = iid.firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 
@@ -143,12 +143,23 @@ public class HwvtepSouthboundMapper {
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
                     PhysicalSwitch pSwitch) {
-        String nodeString = client.getNodeKey().getNodeId().getValue() + "/physicalswitch/" + pSwitch.getName();
-        NodeId nodeId = new NodeId(new Uri(nodeString));
-        NodeKey nodeKey = new NodeKey(nodeId);
+        //TODO: Clean this up
+        return createInstanceIdentifier(client, new HwvtepNodeName(pSwitch.getName()));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
+                    HwvtepNodeName psName) {
+        NodeKey nodeKey = new NodeKey(createManagedNodeId(client, psName));
         return InstanceIdentifier.builder(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class, nodeKey).build();
+    }
+
+    public static NodeId createManagedNodeId(HwvtepConnectionInstance client, HwvtepNodeName psName) {
+        String nodeString = client.getNodeKey().getNodeId().getValue()
+                        + "/" + HwvtepSouthboundConstants.PSWITCH_URI_PREFIX + "/" + psName.getValue();
+        NodeId nodeId = new NodeId(new Uri(nodeString));
+        return nodeId;
     }
 
     public static InstanceIdentifier<LogicalSwitches> createInstanceIdentifier(HwvtepConnectionInstance client,

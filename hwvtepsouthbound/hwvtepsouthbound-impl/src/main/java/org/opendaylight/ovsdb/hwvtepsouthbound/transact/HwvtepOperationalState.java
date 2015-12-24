@@ -67,7 +67,7 @@ public class HwvtepOperationalState {
                     operationalNodes.put(entry.getKey(), readNode.get());
                     HwvtepGlobalAugmentation hgAugmentation = readNode.get().getAugmentation(HwvtepGlobalAugmentation.class);
                     PhysicalSwitchAugmentation psAugmentation = readNode.get().getAugmentation(PhysicalSwitchAugmentation.class);
-                    if (hgAugmentation != null) {
+                    if (hgAugmentation != null && hgAugmentation.getSwitches() != null) {
                         for (Switches pswitch : hgAugmentation.getSwitches()) {
                             @SuppressWarnings("unchecked")
                             InstanceIdentifier<Node> psNodeIid = (InstanceIdentifier<Node>) pswitch.getSwitchRef().getValue();

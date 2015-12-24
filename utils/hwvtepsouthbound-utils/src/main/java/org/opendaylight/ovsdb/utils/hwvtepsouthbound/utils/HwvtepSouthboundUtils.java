@@ -9,12 +9,14 @@
 package org.opendaylight.ovsdb.utils.hwvtepsouthbound.utils;
 
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -23,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +71,28 @@ public class HwvtepSouthboundUtils {
         return path;
     }
 
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, HwvtepNodeName name) {
+        return HwvtepSouthboundMapper.createInstanceIdentifier(
+                        createManagedNodeId(key, name));
+    }
+
+    private static NodeId createManagedNodeId(ConnectionInfo key, HwvtepNodeName nodeName) {
+        return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), nodeName);
+    }
+
+    private static NodeId createManagedNodeId(IpAddress remoteIp, PortNumber remotePort, HwvtepNodeName nodeName) {
+        //This assumes that HwvtepNode can only be Physical switch
+        return new NodeId(createNodeId(remoteIp,remotePort).getValue()
+                        + "/" + HwvtepSouthboundConstants.PSWITCH_URI_PREFIX + "/" + nodeName.getValue());
+    }
+
     public static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
         return new NodeKey(createNodeId(ip, port));
+    }
+
+    public static Object connectionInfoToString(ConnectionInfo connectionInfo) {
+        return String.valueOf(
+                        connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
     }
 
 }

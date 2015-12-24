@@ -93,14 +93,44 @@ module hwvtep {
             description "Reference to the physical locator to reach this entry";
             type hwvtep-physical-locator-ref;
         }
-        leaf bfd-config-local {
-            type string;
+        list bfd-local-configs {
+            description "Local configuation attributes for BFD";
+
+            key "bfd-local-config-key";
+            leaf bfd-local-config-key {
+                description "bfd-local-config name/key";
+                type string;
+            }
+            leaf bfd-local-config-value {
+                description "bfd-local-config value";
+                type string;
+            }
         }
-        leaf bfd-config-remote {
-            type string;
+        list bfd-remote-configs {
+            description "Remote configuration attributes for BFD";
+
+            key "bfd-remote-config-key";
+            leaf bfd-remote-config-key {
+                description "bfd-remote-config name/key";
+                type string;
+            }
+            leaf bfd-remote-config-value {
+                description "bfd-remote-config value";
+                type string;
+            }
         }
-        leaf bfd-params {
-            type string;
+        list bfd-params {
+            description "Parameters to configure and enable BFD";
+
+            key "bfd-param-key";
+            leaf bfd-param-key {
+                description "bfd-param name/key";
+                type string;
+            }
+            leaf bfd-param-value {
+                description "bfd-param value";
+                type string;
+            }
         }
     }
 

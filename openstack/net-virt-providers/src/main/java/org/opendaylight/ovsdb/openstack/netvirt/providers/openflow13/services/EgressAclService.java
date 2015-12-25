@@ -47,6 +47,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider, ConfigInterface {
 
@@ -293,6 +294,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private void egressAclTcp(Long dpidLong, String segmentationId, String srcMac,
                               NeutronSecurityRule portSecurityRule, String dstAddress,
                               boolean write, Integer protoPortMatchPriority) {
+        boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_TCP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
@@ -309,10 +311,10 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
                             + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
+            } else {
+                portRange = true;
             }
-            /*TODO TCP PortRange Match*/
         }
-
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
@@ -323,9 +325,23 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
                                       new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
         }
-        flowId = flowId + "_Permit";
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        if (portRange) {
+            Map<Integer, Integer> portMaskMap = MatchUtils
+                    .getLayer4MaskForRange(portSecurityRule.getSecurityRulePortMin(),
+                                           portSecurityRule.getSecurityRulePortMax());
+            for (Integer port: portMaskMap.keySet()) {
+                String rangeflowId = flowId + port + "_" + portMaskMap.get(port) + "_";
+                rangeflowId = rangeflowId + "_Permit";
+                MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.TCP_SHORT,
+                                                  0, port, portMaskMap.get(port));
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            }
+        } else {
+            flowId = flowId + "_Permit";
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        }
     }
 
     /**
@@ -389,7 +405,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private void egressAclUdp(Long dpidLong, String segmentationId, String srcMac,
                               NeutronSecurityRule portSecurityRule, String dstAddress,
                               boolean write, Integer protoPortMatchPriority) {
-
+        boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_UDP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
@@ -406,24 +422,37 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
                     + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
+            } else {
+                portRange = true;
             }
-            /*TODO UDP PortRange Match*/
         }
-
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
                                                         MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
-
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()));
         }
-        flowId = flowId + "_Permit";
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        if (portRange) {
+            Map<Integer, Integer> portMaskMap = MatchUtils
+                    .getLayer4MaskForRange(portSecurityRule.getSecurityRulePortMin(),
+                                           portSecurityRule.getSecurityRulePortMax());
+            for (Integer port: portMaskMap.keySet()) {
+                String rangeflowId = flowId + port + "_" + portMaskMap.get(port) + "_";
+                rangeflowId = rangeflowId + "_Permit";
+                MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.UDP_SHORT,
+                                                  0, port, portMaskMap.get(port));
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            }
+        } else {
+            flowId = flowId + "_Permit";
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        }
     }
 
     public void egressACLDefaultTcpDrop(Long dpidLong, String segmentationId, String attachedMac,

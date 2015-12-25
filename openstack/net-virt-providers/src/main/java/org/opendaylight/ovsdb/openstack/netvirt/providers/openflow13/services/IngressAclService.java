@@ -48,6 +48,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider, ConfigInterface {
     private static final Logger LOG = LoggerFactory.getLogger(IngressAclService.class);
@@ -263,7 +264,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     private void ingressAclTcp(Long dpidLong, String segmentationId, String dstMac,
                                NeutronSecurityRule portSecurityRule, String srcAddress, boolean write,
                                Integer protoPortMatchPriority ) {
-
+        boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_TCP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
@@ -280,10 +281,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
                     + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
+            } else {
+                portRange = true;
             }
-            /*TODO TCP PortRange Match*/
         }
-
         if (null != srcAddress) {
             flowId = flowId + srcAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
@@ -296,8 +297,21 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                                                        .getSecurityRuleRemoteIpPrefix()),null);
         }
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
-        flowId = flowId + "_Permit";
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        if (portRange) {
+            Map<Integer, Integer> portMaskMap = MatchUtils
+                    .getLayer4MaskForRange(portSecurityRule.getSecurityRulePortMin(),
+                                           portSecurityRule.getSecurityRulePortMax());
+            for (Integer port: portMaskMap.keySet()) {
+                String rangeflowId = flowId + port + "_" + portMaskMap.get(port) + "_";
+                rangeflowId = rangeflowId + "_Permit";
+                MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.TCP_SHORT,
+                                                  0, port, portMaskMap.get(port));
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            }
+        } else {
+            flowId = flowId + "_Permit";
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        }
     }
 
     /**
@@ -315,6 +329,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     private void ingressAclUdp(Long dpidLong, String segmentationId, String dstMac,
                                NeutronSecurityRule portSecurityRule, String srcAddress,
                                boolean write, Integer protoPortMatchPriority ) {
+        boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_UDP_" + segmentationId + "_" + dstMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,null,dstMac);
@@ -331,11 +346,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
                     + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
+            } else {
+                portRange = true;
             }
-            /*TODO TCP PortRange Match*/
-
         }
-
         if (null != srcAddress) {
             flowId = flowId + srcAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,
@@ -348,8 +362,21 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                                                        .getSecurityRuleRemoteIpPrefix()),null);
         }
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
-        flowId = flowId + "_Permit";
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        if (portRange) {
+            Map<Integer, Integer> portMaskMap = MatchUtils
+                    .getLayer4MaskForRange(portSecurityRule.getSecurityRulePortMin(),
+                                           portSecurityRule.getSecurityRulePortMax());
+            for (Integer port: portMaskMap.keySet()) {
+                String rangeflowId = flowId + port + "_" + portMaskMap.get(port) + "_";
+                rangeflowId = rangeflowId + "_Permit";
+                MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.UDP_SHORT,
+                                                   0, port, portMaskMap.get(port));
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            }
+        } else {
+            flowId = flowId + "_Permit";
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        }
     }
 
     /**

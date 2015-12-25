@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
-  <artifactId>netvirt-impl</artifactId>
+  <artifactId>netvirt-new-impl</artifactId>
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>

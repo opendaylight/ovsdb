@@ -1,6 +1,6 @@
-module netvirt-impl {
+module netvirt-new-impl {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:impl";
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:new:impl";
     prefix "netvirt-impl";
 
     import config { prefix config; revision-date 2013-04-05; }
@@ -9,7 +9,7 @@ module netvirt-impl {
     description
         "Service definition for netvirt project";
 
-    revision "2014-12-10" {
+    revision "2015-12-30" {
         description
             "Initial revision";
     }

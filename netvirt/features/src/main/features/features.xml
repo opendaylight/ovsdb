@@ -13,15 +13,33 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.sfc/features-sfc/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-features/{{VERSION}}/xml/features</repository>
   <feature name='odl-netvirt-api' version='${project.version}' description='OpenDaylight :: netvirt :: api'>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:org.opendaylight.ovsdb/netvirt-api/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-netvirt' version='${project.version}' description='OpenDaylight :: netvirt'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+    <feature version='${openflowplugin.version}'>odl-openflowplugin-nxm-extensions</feature>
+    <feature version='${project.version}'>odl-ovsdb-southbound-impl</feature>
+    <feature version='${project.version}'>odl-ovsdb-openstack</feature>
+    <feature version='${project.version}'>odl-ovsdb-sfc</feature>
     <feature version='${project.version}'>odl-netvirt-api</feature>
-    <bundle>mvn:org.opendaylight.ovsdb/netvirt-impl/{{VERSION}}</bundle>
-    <configfile finalname="${configfile.directory}/netvirt.xml">mvn:org.opendaylight.ovsdb/netvirt-impl/{{VERSION}}/xml/config</configfile>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-impl/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/netvirt-new-impl/{{VERSION}}</bundle>
+    <configfile finalname="${configfile.directory}/netvirt.xml">mvn:org.opendaylight.ovsdb/netvirt-new-impl/{{VERSION}}/xml/config</configfile>
   </feature>
   <feature name='odl-netvirt-rest' version='${project.version}' description='OpenDaylight :: netvirt :: REST'>
     <feature version="${project.version}">odl-netvirt</feature>
@@ -31,6 +49,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${project.version}">odl-netvirt-rest</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${dlux.version}">odl-dlux-yangui</feature>
+  </feature>
+  <feature name='odl-netvirt-hwgw' version='${project.version}' description='OpenDaylight :: netvirt :: Hardware Gateway'>
+    <feature version="${project.version}">odl-netvirt</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/hwgw/{{VERSION}}</bundle>
   </feature>
 
 </features>

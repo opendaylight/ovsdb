@@ -535,7 +535,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return openFlowPort;
     }
 
-    private List<String> getControllersFromOvsdbNode(Node node) {
+    public List<String> getControllersFromOvsdbNode(Node node) {
         List<String> controllersStr = new ArrayList<>();
 
         String controllerIpStr = getControllerIPAddress();

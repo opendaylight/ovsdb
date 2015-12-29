@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -31,9 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
@@ -168,9 +167,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      * @param lbConfig LoadBalancerConfiguration
      * @param write Boolean to indicate of the flow is to be inserted or removed
      */
-    private void manageLoadBalancerVIPRulesFirstPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig, boolean write) {
-        MatchBuilder matchBuilder = new MatchBuilder();
+    private void manageLoadBalancerVIPRulesFirstPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig,
+                                                     boolean write) {
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getProviderSegmentationId() + "_" + lbConfig.getVip();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(DEFAULT_FLOW_PRIORITY);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
 
         // Match Tunnel-ID, VIP, and Reg0==0
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
@@ -184,18 +187,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
-
-        String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getProviderSegmentationId() + "_" + lbConfig.getVip();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -247,7 +239,6 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             flowBuilder.setInstructions(isb.build());
 
             writeFlow(flowBuilder, nodeBuilder);
-
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
@@ -266,11 +257,17 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         }
     }
 
-    private void manageLoadBalancerMemberVIPRulesSecondPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, boolean write) {
+    private void manageLoadBalancerMemberVIPRulesSecondPass(NodeBuilder nodeBuilder,
+                                                            LoadBalancerConfiguration lbConfig,
+                                                            LoadBalancerPoolMember member, boolean write) {
         String vip = lbConfig.getVip();
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "LOADBALANCER_FORWARD_FLOW2_" + lbConfig.getProviderSegmentationId() + "_"
+                + vip + "_" + member.getIP();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(DEFAULT_FLOW_PRIORITY+1);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
 
         // Match Tunnel-ID, VIP, Reg0==1 and Reg1==Index of member
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
@@ -285,19 +282,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(vip));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
-
-        String flowId = "LOADBALANCER_FORWARD_FLOW2_" + lbConfig.getProviderSegmentationId() + "_" +
-                        vip + "_" + member.getIP();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY+1);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -344,7 +329,6 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             flowBuilder.setInstructions(isb.build());
 
             writeFlow(flowBuilder, nodeBuilder);
-
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
@@ -368,34 +352,27 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         String vip = lbConfig.getVip();
         String vmac = lbConfig.getVmac();
 
-        MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "LOADBALANCER_REVERSE_FLOW_" + lbConfig.getProviderSegmentationId() +
+                vip + "_" + member.getIP();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(DEFAULT_FLOW_PRIORITY);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
 
         // Match Tunnel-ID, MemberIP, and Protocol/Port
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
                    lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
         } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
-            MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
+            MatchUtils.createVlanIdMatch(matchBuilder,
+                    new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
         } else {
             return; //Should not get here. TODO: Other types
         }
 
         MatchUtils.createSrcL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(member.getIP()));
         MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));
-
-        String flowId = "LOADBALANCER_REVERSE_FLOW_" + lbConfig.getProviderSegmentationId() +
-                        vip + "_" + member.getIP();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -447,7 +424,6 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             flowBuilder.setInstructions(isb.build());
 
             writeFlow(flowBuilder, nodeBuilder);
-
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }

@@ -56,6 +56,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>neutron-utils</module>
     <module>servicehelper</module>
     <module>southbound-utils</module>
+    <module>hwvtepsouthbound-utils</module>
   </modules>
 
 <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->

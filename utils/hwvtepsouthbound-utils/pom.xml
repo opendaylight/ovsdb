@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>org.opendaylight.ovsdb</groupId>
+  <artifactId>utils.hwvtepsouthbound-utils</artifactId>
+  <version>1.2.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <dependencies>
+    <!-- project specific dependencies -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>hwvtepsouthbound-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>hwvtepsouthbound-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>utils.mdsal-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- testing dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

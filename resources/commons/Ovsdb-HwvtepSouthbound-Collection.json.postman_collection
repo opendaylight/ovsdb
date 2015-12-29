@@ -264,13 +264,13 @@
             "time": 1447909152443,
             "preRequestScript": "",
             "tests": "",
-            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/ps0\",\n            \"hwvtep-node-name\": \"ps0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnleIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
+            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/br0\",\n            \"hwvtep-node-name\": \"br0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnelIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
             "id": "e25f67e4-3a3f-5da7-f7c8-41b371156719",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%phsicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "preRequestScript": "",
             "pathVariables": {},
             "method": "PUT",
@@ -283,13 +283,13 @@
             "time": 1448552632013,
             "name": "Update Specific Config Physical Switch",
             "description": "Fire this Restconf request if you want to update a exsiting physical switch.",
-            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/ps0\",\n            \"hwvtep-node-name\": \"ps0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnleIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
+            "rawModeData": "{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"hwvtep://{{hwvtepNodeIp}}:6640/physicalswitch/br0\",\n            \"hwvtep-node-name\": \"br0\",\n            \"hwvtep-node-description\": \"\",\n            \"management-ips\": [\n              {\n                \"management-ips-key\": \"{{managementIp}}\"\n              }\n            ],\n            \"tunnel-ips\": [\n              {\n                \"tunnel-ips-key\": \"{{tunnelIp}}\"\n              }\n            ],\n            \"managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']\"             \n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
             "id": "f7d33d50-7c8e-69e2-6d60-5c6155c5d210",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%phsicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "preRequestScript": "",
             "pathVariables": {},
             "method": "GET",
@@ -307,7 +307,7 @@
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
             "id": "233b5ab5-8177-4416-6912-2477520a0654",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%phsicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "preRequestScript": "",
             "pathVariables": {},
             "method": "DELETE",
@@ -327,7 +327,7 @@
             "id": "a13e6877-997e-84e1-c8e8-e83ef5e9a002",
             "name": "Get Specific Operational Physical Switch",
             "description": "",
-            "url": "http://{{controllerHost}}:8181/restconf/operational/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fps0",
+            "url": "http://{{controllerHost}}:8181/restconf/operational/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F{{hwvtepNodeIp}}:6640%2Fphysicalswitch%2Fbr0",
             "method": "GET",
             "headers": "Authorization: Basic YWRtaW46YWRtaW4=\n",
             "data": [],
@@ -356,7 +356,7 @@
             "time": 1448641495086,
             "name": "Create Specific Config Physical Port",
             "description": "",
-            "rawModeData": "{\n  \"network-topology:termination-point\": [\n        {\n            \"tp-id\": \"port0\",\n          \t\"hwvtep-node-name\": \"port0\",\n            \"hwvtep-node-description\": \"\",\n            \"vlan-bindings\": [\n          \t\t{\n                  \"vlan-id-key\": \"100\",\n                  \"logical-switch-ref\": \"ls0\"\n            \t}\n          \t]\n\t\t}\n    ]\n}"
+            "rawModeData": "{\n  \"network-topology:termination-point\": [\n        {\n            \"tp-id\": \"port0\",\n          \t\"hwvtep-node-name\": \"port0\",\n            \"hwvtep-node-description\": \"\",\n            \"vlan-bindings\": [\n          \t\t{\n                  \"vlan-id-key\": \"100\",\n                  \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\"\n            \t}\n          \t]\n\t\t}\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -375,7 +375,7 @@
             "time": 1448643757985,
             "name": "Update Specific Config Physical Port",
             "description": "",
-            "rawModeData": "{\n  \"network-topology:termination-point\": [\n        {\n            \"tp-id\": \"port0\",\n          \t\"hwvtep-node-name\": \"port0\",\n            \"hwvtep-node-description\": \"\",\n            \"vlan-bindings\": [\n          \t\t{\n                  \"vlan-id-key\": \"100\",\n                  \"logical-switch-ref\": \"ls0\"\n            \t}\n          \t]\n\t\t}\n    ]\n}"
+            "rawModeData": "{\n  \"network-topology:termination-point\": [\n        {\n            \"tp-id\": \"port0\",\n          \t\"hwvtep-node-name\": \"port0\",\n            \"hwvtep-node-description\": \"\",\n            \"vlan-bindings\": [\n          \t\t{\n                  \"vlan-id-key\": \"100\",\n                  \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\"\n            \t}\n          \t]\n\t\t}\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -449,7 +449,7 @@
             "time": 1449132978312,
             "name": "Create Specific Config UcastMacRemote",
             "description": "",
-            "rawModeData": "{\n  \"remote-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"11:11:11:11:11:11\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"1.1.1.1\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"             \n        }\n    ]\n}"
+            "rawModeData": "{\n  \"remote-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"11:11:11:11:11:11\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"1.1.1.1\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"             \n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -468,7 +468,7 @@
             "time": 1449310821724,
             "name": "Update Specific Config UcastMacRemote",
             "description": "",
-            "rawModeData": "{\n  \"remote-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"11:11:11:11:11:11\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"1.1.1.1\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"\n        }\n    ]\n}"
+            "rawModeData": "{\n  \"remote-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"11:11:11:11:11:11\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"1.1.1.1\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"\n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -561,7 +561,7 @@
             "time": 1449286080233,
             "name": "Create Specific Config UcastMacLocal",
             "description": "",
-            "rawModeData": "{\n  \"local-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"22:22:22:22:22:22\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"2.2.2.2\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"             \n        }\n    ]\n}"
+            "rawModeData": "{\n  \"local-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"22:22:22:22:22:22\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"2.2.2.2\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"             \n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -580,7 +580,7 @@
             "time": 1449310498424,
             "name": "Update Specific Config UcastMacLocal",
             "description": "",
-            "rawModeData": "{\n  \"local-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"22:22:22:22:22:22\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"2.2.2.2\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"\n        }\n    ]\n}"
+            "rawModeData": "{\n  \"local-ucast-macs\": [\n        {\n            \"mac-entry-key\": \"22:22:22:22:22:22\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"2.2.2.2\",\n            \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{LocatorIp}}']\"\n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -654,7 +654,7 @@
             "time": 1449468092415,
             "name": "Create Specific Config McastMacRemote",
             "description": "",
-            "rawModeData": "{\n  \"remote-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"33:33:33:33:33:55\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"3.3.3.5\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.49']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.48']\"\n                }\n            ]\n        }\n    ]\n}"
+            "rawModeData": "{\n  \"remote-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"33:33:33:33:33:55\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"3.3.3.5\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-1}}']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-2}}']\"\n                }\n            ]\n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -673,7 +673,7 @@
             "time": 1449468318065,
             "name": "Update Specific Config McastMacRemote ",
             "description": "",
-            "rawModeData": "{\n  \"remote-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"33:33:33:33:33:33\",\n            \"logical-switch-ref\": \"ls1\",\n            \"ipaddr\": \"3.3.3.3\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.49']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.48']\"\n                }\n            ]\n        }\n    ]\n}"
+            "rawModeData": "{\n  \"remote-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"33:33:33:33:33:33\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"3.3.3.3\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-1}}']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-2}}']\"\n                }\n            ]\n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -748,7 +748,7 @@
             "time": 1449468010690,
             "name": "Create Specific Config McastMacLocal",
             "description": "",
-            "rawModeData": "{\n  \"local-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"44:44:44:44:44:66\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"4.4.4.6\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.49']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.48']\"\n                }\n            ]\n        }\n    ]\n}"
+            "rawModeData": "{\n  \"local-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"44:44:44:44:44:66\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"4.4.4.6\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-1}}']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-2}}']\"\n                }\n            ]\n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",
@@ -767,7 +767,7 @@
             "time": 1449468504628,
             "name": "Update Specific Config McastMacLocal",
             "description": "",
-            "rawModeData": "{\n  \"local-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"44:44:44:44:44:44\",\n            \"logical-switch-ref\": \"ls0\",\n            \"ipaddr\": \"4.4.4.4\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.49']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:219.141.189.48']\"\n                }\n            ]\n        }\n    ]\n}"
+            "rawModeData": "{\n  \"local-mcast-macs\": [\n        {\n            \"mac-entry-key\": \"44:44:44:44:44:44\",\n            \"logical-switch-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/hwvtep:logical-switches[hwvtep:hwvtep-node-name='ls0']\",\n            \"ipaddr\": \"4.4.4.4\",\n            \"locator-set\": [\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-1}}']\"\n                },\n                {\n                    \"locator-ref\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='hwvtep:1']/network-topology:node[network-topology:node-id='hwvtep://{{hwvtepNodeIp}}:6640']/network-topology:termination-point[network-topology:tp-id='vxlan_over_ipv4:{{locatorIp-2}}']\"\n                }\n            ]\n        }\n    ]\n}"
         },
         {
             "collectionId": "19f6b1a8-4d54-62f8-6bd6-f52e0b6e40b8",

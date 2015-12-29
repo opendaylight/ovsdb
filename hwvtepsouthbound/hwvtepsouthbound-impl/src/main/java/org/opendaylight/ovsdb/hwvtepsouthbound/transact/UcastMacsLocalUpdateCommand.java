@@ -74,7 +74,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
             UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsLocal.class);
             setIpAddress(ucastMacsLocal, localUcastMac);
             setLocator(transaction, ucastMacsLocal, localUcastMac);
-            setLogicalSwitch(instanceIdentifier, ucastMacsLocal, localUcastMac);
+            setLogicalSwitch(ucastMacsLocal, localUcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(ucastMacsLocal, localUcastMac, operationalMacOptional);
                 transaction.add(op.insert(ucastMacsLocal));
@@ -90,18 +90,19 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setLogicalSwitch(InstanceIdentifier<Node> iid, UcastMacsLocal ucastMacsLocal, LocalUcastMacs inputMac) {
+    private void setLogicalSwitch(UcastMacsLocal ucastMacsLocal, LocalUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
-            HwvtepNodeName lswitchName = new HwvtepNodeName(inputMac.getLogicalSwitchRef().getValue());
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
-                    getOperationalState().getLogicalSwitches(iid, new LogicalSwitchesKey(lswitchName));
+                    getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
                 Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 ucastMacsLocal.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update localUcastMacs: No logical switch named {} found in operational datastore!",
-                        lswitchName);
+                LOG.warn("Create or update localUcastMacs: No logical switch with iid {} found in operational datastore!",
+                        lswitchIid);
             }
         }
     }

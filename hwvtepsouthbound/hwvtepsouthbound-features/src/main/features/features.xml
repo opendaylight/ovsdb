@@ -43,5 +43,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${dlux.version}">odl-dlux-yangui</feature>
   </feature>
+  <feature name='odl-ovsdb-hwvtepsouthbound-test' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: test'>
+    <feature version="${project.version}">odl-ovsdb-hwvtepsouthbound</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.hwvtepsouthbound-utils/{{VERSION}}</bundle>
+  </feature>
 
 </features>

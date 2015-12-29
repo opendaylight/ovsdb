@@ -20,6 +20,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -28,9 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
@@ -48,6 +47,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider, ConfigInterface {
 
@@ -197,42 +197,39 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                   break;
             }
         }
-
     }
 
     private void egressOtherProtocolAclHandler(Long dpidLong, String segmentationId, String srcMac,
-         NeutronSecurityRule portSecurityRule, String dstAddress,
-         boolean write, Integer protoPortMatchPriority) {
+                                               NeutronSecurityRule portSecurityRule, String dstAddress,
+                                               boolean write, Integer priority) {
+        MatchBuilder matchBuilder = new MatchBuilder();
+        String flowId = "Egress_Other_" + segmentationId + "_" + srcMac + "_";
+        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
 
-         MatchBuilder matchBuilder = new MatchBuilder();
-         String flowId = "Egress_Other_" + segmentationId + "_" + srcMac + "_";
-         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        short proto = 0;
+        try {
+            Integer protocol = new Integer(portSecurityRule.getSecurityRuleProtocol());
+            proto = protocol.shortValue();
+            flowId = flowId + proto;
+        } catch (NumberFormatException e) {
+            LOG.error("Protocol vlaue conversion failure", e);
+        }
+        matchBuilder = MatchUtils.createIpProtocolMatch(matchBuilder, proto);
 
-         short proto = 0;
-         try {
-             Integer protocol = new Integer(portSecurityRule.getSecurityRuleProtocol());
-             proto = protocol.shortValue();
-             flowId = flowId + proto;
-         } catch (NumberFormatException e) {
-             LOG.error("Protocol vlaue conversion failure", e);
-         }
-         matchBuilder = MatchUtils.createIpProtocolMatch(matchBuilder, proto);
-
-         if (null != dstAddress) {
-             flowId = flowId + dstAddress;
-             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+        if (null != dstAddress) {
+            flowId = flowId + dstAddress;
+            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,
                                                          MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
 
-         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
-             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
-             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,new Ipv4Prefix(portSecurityRule
-                                                                        .getSecurityRuleRemoteIpPrefix()));
-         }
-         flowId = flowId + "_Permit";
-         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
- }
+        } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+            flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,
+                    new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+        }
+        flowId = flowId + "_Permit";
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        syncFlow(flowId, nodeBuilder, matchBuilder, priority, write, false);
+    }
 
     @Override
     public void programFixedSecurityGroup(Long dpid, String segmentationId, String attachedMac,
@@ -275,9 +272,8 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      */
     private void egressAclIPv4(Long dpidLong, String segmentationId, String srcMac,
                                boolean write, Integer protoPortMatchPriority ) {
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         String flowId = "Egress_IP" + segmentationId + "_" + srcMac + "_Permit_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
@@ -298,6 +294,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private void egressAclTcp(Long dpidLong, String segmentationId, String srcMac,
                               NeutronSecurityRule portSecurityRule, String dstAddress,
                               boolean write, Integer protoPortMatchPriority) {
+        boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_TCP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
@@ -314,11 +311,10 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
                             + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.TCP_SHORT, 0, 0);
+            } else {
+                portRange = true;
             }
-            /*TODO TCP PortRange Match*/
-
         }
-
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
@@ -329,11 +325,22 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
                                       new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
         }
-        flowId = flowId + "_Permit";
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
-
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        if (portRange) {
+            Map<Integer, Integer> portMaskMap = MatchUtils
+                    .getLayer4MaskForRange(portSecurityRule.getSecurityRulePortMin(),
+                                           portSecurityRule.getSecurityRulePortMax());
+            for (Integer port: portMaskMap.keySet()) {
+                String rangeflowId = flowId + port + "_" + portMaskMap.get(port) + "_";
+                rangeflowId = rangeflowId + "_Permit";
+                MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.TCP_SHORT,
+                                                  0, port, portMaskMap.get(port));
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            }
+        } else {
+            flowId = flowId + "_Permit";
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        }
     }
 
     /**
@@ -378,10 +385,8 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
         }
         flowId = flowId + "_Permit";
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
-
     }
 
     /**
@@ -399,7 +404,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private void egressAclUdp(Long dpidLong, String segmentationId, String srcMac,
                               NeutronSecurityRule portSecurityRule, String dstAddress,
                               boolean write, Integer protoPortMatchPriority) {
-
+        boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_UDP_" + segmentationId + "_" + srcMac + "_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
@@ -416,54 +421,50 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 flowId = flowId + portSecurityRule.getSecurityRulePortMin() + "_"
                     + portSecurityRule.getSecurityRulePortMax() + "_";
                 matchBuilder = MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 0, 0);
+            } else {
+                portRange = true;
             }
-            /*TODO UDP PortRange Match*/
-
         }
-
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
                                                         MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
-
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
             matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,
                                                         new Ipv4Prefix(portSecurityRule
                                                                        .getSecurityRuleRemoteIpPrefix()));
         }
-        flowId = flowId + "_Permit";
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
-
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        if (portRange) {
+            Map<Integer, Integer> portMaskMap = MatchUtils
+                    .getLayer4MaskForRange(portSecurityRule.getSecurityRulePortMin(),
+                                           portSecurityRule.getSecurityRulePortMax());
+            for (Integer port: portMaskMap.keySet()) {
+                String rangeflowId = flowId + port + "_" + portMaskMap.get(port) + "_";
+                rangeflowId = rangeflowId + "_Permit";
+                MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.UDP_SHORT,
+                                                  0, port, portMaskMap.get(port));
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            }
+        } else {
+            flowId = flowId + "_Permit";
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        }
     }
+
     public void egressACLDefaultTcpDrop(Long dpidLong, String segmentationId, String attachedMac,
                                         int priority, boolean write) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "TCP_Syn_Egress_Default_Drop_" + segmentationId + "_" + attachedMac;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
-        flowBuilder.setMatch(MatchUtils.createSmacTcpPortWithFlagMatch(matchBuilder,
-                                                                       attachedMac, Constants.TCP_SYN, segmentationId).build());
-        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-
-        String flowId = "TCP_Syn_Egress_Default_Drop_" + segmentationId + "_" + attachedMac;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(priority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createSmacTcpPortWithFlagMatch(matchBuilder, attachedMac, Constants.TCP_SYN, segmentationId);
+        flowBuilder.setMatch(matchBuilder.build());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
             InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructions = Lists.newArrayList();
@@ -472,11 +473,8 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
-            // Add InstructionBuilder to the Instruction(s)Builder List
             isb.setInstruction(instructions);
 
-            LOG.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -485,36 +483,23 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     }
 
     public void egressACLTcpPortWithPrefix(Long dpidLong, String segmentationId, String attachedMac, boolean write,
-                                           Integer securityRulePortMin, String securityRuleIpPrefix, Integer protoPortPrefixMatchPriority) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+                                           Integer securityRulePortMin, String securityRuleIpPrefix,
+                                           Integer priority) {
         PortNumber tcpPort = new PortNumber(securityRulePortMin);
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
         Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
 
-        flowBuilder.setMatch(MatchUtils
-                             .createSmacTcpSynDstIpPrefixTcpPort(matchBuilder, new MacAddress(attachedMac),
-                                                                 tcpPort, Constants.TCP_SYN, segmentationId, srcIpPrefix).build());
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "UcastEgress_" + segmentationId + "_" + attachedMac
+                + securityRulePortMin + securityRuleIpPrefix;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
-        LOG.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
-        String flowId = "UcastEgress_" + segmentationId + "_" + attachedMac +
-                securityRulePortMin + securityRuleIpPrefix;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortPrefixMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createSmacTcpSynDstIpPrefixTcpPort(matchBuilder, new MacAddress(attachedMac),
+                        tcpPort, Constants.TCP_SYN, segmentationId, srcIpPrefix);
+        flowBuilder.setMatch(matchBuilder.build());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
@@ -524,8 +509,6 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            LOG.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -533,38 +516,20 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
     }
 
-
-
     public void egressAllowProto(Long dpidLong, String segmentationId, String attachedMac, boolean write,
-                                 String securityRuleProtcol, Integer protoMatchPriority) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+                                 String securityRuleProtcol, Integer priority) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "EgressAllProto_" + segmentationId + "_"
+                + attachedMac + "_AllowEgressTCPSyn_" + securityRuleProtcol;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
-        flowBuilder.setMatch(MatchUtils
-                             .createDmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null).build());
-        flowBuilder.setMatch(MatchUtils
-                             .createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-
-        LOG.debug("MatchBuilder contains:  {}", flowBuilder.getMatch());
-        String flowId = "EgressAllProto_" + segmentationId + "_" +
-                attachedMac + "_AllowEgressTCPSyn_" + securityRuleProtcol;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createDmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null);
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        flowBuilder.setMatch(matchBuilder.build());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
@@ -574,8 +539,6 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            LOG.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -584,42 +547,24 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     }
 
     public void egressACLPermitAllProto(Long dpidLong, String segmentationId, String attachedMac,
-                                        boolean write, String securityRuleIpPrefix, Integer protoPortMatchPriority) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+                                        boolean write, String securityRuleIpPrefix, Integer priority) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "Egress_Proto_ACL" + segmentationId + "_" +
+                attachedMac + "_Permit_" + securityRuleIpPrefix;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId))
-                             .build());
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         if (securityRuleIpPrefix != null) {
             Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
-            flowBuilder.setMatch(MatchUtils
-                                 .createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, srcIpPrefix)
-                                 .build());
+            MatchUtils.createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, srcIpPrefix);
         } else {
-            flowBuilder.setMatch(MatchUtils
-                                 .createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null)
-                                 .build());
+            MatchUtils.createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null);
         }
-        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-        String flowId = "Egress_Proto_ACL" + segmentationId + "_" +
-                attachedMac + "_Permit_" + securityRuleIpPrefix;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        flowBuilder.setMatch(matchBuilder.build());
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
@@ -629,8 +574,6 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            LOG.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -638,32 +581,18 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
     }
 
-
     public void egressACLTcpSyn(Long dpidLong, String segmentationId, String attachedMac, boolean write,
-                                Integer securityRulePortMin, Integer protoPortMatchPriority) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+                                Integer securityRulePortMin, Integer priority) {
         PortNumber tcpPort = new PortNumber(securityRulePortMin);
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "Ucast_this.getTable()" + segmentationId + "_" + attachedMac + securityRulePortMin;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
-        flowBuilder.setMatch(MatchUtils.createSmacTcpSyn(matchBuilder, attachedMac, tcpPort,
-                                                         Constants.TCP_SYN, segmentationId).build());
-
-        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-        String flowId = "Ucast_this.getTable()" + segmentationId + "_" + attachedMac + securityRulePortMin;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createSmacTcpSyn(matchBuilder, attachedMac, tcpPort, Constants.TCP_SYN, segmentationId);
+        flowBuilder.setMatch(matchBuilder.build());
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
@@ -676,8 +605,6 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            LOG.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
@@ -690,19 +617,15 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      *
      * @param dpidLong the dpid
      * @param write whether to write or delete the flow
-     * @param protoPortMatchPriority the priority
+     * @param priority the priority
      */
     private void egressAclDhcpAllowClientTrafficFromVm(Long dpidLong,
-                                                       boolean write, Integer protoPortMatchPriority) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+                                                       boolean write, Integer priority) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        String flowName = "Egress_DHCP_Client"  + "_Permit_";
         MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-
-        MatchUtils.createDhcpMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT).build();
-        LOG.debug("egressAclDHCPAllowClientTrafficFromVm: MatchBuilder contains: {}", matchBuilder);
-        String flowId = "Egress_DHCP_Client"  + "_Permit_";
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        MatchUtils.createDhcpMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);
     }
 
     /**
@@ -711,21 +634,17 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      * @param dpidLong the dpid
      * @param localPort the local port
      * @param write is write or delete
-     * @param protoPortMatchPriority  the priority
+     * @param priority  the priority
      */
     private void egressAclDhcpDropServerTrafficfromVm(Long dpidLong, long localPort,
-                                                      boolean write, Integer protoPortMatchPriority) {
+                                                      boolean write, Integer priority) {
 
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        String flowName = "Egress_DHCP_Server" + "_" + localPort + "_DROP_";
         MatchBuilder matchBuilder = new MatchBuilder();
-        //FlowBuilder flowBuilder = new FlowBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
-        MatchUtils.createDhcpMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT).build();
-        LOG.debug("egressAclDHCPDropServerTrafficfromVM: MatchBuilder contains: {}", matchBuilder);
-        String flowId = "Egress_DHCP_Server" + "_" + localPort + "_DROP_";
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, true);
-
+        MatchUtils.createDhcpMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, true);
     }
 
     /**
@@ -735,52 +654,39 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      * @param localPort the local port
      * @param srcIp the vm ip address
      * @param attachedMac the vm mac address
-     * @param protoPortMatchPriority  the priority
+     * @param priority  the priority
      * @param write is write or delete
      */
     private void egressAclAllowTrafficFromVmIpMacPair(Long dpidLong, long localPort,
                                                       String attachedMac, String srcIp,
-                                                      Integer protoPortMatchPriority, boolean write) {
+                                                      Integer priority, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        String flowName = "Egress_Allow_VM_IP_MAC" + "_" + localPort + attachedMac + "_Permit_";
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createSrcL3Ipv4MatchWithMac(matchBuilder, new Ipv4Prefix(srcIp),new MacAddress(attachedMac));
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         LOG.debug("egressAclAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", matchBuilder);
-        String flowId = "Egress_Allow_VM_IP_MAC" + "_" + localPort + attachedMac + "_Permit_";
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
-
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);
     }
 
     /**
      * Add or remove flow to the node.
      *
-     * @param flowId the the flow id
+     * @param flowName the the flow id
      * @param nodeBuilder the node builder
      * @param matchBuilder the matchbuilder
-     * @param protoPortMatchPriority the protocol priority
+     * @param priority the protocol priority
      * @param write whether it is a write
      * @param drop whether it is a drop or forward
      */
-    private void syncFlow(String flowId, NodeBuilder nodeBuilder,
-                          MatchBuilder matchBuilder,Integer protoPortMatchPriority,
-                          boolean write,boolean drop) {
+    private void syncFlow(String flowName, NodeBuilder nodeBuilder,
+                          MatchBuilder matchBuilder, Integer priority,
+                          boolean write, boolean drop) {
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
         if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-
             InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             if (drop) {
                 InstructionUtils.createDropInstructions(ib);
@@ -796,10 +702,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
-
     }
-
-
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {

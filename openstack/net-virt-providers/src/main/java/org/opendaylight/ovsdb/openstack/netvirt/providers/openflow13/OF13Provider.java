@@ -42,6 +42,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -1282,12 +1283,12 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
      */
 
     private void writeNormalRule(Long dpidLong) {
-
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "NORMAL";
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, (short)0).setPriority(0);
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(matchBuilder.build());
 
         // Create the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
@@ -1297,7 +1298,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         List<Instruction> instructions = Lists.newArrayList();
 
         // Call the InstructionBuilder Methods Containing Actions
-        InstructionUtils.createNormalInstructions(nodeName, ib);
+        InstructionUtils.createNormalInstructions(FlowUtils.getNodeName(dpidLong), ib);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -1307,18 +1308,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
-
-        String flowId = "NORMAL";
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setPriority(0);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId((short) 0);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
     }
 

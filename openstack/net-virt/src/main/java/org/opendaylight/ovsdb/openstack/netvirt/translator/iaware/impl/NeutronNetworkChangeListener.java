@@ -131,7 +131,9 @@ public class NeutronNetworkChangeListener implements ClusteredDataChangeListener
         result.setStatus(network.getStatus());
 
         // todo remove '-' chars as tenant id doesn't use them
-        result.setTenantID(network.getTenantId().getValue());
+        if (network.getTenantId() != null) {
+            result.setTenantID(network.getTenantId().getValue());
+        }
         result.setID(network.getUuid().getValue());
 
         NetworkL3Extension l3Extension = network.getAugmentation(NetworkL3Extension.class);

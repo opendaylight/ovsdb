@@ -15,15 +15,14 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
@@ -31,9 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
@@ -70,83 +67,72 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
                                        InetAddress rewriteSrcAddress,
                                        Long OutPort,
                                        Action action) {
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "OutboundNAT_" + matchSegmentationId + "_" + matchSrcAddress.getHostAddress();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(512);
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
-
         MatchUtils.createDmacIpSaMatch(matchBuilder,
                 matchDestMacAddress,
                 MatchUtils.iPv4PrefixFromIPv4Address(matchSrcAddress.getHostAddress()),
                 matchSegmentationId);
-
-        // Instructions List Stores Individual Instructions
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
-        List<Instruction> instructions_tmp = Lists.newArrayList();
-        InstructionBuilder ib = new InstructionBuilder();
-
-        ApplyActionsBuilder aab = new ApplyActionsBuilder();
-        ActionBuilder ab = new ActionBuilder();
-        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList =
-                Lists.newArrayList();
-
-        // Set source Mac address
-        ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(rewriteSrcMacAddress)));
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
-        actionList.add(ab.build());
-
-        // DecTTL
-        ab.setAction(ActionUtils.decNwTtlAction());
-        ab.setOrder(1);
-        ab.setKey(new ActionKey(1));
-        actionList.add(ab.build());
-
-        // Set Destination Mac address
-        ab.setAction(ActionUtils.setDlDstAction(new MacAddress(rewriteDestMacAddress)));
-        ab.setOrder(2);
-        ab.setKey(new ActionKey(2));
-        actionList.add(ab.build());
-
-        // Set source Ip address
-        Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(
-                MatchUtils.iPv4PrefixFromIPv4Address(rewriteSrcAddress.getHostAddress()));
-        ab.setAction(ActionUtils.setNwSrcAction(ipb.build()));
-        ab.setOrder(3);
-        ab.setKey(new ActionKey(3));
-        actionList.add(ab.build());
-
-        // Create Apply Actions Instruction
-        aab.setAction(actionList);
-        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions_tmp.add(ib.build());
-
-        // Set the Output Port/Iface
-        ib = new InstructionBuilder();
-        InstructionUtils.addOutputPortInstructions(ib, dpidLong, OutPort, instructions_tmp);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
-        FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setInstructions(isb.setInstruction(instructions).build());
-
-        String flowId = "OutboundNAT_" + matchSegmentationId + "_" + matchSrcAddress.getHostAddress();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(512);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (action.equals(Action.ADD)) {
+            // Instructions List Stores Individual Instructions
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            List<Instruction> instructions_tmp = Lists.newArrayList();
+            InstructionBuilder ib = new InstructionBuilder();
+
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            ActionBuilder ab = new ActionBuilder();
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList =
+                    Lists.newArrayList();
+
+            // Set source Mac address
+            ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(rewriteSrcMacAddress)));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            // DecTTL
+            ab.setAction(ActionUtils.decNwTtlAction());
+            ab.setOrder(1);
+            ab.setKey(new ActionKey(1));
+            actionList.add(ab.build());
+
+            // Set Destination Mac address
+            ab.setAction(ActionUtils.setDlDstAction(new MacAddress(rewriteDestMacAddress)));
+            ab.setOrder(2);
+            ab.setKey(new ActionKey(2));
+            actionList.add(ab.build());
+
+            // Set source Ip address
+            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(
+                    MatchUtils.iPv4PrefixFromIPv4Address(rewriteSrcAddress.getHostAddress()));
+            ab.setAction(ActionUtils.setNwSrcAction(ipb.build()));
+            ab.setOrder(3);
+            ab.setKey(new ActionKey(3));
+            actionList.add(ab.build());
+
+            // Create Apply Actions Instruction
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions_tmp.add(ib.build());
+
+            // Set the Output Port/Iface
+            ib = new InstructionBuilder();
+            InstructionUtils.addOutputPortInstructions(ib, dpidLong, OutPort, instructions_tmp);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            flowBuilder.setInstructions(isb.setInstruction(instructions).build());
+
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             removeFlow(flowBuilder, nodeBuilder);
@@ -159,17 +145,14 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
     @Override
     public Status programIpRewriteExclusion(Long dpid, String segmentationId, String excludedCidr,
                                             Action action) {
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpid);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "OutboundNATExclusion_" + segmentationId + "_" + excludedCidr;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(1024);
 
         MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
-
-        // Instructions List Stores Individual Instructions
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
-        InstructionBuilder ib;
-
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+
         String ipAddress = excludedCidr.substring(0, excludedCidr.indexOf("/"));
         InetAddress inetAddress;
         try {
@@ -185,29 +168,22 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
             return new Status(StatusCode.NOTIMPLEMENTED);
         }
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(excludedCidr));
-
-        // Goto Next Table
-        ib = getMutablePipelineInstructionBuilder();
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
-        FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setInstructions(isb.setInstruction(instructions).build());
-
-        String flowId = "OutboundNATExclusion_" + segmentationId + "_" + excludedCidr;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setPriority(1024);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
 
         if (action.equals(Action.ADD)) {
+            // Instructions List Stores Individual Instructions
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            InstructionBuilder ib;
+
+            // Goto Next Table
+            ib = getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            flowBuilder.setInstructions(isb.setInstruction(instructions).build());
+
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             removeFlow(flowBuilder, nodeBuilder);

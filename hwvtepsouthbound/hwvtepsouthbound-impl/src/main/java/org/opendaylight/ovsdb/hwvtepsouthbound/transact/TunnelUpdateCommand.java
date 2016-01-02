@@ -26,6 +26,6 @@ public class TunnelUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        //TODO
+        //FIXME: Handling it as part of PhysicalSwitchUpdate. Do we need this?
     }
 }

@@ -159,6 +159,7 @@ module hwvtep {
             }
         }
         list tunnels {
+            key "local-locator-ref remote-locator-ref";
             uses hwvtep-tunnel-attributes ;
         }
     }

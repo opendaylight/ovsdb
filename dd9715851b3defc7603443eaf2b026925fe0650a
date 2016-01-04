@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_7ef4e8f1",
+        "filename": "netvirt/features/src/main/features/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-01-04T14:19:29Z",
+      "side": 1,
+      "message": "I thought I\u0027d include sfc because we\u0027ll want hwgw to be able to run with sfc.",
+      "parentUuid": "1aa4ed85_7e0aa822",
+      "range": {
+        "startLine": 22,
+        "startChar": 39,
+        "endLine": 22,
+        "endChar": 47
+      },
+      "revId": "dd9715851b3defc7603443eaf2b026925fe0650a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_03c5613b",
         "filename": "netvirt/impl/pom.xml",
         "patchSetId": 4
@@ -107,6 +131,30 @@
       "writtenOn": "2016-01-04T13:59:46Z",
       "side": 1,
       "message": "seems like the revision should allow using the same name and not require the \"new\".",
+      "range": {
+        "startLine": 12,
+        "startChar": 113,
+        "endLine": 12,
+        "endChar": 115
+      },
+      "revId": "dd9715851b3defc7603443eaf2b026925fe0650a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_fe90d896",
+        "filename": "netvirt/impl/src/main/config/default-config.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-01-04T14:19:29Z",
+      "side": 1,
+      "message": "I believe the revisions were different before the name change, and we still had a problem.",
+      "parentUuid": "1aa4ed85_de2abc7d",
       "range": {
         "startLine": 12,
         "startChar": 113,

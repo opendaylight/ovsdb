@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_03c5613b",
+        "filename": "netvirt/impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-04T13:16:12Z",
+      "side": 1,
+      "message": "Why is the artifact renamed?",
+      "revId": "dd9715851b3defc7603443eaf2b026925fe0650a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_a3b48dd1",
+        "filename": "netvirt/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/netvirt/_new/impl/rev151230/NetvirtModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-04T13:16:12Z",
+      "side": 1,
+      "message": "The license header is missing.",
+      "revId": "dd9715851b3defc7603443eaf2b026925fe0650a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

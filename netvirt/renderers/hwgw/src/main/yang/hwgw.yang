@@ -9,7 +9,7 @@ module hwgw {
     description
         "Service definition for hwgw project";
 
-    revision "2014-12-10" {
+    revision "2015-12-27" {
         description
             "Initial revision";
     }

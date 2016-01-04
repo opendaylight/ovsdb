@@ -21,7 +21,6 @@ public interface GatewayMacResolverListener {
      * @param externalNetworkBridgeDpid Bridge used for sending ARP request
      * @param gatewayIpAddress Ip address that Mac Resolver ARPed for
      * @param macAddress Mac Address associated with the gatewayIpAddress
-     * @return
      */
     void gatewayMacResolved(final Long externalNetworkBridgeDpid, final IpAddress gatewayIpAddress,
                             final MacAddress macAddress);

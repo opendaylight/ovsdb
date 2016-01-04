@@ -117,7 +117,7 @@ public class TenantNetworkManagerImplTest {
 
         List<OvsdbTerminationPointAugmentation> ports = new ArrayList<>();
         ports.add(mock(OvsdbTerminationPointAugmentation.class));
-        when(southbound.getTerminationPointsOfBridge(any(Node.class))).thenReturn(ports);
+        when(southbound.readTerminationPointAugmentations(any(Node.class))).thenReturn(ports);
 
         assertTrue("Error, did not return correct boolean for isTenantNetworkPresentInNode", tenantNetworkManagerImpl.isTenantNetworkPresentInNode(mock(Node.class), SEG_ID));
     }

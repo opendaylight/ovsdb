@@ -62,7 +62,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
 
     private boolean checkIfOnlyConnectedManager(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
         ManagerEntry onlyConnectedManager = null;
-        if (ovsdbNodeAugmentation != null) {
+        if (ovsdbNodeAugmentation != null && ovsdbNodeAugmentation.getManagerEntry() != null) {
             int connectedManager = 0;
             for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
                 if (manager.isConnected()) {

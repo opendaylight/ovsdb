@@ -107,6 +107,9 @@ public class TerminationPointCreateCommandTest {
         doNothing().when(bridge).setName(anyString());
         PowerMockito.whenNew(UUID.class).withAnyArguments().thenReturn(mock(UUID.class));
         doNothing().when(bridge).setPorts(any(HashSet.class));
+
+        terminationPointCreateCommand.execute(transaction);
+        verify(terminationPointCreateCommand).getChanges();
     }
 
     @SuppressWarnings("unchecked")

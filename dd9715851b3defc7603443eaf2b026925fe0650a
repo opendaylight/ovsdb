@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_231c1dc1",
+        "filename": "netvirt/impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-01-04T13:26:15Z",
+      "side": 1,
+      "message": "Look at Andre\u0027s comment for patchset2. There is already a netvirt-impl with same artifact-id and name space in OVSDB project. When trying to bring up features that use both Andre was running into exception. You were on vacation and this was the best Andre and I could come up with. Can you take a look at that and suggest a better solution?",
+      "parentUuid": "1aa4ed85_03c5613b",
+      "revId": "dd9715851b3defc7603443eaf2b026925fe0650a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_a3b48dd1",
         "filename": "netvirt/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/netvirt/_new/impl/rev151230/NetvirtModule.java",
         "patchSetId": 4

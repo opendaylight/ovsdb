@@ -76,7 +76,9 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         }
 
         try {
-            List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
+            // Make sure to get fresh list of termination points, and not use the ones provided in node param!
+            List<OvsdbTerminationPointAugmentation> ports = southbound.readTerminationPointAugmentations(node);
+
             for (OvsdbTerminationPointAugmentation port : ports) {
                 String ifaceId = southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
                 if (ifaceId != null && isInterfacePresentInTenantNetwork(ifaceId, networkId)) {

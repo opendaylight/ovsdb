@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_6373f5e7",
+        "filename": "netvirt/impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-04T13:45:30Z",
+      "side": 1,
+      "message": "As I understand it the conflict is between the openstack/net-virt and netvirt-impl YANG modules, is that correct? I\u0027d rather keep the Maven artifact and YANG modules consistent, so netvirt-new-impl seems better in the short term. (If openstack/net-virt is removed later we can always rename this one...)",
+      "parentUuid": "1aa4ed85_231c1dc1",
+      "revId": "dd9715851b3defc7603443eaf2b026925fe0650a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_a3b48dd1",
         "filename": "netvirt/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/netvirt/_new/impl/rev151230/NetvirtModule.java",
         "patchSetId": 4

@@ -22,6 +22,30 @@
       "revId": "90102f7b07d181aea53ae6409750e1c2791bb3ec",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_008552ac",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/error/SchemaVersionMismatchException.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-05T08:07:27Z",
+      "side": 1,
+      "message": "All exceptions store their stacktrace (fillInStackTrace() called by the Throwable constructors); the logger then determines whether or not to output the stacktrace when logging the exception. I use this() here rather than super() because the 3-parameter constructor builds on the 1-parameter constructor in this class, not in the parent class; effectively it\u0027s the same here, but if we ever add code to the 1-parameter constructor it would be nice to have it taken into account by the 3-parameter constructor. The other two constructors are only defined here to expose them to users of this class; they can\u0027t build on each other, they just call their equivalent super-constructor.\n\nActually your comment makes me realise that the other two constructors aren\u0027t used and aren\u0027t needed, so I\u0027ll remove them (which means using super() in this constructor!).",
+      "parentUuid": "1aa4ed85_80d4e247",
+      "range": {
+        "startLine": 30,
+        "startChar": 8,
+        "endLine": 30,
+        "endChar": 12
+      },
+      "revId": "90102f7b07d181aea53ae6409750e1c2791bb3ec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

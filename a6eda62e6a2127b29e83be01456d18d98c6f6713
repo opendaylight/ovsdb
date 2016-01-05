@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1aa4ed85_e33fe023",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-01-05T10:55:24Z",
+      "side": 1,
+      "message": "Warning from integration/distribution side:\nThis is incompatible with the non-li openflow features in odl-integration-compatible-with-all, so odl-ovsdb-openstack feature would need to be commented out from odl-integration-all (the same way as NIC and DIDM features are already).",
+      "range": {
+        "startLine": 36,
+        "startChar": 81,
+        "endLine": 36,
+        "endChar": 84
+      },
+      "revId": "a6eda62e6a2127b29e83be01456d18d98c6f6713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_00c0f27a",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
         "patchSetId": 1

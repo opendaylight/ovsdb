@@ -165,6 +165,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/HwvtepSouthboundIT.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

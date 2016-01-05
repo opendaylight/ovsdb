@@ -92,7 +92,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
             }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB Southbound Provider instance entity {} was already "
-                    + "registered for {} ownership", instanceEntity, e);
+                    + "registered for ownership", instanceEntity, e);
         }
     }
 

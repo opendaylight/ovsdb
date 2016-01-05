@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_20596efe",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-05T04:05:20Z",
+      "side": 1,
+      "message": "yup, we can do that, we can probably put trace log, otherwise it\u0027s going to generate lot of log if we put it on debug. will fix it once it will get merge.",
+      "parentUuid": "1aa4ed85_00c0f27a",
+      "range": {
+        "startLine": 142,
+        "startChar": 37,
+        "endLine": 142,
+        "endChar": 61
+      },
+      "revId": "a6eda62e6a2127b29e83be01456d18d98c6f6713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_803b829b",
         "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/ArpResponderServiceTest.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-05T03:58:14Z",
       "side": 1,
       "message": "is this needed?",
+      "range": {
+        "startLine": 34,
+        "startChar": 58,
+        "endLine": 34,
+        "endChar": 82
+      },
+      "revId": "a6eda62e6a2127b29e83be01456d18d98c6f6713",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_e072767b",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/ArpResponderServiceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-05T04:05:20Z",
+      "side": 1,
+      "message": "probably not, looks like didn\u0027t get cleaned up while merging master to net-virt-clsutering. Will fix this as well after merging the patch.",
+      "parentUuid": "1aa4ed85_803b829b",
       "range": {
         "startLine": 34,
         "startChar": 58,

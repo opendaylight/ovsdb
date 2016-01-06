@@ -56,7 +56,8 @@ public class AbstractEventTest {
         assertNotNull("Error, hashCode() did not return any value", abstractEvent1.hashCode());
         assertEquals("Error, hashCode() is not consistent", abstractEvent2.hashCode(), abstractEvent3.hashCode());
 
+        int transactionId = abstractEvent1.getTransactionId();
         assertEquals("Error, toString() did not return the correct value",
-                "AbstractEvent [transactionId=1 handlerType=SOUTHBOUND action=DELETE]", abstractEvent1.toString());
+                "AbstractEvent [transactionId=" + transactionId + " handlerType=SOUTHBOUND action=DELETE]", abstractEvent1.toString());
     }
 }

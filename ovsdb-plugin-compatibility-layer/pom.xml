@@ -42,10 +42,6 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-    </dependency>
-    <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
@@ -110,7 +106,7 @@
               javax.net.ssl,
               *
             </Import-Package>
-            <Embed-Dependency>commons-codec,javax.servlet-api,portlet-api,commons-collections,utils.config;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Dependency>commons-codec,javax.servlet-api,portlet-api,utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.compatibility.plugin.internal.Activator</Bundle-Activator>
             <Private-Package>

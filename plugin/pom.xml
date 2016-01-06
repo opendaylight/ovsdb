@@ -53,10 +53,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-    </dependency>
-    <dependency>
       <groupId>equinoxSDK381</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
@@ -115,7 +111,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>commons-codec,javax.servlet-api,portlet-api,commons-collections,utils.config;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Dependency>commons-codec,javax.servlet-api,portlet-api,utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.plugin.internal.Activator</Bundle-Activator>
             <Private-Package>

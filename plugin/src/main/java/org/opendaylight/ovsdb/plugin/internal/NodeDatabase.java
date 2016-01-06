@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.collections.MapUtils;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
@@ -130,10 +129,6 @@ public class NodeDatabase {
             if (tableCache != null) {
                 tableCache.remove(uuid);
             }
-        }
-
-        public void printTableCache() {
-            MapUtils.debugPrint(System.out, null, cache);
         }
     }
 }

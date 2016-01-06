@@ -98,7 +98,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <switchmanager.api.version>0.8.4-SNAPSHOT</switchmanager.api.version>
     <yangtools.version>0.7.4-SNAPSHOT</yangtools.version>
     <!-- 3rd Pary Dependency Versions -->
-    <commons.collection.version>1.0</commons.collection.version>
     <httpcomponents.version>4.2.1</httpcomponents.version>
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
@@ -108,11 +107,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>${commons.collection.version}</version>
-      </dependency>
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-all</artifactId>

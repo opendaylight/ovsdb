@@ -82,7 +82,6 @@ public final class Constants {
     public static final Integer PREFIX_MATCH_PRIORITY_DROP = 36004;
     public static final Integer PROTO_PREFIX_MATCH_PRIORITY_DROP = 36003;
     public static final Integer PREFIX_PORT_MATCH_PRIORITY_DROP = 36002;
-    public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP = 36001;
 
     public static final Integer PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY = 61012;
     public static final Integer PROTO_MATCH_PRIORITY = 61010;
@@ -92,6 +91,10 @@ public final class Constants {
     public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY = 61007;
     public static final Integer PROTO_DHCP_SERVER_MATCH_PRIORITY = 61006;
     public static final Integer PROTO_VM_IP_MAC_MATCH_PRIORITY = 36001;
+    public static final Integer CT_STATE_UNTRACKED_PRIORITY = 62030;
+    public static final Integer CT_STATE_TRACKED_EST_PRIORITY = 62020;
+    public static final Integer CT_STATE_TRACKED_NEW_PRIORITY = 62010;
+    public static final Integer CT_STATE_NEW_PRIORITY_DROP = 36007;
 
     public static final int TCP_SYN = 0x002;
     public static final short INGRESS_ACL = 40; // Flows Destined to the VM Port go here

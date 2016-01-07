@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SecurityServicesImpl implements ConfigInterface, SecurityServicesManager {
+
     private static final Logger LOG = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
@@ -44,6 +45,16 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     private volatile ConfigurationService configurationService;
     private volatile IngressAclProvider ingressAclProvider;
     private volatile EgressAclProvider egressAclProvider;
+    private boolean isConntrackEnabled = false;
+
+    public SecurityServicesImpl() {
+        super();
+    }
+
+    public SecurityServicesImpl(boolean isConntrack) {
+        super();
+        this.isConntrackEnabled = isConntrack;
+    }
 
     @Override
     public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
@@ -506,5 +517,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         } else if (impl instanceof EgressAclProvider) {
             egressAclProvider = (EgressAclProvider) impl;
         }
+    }
+
+    @Override
+    public boolean isConntrackEnabled() {
+        return isConntrackEnabled;
     }
 }

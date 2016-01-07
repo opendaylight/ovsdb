@@ -31,6 +31,7 @@ public class NetvirtProvider implements BindingAwareProvider, AutoCloseable {
     private static EntityOwnershipService entityOwnershipService;
     private static final Entity ownerInstanceEntity = new Entity(
             Constants.NETVIRT_OWNER_ENTITY_TYPE, Constants.NETVIRT_OWNER_ENTITY_TYPE);
+    private boolean conntrackEnabled = false;
 
     public NetvirtProvider(BundleContext bundleContext, EntityOwnershipService eos) {
         LOG.info("NetvirtProvider: bundleContext: {}", bundleContext);
@@ -56,11 +57,21 @@ public class NetvirtProvider implements BindingAwareProvider, AutoCloseable {
     public void onSessionInitiated(ProviderContext providerContext) {
         dataBroker = providerContext.getSALService(DataBroker.class);
         LOG.info("NetvirtProvider: onSessionInitiated dataBroker: {}", dataBroker);
+        LOG.info("NetvirtProvider: onSessionInitiated isConntrackEnabled: {}", this.conntrackEnabled);
         this.activator = new ConfigActivator(providerContext);
+        activator.setConntrackEnabled(this.conntrackEnabled);
         try {
             activator.start(bundleContext);
         } catch (Exception e) {
             LOG.warn("Failed to start Netvirt: ", e);
         }
+    }
+
+    public boolean isConntrackEnabled() {
+        return conntrackEnabled;
+    }
+
+    public void setConntrackEnabled(boolean conntackEnabled) {
+        this.conntrackEnabled = conntackEnabled;
     }
 }

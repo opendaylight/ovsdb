@@ -1022,7 +1022,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 }
             }
             ingressAclProvider.programFixedSecurityGroup(dpid, segmentationId, dhcpPort.getMacAddress(), localPort,
-                                                       isLastPortinSubnet, isComputePort, write);
+                                                       isLastPortinSubnet, isComputePort, attachedMac, write);
             egressAclProvider.programFixedSecurityGroup(dpid, segmentationId, attachedMac, localPort,
                                                       srcAddressList, isLastPortinBridge, isComputePort,write);
             /* If the network type is tunnel based (VXLAN/GRRE/etc) with Neutron Port Security ACLs */

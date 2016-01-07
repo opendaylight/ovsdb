@@ -20,6 +20,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
@@ -29,13 +30,25 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -228,7 +241,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
         flowId = flowId + "_Permit";
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
-        syncFlow(flowId, nodeBuilder, matchBuilder, priority, write, false);
+        syncFlow(flowId, nodeBuilder, matchBuilder, priority, write, false, securityServicesManager.isConntrackEnabled());
     }
 
     @Override
@@ -236,10 +249,14 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                         long localPort, List<Neutron_IPs> srcAddressList,
                                         boolean isLastPortinBridge, boolean isComputePort ,boolean write) {
         // If it is the only port in the bridge add the rule to allow any DHCP client traffic
-        if (isLastPortinBridge) {
+        //if (isLastPortinBridge) {
             egressAclDhcpAllowClientTrafficFromVm(dpid, write, Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
-        }
+       // }
         if (isComputePort) {
+            programArpRule(dpid, segmentationId, localPort, attachedMac, write);
+            if (securityServicesManager.isConntrackEnabled()) {
+                programEgressAclFixedConntrackRule(dpid, segmentationId, localPort, attachedMac, write);
+            }
             // add rule to drop the DHCP server traffic originating from the vm.
             egressAclDhcpDropServerTrafficfromVm(dpid, localPort, write,
                                                  Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
@@ -262,6 +279,149 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
     }
 
+    private void programArpRule(Long dpid, String segmentationId, long localPort, String attachedMac, boolean write) {
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        String flowId = "Egress_ARP_" + segmentationId + "_" + localPort + "_";
+
+        EthernetMatchBuilder ethernetType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0806L));
+        ethernetType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetType.build());
+
+        ArpMatchBuilder arpDstMatch = new ArpMatchBuilder();
+        ArpSourceHardwareAddressBuilder arpSrc = new ArpSourceHardwareAddressBuilder();
+        arpSrc.setAddress(new MacAddress(attachedMac));
+        arpDstMatch.setArpSourceHardwareAddress(arpSrc.build());
+        matchBuilder.setLayer3Match(arpDstMatch.build());
+
+        syncFlow(flowId, nodeBuilder, matchBuilder, Constants.PROTO_MATCH_PRIORITY, write, false, false);
+    }
+
+    private void programEgressAclFixedConntrackRule(Long dpid,
+            String segmentationId, long localPort, String attachMac, boolean write) {
+         try {
+             String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
+             programConntrackUntrackRule(nodeName, segmentationId, localPort,attachMac,
+                                         Constants.CT_STATE_UNTRACKED_PRIORITY, write );
+             programConntrackTrackedPlusEstRule(nodeName, dpid, segmentationId, localPort,
+                                         Constants.CT_STATE_TRACKED_EST_PRIORITY, write );
+             programConntrackNewDropRule(nodeName, dpid, segmentationId, localPort,
+                                              Constants.CT_STATE_NEW_PRIORITY_DROP, write );
+             LOG.info("programEgressAclFixedConntrackRule :  default connection tracking rule are added.");
+         } catch (Exception e) {
+             LOG.error("Failed to add default conntrack rules : " , e);
+         }
+     }
+
+     private void programConntrackUntrackRule(String nodeName, String segmentationId,
+                                              long localPort, String attachMac, Integer priority, boolean write) {
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         String flowId = "Egress_Fixed_Conntrk_Untrk_" + segmentationId + "_" + localPort + "_";
+         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder, attachMac, null);
+         //matchBuilder = MatchUtils.createInPortMatch(matchBuilder, dpid, localPort);
+         matchBuilder = MatchUtils.addCtState(matchBuilder,0x00,0X80);
+
+         FlowBuilder flowBuilder = getFlowBuilder(flowId, matchBuilder, priority);
+         if (write) {
+             InstructionBuilder ib = new InstructionBuilder();
+             List<Instruction> instructionsList = Lists.newArrayList();
+             InstructionsBuilder isb = new InstructionsBuilder();
+             ActionBuilder ab = new ActionBuilder();
+             ab.setAction(ActionUtils.nxConntrackAction(0, 0L, 0, (short)0x0));
+             // 0xff means no table, 0x0 is table = 0
+             ab.setOrder(0);
+             ab.setKey(new ActionKey(0));
+             List<Action> actionList = Lists.newArrayList();
+             actionList.add(ab.build());
+             ApplyActionsBuilder aab = new ApplyActionsBuilder();
+             aab.setAction(actionList);
+             ib.setOrder(0);
+             ib.setKey(new InstructionKey(0));
+             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+             instructionsList.add(ib.build());
+             isb.setInstruction(instructionsList);
+             flowBuilder.setInstructions(isb.build());
+             writeFlow(flowBuilder, nodeBuilder);
+             LOG.info("EGRESS:default programConntrackUntrackRule() flows are written");
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
+     }
+
+     private void programConntrackTrackedPlusEstRule(String nodeName, Long dpid, String segmentationId,
+                                                   long localPort,Integer priority, boolean write) {
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         String flowId = "Egress_Fixed_Conntrk_TrkEst_" + segmentationId + "_" + localPort + "_";
+         matchBuilder = MatchUtils.createInPortMatch(matchBuilder, dpid, localPort);
+         matchBuilder = MatchUtils.addCtState(matchBuilder,0x82, 0x82);
+
+         FlowBuilder flowBuilder = getFlowBuilder(flowId, matchBuilder, priority);
+         if (write) {
+             InstructionBuilder ib = new InstructionBuilder();
+             List<Instruction> instructionsList = Lists.newArrayList();
+             InstructionsBuilder isb = new InstructionsBuilder();
+             // got to next table instruction
+             ib = this.getMutablePipelineInstructionBuilder();
+             ib.setOrder(0);
+             ib.setKey(new InstructionKey(0));
+             instructionsList.add(ib.build());
+             isb.setInstruction(instructionsList);
+             flowBuilder.setInstructions(isb.build());
+             writeFlow(flowBuilder, nodeBuilder);
+             LOG.info("EGRESS:default programConntrackTrackedPlusEstRule() flows are written");
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
+     }
+
+     private void programConntrackNewDropRule(String nodeName, Long dpid, String segmentationId,
+                                              long localPort, Integer priority, boolean write) {
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         String flowId = "Egress_Fixed_Conntrk_NewDrop_" + segmentationId + "_" + localPort + "_";
+         matchBuilder = MatchUtils.createInPortMatch(matchBuilder, dpid, localPort);
+         matchBuilder = MatchUtils.addCtState(matchBuilder,0x01, 0x01);
+
+         FlowBuilder flowBuilder = getFlowBuilder(flowId, matchBuilder, priority);
+         if (write) {
+             InstructionBuilder ib = new InstructionBuilder();
+             InstructionsBuilder isb = new InstructionsBuilder();
+             List<Instruction> instructions = Lists.newArrayList();
+             InstructionUtils.createDropInstructions(ib);
+             ib.setOrder(0);
+             ib.setKey(new InstructionKey(0));
+             instructions.add(ib.build());
+             isb.setInstruction(instructions);
+             LOG.debug("Instructions contain: {}", ib.getInstruction());
+             flowBuilder.setInstructions(isb.build());
+             writeFlow(flowBuilder, nodeBuilder);
+             LOG.info("EGRESS:default programConntrackNewDropRule() flows are written");
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
+     }
+
+     private FlowBuilder getFlowBuilder(String flowId, MatchBuilder matchBuilder, int priority) {
+         FlowBuilder flowBuilder = new FlowBuilder();
+         flowBuilder.setMatch(matchBuilder.build());
+         flowBuilder.setId(new FlowId(flowId));
+         FlowKey key = new FlowKey(new FlowId(flowId));
+         flowBuilder.setStrict(false);
+         flowBuilder.setPriority(priority);
+         flowBuilder.setBarrier(true);
+         flowBuilder.setTableId(this.getTable());
+         flowBuilder.setKey(key);
+         flowBuilder.setFlowName(flowId);
+         flowBuilder.setHardTimeout(0);
+         flowBuilder.setIdleTimeout(0);
+         return flowBuilder;
+     }
+
     /**
      * Allows IPv4 packet egress from the src mac address.
      * @param dpidLong the dpid
@@ -276,7 +436,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_IP" + segmentationId + "_" + srcMac + "_Permit_";
         matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false, false);
     }
 
     /**
@@ -335,11 +495,11 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 rangeflowId = rangeflowId + "_Permit";
                 MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.TCP_SHORT,
                                                   0, port, portMaskMap.get(port));
-                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false, securityServicesManager.isConntrackEnabled());
             }
         } else {
             flowId = flowId + "_Permit";
-            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false, securityServicesManager.isConntrackEnabled());
         }
     }
 
@@ -381,12 +541,14 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
-            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+            if (!portSecurityRule.getSecurityRuleRemoteIpPrefix().contains("/0")) {
+                matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
                     new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+            }
         }
         flowId = flowId + "_Permit";
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
-        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false, securityServicesManager.isConntrackEnabled());
     }
 
     /**
@@ -445,11 +607,11 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 rangeflowId = rangeflowId + "_Permit";
                 MatchUtils.addLayer4MatchWithMask(matchBuilder, MatchUtils.UDP_SHORT,
                                                   0, port, portMaskMap.get(port));
-                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+                syncFlow(rangeflowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false, securityServicesManager.isConntrackEnabled());
             }
         } else {
             flowId = flowId + "_Permit";
-            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+            syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false, securityServicesManager.isConntrackEnabled());
         }
     }
 
@@ -625,7 +787,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         String flowName = "Egress_DHCP_Client"  + "_Permit_";
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createDhcpMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT);
-        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false, false);
     }
 
     /**
@@ -644,7 +806,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         MatchUtils.createDhcpMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT);
-        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, true);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, true, false);
     }
 
     /**
@@ -666,7 +828,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         MatchUtils.createSrcL3Ipv4MatchWithMac(matchBuilder, new Ipv4Prefix(srcIp),new MacAddress(attachedMac));
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         LOG.debug("egressAclAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", matchBuilder);
-        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false, false);
     }
 
     /**
@@ -678,16 +840,24 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      * @param priority the protocol priority
      * @param write whether it is a write
      * @param drop whether it is a drop or forward
+     * @param isCtCommit commit the connection or CT to track
      */
     private void syncFlow(String flowName, NodeBuilder nodeBuilder,
                           MatchBuilder matchBuilder, Integer priority,
-                          boolean write, boolean drop) {
+                          boolean write, boolean drop, boolean isCtCommit) {
+        MatchBuilder matchBuilder1 = matchBuilder;
+        if (isCtCommit) {
+            matchBuilder1 = MatchUtils.addCtState(matchBuilder1,0x81, 0x81);
+        }
         FlowBuilder flowBuilder = new FlowBuilder();
-        flowBuilder.setMatch(matchBuilder.build());
+        flowBuilder.setMatch(matchBuilder1.build());
         FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
 
         if (write) {
             InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib1 = new InstructionBuilder();
+            ActionBuilder ab = new ActionBuilder();
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
             if (drop) {
                 InstructionUtils.createDropInstructions(ib);
             }
@@ -696,6 +866,19 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
             instructionsList.add(ib.build());
+            if (isCtCommit) {
+                LOG.info("Adding Conntarck rule, flowname = " + flowName);
+                ab.setAction(ActionUtils.nxConntrackAction(1, 0L, 0, (short)0xff));
+                ab.setOrder(0);
+                ab.setKey(new ActionKey(0));
+                List<Action> actionList = Lists.newArrayList();
+                actionList.add(ab.build());
+                aab.setAction(actionList);
+                ib1.setOrder(1);
+                ib1.setKey(new InstructionKey(1));
+                ib1.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+                instructionsList.add(ib1.build());
+            }
             isb.setInstruction(instructionsList);
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);

@@ -44,6 +44,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     private volatile ConfigurationService configurationService;
     private volatile IngressAclProvider ingressAclProvider;
     private volatile EgressAclProvider egressAclProvider;
+    private boolean isConntrackEnabled = false;
 
     @Override
     public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
@@ -506,5 +507,14 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         } else if (impl instanceof EgressAclProvider) {
             egressAclProvider = (EgressAclProvider) impl;
         }
+    }
+
+    public void setContrackEnabled(boolean isContrack) {
+        this.isConntrackEnabled = isContrack;
+    }
+
+    @Override
+    public boolean isConntrackEnabled() {
+        return isConntrackEnabled;
     }
 }

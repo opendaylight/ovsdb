@@ -969,7 +969,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramFixedSecurityACLAdd1() throws Exception {
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, false, false, true);
+        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, false, false, null, true);
 
         verify(writeTransaction, times(0)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
         verify(writeTransaction, times(0)).submit();
@@ -981,7 +981,7 @@ public class IngressAclServiceTest {
     @Test
     public void testProgramFixedSecurityACLRemove1() throws Exception {
 
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, false, false, false);
+        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, false, false, null, false);
 
         verify(writeTransaction, times(0)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(0)).submit();

@@ -233,6 +233,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         LOGGER.debug("Neutron port {} event : {}", action, neutronPort.toString());
         if(action == Action.UPDATE){
             this.processSecurityGroupUpdate(neutronPort,originalPort);
+            this.updatePortInCleanupCache(neutronPort, originalPort);
         }
         if (!this.enabled) {
             return;
@@ -1398,6 +1399,13 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     public void removePortFromCleanupCache(NeutronPort port) {
         this.portCleanupCache.remove(port);
+    }
+
+
+    public void updatePortInCleanupCache(NeutronPort updatedPort,NeutronPort originalPort) {
+        removePortFromCleanupCache(originalPort);
+        storePortInCleanupCache(updatedPort);
+        return;
     }
 
     public NeutronPort getPortFromCleanupCache(String portid) {

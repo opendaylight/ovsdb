@@ -311,12 +311,8 @@ public class SouthboundImpl implements Southbound {
     }
 
     public String getDatapathId(Node node) {
-        String datapathId = null;
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
-        if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
-            datapathId = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
-        }
-        return datapathId;
+        return getDatapathId(ovsdbBridgeAugmentation);
     }
 
     public String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {

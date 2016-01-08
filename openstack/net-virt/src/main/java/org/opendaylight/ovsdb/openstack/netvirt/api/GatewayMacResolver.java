@@ -31,14 +31,17 @@ public interface GatewayMacResolver {
      * periodicRefresh flag.
      * @param gatewayMacResolverListener An optional listener for mac update callback (can be null)
      * @param externalNetworkBridgeDpid This bridge will be used for sending ARP request
+     * @param refreshExternalNetworkBridgeDpidIfNeeded Instructs resolver to change bridge dpid if resolve is failing
      * @param gatewayIp ARP request will be send for this ip address
      * @param sourceIpAddress Source IP address for the ARP request (localhost)
      * @param sourceMacAddress Source MAC address for the ARP request (localhost)
      * @param periodicRefresh Do you want to periodically refresh the gateway mac?
      * @return ListenableFuture that contains the mac address of gateway ip.
      */
-    public ListenableFuture<MacAddress> resolveMacAddress(final GatewayMacResolverListener gatewayMacResolverListener,
-            final Long externalNetworkBridgeDpid, final Ipv4Address gatewayIp, final Ipv4Address sourceIpAddress,
+    public ListenableFuture<MacAddress> resolveMacAddress(
+            final GatewayMacResolverListener gatewayMacResolverListener,
+            final Long externalNetworkBridgeDpid, final Boolean refreshExternalNetworkBridgeDpidIfNeeded,
+            final Ipv4Address gatewayIp, final Ipv4Address sourceIpAddress,
             final MacAddress sourceMacAddress, final Boolean periodicRefresh);
 
     /**

@@ -24,7 +24,8 @@ public final class ArpResolverMetadata {
 
     private final GatewayMacResolverListener gatewayMacResolverListener;
     private final Ipv4Address gatewayIpAddress;
-    private final Long externalNetworkBridgeDpid;
+    private Long externalNetworkBridgeDpid;
+    private final boolean refreshExternalNetworkBridgeDpidIfNeeded;
     private final Ipv4Address arpRequestSourceIp;
     private final MacAddress arpRequestSourceMacAddress;
     private final boolean periodicRefresh;
@@ -36,10 +37,12 @@ public final class ArpResolverMetadata {
 
     public ArpResolverMetadata(final GatewayMacResolverListener gatewayMacResolverListener,
                                final Long externalNetworkBridgeDpid,
+                               final boolean refreshExternalNetworkBridgeDpidIfNeeded,
             final Ipv4Address gatewayIpAddress, final Ipv4Address arpRequestSourceIp,
             final MacAddress arpRequestMacAddress, final boolean periodicRefresh){
         this.gatewayMacResolverListener = gatewayMacResolverListener;
         this.externalNetworkBridgeDpid = externalNetworkBridgeDpid;
+        this.refreshExternalNetworkBridgeDpidIfNeeded = refreshExternalNetworkBridgeDpidIfNeeded;
         this.gatewayIpAddress = gatewayIpAddress;
         this.arpRequestSourceIp = arpRequestSourceIp;
         this.arpRequestSourceMacAddress = arpRequestMacAddress;
@@ -49,11 +52,14 @@ public final class ArpResolverMetadata {
         this.numberOfOutstandingArpRequests = 0;
     }
 
-    public RemoveFlowInput getFlowToRemove() {
-        return flowToRemove;
+    public boolean isRefreshExternalNetworkBridgeDpidIfNeeded() {
+        return refreshExternalNetworkBridgeDpidIfNeeded;
     }
     public boolean isPeriodicRefresh() {
         return periodicRefresh;
+    }
+    public RemoveFlowInput getFlowToRemove() {
+        return flowToRemove;
     }
     public void setFlowToRemove(RemoveFlowInput flowToRemove) {
         this.flowToRemove = flowToRemove;
@@ -82,11 +88,17 @@ public final class ArpResolverMetadata {
     public Long getExternalNetworkBridgeDpid() {
         return externalNetworkBridgeDpid;
     }
+    public void setExternalNetworkBridgeDpid(Long externalNetworkBridgeDpid) {
+        this.externalNetworkBridgeDpid = externalNetworkBridgeDpid;
+    }
     public Ipv4Address getArpRequestSourceIp() {
         return arpRequestSourceIp;
     }
     public MacAddress getArpRequestSourceMacAddress() {
         return arpRequestSourceMacAddress;
+    }
+    public boolean isGatewayMacAddressResolved() {
+        return gatewayMacAddressResolved;
     }
 
     /**
@@ -122,6 +134,10 @@ public final class ArpResolverMetadata {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+
+        result = prime
+                * result
+                + ((gatewayMacResolverListener == null) ? 0 : gatewayMacResolverListener.hashCode());
         result = prime
                 * result
                 + ((arpRequestSourceMacAddress == null) ? 0 : arpRequestSourceMacAddress
@@ -138,6 +154,7 @@ public final class ArpResolverMetadata {
                 * result
                 + ((gatewayIpAddress == null) ? 0 : gatewayIpAddress.hashCode());
         result = prime * result + (periodicRefresh ? 1231 : 1237);
+        result = prime * result + (refreshExternalNetworkBridgeDpidIfNeeded ? 1231 : 1237);
         return result;
     }
 
@@ -150,6 +167,11 @@ public final class ArpResolverMetadata {
         if (getClass() != obj.getClass())
             return false;
         ArpResolverMetadata other = (ArpResolverMetadata) obj;
+        if (gatewayMacResolverListener == null) {
+            if (other.gatewayMacResolverListener != null)
+                return false;
+        } else if (!gatewayMacResolverListener.equals(other.gatewayMacResolverListener))
+            return false;
         if (arpRequestSourceMacAddress == null) {
             if (other.arpRequestSourceMacAddress != null)
                 return false;
@@ -172,6 +194,8 @@ public final class ArpResolverMetadata {
         } else if (!gatewayIpAddress.equals(other.gatewayIpAddress))
             return false;
         if (periodicRefresh != other.periodicRefresh)
+            return false;
+        if (refreshExternalNetworkBridgeDpidIfNeeded != other.refreshExternalNetworkBridgeDpidIfNeeded)
             return false;
         return true;
     }

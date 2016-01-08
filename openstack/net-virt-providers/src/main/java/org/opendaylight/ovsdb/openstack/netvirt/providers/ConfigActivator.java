@@ -28,6 +28,7 @@ public class ConfigActivator implements BundleActivator {
     private List<ServiceRegistration<?>> registrations = new ArrayList<>();
     private ProviderContext providerContext;
     private ServiceTracker NetworkingProviderManagerTracker;
+    private ServiceTracker NodeCacheManagerTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -94,7 +95,7 @@ public class ConfigActivator implements BundleActivator {
         registerService(context, OutboundNatProvider.class.getName(),
                 outboundNatService, Service.OUTBOUND_NAT);
 
-        GatewayMacResolverService gatewayMacResolverService = new GatewayMacResolverService();
+        final GatewayMacResolverService gatewayMacResolverService = new GatewayMacResolverService();
         registerService(context, GatewayMacResolver.class.getName(),
                 gatewayMacResolverService, Service.GATEWAY_RESOLVER);
         getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
@@ -131,6 +132,23 @@ public class ConfigActivator implements BundleActivator {
         };
         NetworkingProviderManagerTracker.open();
         this.NetworkingProviderManagerTracker = NetworkingProviderManagerTracker;
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker NodeCacheManagerTracker = new ServiceTracker(context,
+                NodeCacheManager.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService NodeCacheManager");
+                NodeCacheManager service =
+                        (NodeCacheManager) context.getService(reference);
+                if (service != null) {
+                    gatewayMacResolverService.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        NodeCacheManagerTracker.open();
+        this.NodeCacheManagerTracker = NodeCacheManagerTracker;
     }
 
     @Override
@@ -138,6 +156,7 @@ public class ConfigActivator implements BundleActivator {
         LOG.info("ConfigActivator stop");
         /* ServiceTrackers and services are already released when bundle stops
         NetworkingProviderManagerTracker.close();
+        NodeCacheManagerTracker.close();
         for (ServiceRegistration registration : registrations) {
             if (registration != null) {
                 registration.unregister();

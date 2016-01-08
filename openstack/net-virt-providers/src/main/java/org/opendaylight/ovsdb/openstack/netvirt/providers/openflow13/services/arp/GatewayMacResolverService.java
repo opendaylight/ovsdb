@@ -7,26 +7,19 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.math.BigInteger;
-import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.openflowplugin.api.OFConstants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -75,14 +68,20 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import javax.annotation.Nullable;
+import java.math.BigInteger;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  *
@@ -110,6 +109,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     private final ScheduledExecutorService gatewayMacRefresherPool = Executors.newScheduledThreadPool(1);
     private final ScheduledExecutorService refreshRequester = Executors.newSingleThreadScheduledExecutor();
     private AtomicBoolean initializationDone = new AtomicBoolean(false);
+    private volatile NodeCacheManager nodeCacheManager;
 
     static {
         ApplyActions applyActions = new ApplyActionsBuilder().setAction(
@@ -148,7 +148,8 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                     if (!gatewayToArpMetadataMap.isEmpty()){
                         for(final Entry<Ipv4Address, ArpResolverMetadata> gatewayToArpMetadataEntry : gatewayToArpMetadataMap.entrySet()){
                             final Ipv4Address gatewayIp = gatewayToArpMetadataEntry.getKey();
-                            final ArpResolverMetadata gatewayMetaData = gatewayToArpMetadataEntry.getValue();
+                            final ArpResolverMetadata gatewayMetaData =
+                                    checkAndGetExternalBridgeDpid(gatewayToArpMetadataEntry.getValue());
                             gatewayMacRefresherPool.schedule(new Runnable(){
 
                                 @Override
@@ -157,13 +158,15 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                                     final Node externalNetworkBridge = getExternalBridge(gatewayMetaData.getExternalNetworkBridgeDpid());
                                     if(externalNetworkBridge == null){
                                         LOG.error("MAC address for gateway {} can not be resolved, because external bridge {} "
-                                                + "is not connected to controller.",gatewayIp.getValue(),gatewayMetaData.getExternalNetworkBridgeDpid() );
+                                                + "is not connected to controller.",
+                                                gatewayIp.getValue(),
+                                                gatewayMetaData.getExternalNetworkBridgeDpid() );
+                                    } else {
+                                        LOG.debug("Refresh Gateway Mac for gateway {} using source ip {} and mac {} for ARP request",
+                                                gatewayIp.getValue(),gatewayMetaData.getArpRequestSourceIp().getValue(),gatewayMetaData.getArpRequestSourceMacAddress().getValue());
+
+                                        sendGatewayArpRequest(externalNetworkBridge,gatewayIp,gatewayMetaData.getArpRequestSourceIp(), gatewayMetaData.getArpRequestSourceMacAddress());
                                     }
-
-                                    LOG.debug("Refresh Gateway Mac for gateway {} using source ip {} and mac {} for ARP request",
-                                            gatewayIp.getValue(),gatewayMetaData.getArpRequestSourceIp().getValue(),gatewayMetaData.getArpRequestSourceMacAddress().getValue());
-
-                                    sendGatewayArpRequest(externalNetworkBridge,gatewayIp,gatewayMetaData.getArpRequestSourceIp(), gatewayMetaData.getArpRequestSourceMacAddress());
                                 }
                             }, 1, TimeUnit.SECONDS);
                         }
@@ -183,15 +186,16 @@ public class GatewayMacResolverService extends AbstractServiceInstance
      * @param sourceIpAddress Source Ip address for the ARP request packet
      * @param sourceMacAddress Source Mac address for the ARP request packet
      * @param periodicRefresh Enable/Disable periodic refresh of the Gateway Mac address
-     * NOTE:Periodic refresh is not supported yet.
      * @param gatewayIp  Resolve MAC address of this Gateway Ip
      * @return Future object
      */
     @Override
     public ListenableFuture<MacAddress> resolveMacAddress(
             final GatewayMacResolverListener gatewayMacResolverListener, final Long externalNetworkBridgeDpid,
+            final Boolean refreshExternalNetworkBridgeDpidIfNeeded,
             final Ipv4Address gatewayIp, final Ipv4Address sourceIpAddress, final MacAddress sourceMacAddress,
             final Boolean periodicRefresh){
+        Preconditions.checkNotNull(refreshExternalNetworkBridgeDpidIfNeeded);
         Preconditions.checkNotNull(sourceIpAddress);
         Preconditions.checkNotNull(sourceMacAddress);
         Preconditions.checkNotNull(gatewayIp);
@@ -212,14 +216,19 @@ public class GatewayMacResolverService extends AbstractServiceInstance
             }
         }else{
             gatewayToArpMetadataMap.put(gatewayIp,new ArpResolverMetadata(gatewayMacResolverListener,
-                    externalNetworkBridgeDpid, gatewayIp,sourceIpAddress,sourceMacAddress,periodicRefresh));
+                    externalNetworkBridgeDpid, refreshExternalNetworkBridgeDpidIfNeeded,
+                    gatewayIp, sourceIpAddress, sourceMacAddress, periodicRefresh));
         }
 
-
         final Node externalNetworkBridge = getExternalBridge(externalNetworkBridgeDpid);
-        if(externalNetworkBridge == null){
-            LOG.error("MAC address for gateway {} can not be resolved, because external bridge {} "
-                    + "is not connected to controller.",gatewayIp.getValue(),externalNetworkBridgeDpid );
+        if (externalNetworkBridge == null) {
+            if (!refreshExternalNetworkBridgeDpidIfNeeded) {
+                LOG.error("MAC address for gateway {} can not be resolved, because external bridge {} "
+                        + "is not connected to controller.", gatewayIp.getValue(), externalNetworkBridgeDpid);
+            } else {
+                LOG.debug("MAC address for gateway {} can not be resolved, since dpid was not refreshed yet",
+                        gatewayIp.getValue());
+            }
             return null;
         }
 
@@ -230,9 +239,52 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     }
 
     private Node getExternalBridge(final Long externalNetworkBridgeDpid){
-        final String nodeName = OPENFLOW + externalNetworkBridgeDpid;
+        if (externalNetworkBridgeDpid != null) {
+            final String nodeName = OPENFLOW + externalNetworkBridgeDpid;
+            return getOpenFlowNode(nodeName);
+        }
+        return null;
+    }
 
-        return getOpenFlowNode(nodeName);
+    private ArpResolverMetadata checkAndGetExternalBridgeDpid(ArpResolverMetadata gatewayMetaData) {
+        final Long origDpid = gatewayMetaData.getExternalNetworkBridgeDpid();
+
+        // If we are not allowing dpid to change, there is nothing further to do here
+        if (!gatewayMetaData.isRefreshExternalNetworkBridgeDpidIfNeeded()) {
+            return gatewayMetaData;
+        }
+
+        // If current dpid is null, or if mac is not getting resolved, make an attempt to
+        // grab a different dpid, so a different (or updated) external bridge gets used
+        if (origDpid == null || !gatewayMetaData.isGatewayMacAddressResolved()) {
+            Long newDpid = getAnotherExternalBridgeDpid(origDpid);
+            gatewayMetaData.setExternalNetworkBridgeDpid(newDpid);
+        }
+
+        return gatewayMetaData;
+    }
+
+    private Long getAnotherExternalBridgeDpid(final Long unwantedDpid) {
+        /*
+        **
+        *
+
+        FIXME!!!
+
+        //Pickup the first node that has external bridge (br-ex).
+        //NOTE: We are assuming that all the br-ex are serving one external network and gateway ip of
+        //the external network is reachable from every br-ex
+        // TODO: Consider other deployment scenario, and thing of better solution.
+        List<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node> allBridges = nodeCacheManager.getBridgeNodes();
+        for(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node node : allBridges){
+            if (southbound.getBridge(node, configurationService.getExternalBridgeName()) != null) {
+                return node;
+            }
+        }
+        *
+        */
+
+        return null;
     }
 
     private void sendGatewayArpRequest(final Node externalNetworkBridge,final Ipv4Address gatewayIp,
@@ -409,7 +461,11 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     }
 
     @Override
-    public void setDependencies(Object impl) {}
+    public void setDependencies(Object impl) {
+        if (impl instanceof NodeCacheManager) {
+            nodeCacheManager = (NodeCacheManager) impl;
+        }
+    }
 
     @Override
     public void stopPeriodicRefresh(Ipv4Address gatewayIp) {

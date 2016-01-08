@@ -27,6 +27,7 @@ public interface NodeCacheManager {
     List<Node> getNodes();
     Map<NodeId, Node> getOvsdbNodes();
     List<Node> getBridgeNodes();
+    List<Long> getBridgeDpids(final String bridgeName);
     void cacheListenerAdded(final ServiceReference ref, NodeCacheListener handler);
     void cacheListenerRemoved(final ServiceReference ref);
 

@@ -8,20 +8,42 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2RewriteProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestratorImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.*;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.ArpResponderService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.ClassifierService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.EgressAclService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.InboundNatService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.IngressAclService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L2ForwardingService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L2RewriteService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L3ForwardingService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.LoadBalancerService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.OutboundNatService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.RoutingService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp.GatewayMacResolverService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -30,6 +52,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
@@ -101,7 +128,7 @@ public class ConfigActivator implements BundleActivator {
         registerService(context, OutboundNatProvider.class.getName(),
                 outboundNatService, Service.OUTBOUND_NAT);
 
-        GatewayMacResolverService gatewayMacResolverService = new GatewayMacResolverService();
+        final GatewayMacResolverService gatewayMacResolverService = new GatewayMacResolverService();
         registerService(context, GatewayMacResolver.class.getName(),
                 gatewayMacResolverService, Service.GATEWAY_RESOLVER);
         getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
@@ -137,6 +164,38 @@ public class ConfigActivator implements BundleActivator {
             }
         };
         networkingProviderManagerTracker.open();
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker ConfigurationServiceTracker = new ServiceTracker(context,
+                ConfigurationService.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService ConfigurationService");
+                ConfigurationService service =
+                        (ConfigurationService) context.getService(reference);
+                if (service != null) {
+                    gatewayMacResolverService.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        ConfigurationServiceTracker.open();
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker NodeCacheManagerTracker = new ServiceTracker(context,
+                NodeCacheManager.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService NodeCacheManager");
+                NodeCacheManager service =
+                        (NodeCacheManager) context.getService(reference);
+                if (service != null) {
+                    gatewayMacResolverService.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        NodeCacheManagerTracker.open();
     }
 
     @Override

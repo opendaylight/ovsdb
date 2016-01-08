@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_2abba3c5",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "Please move these into each method; there\u0027s no point in sharing them.",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6a112bac",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "Sharing everything like this relies on a defect in Pax Exam which calls @Before methods before every container invocation, so nothing ends up being shared among the test methods. Mocks whose behaviour needs to change for different tests must not be shared.",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_aa2213ff",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "thenReturn() with multiple parameters shouldn\u0027t be used to handle different test cases. It\u0027s intended to be used to mock methods whose return value naturally changes: counters etc.",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_0a205ff6",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "There\u0027s no point in using expectedResult here, just assertTrue().",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6a880be8",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "As an example of the kinds of tests I\u0027d like to see, here\u0027s an free-standing implementation of testFloatingIPExists():\n\n    @Test\n    public void testFloatingIPExists() {\n        // floatingIPExists() returns true if the underlying data broker contains the node, false otherwise\n        BindingAwareBroker.ProviderContext providerContext \u003d Mockito.mock(BindingAwareBroker.ProviderContext.class);\n        DataBroker db \u003d Mockito.mock(DataBroker.class);\n        Mockito.when(providerContext.getSALService(DataBroker.class)).thenReturn(db);\n        ReadOnlyTransaction tx \u003d Mockito.mock(ReadOnlyTransaction.class);\n        Mockito.when(db.newReadOnlyTransaction()).thenReturn(tx);\n        NeutronFloatingIPInterface testedInterface \u003d new NeutronFloatingIPInterface(providerContext);\n\n        // First case: the underlying data broker returns something\n        CheckedFuture succeedingFuture \u003d Mockito.mock(CheckedFuture.class);\n        Floatingip floatingip \u003d new FloatingipBuilder().setUuid(new Uuid(UUID_VALUE)).build();\n        try {\n            Mockito.when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingip));\n        } catch (Exception e) {\n            // Artificial try/catch for Mockito\n        }\n        Mockito.when(tx.read(Mockito.eq(LogicalDatastoreType.CONFIGURATION),\n                Mockito.any(InstanceIdentifier.class))).thenReturn(succeedingFuture);\n        Assert.assertTrue(testedInterface.floatingIPExists(UUID_VALUE));\n\n        // Second case: the underlying data broker returns nothing\n        CheckedFuture failingFuture \u003d Mockito.mock(CheckedFuture.class);\n        try {\n            Mockito.when(failingFuture.checkedGet()).thenReturn(Optional.absent());\n        } catch (Exception e) {\n            // Artifical try/catch for Mockito\n        }\n        Mockito.when(tx.read(Mockito.eq(LogicalDatastoreType.CONFIGURATION),\n                Mockito.any(InstanceIdentifier.class))).thenReturn(failingFuture);\n        Assert.assertFalse(testedInterface.floatingIPExists(UUID_VALUE));\n    }\n\nUUID_VALUE is as defined above. This uses non-mocked objects wherever sensible. The mocks themselves can\u0027t be shared since they all needed changed (in cascade) for the varying test behaviour; what would work to make the other tests easier to write is to have shared methods to build them: e.g. createMockReadOnlyTransaction(). The Floatingip instance can be shared since it corresponds directly to the shared UUID and doesn\u0027t change.",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_ca6cb739",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "You should assert that the returned output matches the expected value, since you control what the data broker returns.",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_aa697327",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "This should assert that the return value is null (assertNull).",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_0a77bf03",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-08T14:58:14Z",
+      "side": 1,
+      "message": "Of course output is an instance of List, this doesn\u0027t check anything (except that the implementation doesn\u0027t produce an exception).",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

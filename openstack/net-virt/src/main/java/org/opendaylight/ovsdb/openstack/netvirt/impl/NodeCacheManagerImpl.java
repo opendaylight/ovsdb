@@ -21,6 +21,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -153,6 +154,20 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
             }
         }
         return nodes;
+    }
+
+    @Override
+    public List <Long> getExternalBridgeDpids(final String bridgeName) {
+        List<Long> dpids = Lists.newArrayList();
+        for (Node node : nodeCache.values()) {
+            if (bridgeName == null || southbound.getBridge(node, bridgeName) != null) {
+                long dpid = southbound.getDataPathId(node);
+                if (dpid != 0L) {
+                    dpids.add(Long.valueOf(dpid));
+                }
+            }
+        }
+        return dpids;
     }
 
     @Override

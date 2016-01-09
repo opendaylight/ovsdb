@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,8 +32,10 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -46,6 +49,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.base.Optional;
@@ -140,6 +144,9 @@ public class AbstractServiceInstanceTest {
         FlowBuilder flowBuilder = mock(FlowBuilder.class);
         when(flowBuilder.getKey()).thenReturn(mock(FlowKey.class));
 
+        NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
+        MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));
+
         abstractServiceInstance.writeFlow(flowBuilder, nodeBuilder);
 
         //verify(transaction, times(1)).put(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class), any(DataObject.class), eq(true));
@@ -162,6 +169,9 @@ public class AbstractServiceInstanceTest {
 
         FlowBuilder flowBuilder = mock(FlowBuilder.class);
         when(flowBuilder.getKey()).thenReturn(mock(FlowKey.class));
+
+        NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
+        MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));
 
         abstractServiceInstance.removeFlow(flowBuilder, nodeBuilder);
         verify(transaction, times(1)).delete(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class));

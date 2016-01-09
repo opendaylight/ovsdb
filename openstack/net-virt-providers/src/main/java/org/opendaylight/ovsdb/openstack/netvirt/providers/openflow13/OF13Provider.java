@@ -1559,56 +1559,62 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     }
 
     private void writeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-        InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
-                        new GroupKey(groupBuilder.getGroupId())).build();
-        modification.put(LogicalDatastoreType.CONFIGURATION, path1, groupBuilder.build(), true /*createMissingParents*/);
+        if (NetvirtProvidersProvider.isMasterProviderInstance()) {
+            ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+            InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                    .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
+                            new GroupKey(groupBuilder.getGroupId())).build();
+            modification.put(LogicalDatastoreType.CONFIGURATION, path1, groupBuilder.build(), true /*createMissingParents*/);
 
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for write of Group " + groupBuilder.getGroupName());
-        } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+            try {
+                commitFuture.get();  // TODO: Make it async (See bug 1362)
+                LOG.debug("Transaction success for write of Group " + groupBuilder.getGroupName());
+            } catch (InterruptedException|ExecutionException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
     private void removeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
-                        new GroupKey(groupBuilder.getGroupId())).build();
-        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+        if (NetvirtProvidersProvider.isMasterProviderInstance()) {
+            WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
+            InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                    .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
+                            new GroupKey(groupBuilder.getGroupId())).build();
+            modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
+            CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
 
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for deletion of Group " + groupBuilder.getGroupName());
-        } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            try {
+                commitFuture.get();  // TODO: Make it async (See bug 1362)
+                LOG.debug("Transaction success for deletion of Group " + groupBuilder.getGroupName());
+            } catch (InterruptedException|ExecutionException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-        InstanceIdentifier<Flow> path1 =
-                InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                                .rev130819.nodes.Node.class,
-                        nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                        new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+        if (NetvirtProvidersProvider.isMasterProviderInstance()){
+            ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+            InstanceIdentifier<Flow> path1 =
+                    InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                                    .rev130819.nodes.Node.class,
+                            nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
+                            new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
 
-        //modification.put(LogicalDatastoreType.OPERATIONAL, path1, flowBuilder.build());
-        modification.put(LogicalDatastoreType.CONFIGURATION, path1, flowBuilder.build(),
-                true);//createMissingParents
+            //modification.put(LogicalDatastoreType.OPERATIONAL, path1, flowBuilder.build());
+            modification.put(LogicalDatastoreType.CONFIGURATION, path1, flowBuilder.build(),
+                    true);//createMissingParents
 
 
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            LOG.debug("Transaction success for write of Flow " + flowBuilder.getFlowName());
-        } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+            try {
+                commitFuture.get();  // TODO: Make it async (See bug 1362)
+                LOG.debug("Transaction success for write of Flow " + flowBuilder.getFlowName());
+            } catch (InterruptedException|ExecutionException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 

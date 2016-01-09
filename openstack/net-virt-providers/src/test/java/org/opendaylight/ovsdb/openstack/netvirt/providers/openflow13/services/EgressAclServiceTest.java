@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,6 +37,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityGroupCacheManger;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -48,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.util.concurrent.CheckedFuture;
@@ -108,7 +111,7 @@ public class EgressAclServiceTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalArgumentException, IllegalAccessException {
         egressAclServiceSpy = PowerMockito.spy(egressAclService);
 
         when(writeTransaction.submit()).thenReturn(commitFuture);
@@ -139,6 +142,10 @@ public class EgressAclServiceTest {
 
         when(securityGroup.getSecurityRules()).thenReturn(portSecurityList);
         when(securityServices.getVmListForSecurityGroup(PORT_UUID, SECURITY_GROUP_UUID)).thenReturn(neutronDestIpList);
+
+        NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
+        MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));
+
     }
 
     /**

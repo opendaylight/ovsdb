@@ -22,7 +22,7 @@ public class NetvirtProvidersImplModule extends org.opendaylight.yang.gen.v1.urn
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        NetvirtProvidersProvider provider = new NetvirtProvidersProvider(bundleContext);
+        NetvirtProvidersProvider provider = new NetvirtProvidersProvider(bundleContext, getClusteringEntityOwnershipServiceDependency());
         BindingAwareBroker localBroker = getBrokerDependency();
         localBroker.registerProvider(provider);
         return provider;

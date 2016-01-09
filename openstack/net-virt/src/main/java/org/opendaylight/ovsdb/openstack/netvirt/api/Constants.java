@@ -102,4 +102,9 @@ public final class Constants {
     //6653 is official openflow port.
     public static short OPENFLOW_PORT = 6653;
     public static String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
+
+    /*
+     * Clustering
+     */
+    public static final String NETVIRT_OWNER_ENTITY_TYPE = "ovsdb-netvirt-provider";
 }

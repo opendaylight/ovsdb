@@ -26,7 +26,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </prerequisites>
   <properties>
     <!-- uncomment the next line if you want karaf to automatically load the feature -->
-    <karaf.localFeature>odl-ovsdb-openstack</karaf.localFeature>
+    <!-- <karaf.localFeature>odl-ovsdb-openstack</karaf.localFeature> -->
   </properties>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>

@@ -58,6 +58,15 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
     @Override
     public Status programStaticArpEntry(Long dpid, String segmentationId, String macAddressStr,
                                         InetAddress ipAddress, Action action) {
+        if (ipAddress instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 case
+            LOG.debug("ipv6 address case is not implemented yet. dpid {} segmentationId {} macAddressStr, "
+                    + "ipAddress {} action {}",
+                    dpid, segmentationId, macAddressStr, ipAddress, action);
+            return new Status(StatusCode.NOTIMPLEMENTED);
+        }
+
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpid);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "ArpResponder_" + segmentationId + "_" + ipAddress.getHostAddress();
@@ -74,15 +83,6 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
             } else {
                 MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
             }
-        }
-
-        if (ipAddress instanceof Inet6Address) {
-            // WORKAROUND: For now ipv6 is not supported
-            // TODO: implement ipv6 case
-            LOG.debug("ipv6 address case is not implemented yet. dpid {} segmentationId {} macAddressStr, "
-                    + "ipAddress {} action {}",
-                    dpid, segmentationId, macAddressStr, ipAddress, action);
-            return new Status(StatusCode.NOTIMPLEMENTED);
         }
 
         flowBuilder.setMatch(matchBuilder.build());

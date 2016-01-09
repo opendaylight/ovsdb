@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_30a676c2",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1360,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-09T03:56:15Z",
+      "side": 0,
+      "message": "The code in this if{} block is redundant. the resolver service will take care for that periodically.",
+      "range": {
+        "startLine": 1360,
+        "startChar": 27,
+        "endLine": 1360,
+        "endChar": 44
+      },
+      "revId": "0b0469a8a7a8616a2d61d0018ef55f72c2df0f5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_70b0fef4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-09T03:56:15Z",
+      "side": 0,
+      "message": "removing the duplicate code here, and have a single way of doing this work, by simply calling the other getDatapathId() flavor.",
+      "range": {
+        "startLine": 317,
+        "startChar": 30,
+        "endLine": 317,
+        "endChar": 45
+      },
+      "revId": "0b0469a8a7a8616a2d61d0018ef55f72c2df0f5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

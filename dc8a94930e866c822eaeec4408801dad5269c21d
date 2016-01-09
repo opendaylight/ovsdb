@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_90ab0289",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1352,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-09T03:56:15Z",
+      "side": 1,
+      "message": "pass in nuul is okay, as the resolver service will figure dpid by itself, given the parameter below is true.",
+      "range": {
+        "startLine": 1352,
+        "startChar": 41,
+        "endLine": 1352,
+        "endChar": 66
+      },
+      "revId": "dc8a94930e866c822eaeec4408801dad5269c21d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

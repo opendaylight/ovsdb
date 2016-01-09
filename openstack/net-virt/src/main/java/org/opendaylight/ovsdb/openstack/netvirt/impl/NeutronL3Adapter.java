@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2014 Red Hat, Inc.
  *
  * This program and the accompanying materials are made available under the
@@ -664,10 +664,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
          * added and removed and call the appropriate providers for updating the flows.
          */
         try {
-            if (null == originalPort) {
-                LOGGER.debug("processSecurityGroupUpdate: originalport is empty");
-                return;
-            }
             List<NeutronSecurityGroup> addedGroup = getsecurityGroupChanged(neutronPort,
                                                                             originalPort);
             List<NeutronSecurityGroup> deletedGroup = getsecurityGroupChanged(originalPort,
@@ -687,7 +683,13 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     private List<NeutronSecurityGroup> getsecurityGroupChanged(NeutronPort port1, NeutronPort port2) {
         LOGGER.trace("getsecurityGroupChanged:" + "Port1:" + port1 + "Port2" + port2);
+        if (port1 == null) {
+            return null;
+        }
         ArrayList<NeutronSecurityGroup> list1 = new ArrayList<NeutronSecurityGroup>(port1.getSecurityGroups());
+        if (port2 == null) {
+            return list1;
+        }
         ArrayList<NeutronSecurityGroup> list2 = new ArrayList<NeutronSecurityGroup>(port2.getSecurityGroups());
         for (Iterator<NeutronSecurityGroup> iterator = list1.iterator(); iterator.hasNext();) {
             NeutronSecurityGroup securityGroup1 = iterator.next();

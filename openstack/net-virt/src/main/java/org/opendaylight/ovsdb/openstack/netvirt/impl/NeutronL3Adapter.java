@@ -190,6 +190,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             LOG.error("Unable to process abstract event " + abstractEvent);
             return;
         }
+        if (!this.enabled) {
+            return;
+        }
+
         NeutronL3AdapterEvent ev = (NeutronL3AdapterEvent) abstractEvent;
         switch (ev.getAction()) {
             case UPDATE:
@@ -421,10 +425,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOG.debug("Neutron port {} event : {}", action, neutronPort.toString());
 
-        this.processSecurityGroupUpdate(neutronPort);
         if (!this.enabled) {
             return;
         }
+        this.processSecurityGroupUpdate(neutronPort);
 
         final boolean isDelete = action == Action.DELETE;
 

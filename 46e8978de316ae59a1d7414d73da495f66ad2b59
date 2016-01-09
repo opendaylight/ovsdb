@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_bbf547cd",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-01-09T15:43:41Z",
+      "side": 1,
+      "message": "What happens if unwantedDpid isn\u0027t in the list anymore?",
+      "revId": "46e8978de316ae59a1d7414d73da495f66ad2b59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_1b0393b9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-01-09T15:43:41Z",
+      "side": 1,
+      "message": "So, this is hard-coded to \"true\" here.  Did you add this parameter for future configurability, or to make it easier to turn it off if it doesn\u0027t work out?",
+      "range": {
+        "startLine": 1468,
+        "startChar": 28,
+        "endLine": 1468,
+        "endChar": 32
+      },
+      "revId": "46e8978de316ae59a1d7414d73da495f66ad2b59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

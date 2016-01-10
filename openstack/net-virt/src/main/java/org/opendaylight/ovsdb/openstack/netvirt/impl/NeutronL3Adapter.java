@@ -896,10 +896,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
          */
         try {
             NeutronPort originalPort = neutronPort.getOriginalPort();
-            if (null == originalPort) {
-                LOG.debug("processSecurityGroupUpdate: originalport is empty");
-                return;
-            }
             List<NeutronSecurityGroup> addedGroup = getsecurityGroupChanged(neutronPort,
                                                                             neutronPort.getOriginalPort());
             List<NeutronSecurityGroup> deletedGroup = getsecurityGroupChanged(neutronPort.getOriginalPort(),
@@ -919,7 +915,13 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     private List<NeutronSecurityGroup> getsecurityGroupChanged(NeutronPort port1, NeutronPort port2) {
         LOG.trace("getsecurityGroupChanged:" + "Port1:" + port1 + "Port2" + port2);
+        if (port1 == null) {
+            return null;
+        }
         List<NeutronSecurityGroup> list1 = new ArrayList<>(port1.getSecurityGroups());
+        if (port2 == null) {
+            return list1;
+        }
         List<NeutronSecurityGroup> list2 = new ArrayList<>(port2.getSecurityGroups());
         for (Iterator<NeutronSecurityGroup> iterator = list1.iterator(); iterator.hasNext();) {
             NeutronSecurityGroup securityGroup1 = iterator.next();

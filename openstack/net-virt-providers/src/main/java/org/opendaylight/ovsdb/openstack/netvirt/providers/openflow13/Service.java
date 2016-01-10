@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,6 +17,7 @@ public enum Service {
     DIRECTOR ((short) 10, "Director"),
     SFC_CLASSIFIER ((short) 10, "SFC Classifier"),
     ARP_RESPONDER ((short) 20, "Distributed ARP Responder"),
+    ICMP_ECHO ((short) 20, "Distributed ICMP Echo Responder"),
     INBOUND_NAT ((short) 30, "DNAT for inbound floating-ip traffic"),
     EGRESS_ACL ((short) 40, "Egress Acces-control"),
     LOAD_BALANCER ((short) 50, "Distributed LBaaS"),

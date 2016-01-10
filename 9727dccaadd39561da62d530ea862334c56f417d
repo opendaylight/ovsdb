@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_762bd630",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T15:52:03Z",
+      "side": 1,
+      "message": "Is that right to change this name - this table is still ARP_RESPONDER since there is a new ICMP_ECHO provider, right? Meaning both ARP and ICMP use the same table 20, but they are two different services.",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_960f7ae1",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T15:52:03Z",
+      "side": 1,
+      "message": "could you move this up below RESPONDER to keep the list in order?",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_d6f8e2c6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/ConfigActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T15:52:03Z",
+      "side": 1,
+      "message": "expand this back out rather than wildcard. The default intellij and eclipse project settings change 10 or more explicit imports into a wildcard.",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_b6f55ecd",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T15:52:03Z",
+      "side": 1,
+      "message": "same comment on wildcard",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_36314ea3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1572,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T15:52:03Z",
+      "side": 1,
+      "message": "Could you try this patch without this line? These two methods are slightly wrong. this setDependencies() should be able to find instances of services that are part of netvirt. The next setDependencies() is to get services from bundles outside of netvirt. In this case icmpEchoProvider is from the netvirtProviders bundle so the call in the other setDependencies is the one that should find the instance.\n\nI realize the code here is wrong for other services that have the same condition. We should clean that in another fix.",
+      "range": {
+        "startLine": 1572,
+        "startChar": 8,
+        "endLine": 1572,
+        "endChar": 24
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_96265a67",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/ActionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T15:52:03Z",
+      "side": 1,
+      "message": "this should be up with the other imports to keep everything in order.",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

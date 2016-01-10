@@ -1773,6 +1773,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .expectInputAsOutput()
                 .build());
 
+        if ((builder instanceof SouthboundBridgeExternalIdsBuilder) ||
+                (builder instanceof SouthboundInterfaceExternalIdsBuilder)) {
+            builder.reset();
+
+            return testCases;
+        }
+
         // Test Case 3:  TestOneGoodOneMalformedValue
         // Test Type:    Negative
         // Description:

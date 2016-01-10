@@ -9,6 +9,9 @@
   <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/library-features/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-features/{{VERSION}}/xml/features</repository>
 
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
            version='${project.version}'>
@@ -49,4 +52,23 @@
     <feature version="${dlux.version}">odl-dlux-core</feature>
     <bundle>mvn:org.opendaylight.ovsdb/ovsdb-ui-bundle/{{VERSION}}</bundle>
   </feature>
+  <feature name='odl-netvirt-api' version='${project.version}' description='OpenDaylight :: netvirt :: api'>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/netvirt-api/{{VERSION}}</bundle>
+  </feature>
+  <feature name='odl-netvirt-rest' version='${project.version}' description='OpenDaylight :: netvirt :: REST'>
+    <feature version="${project.version}">odl-netvirt-api</feature>
+    <feature version="${restconf.version}">odl-restconf</feature>
+  </feature>
+  <feature name='odl-netvirt-ui' version='${project.version}' description='OpenDaylight :: netvirt :: UI'>
+    <feature version="${project.version}">odl-netvirt-rest</feature>
+    <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+  </feature>
+  <feature name='odl-netvirt-hwgw' version='${project.version}' description='OpenDaylight :: netvirt :: Hardware Gateway'>
+    <feature version="${project.version}">odl-netvirt-api</feature>
+    <feature version='${project.version}'>odl-ovsdb-hwvtepsouthbound</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/hwgw/{{VERSION}}</bundle>
+  </feature>
+
 </features>

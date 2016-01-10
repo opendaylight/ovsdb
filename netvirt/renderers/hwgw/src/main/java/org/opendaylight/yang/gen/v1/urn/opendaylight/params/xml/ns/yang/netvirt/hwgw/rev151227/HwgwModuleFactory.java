@@ -14,7 +14,7 @@
 *
 * Do not modify this file unless it is present under src/main directory
 */
-package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.hwgw.rev141210;
-public class HwgwModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.hwgw.rev141210.AbstractHwgwModuleFactory {
+package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.hwgw.rev151227;
+public class HwgwModuleFactory extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.hwgw.rev151227.AbstractHwgwModuleFactory {
 
 }

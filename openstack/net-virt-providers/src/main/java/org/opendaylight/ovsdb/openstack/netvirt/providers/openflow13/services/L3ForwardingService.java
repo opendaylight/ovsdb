@@ -52,6 +52,14 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
     @Override
     public Status programForwardingTableEntry(Long dpid, String segmentationId, InetAddress ipAddress,
                                               String macAddress, Action action) {
+        if (ipAddress instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 case
+            LOG.debug("ipv6 address is not implemented yet. dpid {} segmentationId {} ipAddress {} macAddress {} Action {}",
+                      dpid, segmentationId, ipAddress, macAddress, action);
+            return new Status(StatusCode.NOTIMPLEMENTED);
+        }
+
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpid);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "L3Forwarding_" + segmentationId + "_" + ipAddress.getHostAddress();
@@ -61,13 +69,6 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
 
-        if (ipAddress instanceof Inet6Address) {
-            // WORKAROUND: For now ipv6 is not supported
-            // TODO: implement ipv6 case
-            LOG.debug("ipv6 address is not implemented yet. dpid {} segmentationId {} ipAddress {} macAddress {} Action {}",
-                      dpid, segmentationId, ipAddress, macAddress, action);
-            return new Status(StatusCode.NOTIMPLEMENTED);
-        }
         flowBuilder.setMatch(matchBuilder.build());
 
         if (action.equals(Action.ADD)) {

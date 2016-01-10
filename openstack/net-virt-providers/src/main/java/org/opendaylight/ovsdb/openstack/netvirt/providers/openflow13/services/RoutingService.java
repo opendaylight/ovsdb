@@ -58,6 +58,12 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
     @Override
     public Status programRouterInterface(Long dpid, String sourceSegId, String destSegId, String macAddress,
                                          InetAddress address, int mask, Action action) {
+        if (address instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 case
+            LOG.debug("ipv6 address is not implemented yet. address {}", address);
+            return new Status(StatusCode.NOTIMPLEMENTED);
+        }
 
         SubnetUtils addressSubnetInfo = new SubnetUtils(address.getHostAddress() + "/" + mask);
         final String prefixString = addressSubnetInfo.getInfo().getNetworkAddress() + "/" + mask;
@@ -77,12 +83,6 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(sourceSegId));
         }
 
-        if (address instanceof Inet6Address) {
-            // WORKAROUND: For now ipv6 is not supported
-            // TODO: implement ipv6 case
-            LOG.debug("ipv6 address is not implemented yet. address {}", address);
-            return new Status(StatusCode.NOTIMPLEMENTED);
-        }
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
         flowBuilder.setMatch(matchBuilder.build());
 

@@ -75,6 +75,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/HardwareVTEPIT.java</exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>

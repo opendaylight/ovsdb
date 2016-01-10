@@ -1774,7 +1774,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .build());
 
         if ((builder instanceof SouthboundBridgeExternalIdsBuilder) ||
-                (builder instanceof SouthboundInterfaceExternalIdsBuilder)) {
+                (builder instanceof SouthboundInterfaceExternalIdsBuilder) ||
+                (builder instanceof SouthboundPortExternalIdsBuilder)) {
+            LOG.info("generateKeyValueTestCases: instance skipping test case 3 TestOneGoodOneMalformedValue");
             builder.reset();
 
             return testCases;

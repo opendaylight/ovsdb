@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -45,7 +45,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
@@ -121,7 +120,7 @@ public class AbstractServiceInstanceTest {
         assertNotNull("Error, getMutablePipelineInstructionBuilder() did not return the correct value", abstractServiceInstance.getMutablePipelineInstructionBuilder());
         assertTrue("Error, getMutablePipelineInstructionBuilder() did not return a InstructionBuilder object", abstractServiceInstance.getMutablePipelineInstructionBuilder() instanceof InstructionBuilder);
 
-        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
+        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.RESPONDER);
 
         // service defined
         assertNotNull("Error, getMutablePipelineInstructionBuilder() did not return the correct value", abstractServiceInstance.getMutablePipelineInstructionBuilder());
@@ -210,7 +209,7 @@ public class AbstractServiceInstanceTest {
         when(southbound.getBridgeName(any(Node.class))).thenReturn(Constants.INTEGRATION_BRIDGE);
         when(southbound.getDataPathId(any(Node.class))).thenReturn(261L);
 
-        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
+        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.RESPONDER);
 
         abstractServiceInstance.setService(service);
 

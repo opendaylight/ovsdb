@@ -48,7 +48,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
     private static final Logger LOG = LoggerFactory.getLogger(ArpResponderService.class);
 
     public ArpResponderService() {
-        super(Service.ARP_RESPONDER);
+        super(Service.RESPONDER);
     }
 
     public ArpResponderService(Service service) {

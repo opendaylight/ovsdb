@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -48,7 +48,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 @SuppressWarnings("unchecked")
 public class InboundNatServiceTest {
 
-    @InjectMocks private InboundNatService inboundNatService = new InboundNatService(Service.ARP_RESPONDER);
+    @InjectMocks private InboundNatService inboundNatService = new InboundNatService(Service.RESPONDER);
 
     @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
@@ -65,7 +65,7 @@ public class InboundNatServiceTest {
 
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
 
-        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
+        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.RESPONDER);
 
         NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
         MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));

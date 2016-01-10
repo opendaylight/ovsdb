@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -118,7 +118,7 @@ public class EgressAclServiceTest {
 
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
 
-        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
+        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.RESPONDER);
 
         portSecurityRule = mock(NeutronSecurityRule.class);
 

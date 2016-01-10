@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,7 +16,7 @@ public enum Service {
     GATEWAY_RESOLVER((short) 0, "External Network Gateway Resolver"),
     DIRECTOR ((short) 10, "Director"),
     SFC_CLASSIFIER ((short) 10, "SFC Classifier"),
-    ARP_RESPONDER ((short) 20, "Distributed ARP Responder"),
+    RESPONDER((short) 20, "Distributed ARP and ICMP echo Responder"),
     INBOUND_NAT ((short) 30, "DNAT for inbound floating-ip traffic"),
     EGRESS_ACL ((short) 40, "Egress Acces-control"),
     LOAD_BALANCER ((short) 50, "Distributed LBaaS"),
@@ -25,7 +25,8 @@ public enum Service {
     L2_REWRITE ((short) 80, "Layer2 rewrite service"),
     INGRESS_ACL ((short) 90, "Ingress Acces-control"),
     OUTBOUND_NAT ((short) 100, "DNAT for outbound floating-ip traffic"),
-    L2_FORWARDING ((short) 110, "Layer2 mac,vlan based forwarding");
+    L2_FORWARDING ((short) 110, "Layer2 mac,vlan based forwarding"),
+    ICMP_ECHO ((short) 20, "ICMP echo to gateway responder");
 
     short table;
     String description;

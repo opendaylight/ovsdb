@@ -31,9 +31,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetFieldBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TunnelBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.DstChoice;
@@ -66,6 +66,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxTunIpv4DstCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfArpSpaCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfEthSrcCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfIpSrcCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.action.rev140421.OfjNxHashFields;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.action.rev140421.OfjNxMpAlgorithm;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nx.action.multipath.grouping.NxMultipath;
@@ -232,6 +233,14 @@ public final class ActionUtils {
         return nxLoadArpSpaAction(BigInteger.valueOf(ipl));
     }
 
+    public static Action setIcmpTypeAction(byte value) {
+        SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
+        setFieldBuilder.setIcmpv4Match(new Icmpv4MatchBuilder().setIcmpv4Type((short)value).build());
+        return new SetFieldCaseBuilder()
+                .setSetField(setFieldBuilder.build())
+                .build();
+    }
+
     public static Action nxMoveRegAction(SrcChoice srcChoice,
                                          DstChoice dstChoice,
                                          int endOffset,
@@ -286,6 +295,12 @@ public final class ActionUtils {
         return nxMoveRegAction(new SrcOfArpSpaCaseBuilder().setOfArpSpa(Boolean.TRUE).build(),
                                new DstOfArpTpaCaseBuilder().setOfArpTpa(Boolean.TRUE).build());
     }
+
+    public static Action nxMoveIpSrcToIpDstAction() {
+        return nxMoveRegAction(new SrcOfIpSrcCaseBuilder().setOfIpSrc(Boolean.TRUE).build(),
+                               new DstOfIpDstCaseBuilder().setOfIpDst(Boolean.TRUE).build());
+    }
+
 
     public static Action nxOutputRegAction(SrcChoice srcChoice) {
         NxOutputReg r = new NxOutputRegBuilder()

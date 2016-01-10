@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da33351e_96b49af3",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-10T19:20:11Z",
+      "side": 1,
+      "message": "Holy cow that was dumb. I will certainly undo that.",
+      "parentUuid": "da33351e_762bd630",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_960f7ae1",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-10T15:52:03Z",
       "side": 1,
       "message": "could you move this up below RESPONDER to keep the list in order?",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_76b916e9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-10T19:20:11Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "da33351e_960f7ae1",
       "revId": "9727dccaadd39561da62d530ea862334c56f417d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "da33351e_d6cd8288",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/ConfigActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-10T19:20:11Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "da33351e_d6f8e2c6",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_b6f55ecd",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2016-01-10T15:52:03Z",
       "side": 1,
       "message": "same comment on wildcard",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_16c88a73",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-10T19:20:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da33351e_b6f55ecd",
       "revId": "9727dccaadd39561da62d530ea862334c56f417d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -93,6 +165,30 @@
     },
     {
       "key": {
+        "uuid": "da33351e_76875610",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1572,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-10T19:20:11Z",
+      "side": 1,
+      "message": "Done. Works just fine without this fix. I want to spend some time figuring out this whole service business...I might reach out to you later this week.",
+      "parentUuid": "da33351e_36314ea3",
+      "range": {
+        "startLine": 1572,
+        "startChar": 8,
+        "endLine": 1572,
+        "endChar": 24
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_96265a67",
         "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/ActionUtils.java",
         "patchSetId": 1
@@ -104,6 +200,24 @@
       "writtenOn": "2016-01-10T15:52:03Z",
       "side": 1,
       "message": "this should be up with the other imports to keep everything in order.",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_b6ca7e6c",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/ActionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-10T19:20:11Z",
+      "side": 1,
+      "message": "Turns out it\u0027s not used. deleted.",
+      "parentUuid": "da33351e_96265a67",
       "revId": "9727dccaadd39561da62d530ea862334c56f417d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

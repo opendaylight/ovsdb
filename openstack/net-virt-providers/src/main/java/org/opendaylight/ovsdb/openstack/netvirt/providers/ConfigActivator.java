@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2015, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,11 +7,6 @@
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
-
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -22,6 +17,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IcmpEchoProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
@@ -42,6 +38,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.ArpResponderService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.ClassifierService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.EgressAclService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.IcmpEchoResponderService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.InboundNatService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.IngressAclService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L2ForwardingService;
@@ -58,6 +55,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
 
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
@@ -141,6 +143,10 @@ public class ConfigActivator implements BundleActivator {
                 gatewayMacResolverService, Service.GATEWAY_RESOLVER);
         getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
 
+        IcmpEchoResponderService icmpEchoResponderService = new IcmpEchoResponderService();
+        registerService(context, IcmpEchoProvider.class.getName(),
+                                            icmpEchoResponderService, Service.ICMP_ECHO);
+
         netvirtProvidersConfig.setDependencies(context, null);
         pipelineOrchestrator.setDependencies(context, null);
         outboundNatService.setDependencies(context, null);
@@ -156,6 +162,7 @@ public class ConfigActivator implements BundleActivator {
         classifierService.setDependencies(context, null);
         of13Provider.setDependencies(context, null);
         gatewayMacResolverService.setDependencies(context, null);
+        icmpEchoResponderService.setDependencies(context, null);
 
         @SuppressWarnings("unchecked")
         ServiceTracker networkingProviderManagerTracker = new ServiceTracker(context,

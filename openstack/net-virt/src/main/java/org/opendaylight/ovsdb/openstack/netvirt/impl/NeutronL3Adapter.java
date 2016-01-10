@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IcmpEchoProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
@@ -93,6 +94,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     private volatile RoutingProvider routingProvider;
     private volatile GatewayMacResolver gatewayMacResolver;
     private volatile SecurityServicesManager securityServicesManager;
+    private volatile IcmpEchoProvider icmpEchoProvider;
 
     private class FloatIpData {
         // br-int of node where floating ip is associated with tenant port
@@ -1050,6 +1052,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 }
                 // Enable ARP responder by default, because router interface needs to be responded always.
                 programStaticArpStage1(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                programIcmpEcho(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
             }
 
             // Compute action to be programmed. In the case of rewrite exclusions, we must never program rules
@@ -1207,6 +1210,41 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         return status;
     }
 
+    private boolean programIcmpEcho(Long dpid, String segOrOfPort,
+                                           String macAddress, String ipStr,
+                                           Action action) {
+        if (action == Action.DELETE ) {
+            LOG.trace("Deleting Flow : programIcmpEcho dpid {} segOrOfPort {} mac {} ip {} action {}",
+                    dpid, segOrOfPort, macAddress, ipStr, action);
+        }
+        if (action == Action.ADD) {
+            LOG.trace("Adding Flow : programIcmpEcho dpid {} segOrOfPort {} mac {} ip {} action {}",
+                    dpid, segOrOfPort, macAddress, ipStr, action);
+        }
+
+        Status status = new Status(StatusCode.UNSUPPORTED);
+        if (icmpEchoProvider != null){
+            try {
+                InetAddress inetAddress = InetAddress.getByName(ipStr);
+                status = icmpEchoProvider.programIcmpEchoEntry(dpid, segOrOfPort,
+                                                macAddress, inetAddress, action);
+            } catch (UnknownHostException e) {
+                status = new Status(StatusCode.BADREQUEST);
+            }
+        }
+
+        if (status.isSuccess()) {
+            LOG.debug("programIcmpEcho {} for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{}",
+                    icmpEchoProvider == null ? "skipped" : "programmed",
+                    macAddress, ipStr, dpid, segOrOfPort, action);
+        } else {
+            LOG.error("programIcmpEcho failed for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{} status:{}",
+                    macAddress, ipStr, dpid, segOrOfPort, action, status);
+        }
+
+        return status.isSuccess();
+    }
+
     private boolean programStaticArpStage1(Long dpid, String segOrOfPort,
                                            String macAddress, String ipStr,
                                            Action action) {
@@ -1215,7 +1253,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                     dpid, segOrOfPort, macAddress, ipStr, action);
         }
         if (action == Action.ADD) {
-            LOG.trace("Adding Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {} is already done",
+            LOG.trace("Adding Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {}",
                     dpid, segOrOfPort, macAddress, ipStr, action);
         }
 
@@ -1522,6 +1560,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
         securityServicesManager =
                 (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
+
         initL3AdapterMembers();
     }
 
@@ -1547,7 +1586,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             l3ForwardingProvider = (L3ForwardingProvider)impl;
         }else if (impl instanceof GatewayMacResolver) {
             gatewayMacResolver = (GatewayMacResolver)impl;
+        }else if (impl instanceof IcmpEchoProvider) {
+            icmpEchoProvider = (IcmpEchoProvider)impl;
         }
+
         populateL3ForwardingCaches();
     }
 }

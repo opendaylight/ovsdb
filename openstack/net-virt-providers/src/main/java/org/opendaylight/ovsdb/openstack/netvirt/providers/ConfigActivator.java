@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2015, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -106,6 +106,9 @@ public class ConfigActivator implements BundleActivator {
                 gatewayMacResolverService, Service.GATEWAY_RESOLVER);
         getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
 
+        IcmpEchoResponderService icmpEchoResponderService = new IcmpEchoResponderService();
+        registerService(context, IcmpEchoProvider.class.getName(),
+                                            icmpEchoResponderService, Service.ICMP_ECHO);
 
         pipelineOrchestrator.setDependencies(context, null);
         outboundNatService.setDependencies(context, null);
@@ -121,6 +124,7 @@ public class ConfigActivator implements BundleActivator {
         classifierService.setDependencies(context, null);
         of13Provider.setDependencies(context, null);
         gatewayMacResolverService.setDependencies(context, null);
+        icmpEchoResponderService.setDependencies(context, null);
 
         @SuppressWarnings("unchecked")
         ServiceTracker networkingProviderManagerTracker = new ServiceTracker(context,

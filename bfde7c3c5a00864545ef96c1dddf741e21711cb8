@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_f616c6f0",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T16:00:41Z",
+      "side": 1,
+      "message": "Why can\u0027t the initFlowBuilder be used?",
+      "revId": "bfde7c3c5a00864545ef96c1dddf741e21711cb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_56d33238",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/ConfigActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T16:00:41Z",
+      "side": 1,
+      "message": "could just add a second constructor and pass the value",
+      "revId": "bfde7c3c5a00864545ef96c1dddf741e21711cb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_36d82e53",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/ActionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-10T16:00:41Z",
+      "side": 1,
+      "message": "thanks for expanding these back out!",
+      "revId": "bfde7c3c5a00864545ef96c1dddf741e21711cb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "da33351e_ed39d0d9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-11T13:14:38Z",
+      "side": 1,
+      "message": "Yes, exactly. That is why I left the TODO on line 285\nalone. Note this is the same code we had before, so I\nam not making any attempt on improving that in this\ngerrit.\n\nWe could randomize the dpid list returned to make the br-ex\nused changed, but my thinking is that the predictability\nmay be more desirable. Maybe a future enhancement could be\nto add another config param which dictates how user wants\nthis algorithm to behave.",
+      "parentUuid": "da33351e_1b1a7317",
+      "revId": "46e8978de316ae59a1d7414d73da495f66ad2b59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_4d2b9c82",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-11T13:14:38Z",
+      "side": 1,
+      "message": "using a stale dpid simply means that the bridge dpid\nprovided is not going to be found and the arp packet\nnever gets sent. This is a last resort value for sure.\nSince there is no better value to be used, I thought\nof leaving things alone.",
+      "parentUuid": "da33351e_bbf547cd",
+      "revId": "46e8978de316ae59a1d7414d73da495f66ad2b59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_1b0393b9",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 3
@@ -48,6 +84,30 @@
       "writtenOn": "2016-01-09T15:43:41Z",
       "side": 1,
       "message": "So, this is hard-coded to \"true\" here.  Did you add this parameter for future configurability, or to make it easier to turn it off if it doesn\u0027t work out?",
+      "range": {
+        "startLine": 1468,
+        "startChar": 28,
+        "endLine": 1468,
+        "endChar": 32
+      },
+      "revId": "46e8978de316ae59a1d7414d73da495f66ad2b59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_8d0e4433",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-11T13:14:38Z",
+      "side": 1,
+      "message": "yes to both questions.  :) \n\nThe Mac resolver Service can actually be used by other services besides NeutronL3Adapter. While for this\nspecific case it will always use the new param as true, I\ndid not want to impose that behavior on other potential users of the mac resolver service.",
+      "parentUuid": "da33351e_1b0393b9",
       "range": {
         "startLine": 1468,
         "startChar": 28,

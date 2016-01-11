@@ -48,6 +48,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -375,11 +376,31 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void cleanEntityOperationalData(Entity entity) {
 
+        //Do explicit cleanup rather then using OvsdbNodeRemoveCommand, because there
+        // are chances that other controller instance went down abruptly and it does
+        // not clear manager entry, which OvsdbNodeRemoveCommand look for before cleanup.
+
         InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) SouthboundUtil
                 .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
         final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        SouthboundUtil.deleteNode(transaction, nodeIid);
+        Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction,nodeIid);
+        if ( ovsdbNodeOpt.isPresent() ) {
+            Node ovsdbNode = ovsdbNodeOpt.get();
+            OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+            LOG.info("ANIL VISHNOI : nodeAugmentation : {}",nodeAugmentation);
+            if (nodeAugmentation != null) {
+                if (nodeAugmentation.getManagedNodeEntry() != null) {
+                    for (ManagedNodeEntry managedNode : nodeAugmentation.getManagedNodeEntry()) {
+                        transaction.delete(
+                                LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                    }
+                } else {
+                    LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
+                }
+            }
+            SouthboundUtil.deleteNode(transaction, nodeIid);
+        }
     }
 
     private OpenVSwitch getOpenVswitchTableEntry(OvsdbConnectionInstance connectionInstance) {

@@ -13,6 +13,7 @@
         <module>
           <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:providers:impl">prefix:netvirt-providers-impl</type>
           <name>netvirt-providers-default</name>
+          <table-offset>0</table-offset>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>

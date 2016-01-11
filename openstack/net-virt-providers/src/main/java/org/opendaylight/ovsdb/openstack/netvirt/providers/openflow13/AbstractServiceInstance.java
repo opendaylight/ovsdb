@@ -86,8 +86,21 @@ public abstract class AbstractServiceInstance {
         return bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName);
     }
 
+    /**
+     * Return the offset adjusted table for this {@link Service}
+     * @return The table id
+     */
     public short getTable() {
-        return service.getTable();
+        return (short)(orchestrator.getTableOffset() + service.getTable());
+    }
+
+    /**
+     * Return the offset adjusted table for the given {@link Service}
+     * @param service Identifies the openflow {@link Service}
+     * @return The table id
+     */
+    public short getTable(Service service) {
+        return (short)(orchestrator.getTableOffset() + service.getTable());
     }
 
     public Service getService() {
@@ -132,7 +145,8 @@ public abstract class AbstractServiceInstance {
     protected final InstructionBuilder getMutablePipelineInstructionBuilder() {
         Service nextService = orchestrator.getNextServiceInPipeline(service);
         if (nextService != null) {
-            return InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), nextService.getTable());
+            return InstructionUtils.createGotoTableInstructions(new InstructionBuilder(),
+                    orchestrator.getTable(nextService));
         } else {
             return InstructionUtils.createDropInstructions(new InstructionBuilder());
         }
@@ -140,19 +154,14 @@ public abstract class AbstractServiceInstance {
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         if (NetvirtProvidersProvider.isMasterProviderInstance()) {
-            LOG.debug("writeFlow 3: flowBuilder: {}, nodeBuilder: {}",
+            LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
                     flowBuilder.build(), nodeBuilder.build());
             WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-            LOG.debug("writeFlow: about to put nodePath for Flow {}, nodePath: {}",
-                    flowBuilder.getFlowName(), createNodePath(nodeBuilder));
             modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
                     nodeBuilder.build(), true /*createMissingParents*/);
-            LOG.debug("writeFlow: about to put Flow {}", flowBuilder.getFlowName());
             modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
                     flowBuilder.build(), true /*createMissingParents*/);
-            LOG.debug("writeFlow: about to submit Flow {}", flowBuilder.getFlowName());
             CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-            LOG.debug("writeFlow: checking status of Flow {}", flowBuilder.getFlowName());
             try {
                 commitFuture.checkedGet();  // TODO: Make it async (See bug 1362)
                 LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
@@ -259,13 +268,13 @@ public abstract class AbstractServiceInstance {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        String flowId = "DEFAULT_PIPELINE_FLOW_"+service.getTable();
+        String flowId = "DEFAULT_PIPELINE_FLOW_" + getTable();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setPriority(0);
         flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(service.getTable());
+        flowBuilder.setTableId(getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);

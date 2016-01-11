@@ -93,7 +93,6 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                                         implements ConfigInterface, GatewayMacResolver,PacketProcessingListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(GatewayMacResolverService.class);
-    private static final short TABLE_FOR_ARP_FLOW = 0;
     private static final String ARP_REPLY_TO_CONTROLLER_FLOW_NAME = "GatewayArpReplyRouter";
     private static final int ARP_REPLY_TO_CONTROLLER_FLOW_PRIORITY = 10000;
     private static final Instruction SEND_TO_CONTROLLER_INSTRUCTION;
@@ -383,7 +382,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     private Flow createArpReplyToControllerFlow(final ArpMessageAddress senderAddress, final Ipv4Address ipForRequestedMac) {
         checkNotNull(senderAddress);
         checkNotNull(ipForRequestedMac);
-        FlowBuilder arpFlow = new FlowBuilder().setTableId(TABLE_FOR_ARP_FLOW)
+        FlowBuilder arpFlow = new FlowBuilder().setTableId(Service.CLASSIFIER.getTable())
             .setFlowName(ARP_REPLY_TO_CONTROLLER_FLOW_NAME)
             .setPriority(ARP_REPLY_TO_CONTROLLER_FLOW_PRIORITY)
             .setBufferId(OFConstants.OFP_NO_BUFFER)

@@ -1,0 +1,361 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_ed25500b",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "Please move all these declaration into the methods, there\u0027s no point in sharing them in the class instances, apart from floatingip which can be shared and initialised here.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_ed6c3039",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "This is unused now.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_8d8804e9",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "No need to spy here, nothing gets verified.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6d602036",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "Please explain the underlying condition you\u0027re trying to test: floatingIPExists() is expected to return true because the datastore contains a matching floating IP.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_4d655c44",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "Likewise:\n\n    // Second case: the datastore has no matching floating IP, expect false",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_8d5f6472",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "No point in spying here either.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6dc78013",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "No need for String.valueOf() here, floatingip.getUuid().getValue() is already an instance of String. But neutronFloatingIP should be removed completely (see below).",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_2de578a8",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "For comparative assertions, the order is expected, actual, so the arguments should be switched. But you don\u0027t actually need neutronFloatingIP here, just check against the expected UUID:\n\n    assertEquals(\"UUID mismatch\", UUID_VALUE, neutronFloatingIPReceived.getID());",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_0d9074eb",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "No point in spying here.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_2dfc583e",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "List\u003cFloatingip\u003e floatingipList \u003d new ArrayList\u003c\u003e();\n\n(the second type parameter is no longer necessary).",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_ed88b0c8",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "The test given here only tests that there\u0027s at least one element in the returned list; it has to be an instance of NeutronFloatingIP because that\u0027s how it\u0027s declared. You *know* what the return value should be, so check that:\n\n    List\u003cNeutronFloatingIP\u003e actualFloatingIps \u003d neutronFloatingIPInterface.getAllFloatingIPs();\n    assertTrue(\"There should be one floating IP\", 1, actualFloatingIps.size());\n    assertTrue(\"UUID mismatch\", UUID_VALUE, actualFloatingIps.get(0).getID());",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_2d93b8fb",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "Because neutronFloatingIP is a mock object, this will always assert false, even if the underlying implementation is incorrect. You\u0027re expecting an empty collection, so assert that:\n\n    assertTrue(\"Non-empty list of floating IPs\", neutronFloatingIPInterface.getAllFloatingIPs().isEmpty());",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_8dbbe471",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "The test as it stands doesn\u0027t check that the floating IP is added, it just checks that addFloatingIP() claims it did. For tests involving modifications to the underlying MD-SAL, I think it\u0027s really necessary to use an MD-SAL backed test instead of a mocked DataBroker (see my previous comment with the test example).",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6dbca06d",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "No point in spying here.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_cdaccc38",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "As above, this doesn\u0027t check the actual modification.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6d63001b",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "And again.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_2d81f88f",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "Why not just use the builder, instead of mocking everything?",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_6d4ae084",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "You should check all the properties, not just the UUID.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_4d4f1c93",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "As above, I\u0027d rather see a builder here than a mock.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_ad44e874",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "And again all the properties should be checked.",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_2d58d855",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T16:12:56Z",
+      "side": 1,
+      "message": "You need to actually verify something after calling verifyStatic().",
+      "revId": "434008ace2f5a438b76b440ca7ac2d81c47df5df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

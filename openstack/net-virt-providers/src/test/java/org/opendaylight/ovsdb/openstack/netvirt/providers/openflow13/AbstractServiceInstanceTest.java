@@ -75,7 +75,7 @@ public class AbstractServiceInstanceTest {
     private final String NODE_ID = Constants.INTEGRATION_BRIDGE + ":" +  ID;
 
     /**
-     * Test method {@link AbstractServiceInstance#isBridgeInPipeline(String)}
+     * Test method {@link AbstractServiceInstance#isBridgeInPipeline(Node)}
      */
     @Test
     public void testIsBridgeInPipeline() {
@@ -89,7 +89,23 @@ public class AbstractServiceInstanceTest {
     @Test
     public void testGetTable() {
         abstractServiceInstance.setService(service);
-        assertEquals("Error, getTable() did not return the correct value", 70, abstractServiceInstance.getTable());
+        assertEquals("Error, getTable() did not return the correct value",
+                service.getTable(), abstractServiceInstance.getTable());
+
+        when(orchestrator.getTableOffset()).thenReturn(Service.DIRECTOR.getTable());
+        assertEquals("Error, getTable() did not return the correct value",
+                (short)(Service.DIRECTOR.getTable() + service.getTable()), abstractServiceInstance.getTable());
+    }
+
+    /**
+     * Test method {@link AbstractServiceInstance@getTable(Service}
+     */
+    @Test
+    public void testGetTableWithService() {
+        when(orchestrator.getTableOffset()).thenReturn((short)0);
+        abstractServiceInstance.setService(service);
+        assertEquals("Error, getTables(service) did not return the correct value",
+                Service.L2_FORWARDING.getTable(), abstractServiceInstance.getTable(Service.L2_FORWARDING));
     }
 
     @Test
@@ -203,7 +219,7 @@ public class AbstractServiceInstanceTest {
     }
 
     /**
-     * Test method {@link AbstractServiceInstance#programDefaultPipelineRule(String)}
+     * Test method {@link AbstractServiceInstance#programDefaultPipelineRule(Node)}
      */
     @Test
     public void testProgramDefaultPipelineRule() {

@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 public class SfcClassifierService extends AbstractServiceInstance implements ConfigInterface, ISfcClassifierService {
     private static final Logger LOG = LoggerFactory.getLogger(SfcClassifierService.class);
-    private static final short TABLE_0 = 0;
     private static final short UDP_SHORT = 17;
     static int cookieIndex = 0;
 
@@ -161,7 +160,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setTableId(getTable(Service.CLASSIFIER));
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -203,7 +202,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setTableId(getTable(Service.CLASSIFIER));
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -244,7 +243,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(TABLE_0);
+        flowBuilder.setTableId(getTable(Service.CLASSIFIER));
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -271,7 +270,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
             ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
 
-            ab.setAction(ActionUtils.nxResubmitAction((int)sfOfPort, TABLE_0));
+            ab.setAction(ActionUtils.nxResubmitAction((int)sfOfPort, Service.CLASSIFIER.getTable()));
             ab.setOrder(actionList.size());
             ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
@@ -306,7 +305,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "sfcEgressClassBypass_" + nsp + "_" + + nsi + "_"  + sfOfPort;
-        initFlowBuilder(flowBuilder, flowName, TABLE_0, FlowID.FLOW_EGRESSCLASSBYPASS).setPriority(40000);
+        initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable(),
+                FlowID.FLOW_EGRESSCLASSBYPASS).setPriority(40000);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, sfOfPort);
@@ -373,7 +373,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "sfIngress_" + dstPort + "_" + ipAddress;
-        initFlowBuilder(flowBuilder, flowName, TABLE_0, FlowID.FLOW_SFINGRESS);
+        initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable(), FlowID.FLOW_SFINGRESS);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createIpProtocolMatch(matchBuilder, UDP_SHORT);
@@ -406,7 +406,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "ArpResponder_" + ipAddress;
-        initFlowBuilder(flowBuilder, flowName, TABLE_0, FlowID.FLOW_SFARP).setPriority(1024);
+        initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable(), FlowID.FLOW_SFARP).setPriority(1024);
 
         MacAddress macAddress = new MacAddress(macAddressStr);
 

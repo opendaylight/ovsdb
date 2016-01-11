@@ -41,6 +41,24 @@ public class PipelineOrchestratorImplTest {
     @Mock private ExecutorService eventHandler;
     @Mock private Southbound southbound;
 
+    /**
+     * Test for method {@link PipelineOrchestratorImpl#getTableOffset()}
+     */
+    @Test
+    public void testGetTableOffset() {
+        short tableOffset = 0;
+        assertEquals("tableOffset was not set", tableOffset, orchestrator.getTableOffset());
+    }
+
+    /**
+     * Test for {@link PipelineOrchestratorImpl#getTable(Service)}
+     */
+    @Test
+    public void testGetTableOffsetWithService() {
+        assertEquals("tableOffset was not set", Service.CLASSIFIER.getTable(),
+                orchestrator.getTable(Service.CLASSIFIER));
+    }
+
     /***
      * Registers a mock service and verifies the registration by asking the
      * pipeline orchestrator to return the associated service from its internal
@@ -65,7 +83,7 @@ public class PipelineOrchestratorImplTest {
 
     /**
      * Test method
-     * {@link PipelineOrchestratorImplr#getNextServiceInPipeline(Service)}
+     * {@link PipelineOrchestratorImpl#getNextServiceInPipeline(Service)}
      */
     @Test
     public void testGetNextServiceInPipeline() {

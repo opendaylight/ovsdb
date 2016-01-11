@@ -269,6 +269,9 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
             sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
             sfcClassifierService.programStaticArpEntry(dataPathId, 0L, sfMac, sfIpAddr, true);
+        } else {
+            LOG.info("handleSf: sf and bridge are not on the same node: {} - {}, do nothing",
+            bridgeNode.getNodeId(), serviceFunction.getName());
         }
     }
 
@@ -277,13 +280,25 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
         Node ovsdbNode = southbound.readOvsdbNode(bridgeNode);
         if (ovsdbNode != null) {
+            localIp = getLocalip(ovsdbNode);
+        }
+        return localIp.equals(String.valueOf(ip.getIp().getValue()));
+    }
+
+    private String getLocalip(Node ovsdbNode) {
+        Preconditions.checkNotNull("The ovsdbNode was null", ovsdbNode);
+        String localIp = null;
+        if (ovsdbNode != null) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null && ovsdbNodeAugmentation.getOpenvswitchOtherConfigs() != null) {
                 localIp = southbound.getOtherConfig(ovsdbNode, OvsdbTables.OPENVSWITCH, TUNNEL_ENDPOINT_KEY);
             }
-
         }
-        return localIp.equals(String.valueOf(ip.getIp().getValue()));
+        if (localIp == null) {
+            LOG.warn("local_ip was not found for node: {}", ovsdbNode);
+            localIp = "";
+        }
+        return localIp;
     }
 
     private boolean isSfOnBridge(Node bridgeNode, ServiceFunction serviceFunction) {
@@ -386,6 +401,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                     port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
                     if (port != null) {
                         ofPort = southbound.getOFPort(port);
+                        LOG.info("found ofPort {} - {}, try: {}", portName, ofPort, i);
                         break;
                     }
                 }

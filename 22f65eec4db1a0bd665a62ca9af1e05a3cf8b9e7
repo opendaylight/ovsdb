@@ -87,6 +87,24 @@
     },
     {
       "key": {
+        "uuid": "da33351e_4d043c15",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-11T13:01:44Z",
+      "side": 1,
+      "message": "Here\u0027s a better version, using AbstractDataBrokerTest to avoid mocking anything apart from the initial ProviderContext:\n\n    /**\n     * Unit tests for {@link NeutronFloatingIPInterface}.\n     */\n    public class NeutronFloatingIPInterfaceTest extends AbstractDataBrokerTest {\n        private static final String UUID_VALUE \u003d \"b9a13232-525e-4d8c-be21-cd65e3436034\";\n    \n        @Test\n        public void testFloatingIPExists() throws TransactionCommitFailedException {\n            // floatingIPExists() returns true if the underlying data broker contains the node, false otherwise\n            BindingAwareBroker.ProviderContext providerContext \u003d Mockito.mock(BindingAwareBroker.ProviderContext.class);\n            DataBroker db \u003d getDataBroker();\n            Mockito.when(providerContext.getSALService(DataBroker.class)).thenReturn(db);\n            NeutronFloatingIPInterface testedInterface \u003d new NeutronFloatingIPInterface(providerContext);\n    \n            // First case: the underlying data broker returns nothing (we haven\u0027t inserted the IP yet)\n            Assert.assertFalse(testedInterface.floatingIPExists(UUID_VALUE));\n    \n            // Add an IP\n            WriteTransaction writeTransaction \u003d db.newWriteOnlyTransaction();\n            Floatingip floatingip \u003d new FloatingipBuilder().setUuid(new Uuid(UUID_VALUE)).build();\n            writeTransaction.put(LogicalDatastoreType.CONFIGURATION, testedInterface.createInstanceIdentifier(floatingip),\n                    floatingip);\n            writeTransaction.submit().checkedGet();\n    \n            // Second case: the underlying data broker returns something\n            Assert.assertTrue(testedInterface.floatingIPExists(UUID_VALUE));\n        }\n    }",
+      "parentUuid": "da33351e_6a880be8",
+      "revId": "22f65eec4db1a0bd665a62ca9af1e05a3cf8b9e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_ca6cb739",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/translator/crud/impl/NeutronFloatingIPInterfaceTest.java",
         "patchSetId": 1

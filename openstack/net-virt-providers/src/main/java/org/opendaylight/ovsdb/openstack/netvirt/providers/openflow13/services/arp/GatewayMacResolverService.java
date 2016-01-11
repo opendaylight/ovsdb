@@ -71,6 +71,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -281,12 +282,13 @@ public class GatewayMacResolverService extends AbstractServiceInstance
             return unwantedDpid;
         }
 
-        // Pickup the first dpid in list that is different than the unwanted one provided and is in the
-        // operational tree.
+        // Pickup another dpid in list that is different than the unwanted one provided and is in the
+        // operational tree. If none can be found, return the provided dpid as a last resort.
         // NOTE: We are assuming that all the br-ex are serving one external network and gateway ip of
         // the external network is reachable from every br-ex
         // TODO: Consider other deployment scenario, and think of another solution.
         List<Long> dpids =  nodeCacheManager.getBridgeDpids(configurationService.getExternalBridgeName());
+        Collections.shuffle(dpids);
         for (Long dpid : dpids) {
             if (dpid == null || dpid.equals(unwantedDpid) || getExternalBridge(dpid) == null) {
                 continue;

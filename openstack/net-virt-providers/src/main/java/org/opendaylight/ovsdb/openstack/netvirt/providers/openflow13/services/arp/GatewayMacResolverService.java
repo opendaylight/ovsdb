@@ -151,7 +151,8 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                         for(final Entry<Ipv4Address, ArpResolverMetadata> gatewayToArpMetadataEntry : gatewayToArpMetadataMap.entrySet()){
                             final Ipv4Address gatewayIp = gatewayToArpMetadataEntry.getKey();
                             final ArpResolverMetadata gatewayMetaData =
-                                    checkAndGetExternalBridgeDpid(gatewayToArpMetadataEntry.getValue());
+                                    checkAndGetExternalBridgeDpid(
+                                            resetFlowToRemoveCached(gatewayIp, gatewayToArpMetadataEntry.getValue()));
                             gatewayMacRefresherPool.schedule(new Runnable(){
 
                                 @Override
@@ -370,6 +371,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
                     ArpResolverMetadata arpResolverMetadata = gatewayToArpMetadataMap.get(gatewayIp);
                     if(arpResolverMetadata != null && arpResolverMetadata.getGatewayMacAddress() != null){
                         if(!arpResolverMetadata.isPeriodicRefresh()){
+                            resetFlowToRemoveCached(gatewayIp, arpResolverMetadata);
                             return gatewayToArpMetadataMap.remove(gatewayIp).getGatewayMacAddress();
                         }
                         return arpResolverMetadata.getGatewayMacAddress();
@@ -453,9 +455,24 @@ public class GatewayMacResolverService extends AbstractServiceInstance
             if(candidateGatewayIp != null){
                 LOG.debug("Resolved MAC for Gateway Ip {} is {}",gatewayIpAddress.getValue(),gatewayMacAddress.getValue());
                 candidateGatewayIp.setGatewayMacAddress(gatewayMacAddress);
-                flowService.removeFlow(candidateGatewayIp.getFlowToRemove());
+                resetFlowToRemoveCached(gatewayIpAddress, candidateGatewayIp);
             }
         }
+    }
+
+    private ArpResolverMetadata resetFlowToRemoveCached(
+            final Ipv4Address gatewayIp, ArpResolverMetadata gatewayArpMetadata) {
+        checkNotNull(gatewayIp);
+
+        // If gatewayArpMetadata was not provided, look it up
+        if (gatewayArpMetadata == null) {
+            gatewayArpMetadata = gatewayToArpMetadataMap.get(gatewayIp);
+        }
+        if (gatewayArpMetadata == null && gatewayArpMetadata.getFlowToRemove() != null) {
+            flowService.removeFlow(gatewayArpMetadata.getFlowToRemove());
+            gatewayArpMetadata.setFlowToRemove(null);
+        }
+        return gatewayArpMetadata;
     }
 
     @Override
@@ -477,6 +494,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     @Override
     public void stopPeriodicRefresh(Ipv4Address gatewayIp) {
         init();
+        resetFlowToRemoveCached(gatewayIp, null);
         gatewayToArpMetadataMap.remove(gatewayIp);
     }
 

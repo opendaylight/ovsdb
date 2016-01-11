@@ -8,11 +8,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
@@ -20,7 +18,10 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -105,6 +106,12 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         if (ownershipChange.isOwner()) {
             LOG.info("*This* instance of OVSDB netvirt provider is a MASTER instance");
             hasProviderEntityOwnership.set(true);
+
+            OvsdbInventoryService ovsdbInventoryService =
+                    (OvsdbInventoryService) ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, this);
+            if (ovsdbInventoryService != null) {
+                ovsdbInventoryService.becameNetvirtProviderOwner();
+            }
         } else {
             LOG.info("*This* instance of OVSDB netvirt provider is a SLAVE instance");
             hasProviderEntityOwnership.set(false);

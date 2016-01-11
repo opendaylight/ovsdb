@@ -16,4 +16,5 @@ public interface OvsdbInventoryService {
     void listenerAdded(OvsdbInventoryListener listener);
     void listenerRemoved(OvsdbInventoryListener listener);
     void providersReady();
+    void becameNetvirtProviderOwner();
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
@@ -27,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv6MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.MetadataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TcpFlagMatchBuilder;
@@ -34,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
@@ -91,6 +94,7 @@ public class MatchUtils {
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
     public static final String ICMP = "icmp";
+    public static final String ICMPV6 = "icmpv6";
     public static final short ALL_ICMP = -1;
 
     /**
@@ -235,6 +239,32 @@ public class MatchUtils {
             icmpv4match.setIcmpv4Code(code);
         }
         matchBuilder.setIcmpv4Match(icmpv4match.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     * Match ICMPv6 code and type
+     *
+     * @param matchBuilder MatchBuilder Object
+     * @param type         short representing an ICMP type
+     * @param code         short representing an ICMP code
+     * @return matchBuilder Map MatchBuilder Object with a match
+     */
+    public static MatchBuilder createICMPv6Match(MatchBuilder matchBuilder, short type, short code) {
+
+        // Build the IPv6 Match required per OVS Syntax
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol((short) 58);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        // Build the ICMPv6 Match
+        Icmpv6MatchBuilder icmpv6match = new Icmpv6MatchBuilder();
+        if (type != ALL_ICMP || code != ALL_ICMP) {
+            icmpv6match.setIcmpv6Type(type);
+            icmpv6match.setIcmpv6Code(code);
+        }
+        matchBuilder.setIcmpv6Match(icmpv6match.build());
 
         return matchBuilder;
     }
@@ -417,6 +447,35 @@ public class MatchUtils {
         EthernetMatchBuilder ethType = new EthernetMatchBuilder();
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethType.build());
+
+        IpMatchBuilder ipMmatch = new IpMatchBuilder();
+        if (ipProtocol == TCP_SHORT) {
+            ipMmatch.setIpProtocol(TCP_SHORT);
+        }
+        else if (ipProtocol == UDP_SHORT) {
+            ipMmatch.setIpProtocol(UDP_SHORT);
+        }
+        else if (ipProtocol == ICMP_SHORT) {
+            ipMmatch.setIpProtocol(ICMP_SHORT);
+        }
+        matchBuilder.setIpMatch(ipMmatch.build());
+        return matchBuilder;
+    }
+
+    /**
+     * Create  TCP Port Match
+     *
+     * @param matchBuilder MatchBuilder Object without a match yet
+     * @param ipProtocol   Integer representing the IP protocol
+     * @return matchBuilder Map MatchBuilder Object with a match
+     */
+    public static MatchBuilder createIpv6ProtocolMatch(MatchBuilder matchBuilder, short ipProtocol) {
+
+        EthernetMatchBuilder ethType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
         ethType.setEthernetType(ethTypeBuilder.build());
         matchBuilder.setEthernetMatch(ethType.build());
 
@@ -914,7 +973,7 @@ public class MatchUtils {
     }
 
     /**
-     * Create a DHCP match with pot provided.
+     * Create a DHCP match with port provided.
      *
      * @param matchBuilder the match builder
      * @param srcPort the source port
@@ -927,6 +986,36 @@ public class MatchUtils {
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
+     * Create a DHCP match with port provided.
+     *
+     * @param matchBuilder the match builder
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return the DHCP match
+     */
+    public static MatchBuilder createDhcpv6Match(MatchBuilder matchBuilder,
+                                                 int srcPort, int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
         ethernetMatch.setEthernetType(ethTypeBuilder.build());
         matchBuilder.setEthernetMatch(ethernetMatch.build());
 
@@ -980,6 +1069,42 @@ public class MatchUtils {
     }
 
     /**
+     * Creates DHCPv6 server packet match with DHCP mac address and port.
+     *
+     * @param matchBuilder the matchbuilder
+     * @param dhcpServerMac MAc address of the DHCP server of the subnet
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return the DHCP server match
+     */
+    public static MatchBuilder createDhcpv6ServerMatch(MatchBuilder matchBuilder, String dhcpServerMac, int srcPort,
+            int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
+        ethSourceBuilder.setAddress(new MacAddress(dhcpServerMac));
+        ethernetMatch.setEthernetSource(ethSourceBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
      * Creates a Match with src ip address mac address set.
      * @param matchBuilder MatchBuilder Object
      * @param srcip String containing an IPv4 prefix
@@ -1005,13 +1130,38 @@ public class MatchUtils {
     }
 
     /**
+     * Creates a Match with src ip address mac address set.
+     * @param matchBuilder MatchBuilder Object
+     * @param srcip String containing an IPv6 prefix
+     * @param srcMac The source macAddress
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createSrcL3Ipv6MatchWithMac(MatchBuilder matchBuilder, Ipv6Prefix srcip, MacAddress srcMac) {
+
+        Ipv6MatchBuilder ipv6MatchBuilder = new Ipv6MatchBuilder();
+        ipv6MatchBuilder.setIpv6Source(new Ipv6Prefix(srcip));
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        eth.setEthernetSource(new EthernetSourceBuilder()
+                .setAddress(srcMac)
+                .build());
+
+        matchBuilder.setLayer3Match(ipv6MatchBuilder.build());
+        matchBuilder.setEthernetMatch(eth.build());
+        return matchBuilder;
+
+    }
+
+    /**
      * Creates a ether net match with ether type set to 0x0800L.
      * @param matchBuilder MatchBuilder Object
      * @param srcMac The source macAddress
      * @param dstMac The destination mac address
      * @return matchBuilder Map Object with a match
      */
-    public static MatchBuilder createEtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
+    public static MatchBuilder createV4EtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
     {
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
@@ -1028,6 +1178,32 @@ public class MatchUtils {
         matchBuilder.setEthernetMatch(eth.build());
         return matchBuilder;
     }
+
+    /**
+     * Creates a ether net match with ether type set to 0x86DDL.
+     * @param matchBuilder MatchBuilder Object
+     * @param srcMac The source macAddress
+     * @param dstMac The destination mac address
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createV6EtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
+    {
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        if (null != srcMac) {
+            eth.setEthernetSource(new EthernetSourceBuilder()
+            .setAddress(new MacAddress(srcMac)).build());
+        }
+        if (null != dstMac) {
+            eth.setEthernetDestination(new EthernetDestinationBuilder()
+                           .setAddress(new MacAddress(dstMac)).build());
+        }
+        matchBuilder.setEthernetMatch(eth.build());
+        return matchBuilder;
+    }
+
     /**
      * Adds remote Ip prefix to existing match.
      * @param matchBuilder The match builder
@@ -1048,6 +1224,28 @@ public class MatchUtils {
 
         return matchBuilder;
     }
+
+    /**
+     * Adds remote Ipv6 prefix to existing match.
+     * @param matchBuilder The match builder
+     * @param sourceIpPrefix The source IP prefix
+     * @param destIpPrefix The destination IP prefix
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder addRemoteIpv6Prefix(MatchBuilder matchBuilder,
+                                                   Ipv6Prefix sourceIpPrefix,Ipv6Prefix destIpPrefix) {
+        Ipv6MatchBuilder ipv6match = new Ipv6MatchBuilder();
+        if (null != sourceIpPrefix) {
+            ipv6match.setIpv6Source(sourceIpPrefix);
+        }
+        if (null != destIpPrefix) {
+            ipv6match.setIpv6Destination(destIpPrefix);
+        }
+        matchBuilder.setLayer3Match(ipv6match.build());
+
+        return matchBuilder;
+    }
+
     /**
      * Add a layer4 match to an existing match
      *
@@ -1310,6 +1508,16 @@ public class MatchUtils {
      */
     public static Ipv4Prefix iPv4PrefixFromIPv4Address(String ipv4AddressString) {
         return new Ipv4Prefix(ipv4AddressString + "/32");
+    }
+
+    /**
+     * Create ipv6 prefix from ipv6 address, by appending /128 mask
+     *
+     * @param ipv6AddressString the ip address, in string format
+     * @return Ipv6Prefix with ipv6Address and /128 mask
+     */
+    public static Ipv6Prefix iPv6PrefixFromIPv6Address(String ipv6AddressString) {
+        return new Ipv6Prefix(ipv6AddressString + "/128");
     }
 
     /**

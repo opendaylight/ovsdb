@@ -27,6 +27,7 @@ import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefixBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -56,7 +57,10 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private volatile SecurityGroupCacheManger securityGroupCacheManger;
     private static final int DHCP_SOURCE_PORT = 67;
     private static final int DHCP_DESTINATION_PORT = 68;
+    private static final int DHCPV6_SOURCE_PORT = 547;
+    private static final int DHCPV6_DESTINATION_PORT = 546;
     private static final String HOST_MASK = "/32";
+    private static final String V6_HOST_MASK = "/128";
     private static final int PORT_RANGE_MIN = 1;
     private static final int PORT_RANGE_MAX = 65535;
 
@@ -96,8 +100,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 continue;
             }
 
-            if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
-                    && portSecurityRule.getSecurityRuleDirection().equals("egress")) {
+            if (portSecurityRule.getSecurityRuleDirection().equals("egress")) {
                 LOG.debug("programPortSecurityGroup: Acl Rule matching IPv4 and ingress is: {} ", portSecurityRule);
                 if (null != portSecurityRule.getSecurityRemoteGroupID()) {
                     //Remote Security group is selected
@@ -135,38 +138,13 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                         Neutron_IPs vmIp, boolean write) {
         if (null == portSecurityRule.getSecurityRuleProtocol()) {
             /* TODO Rework on the priority values */
-            egressAclIPv4(dpid, segmentationId, attachedMac,
+            boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+            egressAclIP(dpid, isIpv6, segmentationId, attachedMac,
                           write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
         } else {
             String ipaddress = null;
             if (null != vmIp) {
                 ipaddress = vmIp.getIpAddress();
-                try {
-                    InetAddress address = InetAddress.getByName(ipaddress);
-                    // TODO: remove this when ipv6 support is implemented
-                    if (address instanceof Inet6Address) {
-                        LOG.debug("Skipping ip address {}. IPv6 support is not yet implemented.", address);
-                        return;
-                    }
-                } catch (UnknownHostException e) {
-                    LOG.warn("Invalid ip address {}", ipaddress, e);
-                    return;
-                }
-            }
-
-            if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
-                String prefixStr = portSecurityRule.getSecurityRuleRemoteIpPrefix();
-                try {
-                    IpPrefix ipPrefix = IpPrefixBuilder.getDefaultInstance(prefixStr);
-                    // TODO: remove this when ipv6 support is implemented
-                    if (ipPrefix.getIpv6Prefix() != null) {
-                        LOG.debug("Skipping ip prefix {}. IPv6 support is not yet implemented.", ipPrefix);
-                        return;
-                    }
-                } catch (IllegalArgumentException e) {
-                    LOG.warn("Invalid ip prefix {}", prefixStr, e);
-                    return;
-                }
             }
 
             switch (portSecurityRule.getSecurityRuleProtocol()) {
@@ -183,6 +161,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                   break;
               case MatchUtils.ICMP:
+              case MatchUtils.ICMPV6:
                   LOG.debug("programPortSecurityRule: Rule matching ICMP", portSecurityRule);
                   egressAclIcmp(dpid, segmentationId, attachedMac,
                                 portSecurityRule, ipaddress,write,
@@ -204,7 +183,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                                boolean write, Integer priority) {
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_Other_" + segmentationId + "_" + srcMac + "_";
-        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,srcMac,null);
 
         short proto = 0;
         try {
@@ -238,11 +217,14 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         // If it is the only port in the bridge add the rule to allow any DHCP client traffic
         if (isLastPortinBridge) {
             egressAclDhcpAllowClientTrafficFromVm(dpid, write, Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
+            egressAclDhcpv6AllowClientTrafficFromVm(dpid, write, Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
         }
         if (isComputePort) {
             // add rule to drop the DHCP server traffic originating from the vm.
             egressAclDhcpDropServerTrafficfromVm(dpid, localPort, write,
                                                  Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
+            egressAclDhcpv6DropServerTrafficfromVm(dpid, localPort, write,
+                                                   Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
             //Adds rule to check legitimate ip/mac pair for each packet from the vm
             for (Neutron_IPs srcAddress : srcAddressList) {
                 try {
@@ -251,9 +233,11 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                         String addressWithPrefix = srcAddress.getIpAddress() + HOST_MASK;
                         egressAclAllowTrafficFromVmIpMacPair(dpid, localPort, attachedMac, addressWithPrefix,
                                                              Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
-                    } else {
-                        LOG.debug("Skipping IPv6 address {}. IPv6 support is not yet implemented.",
-                                  srcAddress.getIpAddress());
+                    } else if (address instanceof Inet6Address) {
+                        LOG.error("Adding IPv6 address {}. ", srcAddress.getIpAddress());
+                        String addressWithPrefix = srcAddress.getIpAddress() + V6_HOST_MASK;
+                        egressAclAllowTrafficFromVmIpV6MacPair(dpid, localPort, attachedMac, addressWithPrefix,
+                                                               Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
                     }
                 } catch(UnknownHostException e) {
                     LOG.warn("Invalid IP address {}", srcAddress.getIpAddress());
@@ -263,19 +247,23 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     }
 
     /**
-     * Allows IPv4 packet egress from the src mac address.
+     * Allows IPv4/v6 packet egress from the src mac address.
      * @param dpidLong the dpid
      * @param segmentationId the segementation id
      * @param srcMac the src mac address
      * @param write add or remove
      * @param protoPortMatchPriority the protocol match priority.
      */
-    private void egressAclIPv4(Long dpidLong, String segmentationId, String srcMac,
+    private void egressAclIP(Long dpidLong, boolean isIpv6, String segmentationId, String srcMac,
                                boolean write, Integer protoPortMatchPriority ) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_IP" + segmentationId + "_" + srcMac + "_Permit_";
-        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        if (isIpv6) {
+            matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);
+        } else {
+            matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,srcMac,null);
+        }
         syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
     }
 
@@ -297,7 +285,12 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_TCP_" + segmentationId + "_" + srcMac + "_";
-        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        if (isIpv6) {
+            matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);
+        } else {
+            matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,srcMac,null);
+        }
 
         /* Custom TCP Match */
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
@@ -317,13 +310,22 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
-            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
-                                      MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
-
+            if (isIpv6) {
+                matchBuilder = MatchUtils.addRemoteIpv6Prefix(matchBuilder,null,
+                        MatchUtils.iPv6PrefixFromIPv6Address(dstAddress));
+            } else {
+                matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+                        MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
+            }
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
-            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
-                                      new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+            if (isIpv6) {
+                matchBuilder = MatchUtils.addRemoteIpv6Prefix(matchBuilder,null,
+                        new Ipv6Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+            } else {
+                matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+                        new Ipv4Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+            }
         }
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         if (portRange) {
@@ -343,8 +345,20 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
     }
 
+    private void egressAclIcmp(Long dpidLong, String segmentationId, String srcMac,
+            NeutronSecurityRule portSecurityRule, String dstAddress,
+            boolean write, Integer protoPortMatchPriority) {
+
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        if (isIpv6) {
+            egressAclIcmpV6(dpidLong, segmentationId, srcMac, portSecurityRule, dstAddress, write, protoPortMatchPriority);
+        } else {
+            egressAclIcmpV4(dpidLong, segmentationId, srcMac, portSecurityRule, dstAddress, write, protoPortMatchPriority);
+        }
+    }
+
     /**
-     * Creates a egress match with src macaddress. If dest address is specified
+     * Creates a icmp egress match with src macaddress. If dest address is specified
      * destination specific match will be created. Otherwise a match with a
      * CIDR will be created.
      * @param dpidLong the dpid
@@ -355,13 +369,13 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      * @param write add or delete
      * @param protoPortMatchPriority the protocol match priority
      */
-    private void egressAclIcmp(Long dpidLong, String segmentationId, String srcMac,
-                               NeutronSecurityRule portSecurityRule, String dstAddress,
-                               boolean write, Integer protoPortMatchPriority) {
+    private void egressAclIcmpV4(Long dpidLong, String segmentationId, String srcMac,
+                                 NeutronSecurityRule portSecurityRule, String dstAddress,
+                                 boolean write, Integer protoPortMatchPriority) {
 
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_ICMP_" + segmentationId + "_" + srcMac + "_";
-        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,srcMac,null);
         /*Custom ICMP Match */
         if (portSecurityRule.getSecurityRulePortMin() != null &&
                              portSecurityRule.getSecurityRulePortMax() != null) {
@@ -390,6 +404,53 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     }
 
     /**
+     * Creates a icmpv6 egress match with src macaddress. If dest address is specified
+     * destination specific match will be created. Otherwise a match with a
+     * CIDR will be created.
+     * @param dpidLong the dpid
+     * @param segmentationId the segmentation id
+     * @param srcMac the source mac address.
+     * @param portSecurityRule the security rule in the SG
+     * @param dstAddress the source IP address
+     * @param write add or delete
+     * @param protoPortMatchPriority the protocol match priority
+     */
+    private void egressAclIcmpV6(Long dpidLong, String segmentationId, String srcMac,
+                                 NeutronSecurityRule portSecurityRule, String dstAddress,
+                                 boolean write, Integer protoPortMatchPriority) {
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        String flowId = "Egress_ICMP_" + segmentationId + "_" + srcMac + "_";
+        matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);
+
+        /*Custom ICMP Match */
+        if (portSecurityRule.getSecurityRulePortMin() != null &&
+                             portSecurityRule.getSecurityRulePortMax() != null) {
+            flowId = flowId + portSecurityRule.getSecurityRulePortMin().shortValue() + "_"
+                    + portSecurityRule.getSecurityRulePortMax().shortValue() + "_";
+            matchBuilder = MatchUtils.createICMPv6Match(matchBuilder,
+                    portSecurityRule.getSecurityRulePortMin().shortValue(),
+                    portSecurityRule.getSecurityRulePortMax().shortValue());
+        } else {
+            /* All ICMP Match */ // We are getting from neutron NULL for both min and max
+            flowId = flowId + "all" + "_" ;
+            matchBuilder = MatchUtils.createICMPv6Match(matchBuilder, MatchUtils.ALL_ICMP, MatchUtils.ALL_ICMP);
+        }
+        if (null != dstAddress) {
+            flowId = flowId + dstAddress;
+            matchBuilder = MatchUtils.addRemoteIpv6Prefix(matchBuilder,null,
+                    MatchUtils.iPv6PrefixFromIPv6Address(dstAddress));
+        } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
+            flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
+            matchBuilder = MatchUtils.addRemoteIpv6Prefix(matchBuilder,null,
+                    new Ipv6Prefix(portSecurityRule.getSecurityRuleRemoteIpPrefix()));
+        }
+        flowId = flowId + "_Permit";
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        syncFlow(flowId, nodeBuilder, matchBuilder, protoPortMatchPriority, write, false);
+    }
+
+    /**
      * Creates a egress match with src macaddress. If dest address is specified
      * destination specific match will be created. Otherwise a match with a
      * CIDR will be created.
@@ -407,7 +468,12 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_UDP_" + segmentationId + "_" + srcMac + "_";
-        matchBuilder = MatchUtils.createEtherMatchWithType(matchBuilder,srcMac,null);
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        if (isIpv6) {
+            matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);	
+        } else {
+            matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,srcMac,null);
+        }
 
         /* Custom UDP Match */
         if (portSecurityRule.getSecurityRulePortMin().equals(portSecurityRule.getSecurityRulePortMax())) {
@@ -427,13 +493,24 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
         if (null != dstAddress) {
             flowId = flowId + dstAddress;
-            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
-                                                        MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
+            if (isIpv6) {
+                matchBuilder = MatchUtils.addRemoteIpv6Prefix(matchBuilder,null,
+                        MatchUtils.iPv6PrefixFromIPv6Address(dstAddress));
+            } else {
+                matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder,null,
+                        MatchUtils.iPv4PrefixFromIPv4Address(dstAddress));
+            }
         } else if (null != portSecurityRule.getSecurityRuleRemoteIpPrefix()) {
             flowId = flowId + portSecurityRule.getSecurityRuleRemoteIpPrefix();
-            matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,
-                                                        new Ipv4Prefix(portSecurityRule
-                                                                       .getSecurityRuleRemoteIpPrefix()));
+            if (isIpv6) {
+                matchBuilder = MatchUtils.addRemoteIpv6Prefix(matchBuilder, null,
+                        new Ipv6Prefix(portSecurityRule
+                                       .getSecurityRuleRemoteIpPrefix()));
+            } else {
+                matchBuilder = MatchUtils.addRemoteIpPrefix(matchBuilder, null,
+                        new Ipv4Prefix(portSecurityRule
+                                       .getSecurityRuleRemoteIpPrefix()));
+            }
         }
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         if (portRange) {
@@ -629,6 +706,22 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     }
 
     /**
+     * Adds flow to allow any DHCP IPv6 client traffic.
+     *
+     * @param dpidLong the dpid
+     * @param write whether to write or delete the flow
+     * @param priority the priority
+     */
+    private void egressAclDhcpv6AllowClientTrafficFromVm(Long dpidLong,
+                                                         boolean write, Integer priority) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        String flowName = "Egress_DHCPv6_Client"  + "_Permit_";
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createDhcpv6Match(matchBuilder, DHCPV6_DESTINATION_PORT, DHCPV6_SOURCE_PORT);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);
+    }
+
+    /**
      * Adds rule to prevent DHCP spoofing by the vm attached to the port.
      *
      * @param dpidLong the dpid
@@ -644,6 +737,25 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         MatchUtils.createDhcpMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, true);
+    }
+
+    /**
+     * Adds rule to prevent DHCPv6 spoofing by the vm attached to the port.
+     *
+     * @param dpidLong the dpid
+     * @param localPort the local port
+     * @param write is write or delete
+     * @param priority  the priority
+     */
+    private void egressAclDhcpv6DropServerTrafficfromVm(Long dpidLong, long localPort,
+                                                        boolean write, Integer priority) {
+
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        String flowName = "Egress_DHCPv6_Server" + "_" + localPort + "_DROP_";
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
+        MatchUtils.createDhcpv6Match(matchBuilder, DHCPV6_SOURCE_PORT, DHCPV6_DESTINATION_PORT);
         syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, true);
     }
 
@@ -664,6 +776,28 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         String flowName = "Egress_Allow_VM_IP_MAC" + "_" + localPort + attachedMac + "_Permit_";
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createSrcL3Ipv4MatchWithMac(matchBuilder, new Ipv4Prefix(srcIp),new MacAddress(attachedMac));
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
+        LOG.debug("egressAclAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", matchBuilder);
+        syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);
+    }
+
+    /**
+     * Adds rule to check legitimate ip/mac pair for each packet from the vm.
+     *
+     * @param dpidLong the dpid
+     * @param localPort the local port
+     * @param srcIp the vm ip address
+     * @param attachedMac the vm mac address
+     * @param priority  the priority
+     * @param write is write or delete
+     */
+    private void egressAclAllowTrafficFromVmIpV6MacPair(Long dpidLong, long localPort,
+                                                        String attachedMac, String srcIp,
+                                                        Integer priority, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        String flowName = "Egress_Allow_VM_IPv6_MAC" + "_" + localPort + attachedMac + "_Permit_";
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createSrcL3Ipv6MatchWithMac(matchBuilder, new Ipv6Prefix(srcIp),new MacAddress(attachedMac));
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         LOG.debug("egressAclAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", matchBuilder);
         syncFlow(flowName, nodeBuilder, matchBuilder, priority, write, false);

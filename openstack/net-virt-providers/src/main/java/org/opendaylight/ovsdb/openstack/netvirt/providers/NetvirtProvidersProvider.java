@@ -92,13 +92,13 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         dataBroker = providerContextRef.getSALService(DataBroker.class);
         providerContext = providerContextRef;
         LOG.info("NetvirtProvidersProvider: onSessionInitiated dataBroker: {}", dataBroker);
+        providerEntityListener = new ProviderEntityListener(this, entityOwnershipService);
         this.activator = new ConfigActivator(providerContextRef);
         try {
             activator.start(bundleContext);
         } catch (Exception e) {
             LOG.warn("Failed to start Netvirt: ", e);
         }
-        providerEntityListener = new ProviderEntityListener(this, entityOwnershipService);
     }
 
     private void handleOwnershipChange(EntityOwnershipChange ownershipChange) {

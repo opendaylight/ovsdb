@@ -72,6 +72,52 @@
     },
     {
       "key": {
+        "uuid": "da33351e_c3081d30",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T02:51:43Z",
+      "side": 1,
+      "message": "make a CONST or leave some bread crumb for code reader to know what icmp type 0 is.",
+      "range": {
+        "startLine": 90,
+        "startChar": 68,
+        "endLine": 90,
+        "endChar": 69
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_23062921",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T02:51:43Z",
+      "side": 1,
+      "message": "0 (echo_reply)",
+      "range": {
+        "startLine": 118,
+        "startChar": 32,
+        "endLine": 118,
+        "endChar": 33
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_d6f8e2c6",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/ConfigActivator.java",
         "patchSetId": 1
@@ -136,6 +182,75 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "da33351e_b6f55ecd",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_83173551",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T02:51:43Z",
+      "side": 1,
+      "message": "maybe use NOT_SUPPORTED or something similar for the default value? This seems like null provider would be perceived as success. I could be wrong here, and that is the desired behavior...",
+      "range": {
+        "startLine": 1214,
+        "startChar": 46,
+        "endLine": 1214,
+        "endChar": 53
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_232f49a3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1245,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T02:51:43Z",
+      "side": 1,
+      "message": "that is a typo in the log.\n\nHistorically, these calls used to have a local cache to avoid calling the flow program routine multiple times. that cache has recently been removed but I think the log was not\nadjusted properly in this case.",
+      "range": {
+        "startLine": 1245,
+        "startChar": 47,
+        "endLine": 1245,
+        "endChar": 55
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_032cc5aa",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T02:51:43Z",
+      "side": 1,
+      "message": "since you are here, can you please remove \" is already done\" from the log log message?",
+      "range": {
+        "startLine": 1246,
+        "startChar": 105,
+        "endLine": 1246,
+        "endChar": 121
+      },
       "revId": "9727dccaadd39561da62d530ea862334c56f417d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -25,6 +25,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -316,6 +317,7 @@ public class NeutronFloatingIPInterfaceTest {
      * Test that checks if @{NeutronFloatingIPInterface#registerNewInterface} is called
      * and then checks that it register service or not.
      */
+    @Ignore
     @Test
     public void testRegisterNewInterface() throws Exception {
         ProviderContext providerContext = mock(ProviderContext.class);

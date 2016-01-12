@@ -334,7 +334,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "LLDP";
-        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable());
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable());
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(0x88CCL));
@@ -360,6 +360,34 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         flowBuilder.setInstructions(isb.build());
 
         writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    @Override
+    public void programGotoTable(Long dpidLong, boolean write) {
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "TableOffset_" + getTable();
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable())
+                .setPriority(0);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        flowBuilder.setMatch(matchBuilder.build());
+
+        if (write) {
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            InstructionBuilder ib =
+                    InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), getTable());
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            isb.setInstruction(instructions);
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
     @Override

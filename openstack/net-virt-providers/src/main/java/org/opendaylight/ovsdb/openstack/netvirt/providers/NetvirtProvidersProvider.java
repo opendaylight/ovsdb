@@ -20,6 +20,8 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,14 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
     private static EntityOwnershipService entityOwnershipService;
     private ProviderEntityListener providerEntityListener = null;
     private static AtomicBoolean hasProviderEntityOwnership = new AtomicBoolean(false);
+    private static short tableOffset;
+    private NetvirtProvidersConfigImpl netvirtProvidersConfig = null;
 
-    public NetvirtProvidersProvider(BundleContext bundleContext, EntityOwnershipService eos) {
+    public NetvirtProvidersProvider(BundleContext bundleContext, EntityOwnershipService eos, short tableOffset) {
         LOG.info("NetvirtProvidersProvider: bundleContext: {}", bundleContext);
         this.bundleContext = bundleContext;
-        entityOwnershipService = eos;
+            entityOwnershipService = eos;
+        setTableOffset(tableOffset);
     }
 
     public static DataBroker getDataBroker() {
@@ -56,6 +61,23 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
 
     public static boolean isMasterProviderInstance() {
         return hasProviderEntityOwnership.get();
+    }
+
+    public static void setTableOffset(short tableOffset) {
+        try {
+            new TableId((short) (tableOffset + Service.L2_FORWARDING.getTable()));
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Invalid table offset: {}", tableOffset, e);
+            return;
+        }
+
+        LOG.info("setTableOffset: changing from {} to {}",
+                NetvirtProvidersProvider.tableOffset, tableOffset);
+        NetvirtProvidersProvider.tableOffset = tableOffset;
+    }
+
+    public static short getTableOffset() {
+        return tableOffset;
     }
 
     @Override

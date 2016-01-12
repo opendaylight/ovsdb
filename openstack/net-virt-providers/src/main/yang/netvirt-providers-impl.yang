@@ -31,6 +31,7 @@ module netvirt-providers-impl {
                     }
                 }
             }
+
             container clustering-entity-ownership-service {
                 uses config:service-ref {
                     refine type {
@@ -38,6 +39,11 @@ module netvirt-providers-impl {
                         config:required-identity eos:entity-ownership-service;
                     }
                 }
+            }
+
+            leaf table-offset {
+                description "The table-offset is used to set the starting table for the netvirt pipeline";
+                type uint8;
             }
         }
     }

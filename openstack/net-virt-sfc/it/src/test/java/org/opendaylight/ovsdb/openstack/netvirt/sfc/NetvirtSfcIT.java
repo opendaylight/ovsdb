@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +26,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.SfcClassifier;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
@@ -53,9 +54,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionPathUti
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
-import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -84,17 +83,12 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.cont
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.AccessListEntriesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.AceBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.ActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Matches;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.MatchesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.ClassifierBuilder;
@@ -103,6 +97,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.Sfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -110,6 +105,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -143,7 +139,10 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
+    private static String controllerStr;
     private static boolean ovsdb_wait = false;
+    private static String userSpaceEnabled = "no";
+    private static PipelineOrchestrator pipelineOrchestrator;
     private static Southbound southbound;
     private static DataBroker dataBroker;
     public static final String CONTROLLER_IPADDRESS = "ovsdb.controller.address";
@@ -153,6 +152,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public static final String CONNECTION_TYPE_ACTIVE = "active";
     public static final String CONNECTION_TYPE_PASSIVE = "passive";
     public static final String DEFAULT_SERVER_PORT = "6640";
+    public static final String USERSPACE_ENABLED = "ovsdb.userspace.enabled";
     public static final String INTEGRATION_BRIDGE_NAME = "br-int";
     private static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
     private static final String OVSDB_TRACE = "ovsdb.trace";
@@ -179,7 +179,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final String SFCPATH = "SFC-Path";
     private static final String SFCSF1NAME = "firewall-abstract";
     private static final SftType SFCSF1TYPE = new SftType("firewall");
-    private static final int GPEPORT = 6633;
+    private static final int GPEUDPPORT = 6633;
 
     @Override
     public String getModuleName() {
@@ -235,7 +235,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     public Option[] getPropertiesOptions() {
         return new Option[] {
                 propagateSystemProperties(SERVER_IPADDRESS, SERVER_PORT, CONNECTION_TYPE,
-                        CONTROLLER_IPADDRESS, OVSDB_TRACE, OVSDB_WAIT),
+                        CONTROLLER_IPADDRESS, OVSDB_TRACE, OVSDB_WAIT, USERSPACE_ENABLED),
         };
     }
 
@@ -255,9 +255,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.sfc",
                         LogLevel.TRACE.name()),
-                //editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                //        "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13",
-                //        LogLevel.TRACE.name()),
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13",
+                        LogLevel.TRACE.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.sfc",
                         LogLevel.TRACE.name()),
@@ -275,8 +275,11 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         addressStr = props.getProperty(SERVER_IPADDRESS);
         portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
         connectionType = props.getProperty(CONNECTION_TYPE, "active");
-        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}",
-                connectionType, addressStr, portStr);
+        controllerStr = props.getProperty(CONTROLLER_IPADDRESS, "0.0.0.0");
+        userSpaceEnabled = props.getProperty(USERSPACE_ENABLED, "no");
+        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}, controller ip: {}, " +
+                        "userspace.enabled: {}",
+                connectionType, addressStr, portStr, controllerStr, userSpaceEnabled);
         if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
@@ -284,7 +287,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         }
         LOG.info("getProperties {}: {}", OVSDB_TRACE, props.getProperty(OVSDB_TRACE));
         LOG.info("getProperties {}: {}", OVSDB_WAIT, props.getProperty(OVSDB_WAIT));
-        if (props.getProperty(OVSDB_WAIT).equals("true")) {
+        if (props.getProperty(OVSDB_WAIT) != null && props.getProperty(OVSDB_WAIT).equals("true")) {
             ovsdb_wait = true;
         }
     }
@@ -313,6 +316,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + NETVIRT_TOPOLOGY_ID, getNetvirtTopology());
         southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         assertNotNull("southbound should not be null", southbound);
+        pipelineOrchestrator =
+                (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
+        assertNotNull("pipelineOrchestrator should not be null", pipelineOrchestrator);
         setup.set(true);
     }
 
@@ -446,6 +452,13 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         testModelDelete(builder, clazz);
     }
 
+    private <T extends DataObject> void testModel(Builder<T> builder, Class<T> clazz)
+            throws InterruptedException {
+        testModelPut(builder, clazz);
+        Thread.sleep(1000);
+        testModelDelete(builder, clazz);
+    }
+
     private ServiceFunctionsBuilder serviceFunctionsBuilder() {
         String sf1Name = SF1NAME;
         String sf1Ip = SF1IP;
@@ -461,7 +474,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         String sf2DplName = SF2DPLNAME;
         String sn2Name = SN2NAME;
         String bridge2Name= BRIDGE2NAME;
-        int port = GPEPORT;
+        int port = GPEUDPPORT;
 
         ServiceFunctionBuilder serviceFunctionBuilder =
                 serviceFunctionUtils.serviceFunctionBuilder(sf1Ip, port, sf1DplName, sff1Name, sf1Name);
@@ -497,7 +510,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         String sn2Name = SN2NAME;
         String bridge2Name= BRIDGE2NAME;
         String aclName = ACLNAME;
-        int port = GPEPORT;
+        int port = GPEUDPPORT;
 
         ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
                 serviceFunctionForwarderUtils.serviceFunctionForwarderBuilder(
@@ -562,24 +575,84 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     @Test
     public void testSfcModel() throws InterruptedException {
-        testModel(serviceFunctionsBuilder(), ServiceFunctions.class, 3000);
-        testModel(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class, 3000);
-        testModel(serviceFunctionChainsBuilder(), ServiceFunctionChains.class, 3000);
-        testModel(serviceFunctionPathsBuilder(), ServiceFunctionPaths.class, 3000);
+        int timeout = 1000;
+        testModel(serviceFunctionsBuilder(), ServiceFunctions.class, timeout);
+        testModel(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class, timeout);
+        testModel(serviceFunctionChainsBuilder(), ServiceFunctionChains.class, timeout);
+        testModel(serviceFunctionPathsBuilder(), ServiceFunctionPaths.class, timeout);
     }
 
     @Test
     public void testSfcModels() throws InterruptedException {
+        testModel(serviceFunctionsBuilder(), ServiceFunctions.class);
+        testModel(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class);
+        testModel(serviceFunctionChainsBuilder(), ServiceFunctionChains.class);
+        testModel(serviceFunctionPathsBuilder(), ServiceFunctionPaths.class);
+
+        testModel(accessListsBuilder(), AccessLists.class);
+        testModel(classifiersBuilder(), Classifiers.class);
+    }
+
+    /**
+     * Test that the NetvirtSfc SfcClassifierService is added to the Netvirt pipeline.
+     * @throws InterruptedException
+     */
+    @Test
+    public void testNetvirtSfcPipeline() throws InterruptedException {
         String bridgeName = INTEGRATION_BRIDGE_NAME;
-        ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
         Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
 
-        Thread.sleep(5000);
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+                + " is not connected", isControllerConnected(connectionInfo));
+
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
         assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
+        String datapathIdString = southbound.getDatapathId(bridgeNode);
+        LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
+        assertNotEquals("datapathId was not found", datapathId, 0);
+
+        String flowId = "DEFAULT_PIPELINE_FLOW_" + Service.SFC_CLASSIFIER.getTable();
+        verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
+
+        assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
+        Thread.sleep(1000);
+        assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
+    }
+
+    /**
+     * Test the full NetvirtSfc functionality by creating everything needed to realize a chain and
+     * then verify all flows have been created.
+     * NOTE: This test requires an OVS with the NSH v8 patch, otherwise it will fail miserably.
+     * @throws InterruptedException
+     */
+    @Test
+    public void testNetvirtSfcAll() throws InterruptedException {
+        if (userSpaceEnabled.equals("yes")) {
+            LOG.info("testNetvirtSfcAll: skipping test because userSpaceEnabled {}", userSpaceEnabled);
+            return;
+        }
+        String bridgeName = INTEGRATION_BRIDGE_NAME;
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
+        assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
+        Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
+        assertNotNull("node is not connected", ovsdbNode);
+
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+                + " is not connected", isControllerConnected(connectionInfo));
+
+        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
+        assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
+        long datapathId = southbound.getDataPathId(bridgeNode);
+        String datapathIdString = southbound.getDatapathId(bridgeNode);
+        LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
+        assertNotEquals("datapathId was not found", datapathId, 0);
+
+        String flowId = "DEFAULT_PIPELINE_FLOW_" + Service.SFC_CLASSIFIER.getTable();
+        verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
 
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
@@ -588,86 +661,50 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal");
         Map<String, String> options = Maps.newHashMap();
         options.put("key", "flow");
+        options.put("dst_port", String.valueOf(GPEUDPPORT));
+        options.put("remote_ip", "flow");
+        options.put("nshc1", "flow");
+        options.put("nshc2", "flow");
+        options.put("nsp", "flow");
+        options.put("nsi", "flow");
+        southboundUtils.addTerminationPoint(bridgeNode, "vxgpe", "vxlan", options, null);
+        options.clear();
+        options.put("key", "flow");
         options.put("remote_ip", "192.168.120.32");
         southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null);
-        Thread.sleep(1000);
+        long vxGpeOfPort = getOFPort(bridgeNode, "vxgpe");
 
         testModelPut(serviceFunctionsBuilder(), ServiceFunctions.class);
         testModelPut(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class);
         testModelPut(serviceFunctionChainsBuilder(), ServiceFunctionChains.class);
         testModelPut(serviceFunctionPathsBuilder(), ServiceFunctionPaths.class);
 
-        Thread.sleep(5000);
-
         testModelPut(accessListsBuilder(), AccessLists.class);
         testModelPut(classifiersBuilder(), Classifiers.class);
 
-        Thread.sleep(10000);
-
         readwait();
 
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
-        FlowBuilder flowBuilder = getSfcIngressClassifierFlowBuilder();
-        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("Could not find flow in config", flow);
-        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational", flow);
+        flowId = "sfcIngressClass_" + "httpRule";
+        verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
+        flowId = "sfcTable_" + vxGpeOfPort;
+        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
+        flowId = "sfEgress_" + GPEUDPPORT;
+        verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
+        flowId = "sfIngress_" + GPEUDPPORT + "_" + SF1IP;
+        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
+        flowId = "ArpResponder_" + SF1IP;
+        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
 
         assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
         Thread.sleep(1000);
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
     }
 
-    /*
-     * Connect to an ovsdb node. Netvirt should add br-int, add the controller address
-     * and program the pipeline flows.
+    /**
+     * Test the standalone NetvirtSfc implementation
+     * NOTE: This test requires an OVS with the NSH v8 patch, otherwise it will fail miserably.
+     * @throws InterruptedException
      */
-    @Test
-    public void testNetvirtSfc() throws InterruptedException {
-        String bridgeName = INTEGRATION_BRIDGE_NAME;
-        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
-        assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
-        Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
-        assertNotNull("node is not connected", ovsdbNode);
-        ControllerEntry controllerEntry;
-        // Loop 10s checking if the controller was added
-        for (int i = 0; i < 10; i++) {
-            ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
-            assertNotNull("ovsdb node not found", ovsdbNode);
-            String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
-            assertNotNull("Failed to get controller target", controllerTarget);
-            OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, bridgeName);
-            if (bridge != null) {
-                assertNotNull("Failed to read bridge", bridge);
-                assertNotNull("Failed to extract controllerEntry", bridge.getControllerEntry());
-                controllerEntry = bridge.getControllerEntry().iterator().next();
-                assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
-                if (controllerEntry.isIsConnected()) {
-                    Assert.assertTrue("switch is not connected to the controller", controllerEntry.isIsConnected());
-                    break;
-                }
-            }
-            Thread.sleep(1000);
-        }
-
-        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
-        assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
-        long datapathId = southbound.getDataPathId(bridgeNode);
-
-        //Thread.sleep(10000);
-
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
-        FlowBuilder flowBuilder = FlowUtils.getPipelineFlow(Service.SFC_CLASSIFIER.getTable(), (short)0);
-        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("Could not find flow in config", flow);
-        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational", flow);
-
-        assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
-        Thread.sleep(1000);
-        assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
-    }
-
     @Ignore
     @Test
     public void testStandalone() throws InterruptedException {
@@ -676,31 +713,21 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
         Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
+
         String controllerTarget = "tcp:192.168.50.1:6653";
         List<ControllerEntry> setControllerEntry = southboundUtils.createControllerEntry(controllerTarget);
         Assert.assertTrue(southboundUtils.addBridge(connectionInfo, null, bridgeName, null, true,
                 SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
                 setControllerEntry, null, "00:00:00:00:00:00:00:01"));
-        // Loop 10s checking if the controller was added
-        for (int i = 0; i < 10; i++) {
-            ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
-            assertNotNull("ovsdb node not found", ovsdbNode);
-            assertNotNull("Failed to get controller target", controllerTarget);
-            OvsdbBridgeAugmentation bridge = southboundUtils.getBridge(connectionInfo, bridgeName);
-            assertNotNull(bridge);
-            assertNotNull(bridge.getControllerEntry());
-            ControllerEntry controllerEntry = bridge.getControllerEntry().iterator().next();
-            assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
-            if (controllerEntry.isIsConnected()) {
-                Assert.assertTrue(controllerEntry.isIsConnected());
-                break;
-            }
-            Thread.sleep(1000);
-        }
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+                + " is not connected", isControllerConnected(connectionInfo));
 
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, bridgeName);
         assertNotNull("bridge " + bridgeName + " was not found", bridgeNode);
         long datapathId = southbound.getDataPathId(bridgeNode);
+        String datapathIdString = southbound.getDatapathId(bridgeNode);
+        LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
+        assertNotEquals("datapathId was not found", datapathId, 0);
 
         SfcClassifier sfcClassifier = new SfcClassifier(dataBroker, southbound, mdsalUtils);
         //sfcClassifier.programLocalInPort(datapathId, "4096", (long)1, (short)0, (short)50, true);
@@ -711,7 +738,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         sfcClassifier.programSfcClassiferFlows(datapathId, (short)0, "test", matchesBuilder.build(),
                 nshUtils, (long)2, true);
 
-        nshUtils = new NshUtils(null, null, (long)10, (short)253, 0, 0);
+        //nshUtils = new NshUtils(null, null, (long)10, (short)253, 0, 0);
         //sfcClassifier.programEgressSfcClassiferFlows(datapathId, (short)0, "test", null,
         //        nshUtils, (long)2, (long)3, true);
 
@@ -722,23 +749,27 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         //}
 
         //NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
-        //FlowBuilder flowBuilder = getLocalInPortFlow(datapathId, "4096", (long) 1, (short) 0);
+        //FlowBuilder flowBuilder = getLocalInPortFlow(datapathId, "4096", (long) 1,
+        //                                             pipelineOrchestrator.getTable(Service.CLASSIFIER));
         //Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
         //assertNotNull("Could not find flow in config", flow);
         //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
         //assertNotNull("Could not find flow in operational", flow);
 
-        MatchBuilder matchBuilder = sfcClassifier.buildMatch(matchesBuilder.build());
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
-        FlowBuilder flowBuilder = getSfcClassifierFlow(datapathId, (short) 0, "test", null,
-                nshUtils, (long) 2, matchBuilder);
-        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("Could not find flow in config", flow);
-        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational", flow);
+        //MatchBuilder matchBuilder = sfcClassifier.buildMatch(matchesBuilder.build());
+        //NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
+        //FlowBuilder flowBuilder = getSfcClassifierFlow(datapathId,
+        //        pipelineOrchestrator.getTable(Service.CLASSIFIER), "test", null,
+        //        nshUtils, (long) 2, matchBuilder);
+        //Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        //assertNotNull("Could not find flow in config", flow);
+        //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        //assertNotNull("Could not find flow in operational", flow);
 
         //nodeBuilder = FlowUtils.createNodeBuilder(datapathId);
-        //flowBuilder = getEgressSfcClassifierFlow(datapathId, (short) 0, "test", nshUtils, (long) 2);
+        //flowBuilder = getEgressSfcClassifierFlow(datapathId,
+                                                   //pipelineOrchestrator.getTable(Service.CLASSIFIER),
+                                                   //"test", nshUtils, (long) 2);
         //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
         //assertNotNull("Could not find flow in config", flow);
         //flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
@@ -753,90 +784,34 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
     }
 
-    private FlowBuilder getLocalInPortFlow(long dpidLong, String segmentationId, long inPort, short writeTable) {
-        MatchBuilder matchBuilder = new MatchBuilder();
+    private Flow getFlow (
+            FlowBuilder flowBuilder,
+            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder,
+            LogicalDatastoreType store) throws InterruptedException {
 
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
-        String flowId = "sfcIngress_" + segmentationId + "_" + inPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        return flowBuilder;
-    }
-
-    public FlowBuilder getSfcClassifierFlow(long dpidLong, short writeTable, String ruleName, Matches match,
-                                             NshUtils nshHeader, long tunnelOfPort, MatchBuilder matchBuilder) {
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcClass_" + ruleName + "_" + nshHeader.getNshNsp();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        return flowBuilder;
-    }
-
-    private FlowBuilder getEgressSfcClassifierFlow(long dpidLong, short writeTable, String ruleName,
-                                                   NshUtils nshHeader, long tunnelOfPort) {
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        MatchBuilder matchBuilder = new MatchBuilder();
-        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, tunnelOfPort).build());
-        flowBuilder.setMatch(
-                MatchUtils.createTunnelIDMatch(matchBuilder, BigInteger.valueOf(nshHeader.getNshNsp())).build());
-        flowBuilder.setMatch(MatchUtils.addNxNspMatch(matchBuilder, nshHeader.getNshNsp()).build());
-        flowBuilder.setMatch(MatchUtils.addNxNsiMatch(matchBuilder, nshHeader.getNshNsi()).build());
-
-        String flowId = "egressSfcClass_" + ruleName + "_" + nshHeader.getNshNsp() + "_" + nshHeader.getNshNsi();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        return flowBuilder;
-    }
-
-    private FlowBuilder getSfcIngressClassifierFlowBuilder() {
-        FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "sfcIngressClass_" + "httpRule";
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setTableId((short)10);
-        return flowBuilder;
-    }
-
-    private Flow getFlow (FlowBuilder flowBuilder, NodeBuilder nodeBuilder, LogicalDatastoreType store)
-            throws InterruptedException {
         Flow flow = null;
         for (int i = 0; i < 10; i++) {
+            LOG.info("getFlow try {} from {}: looking for flow: {}, node: {}",
+                    i, store, flowBuilder.build(), nodeBuilder.build());
             flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
             if (flow != null) {
-                LOG.info("getFlow: flow: {}: {}", store, flow);
+                LOG.info("getFlow try {} from {}: found flow: {}", i, store, flow);
                 break;
             }
             Thread.sleep(1000);
         }
         return flow;
+    }
+
+    private void verifyFlow(long datapathId, String flowId, Service service) throws InterruptedException {
+        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
+                FlowUtils.createNodeBuilder(datapathId);
+        FlowBuilder flowBuilder =
+                FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, pipelineOrchestrator.getTable(service));
+        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
+        assertNotNull("Could not find flow in config: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
+        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
+        assertNotNull("Could not find flow in operational: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
     }
 
     private void readwait() {
@@ -848,5 +823,66 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean isControllerConnected(ConnectionInfo connectionInfo) throws InterruptedException {
+        LOG.info("isControllerConnected enter");
+        Boolean connected = false;
+        ControllerEntry controllerEntry;
+        Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
+        assertNotNull("ovsdb node not found", ovsdbNode);
+
+        BridgeConfigurationManager bridgeConfigurationManager =
+                (BridgeConfigurationManager) ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, this);
+        assertNotNull("Could not find BridgeConfigurationManager Service", bridgeConfigurationManager);
+        String controllerTarget = bridgeConfigurationManager.getControllersFromOvsdbNode(ovsdbNode).get(0);
+        Assert.assertNotNull("Failed to get controller target", controllerTarget);
+
+        for (int i = 0; i < 10; i++) {
+            LOG.info("isControllerConnected try {}: looking for controller: {}", i, controllerTarget);
+            OvsdbBridgeAugmentation bridge =
+                    southboundUtils.getBridge(connectionInfo, INTEGRATION_BRIDGE_NAME);
+            Assert.assertNotNull(bridge);
+            Assert.assertNotNull(bridge.getControllerEntry());
+            controllerEntry = bridge.getControllerEntry().iterator().next();
+            Assert.assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
+            if (controllerEntry.isIsConnected()) {
+                Assert.assertTrue("Controller is not connected", controllerEntry.isIsConnected());
+                connected = true;
+                break;
+            }
+            Thread.sleep(1000);
+        }
+        LOG.info("isControllerConnected exit: {} - {}", connected, controllerTarget);
+        return connected;
+    }
+
+    private long getOFPort(Node bridgeNode, String portName) {
+        long ofPort = 0L;
+        OvsdbTerminationPointAugmentation port =
+                southbound.extractTerminationPointAugmentation(bridgeNode, portName);
+        if (port != null) {
+            ofPort = southbound.getOFPort(port);
+        }
+        if (ofPort == 0L) {
+            for (int i = 0; i < 10; i++) {
+                LOG.info("Looking for ofPort {}, try: {}", portName, i);
+                TerminationPoint tp = southbound.readTerminationPoint(bridgeNode, null, portName);
+                if (tp != null) {
+                    port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                    if (port != null) {
+                        ofPort = southbound.getOFPort(port);
+                        LOG.info("found ofPort {} - {}, try: {}", portName, ofPort, i);
+                        break;
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    LOG.error("Interrupted while waiting for ofPort {}", portName, e);
+                }
+            }
+        }
+        return ofPort;
     }
 }

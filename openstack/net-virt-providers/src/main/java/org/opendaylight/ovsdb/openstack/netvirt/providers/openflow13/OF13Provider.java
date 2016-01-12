@@ -1259,6 +1259,11 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
         writeLLDPRule(dpid);
 
+        if (bridgeName.equals(configurationService.getIntegrationBridgeName()) &&
+                NetvirtProvidersProvider.getTableOffset() != 0) {
+            classifierProvider.programGotoTable(dpid,true);
+        }
+
         if (bridgeName.equals(configurationService.getExternalBridgeName())) {
             writeNormalRule(dpid);
         }
@@ -1286,7 +1291,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "NORMAL";
-        FlowUtils.initFlowBuilder(flowBuilder, flowName, (short)0).setPriority(0);
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable()).setPriority(0);
         MatchBuilder matchBuilder = new MatchBuilder();
         flowBuilder.setMatch(matchBuilder.build());
 

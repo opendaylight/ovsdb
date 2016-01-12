@@ -8,6 +8,12 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
@@ -53,11 +59,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-
 public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
     private List<ServiceRegistration<?>> registrations = new ArrayList<>();
@@ -70,6 +71,13 @@ public class ConfigActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         LOG.info("ConfigActivator start:");
+
+        NetvirtProvidersConfigImpl netvirtProvidersConfig =
+                new NetvirtProvidersConfigImpl(providerContext.getSALService(DataBroker.class),
+                        NetvirtProvidersProvider.getTableOffset());
+        registerService(context,
+                new String[] {NetvirtProvidersConfigImpl.class.getName()},
+                null, netvirtProvidersConfig);
 
         PipelineOrchestratorImpl pipelineOrchestrator = new PipelineOrchestratorImpl();
         registerService(context,
@@ -133,7 +141,7 @@ public class ConfigActivator implements BundleActivator {
                 gatewayMacResolverService, Service.GATEWAY_RESOLVER);
         getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
 
-
+        netvirtProvidersConfig.setDependencies(context, null);
         pipelineOrchestrator.setDependencies(context, null);
         outboundNatService.setDependencies(context, null);
         egressAclService.setDependencies(context, null);

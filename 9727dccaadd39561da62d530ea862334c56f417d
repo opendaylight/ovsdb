@@ -236,6 +236,24 @@
     },
     {
       "key": {
+        "uuid": "da33351e_b48391cb",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T15:25:34Z",
+      "side": 1,
+      "message": "If you use intelij, here sone info on what to do to make it stop doing * on your imports:\nhttp://stackoverflow.com/questions/3587071/disable-intellij-starred-package-imports",
+      "parentUuid": "da33351e_16c88a73",
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_83173551",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1

@@ -102,6 +102,7 @@ public class ConfigActivator implements BundleActivator {
     private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<>();
     private List<Pair<Object, ServiceRegistration>> servicesAndRegistrations = new ArrayList<>();
     private ProviderContext providerContext;
+    private boolean conntrackEnabled = false;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -169,7 +170,7 @@ public class ConfigActivator implements BundleActivator {
                 new Class[] {INeutronSecurityRuleAware.class, INeutronSecurityGroupAware.class},
                 AbstractEvent.HandlerType.NEUTRON_PORT_SECURITY, portSecurityHandler);
 
-        final SecurityServicesImpl securityServices = new SecurityServicesImpl();
+        final SecurityServicesImpl securityServices = new SecurityServicesImpl(conntrackEnabled);
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
@@ -326,5 +327,9 @@ public class ConfigActivator implements BundleActivator {
         }
         servicesAndRegistrations.add(Pair.of(impl, serviceRegistration));
         return serviceRegistration;
+    }
+
+    public void setConntrackEnabled(boolean conntrackEnabled) {
+        this.conntrackEnabled = conntrackEnabled;
     }
 }

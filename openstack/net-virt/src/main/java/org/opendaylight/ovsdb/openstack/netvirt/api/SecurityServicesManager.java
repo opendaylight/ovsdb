@@ -104,4 +104,9 @@ public interface SecurityServicesManager {
      * @param write whether to add/delete flow.
      */
     void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write);
+    /**
+     * Is connection tracking enabled or not by the user (default is false).
+     * @return whether connection tracking enabled.
+     */
+    boolean isConntrackEnabled();
 }

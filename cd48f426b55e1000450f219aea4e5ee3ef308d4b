@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_43e24dd6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "why short? trying to save memory?",
+      "range": {
+        "startLine": 44,
+        "startChar": 19,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_a3e7d9e3",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "tab",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 12
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_83ec55c9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "can tableOffset and getTable change to short as well?",
+      "range": {
+        "startLine": 103,
+        "startChar": 16,
+        "endLine": 103,
+        "endChar": 21
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_e3d0c1f9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "don\u0027t need the debugs? not even trace?",
+      "range": {
+        "startLine": 164,
+        "startChar": 12,
+        "endLine": 164,
+        "endChar": 25
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_e3f7218b",
+        "filename": "openstack/net-virt-providers/src/main/yang/netvirt-providers-config.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "is 255 the max table id we want to allow?\n\njava\u0027s short goes from 0 to 32767. Should this be an uint16\ninstead?",
+      "range": {
+        "startLine": 17,
+        "startChar": 17,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_c3f49d89",
+        "filename": "openstack/net-virt-providers/src/main/yang/netvirt-providers-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "uint16 ?",
+      "range": {
+        "startLine": 46,
+        "startChar": 21,
+        "endLine": 46,
+        "endChar": 26
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_632b11ec",
+        "filename": "openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "this does not seem related to table id offset.\nmake a different gerrit?",
+      "range": {
+        "startLine": 273,
+        "startChar": 16,
+        "endLine": 273,
+        "endChar": 20
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_43308d56",
+        "filename": "openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "this does not seem related to table id offset.\nmake a different gerrit?",
+      "range": {
+        "startLine": 291,
+        "startChar": 12,
+        "endLine": 291,
+        "endChar": 21
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_a3351948",
+        "filename": "openstack/net-virt-sfc/impl/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/sfc/workaround/NetvirtSfcWorkaroundOF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T00:42:57Z",
+      "side": 1,
+      "message": "this does not seem related to table id offset.\nmake a different gerrit?",
+      "range": {
+        "startLine": 404,
+        "startChar": 28,
+        "endLine": 404,
+        "endChar": 32
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

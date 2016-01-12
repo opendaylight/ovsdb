@@ -4,6 +4,8 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension-li/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-li/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.neutron/features-neutron/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.1-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
@@ -48,6 +50,26 @@
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}/xml/config</configfile>
   </feature>
+
+  <feature name="odl-ovsdb-openstack-clusteraware" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization - Cluster Aware"
+           version='${project.version}'>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model-li</feature>
+    <feature version="${neutron.version}">odl-neutron-service</feature>
+    <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services-li</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions-li</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.neutron/dummyprovider/{{VERSION}}</bundle>
+    <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}/xml/config</configfile>
+    <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}/xml/config</configfile>
+  </feature>
+
   <feature name="odl-ovsdb-ui" description="OpenDaylight :: OVSDB :: DLUX Integration Plugin" version='${project.version}'>
     <feature version="${dlux.version}">odl-dlux-core</feature>
     <bundle>mvn:org.opendaylight.ovsdb/ovsdb-ui-bundle/{{VERSION}}</bundle>

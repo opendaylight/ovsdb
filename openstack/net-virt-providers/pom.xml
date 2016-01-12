@@ -46,7 +46,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <liblldp.version>0.10.0-SNAPSHOT</liblldp.version>
     <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
-    <powermock.version>1.5.2</powermock.version>
+    <powermock.version>1.6.4</powermock.version>
     <sonar.jacoco.itReportPath>../net-virt-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
@@ -149,6 +149,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <version>1.10.19</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -219,6 +220,24 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             </property>
           </properties>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-instrument</id>
+            <goals>
+              <goal>instrument</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-restore-instrumented-classes</id>
+            <goals>
+              <goal>restore-instrumented-classes</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

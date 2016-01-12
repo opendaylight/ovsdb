@@ -473,6 +473,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
+    @Ignore
     @Test
     public void testNetVirtFixedSG() throws InterruptedException {
         final Version minSGOvsVersion = Version.fromString("1.10.2");

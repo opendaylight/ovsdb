@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "da33351e_1446bdbf",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T15:20:55Z",
+      "side": 1,
+      "message": "ack. in that case, it should be okay.",
+      "parentUuid": "da33351e_79baa2e2",
+      "range": {
+        "startLine": 44,
+        "startChar": 19,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_a3e7d9e3",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
         "patchSetId": 1
@@ -143,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "da33351e_b40c3196",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T15:20:55Z",
+      "side": 1,
+      "message": "ok, np.",
+      "parentUuid": "da33351e_39adba89",
+      "range": {
+        "startLine": 103,
+        "startChar": 16,
+        "endLine": 103,
+        "endChar": 21
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_e3d0c1f9",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
         "patchSetId": 1
@@ -178,6 +226,30 @@
       "side": 1,
       "message": "We used to only have the first debug and then the result debug. I added the extra debugs when we were having mdsal issues. I don\u0027t see those anymore so I removed the logs.",
       "parentUuid": "da33351e_e3d0c1f9",
+      "range": {
+        "startLine": 164,
+        "startChar": 12,
+        "endLine": 164,
+        "endChar": 25
+      },
+      "revId": "cd48f426b55e1000450f219aea4e5ee3ef308d4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_94112daf",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-12T15:20:55Z",
+      "side": 1,
+      "message": "ack. that is fine, even more by hearing that the issues are gone! ;)",
+      "parentUuid": "da33351e_79b622de",
       "range": {
         "startLine": 164,
         "startChar": 12,

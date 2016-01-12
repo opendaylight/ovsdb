@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "da33351e_1e17fcee",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-12T05:47:42Z",
+      "side": 1,
+      "message": "I added a comment since so far it\u0027s really just used once and the zero doesn\u0027t really have a meaning. The RFC says that the code needs to be zero for echo requests but it doesn\u0027t indicate or mean anything...so in fact, while the 8 could theoretically be ECHO_REQUEST, the zero is just 0.",
+      "parentUuid": "da33351e_c3081d30",
+      "range": {
+        "startLine": 90,
+        "startChar": 68,
+        "endLine": 90,
+        "endChar": 69
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_23062921",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
         "patchSetId": 1
@@ -106,6 +130,30 @@
       "writtenOn": "2016-01-12T02:51:43Z",
       "side": 1,
       "message": "0 (echo_reply)",
+      "range": {
+        "startLine": 118,
+        "startChar": 32,
+        "endLine": 118,
+        "endChar": 33
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_9e2b0c30",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-12T05:47:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da33351e_23062921",
       "range": {
         "startLine": 118,
         "startChar": 32,
@@ -234,6 +282,30 @@
     },
     {
       "key": {
+        "uuid": "da33351e_5e3184a1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1245,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-12T05:47:42Z",
+      "side": 1,
+      "message": "Thanks ;-)",
+      "parentUuid": "da33351e_232f49a3",
+      "range": {
+        "startLine": 1245,
+        "startChar": 47,
+        "endLine": 1245,
+        "endChar": 55
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_032cc5aa",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1
@@ -245,6 +317,30 @@
       "writtenOn": "2016-01-12T02:51:43Z",
       "side": 1,
       "message": "since you are here, can you please remove \" is already done\" from the log log message?",
+      "range": {
+        "startLine": 1246,
+        "startChar": 105,
+        "endLine": 1246,
+        "endChar": 121
+      },
+      "revId": "9727dccaadd39561da62d530ea862334c56f417d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_be26d066",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-12T05:47:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da33351e_032cc5aa",
       "range": {
         "startLine": 1246,
         "startChar": 105,

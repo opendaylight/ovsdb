@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da33351e_8340d557",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-12T02:42:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da33351e_434fed92",
+      "range": {
+        "startLine": 379,
+        "startChar": 37,
+        "endLine": 379,
+        "endChar": 41
+      },
+      "revId": "c1ed09e3b5428b79264e07810649180e4f9b7945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da33351e_8349f58d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "dang!! :), let me fix it.",
       "parentUuid": "da33351e_8349f58d",
+      "range": {
+        "startLine": 391,
+        "startChar": 27,
+        "endLine": 391,
+        "endChar": 34
+      },
+      "revId": "c1ed09e3b5428b79264e07810649180e4f9b7945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_e32441c8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-12T02:42:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da33351e_0355e51c",
       "range": {
         "startLine": 391,
         "startChar": 27,

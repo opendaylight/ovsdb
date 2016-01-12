@@ -68,6 +68,30 @@
       "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_59651e44",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-01-12T12:54:50Z",
+      "side": 1,
+      "message": "Sure @Flavio. Thanks for reviewing. \nI\u0027ll remove it in the next patch.",
+      "parentUuid": "da33351e_993a0635",
+      "range": {
+        "startLine": 237,
+        "startChar": 28,
+        "endLine": 237,
+        "endChar": 33
+      },
+      "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

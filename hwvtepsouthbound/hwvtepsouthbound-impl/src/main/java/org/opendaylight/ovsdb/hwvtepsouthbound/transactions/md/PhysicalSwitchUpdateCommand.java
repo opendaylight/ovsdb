@@ -51,6 +51,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdParamsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdStatusBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
@@ -140,6 +142,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
                 setBfdLocalConfigs(tBuilder, tunnel);
                 setBfdRemoteConfigs(tBuilder, tunnel);
                 setBfdParams(tBuilder, tunnel);
+                setBfdStatus(tBuilder, tunnel);
 
                 if (tunnel.getRemoteColumn().getData() != null) {
                     PhysicalLocator pLoc = updatedPLocRows.get(tunnel.getRemoteColumn().getData());
@@ -210,6 +213,25 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             tBuilder.setBfdParams(paramsList);
+        }
+    }
+
+    private void setBfdStatus(TunnelsBuilder tBuilder, Tunnel tunnel) {
+        Map<String, String> status = tunnel.getBfdStatusColumn().getData();
+        if(status != null && !status.isEmpty()) {
+            Set<String> paramKeys = status.keySet();
+            List<BfdStatus> statusList = new ArrayList<>();
+            String paramValue = null;
+            for(String paramKey: paramKeys) {
+                paramValue = status.get(paramKey);
+                if(paramValue != null && paramKey != null) {
+                    statusList.add(new BfdStatusBuilder()
+                        .setBfdStatusKey(paramKey)
+                        .setBfdStatusValue(paramValue)
+                        .build());
+                }
+            }
+            tBuilder.setBfdStatus(statusList);
         }
     }
 

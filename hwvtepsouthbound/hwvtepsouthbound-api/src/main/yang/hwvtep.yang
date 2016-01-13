@@ -132,6 +132,20 @@ module hwvtep {
                 type string;
             }
         }
+        list bfd-status {
+            description "runtime status of BFD on this tunnel";
+
+            config false;
+            key "bfd-status-key";
+            leaf bfd-status-key {
+                description "bfd-status name/key";
+                type string;
+            }
+            leaf bfd-status-value {
+                description "bfd-status value";
+                type string;
+            }
+        }
     }
 
     grouping hwvtep-physical-switch-attributes {

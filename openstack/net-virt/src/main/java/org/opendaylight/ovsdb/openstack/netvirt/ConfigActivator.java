@@ -36,6 +36,7 @@ public class ConfigActivator implements BundleActivator {
     private ServiceTracker gatewayMacResolverProviderTracker;
     private ServiceTracker ingressAclProviderTracker;
     private ServiceTracker egressAclProviderTracker;
+    private ServiceTracker icmpEchoProviderTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -467,6 +468,22 @@ public class ConfigActivator implements BundleActivator {
         };
         egressAclProviderTracker.open();
         this.egressAclProviderTracker = egressAclProviderTracker;
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker icmpEchoResponderServiceTracker = new ServiceTracker(context,
+                IcmpEchoProvider.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService IcmpEchoProvider");
+                IcmpEchoProvider service = (IcmpEchoProvider) context.getService(reference);
+                if(service != null) {
+                    neutronL3Adapter.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        icmpEchoResponderServiceTracker.open();
+        this.icmpEchoProviderTracker = icmpEchoResponderServiceTracker;
 
     }
 

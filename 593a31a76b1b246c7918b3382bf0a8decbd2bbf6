@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_72091895",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-13T02:02:25Z",
+      "side": 1,
+      "message": "The method pulls from the node itself rather than reading from mdsal as an optimization. This change would undo that. Did you find another case where the cached node is not sufficient?",
+      "revId": "593a31a76b1b246c7918b3382bf0a8decbd2bbf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

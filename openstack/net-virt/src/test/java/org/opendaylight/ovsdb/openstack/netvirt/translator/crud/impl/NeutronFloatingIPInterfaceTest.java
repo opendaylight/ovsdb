@@ -16,16 +16,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,15 +37,12 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.floatingips.attributes.Floatingips;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.floatingips.attributes.floatingips.Floatingip;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.floatingips.attributes.floatingips.FloatingipBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * Unit test for {@link NeutronFloatingIPInterface}
@@ -311,27 +304,5 @@ public class NeutronFloatingIPInterfaceTest {
         assertEquals("Tenant Id mismatch", UUID_VALUE, neutronFloatingIPReceived.getTenantUUID());
         assertEquals("Router Id mismatch", UUID_VALUE, neutronFloatingIPReceived.getRouterUUID());
         assertEquals("Status mismatch", STATUS, neutronFloatingIPReceived.getStatus());
-    }
-
-    /**
-     * Test that checks if @{NeutronFloatingIPInterface#registerNewInterface} is called
-     * and then checks that it register service or not.
-     */
-    @Ignore
-    @Test
-    public void testRegisterNewInterface() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        BundleContext bundleContext = mock(BundleContext.class);
-        ServiceRegistration serviceRegistration = mock(ServiceRegistration.class);
-        mockStatic(NeutronFloatingIPInterface.class);
-        List<ServiceRegistration<?>> serviceRegistrationList = new ArrayList<>();
-        serviceRegistrationList.add(serviceRegistration);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = spy(new NeutronFloatingIPInterface(providerContext));
-        when(bundleContext.registerService(INeutronFloatingIPCRUD.class, neutronFloatingIPInterface, null)).thenReturn(serviceRegistration);
-        NeutronFloatingIPInterface.registerNewInterface(bundleContext, providerContext, serviceRegistrationList);
-        verifyStatic();
-        NeutronFloatingIPInterface.registerNewInterface(any(BundleContext.class), any(ProviderContext.class), any(List.class));
     }
 }

@@ -22,6 +22,30 @@
       "revId": "b44a82f4b9378db48783698aa602de1b7ec1d021",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_8379ecfe",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-01-13T13:54:27Z",
+      "side": 1,
+      "message": "This will show up in operational data store. I felt it would look less cluttered if it doesn\u0027t show up at all instead of showing up as empty list. Code wise won\u0027t make any difference either way to anyone who is listening for these updates.",
+      "parentUuid": "da33351e_03ce7c83",
+      "range": {
+        "startLine": 221,
+        "startChar": 29,
+        "endLine": 221,
+        "endChar": 46
+      },
+      "revId": "b44a82f4b9378db48783698aa602de1b7ec1d021",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

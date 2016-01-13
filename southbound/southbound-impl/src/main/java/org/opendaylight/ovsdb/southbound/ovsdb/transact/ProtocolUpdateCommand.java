@@ -45,7 +45,7 @@ public class ProtocolUpdateCommand extends AbstractTransactCommand {
                         entry.getKey().firstIdentifierOf(OvsdbBridgeAugmentation.class);
                 Optional<OvsdbBridgeAugmentation> bridgeOptional =
                         getOperationalState().getOvsdbBridgeAugmentation(bridgeIid);
-                OvsdbBridgeAugmentation ovsdbBridge = null;
+                OvsdbBridgeAugmentation ovsdbBridge;
                 if (bridgeOptional.isPresent()) {
                     ovsdbBridge = bridgeOptional.get();
                 } else {
@@ -66,7 +66,8 @@ public class ProtocolUpdateCommand extends AbstractTransactCommand {
                                 .where(bridge.getNameColumn().getSchema().opEqual(bridge.getNameColumn().getData()))
                                 .build());
                         } catch (SchemaVersionMismatchException e) {
-                            LOG.warn("protocol not supported by this version of ovsdb", e);
+                            // We don't care about the exception stack trace here
+                            LOG.warn("protocol not supported by this version of ovsdb: {}", e.getMessage());
                         }
                     }
                 }

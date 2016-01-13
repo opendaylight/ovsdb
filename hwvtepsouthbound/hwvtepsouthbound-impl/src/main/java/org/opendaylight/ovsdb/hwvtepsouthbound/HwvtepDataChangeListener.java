@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
+public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
 
     private ListenerRegistration<HwvtepDataChangeListener> registration;
     private HwvtepConnectionManager hcm;

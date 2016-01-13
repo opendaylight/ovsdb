@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_03ce7c83",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-13T13:26:33Z",
+      "side": 1,
+      "message": "if status is empty, you would end up with an empty list in builder instead of not setting bfd status... isn\u0027t that better?\n\nmy wonder is whether \"!status.isEmpty()\" is really wanted here.",
+      "range": {
+        "startLine": 221,
+        "startChar": 29,
+        "endLine": 221,
+        "endChar": 46
+      },
+      "revId": "b44a82f4b9378db48783698aa602de1b7ec1d021",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

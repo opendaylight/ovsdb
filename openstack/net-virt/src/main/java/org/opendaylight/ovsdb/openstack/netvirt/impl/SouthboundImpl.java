@@ -16,11 +16,11 @@ import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.openstack.netvirt.ClusterAwareMdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
@@ -65,7 +65,7 @@ public class SouthboundImpl implements Southbound {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundImpl.class);
     private final DataBroker databroker;
     private static final String PATCH_PORT_TYPE = "patch";
-    private final ClusterAwareMdsalUtils mdsalUtils;
+    private final MdsalUtils mdsalUtils;
 
     /**
      * Class constructor setting the data broker.
@@ -74,7 +74,7 @@ public class SouthboundImpl implements Southbound {
      */
     public SouthboundImpl(DataBroker dataBroker) {
         this.databroker = dataBroker;
-        mdsalUtils = new ClusterAwareMdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
     }
 
     public DataBroker getDatabroker() {

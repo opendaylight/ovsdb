@@ -187,6 +187,30 @@
       "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_885c7627",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-01-14T22:19:20Z",
+      "side": 1,
+      "message": "@Aswin, I verified the behavior in Neutron and it seems to work fine.\nBasically for IPv6 SG rules it only considers the IPv6 addresses from the remote VM. \nObservations: http://paste.openstack.org/show/483938/\n\nSo if isIpv6 is true then dstAddress should also be an IPv6 address.",
+      "parentUuid": "9a3d3df0_ffc33f36",
+      "range": {
+        "startLine": 313,
+        "startChar": 16,
+        "endLine": 313,
+        "endChar": 22
+      },
+      "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -139,6 +139,30 @@
       "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ffacdf8e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-01-14T07:41:19Z",
+      "side": 1,
+      "message": "Here the dstAddress is the ipaddress of a remote vm from which we allow traffic to this vm. It is used when we configure remote_group_id. So when we get the ipaddress of other vm from the port object, I just had a thought whether it could be a ipv4 address.",
+      "parentUuid": "9a3d3df0_7f58cffa",
+      "range": {
+        "startLine": 313,
+        "startChar": 16,
+        "endLine": 313,
+        "endChar": 22
+      },
+      "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

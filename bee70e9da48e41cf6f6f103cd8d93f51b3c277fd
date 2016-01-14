@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_452c1e4b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/ConfigActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-14T12:12:32Z",
+      "side": 1,
+      "message": "nitpick: remove space",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 12
+      },
+      "revId": "bee70e9da48e41cf6f6f103cd8d93f51b3c277fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

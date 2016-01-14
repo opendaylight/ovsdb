@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,6 +7,7 @@
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -15,11 +16,13 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
@@ -29,20 +32,14 @@ import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
+        .Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.google.common.collect.Maps;
 
 /**
  * Unit test for {@link NodeCacheManagerImpl}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class NodeCacheManagerImplTest {
 
     @InjectMocks private NodeCacheManagerImpl nodeCacheManagerImpl;
@@ -119,9 +116,8 @@ public class NodeCacheManagerImplTest {
         Southbound southbound = mock(Southbound.class);
         EventDispatcher eventDispatcher = mock(EventDispatcher.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, nodeCacheManagerImpl)).thenReturn(southbound);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, nodeCacheManagerImpl)).thenReturn(eventDispatcher);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
+        ServiceHelper.overrideGlobalInstance(EventDispatcher.class, eventDispatcher);
 
         nodeCacheManagerImpl.setDependencies(mock(ServiceReference.class));
 

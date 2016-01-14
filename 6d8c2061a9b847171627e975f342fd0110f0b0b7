@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba3841fe_63b95ce9",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-14T02:20:05Z",
+      "side": 1,
+      "message": "whitespace nitpicks",
+      "revId": "6d8c2061a9b847171627e975f342fd0110f0b0b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba3841fe_a3ca446c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosRemovedCommand.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-14T02:20:05Z",
+      "side": 1,
+      "message": "why not keep this log?",
+      "range": {
+        "startLine": 93,
+        "startChar": 2,
+        "endLine": 93,
+        "endChar": 14
+      },
+      "revId": "6d8c2061a9b847171627e975f342fd0110f0b0b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba3841fe_03c85073",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-14T02:20:05Z",
+      "side": 1,
+      "message": "nitpick",
+      "revId": "6d8c2061a9b847171627e975f342fd0110f0b0b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba3841fe_e3c44c61",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbQosRemovedCommand.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-14T02:20:05Z",
+      "side": 1,
+      "message": "nitpicks",
+      "revId": "6d8c2061a9b847171627e975f342fd0110f0b0b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

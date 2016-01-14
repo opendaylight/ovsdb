@@ -163,6 +163,30 @@
       "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ffc33f36",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-01-14T07:55:48Z",
+      "side": 1,
+      "message": "aah ok. IMO if the SecurityGroup rule is for IPv6, we probably should consider only IPv6 addresses from the remote VM. Any thoughts?\n\nI\u0027ll check the behaviour in Neutron and will update you. Clearly ip6tables does not allow us to add a rule with IPv4 addresses, so it would be interesting to see if Neutron is handling this use-case properly or if there is any exception.",
+      "parentUuid": "9a3d3df0_ffacdf8e",
+      "range": {
+        "startLine": 313,
+        "startChar": 16,
+        "endLine": 313,
+        "endChar": 22
+      },
+      "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

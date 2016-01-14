@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014 Intel Corp. and others.  All rights reserved.
+* Copyright (c) 2014, 2016 Intel Corp. and others.  All rights reserved.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -33,23 +34,21 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105
+        .OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
+        .Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Test class for BridgeConfigurationManagerImpl
@@ -58,8 +57,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Alexis de Talhouet
  * @author Sam Hague (shague@redhat.com)
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceHelper.class, ConfigProperties.class})
+@RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigurationManagerImplTest {
     @Mock private Node node;
     @Mock private OvsdbBridgeAugmentation bridge;
@@ -120,7 +118,7 @@ public class BridgeConfigurationManagerImplTest {
                 .thenReturn(bridge);
 
         BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
-                PowerMockito.spy(new BridgeConfigurationManagerImpl());
+                spy(new BridgeConfigurationManagerImpl());
         doReturn(false).when(bridgeConfigurationManagerImplSpy).isNodeNeutronReady(any(Node.class));
         bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
         bridgeConfigurationManagerImplSpy.setSouthbound(southbound);
@@ -192,7 +190,7 @@ public class BridgeConfigurationManagerImplTest {
                 bridgeConfigurationManagerImpl.isNodeVlanReady(node, node, neutronNetwork));
 
         BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
-                PowerMockito.spy(new BridgeConfigurationManagerImpl());
+                spy(new BridgeConfigurationManagerImpl());
         doReturn(ETH1).when(bridgeConfigurationManagerImplSpy).getPhysicalInterfaceName(any(Node.class), anyString());
         bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
         bridgeConfigurationManagerImplSpy.setSouthbound(southbound);
@@ -221,13 +219,15 @@ public class BridgeConfigurationManagerImplTest {
         when(configurationService.getIntegrationBridgeName()).thenReturn(BR_INT);
         when(southbound.isBridgeOnOvsdbNode(any(Node.class), anyString())).thenReturn(false);
 
-        PowerMockito.mockStatic(ConfigProperties.class);
-        when(ConfigProperties.getProperty(any(Class.class), anyString())).thenReturn(ADDRESS);
+        // TODO Figure out the strings
+        //when(ConfigProperties.getProperty(any(Class.class), anyString())).thenReturn(ADDRESS);
 
         when(southbound.addBridge(any(Node.class), anyString(), anyList(), eq(DatapathTypeSystem.class))).thenReturn(true);
         when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
 
         bridgeConfigurationManagerImpl.prepareNode(node);
+
+        // TODO This test doesn't verify anything
     }
 
     @Test
@@ -235,7 +235,7 @@ public class BridgeConfigurationManagerImplTest {
         NeutronNetwork neutronNetworkMock = mock(NeutronNetwork.class, RETURNS_MOCKS);
         String networkTypes[] = {"vlan", "vxlan", "gre"};
         BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
-                PowerMockito.spy(new BridgeConfigurationManagerImpl());
+                spy(new BridgeConfigurationManagerImpl());
         bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
         bridgeConfigurationManagerImplSpy.setSouthbound(southbound);
 
@@ -339,10 +339,9 @@ public class BridgeConfigurationManagerImplTest {
         NetworkingProviderManager networkingProviderManager = mock(NetworkingProviderManager.class);
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(ConfigurationService.class, bridgeConfigurationManagerImpl)).thenReturn(configurationService);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, bridgeConfigurationManagerImpl)).thenReturn(networkingProviderManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, bridgeConfigurationManagerImpl)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(ConfigurationService.class, configurationService);
+        ServiceHelper.overrideGlobalInstance(NetworkingProviderManager.class, networkingProviderManager);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         bridgeConfigurationManagerImpl.setDependencies(mock(ServiceReference.class));
 

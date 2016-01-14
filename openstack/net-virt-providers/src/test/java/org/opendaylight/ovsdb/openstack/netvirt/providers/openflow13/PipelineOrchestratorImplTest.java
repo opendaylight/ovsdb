@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe Technologies.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe Technologies.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,20 +21,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link PipelineOrchestratorImplTest}
  */
-@PrepareForTest(ServiceHelper.class)
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PipelineOrchestratorImplTest {
     @InjectMocks private PipelineOrchestratorImpl orchestrator;
 
@@ -122,9 +119,8 @@ public class PipelineOrchestratorImplTest {
       NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
       Southbound southbound = mock(Southbound.class);
 
-      PowerMockito.mockStatic(ServiceHelper.class);
-      PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, orchestrator)).thenReturn(nodeCacheManager);
-      PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, orchestrator)).thenReturn(southbound);
+      ServiceHelper.overrideGlobalInstance(NodeCacheManager.class, nodeCacheManager);
+      ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
       orchestrator.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
 

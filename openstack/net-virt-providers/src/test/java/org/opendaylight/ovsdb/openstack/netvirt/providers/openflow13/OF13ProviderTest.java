@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe Technologies.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe Technologies.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -488,17 +488,16 @@ public class OF13ProviderTest {
         SecurityServicesManager securityServicesManager = mock(SecurityServicesManager.class);
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(ConfigurationService.class, of13Provider)).thenReturn(configurationService);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(TenantNetworkManager.class, of13Provider)).thenReturn(tenantNetworkManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, of13Provider)).thenReturn(bridgeConfigurationManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, of13Provider)).thenReturn(nodeCacheManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(ClassifierProvider.class, of13Provider)).thenReturn(classifierProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(IngressAclProvider.class, of13Provider)).thenReturn(ingressAclProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(EgressAclProvider.class, of13Provider)).thenReturn(egressAclProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(L2ForwardingProvider.class, of13Provider)).thenReturn(l2ForwardingProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(SecurityServicesManager.class, of13Provider)).thenReturn(securityServicesManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, of13Provider)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(ConfigurationService.class, configurationService);
+        ServiceHelper.overrideGlobalInstance(TenantNetworkManager.class, tenantNetworkManager);
+        ServiceHelper.overrideGlobalInstance(BridgeConfigurationManager.class, bridgeConfigurationManager);
+        ServiceHelper.overrideGlobalInstance(NodeCacheManager.class, nodeCacheManager);
+        ServiceHelper.overrideGlobalInstance(ClassifierProvider.class, classifierProvider);
+        ServiceHelper.overrideGlobalInstance(IngressAclProvider.class, ingressAclProvider);
+        ServiceHelper.overrideGlobalInstance(EgressAclProvider.class, egressAclProvider);
+        ServiceHelper.overrideGlobalInstance(L2ForwardingProvider.class, l2ForwardingProvider);
+        ServiceHelper.overrideGlobalInstance(SecurityServicesManager.class, securityServicesManager);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         of13Provider.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Hewlett-Packard Enterprise and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Hewlett-Packard Enterprise and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
@@ -29,15 +30,11 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSecurityGroupCRUD;
-import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test fort {@link SecurityGroupCacheManagerImpl}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SecurityGroupCacheManagerImplTest {
 
     @InjectMocks private SecurityGroupCacheManagerImpl securityGroupCacheManagerImpl;

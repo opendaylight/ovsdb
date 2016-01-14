@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,27 +26,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105
+        .OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
+        .Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link TenantNetworkManagerImpl}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class TenantNetworkManagerImplTest {
 
     @InjectMocks private TenantNetworkManagerImpl tenantNetworkManagerImpl;
@@ -74,7 +72,7 @@ public class TenantNetworkManagerImplTest {
     }
 
     /**
-     * Test method {@link TenantNetworkManagerImpl#reclaimInternalVlan(Node, String, NeutronNetwork)}
+     * Test method {@link TenantNetworkManagerImpl#reclaimInternalVlan(Node, NeutronNetwork)}
      */
     @Test
     public void testReclaimInternalVlan() {
@@ -87,7 +85,7 @@ public class TenantNetworkManagerImplTest {
     }
 
     /**
-     * Test method {@link TenantNetworkManagerImpl#programInternalVlan(Node, String, NeutronNetwork)}
+     * Test method {@link TenantNetworkManagerImpl#programInternalVlan(Node, OvsdbTerminationPointAugmentation, NeutronNetwork)}
      */
     @Test
     public void testProgramInternalVlan(){
@@ -141,7 +139,7 @@ public class TenantNetworkManagerImplTest {
     }
 
     /**
-     * Test method {@link TenantNetworkManagerImpl#getTenantNetwork(Interface)}
+     * Test method {@link TenantNetworkManagerImpl#getTenantNetwork(OvsdbTerminationPointAugmentation)}
      */
     @Test
     public void testGetTenantNetwork() {
@@ -174,9 +172,8 @@ public class TenantNetworkManagerImplTest {
         VlanConfigurationCache vlanConfigurationCache = mock(VlanConfigurationCache.class);
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(VlanConfigurationCache.class, tenantNetworkManagerImpl)).thenReturn(vlanConfigurationCache);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, tenantNetworkManagerImpl)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(VlanConfigurationCache.class, vlanConfigurationCache);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         tenantNetworkManagerImpl.setDependencies(mock(ServiceReference.class));
 

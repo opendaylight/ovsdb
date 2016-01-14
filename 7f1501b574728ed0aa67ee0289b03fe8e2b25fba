@@ -115,6 +115,30 @@
       "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7f58cffa",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-01-14T06:57:33Z",
+      "side": 1,
+      "message": "AFAIU we cannot create a security group providing conflicting values for ethertype and IP addresses. Just cross checked please see - http://paste.openstack.org/show/483847/\n\nAm i missing something?\n\nThanks Aswin for reviewing.",
+      "parentUuid": "9a3d3df0_df475b4a",
+      "range": {
+        "startLine": 313,
+        "startChar": 16,
+        "endLine": 313,
+        "endChar": 22
+      },
+      "revId": "7f1501b574728ed0aa67ee0289b03fe8e2b25fba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

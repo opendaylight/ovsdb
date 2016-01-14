@@ -46,7 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -56,7 +55,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link AbstractServiceInstance}
  */
-//@PrepareForTest(ServiceHelper.class)
 @RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")
 public class AbstractServiceInstanceTest {
@@ -246,18 +244,17 @@ public class AbstractServiceInstanceTest {
         verify(abstractServiceInstance, times(1)).writeFlow(any(FlowBuilder.class), any(NodeBuilder.class));
     }
 
-//    @Test TODO - re-activate test
+    @Test
     public void testSetDependencies() throws Exception {
         PipelineOrchestrator pipelineOrchestrator = mock(PipelineOrchestrator.class);
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, abstractServiceInstance)).thenReturn(pipelineOrchestrator);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, abstractServiceInstance)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(PipelineOrchestrator.class, pipelineOrchestrator);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         abstractServiceInstance.setDependencies(mock(ServiceReference.class), mock(AbstractServiceInstance.class));
 
-        assertEquals("Error, did not return the correct object", getField("pipelineOrchestrator"), pipelineOrchestrator);
+        assertEquals("Error, did not return the correct object", getField("orchestrator"), pipelineOrchestrator);
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
     }
 

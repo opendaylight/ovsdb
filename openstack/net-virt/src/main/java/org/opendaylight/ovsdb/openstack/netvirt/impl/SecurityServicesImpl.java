@@ -45,6 +45,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     private volatile ConfigurationService configurationService;
     private volatile IngressAclProvider ingressAclProvider;
     private volatile EgressAclProvider egressAclProvider;
+    private volatile NeutronL3Adapter neutronL3Adapter;
     private boolean isConntrackEnabled = false;
 
     public SecurityServicesImpl() {
@@ -113,21 +114,34 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     @Override
     public NeutronPort getDhcpServerPort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
-            LOG.error("getDHCPServerPort: neutron port is null");
-            return null;
+            LOG.warn("getDHCPServerPort: neutron port cache is null");
         }
         LOG.trace("getDHCPServerPort for {}",
                   terminationPointAugmentation.getName());
+        NeutronPort neutronPort = null;
         try {
             String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                                                                            Constants.EXTERNAL_ID_INTERFACE_ID);
             if (neutronPortId == null) {
                 return null;
             }
-            NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
-            if (neutronPort == null) {
-                LOG.error("getDHCPServerPort: neutron port of {} is not found", neutronPortId);
-                return null;
+            if (null != neutronPortCache) {
+                neutronPort = neutronPortCache.getPort(neutronPortId);
+
+            }
+            if (neutronPort == null ){
+                neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
+                if (neutronPort == null)
+                {
+                    LOG.info("getDHCPServerPort: neutron port of {} is not found", neutronPortId);
+                    return null;
+                }
+                LOG.info("getDHCPServerPort: neutron port of {} got from cleanupcache", neutronPortId);
+
+            }
+            /* if the current port is a DHCP port, return the same*/
+            if (neutronPort.getDeviceOwner().contains("dhcp")) {
+                return neutronPort;
             }
             /* if the current port is a DHCP port, return the same*/
             if (neutronPort.getDeviceOwner().contains("dhcp")) {
@@ -186,20 +200,61 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         return null;
     }
 
+
+    @Override
+    public NeutronPort getNeutronPortFromCache(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        NeutronPort neutronPort = null;
+        LOG.trace("getNeutronPortFromCache for {}",
+                terminationPointAugmentation.getName());
+        try {
+            String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                    Constants.EXTERNAL_ID_INTERFACE_ID);
+            if (neutronPortId == null) {
+                return null;
+            }
+            if (null != neutronPortCache) {
+                neutronPort = neutronPortCache.getPort(neutronPortId);
+
+            }
+            if (neutronPort == null ){
+                LOG.trace("getNeutronPortFromCache: neutron port of {} search in cleanupcache", neutronPortId);
+
+                neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
+                if (neutronPort == null)
+                {
+                    LOG.info("getNeutronPortFromCache: neutron port of {} is not found", neutronPortId);
+                    return null;
+                }
+                LOG.trace("getNeutronPortFromCache: neutron port of {} got from cleanupcache", neutronPortId);
+
+            }
+        }catch (Exception e) {
+            LOG.warn("getNeutronPortFromCache:getNeutronPortFromCache failed due to ", e);
+            return null;
+        }
+        return neutronPort;
+    }
+
+
+
     @Override
     public boolean isComputePort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
-            LOG.error("neutron port is null");
-            return false;
+           LOG.warn("isComputePort : neutronPortCache is null");
         }
+        NeutronPort neutronPort = null;
         LOG.trace("isComputePort for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                                                                        Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return false;
         }
-        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPortCache != null) {
+            neutronPort = neutronPortCache.getPort(neutronPortId);
+        }
         if (neutronPort == null) {
+            neutronPort = getNeutronPortFromCache(terminationPointAugmentation);
+            if (neutronPort == null)
             return false;
         }
         /*Check the device owner and if it contains compute to identify
@@ -216,9 +271,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     @Override
     public boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
-            LOG.error("isLastPortinSubnet: neutron port is null");
-            return false;
+            LOG.error("isLastPortinSubnet: neutronPortCache is null");
         }
+        NeutronPort neutronPort = null;
         try {
             LOG.trace("isLastPortinSubnet: for {}", terminationPointAugmentation.getName());
             String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
@@ -226,10 +281,15 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             if (neutronPortId == null) {
                 return false;
             }
-            NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+            if (neutronPortCache != null) {
+                neutronPort = neutronPortCache.getPort(neutronPortId);
+            }
             if (neutronPort == null) {
-                LOG.error("isLastPortinSubnet: neutron port of {} is not found", neutronPortId);
-                return false;
+                neutronPort = getNeutronPortFromCache(terminationPointAugmentation);
+                if (neutronPort == null) {
+                    LOG.error("isLastPortinSubnet: neutron port of {} is not found", neutronPortId);
+                    return false;
+                }
             }
             List<Neutron_IPs> neutronPortFixedIp = neutronPort.getFixedIPs();
             if (null == neutronPortFixedIp || neutronPortFixedIp.isEmpty()) {
@@ -297,16 +357,21 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     @Override
     public List<Neutron_IPs> getIpAddressList(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
-            LOG.error("getIpAddress: neutron port is null");
-            return null;
+            LOG.warn("getIpAddress: neutronPortCache is null");
         }
+        NeutronPort neutronPort = null;
         LOG.trace("getIpAddress: for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                                                                        Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return null;
         }
-        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPortCache != null) {
+            neutronPort = neutronPortCache.getPort(neutronPortId);
+        }
+        if (neutronPort == null) {
+            neutronPort = getNeutronPortFromCache(terminationPointAugmentation);
+        }
         if (neutronPort == null) {
             LOG.error("getIpAddress: neutron port of {} is not found", neutronPortId);
             return null;
@@ -498,6 +563,8 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
     @Override
     public void setDependencies(ServiceReference serviceReference) {
+        neutronL3Adapter =
+                (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         neutronNetworkCache =

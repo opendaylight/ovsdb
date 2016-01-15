@@ -67,9 +67,11 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Neutron L3 Adapter implements a hub-like adapter for the various Neutron events. Based on
@@ -133,6 +135,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     private Boolean enabled = false;
     private Boolean flgDistributedARPEnabled = true;
     private Boolean isCachePopulationDone = false;
+    private Set<NeutronPort> portCleanupCache;
 
     private Southbound southbound;
     private NeutronModelsDataStoreHelper neutronModelsDataStoreHelper;
@@ -174,6 +177,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         } else {
             LOG.debug("OVSDB L3 forwarding is disabled");
         }
+        this.portCleanupCache = new HashSet<>();
     }
 
     //
@@ -420,10 +424,15 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOG.debug("Neutron port {} event : {}", action, neutronPort.toString());
 
+        if (action == Action.UPDATE) {
+            // FIXME: Bug 4971 Move cleanup cache to SG Impl
+            this.updatePortInCleanupCache(neutronPort, neutronPort.getOriginalPort());
+            this.processSecurityGroupUpdate(neutronPort);
+        }
+
         if (!this.enabled) {
             return;
         }
-        this.processSecurityGroupUpdate(neutronPort);
 
         final boolean isDelete = action == Action.DELETE;
 
@@ -769,11 +778,17 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                                      final NeutronNetwork neutronNetwork, Action action) {
         LOG.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, bridgeNode.getNodeId().getValue(), intf.getName(), neutronNetwork);
+
+        final NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
+        if (action != Action.DELETE && neutronPort != null) {
+            // FIXME: Bug 4971 Move cleanup cache to SG Impl
+            storePortInCleanupCache(neutronPort);
+        }
+
         if (!this.enabled) {
             return;
         }
 
-        final NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
         final Long dpId = getDpidForIntegrationBridge(bridgeNode);
         final Uuid interfaceUuid = intf.getInterfaceUuid();
 
@@ -1521,6 +1536,33 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         }else{
             LOG.warn("Neutron network not found for router interface {}", gatewayPort);
         }
+    }
+
+
+    private void storePortInCleanupCache(NeutronPort port) {
+        this.portCleanupCache.add(port);
+    }
+
+
+    private void updatePortInCleanupCache(NeutronPort updatedPort,NeutronPort originalPort) {
+        removePortFromCleanupCache(originalPort);
+        storePortInCleanupCache(updatedPort);
+    }
+
+    public void removePortFromCleanupCache(NeutronPort port) {
+        this.portCleanupCache.remove(port);
+    }
+
+    public NeutronPort getPortFromCleanupCache(String portid) {
+        for (NeutronPort neutronPort : this.portCleanupCache) {
+            if (neutronPort.getPortUUID() != null ) {
+                if (neutronPort.getPortUUID().equals(portid)) {
+                    LOG.info("getPortFromCleanupCache: Matching NeutronPort found {}", portid);
+                    return neutronPort;
+                    }
+                }
+            }
+        return null;
     }
 
     /**

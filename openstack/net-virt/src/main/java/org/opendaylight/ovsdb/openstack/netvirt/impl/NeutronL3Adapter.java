@@ -243,12 +243,15 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     public void handleNeutronPortEvent(final NeutronPort neutronPort, NeutronPort originalPort, Action action) {
         LOGGER.debug("Neutron port {} event : {}", action, neutronPort.toString());
-        if (!this.enabled) {
-            return;
-        }
+
         if(action == Action.UPDATE){
+            // FIXME: Bug 4971 Move cleanup cache to SG Impl
             this.processSecurityGroupUpdate(neutronPort,originalPort);
             this.updatePortInCleanupCache(neutronPort, originalPort);
+        }
+
+        if (!this.enabled) {
+            return;
         }
 
         final boolean isDelete = action == Action.DELETE;
@@ -552,11 +555,17 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                                      final NeutronNetwork neutronNetwork, Action action) {
         LOGGER.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, bridgeNode.getNodeId().getValue(), intf.getName(), neutronNetwork);
+
+        final NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
+        if (action != Action.DELETE && neutronPort != null) {
+            // FIXME: Bug 4971 Move cleanup cache to SG Impl
+            storePortInCleanupCache(neutronPort);
+        }
+
         if (!this.enabled) {
             return;
         }
 
-        final NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
         final Long dpId = getDpidForIntegrationBridge(bridgeNode);
         final Uuid interfaceUuid = intf.getInterfaceUuid();
 
@@ -569,7 +578,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             if (action != Action.DELETE && neutronPortToDpIdCache.get(neutronPortUuid) == null &&
                     dpId != null && interfaceUuid != null) {
                 handleInterfaceEventAdd(neutronPortUuid, dpId, interfaceUuid);
-                storePortInCleanupCache(neutronPort);
             }
 
             handleNeutronPortEvent(neutronPort, null, action);
@@ -1375,7 +1383,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     }
 
 
-    public void storePortInCleanupCache(NeutronPort port) {
+    private void storePortInCleanupCache(NeutronPort port) {
         this.portCleanupCache.add(port);
     }
 
@@ -1386,10 +1394,9 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     }
 
 
-    public void updatePortInCleanupCache(NeutronPort updatedPort,NeutronPort originalPort) {
+    private void updatePortInCleanupCache(NeutronPort updatedPort,NeutronPort originalPort) {
         removePortFromCleanupCache(originalPort);
         storePortInCleanupCache(updatedPort);
-        return;
     }
 
     public NeutronPort getPortFromCleanupCache(String portid) {

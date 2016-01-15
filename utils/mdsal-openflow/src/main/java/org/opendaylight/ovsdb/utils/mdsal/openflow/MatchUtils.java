@@ -11,7 +11,9 @@ package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -61,12 +63,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg6Key;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg7Key;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxTunIdKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfTcpDstKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfTcpSrcKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfUdpDstKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfUdpSrcKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.reg.grouping.NxmNxRegBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.tun.id.grouping.NxmNxTunIdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNspKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNsiKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsi.grouping.NxmNxNsiBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.tcp.dst.grouping.NxmOfTcpDstBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.tcp.src.grouping.NxmOfTcpSrcBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.udp.dst.grouping.NxmOfUdpDstBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.udp.src.grouping.NxmOfUdpSrcBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1063,6 +1073,80 @@ public class MatchUtils {
         return matchBuilder;
     }
 
+    /**
+     * Add a layer4 match to an existing match with mask
+     *
+     * @param matchBuilder Map matchBuilder MatchBuilder Object with a match.
+     * @param protocol The layer4 protocol
+     * @param srcPort The src port
+     * @param destPort The destination port
+     * @param mask the mask for the port
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder addLayer4MatchWithMask(MatchBuilder matchBuilder,
+                                                      int protocol, int srcPort, int destPort,int mask) {
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+
+        NxAugMatchNodesNodeTableFlow nxAugMatch = null;
+        GeneralAugMatchNodesNodeTableFlow genAugMatch = null;
+        if (protocol == TCP_SHORT) {
+            ipmatch.setIpProtocol(TCP_SHORT);
+            if (0 != srcPort) {
+                NxmOfTcpSrcBuilder tcpSrc = new NxmOfTcpSrcBuilder();
+                tcpSrc.setPort(new PortNumber(srcPort));
+                tcpSrc.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder().setNxmOfTcpSrc(tcpSrc.build()).build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfTcpSrcKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            } else if (0 != destPort) {
+                NxmOfTcpDstBuilder tcpDst = new NxmOfTcpDstBuilder();
+                tcpDst.setPort(new PortNumber(destPort));
+                tcpDst.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmOfTcpDst(tcpDst.build())
+                .build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfTcpDstKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            }
+
+        } else if (UDP_SHORT == protocol) {
+            ipmatch.setIpProtocol(UDP_SHORT);
+            UdpMatchBuilder udpMatch = new UdpMatchBuilder();
+            if (0 != srcPort) {
+                NxmOfUdpSrcBuilder udpSrc = new NxmOfUdpSrcBuilder();
+                udpSrc.setPort(new PortNumber(srcPort));
+                udpSrc.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder().setNxmOfUdpSrc(udpSrc.build()).build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfUdpSrcKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            } else if (0 != destPort) {
+                NxmOfUdpDstBuilder udpDst = new NxmOfUdpDstBuilder();
+                udpDst.setPort(new PortNumber(destPort));
+                udpDst.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmOfUdpDst(udpDst.build())
+                .build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfUdpDstKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            }
+        }
+        matchBuilder.setIpMatch(ipmatch.build());
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, genAugMatch);
+        return matchBuilder;
+    }
 
     public static class RegMatch {
         final Class<? extends NxmNxReg> reg;
@@ -1213,6 +1297,57 @@ public class MatchUtils {
      */
     public static Ipv4Prefix iPv4PrefixFromIPv4Address(String ipv4AddressString) {
         return new Ipv4Prefix(ipv4AddressString + "/32");
+    }
+
+    /**
+     * Converts port range into a set of masked port ranges.
+     *
+     * @param portMin the strating port of the range.
+     * @param portMax the ending port of the range.
+     * @return the map contianing the port no and their mask.
+     *
+     */
+    public static Map<Integer,Integer>  getLayer4MaskForRange(int portMin, int portMax) {
+        int [] offset = {32768,16384,8192,4096,2048,1024,512,256,128,64,32,16,8,4,2,1};
+        int[] mask = {0x8000,0xC000,0xE000,0xF000,0xF800,0xFC00,0xFE00,0xFF00,
+            0xFF80,0xFFC0,0xFFE0,0xFFF0,0xFFF8,0xFFFC,0xFFFE,0xFFFF};
+        int noOfPorts = portMax - portMin + 1;
+        String binaryNoOfPorts = Integer.toBinaryString(noOfPorts);
+        int medianOffset = 16 - binaryNoOfPorts.length();
+        int medianLength = offset[medianOffset];
+        int median = 0;
+        for (int tempMedian = 0;tempMedian < portMax;) {
+            tempMedian = medianLength + tempMedian;
+            if (portMin < tempMedian) {
+                median = tempMedian;
+                break;
+            }
+        }
+        Map<Integer,Integer> portMap = new HashMap<Integer,Integer>();
+        int tempMedian = 0;
+        int currentMedain = median;
+        for (int tempMedianOffset = medianOffset;16 > tempMedianOffset;tempMedianOffset++) {
+            tempMedian = currentMedain - offset[tempMedianOffset];
+            if (portMin <= tempMedian) {
+                for (;portMin <= tempMedian;) {
+                    portMap.put(tempMedian, mask[tempMedianOffset]);
+                    currentMedain = tempMedian;
+                    tempMedian = tempMedian - offset[tempMedianOffset];
+                }
+            }
+        }
+        currentMedain = median;
+        for (int tempMedianOffset = medianOffset;16 > tempMedianOffset;tempMedianOffset++) {
+            tempMedian = currentMedain + offset[tempMedianOffset];
+            if (portMax >= tempMedian - 1) {
+                for (;portMax >= tempMedian - 1;) {
+                    portMap.put(currentMedain, mask[tempMedianOffset]);
+                    currentMedain = tempMedian;
+                    tempMedian = tempMedian  + offset[tempMedianOffset];
+                }
+            }
+        }
+        return portMap;
     }
 
     /**

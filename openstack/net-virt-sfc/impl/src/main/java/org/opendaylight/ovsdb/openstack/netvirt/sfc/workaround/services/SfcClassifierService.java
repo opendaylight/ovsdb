@@ -72,6 +72,11 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         return new BigInteger(cookieString, 16);
     }
 
+    private BigInteger getCookie(FlowID flowID, short nsp, short nsi) {
+        String cookieString = String.format("1110%02d%03d%03d0%03d", flowID.value, 0, nsp, nsi);
+        return new BigInteger(cookieString, 16);
+    }
+
     public SfcClassifierService(Service service) {
         super(service);
     }
@@ -88,29 +93,34 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     @Override
     public void setDependencies(Object impl) {}
 
+    private FlowBuilder initFlowBuilder(FlowBuilder flowBuilder, String flowName, short table, FlowID flowID) {
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, table)
+                .setCookie(new FlowCookie(getCookie(flowID)))
+                .setCookieMask(new FlowCookie(getCookie(flowID)));
+        return flowBuilder;
+    }
+
+    private FlowBuilder initFlowBuilder(FlowBuilder flowBuilder, String flowName, short table, FlowID flowID,
+                                        short nsp, short nsi) {
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, table)
+                .setCookie(new FlowCookie(getCookie(flowID, nsp, nsi)))
+                .setCookieMask(new FlowCookie(getCookie(flowID, nsp, nsi)));
+        return flowBuilder;
+    }
+
     @Override
     public void programIngressClassifier(long dataPathId, String ruleName, Matches matches,
                                          NshUtils nshHeader, long vxGpeOfPort, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcIngressClass_" + ruleName;// + "_" + nshHeader.getNshNsp();
+        initFlowBuilder(flowBuilder, flowName, getTable(), FlowID.FLOW_INGRESSCLASS,
+                (short)nshHeader.getNshNsp(), nshHeader.getNshNsi());
 
         MatchBuilder matchBuilder = buildMatch(matches);
         MatchUtils.addNxRegMatch(matchBuilder,
                 MatchUtils.RegMatch.of(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL));
-        MatchUtils.addNxRegMatch(matchBuilder,
-                MatchUtils.RegMatch.of(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL));
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcIngressClass_" + ruleName;// + "_" + nshHeader.getNshNsp();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable());
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_INGRESSCLASS)));
 
         if (write) {
             ActionBuilder ab = new ActionBuilder();
@@ -151,23 +161,13 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     public void programSfcTable(long dataPathId, long vxGpeOfPort, short goToTableId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcTable_" + vxGpeOfPort;
+        initFlowBuilder(flowBuilder, flowName, getTable(Service.CLASSIFIER), FlowID.FLOW_SFCTABLE)
+                .setPriority(1000);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort);
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcTable_" + vxGpeOfPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable(Service.CLASSIFIER));
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setPriority(1000);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_SFCTABLE)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_SFCTABLE)));
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -191,24 +191,15 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                                          int tunnelOfPort, int tunnelId, short gotoTableId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcEgressClass1_" + vxGpeOfPort;
+        initFlowBuilder(flowBuilder, flowName, getTable(Service.CLASSIFIER), FlowID.FLOW_EGRESSCLASSUNUSED,
+                (short)nsp, nsi);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort);
         MatchUtils.addNxNspMatch(matchBuilder, nsp);
         MatchUtils.addNxNsiMatch(matchBuilder, nsi);
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcEgressClass1_" + vxGpeOfPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable(Service.CLASSIFIER));
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_EGRESSCLASSUNUSED)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_EGRESSCLASSUNUSED)));
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -232,24 +223,15 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                                         long sfOfPort, int tunnelId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "sfcEgressClass_" + nsp + "_" + + nsi + "_"  + vxGpeOfPort;
+        initFlowBuilder(flowBuilder, flowName, getTable(Service.SFC_CLASSIFIER), FlowID.FLOW_EGRESSCLASS,
+                (short)nsp, nsi);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, vxGpeOfPort);
         MatchUtils.addNxNspMatch(matchBuilder, nsp);
         MatchUtils.addNxNsiMatch(matchBuilder, nsi);
         flowBuilder.setMatch(matchBuilder.build());
-
-        String flowId = "sfcEgressClass_" + nsp + "_" + + nsi + "_"  + vxGpeOfPort;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(getTable(Service.CLASSIFIER));
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        flowBuilder.setCookie(new FlowCookie(getCookie(FlowID.FLOW_EGRESSCLASS)));
-        flowBuilder.setCookieMask(new FlowCookie(getCookie(FlowID.FLOW_EGRESSCLASS)));
 
         if (write) {
             InstructionsBuilder isb = new InstructionsBuilder();
@@ -270,7 +252,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
             ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
 
-            ab.setAction(ActionUtils.nxResubmitAction((int)sfOfPort, Service.CLASSIFIER.getTable()));
+            ab.setAction(ActionUtils.nxResubmitAction((int)sfOfPort, getTable(Service.CLASSIFIER)));
             ab.setOrder(actionList.size());
             ab.setKey(new ActionKey(actionList.size()));
             actionList.add(ab.build());
@@ -292,21 +274,15 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         }
     }
 
-    private FlowBuilder initFlowBuilder(FlowBuilder flowBuilder, String flowName, short table, FlowID flowID) {
-        FlowUtils.initFlowBuilder(flowBuilder, flowName, table)
-                .setCookie(new FlowCookie(getCookie(flowID)))
-                .setCookieMask(new FlowCookie(getCookie(flowID)));
-        return flowBuilder;
-    }
-
     @Override
     public void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
                                               long sfOfPort, int tunnelId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "sfcEgressClassBypass_" + nsp + "_" + + nsi + "_"  + sfOfPort;
-        initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable(),
-                FlowID.FLOW_EGRESSCLASSBYPASS).setPriority(40000);
+        initFlowBuilder(flowBuilder, flowName, getTable(Service.CLASSIFIER),
+                FlowID.FLOW_EGRESSCLASSBYPASS, (short)nsp, nsi)
+                .setPriority(40000);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         MatchUtils.createInPortMatch(matchBuilder, dataPathId, sfOfPort);
@@ -406,7 +382,8 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "ArpResponder_" + ipAddress;
-        initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable(), FlowID.FLOW_SFARP).setPriority(1024);
+        initFlowBuilder(flowBuilder, flowName, getTable(Service.ARP_RESPONDER), FlowID.FLOW_SFARP)
+                .setPriority(1024);
 
         MacAddress macAddress = new MacAddress(macAddressStr);
 

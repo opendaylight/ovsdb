@@ -12,7 +12,7 @@ module netvirt-sfc-classifier {
 
     container classifiers {
         description "Classifier container which represents the ACL being applied,
-                     atachment point and the associated chain";
+                     attachment point and the associated chain";
 
         list classifier {
             description "A list of SFC classifiers";

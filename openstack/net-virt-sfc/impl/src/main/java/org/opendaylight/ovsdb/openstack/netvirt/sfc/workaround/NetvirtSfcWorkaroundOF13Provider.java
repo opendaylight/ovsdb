@@ -118,7 +118,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     private void processAclEntry(Ace entry) {
         Matches matches = entry.getMatches();
-        Preconditions.checkNotNull(matches, "Input bridges cannot be NULL!");
+        Preconditions.checkNotNull(matches, "ACL Entry cannot be null!");
 
         RenderedServicePath rsp = getRenderedServicePath(entry);
         if (rsp == null) {
@@ -129,8 +129,19 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         handleRenderedServicePath(rsp, entry);
     }
 
-    private void handleRenderedServicePath(RenderedServicePath rsp, Ace entry) {
+    private void handleRenderedServicePath(RenderedServicePath rsp) {
         LOG.info("handleRenderedServicePath: RSP: {}", rsp);
+        Ace entry = getAceFromRenderedServicePath(rsp);
+        if (entry == null) {
+            LOG.warn("handleRenderedServicePath: failed to get acl entry");
+            return;
+        }
+
+        handleRenderedServicePath(rsp, entry);
+    }
+
+    private void handleRenderedServicePath(RenderedServicePath rsp, Ace entry) {
+        LOG.info("handleRenderedServicePath: RSP: {}, Ace: {}", rsp, entry);
 
         Matches matches = entry.getMatches();
         if (matches == null) {
@@ -214,19 +225,19 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
         if (hop == firstHop) {
             LOG.info("handleSff: first hop processing {} - {}",
-                    bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
+                    bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
             NshUtils nshHeader = new NshUtils();
             nshHeader.setNshNsp(rsp.getPathId());
             nshHeader.setNshNsi(firstHop.getServiceIndex());
             if (isSffOnBridge(bridgeNode, serviceFunctionForwarder)) {
                 LOG.info("handleSff: sff and bridge are the same: {} - {}, skipping first sff",
-                        bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
+                        bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
                 Ip ip = sfcUtils.getSfIp(serviceFunction);
                 nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
                 nshHeader.setNshTunUdpPort(ip.getPort());
             } else {
                 LOG.info("handleSff: sff and bridge are not the same: {} - {}, sending to first sff",
-                        bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
+                        bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
                 Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
                 nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
                 nshHeader.setNshTunUdpPort(ip.getPort());
@@ -235,25 +246,28 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                     nshHeader, vxGpeOfPort, true);
         } else if (hop == lastHop) {
             LOG.info("handleSff: last hop processing {} - {}",
-                    bridgeNode.getNodeId(), serviceFunctionForwarder.getName());
+                    bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
             short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
             String sfDplName = sfcUtils.getSfDplName(serviceFunction);
             long sfOfPort = getSfPort(bridgeNode, sfDplName);
+            // TODO: Coexistence: SFC flows should take this using new egressTable REST
             sfcClassifierService.programEgressClassifier(dataPathId, vxGpeOfPort, rsp.getPathId(),
                     lastServiceindex, sfOfPort, 0, true);
+            // TODO: Coexistence: This flow should like like one above, change port, add reg0=1, resubmit
             sfcClassifierService.programEgressClassifierBypass(dataPathId, vxGpeOfPort, rsp.getPathId(),
                     lastServiceindex, sfOfPort, 0, true);
         } else {
             // add typical sff flows
         }
 
-        sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
+        // TODO: Coexistence: SFC flows should take this using new tableOffset REST
+        //sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
     }
 
     void handleSf(Node bridgeNode, ServiceFunction serviceFunction) {
         if (isSfOnBridge(bridgeNode, serviceFunction)) {
             LOG.info("handleSf: sf and bridge are on the same node: {} - {}, adding workaround and arp",
-                    bridgeNode.getNodeId(), serviceFunction.getName());
+                    bridgeNode.getNodeId().getValue(), serviceFunction.getName().getValue());
             long dataPathId = southbound.getDataPathId(bridgeNode);
             Ip ip = sfcUtils.getSfIp(serviceFunction);
             String sfIpAddr = String.valueOf(ip.getIp().getValue());
@@ -266,12 +280,13 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                 return;
             }
             //should be sffdplport, but they should all be the same 6633/4790
-            sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
-            sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
+            // TODO: Coexistence: SFC flows should take this using new sf dpl augmentation
+            //sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
+            //sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
             sfcClassifierService.programStaticArpEntry(dataPathId, 0L, sfMac, sfIpAddr, true);
         } else {
             LOG.info("handleSf: sf and bridge are not on the same node: {} - {}, do nothing",
-            bridgeNode.getNodeId(), serviceFunction.getName());
+                    bridgeNode.getNodeId().getValue(), serviceFunction.getName().getValue());
         }
     }
 
@@ -282,11 +297,15 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         if (ovsdbNode != null) {
             localIp = getLocalip(ovsdbNode);
         }
+        LOG.info("isSffOnBridge: {}: {}, localIp: {}, sff ip: {}",
+                bridgeNode.getNodeId().getValue(),
+                localIp.equals(String.valueOf(ip.getIp().getValue())),
+                localIp, ip.getIp().getValue());
         return localIp.equals(String.valueOf(ip.getIp().getValue()));
     }
 
     private String getLocalip(Node ovsdbNode) {
-        Preconditions.checkNotNull("The ovsdbNode was null", ovsdbNode);
+        Preconditions.checkNotNull(ovsdbNode, "The ovsdbNode was null");
         String localIp = null;
         if (ovsdbNode != null) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
@@ -304,7 +323,19 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private boolean isSfOnBridge(Node bridgeNode, ServiceFunction serviceFunction) {
         String sfDplName = sfcUtils.getSfDplName(serviceFunction);
         long sfOfPort = getSfPort(bridgeNode, sfDplName);
+        LOG.info("isSfOnBridge: {}: {}, sfOfPort: {}", bridgeNode.getNodeId().getValue(), sfOfPort != 0L, sfOfPort);
         return sfOfPort != 0L;
+    }
+
+    private Ace getAceFromRenderedServicePath(RenderedServicePath rsp) {
+        Preconditions.checkNotNull(rsp, "RSP cannot be null");
+        Ace ace = null;
+        String rspName = rsp.getName().getValue();
+        String rspNameSuffix = "_rsp";
+        String sfcName = rspName.substring(0, rspName.length() - rspNameSuffix.length());
+        ace = sfcUtils.getAce(sfcName);
+
+        return ace;
     }
 
     private RenderedServicePath getRenderedServicePath (Ace entry) {
@@ -423,6 +454,16 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             mac = southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_VM_MAC);
         }
         return mac;
+    }
+
+    @Override
+    public void removeRsp(RenderedServicePath change) {
+        LOG.info("removeRsp not implemented yet");
+    }
+
+    @Override
+    public void updateRsp(RenderedServicePath change) {
+        LOG.info("updateRsp not implemented yet");
     }
 
     @Override

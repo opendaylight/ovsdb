@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_eb736fe5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-18T21:35:43Z",
+      "side": 1,
+      "message": "i think you need to extract the Node.class IID from created and then pass it to getConnectionInstance \ncreated.firstIdentifierOf(Node.class)",
+      "revId": "e8330d8b1d376bae4468d8b5ebbd5b5781a9ad65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

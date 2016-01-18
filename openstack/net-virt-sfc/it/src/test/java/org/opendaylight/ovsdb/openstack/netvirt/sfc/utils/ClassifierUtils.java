@@ -38,7 +38,7 @@ public class ClassifierUtils extends AbstractUtils {
                 .setAcl(aclName);
     }
 
-    public ClassifiersBuilder ClassifiersBuilder(ClassifiersBuilder classifiersBuilder,
+    public ClassifiersBuilder classifiersBuilder(ClassifiersBuilder classifiersBuilder,
                                                  ClassifierBuilder classifierBuilder) {
         List<Classifier> classifierList = new ArrayList<>();
         classifierList.add(classifierBuilder.build());

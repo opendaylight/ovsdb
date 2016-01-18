@@ -201,7 +201,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>
               org.opendaylight.ovsdb.openstack.netvirt.providers,
-              org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13
+              org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.providers.config.rev160109
             </Export-Package>
           </instructions>
         </configuration>

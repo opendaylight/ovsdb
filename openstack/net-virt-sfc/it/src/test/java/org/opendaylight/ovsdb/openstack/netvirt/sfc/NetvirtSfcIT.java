@@ -48,17 +48,24 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.standalone.openflow13.SfcClassifier;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.AclUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ClassifierUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.NetvirtConfigUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionChainUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionForwarderUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionPathUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcConfigUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.RspName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SftType;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.RenderedServicePaths;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePath;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePathKey;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.rendered.service.path.RenderedServicePathHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctions;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
@@ -77,6 +84,8 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev1407
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPathsBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPathBuilder;
+import org.opendaylight.yang.gen.v1.urn.ericsson.params.xml.ns.yang.sfc.of.renderer.rev151123.SfcOfRendererConfig;
+import org.opendaylight.yang.gen.v1.urn.ericsson.params.xml.ns.yang.sfc.of.renderer.rev151123.SfcOfRendererConfigBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessListsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.AclBuilder;
@@ -89,6 +98,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.providers.config.rev160109.NetvirtProvidersConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.providers.config.rev160109.NetvirtProvidersConfigBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.ClassifiersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.classifiers.ClassifierBuilder;
@@ -133,6 +144,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static ServiceFunctionForwarderUtils serviceFunctionForwarderUtils = new ServiceFunctionForwarderUtils();
     private static ServiceFunctionChainUtils serviceFunctionChainUtils = new ServiceFunctionChainUtils();
     private static ServiceFunctionPathUtils serviceFunctionPathUtils = new ServiceFunctionPathUtils();
+    private static SfcConfigUtils sfcConfigUtils = new SfcConfigUtils();
+    private static NetvirtConfigUtils netvirtConfigUtils = new NetvirtConfigUtils();
     private static MdsalUtils mdsalUtils;
     private static AtomicBoolean setup = new AtomicBoolean(false);
     private static SouthboundUtils southboundUtils;
@@ -161,9 +174,11 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final String SF2NAME = "dpi-72";
     private static final String SF1IP = "10.2.1.1";//"192.168.50.70";//"192.168.120.31";
     private static final String SF2IP = "10.2.1.2";
-    private static final String SF1DPLNAME = "sf1Dpl";
-    private static final String SF2DPLNAME = "sf2Dpl";
-    private static final String SFF1IP = "127.0.0.1"; //"192.168.1.129"
+    private static final String SF1DPLNAME = "sf1";
+    private static final String SF2DPLNAME = "sf2";
+    // Use 192.168.50.70 when running against vagrant vm for workaround testing
+    // "192.168.50.70"; "127.0.0.1"; "192.168.1.129";
+    private static final String SFF1IP = "192.168.1.129";
     private static final String SFF2IP = "192.168.1.129";//"127.0.0.1";
     private static final String SFF1NAME = "sff1";
     private static final String SFF2NAME = "sff2";
@@ -249,6 +264,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 //editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                 //        "log4j.logger.org.opendaylight.ovsdb",
                 //        LogLevelOption.LogLevel.TRACE.name()),
+                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.library",
+                        LogLevel.INFO.name()),
                 editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(NetvirtSfcIT.class),
                         LogLevel.INFO.name()),
@@ -409,7 +427,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         SffsBuilder sffsBuilder = classifierUtils.sffsBuilder(new SffsBuilder(), sffBuilder);
         ClassifierBuilder classifierBuilder = classifierUtils.classifierBuilder(new ClassifierBuilder(),
                 "classifierName", ACLNAME, sffsBuilder);
-        ClassifiersBuilder classifiersBuilder = classifierUtils.ClassifiersBuilder(new ClassifiersBuilder(),
+        ClassifiersBuilder classifiersBuilder = classifierUtils.classifiersBuilder(new ClassifiersBuilder(),
                 classifierBuilder);
         LOG.info("Classifiers: {}", classifiersBuilder.build());
         return classifiersBuilder;
@@ -573,6 +591,20 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         return serviceFunctionPathsBuilder;
     }
 
+    private SfcOfRendererConfigBuilder sfcOfRendererConfigBuilder(short tableOffset, short egressTable) {
+        SfcOfRendererConfigBuilder sfcOfRendererConfigBuilder =
+                sfcConfigUtils.sfcOfRendererConfigBuilder(new SfcOfRendererConfigBuilder(), tableOffset, egressTable);
+        LOG.info("SfcOfRendererConfig: {}", sfcOfRendererConfigBuilder.build());
+        return sfcOfRendererConfigBuilder;
+    }
+
+    private NetvirtProvidersConfigBuilder netvirtProvidersConfigBuilder(short tableOffset) {
+        NetvirtProvidersConfigBuilder netvirtProvidersConfigBuilder =
+                netvirtConfigUtils.netvirtProvidersConfigBuilder(new NetvirtProvidersConfigBuilder(), tableOffset);
+        LOG.info("NetvirtProvidersConfig: {}", netvirtProvidersConfigBuilder.build());
+        return netvirtProvidersConfigBuilder;
+    }
+
     @Test
     public void testSfcModel() throws InterruptedException {
         int timeout = 1000;
@@ -618,6 +650,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         String flowId = "DEFAULT_PIPELINE_FLOW_" + Service.SFC_CLASSIFIER.getTable();
         verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
 
+        readwait();
+
         assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
         Thread.sleep(1000);
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
@@ -635,6 +669,13 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
             LOG.info("testNetvirtSfcAll: skipping test because userSpaceEnabled {}", userSpaceEnabled);
             return;
         }
+
+        short netvirtTableOffset = 1;
+        testModelPut(netvirtProvidersConfigBuilder(netvirtTableOffset), NetvirtProvidersConfig.class);
+        short sfcTableoffset = 150;
+        short egressTable = pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
+        testModelPut(sfcOfRendererConfigBuilder(sfcTableoffset, egressTable), SfcOfRendererConfig.class);
+
         String bridgeName = INTEGRATION_BRIDGE_NAME;
         ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
@@ -651,15 +692,20 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
         assertNotEquals("datapathId was not found", datapathId, 0);
 
-        String flowId = "DEFAULT_PIPELINE_FLOW_" + Service.SFC_CLASSIFIER.getTable();
+        String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
         verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
 
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
         southboundUtils.addTerminationPoint(bridgeNode, SF1DPLNAME, "internal", null, externalIds);
+        externalIds.clear();
+        externalIds.put("attached-mac", "f6:00:00:0c:00:01");
         southboundUtils.addTerminationPoint(bridgeNode, "vm1", "internal");
+        externalIds.clear();
+        externalIds.put("attached-mac", "f6:00:00:0c:00:02");
         southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal");
-        Map<String, String> options = Maps.newHashMap();
+        // SFC will add the SFF dpl port when creating the RSP
+        /*Map<String, String> options = Maps.newHashMap();
         options.put("key", "flow");
         options.put("dst_port", String.valueOf(GPEUDPPORT));
         options.put("remote_ip", "flow");
@@ -671,8 +717,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         options.clear();
         options.put("key", "flow");
         options.put("remote_ip", "192.168.120.32");
-        southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null);
-        long vxGpeOfPort = getOFPort(bridgeNode, "vxgpe");
+        southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null);*/
 
         testModelPut(serviceFunctionsBuilder(), ServiceFunctions.class);
         testModelPut(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class);
@@ -682,22 +727,51 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         testModelPut(accessListsBuilder(), AccessLists.class);
         testModelPut(classifiersBuilder(), Classifiers.class);
 
+        long vxGpeOfPort = getOFPort(bridgeNode, "vxgpe");
+        assertNotEquals("vxGpePort was not found", 0, vxGpeOfPort);
+
         readwait();
 
         flowId = "sfcIngressClass_" + "httpRule";
         verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
-        flowId = "sfcTable_" + vxGpeOfPort;
-        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
-        flowId = "sfEgress_" + GPEUDPPORT;
-        verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
-        flowId = "sfIngress_" + GPEUDPPORT + "_" + SF1IP;
-        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
+        // SFC is adding these flows now
+        //flowId = "sfcTable_" + vxGpeOfPort;
+        //verifyFlow(datapathId, flowId, Service.CLASSIFIER);
+        //flowId = "sfEgress_" + GPEUDPPORT;
+        //verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
+        //flowId = "sfIngress_" + GPEUDPPORT + "_" + SF1IP;
+        //verifyFlow(datapathId, flowId, Service.CLASSIFIER);
         flowId = "ArpResponder_" + SF1IP;
-        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
+        verifyFlow(datapathId, flowId, Service.ARP_RESPONDER);
+
+        readwait();
 
         assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
         Thread.sleep(1000);
         assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
+    }
+
+    // Not used yet
+    private void getSffDplPort(String rspName) {
+        long ofPort = 0;
+        RenderedServicePathKey renderedServicePathKey =
+                new RenderedServicePathKey(RspName.getDefaultInstance(rspName));
+        InstanceIdentifier<RenderedServicePath> path =
+                InstanceIdentifier.create(RenderedServicePaths.class)
+                        .child(RenderedServicePath.class, renderedServicePathKey);
+        RenderedServicePath rsp = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
+        if (rsp == null) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return;
+        }
+        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
+        if (pathHopList.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return;
+        }
+
+        for (RenderedServicePathHop hop : pathHopList) {
+        }
     }
 
     /**
@@ -803,15 +877,20 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         return flow;
     }
 
-    private void verifyFlow(long datapathId, String flowId, Service service) throws InterruptedException {
+    private void verifyFlow(long datapathId, String flowId, short table) throws InterruptedException {
         org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
                 FlowUtils.createNodeBuilder(datapathId);
         FlowBuilder flowBuilder =
-                FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, pipelineOrchestrator.getTable(service));
+                FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, table);
         Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
         assertNotNull("Could not find flow in config: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
         flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
+        assertNotNull("Could not find flow in operational: " + flowBuilder.build() + "--" + nodeBuilder.build(),
+                flow);
+    }
+
+    private void verifyFlow(long datapathId, String flowId, Service service) throws InterruptedException {
+        verifyFlow(datapathId, flowId, pipelineOrchestrator.getTable(service));
     }
 
     private void readwait() {

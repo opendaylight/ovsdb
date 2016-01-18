@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,8 +13,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
 
 import java.lang.reflect.Field;
 import java.util.Random;
@@ -22,28 +22,20 @@ import java.util.concurrent.BlockingQueue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.ServiceReference;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link EventDispatcherImpl}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceHelper.class, EventDispatcherImpl.class})
 public class EventDispatcherImplTest {
 
-    @InjectMocks private EventDispatcherImpl eventDispatcherImpl;
+    private EventDispatcherImpl eventDispatcherImpl = new EventDispatcherImpl();
 
-    @Mock private AbstractHandler handler;
-    @Mock private ServiceReference<?> ref;
+    private AbstractHandler handler = mock(AbstractHandler.class);
+    private ServiceReference<?> ref = mock(ServiceReference.class);
 
     private AbstractEvent.HandlerType handlerTypeObject = AbstractEvent.HandlerType.NEUTRON_FLOATING_IP;
 
@@ -84,14 +76,20 @@ public class EventDispatcherImplTest {
 
         assertEquals("Error, did not return the expected size, nothing has been added yet", 0, events.size());
 
+        eventDispatcherImpl.eventHandlerAdded(ref, handler);
+
         AbstractEvent mockEvent = mock(AbstractEvent.class);
         when(mockEvent.getHandlerType()).thenReturn(handlerTypeObject);
-        eventDispatcherImpl.enqueueEvent(mockEvent);
-        eventDispatcherImpl.enqueueEvent(mockEvent);
-        eventDispatcherImpl.enqueueEvent(mockEvent);
-        eventDispatcherImpl.enqueueEvent(mockEvent);
+        final int numEnqueues = 4;
+        for (int i = 0; i < numEnqueues; i++) {
+            eventDispatcherImpl.enqueueEvent(mockEvent);
+        }
 
-        verifyPrivate(eventDispatcherImpl, times(4)).invoke("dispatchEvent", mockEvent);
+        // Because events are processed in a different thread, this is a race
+        // We want to ensure that all the events were enqueued; so the sum of
+        // what's been processed and what's still in the queue must equal the
+        // number of events we enqueued
+        verify(handler, times(numEnqueues - events.size())).processEvent(mockEvent);
     }
 
     private Object getField(String fieldName) throws Exception {

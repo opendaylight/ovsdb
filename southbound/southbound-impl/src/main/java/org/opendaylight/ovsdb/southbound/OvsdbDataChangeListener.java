@@ -211,6 +211,12 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                         }
                     }
                 }
+                if(client == null) {
+                    /* Let us try getting it from Operational datastore */
+                    LOG.debug("Trying to get client for {} from Operational information", created.getValue());
+                    InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) created.getKey();
+                    client = cm.getConnectionInstance(nodeIid);
+                }
                 if (client != null) {
                     LOG.debug("Found client for {}", created.getValue());
                     /*

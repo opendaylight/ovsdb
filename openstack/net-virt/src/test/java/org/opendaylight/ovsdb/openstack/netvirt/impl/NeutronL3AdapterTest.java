@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -908,17 +908,16 @@ public class NeutronL3AdapterTest {
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, neutronL3Adapter)).thenReturn(eventDispatcher);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(TenantNetworkManager.class, neutronL3Adapter)).thenReturn(tenantNetworkManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(ConfigurationService.class, neutronL3Adapter)).thenReturn(configurationService);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(ArpProvider.class, neutronL3Adapter)).thenReturn(arpProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(InboundNatProvider.class, neutronL3Adapter)).thenReturn(inboundNatProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(OutboundNatProvider.class, neutronL3Adapter)).thenReturn(outboundNatProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(RoutingProvider.class, neutronL3Adapter)).thenReturn(routingProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(L3ForwardingProvider.class, neutronL3Adapter)).thenReturn(l3ForwardingProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, neutronL3Adapter)).thenReturn(nodeCacheManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, neutronL3Adapter)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(EventDispatcher.class, eventDispatcher);
+        ServiceHelper.overrideGlobalInstance(TenantNetworkManager.class, tenantNetworkManager);
+        ServiceHelper.overrideGlobalInstance(ConfigurationService.class, configurationService);
+        ServiceHelper.overrideGlobalInstance(ArpProvider.class, arpProvider);
+        ServiceHelper.overrideGlobalInstance(InboundNatProvider.class, inboundNatProvider);
+        ServiceHelper.overrideGlobalInstance(OutboundNatProvider.class, outboundNatProvider);
+        ServiceHelper.overrideGlobalInstance(RoutingProvider.class, routingProvider);
+        ServiceHelper.overrideGlobalInstance(L3ForwardingProvider.class, l3ForwardingProvider);
+        ServiceHelper.overrideGlobalInstance(NodeCacheManager.class, nodeCacheManager);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         neutronL3Adapter.setDependencies(mock(ServiceReference.class));
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2015 NEC Corporation and others.  All rights reserved.
+/*
+ * Copyright (c) 2015, 2016 NEC Corporation and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,18 +15,13 @@ import static org.junit.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -47,8 +42,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * Unit test for {@link NeutronFloatingIPInterface}
  */
-@PrepareForTest({NeutronFloatingIPInterface.class})
-@RunWith(PowerMockRunner.class)
 public class NeutronFloatingIPInterfaceTest {
     /**
      * UUID_VALUE used for testing different scenarios.

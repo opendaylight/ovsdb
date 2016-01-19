@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,28 +15,24 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
+        .Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.google.common.collect.Maps;
 
 /**
  * Unit test for {@link ProviderNetworkManagerImpl}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ProviderNetworkManagerImplTest {
 
     @InjectMocks private ProviderNetworkManagerImpl providerNetworkManagerImpl;
@@ -82,8 +78,7 @@ public class ProviderNetworkManagerImplTest {
     public void testSetDependencies() throws Exception {
         OvsdbInventoryService ovsdbInventoryService = mock(OvsdbInventoryService.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, providerNetworkManagerImpl)).thenReturn(ovsdbInventoryService);
+        ServiceHelper.overrideGlobalInstance(OvsdbInventoryService.class, ovsdbInventoryService);
 
         providerNetworkManagerImpl.setDependencies(mock(ServiceReference.class));
 

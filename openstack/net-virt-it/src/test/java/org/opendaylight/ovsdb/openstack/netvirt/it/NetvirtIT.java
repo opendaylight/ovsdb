@@ -634,12 +634,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         iNeutronPortCRUD.update(portId, nport);
 
         LOG.info("Neutron ports have been added");
-        //Thread.sleep(10000);
-        //String flowId = "Egress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
-        //verifyFlow(datapathId, flowId, Service.EGRESS_ACL);
+        Thread.sleep(10000);
+        String flowId = "Egress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
+        verifyFlow(datapathId, flowId, Service.EGRESS_ACL);
 
-        //flowId = "Ingress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
-        //verifyFlow(datapathId, flowId, Service.INGRESS_ACL);
+        flowId = "Ingress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
+        verifyFlow(datapathId, flowId, Service.INGRESS_ACL);
     }
 
     private Flow getFlow (

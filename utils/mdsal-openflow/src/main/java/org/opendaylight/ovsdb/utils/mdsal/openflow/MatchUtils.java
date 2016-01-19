@@ -236,8 +236,10 @@ public class MatchUtils {
 
         // Build the ICMPv4 Match
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
-        if (type != ALL_ICMP || code != ALL_ICMP) {
+        if (type != ALL_ICMP) {
             icmpv4match.setIcmpv4Type(type);
+        }
+        if (code != ALL_ICMP) {
             icmpv4match.setIcmpv4Code(code);
         }
         matchBuilder.setIcmpv4Match(icmpv4match.build());

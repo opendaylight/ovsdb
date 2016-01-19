@@ -368,7 +368,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = "TableOffset_" + getTable();
         FlowUtils.initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable())
-                .setPriority(0);
+                .setPriority(6);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         flowBuilder.setMatch(matchBuilder.build());

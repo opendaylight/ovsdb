@@ -30,6 +30,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcProvider.class);
     private NetvirtSfcAclListener aclListener;
     private NetvirtSfcClassifierListener classifierListener;
+    private RspListener rspListener;
 
     public void setOf13Provider(String of13Provider) {
         LOG.info("of13Provider is: {}", of13Provider);
@@ -67,6 +68,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         }
         aclListener = new NetvirtSfcAclListener(provider, dataBroker);
         classifierListener = new NetvirtSfcClassifierListener(provider, dataBroker);
+        rspListener = new RspListener(provider, dataBroker);
 
         addToPipeline(provider);
         provider.setDependencies(null);

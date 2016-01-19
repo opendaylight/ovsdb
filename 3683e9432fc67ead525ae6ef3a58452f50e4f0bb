@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_fd5a1082",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/MatchUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2016-01-19T15:07:31Z",
+      "side": 1,
+      "message": "nitpick: put a space after if:\nif (...",
+      "revId": "3683e9432fc67ead525ae6ef3a58452f50e4f0bb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

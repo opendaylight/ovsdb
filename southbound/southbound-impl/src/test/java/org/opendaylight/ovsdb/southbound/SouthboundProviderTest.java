@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
@@ -62,6 +63,7 @@ public class SouthboundProviderTest {
     @Mock private EntityOwnershipService entityOwnershipService;
     @Mock private EntityOwnershipCandidateRegistration registration;
     @Mock private EntityOwnershipListener entityOwnershipListener;
+    @Mock private OvsdbConnection ovsdbConnection;
 
     @Before
     public void setUp() throws Exception {
@@ -71,6 +73,7 @@ public class SouthboundProviderTest {
         MemberModifier.field(SouthboundProvider.class, "db").set(southboundProvider, db);
         MemberModifier.field(SouthboundProvider.class, "entityOwnershipService").set(southboundProvider, entityOwnershipService);
         MemberModifier.field(SouthboundProvider.class, "registration").set(southboundProvider, registration);
+        MemberModifier.field(SouthboundProvider.class, "ovsdbConnection").set(southboundProvider, ovsdbConnection);
     }
 
     @Test
@@ -155,5 +158,23 @@ public class SouthboundProviderTest {
         when(transaction.cancel()).thenReturn(true);
         Whitebox.invokeMethod(southboundProvider, "initializeOvsdbTopology", type);
         PowerMockito.verifyPrivate(southboundProvider, times(2)).invoke("initializeTopology", any(LogicalDatastoreType.class));
+    }
+
+    @Test
+    public void testHandleOwnershipChange() throws Exception {
+        EntityOwnershipChange entityOwner = mock(EntityOwnershipChange.class);
+        //suppress calls to initializeOvsdbTopology()
+        MemberModifier.suppress(MemberMatcher.method(SouthboundProvider.class, "initializeOvsdbTopology", LogicalDatastoreType.class));
+        doNothing().when(ovsdbConnection).registerConnectionListener(any(OvsdbConnectionManager.class));
+        when(ovsdbConnection.startOvsdbManager(any(Integer.class))).thenReturn(false);
+        // true case
+        when(entityOwner.isOwner()).thenReturn(true);
+        Whitebox.invokeMethod(southboundProvider, "handleOwnershipChange", entityOwner);
+        PowerMockito.verifyPrivate(southboundProvider, times(2)).invoke("initializeOvsdbTopology", any(LogicalDatastoreType.class));
+        // false case
+        when(entityOwner.isOwner()).thenReturn(false);
+        Whitebox.invokeMethod(southboundProvider, "handleOwnershipChange", entityOwner);
+        PowerMockito.verifyPrivate(southboundProvider, times(2)).invoke("initializeOvsdbTopology", any(LogicalDatastoreType.class));
+        verify(ovsdbConnection, times(2)).registerConnectionListener(any(OvsdbConnectionManager.class));
     }
 }

@@ -16,6 +16,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.net.Inet4Address;
@@ -34,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -514,5 +516,26 @@ public class SouthboundMapperTest {
         //statusAttributeMap contains N_CONNECTIONS_STR key
         statusAttributeMap.remove("n_connections");
         assertEquals(managerEntries, SouthboundMapper.createManagerEntries(ovsdbNode, updatedManagerRows));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetInstanceIdentifier() throws Exception {
+        OpenVSwitch ovs = mock(OpenVSwitch.class);
+        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
+        Column<GenericTableSchema, Map<String, String>> externalIdColumn = mock(Column.class);
+        when(ovs.getExternalIdsColumn()).thenReturn(externalIdColumn);
+        Map<String, String> externalIdMap = new HashMap<>();
+        when(externalIdColumn.getData()).thenReturn(externalIdMap);
+        // if true
+        externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "test");
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        when((InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(anyString())).thenReturn(iid);
+        assertEquals("Incorrect Instance Identifier received", iid, SouthboundMapper.getInstanceIdentifier(ovs));
+        // if false
+        externalIdMap.clear();
+        UUID uuID = new UUID("test");
+        when(ovs.getUuid()).thenReturn(uuID);
+        assertNotNull(SouthboundMapper.getInstanceIdentifier(ovs));
     }
 }

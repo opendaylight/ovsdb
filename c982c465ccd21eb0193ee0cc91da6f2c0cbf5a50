@@ -2,6 +2,46 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_ded0dd55",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-20T20:47:57Z",
+      "side": 1,
+      "message": "nitpick space",
+      "range": {
+        "startLine": 61,
+        "startChar": 58,
+        "endLine": 61,
+        "endChar": 59
+      },
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bed51945",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-20T20:47:57Z",
+      "side": 1,
+      "message": "nitpick space",
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_ff0fa02c",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
         "patchSetId": 15
@@ -90,6 +130,63 @@
         "endLine": 149,
         "endChar": 2
       },
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_fef841e7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-20T20:47:57Z",
+      "side": 1,
+      "message": "what is the reason for needing this?",
+      "range": {
+        "startLine": 72,
+        "startChar": 29,
+        "endLine": 72,
+        "endChar": 32
+      },
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7ee4313b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-20T20:47:57Z",
+      "side": 1,
+      "message": "same question",
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_fecfa1ae",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbQosRemovedCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-20T20:47:57Z",
+      "side": 1,
+      "message": "are these info or debug or even warning? Same question for other log.info in this method.",
       "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

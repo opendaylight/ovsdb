@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_ff0fa02c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2016-01-20T14:47:42Z",
+      "side": 1,
+      "message": "why this code is commented, does the tables schema not updated with Qos info ?",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 2
+      },
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_5f1dec65",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2016-01-20T14:47:42Z",
+      "side": 1,
+      "message": "same here?",
+      "range": {
+        "startLine": 144,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 2
+      },
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

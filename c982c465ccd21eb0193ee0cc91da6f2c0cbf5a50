@@ -159,6 +159,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_3ee4690c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-01-20T21:27:26Z",
+      "side": 1,
+      "message": "It came about during my attempts to clear the QoS setting of a port.  See updatePortQos() line 136.\n\nMay not be necessary though - and looks like I set up a similar pattern in a couple new files and didn\u0027t use it.\n\nI\u0027ll update the patchset.",
+      "parentUuid": "9a3d3df0_fef841e7",
+      "range": {
+        "startLine": 72,
+        "startChar": 29,
+        "endLine": 72,
+        "endChar": 32
+      },
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_7ee4313b",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
         "patchSetId": 15
@@ -176,6 +200,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_9ef135d0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-01-20T21:27:26Z",
+      "side": 1,
+      "message": "see above.",
+      "parentUuid": "9a3d3df0_7ee4313b",
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_fecfa1ae",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbQosRemovedCommand.java",
         "patchSetId": 15
@@ -187,6 +229,24 @@
       "writtenOn": "2016-01-20T20:47:57Z",
       "side": 1,
       "message": "are these info or debug or even warning? Same question for other log.info in this method.",
+      "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1eac05a0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbQosRemovedCommand.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-01-20T21:27:26Z",
+      "side": 1,
+      "message": "I\u0027ll review these (and related files) and update.",
+      "parentUuid": "9a3d3df0_fecfa1ae",
       "revId": "c982c465ccd21eb0193ee0cc91da6f2c0cbf5a50",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

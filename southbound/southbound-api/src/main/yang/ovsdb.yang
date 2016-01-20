@@ -210,12 +210,10 @@ module ovsdb {
             leaf bridge-external-id-key {
                 description "external-id name/key";
                 type string;
-                mandatory true;
             }
             leaf bridge-external-id-value {
                 description "bridge-external-id value";
                 type string;
-                mandatory true;
             }
         }
 
@@ -406,12 +404,10 @@ module ovsdb {
             leaf external-id-key {
                 description "external-id name/key";
                 type string;
-                mandatory true;
             }
             leaf external-id-value {
                 description "external-id value";
                 type string;
-                mandatory true;
             }
         }
 
@@ -511,12 +507,10 @@ module ovsdb {
                 leaf qos-external-id-key {
                     description "qos external-id name/key";
                     type string;
-                    mandatory true;
                 }
                 leaf qos-external-id-value {
                     description "qos-external-id value";
                     type string;
-                    mandatory true;
                 }
             }
             list qos-other-config {
@@ -934,12 +928,10 @@ module ovsdb {
             leaf external-id-key {
                 description "external-id name/key";
                 type string;
-                mandatory true;
             }
             leaf external-id-value {
                 description "external-id value";
                 type string;
-                mandatory true;
             }
         }
 
@@ -977,12 +969,10 @@ module ovsdb {
             leaf external-id-key {
                 description "external-id name/key";
                 type string;
-                mandatory true;
             }
             leaf external-id-value {
                 description "external-id value";
                 type string;
-                mandatory true;
             }
         }
 

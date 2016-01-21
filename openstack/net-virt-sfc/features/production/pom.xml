@@ -31,7 +31,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <openflowplugin.version>0.3.0-SNAPSHOT</openflowplugin.version>
     <restconf.version>1.4.0-SNAPSHOT</restconf.version>
     <sfc.version>0.3.0-SNAPSHOT</sfc.version>
-    <yangtools.version>0.9.0-SNAPSHOT</yangtools.version>
+    <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
   </properties>
   <dependencyManagement>
     <dependencies>

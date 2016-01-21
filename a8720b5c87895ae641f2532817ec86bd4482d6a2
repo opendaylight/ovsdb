@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_c14f6291",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-21T09:28:27Z",
+      "side": 1,
+      "message": "It should be possible to specify the expected ConnectionInfo and OvsdbConnectionInstance here, shouldn\u0027t it?",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_817efaac",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundMapperTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-21T09:28:27Z",
+      "side": 1,
+      "message": "Instead of mocking everything, please construct a valid serialised instance identifier and feed that in to the appropriate place(s).",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_01bcaa68",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-21T09:28:27Z",
+      "side": 1,
+      "message": "What do you mean by \"true case\"?",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_c1c122e6",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-21T09:28:27Z",
+      "side": 1,
+      "message": "Ideally we shouldn\u0027t need to resort to PowerMock to test things like this, but the infrastructure required is a bit complicated to set up. (For future reference, this should be tested by mocking the data-store and verifying the side-effects of the topology initialisation, not by checking that appropriate private methods are called.)",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_21d28ed2",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundUtilTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-21T09:28:27Z",
+      "side": 1,
+      "message": "Nice catch!",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_01d78ac2",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundUtilTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-21T09:28:27Z",
+      "side": 1,
+      "message": "I\u0027d rather have this be a proper MD-SAL-based test but let\u0027s just leave it like that for now.",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

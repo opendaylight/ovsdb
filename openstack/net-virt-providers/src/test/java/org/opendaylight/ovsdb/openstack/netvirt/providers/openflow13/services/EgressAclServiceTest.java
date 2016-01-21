@@ -81,13 +81,10 @@ public class EgressAclServiceTest {
     private Neutron_IPs neutron_ip_dest_2;
     private List<Neutron_IPs> neutronSrcIpList = new ArrayList<>();
     private List<Neutron_IPs> neutronDestIpList = new ArrayList<>();
-    private static final String HOST_ADDRESS = "127.0.0.1/32";
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
     private static final String SRC_IP = "192.168.0.1";
     private static final String DEST_IP_1 = "192.169.0.1";
     private static final String DEST_IP_2 = "192.169.0.2";
-    private static final String DEST_IP_1_WITH_MASK = "192.169.0.1/32";
-    private static final String DEST_IP_2_WITH_MASK = "192.169.0.2/32";
     private static final String SECURITY_GROUP_UUID = "85cc3048-abc3-43cc-89b3-377341426ac5";
     private static final String PORT_UUID = "95cc3048-abc3-43cc-89b3-377341426ac5";
     private static final String SEGMENT_ID = "2";
@@ -149,131 +146,6 @@ public class EgressAclServiceTest {
     }
 
     /**
-     * Rule 1: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (True)
-     */
-    /*@Test
-    public void testProgramPortSecurityACLRule1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(1);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
-        verify(egressAclServiceSpy, times(1)).egressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    *//**
-     * Rule 2: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (True)
-     *//*
-    @Test
-    public void testProgramPortSecurityACLRule2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(null);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
-        verify(egressAclServiceSpy, times(1)).egressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    *//**
-     * Rule 3: TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-     *//*
-    @Test
-    public void testProgramPortSecurityACLRule3() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(null);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
-        verify(egressAclServiceSpy, times(1)).egressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    *//**
-     * Rule 4: TCP Proto (False), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-     *//*
-    @Test
-    public void testProgramPortSecurityACLRule4() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(null);
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(null);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
-        verify(egressAclServiceSpy, times(1)).egressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    *//**
-     * Rule 5: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (False)
-     *//*
-    @Test
-    public void testProgramPortSecurityACLRule5() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(1);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
-        verify(egressAclServiceSpy, times(1)).egressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    *//**
-     * Rule 6: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (False)
-     *//*
-    @Test
-    public void testProgramPortSecurityACLRule6() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(null);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
-        verify(egressAclServiceSpy, times(1)).egressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    *//**
-     * Rule 7: TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (False or 0.0.0.0/0)
-     *//*
-    @Test
-    public void testProgramPortSecurityACLRule7() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
-        when(portSecurityRule.getSecurityRulePortMax()).thenReturn(null);
-        when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
-        when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
-
-        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
-        verify(egressAclServiceSpy, times(1)).egressAllowProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
-    }
-*/
-    /**
      * Test method {@link EgressAclService#programPortSecurityGroup(java.lang.Long, java.lang.String,
      * java.lang.String, long, org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup,
      * java.lang.String, boolean)} when portSecurityRule is incomplete
@@ -311,22 +183,6 @@ public class EgressAclServiceTest {
     }
 
     /**
-     * Test method {@link EgressAclService#egressACLDefaultTcpDrop(Long, String, String, int, boolean)}
-     */
-    @Test
-    public void testEgressACLDefaultTcpDrop() throws Exception {
-        egressAclService.egressACLDefaultTcpDrop(123L, "2", MAC_ADDRESS, 1, true);
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
-
-        egressAclService.egressACLDefaultTcpDrop(123L, "2", MAC_ADDRESS, 1, false);
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get(); // 1 + 1 above
-    }
-
-    /**
      *  Test IPv4 add test case.
      */
     @Test
@@ -340,7 +196,7 @@ public class EgressAclServiceTest {
 
         verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
         verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        verify(commitFuture, times(1)).checkedGet();
     }
 
     /**
@@ -709,7 +565,6 @@ public class EgressAclServiceTest {
         }
     }
 
-
     /**
      *  Test UDP add with port (All UDP) and CIDR selected.
      */
@@ -972,75 +827,82 @@ public class EgressAclServiceTest {
     }
 
     /**
-     *  Test With isLastPortInBridge false isComputeNode false
+     *  Test With isConntrackEnabled false isComputeNode false
      */
     @Test
     public void testProgramFixedSecurityACLAdd1() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(false);
+
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, true);
-
-        verify(writeTransaction, times(0)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
-    }
-    /**
-     *  Test With isLastPortInBridge false isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLRemove1() throws Exception {
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, false);
-
-        verify(writeTransaction, times(0)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
-    }
-
-    /**
-     *  Test With isLastPortInBridge false isComputeNode true
-     */
-    @Test
-    public void testProgramFixedSecurityACLAdd2() throws Exception {
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
-
-        verify(writeTransaction, times(6)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(3)).submit();
-        verify(commitFuture, times(3)).get();
-    }
-
-    /**
-     *  Test With isLastPortInBridge false isComputeNode true
-     */
-    @Test
-    public void testProgramFixedSecurityACLRemove2() throws Exception {
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
-
-        verify(writeTransaction, times(3)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(3)).submit();
-        verify(commitFuture, times(3)).get();
-    }
-
-    /**
-     *  Test With isLastPortInBridge true isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLAdd3() throws Exception {
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true, false, true);
 
         verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
         verify(writeTransaction, times(1)).submit();
+        verify(commitFuture, times(1)).checkedGet();
+    }
+    /**
+     *  Test With isConntrackEnabled false isComputeNode false
+     */
+    @Test
+    public void testProgramFixedSecurityACLRemove1() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(false);
+
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, false);
+
+        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
     }
 
     /**
-     *  Test With isLastPortInBridge true isComputeNode false
+     *  Test With isConntrackEnabled false isComputeNode true
+     */
+    @Test
+    public void testProgramFixedSecurityACLAdd2() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(false);
+
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
+
+        verify(writeTransaction, times(10)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(5)).submit();
+        verify(commitFuture, times(5)).checkedGet();
+    }
+
+    /**
+     *  Test With isConntrackEnabled false isComputeNode true
+     */
+    @Test
+    public void testProgramFixedSecurityACLRemove2() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(false);
+
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
+
+        verify(writeTransaction, times(5)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(5)).submit();
+        verify(commitFuture, times(5)).get();
+    }
+
+    /**
+     *  Test With isConntrackEnabled true isComputeNode false
+     */
+    @Test
+    public void testProgramFixedSecurityACLAdd3() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(true);
+
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, true);
+
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(1)).submit();
+        verify(commitFuture, times(1)).checkedGet();
+    }
+
+    /**
+     *  Test With isConntrackEnabled true isComputeNode false
      */
     @Test
     public void testProgramFixedSecurityACLRemove3() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true, false, false);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, false);
 
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(1)).submit();
@@ -1048,93 +910,32 @@ public class EgressAclServiceTest {
     }
 
     /**
-     *  Test With isLastPortInBridge true isComputeNode true
+     *  Test With isConntrackEnabled true isComputeNode true
      */
     @Test
     public void testProgramFixedSecurityACLAdd4() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true, true, true);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
 
-        verify(writeTransaction, times(8)).put(any(LogicalDatastoreType.class),
+        verify(writeTransaction, times(16)).put(any(LogicalDatastoreType.class),
                                                any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(4)).submit();
-        verify(commitFuture, times(4)).get();
+        verify(writeTransaction, times(8)).submit();
+        verify(commitFuture, times(8)).checkedGet();
     }
 
     /**
-     *  Test With isLastPortInBridge true isComputeNode true
+     *  Test With isConntrackEnabled true isComputeNode true
      */
     @Test
     public void testProgramFixedSecurityACLRemove4() throws Exception {
+        when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true, true, false);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
 
-        verify(writeTransaction, times(4)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(4)).submit();
-        verify(commitFuture, times(4)).get();
+        verify(writeTransaction, times(8)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(8)).submit();
+        verify(commitFuture, times(8)).get();
     }
 
-    /**
-     * Test method {@link EgressAclService#egressACLTcpPortWithPrefix(Long, String, String, boolean, Integer, String, Integer)}
-     */
-    @Test
-    public void testEgressACLTcpPortWithPrefix() throws Exception {
-        egressAclService.egressACLTcpPortWithPrefix(123L, "2", MAC_ADDRESS, true, 1, HOST_ADDRESS, 1);
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
-
-        egressAclService.egressACLTcpPortWithPrefix(123L, "2", MAC_ADDRESS, false, 1, HOST_ADDRESS, 1);
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get(); // 1 + 1 above
-    }
-
-    /**
-     * Test method {@link EgressAclService#egressAllowProto(Long, String, String, boolean, String, Integer)}
-     */
-    @Test
-    public void testEgressAllowProto() throws Exception {
-        egressAclService.egressAllowProto(123L, "2", MAC_ADDRESS, true, HOST_ADDRESS, 1);
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
-
-        egressAclService.egressAllowProto(123L, "2", MAC_ADDRESS, false, HOST_ADDRESS, 1);
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get(); // 1 + 1 above
-    }
-
-    /**
-     * Test method {@link EgressAclService#egressACLPermitAllProto(Long, String, String, boolean, String, Integer)}
-     */
-    @Test
-    public void testEgressACLPermitAllProto() throws Exception {
-        egressAclService.egressACLPermitAllProto(123L, "2", MAC_ADDRESS, true, HOST_ADDRESS, 1);
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
-
-        egressAclService.egressACLPermitAllProto(123L, "2", MAC_ADDRESS, false, HOST_ADDRESS, 1);
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get(); // 1 + 1 above
-    }
-
-    /**
-     * Test method {@link EgressAclService#egressACLTcpSyn(Long, String, String, boolean, Integer, Integer)}
-     */
-    @Test
-    public void testEgressACLTcpSyn() throws Exception {
-        egressAclService.egressACLTcpSyn(123L, "2", MAC_ADDRESS, true, 1, 1);
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
-
-        egressAclService.egressACLTcpSyn(123L, "2", MAC_ADDRESS, false, 1, 1);
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get(); // 1 + 1 above
-    }
 }

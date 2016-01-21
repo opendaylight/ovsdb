@@ -52,7 +52,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>net-virt</module>
     <module>net-virt-providers</module>
     <module>net-virt-it</module>
+    <!-- TEMPORARILY DISABLE net-virt-sfc
     <module>net-virt-sfc</module>
+    -->
   </modules>
 
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->

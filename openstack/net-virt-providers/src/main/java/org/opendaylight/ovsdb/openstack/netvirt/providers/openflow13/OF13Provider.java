@@ -8,11 +8,14 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -1599,29 +1602,53 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         }
     }
 
-    private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        if (NetvirtProvidersProvider.isMasterProviderInstance()){
-            ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-            InstanceIdentifier<Flow> path1 =
-                    InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                                    .rev130819.nodes.Node.class,
-                            nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                            new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+    private static InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+        return InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
+                        nodeBuilder.getKey())
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(flowBuilder.getTableId()))
+                .child(Flow.class, flowBuilder.getKey()).build();
+    }
 
-            //modification.put(LogicalDatastoreType.OPERATIONAL, path1, flowBuilder.build());
-            modification.put(LogicalDatastoreType.CONFIGURATION, path1, flowBuilder.build(),
-                    true);//createMissingParents
+    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
+    createNodePath(NodeBuilder nodeBuilder) {
+        return InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
+                        nodeBuilder.getKey()).build();
+    }
 
-
+    protected void writeFlow(final FlowBuilder flowBuilder, final NodeBuilder nodeBuilder) {
+        if (NetvirtProvidersProvider.isMasterProviderInstance()) {
+            LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+                    flowBuilder.build(), nodeBuilder.build());
+            WriteTransaction modification = dataBroker.newReadWriteTransaction();
+            //modification.merge(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
+            //        nodeBuilder.build(), true /*createMissingParents*/);
+            modification.merge(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
+                    flowBuilder.build(), true /*createMissingParents*/);
             CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-            try {
-                commitFuture.get();  // TODO: Make it async (See bug 1362)
-                LOG.debug("Transaction success for write of Flow " + flowBuilder.getFlowName());
-            } catch (InterruptedException|ExecutionException e) {
+            Futures.addCallback(commitFuture, new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(@Nullable Void aVoid) {
+                    LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    LOG.error("writeFlow: error {} - {} - ", flowBuilder.build(), nodeBuilder.build(), throwable);
+                }
+            });
+            /*try {
+                commitFuture.checkedGet();  // TODO: Make it async (See bug 1362)
+                LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
+            } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-            }
+                modification.cancel();
+            }*/
         }
     }
+
 
     /**
      * Create Output Port Group Instruction

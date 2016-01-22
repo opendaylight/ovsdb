@@ -670,11 +670,11 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
             return;
         }
 
-        short netvirtTableOffset = 1;
-        testModelPut(netvirtProvidersConfigBuilder(netvirtTableOffset), NetvirtProvidersConfig.class);
-        short sfcTableoffset = 150;
-        short egressTable = pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
-        testModelPut(sfcOfRendererConfigBuilder(sfcTableoffset, egressTable), SfcOfRendererConfig.class);
+        //short netvirtTableOffset = 1;
+        //testModelPut(netvirtProvidersConfigBuilder(netvirtTableOffset), NetvirtProvidersConfig.class);
+        //short sfcTableoffset = 150;
+        //short egressTable = pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
+        //testModelPut(sfcOfRendererConfigBuilder(sfcTableoffset, egressTable), SfcOfRendererConfig.class);
 
         String bridgeName = INTEGRATION_BRIDGE_NAME;
         ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);

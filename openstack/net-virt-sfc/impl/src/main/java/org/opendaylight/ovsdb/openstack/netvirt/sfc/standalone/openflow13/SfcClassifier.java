@@ -260,7 +260,7 @@ public class SfcClassifier {
         LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}", flowBuilder.build(), nodeBuilder.build());
         mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, FlowUtils.createNodePath(nodeBuilder),
                 nodeBuilder.build());
-        mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, FlowUtils.createFlowPath(flowBuilder, nodeBuilder),
+        mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, FlowUtils.createFlowPath(flowBuilder, nodeBuilder),
                 flowBuilder.build());
     }
 

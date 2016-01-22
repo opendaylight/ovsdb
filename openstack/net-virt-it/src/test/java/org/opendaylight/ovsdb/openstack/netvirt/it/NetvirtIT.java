@@ -238,7 +238,8 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             }
         }
 
-        dataBroker = getDatabroker(getProviderContext());
+        //dataBroker = getDatabroker(getProviderContext());
+        dataBroker = getDataBroker();
         mdsalUtils = new MdsalUtils(dataBroker);
         assertNotNull("mdsalUtils should not be null", mdsalUtils);
         assertTrue("Did not find " + NETVIRT_TOPOLOGY_ID, getNetvirtTopology());
@@ -273,6 +274,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             e.printStackTrace();
         }
         return providerContext;
+    }
+
+    private DataBroker getDataBroker() {
+        DataBroker dataBroker = NetvirtProvidersProvider.getDataBroker();
+        assertNotNull("dataBroker should not be null", dataBroker);
+        return dataBroker;
     }
 
     private DataBroker getDatabroker(BindingAwareBroker.ProviderContext providerContext) {

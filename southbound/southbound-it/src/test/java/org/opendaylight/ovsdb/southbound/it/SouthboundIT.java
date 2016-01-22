@@ -1594,6 +1594,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         protected abstract void setValue(Builder<T> builder, String value);
 
+        protected abstract boolean isValueMandatory();
+
         public final T build(final String testName, final String key, final String value) {
             final Builder<T> builder = builder();
             this.counter++;
@@ -1626,6 +1628,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         protected void setValue(Builder<PortExternalIds> builder, String value) {
             ((PortExternalIdsBuilder) builder).setExternalIdValue(value);
         }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return true;
+        }
     }
 
     private static final class SouthboundInterfaceExternalIdsBuilder extends KeyValueBuilder<InterfaceExternalIds> {
@@ -1642,6 +1649,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         @Override
         protected void setValue(Builder<InterfaceExternalIds> builder, String value) {
             ((InterfaceExternalIdsBuilder) builder).setExternalIdValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return true;
         }
     }
 
@@ -1660,6 +1672,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         protected void setValue(Builder<Options> builder, String value) {
             ((OptionsBuilder) builder).setValue(value);
         }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return false;
+        }
     }
 
     private static final class SouthboundInterfaceOtherConfigsBuilder extends KeyValueBuilder<InterfaceOtherConfigs> {
@@ -1676,6 +1693,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         @Override
         protected void setValue(Builder<InterfaceOtherConfigs> builder, String value) {
             ((InterfaceOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return false;
         }
     }
 
@@ -1694,6 +1716,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         protected void setValue(Builder<PortOtherConfigs> builder, String value) {
             ((PortOtherConfigsBuilder) builder).setOtherConfigValue(value);
         }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return false;
+        }
     }
 
     private static final class SouthboundBridgeOtherConfigsBuilder extends KeyValueBuilder<BridgeOtherConfigs> {
@@ -1711,6 +1738,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         protected void setValue(Builder<BridgeOtherConfigs> builder, String value) {
             ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigValue(value);
         }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return false;
+        }
     }
 
     private static final class SouthboundBridgeExternalIdsBuilder extends KeyValueBuilder<BridgeExternalIds> {
@@ -1727,6 +1759,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         @Override
         protected void setValue(Builder<BridgeExternalIds> builder, String value) {
             ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return true;
         }
     }
 
@@ -1755,13 +1792,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .input(builder.build(testOneName, idKey, idValue))
                 .expectInputAsOutput()
                 .build());
+        builder.reset();
 
         // Test Case 2:  TestFive
         // Test Type:    Positive
         // Description:  Create a termination point with multiple (five) values
         // Expected:     A port is created with the five values specified below
         final String testFiveName = "TestFive" + testName;
-        builder.reset();
         testCases.add(new SouthboundTestCaseBuilder<T>()
                 .name(testFiveName)
                 .input(
@@ -1772,36 +1809,31 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         builder.build(testFiveName, idKey, idValue))
                 .expectInputAsOutput()
                 .build());
+        builder.reset();
 
-        if ((builder instanceof SouthboundBridgeExternalIdsBuilder) ||
-                (builder instanceof SouthboundInterfaceExternalIdsBuilder) ||
-                (builder instanceof SouthboundPortExternalIdsBuilder)) {
-            LOG.info("generateKeyValueTestCases: instance skipping test case 3 TestOneGoodOneMalformedValue");
+        if (!builder.isValueMandatory()) {
+            // Test Case 3:  TestOneGoodOneMalformedValue
+            // Test Type:    Negative
+            // Description:
+            //     One perfectly fine input
+            //        (TestOneGoodOneMalformedValue_GoodKey_1,
+            //        TestOneGoodOneMalformedValue_GoodValue_1)
+            //     and one malformed input which only has key specified
+            //        (TestOneGoodOneMalformedValue_NoValueForKey_2,
+            //        UNSPECIFIED)
+            // Expected:     A port is created without any values
+            final String testOneGoodOneMalformedValueName = "TestOneGoodOneMalformedValue" + testName;
+            testCases.add(new SouthboundTestCaseBuilder<T>()
+                    .name(testOneGoodOneMalformedValueName)
+                    .input(
+                            builder.build(testOneGoodOneMalformedValueName, GOOD_KEY, GOOD_VALUE),
+                            builder.build(testOneGoodOneMalformedValueName, NO_VALUE_FOR_KEY, null))
+                    .expectNoOutput()
+                    .build());
             builder.reset();
-
-            return testCases;
+        } else {
+            LOG.info("generateKeyValueTestCases: skipping test case 3 for {}", builder.getClass().getSimpleName());
         }
-
-        // Test Case 3:  TestOneGoodOneMalformedValue
-        // Test Type:    Negative
-        // Description:
-        //     One perfectly fine input
-        //        (TestOneGoodOneMalformedValue_GoodKey_1,
-        //        TestOneGoodOneMalformedValue_GoodValue_1)
-        //     and one malformed input which only has key specified
-        //        (TestOneGoodOneMalformedValue_NoValueForKey_2,
-        //        UNSPECIFIED)
-        // Expected:     A port is created without any values
-        final String testOneGoodOneMalformedValueName = "TestOneGoodOneMalformedValue" + testName;
-        builder.reset();
-        testCases.add(new SouthboundTestCaseBuilder<T>()
-                .name(testOneGoodOneMalformedValueName)
-                .input(
-                        builder.build(testOneGoodOneMalformedValueName, GOOD_KEY, GOOD_VALUE),
-                        builder.build(testOneGoodOneMalformedValueName, NO_VALUE_FOR_KEY, null))
-                .expectNoOutput()
-                .build());
-        builder.reset();
 
         return testCases;
     }

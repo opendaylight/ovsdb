@@ -157,8 +157,8 @@ public abstract class AbstractServiceInstance {
             LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
                     flowBuilder.build(), nodeBuilder.build());
             WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-            modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
-                    nodeBuilder.build(), true /*createMissingParents*/);
+            //modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
+            //        nodeBuilder.build(), true /*createMissingParents*/);
             modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
                     flowBuilder.build(), true /*createMissingParents*/);
             CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();

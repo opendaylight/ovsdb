@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Submitted-by: Sam Hague <shague@redhat.com>
+Submitted-at: Sat, 23 Jan 2016 22:48:43 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/33363
+Project: ovsdb
+Branch: refs/heads/stable/beryllium

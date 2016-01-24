@@ -1,0 +1,49 @@
+module netvirt-attributes {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:attributes";
+    prefix "attributes";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt common attributes";
+    }
+
+    import ietf-yang-types { prefix yang; }
+
+    grouping base-attributes {
+        leaf uuid {
+            type yang:uuid;
+            description "UUID to index this object.";
+        }
+
+        leaf name {
+            type string;
+            description "Optional human-readable name for the item. Might not be unique.";
+        }
+
+        leaf description {
+            type string;
+            description "Optional human-readable description for the item. Might not be unique.";
+        }
+
+        list other-config {
+            key config-key;
+            leaf config-key {
+                type string;
+            }
+            leaf config-value {
+                type string;
+            }
+        }
+    }
+
+    grouping admin-attributes {
+        leaf admin-state-up {
+            type boolean;
+            description "The administrative state of the object, which is up (true) or down (false).";
+        }
+        leaf status {
+            type string;
+            description "The object status.";
+        }
+    }
+}

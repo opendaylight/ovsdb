@@ -1,0 +1,84 @@
+module netvirt-l2-networks {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:l2-networks";
+    prefix "l2-networks";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt l2-networks definition";
+    }
+
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import ietf-yang-types { prefix yang; }
+    import netvirt-attributes { prefix "attrs"; }
+
+    identity network-type-base {
+        description "Base Network type for all Network type identifiers.";
+    }
+
+    identity network-type-flat {
+        base network-type-base;
+        description "Flat network type identity.";
+    }
+    identity network-type-vlan {
+        base network-type-base;
+        description "VLAN network type identity.";
+    }
+    identity network-type-vxlan {
+        base network-type-base;
+        description "VXLAN network type identity.";
+    }
+    identity network-type-gre {
+        base network-type-base;
+        description "GRE network type identity.";
+    }
+
+    typedef network-type {
+        type identityref {
+            base network-type-base;
+        }
+        description "This type is used to refer to a Network Type.";
+    }
+
+    container l2-networks {
+        list l2-network {
+
+            description "Description: Logical Layer 2 Networks.  E.g., a Neutron Network.  Typically, an l2-network
+                         defines an L2 broadcast domain and, unless otherwise prohibited, endpoints attached to ports
+                         on an l2-network can communicate with each other.  All l2-network are independent, and
+                         communication between l2-network is only allowed via other means, such as through an
+                         l3-router.";
+
+            key uuid;
+
+            leaf network-type {
+                type network-type;
+                description "The type of physical network that maps to this network resource.";
+            }
+
+            leaf segmentation-id {
+                type string;
+                description "An isolated segment on the physical network. The network-type
+                            attribute defines the segmentation model. For example, if network-type
+                            is vlan, this ID is a vlan identifier. If network-type is gre,
+                            this ID is a gre key.";
+            }
+
+            leaf segmentation-index {
+                type uint32;
+                description "A hidden counter to act as a key, because
+                            segmentation id is not required.";
+            }
+
+            leaf shared {
+                type boolean;
+                default "false";
+                description "Indicates whether this network or subnet is shared across all
+                            tenants. By default, only administrative users can change this
+                            value.";
+            }
+
+            uses attrs:base-attributes;
+            uses attrs:admin-attributes;
+        }
+    }
+}

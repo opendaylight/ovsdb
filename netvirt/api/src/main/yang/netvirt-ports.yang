@@ -1,0 +1,84 @@
+module netvirt-ports {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:ports";
+    prefix "ports";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt ports definition";
+    }
+
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import ietf-yang-types { prefix yang; }
+    import netvirt-attributes { prefix "attrs"; }
+
+    identity port-type-base {
+        description "Base Port type for all Port type identifiers.";
+    }
+
+    identity port-type-l2-network {
+        base port-type-base;
+        description "L2 Network port.";
+    }
+
+    identity port-type-router {
+        base port-type-base;
+        description
+                "Router port.";
+    }
+
+    typedef port-type {
+        type identityref {
+            base port-type-base;
+        }
+        description "This type is used to refer to a Port Type.";
+    }
+
+    grouping end-point {
+
+        leaf macaddr {
+            type yang:mac-address;
+            description "MAC address entry";
+        }
+
+        leaf-list ipaddrs {
+            description "Optional list of IP addresses associated with the end-point";
+            type inet:ip-address;
+        }
+
+        uses attrs:base-attributes;
+    }
+
+    container ports {
+        list port {
+            description "List of ports.  Each port entry contains both logical and physical information.";
+
+            key uuid;
+
+            leaf port-type {
+                type port-type;
+                description "The type of port.";
+            }
+
+            leaf parent {
+                type yang:uuid;
+                description "The UUID of the object this port is a member of.  For example, if the type is
+                             port-type-l2-network, this will be the UUID of the l2-network";
+            }
+
+            leaf device-locator {
+                type yang:uuid;
+                description "The UUID of the device locator for this port";
+            }
+
+            list end-points {
+
+                key macaddr;
+
+                uses end-point;
+            }
+
+            uses attrs:base-attributes;
+            uses attrs:admin-attributes;
+        }
+    }
+}

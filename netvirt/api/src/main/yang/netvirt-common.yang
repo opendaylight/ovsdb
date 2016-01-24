@@ -1,0 +1,68 @@
+module netvirt-common {
+    yang-version 1;
+    namespace "urn:opendaylight:netvirt:common";
+    prefix "common";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt common attributes";
+    }
+
+    import ietf-yang-types { prefix yang; }
+
+    typedef network-type {
+        type enumeration {
+            enum flat;
+            enum gre;
+            enum vlan;
+            enum vxlan;
+            enum vxlan-gpe;
+        }
+        description "Enumeration of supported network types.";
+    }
+
+    grouping base-attributes {
+        leaf uuid {
+            type yang:uuid;
+            description "UUID to index this object.";
+        }
+
+        leaf name {
+            type string;
+            description "Optional human-readable name for the item. Might not be unique.";
+        }
+
+        leaf description {
+            type string;
+            description "Optional human-readable description for the item. Might not be unique.";
+        }
+
+        list other-config {
+            description "This is used to store information needed by the renderer(s).  In general,
+                         it might be used as a cookie to relate external objects or configuration with
+                         the given NetVirt objed.  For example, we may store neutron logical port
+                         information here so that the OVS southbound renderer can match up the port
+                         reported by OVSDB with the Neutron port configured by Neutron.";
+            key config-key;
+            leaf config-key {
+                description "Key to identify the piece of config info.
+                             This needs to be unique both within and between renderers.
+                             Format: <renderer-name>:<renderer-unique-key>";
+                type string;
+            }
+            leaf config-value {
+                type string;
+            }
+        }
+    }
+
+    grouping admin-attributes {
+        leaf admin-state-up {
+            type boolean;
+            description "The administrative state of the object, which is up (true) or down (false).";
+        }
+        leaf status {
+            type string;
+            description "The object status.";
+        }
+    }
+}

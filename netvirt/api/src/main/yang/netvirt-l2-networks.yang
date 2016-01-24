@@ -1,0 +1,56 @@
+module netvirt-l2-networks {
+    yang-version 1;
+    namespace "urn:opendaylight:netvirt:l2-networks";
+    prefix "l2-networks";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt l2-networks definition";
+    }
+
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import ietf-yang-types { prefix yang; }
+    import netvirt-common { prefix "common"; }
+
+    container l2-networks {
+        list l2-network {
+
+            description "Description: Logical Layer 2 Networks.  E.g., a Neutron Network.  Typically, an l2-network
+                         defines an L2 broadcast domain and, unless otherwise prohibited, endpoints attached to ports
+                         on an l2-network can communicate with each other.  All l2-network are independent, and
+                         communication between l2-network is only allowed via other means, such as through an
+                         l3-router.";
+
+            key uuid;
+
+            leaf network-type {
+                type common:network-type;
+                description "The type of physical network that maps to this network resource.";
+            }
+
+            leaf segmentation-id {
+                type string;
+                description "An isolated segment on the physical network. The network-type
+                            attribute defines the segmentation model. For example, if network-type
+                            is vlan, this ID is a vlan identifier. If network-type is gre,
+                            this ID is a gre key.";
+            }
+
+            leaf segmentation-index {
+                type uint32;
+                description "A hidden counter to act as a key, because
+                            segmentation id is not required.";
+            }
+
+            leaf shared {
+                type boolean;
+                default "false";
+                description "Indicates whether this network or subnet is shared across all
+                            tenants. By default, only administrative users can change this
+                            value.";
+            }
+
+            uses common:base-attributes;
+            uses common:admin-attributes;
+        }
+    }
+}

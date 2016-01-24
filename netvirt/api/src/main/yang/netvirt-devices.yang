@@ -1,0 +1,109 @@
+module netvirt-devices {
+    yang-version 1;
+    namespace "urn:opendaylight:netvirt:devices";
+    prefix "devices";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt devices definition";
+    }
+
+    import ietf-yang-types { prefix yang; }
+    import ietf-inet-types { prefix inet; }
+    import netvirt-common { prefix "common"; }
+    import opendaylight-l2-types { prefix ethertype; }
+
+
+
+    grouping flat-attributes {
+    }
+
+    grouping gre-attributes {
+        leaf ip-addr {
+            type inet:ip-address;
+        }
+        leaf port {
+            type inet:port-number;
+        }
+    }
+
+    grouping vlan-attributes {
+        leaf vid {
+            type inet:ip-address;
+        }
+    }
+
+    grouping vxlan-attributes {
+        leaf ip-addr {
+            type inet:ip-address;
+        }
+        leaf port {
+            type inet:port-number;
+        }
+    }
+
+    grouping vxlan-gpe-attributes {
+        leaf ip-addr {
+            type inet:ip-address;
+        }
+        leaf port {
+            type inet:port-number;
+        }
+    }
+
+
+    grouping device-locator {
+        uses common:base-attributes;
+        leaf locator-type {
+            type common:network-type;
+        }
+
+        choice locator-attr {
+            case flat {
+                uses flat-attributes;
+            }
+            case gre {
+                uses gre-attributes;
+            }
+            case vlan {
+                uses vlan-attributes;
+            }
+            case vxlan {
+                uses vxlan-attributes;
+            }
+            case vxlan-gpe {
+                uses vxlan-gpe-attributes;
+            }
+        }
+
+    }
+
+    grouping device {
+        uses common:base-attributes;
+
+        leaf device-type {
+            type enumeration {
+                 enum ovs;
+                 enum hwgw;
+             }
+        }
+
+        // TODO: Need to look at info needed per bridge.
+        list bridges {
+            leaf name {
+                type string;
+            }
+        }
+
+        list device-locators {
+            key uuid;
+            uses device-locator;
+        }
+    }
+
+    container devices {
+        list device {
+            key uuid;
+            uses device;
+        }
+    }
+}

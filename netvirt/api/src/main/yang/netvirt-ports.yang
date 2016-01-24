@@ -1,0 +1,105 @@
+module netvirt-ports {
+    yang-version 1;
+    namespace "urn:opendaylight:netvirt:ports";
+    prefix "ports";
+
+    revision "2015-12-27" {
+        description "Initial revision of netvirt ports definition";
+    }
+
+    import ietf-inet-types { prefix inet; }
+    import ietf-yang-types { prefix yang; }
+    import netvirt-common { prefix "common"; }
+
+    typedef port-type {
+        type enumeration {
+            enum port-type-l2-netowrk;
+            enum port-type-router;
+        }
+    }
+
+    typedef port-binding-type {
+        type enumeration {
+            enum port-binding-type-vlan;
+            enum port-binding-type-vxlan;
+        }
+    }
+
+    grouping end-point {
+        uses common:base-attributes;
+
+        leaf macaddr {
+            type yang:mac-address;
+            description "MAC address entry";
+        }
+
+        leaf-list ipaddrs {
+            description "Optional list of IP addresses associated with the end-point";
+            type inet:ip-address;
+        }
+    }
+
+    grouping parent-port-binding {
+        description "Optional. Used to bind one port to another heerarchically.";
+
+        leaf type {
+            description "How is this port bound to the other.  E.g., VLAN";
+            type port-binding-type;
+        }
+
+        leaf id {
+            description "Depends on binding type.  E.g., if the type is VLAN, this would be the VLAN ID";
+            type string;
+        }
+
+        leaf parent-port {
+            description "Must be the UUID of another port.";
+            type yang:uuid;
+        }
+    }
+
+    grouping port {
+        uses common:base-attributes;
+        uses common:admin-attributes;
+
+        leaf port-type {
+            type port-type;
+            description "The type of port.";
+        }
+
+        leaf parent {
+            type yang:uuid;
+            description "The UUID of the object this port is a member of.  For example, if the type is
+                         port-type-l2-network, this will be the UUID of the l2-network";
+        }
+
+        uses parent-port-binding;
+
+        // TODO: Can we use a leafref for the device locator?
+        leaf device-uuid {
+            type yang:uuid;
+            description "Reference to the the device for this port";
+        }
+
+        leaf device-locator-uuid {
+            type yang:uuid;
+            description "Reference to the the device locator for this port";
+        }
+
+        list end-points {
+
+            key macaddr;
+
+            uses end-point;
+        }
+    }
+
+    container ports {
+        list port {
+            description "List of ports.  Each port entry contains both logical and physical information.";
+
+            key uuid;
+            uses port;
+        }
+    }
+}

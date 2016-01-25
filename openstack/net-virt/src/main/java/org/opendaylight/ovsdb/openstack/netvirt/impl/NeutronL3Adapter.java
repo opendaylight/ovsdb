@@ -1553,15 +1553,19 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         this.portCleanupCache.remove(port);
     }
 
+    public Set<NeutronPort> getPortCleanupCache() {
+        return this.portCleanupCache;
+    }
+
     public NeutronPort getPortFromCleanupCache(String portid) {
         for (NeutronPort neutronPort : this.portCleanupCache) {
             if (neutronPort.getPortUUID() != null ) {
                 if (neutronPort.getPortUUID().equals(portid)) {
                     LOG.info("getPortFromCleanupCache: Matching NeutronPort found {}", portid);
                     return neutronPort;
-                    }
                 }
             }
+        }
         return null;
     }
 

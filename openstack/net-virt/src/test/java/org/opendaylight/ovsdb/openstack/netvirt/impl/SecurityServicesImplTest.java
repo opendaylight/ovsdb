@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Before;
@@ -82,6 +83,7 @@ public class SecurityServicesImplTest {
     @Mock OvsdbTerminationPointAugmentation tp;
     @Mock IngressAclProvider ingressAclService;
     @Mock EgressAclProvider egressAclService;
+    @Mock NeutronL3Adapter neutronL3Adapter;
 
     private static final String NEUTRON_PORT_ID_VM_1 = "neutronID_VM_1";
     private static final String NEUTRON_PORT_ID_VM_2 = "neutronID_VM_2";
@@ -370,7 +372,7 @@ public class SecurityServicesImplTest {
         portList.add(neutronPort_Vm2);
         portList.add(neutronPort_Vm3);
         portList.add(neutronPort_Dhcp);
-        when(neutronPortCache.getAllPorts()).thenReturn(portList);
+        when(neutronL3Adapter.getPortCleanupCache()).thenReturn(new HashSet<NeutronPort>(portList));
         List<Neutron_IPs> ipList = securityServicesImpl.getVmListForSecurityGroup(NEUTRON_PORT_ID_VM_1, SECURITY_GROUP_ID_2);
         assertEquals(ipList,neutron_IPs_2);
     }

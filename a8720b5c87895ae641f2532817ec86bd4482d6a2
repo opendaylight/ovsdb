@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_3618fb80",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-26T09:06:21Z",
+      "side": 1,
+      "message": "Yes, I know that this is a verification, not an invocation. I meant that instead of saying\n\n    verifyPrivate()...(..., any(ConnectionInfo.class), any(OvsdbConnectionInstance.class));\n\nwe could actually make the test stricter by specifying the expected values in the verification:\n\n    verifyPrivate()...(..., key, ovsdbConnectionInstance);\n\nsince we know the precise instances which are supposed to be used in the invocation resulting from the handleOwnershipChanged() method call.",
+      "parentUuid": "9a3d3df0_42e33e07",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_817efaac",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundMapperTest.java",
         "patchSetId": 1
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_b6036b0e",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundMapperTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-26T09:06:21Z",
+      "side": 1,
+      "message": "I guess it depends on the eye of the beholder ;-).",
+      "parentUuid": "9a3d3df0_2289da26",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_01bcaa68",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
         "patchSetId": 1
@@ -101,6 +137,24 @@
       "side": 1,
       "message": "When entity ownership is awarded to this instance.",
       "parentUuid": "9a3d3df0_01bcaa68",
+      "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_19008800",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-26T09:06:21Z",
+      "side": 1,
+      "message": "Thanks, that should go in the comment (in the code, not Gerrit).",
+      "parentUuid": "9a3d3df0_a295ea41",
       "revId": "a8720b5c87895ae641f2532817ec86bd4482d6a2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

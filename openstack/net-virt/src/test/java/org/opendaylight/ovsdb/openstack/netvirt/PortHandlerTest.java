@@ -31,6 +31,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.DistributedArpService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -49,6 +50,7 @@ public class PortHandlerTest {
     @InjectMocks private PortHandler portHandler;
 
     @Mock private NeutronL3Adapter neutronL3Adapter;
+    @Mock private DistributedArpService distributedArpService;
     @Mock private NodeCacheManager nodeCacheManager;
     @Mock private Southbound southbound;
 
@@ -82,10 +84,12 @@ public class PortHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.ADD);
         portHandlerSpy.processEvent(ev);
+        verify(distributedArpService, times(1)).handleArpPortEvent(neutronPort, Action.ADD);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.ADD);
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
         portHandlerSpy.processEvent(ev);
+        verify(distributedArpService, times(1)).handleArpPortEvent(neutronPort, Action.UPDATE);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.UPDATE);
 
         List<Node> nodes = new ArrayList<>();
@@ -101,6 +105,7 @@ public class PortHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.DELETE);
         portHandlerSpy.processEvent(ev);
+        verify(distributedArpService, times(1)).handleArpPortEvent(neutronPort, Action.DELETE);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.DELETE);
         verify(southbound, times(1)).deleteTerminationPoint(any(Node.class), anyString());
     }
@@ -108,11 +113,13 @@ public class PortHandlerTest {
     @Test
     public void testSetDependencies() throws Exception {
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
+        DistributedArpService distributedArpService = mock(DistributedArpService.class);
         NeutronL3Adapter neutronL3Adapter = mock(NeutronL3Adapter.class);
         Southbound southbound = mock(Southbound.class);
         EventDispatcher eventDispatcher = mock(EventDispatcher.class);
 
         ServiceHelper.overrideGlobalInstance(NodeCacheManager.class, nodeCacheManager);
+        ServiceHelper.overrideGlobalInstance(DistributedArpService.class, distributedArpService);
         ServiceHelper.overrideGlobalInstance(NeutronL3Adapter.class, neutronL3Adapter);
         ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
         ServiceHelper.overrideGlobalInstance(EventDispatcher.class, eventDispatcher);
@@ -120,6 +127,7 @@ public class PortHandlerTest {
         portHandler.setDependencies(mock(ServiceReference.class));
 
         assertEquals("Error, did not return the correct object", getField("nodeCacheManager"), nodeCacheManager);
+        assertEquals("Error, did not return the correct object", getField("distributedArpService"), distributedArpService);
         assertEquals("Error, did not return the correct object", getField("neutronL3Adapter"), neutronL3Adapter);
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
         assertEquals("Error, did not return the correct object", portHandler.eventDispatcher, eventDispatcher);

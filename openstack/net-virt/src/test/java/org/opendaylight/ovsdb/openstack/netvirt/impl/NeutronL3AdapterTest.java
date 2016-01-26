@@ -77,11 +77,12 @@ import org.powermock.reflect.Whitebox;
 /**
  * Unit test for {@link NeutronL3Adapter}
  */
-@PrepareForTest({ServiceHelper.class, InetAddress.class, NeutronL3Adapter.class})
+@PrepareForTest({ServiceHelper.class, InetAddress.class, NeutronL3Adapter.class, DistributedArpService.class})
 @RunWith(PowerMockRunner.class)
 public class NeutronL3AdapterTest {
 
     @Mock private NeutronL3Adapter neutronL3Adapter;
+    @Mock private DistributedArpService distributedArpService;
 
     private static final String ID = "45";
     private static final String IP = "127.0.0.1";
@@ -108,7 +109,7 @@ public class NeutronL3AdapterTest {
     @Before
     public void setUp() throws Exception{
         neutronL3Adapter = PowerMockito.mock(NeutronL3Adapter.class, Mockito.CALLS_REAL_METHODS);
-
+        Whitebox.setInternalState(neutronL3Adapter, "distributedArpService", distributedArpService);
         // init instance variables
         MemberModifier.field(NeutronL3Adapter.class, "enabled").set(neutronL3Adapter, true);
 
@@ -342,12 +343,10 @@ public class NeutronL3AdapterTest {
         // Suppress the called to these functions
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "findNeutronPortForFloatingIp", String.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "findOFPortForExtPatch", Long.class));
-        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
 
         Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForFloatingIPArpAdd", neutronFloatingIP);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("findNeutronPortForFloatingIp", anyString());
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("findOFPortForExtPatch", anyLong());
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -359,10 +358,7 @@ public class NeutronL3AdapterTest {
         floatIpDataMapCache.put(ID, floatingIpObject);
         MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
 
-        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
-
         Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForFloatingIPArpDelete", ID);
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
     }
 
     @Test
@@ -510,22 +506,18 @@ public class NeutronL3AdapterTest {
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
         when(nodeCacheManager.getBridgeNodes()).thenReturn(nodes);
         MemberModifier.field(NeutronL3Adapter.class, "nodeCacheManager").set(neutronL3Adapter , nodeCacheManager);
-        MemberModifier.field(NeutronL3Adapter.class, "flgDistributedARPEnabled").set(neutronL3Adapter , true);
 
         // Suppress the called to these functions
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programL3ForwardingStage1", Node.class, Long.class, String.class, String.class, String.class, Action.class));
-        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
 
         Whitebox.invokeMethod(neutronL3Adapter, "updateL3ForNeutronPort", neutronPort, false);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
 
         Whitebox.invokeMethod(neutronL3Adapter, "updateL3ForNeutronPort", neutronPort, true);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
     }
 
     @Test
@@ -602,7 +594,6 @@ public class NeutronL3AdapterTest {
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForNeutronRouterInterfacePair", Node.class, Long.class, NeutronRouter_Interface.class, NeutronRouter_Interface.class, NeutronNetwork.class, String.class, String.class, String.class, int.class, Action.class, Boolean.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowForNetworkFromExternal", Node.class, Long.class, String.class, String.class, String.class, int.class, Action.class));
-        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programIpRewriteExclusionStage1", Node.class, Long.class, String.class, String.class, Action.class));
 
         // init instance variables
@@ -634,7 +625,6 @@ public class NeutronL3AdapterTest {
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForNeutronRouterInterfacePair", any(Node.class), anyLong(), any(NeutronRouter_Interface.class), any(NeutronRouter_Interface.class), any(NeutronNetwork.class), anyString(), anyString(), anyString(), anyInt(), eq(Action.ADD), anyBoolean());
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowForNetworkFromExternal", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyInt(), eq(Action.ADD));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programIpRewriteExclusionStage1", any(Node.class), anyLong(), anyString(), anyString(), eq(Action.ADD));
         assertEquals("Error, did not add the RouterMac", networkIdToRouterMacCacheSize, networkIdToRouterMacCache.size() -1);
         assertEquals("Error, did not add the RouterIP", networkIdToRouterIpListCacheSize, networkIdToRouterIpListCache.size() -1);
@@ -653,7 +643,6 @@ public class NeutronL3AdapterTest {
         PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("programFlowsForNeutronRouterInterfacePair", any(Node.class), anyLong(), any(NeutronRouter_Interface.class), any(NeutronRouter_Interface.class), any(NeutronNetwork.class), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE), anyBoolean());
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowForNetworkFromExternal", any(Node.class), anyLong(), anyString(), anyString(), anyString(), anyInt(), eq(Action.DELETE));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programIpRewriteExclusionStage1", any(Node.class), anyLong(), anyString(), anyString(), eq(Action.DELETE));
         assertEquals("Error, did not remove the RouterMac", networkIdToRouterMacCacheSize, networkIdToRouterMacCache.size() +1);
         assertEquals("Error, did not remove the RouterIP", networkIdToRouterIpListCacheSize, networkIdToRouterIpListCache.size() +1);
@@ -751,34 +740,6 @@ public class NeutronL3AdapterTest {
 
         assertEquals("Error, this not return the correct status code", new Status(StatusCode.SUCCESS), Whitebox.invokeMethod(neutronL3Adapter, "programRouterInterfaceStage2", node, Long.valueOf(45), SEG_ID, SEG_ID, MAC_ADDRESS, IP, 4, Action.ADD));
 
-    }
-
-    @Test
-    public void testProgramStaticArpStage1() throws Exception {
-
-        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage2", Long.class, String.class, String.class, String.class, Action.class));
-
-        PowerMockito.when(neutronL3Adapter, "programStaticArpStage2", anyLong(), anyString(), anyString(), anyString(), any(Action.class)).thenReturn(new Status(StatusCode.SUCCESS));
-
-
-        Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage1", Long.valueOf(12), PORT_INT, MAC_ADDRESS, IP, Action.ADD);
-
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage2", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
-
-        Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage1", Long.valueOf(12), PORT_INT, MAC_ADDRESS, IP, Action.DELETE);
-
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage2", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
-    }
-
-    @Test
-    public void testProgramStaticArpStage2() throws Exception {
-        assertEquals("Error, this not return the correct status code", new Status(StatusCode.BADREQUEST), Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage2", Long.valueOf(45), PORT_INT, MAC_ADDRESS, MALFORM_IP, Action.ADD));
-
-        PowerMockito.mockStatic(InetAddress.class);
-        InetAddress inetAddress = mock(InetAddress.class);
-        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress);
-
-        assertEquals("Error, this not return the correct status code", new Status(StatusCode.SUCCESS), Whitebox.invokeMethod(neutronL3Adapter, "programStaticArpStage2", Long.valueOf(45), PORT_INT, MAC_ADDRESS, IP, Action.ADD));
     }
 
     @Test
@@ -901,6 +862,7 @@ public class NeutronL3AdapterTest {
         TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
         ConfigurationService configurationService = mock(ConfigurationService.class);
         ArpProvider arpProvider = mock(ArpProvider.class);
+        DistributedArpService distributedArpService = mock(DistributedArpService.class);
         InboundNatProvider inboundNatProvider = mock(InboundNatProvider.class);
         OutboundNatProvider outboundNatProvider = mock(OutboundNatProvider.class);
         RoutingProvider routingProvider = mock(RoutingProvider.class);
@@ -912,6 +874,7 @@ public class NeutronL3AdapterTest {
         ServiceHelper.overrideGlobalInstance(TenantNetworkManager.class, tenantNetworkManager);
         ServiceHelper.overrideGlobalInstance(ConfigurationService.class, configurationService);
         ServiceHelper.overrideGlobalInstance(ArpProvider.class, arpProvider);
+        ServiceHelper.overrideGlobalInstance(DistributedArpService.class, distributedArpService);
         ServiceHelper.overrideGlobalInstance(InboundNatProvider.class, inboundNatProvider);
         ServiceHelper.overrideGlobalInstance(OutboundNatProvider.class, outboundNatProvider);
         ServiceHelper.overrideGlobalInstance(RoutingProvider.class, routingProvider);
@@ -926,6 +889,7 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct object", getField("tenantNetworkManager"), tenantNetworkManager);
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
         assertEquals("Error, did not return the correct object", getField("arpProvider"), arpProvider);
+        assertEquals("Error, did not return the correct object", getField("distributedArpService"), distributedArpService);
         assertEquals("Error, did not return the correct object", getField("inboundNatProvider"), inboundNatProvider);
         assertEquals("Error, did not return the correct object", getField("outboundNatProvider"), outboundNatProvider);
         assertEquals("Error, did not return the correct object", getField("routingProvider"), routingProvider);

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_8c545855",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-26T17:33:24Z",
+      "side": 1,
+      "message": "isn\u0027t the same problem still here since this check is going to exit the method if l3.enabled is failed?\n\nMy understanding of the bug was that the arp handling is inside the l3.enabled, but it should be outside of that check.",
+      "revId": "a1a916a5d03c973ad9e6efbc38e32c6c37557d99",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

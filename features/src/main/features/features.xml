@@ -46,7 +46,6 @@
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>
-    <bundle>mvn:org.opendaylight.neutron/dummyprovider/{{VERSION}}</bundle>
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}/xml/config</configfile>
   </feature>
@@ -65,7 +64,6 @@
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>
-    <bundle>mvn:org.opendaylight.neutron/dummyprovider/{{VERSION}}</bundle>
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}/xml/config</configfile>
   </feature>

@@ -186,7 +186,6 @@ public class SouthboundImpl implements Southbound {
             BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
             bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(MdsalHelper.DISABLE_IN_BAND);
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
-            bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(MdsalHelper.DISABLE_IN_BAND);
             List<BridgeOtherConfigs> bridgeOtherConfigsList = new ArrayList<>();
             bridgeOtherConfigsList.add(bridgeOtherConfigsBuilder.build());
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(bridgeOtherConfigsList);

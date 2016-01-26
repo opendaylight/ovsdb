@@ -510,7 +510,6 @@ public class NeutronL3AdapterTest {
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
         when(nodeCacheManager.getBridgeNodes()).thenReturn(nodes);
         MemberModifier.field(NeutronL3Adapter.class, "nodeCacheManager").set(neutronL3Adapter , nodeCacheManager);
-        MemberModifier.field(NeutronL3Adapter.class, "flgDistributedARPEnabled").set(neutronL3Adapter , true);
 
         // Suppress the called to these functions
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
@@ -520,12 +519,10 @@ public class NeutronL3AdapterTest {
         Whitebox.invokeMethod(neutronL3Adapter, "updateL3ForNeutronPort", neutronPort, false);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
 
         Whitebox.invokeMethod(neutronL3Adapter, "updateL3ForNeutronPort", neutronPort, true);
         PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("getDpidForIntegrationBridge", any(Node.class));
         PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
-        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
     }
 
     @Test

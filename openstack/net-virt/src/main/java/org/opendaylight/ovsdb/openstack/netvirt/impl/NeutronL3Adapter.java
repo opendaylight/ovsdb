@@ -487,7 +487,11 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                     }
                 }
             }
-            this.updateL3ForNeutronPort(neutronPort, isDelete);
+            // iterate all the neutron ports from neutronPortCache to write the Arp flows even there
+            // is no router interface (bug 4892).
+            for (NeutronPort neutronPort1 : neutronPortCache.getAllPorts()) {
+                this.updateL3ForNeutronPort(neutronPort1, isDelete);
+            }
         }
     }
 
@@ -837,15 +841,14 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         final String networkUUID = neutronPort.getNetworkUUID();
         final String routerMacAddress = networkIdToRouterMacCache.get(networkUUID);
 
-        // If there is no router interface handling the networkUUID, we are done
-        if (routerMacAddress == null || routerMacAddress.isEmpty()) {
-            return;
-        }
-
-        // If this is the neutron port for the router interface itself, ignore it as well. Ports that represent the
-        // router interface are handled via handleNeutronRouterInterfaceEvent.
-        if (routerMacAddress.equalsIgnoreCase(neutronPort.getMacAddress())) {
-            return;
+        // Configure ARP flows. We do that regardless of router present, because ARP rules are
+        // needed even if there is no router (bug 4892).
+        if ((routerMacAddress != null) && (!routerMacAddress.isEmpty())) {
+            // If this is the neutron port for the router interface itself, ignore it as well. Ports that represent the
+            // router interface are handled via handleNeutronRouterInterfaceEvent.
+            if (routerMacAddress.equalsIgnoreCase(neutronPort.getMacAddress())) {
+                return;
+            }
         }
 
         final NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(networkUUID);

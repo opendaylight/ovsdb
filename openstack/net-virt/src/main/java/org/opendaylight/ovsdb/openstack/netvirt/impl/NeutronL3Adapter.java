@@ -133,7 +133,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     private String externalRouterMac;
     private Boolean enabled = false;
-    private Boolean flgDistributedARPEnabled = true;
     private Boolean isCachePopulationDone = false;
     private Set<NeutronPort> portCleanupCache;
 
@@ -165,15 +164,8 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             if (this.externalRouterMac == null) {
                 this.externalRouterMac = DEFAULT_EXT_RTR_MAC;
             }
-
             this.enabled = true;
             LOG.info("OVSDB L3 forwarding is enabled");
-            if (configurationService.isDistributedArpDisabled()) {
-                this.flgDistributedARPEnabled = false;
-                LOG.info("Distributed ARP responder is disabled");
-            } else {
-                LOG.debug("Distributed ARP responder is enabled");
-            }
         } else {
             LOG.debug("OVSDB L3 forwarding is disabled");
         }
@@ -881,14 +873,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 // Configure L3 fwd. We do that regardless of tenant network present, because these rules are
                 // still needed when routing to subnets non-local to node (bug 2076).
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
-
-                // Configure distributed ARP responder
-                if (flgDistributedARPEnabled) {
-                    // Arp rule is only needed when segmentation exists in the given node (bug 4752).
-                    boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
-                    final Action actionForNode = arpNeeded ? action : Action.DELETE;
-                    programStaticArpStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
-                }
             }
         }
     }

@@ -46,6 +46,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerI
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.DistributedArpService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NodeCacheManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OvsdbInventoryServiceImpl;
@@ -203,6 +204,14 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{NeutronL3Adapter.class.getName(), GatewayMacResolverListener.class.getName()},
                 neutronL3AdapterProperties, neutronL3Adapter);
+        
+        Dictionary<String, Object> distributedArpServiceProperties = new Hashtable<>();
+        distributedArpServiceProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.DISTRIBUTED_ARP_SERVICE);
+        final DistributedArpService distributedArpService = new DistributedArpService();
+        registerService(context,
+                new String[]{DistributedArpService.class.getName()},
+                distributedArpServiceProperties, distributedArpService);
 
         OpenstackRouter openstackRouter = new OpenstackRouter();
         registerService(context,
@@ -240,16 +249,16 @@ public class ConfigActivator implements BundleActivator {
         // addingService may not be called if the service is already available when the ServiceTracker
         // is started
         trackService(context, INeutronNetworkCRUD.class, tenantNetworkManager, networkHandler, lBaaSHandler,
-                lBaaSPoolHandler, lBaaSPoolMemberHandler, neutronL3Adapter);
+                lBaaSPoolHandler, lBaaSPoolMemberHandler, neutronL3Adapter, distributedArpService);
         trackService(context, INeutronSubnetCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler,
                 securityServices, neutronL3Adapter);
         trackService(context, INeutronPortCRUD.class, tenantNetworkManager, lBaaSHandler, lBaaSPoolHandler,
-                lBaaSPoolMemberHandler, securityServices, neutronL3Adapter);
+                lBaaSPoolMemberHandler, securityServices, neutronL3Adapter, distributedArpService);
         trackService(context, INeutronFloatingIPCRUD.class, neutronL3Adapter);
         trackService(context, INeutronLoadBalancerCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
         trackService(context, INeutronLoadBalancerPoolCRUD.class, lBaaSHandler, lBaaSPoolMemberHandler);
         trackService(context, LoadBalancerProvider.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
-        trackService(context, ArpProvider.class, neutronL3Adapter);
+        trackService(context, ArpProvider.class, neutronL3Adapter, distributedArpService);
         trackService(context, InboundNatProvider.class, neutronL3Adapter);
         trackService(context, OutboundNatProvider.class, neutronL3Adapter);
         trackService(context, RoutingProvider.class, neutronL3Adapter);

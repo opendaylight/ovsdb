@@ -133,11 +133,11 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     private String externalRouterMac;
     private Boolean enabled = false;
-    private Boolean flgDistributedARPEnabled = true;
     private Boolean isCachePopulationDone = false;
     private Set<NeutronPort> portCleanupCache;
 
     private Southbound southbound;
+    private DistributedArpService distributedArpService;
     private NeutronModelsDataStoreHelper neutronModelsDataStoreHelper;
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
@@ -165,15 +165,8 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             if (this.externalRouterMac == null) {
                 this.externalRouterMac = DEFAULT_EXT_RTR_MAC;
             }
-
             this.enabled = true;
             LOG.info("OVSDB L3 forwarding is enabled");
-            if (configurationService.isDistributedArpDisabled()) {
-                this.flgDistributedARPEnabled = false;
-                LOG.info("Distributed ARP responder is disabled");
-            } else {
-                LOG.debug("Distributed ARP responder is enabled");
-            }
         } else {
             LOG.debug("OVSDB L3 forwarding is disabled");
         }
@@ -696,7 +689,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
         // Respond to ARPs for the floating ip address by default, via the patch port that connects br-int to br-ex
         //
-        if (programStaticArpStage1(dpId, encodeExcplicitOFPort(ofPort), floatingIpMac, floatingIpAddress,
+        if (distributedArpService.programStaticArpStage1(dpId, encodeExcplicitOFPort(ofPort), floatingIpMac, floatingIpAddress,
                 Action.ADD)) {
             final FloatIpData floatIpData = new FloatIpData(dpId, ofPort, providerSegmentationId, floatingIpMac,
                     floatingIpAddress, fixedIpAddress, neutronRouterMac);
@@ -714,7 +707,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             return;
         }
 
-        if (programStaticArpStage1(floatIpData.dpid, encodeExcplicitOFPort(floatIpData.ofPort), floatIpData.macAddress,
+        if (distributedArpService.programStaticArpStage1(floatIpData.dpid, encodeExcplicitOFPort(floatIpData.ofPort), floatIpData.macAddress,
                 floatIpData.floatingIpAddress, Action.DELETE)) {
             floatIpDataMapCache.remove(neutronFloatingIPUuid);
             LOG.info("Floating IP {} un-programmed ARP mac {} on {} dpid {}",
@@ -881,14 +874,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 // Configure L3 fwd. We do that regardless of tenant network present, because these rules are
                 // still needed when routing to subnets non-local to node (bug 2076).
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
-
-                // Configure distributed ARP responder
-                if (flgDistributedARPEnabled) {
-                    // Arp rule is only needed when segmentation exists in the given node (bug 4752).
-                    boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
-                    final Action actionForNode = arpNeeded ? action : Action.DELETE;
-                    programStaticArpStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
-                }
             }
         }
     }
@@ -1066,7 +1051,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                             actionForNode);
                 }
                 // Enable ARP responder by default, because router interface needs to be responded always.
-                programStaticArpStage1(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                distributedArpService.programStaticArpStage1(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
                 programIcmpEcho(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
             }
 
@@ -1258,49 +1243,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         }
 
         return status.isSuccess();
-    }
-
-    private boolean programStaticArpStage1(Long dpid, String segOrOfPort,
-                                           String macAddress, String ipStr,
-                                           Action action) {
-        if (action == Action.DELETE ) {
-            LOG.trace("Deleting Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {}",
-                    dpid, segOrOfPort, macAddress, ipStr, action);
-        }
-        if (action == Action.ADD) {
-            LOG.trace("Adding Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {}",
-                    dpid, segOrOfPort, macAddress, ipStr, action);
-        }
-
-        Status status = this.programStaticArpStage2(dpid, segOrOfPort, macAddress, ipStr, action);
-        return status.isSuccess();
-    }
-
-    private Status programStaticArpStage2(Long dpid,
-                                          String segOrOfPort,
-                                          String macAddress,
-                                          String address,
-                                          Action action) {
-        Status status;
-        try {
-            InetAddress inetAddress = InetAddress.getByName(address);
-            status = arpProvider == null ?
-                     new Status(StatusCode.SUCCESS) :
-                     arpProvider.programStaticArpEntry(dpid, segOrOfPort,
-                                                       macAddress, inetAddress, action);
-        } catch (UnknownHostException e) {
-            status = new Status(StatusCode.BADREQUEST);
-        }
-
-        if (status.isSuccess()) {
-            LOG.debug("ProgramStaticArp {} for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{}",
-                         arpProvider == null ? "skipped" : "programmed",
-                         macAddress, address, dpid, segOrOfPort, action);
-        } else {
-            LOG.error("ProgramStaticArp failed for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{} status:{}",
-                         macAddress, address, dpid, segOrOfPort, action, status);
-        }
-        return status;
     }
 
     private boolean programInboundIpRewriteStage1(Long dpid, Long inboundOFPort, String providerSegmentationId,
@@ -1598,6 +1540,8 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 (RoutingProvider) ServiceHelper.getGlobalInstance(RoutingProvider.class, this);
         l3ForwardingProvider =
                 (L3ForwardingProvider) ServiceHelper.getGlobalInstance(L3ForwardingProvider.class, this);
+        distributedArpService =
+                 (DistributedArpService) ServiceHelper.getGlobalInstance(DistributedArpService.class, this);
         nodeCacheManager =
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =

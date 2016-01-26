@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2013, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.DistributedArpService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -36,6 +37,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
+    private volatile DistributedArpService distributedArpService;
     private volatile Southbound southbound;
 
     /**
@@ -63,6 +65,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
         LOG.debug(" Port-ADD successful for tenant-id - {}, network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
+        distributedArpService.handleArpPortEvent(neutronPort, Action.ADD);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
     }
 
@@ -93,6 +96,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     }
     private void doNeutronPortUpdated(NeutronPort neutronPort) {
         LOG.debug("Handling neutron update port {}", neutronPort);
+        distributedArpService.handleArpPortEvent(neutronPort, Action.UPDATE);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.UPDATE);
     }
 
@@ -119,6 +123,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     }
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
         LOG.debug("Handling neutron delete port {}", neutronPort);
+        distributedArpService.handleArpPortEvent(neutronPort, Action.DELETE);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
         //TODO: Need to implement getNodes
         List<Node> nodes = nodeCacheManager.getNodes();
@@ -178,6 +183,8 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        distributedArpService =
+                (DistributedArpService) ServiceHelper.getGlobalInstance(DistributedArpService.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =

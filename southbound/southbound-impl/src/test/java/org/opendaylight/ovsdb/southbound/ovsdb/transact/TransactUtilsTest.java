@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.stubbing.OngoingStubbing;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -80,7 +81,7 @@ public class TransactUtilsTest {
         Class<DataObject> klazz = DataObject.class;
         Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
         when(changes.getCreatedData()).thenReturn(map);
-        when(TransactUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(map);
+        when(TransactUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(new HashMap<>());
 
         //test extractCreated()
         assertEquals(map, TransactUtils.extractCreated(changes, klazz));
@@ -140,7 +141,7 @@ public class TransactUtilsTest {
         Class<DataObject> klazz = DataObject.class;
         Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
         when(changes.getOriginalData()).thenReturn(map);
-        when(TransactUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(map);
+        when(TransactUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(new HashMap<>());
 
         //test extractOriginal()
         assertEquals(map, TransactUtils.extractCreated(changes, klazz));
@@ -238,7 +239,7 @@ public class TransactUtilsTest {
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
         Operations op = (Operations) setField("op");
-        when(op.mutate(any(TableSchema.class))).thenReturn(mutate);
+        Mockito.<Mutate<GenericTableSchema>>when(op.mutate(any(TableSchema.class))).thenReturn(mutate);
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Map.class))).thenReturn(mutate);
 
         Mutation deleteIidMutation = mock(Mutation.class);

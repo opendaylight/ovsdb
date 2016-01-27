@@ -872,7 +872,7 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testGetMaskLenFromCidr() throws Exception {
-        assertEquals("Error, did not return the correct mask", 32, Whitebox.invokeMethod(neutronL3Adapter, "getMaskLenFromCidr", IP_MASK));
+        assertEquals("Error, did not return the correct mask", 32, (int) Whitebox.invokeMethod(neutronL3Adapter, "getMaskLenFromCidr", IP_MASK));
     }
 
     @Test
@@ -887,7 +887,7 @@ public class NeutronL3AdapterTest {
         PowerMockito.when(configurationService.getIntegrationBridgeName()).thenReturn("");
         PowerMockito.when(southbound.getDataPathId(any(Node.class))).thenReturn(45L);
 
-        assertEquals("Error, did not return the correct Dpid", 45L, Whitebox.invokeMethod(neutronL3Adapter, "getDpidForIntegrationBridge", mock(Node.class)));
+        assertEquals("Error, did not return the correct Dpid", 45L, (long) Whitebox.invokeMethod(neutronL3Adapter, "getDpidForIntegrationBridge", mock(Node.class)));
     }
 
     @Test

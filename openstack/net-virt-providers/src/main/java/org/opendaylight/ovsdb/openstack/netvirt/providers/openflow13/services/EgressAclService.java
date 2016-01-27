@@ -74,6 +74,8 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private static final int DHCPV6_DESTINATION_PORT = 546;
     private static final String HOST_MASK = "/32";
     private static final String V6_HOST_MASK = "/128";
+    private static final String IP_VERSION_4 = "IPv4";
+    private static final String IP_VERSION_6 = "IPv6";
     private static final int PORT_RANGE_MIN = 1;
     private static final int PORT_RANGE_MAX = 65535;
 
@@ -149,15 +151,31 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     public void programPortSecurityRule(Long dpid, String segmentationId, String attachedMac,
                                         long localPort, NeutronSecurityRule portSecurityRule,
                                         Neutron_IPs vmIp, boolean write) {
+        String securityRuleEtherType = portSecurityRule.getSecurityRuleEthertype();
+        boolean isIpv6 = securityRuleEtherType.equals(IP_VERSION_6);
+        if (!securityRuleEtherType.equals(IP_VERSION_6) && !securityRuleEtherType.equals(IP_VERSION_4)) {
+            LOG.debug("programPortSecurityRule: SecurityRuleEthertype {} does not match IPv4/v6.", securityRuleEtherType);
+            return;
+        }
+
         if (null == portSecurityRule.getSecurityRuleProtocol()) {
             /* TODO Rework on the priority values */
-            boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
             egressAclIP(dpid, isIpv6, segmentationId, attachedMac,
                           write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
         } else {
             String ipaddress = null;
             if (null != vmIp) {
                 ipaddress = vmIp.getIpAddress();
+                try {
+                    InetAddress address = InetAddress.getByName(ipaddress);
+                    if ((isIpv6 && (address instanceof Inet4Address)) || (!isIpv6 && address instanceof Inet6Address)) {
+                        LOG.debug("programPortSecurityRule: Remote vmIP {} does not match with SecurityRuleEthertype {}.", ipaddress, securityRuleEtherType);
+                        return;
+                    }
+                } catch (UnknownHostException e) {
+                    LOG.warn("Invalid IP address {}", ipaddress);
+                    return;
+                }
             }
 
             switch (portSecurityRule.getSecurityRuleProtocol()) {
@@ -430,7 +448,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_TCP_" + segmentationId + "_" + srcMac + "_";
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
         if (isIpv6) {
             matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);
         } else {
@@ -494,7 +512,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             NeutronSecurityRule portSecurityRule, String dstAddress,
             boolean write, Integer protoPortMatchPriority) {
 
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
         if (isIpv6) {
             egressAclIcmpV6(dpidLong, segmentationId, srcMac, portSecurityRule, dstAddress, write, protoPortMatchPriority);
         } else {
@@ -615,7 +633,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_UDP_" + segmentationId + "_" + srcMac + "_";
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
         if (isIpv6) {
             matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);	
         } else {

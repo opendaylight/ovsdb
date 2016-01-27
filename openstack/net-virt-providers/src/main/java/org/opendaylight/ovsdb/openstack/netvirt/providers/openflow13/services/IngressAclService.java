@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -68,6 +69,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     private volatile SecurityGroupCacheManger securityGroupCacheManger;
     private static final int PORT_RANGE_MIN = 1;
     private static final int PORT_RANGE_MAX = 65535;
+    private static final String IP_VERSION_4 = "IPv4";
+    private static final String IP_VERSION_6 = "IPv6";
 
     public IngressAclService() {
         super(Service.INGRESS_ACL);
@@ -141,15 +144,31 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     public void programPortSecurityRule(Long dpid, String segmentationId, String attachedMac,
                                         long localPort, NeutronSecurityRule portSecurityRule,
                                         Neutron_IPs vmIp, boolean write) {
+        String securityRuleEtherType = portSecurityRule.getSecurityRuleEthertype();
+        boolean isIpv6 = securityRuleEtherType.equals(IP_VERSION_6);
+        if (!securityRuleEtherType.equals(IP_VERSION_6) && !securityRuleEtherType.equals(IP_VERSION_4)) {
+            LOG.debug("programPortSecurityRule: SecurityRuleEthertype {} does not match IPv4/v6.", securityRuleEtherType);
+            return;
+        }
+
         if (null == portSecurityRule.getSecurityRuleProtocol()) {
-            boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
             ingressAclIP(dpid, isIpv6, segmentationId, attachedMac,
                          write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
         } else {
             String ipaddress = null;
             if (null != vmIp) {
                 ipaddress = vmIp.getIpAddress();
-            } 
+                try {
+                    InetAddress address = InetAddress.getByName(vmIp.getIpAddress());
+                    if ((isIpv6 && (address instanceof Inet4Address)) || (!isIpv6 && address instanceof Inet6Address)) {
+                        LOG.debug("programPortSecurityRule: Remote vmIP {} does not match with SecurityRuleEthertype {}.", ipaddress, securityRuleEtherType);
+                        return;
+                    }
+                } catch(UnknownHostException e) {
+                    LOG.warn("Invalid IP address {}", ipaddress);
+                    return;
+                }
+            }
 
             switch (portSecurityRule.getSecurityRuleProtocol()) {
               case MatchUtils.TCP:
@@ -403,7 +422,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_TCP_" + segmentationId + "_" + dstMac + "_";
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
         if (isIpv6) {
             matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,null,dstMac);
         } else {
@@ -481,7 +500,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                NeutronSecurityRule portSecurityRule, String srcAddress,
                                boolean write, Integer protoPortMatchPriority ) {
         boolean portRange = false;
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_UDP_" + segmentationId + "_" + dstMac + "_";
         if (isIpv6)  {
@@ -549,7 +568,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             NeutronSecurityRule portSecurityRule, String srcAddress,
             boolean write, Integer protoPortMatchPriority) {
 
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
         if (isIpv6) {
             ingressAclIcmpV6(dpidLong, segmentationId, dstMac, portSecurityRule, srcAddress, write, protoPortMatchPriority);
         } else {

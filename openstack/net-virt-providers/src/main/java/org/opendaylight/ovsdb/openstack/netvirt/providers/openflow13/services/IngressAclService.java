@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -141,15 +142,31 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     public void programPortSecurityRule(Long dpid, String segmentationId, String attachedMac,
                                         long localPort, NeutronSecurityRule portSecurityRule,
                                         Neutron_IPs vmIp, boolean write) {
+        String securityRuleEtherType = portSecurityRule.getSecurityRuleEthertype();
+        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
+        if (!securityRuleEtherType.equals("IPv6") && !securityRuleEtherType.equals("IPv4")) {
+            LOG.debug("programPortSecurityRule: SecurityRuleEthertype {} does not match IPv4/v6.", securityRuleEtherType);
+            return;
+        }
+
         if (null == portSecurityRule.getSecurityRuleProtocol()) {
-            boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals("IPv6");
             ingressAclIP(dpid, isIpv6, segmentationId, attachedMac,
                          write, Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
         } else {
             String ipaddress = null;
             if (null != vmIp) {
                 ipaddress = vmIp.getIpAddress();
-            } 
+                try {
+                    InetAddress address = InetAddress.getByName(vmIp.getIpAddress());
+                    if ((isIpv6 && (address instanceof Inet4Address)) || (!isIpv6 && address instanceof Inet6Address)) {
+                        LOG.debug("programPortSecurityRule: Remote vmIP {} does not match with SecurityRuleEthertype {}.", ipaddress, securityRuleEtherType);
+                        return;
+                    }
+                } catch(UnknownHostException e) {
+                    LOG.warn("Invalid IP address {}", ipaddress);
+                    return;
+                }
+            }
 
             switch (portSecurityRule.getSecurityRuleProtocol()) {
               case MatchUtils.TCP:

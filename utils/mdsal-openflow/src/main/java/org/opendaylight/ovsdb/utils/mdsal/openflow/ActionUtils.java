@@ -249,15 +249,24 @@ public final class ActionUtils {
                                          DstChoice dstChoice,
                                          int endOffset,
                                          boolean groupBucket) {
+        return nxMoveRegAction(srcChoice, dstChoice, 0, 0, endOffset, groupBucket);
+    }
+
+    public static Action nxMoveRegAction(SrcChoice srcChoice,
+                                         DstChoice dstChoice,
+                                         int srcStartOffset,
+                                         int destStartOffset,
+                                         int endOffset,
+                                         boolean groupBucket) {
         NxRegMove r = new NxRegMoveBuilder()
             .setSrc(new SrcBuilder()
                 .setSrcChoice(srcChoice)
-                .setStart(0)
+                .setStart(srcStartOffset)
                 .setEnd(endOffset)
                 .build())
             .setDst(new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nx.action.reg.move.grouping.nx.reg.move.DstBuilder()
                 .setDstChoice(dstChoice)
-                .setStart(0)
+                .setStart(destStartOffset)
                 .setEnd(endOffset)
                 .build())
             .build();

@@ -41,10 +41,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfEthSrcCaseBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -77,7 +78,8 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         ActionBuilder ab = new ActionBuilder();
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
 
-        if (sourceSegId.equals(Constants.EXTERNAL_NETWORK)) {
+        boolean isExternalNet = sourceSegId.equals(Constants.EXTERNAL_NETWORK);
+        if (isExternalNet) {
             // If matching on external network, use register reserved for InboundNatService to ensure that
             // ip rewrite is meant to be consumed by this destination tunnel id.
             MatchUtils.addNxRegMatch(matchBuilder,
@@ -97,22 +99,46 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         final String prefixString = addressSubnetInfo.getInfo().getNetworkAddress() + "/" + mask;
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
 
+        int order = 0;
+        //if this is an east<->west route, save the src mac in case this is an ICMP echo request
+        if(!isExternalNet) {
+            ab.setAction(ActionUtils.nxMoveRegAction(
+                    new SrcOfEthSrcCaseBuilder().setOfEthSrc(Boolean.TRUE).build(),
+                    new DstNxRegCaseBuilder().setNxReg(IcmpEchoResponderService.SRC_MAC_4_HIGH_BYTES_FIELD).build(),
+                    0,0,31, false));
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+            ++order;
+
+            ab.setAction(ActionUtils.nxMoveRegAction(
+                    new SrcOfEthSrcCaseBuilder().setOfEthSrc(Boolean.TRUE).build(),
+                    new DstNxRegCaseBuilder().setNxReg(IcmpEchoResponderService.SRC_MAC_2_LOW_BYTES_FIELD).build(),
+                    32,0,15, false));
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+            ++order;
+        }
+
         // Set source Mac address
         ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(macAddress)));
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
+        ab.setOrder(order);
+        ab.setKey(new ActionKey(order));
         actionList.add(ab.build());
+        ++order;
 
         // DecTTL
         ab.setAction(ActionUtils.decNwTtlAction());
-        ab.setOrder(1);
-        ab.setKey(new ActionKey(1));
+        ab.setOrder(order);
+        ab.setKey(new ActionKey(order));
         actionList.add(ab.build());
+        ++order;
 
         // Set Destination Tunnel ID
         ab.setAction(ActionUtils.setTunnelIdAction(new BigInteger(destSegId)));
-        ab.setOrder(2);
-        ab.setKey(new ActionKey(2));
+        ab.setOrder(order);
+        ab.setKey(new ActionKey(order));
         actionList.add(ab.build());
 
         // Create Apply Actions Instruction

@@ -31,6 +31,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg5;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstOfEthDstCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxRegCaseBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -46,6 +51,8 @@ import java.util.List;
  */
 public class IcmpEchoResponderService extends AbstractServiceInstance implements IcmpEchoProvider, ConfigInterface {
     private static final Logger LOG = LoggerFactory.getLogger(IcmpEchoResponderService.class);
+    public static final Class<? extends NxmNxReg> SRC_MAC_4_HIGH_BYTES_FIELD = NxmNxReg4.class;
+    public static final Class<? extends NxmNxReg> SRC_MAC_2_LOW_BYTES_FIELD = NxmNxReg5.class;
 
     public IcmpEchoResponderService() {
         super(Service.ICMP_ECHO);
@@ -57,28 +64,8 @@ public class IcmpEchoResponderService extends AbstractServiceInstance implements
 
     @Override
     public Status programIcmpEchoEntry(Long dpid, String segmentationId, String macAddressStr, InetAddress ipAddress, Action action) {
-        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
-        MacAddress macAddress = new MacAddress(macAddressStr);
 
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
-
-        // Instructions List Stores Individual Instructions
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
-        InstructionBuilder ib = new InstructionBuilder();
-        ApplyActionsBuilder aab = new ApplyActionsBuilder();
-        ActionBuilder ab = new ActionBuilder();
-        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
-
-        if (segmentationId != null) {
-            final Long inPort = MatchUtils.parseExplicitOFPort(segmentationId);
-            if (inPort != null) {
-                MatchUtils.createInPortMatch(matchBuilder, dpid, inPort);
-            } else {
-                MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
-            }
-        }
+        if (segmentationId == null) return new Status(StatusCode.BADREQUEST);
 
         if (ipAddress instanceof Inet6Address) {
             // WORKAROUND: For now ipv6 is not supported
@@ -88,71 +75,134 @@ public class IcmpEchoResponderService extends AbstractServiceInstance implements
             return new Status(StatusCode.NOTIMPLEMENTED);
         }
 
-        // Match ICMP echo requests, type=8, code=0
-        MatchUtils.createICMPv4Match(matchBuilder, (short)8, (short)0);
-        MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
+        MacAddress macAddress = new MacAddress(macAddressStr);
 
-        // Move Eth Src to Eth Dst
-        ab.setAction(ActionUtils.nxMoveEthSrcToEthDstAction());
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
-        actionList.add(ab.build());
+        programEntry(nodeName, segmentationId, macAddress, ipAddress, true, action);
+        programEntry(nodeName, segmentationId, macAddress, ipAddress, false, action);
 
-        // Set Eth Src
-        ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(macAddress)));
-        ab.setOrder(1);
-        ab.setKey(new ActionKey(1));
-        actionList.add(ab.build());
+        // ToDo: WriteFlow/RemoveFlow should return something we can use to check success
+        return new Status(StatusCode.SUCCESS);
+    }
 
-        // Move Ip Src to Ip Dst
-        ab.setAction(ActionUtils.nxMoveIpSrcToIpDstAction());
-        ab.setOrder(2);
-        ab.setKey(new ActionKey(2));
-        actionList.add(ab.build());
-
-        // Set Ip Src
-        ab.setAction(ActionUtils.setNwSrcAction(new Ipv4Builder().setIpv4Address(
-                                    MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress())).build()));
-        ab.setOrder(3);
-        ab.setKey(new ActionKey(3));
-        actionList.add(ab.build());
-
-        // Set the ICMP type to 0 (echo reply)
-        ab.setAction(ActionUtils.setIcmpTypeAction((byte)0));
-        ab.setOrder(4);
-        ab.setKey(new ActionKey(4));
-        actionList.add(ab.build());
-
-        // Output of InPort
-        ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":INPORT")));
-        ab.setOrder(5);
-        ab.setKey(new ActionKey(5));
-        actionList.add(ab.build());
-
-        // Create Apply Actions Instruction
-        aab.setAction(actionList);
-        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
+    private Status programEntry(String nodeName, String segmentationId, MacAddress macAddress, InetAddress ipAddress, boolean isRouted, Action action) {
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowId = "IcmpEchoResponder_" + segmentationId + "_" + ipAddress.getHostAddress();
+        String flowName = (isRouted ? "RoutedIcmpEchoResponder_" : "LanIcmpEchoResponder_")
+                + segmentationId + "_" + ipAddress.getHostAddress();
 
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
+        //The non-routed flow has an extra match condition and it must therefor be of a higher
+        //prio to make sure we get a "best match" kind of logic between the two
+        flowBuilder.setId(new FlowId(flowName));
+        FlowKey key = new FlowKey(new FlowId(flowName));
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
-        flowBuilder.setPriority(1024);
-        flowBuilder.setFlowName(flowId);
+        flowBuilder.setPriority(isRouted ? 2048 : 2049);
+        flowBuilder.setFlowName(flowName);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
 
+        NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+
+        // Match ICMP echo requests, type=8, code=0
+        MatchUtils.createICMPv4Match(matchBuilder, (short) 8, (short) 0);
+        MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
+
+        if (!isRouted) {
+            //packets that have been "routed" in table 60 (DVR) will have their src MAC in nxm_nx_reg4 and nxm_nx_reg5
+            //here we check that nxm_nx_reg4 is empty to check whether the packet has *not* been router since its
+            //destination is on the same LAN
+            MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(SRC_MAC_4_HIGH_BYTES_FIELD, 0x0L));
+        }
+
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
         if (action.equals(Action.ADD)) {
+            // Instructions List Stores Individual Instructions
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructions = Lists.newArrayList();
+            InstructionBuilder ib = new InstructionBuilder();
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            ActionBuilder ab = new ActionBuilder();
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
+
+            int order = 0;
+            if (isRouted) {
+                ab.setAction(
+                            ActionUtils.nxMoveRegAction(
+                            new SrcNxRegCaseBuilder().setNxReg(SRC_MAC_4_HIGH_BYTES_FIELD).build(),
+                            new DstOfEthDstCaseBuilder().setOfEthDst(true).build(),
+                            0, 0, 31, false));
+                ab.setOrder(order);
+                ab.setKey(new ActionKey(order));
+                actionList.add(ab.build());
+                ++order;
+
+                ab.setAction(
+                            ActionUtils.nxMoveRegAction(
+                            new SrcNxRegCaseBuilder().setNxReg(SRC_MAC_2_LOW_BYTES_FIELD).build(),
+                            new DstOfEthDstCaseBuilder().setOfEthDst(true).build(),
+                            0, 32, 47, false));
+                ab.setOrder(order);
+                ab.setKey(new ActionKey(order));
+                actionList.add(ab.build());
+                ++order;
+            } else {
+                ab.setAction(ActionUtils.nxMoveEthSrcToEthDstAction());
+                ab.setOrder(order);
+                ab.setKey(new ActionKey(order));
+                actionList.add(ab.build());
+                ++order;
+            }
+
+            // Set Eth Src
+            ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(macAddress)));
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+            ++order;
+
+            // Move Ip Src to Ip Dst
+            ab.setAction(ActionUtils.nxMoveIpSrcToIpDstAction());
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+            ++order;
+
+            // Set Ip Src
+            ab.setAction(ActionUtils.setNwSrcAction(new Ipv4Builder().setIpv4Address(
+                    MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress())).build()));
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+            ++order;
+
+            // Set the ICMP type to 0 (echo reply)
+            ab.setAction(ActionUtils.setIcmpTypeAction((byte)0));
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+            ++order;
+
+            // Output of InPort
+            ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":INPORT")));
+            ab.setOrder(order);
+            ab.setKey(new ActionKey(order));
+            actionList.add(ab.build());
+
+            // Create Apply Actions Instruction
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            flowBuilder.setInstructions(isb.setInstruction(instructions).build());
+
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             removeFlow(flowBuilder, nodeBuilder);

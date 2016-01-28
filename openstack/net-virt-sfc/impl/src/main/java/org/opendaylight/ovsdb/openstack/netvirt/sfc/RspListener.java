@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RspListener extends AbstractDataTreeListener<RenderedServicePath> {
     private static final Logger LOG = LoggerFactory.getLogger(RspListener.class);
+    private ListenerRegistration<RspListener> listenerRegistration;
 
     public RspListener(final INetvirtSfcOF13Provider provider, final DataBroker db) {
         super(provider, RenderedServicePath.class);
@@ -37,13 +38,13 @@ public class RspListener extends AbstractDataTreeListener<RenderedServicePath> {
 
     private void registrationListener(final DataBroker db) {
         final DataTreeIdentifier<RenderedServicePath> treeId =
-                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getRspIid());
+                new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, getRspIid());
         try {
             LOG.info("Registering Data Change Listener for NetvirtSfc RenderedServicePath configuration.");
-            ListenerRegistration<RspListener> listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
+            listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
             LOG.warn("Netvirt RenderedServicePath DataChange listener registration failed!");
-            throw new IllegalStateException("NetvirtSfcAccessListListener startup failed! System needs restart.", e);
+            throw new IllegalStateException("RspListener startup failed! System needs restart.", e);
         }
     }
 

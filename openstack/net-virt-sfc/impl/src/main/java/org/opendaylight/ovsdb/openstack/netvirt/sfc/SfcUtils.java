@@ -12,13 +12,16 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.sfc.provider.api.SfcProviderAclAPI;
+import org.opendaylight.sfc.provider.api.SfcProviderRenderedPathAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServiceFunctionAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServicePathAPI;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.RspName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SfName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.RenderedServicePaths;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.path.first.hop.info.RenderedServicePathFirstHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePathKey;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.rendered.service.path.RenderedServicePathHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctions;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunctionKey;
@@ -113,13 +116,17 @@ public class SfcUtils {
                         List<Ace> aces = accessListEntries.getAce();
                         for (Ace ace : aces) {
                             RedirectToSfc sfcRedirect = ace.getActions().getAugmentation(RedirectToSfc.class);
-                            if ((sfcRedirect != null && sfcRedirect.getRspName().equals(name)) ||
-                                    (sfcRedirect != null && sfcRedirect.getSfcName().equals(name)) ||
-                                    (sfcRedirect != null && sfcRedirect.getSfpName().equals(name))) {
+                            if ((sfcRedirect != null) &&
+                                    (sfcRedirect.getRspName().equals(name) ||
+                                    (sfcRedirect.getSfcName().equals(name)) ||
+                                    (sfcRedirect.getSfpName().equals(name)))) {
                                 aceFound = ace;
                                 break;
                             }
                         }
+                    }
+                    if (aceFound != null) {
+                        break;
                     }
                 }
             }
@@ -188,5 +195,25 @@ public class SfcUtils {
         }
 
         return (Ip)serviceFunctionForwarder.getSffDataPlaneLocator().get(0).getDataPlaneLocator().getLocatorType();
+    }
+
+    public RenderedServicePathHop getFirstHop(RenderedServicePath rsp) {
+        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
+        if (pathHopList.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return null;
+        }
+
+        return pathHopList.get(0);
+    }
+
+    public RenderedServicePathHop getLastHop(RenderedServicePath rsp) {
+        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
+        if (pathHopList.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return null;
+        }
+
+        return pathHopList.get(pathHopList.size()-1);
     }
 }

@@ -60,6 +60,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private static final short SFC_TABLE = 150;
     private MdsalUtils mdsalUtils;
     private SfcUtils sfcUtils;
+    private DataBroker dataBroker;
     private static final String VXGPE = "vxgpe";
     public static final String TUNNEL_ENDPOINT_KEY = "local_ip";
 
@@ -68,6 +69,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         Preconditions.checkNotNull(mdsalUtils, "Input mdsalUtils cannot be NULL!");
         Preconditions.checkNotNull(sfcUtils, "Input sfcUtils cannot be NULL!");
 
+        this.dataBroker = dataBroker;
         this.mdsalUtils = mdsalUtils;
         this.sfcUtils = sfcUtils;
     }
@@ -114,6 +116,17 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     @Override
     public void removeClassifierRules(Acl acl) {
 
+    }
+
+    @Override
+    public void removeRsp(RenderedServicePath change) {
+        LOG.info("removeRsp not implemented yet");
+        sfcClassifierService.clearFlows(dataBroker, change.getName().getValue());
+    }
+
+    @Override
+    public void updateRsp(RenderedServicePath change) {
+        LOG.info("updateRsp not implemented yet");
     }
 
     private void processAclEntry(Ace entry) {
@@ -171,26 +184,28 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         for (RenderedServicePathHop hop : pathHopList) {
             for (Node bridgeNode : bridgeNodes) {
                 // ignore bridges other than br-int
+                // TODO: Get bridge name from DPL, rework this loop to use DPL list
                 OvsdbBridgeAugmentation ovsdbBridgeAugmentation = southbound.getBridge(bridgeNode, "br-int");
                 if (ovsdbBridgeAugmentation == null) {
                     continue;
                 }
+                // TODO: Get port name from the DPL
                 long vxGpeOfPort = getOFPort(bridgeNode, VXGPE);
                 if (vxGpeOfPort == 0L) {
-                    LOG.warn("programAclEntry: Could not identify gpe vtep {} -> OF ({}) on {}",
+                    LOG.warn("handleRenderedServicePath: Could not identify gpe vtep {} -> OF ({}) on {}",
                             VXGPE, vxGpeOfPort, bridgeNode);
                     continue;
                 }
                 long dataPathId = southbound.getDataPathId(bridgeNode);
                 if (dataPathId == 0L) {
-                    LOG.warn("programAclEntry: Could not identify datapathId on {}", bridgeNode);
+                    LOG.warn("handleRenderedServicePath: Could not identify datapathId on {}", bridgeNode);
                     continue;
                 }
 
                 ServiceFunction serviceFunction =
                         SfcProviderServiceFunctionAPI.readServiceFunction(firstHop.getServiceFunctionName());
                 if (serviceFunction == null) {
-                    LOG.warn("programAclEntry: Could not identify ServiceFunction {} on {}",
+                    LOG.warn("handleRenderedServicePath: Could not identify ServiceFunction {} on {}",
                             firstHop.getServiceFunctionName().getValue(), bridgeNode);
                     continue;
                 }
@@ -198,12 +213,12 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                         SfcProviderServiceForwarderAPI
                                 .readServiceFunctionForwarder(hop.getServiceFunctionForwarder());
                 if (serviceFunctionForwarder == null) {
-                    LOG.warn("programAclEntry: Could not identify ServiceFunctionForwarder {} on {}",
+                    LOG.warn("handleRenderedServicePath: Could not identify ServiceFunctionForwarder {} on {}",
                             firstHop.getServiceFunctionName().getValue(), bridgeNode);
                     continue;
                 }
 
-                handleSf(bridgeNode, serviceFunction);
+                handleSf(bridgeNode, serviceFunction, rsp);
                 handleSff(bridgeNode, serviceFunctionForwarder, serviceFunction, hop, firstHop, lastHop,
                         entry.getRuleName(), matches, vxGpeOfPort, rsp);
                 if (firstHop == lastHop) {
@@ -243,7 +258,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                 nshHeader.setNshTunUdpPort(ip.getPort());
             }
             sfcClassifierService.programIngressClassifier(dataPathId, ruleName, matches,
-                    nshHeader, vxGpeOfPort, true);
+                    rsp.getPathId(), rsp.getStartingIndex(),
+                    nshHeader, vxGpeOfPort, rsp.getName().getValue(), true);
         } else if (hop == lastHop) {
             LOG.info("handleSff: last hop processing {} - {}",
                     bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
@@ -252,10 +268,10 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             long sfOfPort = getSfPort(bridgeNode, sfDplName);
             // TODO: Coexistence: SFC flows should take this using new egressTable REST
             sfcClassifierService.programEgressClassifier(dataPathId, vxGpeOfPort, rsp.getPathId(),
-                    lastServiceindex, sfOfPort, 0, true);
+                    lastServiceindex, sfOfPort, 0, rsp.getName().getValue(), true);
             // TODO: Coexistence: This flow should like like one above, change port, add reg0=1, resubmit
             sfcClassifierService.programEgressClassifierBypass(dataPathId, vxGpeOfPort, rsp.getPathId(),
-                    lastServiceindex, sfOfPort, 0, true);
+                    lastServiceindex, sfOfPort, 0, rsp.getName().getValue(), true);
         } else {
             // add typical sff flows
         }
@@ -264,7 +280,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         //sfcClassifierService.programSfcTable(dataPathId, vxGpeOfPort, SFC_TABLE, true);
     }
 
-    void handleSf(Node bridgeNode, ServiceFunction serviceFunction) {
+    void handleSf(Node bridgeNode, ServiceFunction serviceFunction, RenderedServicePath rsp) {
         if (isSfOnBridge(bridgeNode, serviceFunction)) {
             LOG.info("handleSf: sf and bridge are on the same node: {} - {}, adding workaround and arp",
                     bridgeNode.getNodeId().getValue(), serviceFunction.getName().getValue());
@@ -283,7 +299,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             // TODO: Coexistence: SFC flows should take this using new sf dpl augmentation
             //sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
             //sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
-            sfcClassifierService.programStaticArpEntry(dataPathId, 0L, sfMac, sfIpAddr, true);
+            sfcClassifierService.programStaticArpEntry(dataPathId, 0L, sfMac, sfIpAddr,
+                    rsp.getName().getValue(), true);
         } else {
             LOG.info("handleSf: sf and bridge are not on the same node: {} - {}, do nothing",
                     bridgeNode.getNodeId().getValue(), serviceFunction.getName().getValue());
@@ -333,6 +350,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         String rspName = rsp.getName().getValue();
         String rspNameSuffix = "_rsp";
         String sfcName = rspName.substring(0, rspName.length() - rspNameSuffix.length());
+        LOG.info("getAceFromRenderedServicePath: rsp: {}, sfcName: {}", rsp, sfcName);
         ace = sfcUtils.getAce(sfcName);
 
         return ace;
@@ -454,16 +472,6 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             mac = southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_VM_MAC);
         }
         return mac;
-    }
-
-    @Override
-    public void removeRsp(RenderedServicePath change) {
-        LOG.info("removeRsp not implemented yet");
-    }
-
-    @Override
-    public void updateRsp(RenderedServicePath change) {
-        LOG.info("updateRsp not implemented yet");
     }
 
     @Override

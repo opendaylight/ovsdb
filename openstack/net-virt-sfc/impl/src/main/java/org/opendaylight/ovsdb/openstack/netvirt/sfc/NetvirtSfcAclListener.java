@@ -46,7 +46,7 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
             LOG.info("Registering Data Change Listener for NetvirtSfc AccessList configuration.");
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
-            LOG.warn("Netvirt AccesList DataChange listener registration fail!");
+            LOG.warn("Netvirt AccessList DataChange listener registration fail!");
             throw new IllegalStateException("NetvirtSfcAccessListListener startup fail! System needs restart.", e);
         }
     }

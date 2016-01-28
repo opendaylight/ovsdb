@@ -72,20 +72,6 @@ public class HwvtepSouthboundUtil {
         return node;
     }
 
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean deleteNode(
-                    ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
-        boolean result = false;
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, connectionIid);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", connectionIid, e);
-        }
-        return result;
-    }
-
     public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db,
                     HwvtepPhysicalSwitchAttributes pNode) {
         Preconditions.checkNotNull(pNode);

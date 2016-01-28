@@ -20,7 +20,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -115,20 +114,6 @@ public class SouthboundUtil {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
         }
         return node;
-    }
-
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean deleteNode(
-            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
-        boolean result = false;
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, connectionIid);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", connectionIid, e);
-        }
-        return result;
     }
 
     private static String getLocalControllerHostIpAddress() {

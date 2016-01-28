@@ -17,7 +17,8 @@ define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/
   // nbv2 support depricated in dlux
   ovsdb.register.factory('NeutronRestangular', ['Restangular', function (Restangular) {
     return Restangular.withConfig(function (RestangularConfig) {
-      RestangularConfig.setBaseUrl('http://localhost:8080/controller/nb/v2/neutron');
+      var baseUrl = window.location.protocol + '//' + window.location.hostname;
+      RestangularConfig.setBaseUrl(baseUrl + ':8080/controller/nb/v2/neutron');
     });
   }]);
 

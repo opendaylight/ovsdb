@@ -150,7 +150,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>
-              org.opendaylight.ovsdb.openstack.netvirt.sfc
+              org.opendaylight.ovsdb.openstack.netvirt.sfc,
+              org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services
             </Export-Package>
           </instructions>
         </configuration>

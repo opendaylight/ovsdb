@@ -37,11 +37,13 @@ public abstract class AbstractDataTreeListener<T extends DataObject> implements 
     public void onDataTreeChanged(Collection<DataTreeModification<T>> changes) {
         Preconditions.checkNotNull(changes, "Changes may not be null!");
 
-        LOG.info("Received Data Tree Changed ...", changes);
+        LOG.info("onDataTreeChanged: Received Data Tree Changed ...", changes);
         for (DataTreeModification<T> change : changes) {
             final InstanceIdentifier<T> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<T> mod = change.getRootNode();
-            LOG.info("Received Data Tree Changed Update of Type={} for Key={}", mod.getModificationType(), key);
+            LOG.info("onDataTreeChanged: Received Data Tree Changed Update of Type={} for Key={}",
+                    mod.getModificationType(), key);
+            LOG.info("onDataTreeChanged: mod: {}", mod);
             switch (mod.getModificationType()) {
                 case DELETE:
                     remove(key, mod.getDataBefore());

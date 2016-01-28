@@ -9,9 +9,15 @@
 package org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -31,9 +37,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
@@ -46,6 +51,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -55,6 +61,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     private static final Logger LOG = LoggerFactory.getLogger(SfcClassifierService.class);
     private static final short UDP_SHORT = 17;
     static int cookieIndex = 0;
+    private FlowCache flowCache = new FlowCache();
 
     private enum FlowID {
         FLOW_INGRESSCLASS(1), FLOW_SFINGRESS(2), FLOW_SFEGRESS(3), FLOW_SFARP(4),
@@ -64,7 +71,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         FlowID(int value) {
             this.value = value;
         }
-
     }
 
     private BigInteger getCookie(FlowID flowID) {
@@ -108,12 +114,22 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         return flowBuilder;
     }
 
+    private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder, String rspName, FlowID flowID) {
+        flowCache.addFlow(flowBuilder, nodeBuilder, rspName, flowID.value);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    private void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder, String rspName, FlowID flowID) {
+        flowCache.removeFlow(rspName, flowID.value);
+        removeFlow(flowBuilder, nodeBuilder);
+    }
+
     @Override
-    public void programIngressClassifier(long dataPathId, String ruleName, Matches matches,
-                                         NshUtils nshHeader, long vxGpeOfPort, boolean write) {
+    public void programIngressClassifier(long dataPathId, String ruleName, Matches matches, long nsp, short nsi,
+                                         NshUtils nshHeader, long vxGpeOfPort, String rspName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfcIngressClass_" + ruleName;// + "_" + nshHeader.getNshNsp();
+        String flowName = FlowNames.getSfcIngressClass(ruleName, nsp, nsi);
         initFlowBuilder(flowBuilder, flowName, getTable(), FlowID.FLOW_INGRESSCLASS,
                 (short)nshHeader.getNshNsp(), nshHeader.getNshNsi());
 
@@ -151,9 +167,9 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
             InstructionsBuilder isb = new InstructionsBuilder();
             isb.setInstruction(instructions);
             flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
+            writeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_INGRESSCLASS);
         } else {
-            removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_INGRESSCLASS);
         }
     }
 
@@ -161,7 +177,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     public void programSfcTable(long dataPathId, long vxGpeOfPort, short goToTableId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfcTable_" + vxGpeOfPort;
+        String flowName = FlowNames.getSfcTable(vxGpeOfPort);
         initFlowBuilder(flowBuilder, flowName, getTable(Service.CLASSIFIER), FlowID.FLOW_SFCTABLE)
                 .setPriority(1000);
 
@@ -191,7 +207,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                                          int tunnelOfPort, int tunnelId, short gotoTableId, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfcEgressClass1_" + vxGpeOfPort;
+        String flowName = FlowNames.getSfcEgressClass1(vxGpeOfPort);
         initFlowBuilder(flowBuilder, flowName, getTable(Service.CLASSIFIER), FlowID.FLOW_EGRESSCLASSUNUSED,
                 (short)nsp, nsi);
 
@@ -220,10 +236,10 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
     @Override
     public void programEgressClassifier(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
-                                        long sfOfPort, int tunnelId, boolean write) {
+                                        long sfOfPort, int tunnelId, String rspName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfcEgressClass_" + nsp + "_" + + nsi + "_"  + vxGpeOfPort;
+        String flowName = FlowNames.getSfcEgressClass(vxGpeOfPort, nsp, nsi);
         initFlowBuilder(flowBuilder, flowName, getTable(Service.SFC_CLASSIFIER), FlowID.FLOW_EGRESSCLASS,
                 (short)nsp, nsi);
 
@@ -268,18 +284,18 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             isb.setInstruction(instructions);
             flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
+            writeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_EGRESSCLASS);
         } else {
-            removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_EGRESSCLASS);
         }
     }
 
     @Override
     public void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
-                                              long sfOfPort, int tunnelId, boolean write) {
+                                              long sfOfPort, int tunnelId, String rspName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfcEgressClassBypass_" + nsp + "_" + + nsi + "_"  + sfOfPort;
+        String flowName = FlowNames.getSfcEgressClassBypass(nsp, nsi, sfOfPort);
         initFlowBuilder(flowBuilder, flowName, getTable(Service.CLASSIFIER),
                 FlowID.FLOW_EGRESSCLASSBYPASS, (short)nsp, nsi)
                 .setPriority(40000);
@@ -304,9 +320,9 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             isb.setInstruction(instructions);
             flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
+            writeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_EGRESSCLASSBYPASS);
         } else {
-            removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_EGRESSCLASSBYPASS);
         }
     }
 
@@ -315,7 +331,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     public void program_sfEgress(long dataPathId, int dstPort, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfEgress_" + dstPort;
+        String flowName = FlowNames.getSfEgress(dstPort);
         initFlowBuilder(flowBuilder, flowName, getTable(), FlowID.FLOW_SFEGRESS);
 
         MatchBuilder matchBuilder = new MatchBuilder();
@@ -348,7 +364,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
                                   String ipAddress, String sfDplName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "sfIngress_" + dstPort + "_" + ipAddress;
+        String flowName = FlowNames.getSfIngress(dstPort, ipAddress);
         initFlowBuilder(flowBuilder, flowName, Service.CLASSIFIER.getTable(), FlowID.FLOW_SFINGRESS);
 
         MatchBuilder matchBuilder = new MatchBuilder();
@@ -378,10 +394,10 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
     @Override
     public void programStaticArpEntry(long dataPathId, long ofPort, String macAddressStr,
-                                      String ipAddress, boolean write) {
+                                      String ipAddress, String rspName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "ArpResponder_" + ipAddress;
+        String flowName = FlowNames.getArpResponder(ipAddress);
         initFlowBuilder(flowBuilder, flowName, getTable(Service.ARP_RESPONDER), FlowID.FLOW_SFARP)
                 .setPriority(1024);
 
@@ -459,9 +475,9 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             isb.setInstruction(instructions);
             flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
+            writeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_SFARP);
         } else {
-            removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_SFARP);
         }
     }
 
@@ -515,5 +531,36 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
         LOG.info("buildMatch: {}", matchBuilder.build());
         return matchBuilder;
+    }
+
+    private static FlowID flowSet[] = {FlowID.FLOW_INGRESSCLASS, FlowID.FLOW_EGRESSCLASS,
+            FlowID.FLOW_EGRESSCLASSBYPASS, FlowID.FLOW_SFARP};
+
+    @Override
+    public void clearFlows(DataBroker dataBroker, String rspName) {
+        Map<Integer, InstanceIdentifier<Flow>> flowMap = flowCache.getFlows(rspName);
+        if (flowMap != null) {
+            for (FlowID flowID : flowSet) {
+                InstanceIdentifier<Flow> path = flowMap.get(flowID.value);
+                if (path != null) {
+                    flowCache.removeFlow(rspName, flowID.value);
+                    removeFlow(dataBroker, path);
+                }
+            }
+        }
+    }
+
+    private void removeFlow(DataBroker dataBroker, InstanceIdentifier<Flow> path) {
+        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
+        modification.delete(LogicalDatastoreType.CONFIGURATION, path);
+
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+        try {
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            LOG.debug("Transaction success for deletion of Flow {}", path);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            modification.cancel();
+        }
     }
 }

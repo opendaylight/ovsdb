@@ -27,9 +27,11 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRunti
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
@@ -38,9 +40,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
@@ -54,7 +60,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionForward
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionPathUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.ServiceFunctionUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcConfigUtils;
-import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.SfcUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.utils.NetvirtSfcUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services.FlowNames;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
@@ -111,6 +118,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -137,9 +145,11 @@ import com.google.common.collect.Maps;
 @ExamReactorStrategy(PerClass.class)
 public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcIT.class);
+    private static final int MDSAL_TIMEOUT = 10000;
+    private static final int NO_MDSAL_TIMEOUT = 0;
     private static AclUtils aclUtils = new AclUtils();
     private static ClassifierUtils classifierUtils = new ClassifierUtils();
-    private static SfcUtils sfcUtils = new SfcUtils();
+    private static NetvirtSfcUtils netvirtSfcUtils = new NetvirtSfcUtils();
     private static ServiceFunctionUtils serviceFunctionUtils = new ServiceFunctionUtils();
     private static ServiceFunctionForwarderUtils serviceFunctionForwarderUtils = new ServiceFunctionForwarderUtils();
     private static ServiceFunctionChainUtils serviceFunctionChainUtils = new ServiceFunctionChainUtils();
@@ -149,6 +159,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static MdsalUtils mdsalUtils;
     private static AtomicBoolean setup = new AtomicBoolean(false);
     private static SouthboundUtils southboundUtils;
+    private static SfcUtils sfcUtils;
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
@@ -177,9 +188,10 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final String SF1DPLNAME = "sf1";
     private static final String SF2DPLNAME = "sf2";
     // Use 192.168.50.70 when running against vagrant vm for workaround testing
+    // Use 192.168.1.129 (or whatever address is dhcp'ed) for tacker-vm
     // "192.168.50.70"; "127.0.0.1"; "192.168.1.129";
-    private static final String SFF1IP = "192.168.1.129";
-    private static final String SFF2IP = "192.168.1.129";//"127.0.0.1";
+    private static final String SFF1IP = "192.168.50.70";
+    private static final String SFF2IP = "127.0.0.1";
     private static final String SFF1NAME = "sff1";
     private static final String SFF2NAME = "sff2";
     private static final String SFFDPL1NAME = "vxgpe";
@@ -190,8 +202,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     private static final String BRIDGE2NAME= "br-int";
     private static final String ACLNAME= "httpAcl";
     private static final String RULENAME= "httpRule";
-    private static final String SFCNAME = "sfc1";
+    private static final String SFCNAME = "SFC";
     private static final String SFCPATH = "SFC-Path";
+    private static final String RSPNAME = SFCPATH + "_rsp";
     private static final String SFCSF1NAME = "firewall-abstract";
     private static final SftType SFCSF1TYPE = new SftType("firewall");
     private static final int GPEUDPPORT = 6633;
@@ -242,8 +255,9 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                                 .version(asInProject())
                                 .type("jar")),
                 configureConsole().startLocalConsole(),
+                //vmOption("-verbose:class"),
                 vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
-                        keepRuntimeFolder()
+                keepRuntimeFolder()
         };
     }
 
@@ -331,12 +345,14 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         mdsalUtils = new MdsalUtils(dataBroker);
         assertNotNull("mdsalUtils should not be null", mdsalUtils);
         southboundUtils = new SouthboundUtils(mdsalUtils);
+        sfcUtils = new SfcUtils(mdsalUtils);
         assertTrue("Did not find " + NETVIRT_TOPOLOGY_ID, getNetvirtTopology());
         southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         assertNotNull("southbound should not be null", southbound);
         pipelineOrchestrator =
                 (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
         assertNotNull("pipelineOrchestrator should not be null", pipelineOrchestrator);
+
         setup.set(true);
     }
 
@@ -439,7 +455,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private SfcBuilder netvirtSfcBuilder() {
-        return sfcUtils.sfcBuilder(new SfcBuilder(), "sfc");
+        return netvirtSfcUtils.sfcBuilder(new SfcBuilder(), "sfc");
     }
 
     @Test
@@ -629,14 +645,26 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
      * Test that the NetvirtSfc SfcClassifierService is added to the Netvirt pipeline.
      * @throws InterruptedException
      */
-    @Test
+    /*@Test
     public void testNetvirtSfcPipeline() throws InterruptedException {
-        String bridgeName = INTEGRATION_BRIDGE_NAME;
         ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
-        assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
+        InstanceIdentifier<Node> ovsdbIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        final NotifyingDataChangeListener ovsdbOperationalListener =
+                new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
+        ovsdbOperationalListener.registerDataChangeListener();
+
+        String bridgeName = INTEGRATION_BRIDGE_NAME;
+        InstanceIdentifier<Node> bridgeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo, bridgeName);
+        final NotifyingDataChangeListener bridgeOperationalListener =
+                new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        bridgeOperationalListener.registerDataChangeListener();
+        assertNotNull("connection failed", southboundUtils.addOvsdbNode(connectionInfo, NO_MDSAL_TIMEOUT));
+
+        ovsdbOperationalListener.waitForCreation(MDSAL_TIMEOUT);
         Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
 
+        bridgeOperationalListener.waitForCreation(MDSAL_TIMEOUT);
         assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
                 + " is not connected", isControllerConnected(connectionInfo));
 
@@ -647,23 +675,40 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
         assertNotEquals("datapathId was not found", datapathId, 0);
 
-        String flowId = "DEFAULT_PIPELINE_FLOW_" + Service.SFC_CLASSIFIER.getTable();
+        String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
         verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
 
-        readwait();
+        assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName, NO_MDSAL_TIMEOUT));
+        bridgeOperationalListener.waitForDeletion(MDSAL_TIMEOUT);
+        bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        assertNull("Bridge should not be found", bridgeNode);
+        assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo, NO_MDSAL_TIMEOUT));
+        ovsdbOperationalListener.waitForDeletion(MDSAL_TIMEOUT);
+        ovsdbNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
+        assertNull("Ovsdb node should not be found", ovsdbNode);
+    }*/
 
-        assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
-        Thread.sleep(1000);
-        assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
+    public class NotifyingDataChangeListener2 {
+        int something;
+
+        public NotifyingDataChangeListener2(int something) {
+            this.something = something;
+        }
     }
 
+    @Test
+    public void testClassNotFound() throws InterruptedException {
+        LOG.info("shague >>>>>");
+        final NotifyingDataChangeListener2 lis2 = new NotifyingDataChangeListener2(500);
+        LOG.info("shague 2 >>>>>");
+    }
     /**
      * Test the full NetvirtSfc functionality by creating everything needed to realize a chain and
      * then verify all flows have been created.
      * NOTE: This test requires an OVS with the NSH v8 patch, otherwise it will fail miserably.
      * @throws InterruptedException
      */
-    @Test
+    /*@Test
     public void testNetvirtSfcAll() throws InterruptedException {
         if (userSpaceEnabled.equals("yes")) {
             LOG.info("testNetvirtSfcAll: skipping test because userSpaceEnabled {}", userSpaceEnabled);
@@ -676,12 +721,24 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         short egressTable = pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
         testModelPut(sfcOfRendererConfigBuilder(sfcTableoffset, egressTable), SfcOfRendererConfig.class);
 
-        String bridgeName = INTEGRATION_BRIDGE_NAME;
         ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
-        assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
+        InstanceIdentifier<Node> ovsdbIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        final NotifyingDataChangeListener ovsdbOperationalListener =
+                new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
+        ovsdbOperationalListener.registerDataChangeListener();
+
+        String bridgeName = INTEGRATION_BRIDGE_NAME;
+        InstanceIdentifier<Node> bridgeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo, bridgeName);
+        final NotifyingDataChangeListener bridgeOperationalListener =
+                new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        bridgeOperationalListener.registerDataChangeListener();
+        assertNotNull("connection failed", southboundUtils.addOvsdbNode(connectionInfo, NO_MDSAL_TIMEOUT));
+
+        ovsdbOperationalListener.waitForCreation(MDSAL_TIMEOUT);
         Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
 
+        bridgeOperationalListener.waitForCreation(MDSAL_TIMEOUT);
         assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
                 + " is not connected", isControllerConnected(connectionInfo));
 
@@ -704,20 +761,17 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         externalIds.clear();
         externalIds.put("attached-mac", "f6:00:00:0c:00:02");
         southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal");
-        // SFC will add the SFF dpl port when creating the RSP
-        /*Map<String, String> options = Maps.newHashMap();
-        options.put("key", "flow");
-        options.put("dst_port", String.valueOf(GPEUDPPORT));
-        options.put("remote_ip", "flow");
-        options.put("nshc1", "flow");
-        options.put("nshc2", "flow");
-        options.put("nsp", "flow");
-        options.put("nsi", "flow");
-        southboundUtils.addTerminationPoint(bridgeNode, "vxgpe", "vxlan", options, null);
-        options.clear();
-        options.put("key", "flow");
-        options.put("remote_ip", "192.168.120.32");
-        southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null);*/
+
+        InstanceIdentifier<TerminationPoint> tpIid =
+                southboundUtils.createTerminationPointInstanceIdentifier(bridgeNode, SFFDPL1NAME);
+        final NotifyingDataChangeListener portOperationalListener =
+                new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, tpIid);
+        portOperationalListener.registerDataChangeListener();
+
+        InstanceIdentifier<RenderedServicePath> rspIid = sfcUtils.getRspId(RSPNAME);
+        final NotifyingDataChangeListener rspOperationalListener =
+                new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, rspIid);
+        rspOperationalListener.registerDataChangeListener();
 
         testModelPut(serviceFunctionsBuilder(), ServiceFunctions.class);
         testModelPut(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class);
@@ -727,51 +781,47 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         testModelPut(accessListsBuilder(), AccessLists.class);
         testModelPut(classifiersBuilder(), Classifiers.class);
 
-        long vxGpeOfPort = getOFPort(bridgeNode, "vxgpe");
+        portOperationalListener.waitForCreation(MDSAL_TIMEOUT);
+        long vxGpeOfPort = southbound.getOFPort(bridgeNode, SFFDPL1NAME);
         assertNotEquals("vxGpePort was not found", 0, vxGpeOfPort);
 
-        readwait();
+        rspOperationalListener.waitForCreation(MDSAL_TIMEOUT);
+        RenderedServicePath rsp = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, rspIid);
+        assertNotNull("RSP was not found", rsp);
 
-        flowId = "sfcIngressClass_" + "httpRule";
+        flowId = FlowNames.getSfcIngressClass(RULENAME, rsp.getPathId(), rsp.getStartingIndex());
         verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
-        // SFC is adding these flows now
-        //flowId = "sfcTable_" + vxGpeOfPort;
-        //verifyFlow(datapathId, flowId, Service.CLASSIFIER);
-        //flowId = "sfEgress_" + GPEUDPPORT;
-        //verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
-        //flowId = "sfIngress_" + GPEUDPPORT + "_" + SF1IP;
-        //verifyFlow(datapathId, flowId, Service.CLASSIFIER);
-        flowId = "ArpResponder_" + SF1IP;
+        flowId = FlowNames.getArpResponder(SF1IP);
         verifyFlow(datapathId, flowId, Service.ARP_RESPONDER);
+        RenderedServicePathHop lastHop = sfcUtils.getLastHop(rsp);
+        short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
+        flowId = FlowNames.getSfcEgressClass(vxGpeOfPort, rsp.getPathId(), lastServiceindex);
+        verifyFlow(datapathId, flowId, Service.SFC_CLASSIFIER);
+        flowId = FlowNames.getSfcEgressClassBypass(rsp.getPathId(), lastServiceindex, 1);
+        verifyFlow(datapathId, flowId, Service.CLASSIFIER);
 
-        readwait();
+        deleteRsp(RSPNAME);
+        rspOperationalListener.waitForDeletion(MDSAL_TIMEOUT);
+        rsp = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, rspIid);
+        assertNull("RSP should not be found", rsp);
 
-        assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName));
-        Thread.sleep(1000);
-        assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo));
-    }
+        assertTrue(southboundUtils.deleteBridge(connectionInfo, bridgeName, NO_MDSAL_TIMEOUT));
+        bridgeOperationalListener.waitForDeletion(MDSAL_TIMEOUT);
+        bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        assertNull("Bridge should not be found", bridgeNode);
+        assertTrue(southboundUtils.disconnectOvsdbNode(connectionInfo, NO_MDSAL_TIMEOUT));
+        ovsdbOperationalListener.waitForDeletion(MDSAL_TIMEOUT);
+        ovsdbNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
+        assertNull("Ovsdb node should not be found", ovsdbNode);
+    }*/
 
-    // Not used yet
-    private void getSffDplPort(String rspName) {
-        long ofPort = 0;
+    private void deleteRsp(String rspName) {
         RenderedServicePathKey renderedServicePathKey =
                 new RenderedServicePathKey(RspName.getDefaultInstance(rspName));
         InstanceIdentifier<RenderedServicePath> path =
                 InstanceIdentifier.create(RenderedServicePaths.class)
                         .child(RenderedServicePath.class, renderedServicePathKey);
-        RenderedServicePath rsp = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
-        if (rsp == null) {
-            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
-            return;
-        }
-        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
-        if (pathHopList.isEmpty()) {
-            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
-            return;
-        }
-
-        for (RenderedServicePathHop hop : pathHopList) {
-        }
+        mdsalUtils.delete(LogicalDatastoreType.OPERATIONAL, path);
     }
 
     /**
@@ -783,7 +833,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     @Test
     public void testStandalone() throws InterruptedException {
         String bridgeName = "sw1";
-        ConnectionInfo connectionInfo = southboundUtils.getConnectionInfo(addressStr, portStr);
+        ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
         assertNotNull("connection failed", southboundUtils.connectOvsdbNode(connectionInfo));
         Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
         assertNotNull("node is not connected", ovsdbNode);
@@ -936,32 +986,82 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         return connected;
     }
 
-    private long getOFPort(Node bridgeNode, String portName) {
-        long ofPort = 0L;
-        OvsdbTerminationPointAugmentation port =
-                southbound.extractTerminationPointAugmentation(bridgeNode, portName);
-        if (port != null) {
-            ofPort = southbound.getOFPort(port);
+    /*private static class NotifyingDataChangeListener2 implements DataChangeListener {
+        @Override
+        public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asyncDataChangeEvent) {
+
         }
-        if (ofPort == 0L) {
-            for (int i = 0; i < 10; i++) {
-                LOG.info("Looking for ofPort {}, try: {}", portName, i);
-                TerminationPoint tp = southbound.readTerminationPoint(bridgeNode, null, portName);
-                if (tp != null) {
-                    port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
-                    if (port != null) {
-                        ofPort = southbound.getOFPort(port);
-                        LOG.info("found ofPort {} - {}, try: {}", portName, ofPort, i);
-                        break;
-                    }
-                }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    LOG.error("Interrupted while waiting for ofPort {}", portName, e);
-                }
+    }*/
+
+    /*public class NotifyingDataChangeListener implements DataChangeListener {
+        private final LogicalDatastoreType type;
+        private final Set<InstanceIdentifier<?>> createdIids = new HashSet<>();
+        private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
+        private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
+        private final InstanceIdentifier<?> iid;
+        private final int RETRY_WAIT = 100;
+
+        private NotifyingDataChangeListener(LogicalDatastoreType type, InstanceIdentifier<?> iid) {
+            this.type = type;
+            this.iid = iid;
+        }
+
+        @Override
+        public void onDataChanged(
+                AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asyncDataChangeEvent) {
+            LOG.info("{} DataChanged: created {}", type, asyncDataChangeEvent.getCreatedData().keySet());
+            LOG.info("{} DataChanged: removed {}", type, asyncDataChangeEvent.getRemovedPaths());
+            LOG.info("{} DataChanged: updated {}", type, asyncDataChangeEvent.getUpdatedData().keySet());
+            createdIids.addAll(asyncDataChangeEvent.getCreatedData().keySet());
+            removedIids.addAll(asyncDataChangeEvent.getRemovedPaths());
+            updatedIids.addAll(asyncDataChangeEvent.getUpdatedData().keySet());
+            synchronized(this) {
+                notifyAll();
             }
         }
-        return ofPort;
-    }
+
+        public boolean isCreated(InstanceIdentifier<?> iid) {
+            return createdIids.remove(iid);
+        }
+
+        public boolean isRemoved(InstanceIdentifier<?> iid) {
+            return removedIids.remove(iid);
+        }
+
+        public boolean isUpdated(InstanceIdentifier<?> iid) {
+            return updatedIids.remove(iid);
+        }
+
+        public void clear() {
+            createdIids.clear();
+            removedIids.clear();
+            updatedIids.clear();
+        }
+
+        public void registerDataChangeListener() {
+            dataBroker.registerDataChangeListener(type, iid, this, AsyncDataBroker.DataChangeScope.SUBTREE);
+        }
+
+        public void waitForCreation(long timeout) throws InterruptedException {
+            synchronized (this) {
+                long _start = System.currentTimeMillis();
+                LOG.info("Waiting for {} DataChanged creation on {}", type, iid);
+                while (!isCreated(iid) && (System.currentTimeMillis() - _start) < timeout) {
+                    wait(RETRY_WAIT);
+                }
+                LOG.info("Woke up, waited {}ms for creation of {}", (System.currentTimeMillis() - _start), iid);
+            }
+        }
+
+        public void waitForDeletion(long timeout) throws InterruptedException {
+            synchronized (this) {
+                long _start = System.currentTimeMillis();
+                LOG.info("Waiting for {} DataChanged deletion on {}", type, iid);
+                while (!isRemoved(iid) && (System.currentTimeMillis() - _start) < timeout) {
+                    wait(RETRY_WAIT);
+                }
+                LOG.info("Woke up, waited {}ms for deletion of {}", (System.currentTimeMillis() - _start), iid);
+            }
+        }
+    }*/
 }

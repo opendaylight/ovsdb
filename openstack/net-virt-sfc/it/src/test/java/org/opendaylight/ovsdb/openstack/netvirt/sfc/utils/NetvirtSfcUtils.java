@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc.utils;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
 
-public class SfcUtils {
+public class NetvirtSfcUtils {
     public SfcBuilder sfcBuilder(SfcBuilder sfcBuilder, String sfcName) {
         return sfcBuilder.setName(sfcName);
     }

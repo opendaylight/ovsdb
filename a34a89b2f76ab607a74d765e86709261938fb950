@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_4b306d01",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-29T06:27:12Z",
+      "side": 1,
+      "message": "Earlier this week we discussed how we\u0027re not using the\nregisters efficiently, that there are a fair amount of wasted bits in there. Personally, I think we should wrap and\nabstract all usages of registers in some sort of utility \nclass so that instead of the service classes writing to and \nmatching registers they would relate to them as simply the \nIsLocal field or the InboundNatSegId field. For e.g.,\n MatchUtils.addIsLocalMatch\n ActionUtils.setIsLocal\n MatchUtils.addStoredSrcMacMatch\n ActionUtils.storeSrcMac\n\nThe actual logic of where the bits are stored and matched \nwould be encapsulated in the utility. The main advantage of \nthis would be to allow refactoring the register usage \nwithout effecting the service code. Also, it would \nconcentrate the allotment and allocation of this limited \nresource into one place. If we go in this direction, the \nconstants would be co-located and private.\n\nSound good?",
+      "parentUuid": "9a3d3df0_600910dd",
+      "revId": "a34a89b2f76ab607a74d765e86709261938fb950",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_a013180c",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-28T15:56:24Z",
       "side": 1,
       "message": "is there a case where segid would be null? This cehck is fine for defending against null, but just curious if there is a code path where it could happen.",
+      "revId": "a34a89b2f76ab607a74d765e86709261938fb950",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_8b643523",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-29T06:27:12Z",
+      "side": 1,
+      "message": "Not actually sure. That check was in the ArpResponder code so I added it here thinking it couldn\u0027t hurt to be defensive.",
+      "parentUuid": "9a3d3df0_a013180c",
       "revId": "a34a89b2f76ab607a74d765e86709261938fb950",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_2b2b6995",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-29T06:27:12Z",
+      "side": 1,
+      "message": "Will take care of Sunday",
+      "parentUuid": "9a3d3df0_00fac4bc",
+      "range": {
+        "startLine": 77,
+        "startChar": 36,
+        "endLine": 77,
+        "endChar": 56
+      },
+      "revId": "a34a89b2f76ab607a74d765e86709261938fb950",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_e0f400d1",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
         "patchSetId": 2
@@ -70,6 +130,24 @@
       "writtenOn": "2016-01-28T15:56:24Z",
       "side": 1,
       "message": "use FlowUtils.createNodeBuilder(dpid)",
+      "revId": "a34a89b2f76ab607a74d765e86709261938fb950",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_8b19d58a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IcmpEchoResponderService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-01-29T06:27:12Z",
+      "side": 1,
+      "message": "Will take care of Sunday",
+      "parentUuid": "9a3d3df0_e0f400d1",
       "revId": "a34a89b2f76ab607a74d765e86709261938fb950",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

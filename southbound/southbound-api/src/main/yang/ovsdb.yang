@@ -1011,6 +1011,26 @@ module ovsdb {
             }
         }
 
+        list interface-lldp {
+            description "Auto Attach configuration for a particular interface.
+                If LLDP is enabled on an interface, the interface processes received
+                LLDP packets and never passes them to OpenFlow or forwards them.
+
+                lldp : enable: optional string, either true or false.
+                       True to enable LLDP on this Interface. If not specified, LLDP
+                       will be disabled by default.";
+
+            key "lldp-key";
+            leaf lldp-key {
+                description "lldp name/key";
+                type string;
+            }
+            leaf lldp-value {
+                description "lldp value";
+                type string;
+            }
+        }
+
         leaf qos {
             description "The unique identifier of the QoS entry for this port.";
             type yang:uuid;

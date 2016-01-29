@@ -83,6 +83,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
@@ -1114,6 +1116,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
+     * Tests the CRUD operations for <code>Interface</code> <code>lldp</code>.
+     *
+     * @see <code>SouthboundIT.generateInterfaceLldpTestCases()</code> for specific test case information
+     */
+    @Test
+    public void testCRUDTerminationPointInterfaceLldp() throws InterruptedException {
+        testCRUDTerminationPoint(new SouthboundInterfaceLldpBuilder(), "TPInterfaceLldp",
+                new InterfaceLldpSouthboundHelper());
+    }
+
+    /*
      * Tests the CRUD operations for <code>Port</code> <code>other_configs</code>.
      *
      * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for specific test case information
@@ -1701,6 +1714,28 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+    private static final class SouthboundInterfaceLldpBuilder extends KeyValueBuilder<InterfaceLldp> {
+        @Override
+        protected Builder<InterfaceLldp> builder() {
+            return new InterfaceLldpBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<InterfaceLldp> builder, String key) {
+            ((InterfaceLldpBuilder) builder).setLldpKey((key));
+        }
+
+        @Override
+        protected void setValue(Builder<InterfaceLldp> builder, String value) {
+            ((InterfaceLldpBuilder) builder).setLldpValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return true;
+        }
+    }
+
     private static final class SouthboundPortOtherConfigsBuilder extends KeyValueBuilder<PortOtherConfigs> {
         @Override
         protected Builder<PortOtherConfigs> builder() {
@@ -1861,6 +1896,20 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         @Override
         public List<InterfaceExternalIds> readValues(OvsdbTerminationPointAugmentation augmentation) {
             return augmentation.getInterfaceExternalIds();
+        }
+    }
+
+    private static class InterfaceLldpSouthboundHelper implements
+    SouthboundTerminationPointHelper<InterfaceLldp> {
+        @Override
+        public void writeValues(
+                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceLldp> values) {
+            builder.setInterfaceLldp(values);
+        }
+
+        @Override
+        public List<InterfaceLldp> readValues(OvsdbTerminationPointAugmentation augmentation) {
+            return augmentation.getInterfaceLldp();
         }
     }
 

@@ -13,8 +13,11 @@ package org.opendaylight.ovsdb.utils.config;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ConfigProperties {
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigProperties.class);
 
     private ConfigProperties() {
         // empty
@@ -37,6 +40,11 @@ public final class ConfigProperties {
         if (value == null) {
             value = System.getProperty(propertyStr, defaultValue);
         }
+
+        if (value == null) {
+            LOG.debug("ConfigProperties missing a value for {}, default {}", propertyStr, defaultValue);
+        }
+
         return value;
     }
 }

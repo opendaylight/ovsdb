@@ -43,6 +43,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
@@ -254,6 +257,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterfaceExternalIds(interf, ovsdbTerminationPointBuilder);
         updateOptions(interf, ovsdbTerminationPointBuilder);
         updateInterfaceOtherConfig(interf, ovsdbTerminationPointBuilder);
+        updateInterfaceLldp(interf, ovsdbTerminationPointBuilder);
     }
 
     private void updateVlan(final Port port,
@@ -440,6 +444,26 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             ovsdbTerminationPointBuilder.setPortOtherConfigs(portOtherConfigs);
+        }
+    }
+
+    private void updateInterfaceLldp(final Interface interf,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Map<String, String> interfaceLldpMap = interf.getLldpColumn().getData();
+        if (interfaceLldpMap != null && !interfaceLldpMap.isEmpty()) {
+            List<InterfaceLldp> interfaceLldpList = new ArrayList<>();
+            for (String interfaceLldpKeyString : interfaceLldpMap.keySet()) {
+                String interfaceLldpValueString = interfaceLldpMap.get(interfaceLldpKeyString);
+                if (interfaceLldpKeyString != null && interfaceLldpValueString!=null) {
+                    interfaceLldpList.add(new InterfaceLldpBuilder()
+                            .setKey(new InterfaceLldpKey(interfaceLldpKeyString))
+                            .setLldpKey(interfaceLldpKeyString)
+                            .setLldpValue(interfaceLldpValueString)
+                            .build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
         }
     }
 

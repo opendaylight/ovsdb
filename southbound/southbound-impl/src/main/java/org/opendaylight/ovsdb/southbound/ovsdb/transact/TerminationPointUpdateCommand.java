@@ -27,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
@@ -110,6 +111,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
         updateInterfaceOptions(terminationPoint, ovsInterface);
         updateInterfaceOtherConfig(terminationPoint, ovsInterface);
         updateInterfaceExternalIds(terminationPoint, ovsInterface);
+        updateInterfaceLldp(terminationPoint, ovsInterface);
     }
 
     private void updatePort(
@@ -190,6 +192,25 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
                 ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete OVSDB interface external_ids");
+            }
+        }
+    }
+
+    private void updateInterfaceLldp(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        List<InterfaceLldp> interfaceLldpList =
+                terminationPoint.getInterfaceLldp();
+        if (interfaceLldpList != null && !interfaceLldpList.isEmpty()) {
+            Map<String, String> interfaceLldpMap = new HashMap<>();
+            for (InterfaceLldp interfaceLldp : interfaceLldpList) {
+                interfaceLldpMap.put(interfaceLldp.getLldpKey(), interfaceLldp.getLldpValue());
+            }
+            try {
+                ovsInterface.setLldp(ImmutableMap.copyOf(interfaceLldpMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete OVSDB interface lldp");
             }
         }
     }

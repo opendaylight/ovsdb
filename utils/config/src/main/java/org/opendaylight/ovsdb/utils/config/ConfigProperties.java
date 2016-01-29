@@ -14,9 +14,11 @@ import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ConfigProperties {
-
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigProperties.class);
     private static final Map<String, String> OVERRIDES = new HashMap<>();
 
     private ConfigProperties() {
@@ -46,7 +48,7 @@ public final class ConfigProperties {
         }
 
         if (value == null) {
-            System.err.println("ConfigProperties missing a value for " + propertyStr);
+            LOG.debug("ConfigProperties missing a value for {}, default {}", propertyStr, defaultValue);
         }
 
         return value;

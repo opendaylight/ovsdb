@@ -54,6 +54,7 @@ import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
@@ -67,6 +68,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
@@ -81,6 +83,23 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
@@ -109,6 +128,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -140,6 +160,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
+    private static DataBroker dataBroker;
 
     @Inject
     private BundleContext bundleContext;
@@ -154,9 +175,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         private final Set<InstanceIdentifier<?>> createdIids = new HashSet<>();
         private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
         private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
+        private final InstanceIdentifier<?> iid;
+        private final int RETRY_WAIT = 100;
 
         private NotifyingDataChangeListener(LogicalDatastoreType type) {
             this.type = type;
+            this.iid = null;
+        }
+
+        private NotifyingDataChangeListener(LogicalDatastoreType type, InstanceIdentifier<?> iid) {
+            this.type = type;
+            this.iid = iid;
         }
 
         @Override
@@ -192,6 +221,50 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public boolean isUpdated(InstanceIdentifier<?> iid) {
             return updatedIids.remove(iid);
         }
+
+        public void clear() {
+            createdIids.clear();
+            removedIids.clear();
+            updatedIids.clear();
+        }
+
+        public void registerDataChangeListener() {
+            dataBroker.registerDataChangeListener(type, iid, this, AsyncDataBroker.DataChangeScope.SUBTREE);
+        }
+
+        public void waitForCreation(long timeout) throws InterruptedException {
+            synchronized (this) {
+                long _start = System.currentTimeMillis();
+                LOG.info("Waiting for {} DataChanged creation on {}", type, iid);
+                while (!isCreated(iid) && (System.currentTimeMillis() - _start) < timeout) {
+                    wait(RETRY_WAIT);
+                }
+                LOG.info("Woke up, waited {}ms for creation of {}", (System.currentTimeMillis() - _start), iid);
+            }
+        }
+
+        public void waitForDeletion(long timeout) throws InterruptedException {
+            synchronized (this) {
+                long _start = System.currentTimeMillis();
+                LOG.info("Waiting for {} DataChanged deletion on {}", type, iid);
+                while (!isRemoved(iid) && (System.currentTimeMillis() - _start) < timeout) {
+                    wait(RETRY_WAIT);
+                }
+                LOG.info("Woke up, waited {}ms for deletion of {}", (System.currentTimeMillis() - _start), iid);
+            }
+        }
+
+        public void waitForUpdate(long timeout) throws InterruptedException {
+            synchronized (this) {
+                long _start = System.currentTimeMillis();
+                LOG.info("Waiting for {} DataChanged update on {}", type, iid);
+                while (!isUpdated(iid) && (System.currentTimeMillis() - _start) < timeout) {
+                    wait(RETRY_WAIT);
+                }
+                LOG.info("Woke up, waited {}ms for update of {}", (System.currentTimeMillis() - _start), iid);
+            }
+        }
+
     }
 
     @Configuration
@@ -301,7 +374,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
         //dataBroker = getSession().getSALService(DataBroker.class);
         Thread.sleep(3000);
-        DataBroker dataBroker = SouthboundProvider.getDb();
+        dataBroker = SouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
@@ -763,6 +836,142 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.warn("Sleep interrupted while waiting for bridge deletion (bridge {})", bridgeName, e);
             }
         }
+    }
+
+    private static class TestQos implements AutoCloseable {
+        private final ConnectionInfo connectionInfo;
+        private final Uri qosId;
+
+        /**
+         * Creates a test qos entry which can be automatically removed when no longer necessary.
+         *
+         * @param connectionInfo The connection information.
+         * @param qosId The Qos identifier.
+         * @param qosType The qos type.
+         * @param externalIds The external identifiers if any.
+         * @param otherConfigs The other configuration items if any.
+         */
+        public TestQos(final ConnectionInfo connectionInfo,
+                                  final Uri qosId,
+                                  final Class<? extends QosTypeBase> qosType,
+                                  @Nullable final List<QosExternalIds> externalIds,
+                                  @Nullable final List<QosOtherConfig> otherConfigs) {
+            this.connectionInfo = connectionInfo;
+            this.qosId = qosId;
+
+            QosEntries qosEntry = new QosEntriesBuilder()
+                .setQosId(qosId)
+                .setQosType(qosType)
+                .setQosExternalIds(externalIds)
+                .setQosOtherConfig(otherConfigs)
+                .build();
+            InstanceIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(QosEntries.class, qosEntry.getKey());
+            final NotifyingDataChangeListener qosOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qeIid);
+            qosOperationalListener.registerDataChangeListener();
+
+            Assert.assertTrue(
+                    mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    qeIid, qosEntry));
+
+            try {
+                qosOperationalListener.waitForCreation(OVSDB_ROUNDTRIP_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for queue {}", qeIid, e);
+            }
+
+        }
+
+        @Override
+        public void close() {
+            final InstanceIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(QosEntries.class, new QosEntriesKey(this.qosId));
+            final NotifyingDataChangeListener qosOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qeIid);
+            qosOperationalListener.registerDataChangeListener();
+
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qeIid));
+            try {
+                qosOperationalListener.waitForDeletion(OVSDB_ROUNDTRIP_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for qos deletion (qos {})", qeIid, e);
+            }
+        }
+    }
+
+    private static class TestQueue implements AutoCloseable {
+        private final ConnectionInfo connectionInfo;
+        private final Uri queueId;
+
+        /**
+         * Creates a test queue entry which can be automatically removed when no longer necessary.
+         *
+         * @param connectionInfo The connection information.
+         * @param queueId The Queue identifier.
+         * @param queueDscp The queue dscp value.
+         * @param externalIds The external identifiers if any.
+         * @param otherConfigs The other configuration items if any.
+         */
+        public TestQueue(final ConnectionInfo connectionInfo,
+                                  final Uri queueId,
+                                  final Short queueDscp,
+                                  @Nullable final List<QueuesExternalIds> externalIds,
+                                  @Nullable final List<QueuesOtherConfig> otherConfigs) {
+            this.connectionInfo = connectionInfo;
+            this.queueId = queueId;
+
+            Queues queue = new QueuesBuilder()
+                .setQueueId(queueId)
+                .setDscp(queueDscp)
+                .setQueuesExternalIds(externalIds)
+                .setQueuesOtherConfig(otherConfigs)
+                .build();
+            InstanceIdentifier<Queues> qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(Queues.class, queue.getKey());
+            final NotifyingDataChangeListener queueOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qIid);
+            queueOperationalListener.registerDataChangeListener();
+
+            Assert.assertTrue(
+                    mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    qIid, queue));
+
+            try {
+                queueOperationalListener.waitForCreation(OVSDB_ROUNDTRIP_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for queue {}", queueId, e);
+            }
+        }
+
+        @Override
+        public void close() {
+            InstanceIdentifier<Queues> qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(Queues.class, new QueuesKey(this.queueId));
+            final NotifyingDataChangeListener queueOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qIid);
+            queueOperationalListener.registerDataChangeListener();
+
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qIid));
+            try {
+                queueOperationalListener.waitForDeletion(OVSDB_ROUNDTRIP_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for queue deletion (queue {})", queueId, e);
+            }
+        }
+    }
+
+    private OvsdbNodeAugmentation getOvsdbNode(ConnectionInfo connectionInfo, LogicalDatastoreType store) {
+        InstanceIdentifier<Node> nodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        Node node = mdsalUtils.read(store, nodeIid);
+        Assert.assertNotNull(node);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        Assert.assertNotNull(ovsdbNodeAugmentation);
+        return ovsdbNodeAugmentation;
     }
 
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo) {
@@ -1374,6 +1583,69 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+    /*
+     * Tests setting and deleting <code>qos</code> field in a <code>port</code>.
+     */
+    @Test
+    public void testCRUDTerminationPointQos() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        String testQosId = new String("testQosEntry");
+
+        // CREATE
+        try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
+                TestQos testQos = new TestQos(connectionInfo, new Uri(testQosId),
+                        SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HFSC), null, null)) {
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            QosEntries operQos = getQos(new Uri(testQosId), ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQos);
+            Uuid qosUuid = new Uuid(operQos.getQosUuid().getValue());
+
+            OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+            Assert.assertNotNull(bridge);
+            NodeId nodeId = SouthboundUtils.createManagedNodeId(connectionInfo, bridge.getBridgeName());
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            String portName = "testTerminationPointQos";
+            ovsdbTerminationBuilder.setName(portName);
+            ovsdbTerminationBuilder.setQos(qosUuid);
+            Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+
+            // READ and check that qos uuid has been added to the port
+            InstanceIdentifier<TerminationPoint> tpEntryIid = getTpIid(connectionInfo, bridge)
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+            TerminationPoint terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
+            Assert.assertNotNull(terminationPoint);
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            Assert.assertEquals(ovsdbTerminationPointAugmentation.getQos(), qosUuid);
+
+            // UPDATE - remove the qos entry from the port
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setName(portName);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            tpUpdateBuilder.setTpId(new TpId(portName));
+
+            Assert.assertTrue(
+                    mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpEntryIid, tpUpdateBuilder.build()));
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+
+            // READ and verify that qos uuid has been removed from port
+            TerminationPoint terminationPointUpdate = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
+            Assert.assertNotNull(terminationPointUpdate);
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentationUpdate =
+                    terminationPointUpdate.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            Assert.assertNull(ovsdbTerminationPointAugmentationUpdate.getQos());
+
+            // DELETE handled by TestBridge
+        }
+    }
+
     @Test
     public void testGetOvsdbNodes() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
@@ -1491,6 +1763,454 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testCRUDBridgeExternalIds() throws InterruptedException {
         testCRUDBridge("BridgeExternalIds", new SouthboundBridgeExternalIdsBuilder(),
                 new BridgeExternalIdsSouthboundHelper());
+    }
+
+    @Test
+    public void testAddDeleteQos() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation;
+        Uri qosUri = new Uri("QOS-ROW");
+        List<String> typeList = new ArrayList<String>();
+        typeList.add(SouthboundConstants.QOS_LINUX_HTB);
+        typeList.add(SouthboundConstants.QOS_LINUX_HFSC);
+
+        for (String qosType : typeList) {
+            try (TestQos testQos = new TestQos(connectionInfo, qosUri, SouthboundMapper.createQosType(qosType), null, null)) {
+                ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                        LogicalDatastoreType.OPERATIONAL);
+                QosEntries operQosHtb = getQos(qosUri, ovsdbNodeAugmentation);
+                Assert.assertNotNull(operQosHtb);
+            }
+            ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            QosEntries operQosHtb = getQos(qosUri, ovsdbNodeAugmentation);
+            Assert.assertNull(operQosHtb);
+        }
+    }
+
+    @Test
+    public void testAddDeleteQueue() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        Uri queueUri = new Uri("QUEUE-A1");
+
+        try (TestQueue testQueue = new TestQueue(connectionInfo, queueUri, new Short("25"), null, null)) {
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            Queues operQueue = getQueue(queueUri, ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQueue);
+        }
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                LogicalDatastoreType.OPERATIONAL);
+        Queues operQueue = getQueue(queueUri, ovsdbNodeAugmentation);
+        Assert.assertNull(operQueue);
+    }
+
+    private static class SouthboundQueuesExternalIdsHelper implements SouthboundQueueHelper<QueuesExternalIds> {
+        @Override
+        public void writeValues(QueuesBuilder builder, List<QueuesExternalIds> values) {
+            builder.setQueuesExternalIds(values);
+        }
+
+        @Override
+        public List<QueuesExternalIds> readValues(Queues queue) {
+            return queue.getQueuesExternalIds();
+        }
+    }
+
+    private static class SouthboundQueuesOtherConfigHelper implements SouthboundQueueHelper<QueuesOtherConfig> {
+        @Override
+        public void writeValues(QueuesBuilder builder, List<QueuesOtherConfig> values) {
+            builder.setQueuesOtherConfig(values);
+        }
+
+        @Override
+        public List<QueuesOtherConfig> readValues(Queues queue) {
+            return queue.getQueuesOtherConfig();
+        }
+    }
+
+    private interface SouthboundQueueHelper<T> {
+        void writeValues(QueuesBuilder builder, List<T> values);
+        List<T> readValues(Queues queue);
+    }
+
+    private Queues getQueue(Uri queueId, OvsdbNodeAugmentation node) {
+        for (Queues queue : node.getQueues()) {
+            if (queue.getKey().getQueueId().equals(queueId))
+                return queue;
+        }
+        return null;
+    }
+
+    private static class SouthboundQosExternalIdsHelper implements SouthboundQosHelper<QosExternalIds> {
+        @Override
+        public void writeValues(QosEntriesBuilder builder, List<QosExternalIds> values) {
+            builder.setQosExternalIds(values);
+        }
+
+        @Override
+        public List<QosExternalIds> readValues(QosEntries qos) {
+            return qos.getQosExternalIds();
+        }
+    }
+
+    private static class SouthboundQosOtherConfigHelper implements SouthboundQosHelper<QosOtherConfig> {
+        @Override
+        public void writeValues(QosEntriesBuilder builder, List<QosOtherConfig> values) {
+            builder.setQosOtherConfig(values);
+        }
+
+        @Override
+        public List<QosOtherConfig> readValues(QosEntries qos) {
+            return qos.getQosOtherConfig();
+        }
+    }
+
+    private interface SouthboundQosHelper<T> {
+        void writeValues(QosEntriesBuilder builder, List<T> values);
+        List<T> readValues(QosEntries qos);
+    }
+
+    private QosEntries getQos(Uri qosId, OvsdbNodeAugmentation node) {
+        for (QosEntries qos : node.getQosEntries()) {
+            if (qos.getKey().getQosId().equals(qosId))
+                return qos;
+        }
+        return null;
+    }
+
+    private <T> void testCRUDQueue(
+            KeyValueBuilder<T> builder, String prefix, SouthboundQueueHelper<T> helper)
+            throws InterruptedException {
+
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+
+        // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
+        // the update has been performed.
+        List<SouthboundTestCase<T>> updateFromTestCases = generateKeyValueTestCases(builder, prefix + "From");
+        List<SouthboundTestCase<T>> updateToTestCases = generateKeyValueTestCases(builder, prefix + "To");
+
+        for (SouthboundTestCase<T> updateFromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<T> updateToTestCase : updateToTestCases) {
+                String testQueueId = String.format("%s_%s", prefix, updateToTestCase.name);
+
+                // CREATE: and update the test queue with starting values.
+                try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId), new Short("45"), null, null)) {
+                    QueuesBuilder queuesBuilder = new QueuesBuilder();
+                    queuesBuilder.setQueueId(new Uri(testQueueId));
+                    InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                            .augmentation(OvsdbNodeAugmentation.class)
+                            .child(Queues.class, queuesBuilder.build().getKey());
+                    final NotifyingDataChangeListener queueConfigurationListener =
+                            new NotifyingDataChangeListener(LogicalDatastoreType.CONFIGURATION, queueIid);
+                    queueConfigurationListener.registerDataChangeListener();
+                    final NotifyingDataChangeListener queueOperationalListener =
+                            new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queueIid);
+                    queueOperationalListener.registerDataChangeListener();
+
+                    helper.writeValues(queuesBuilder, updateFromTestCase.inputValues);
+                    Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                            queueIid, queuesBuilder.build()));
+                    queueConfigurationListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+                    // READ: Read the test queue and ensure changes are propagated to the CONFIGURATION data store,
+                    // then repeat for OPERATIONAL data store
+                    OvsdbNodeAugmentation updateFromConfigurationOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.CONFIGURATION);
+                    Queues queueFromConfig = getQueue(new Uri(testQueueId), updateFromConfigurationOvsdbNodeAugmentation);
+                    if (queueFromConfig != null) {
+                        List<T> updateFromConfigurationValues =
+                                helper.readValues(queueFromConfig);
+                        assertExpectedExist(updateFromTestCase.expectedValues, updateFromConfigurationValues);
+                    }
+
+                    queueOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+                    OvsdbNodeAugmentation updateFromOperationalOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.OPERATIONAL);
+                    Queues queueFromOper = getQueue(new Uri(testQueueId), updateFromOperationalOvsdbNodeAugmentation);
+                    if (queueFromOper != null) {
+                        List<T> updateFromOperationalValues =
+                                helper.readValues(queueFromOper);
+                        assertExpectedExist(updateFromTestCase.expectedValues, updateFromOperationalValues);
+                    }
+
+                    // UPDATE:  update the values
+                    QueuesBuilder queuesUpdateBuilder = new QueuesBuilder();
+                    queuesUpdateBuilder.setQueueId(new Uri(testQueueId));
+                    helper.writeValues(queuesUpdateBuilder, updateToTestCase.inputValues);
+                    Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                            queueIid, queuesUpdateBuilder.build()));
+                    queueConfigurationListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+                    // READ: the test queue and ensure changes are propagated to the CONFIGURATION data store,
+                    // then repeat for OPERATIONAL data store
+                    OvsdbNodeAugmentation updateToConfigurationOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.CONFIGURATION);
+                    Queues queueToConfig = getQueue(new Uri(testQueueId), updateToConfigurationOvsdbNodeAugmentation);
+                    if (queueToConfig != null) {
+                        List<T> updateToConfigurationValues =
+                                helper.readValues(queueToConfig);
+                        assertExpectedExist(updateToTestCase.expectedValues, updateToConfigurationValues);
+                    }
+
+                    queueOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+                    OvsdbNodeAugmentation updateToOperationalOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.OPERATIONAL);
+                    Queues queueToOper = getQueue(new Uri(testQueueId), updateToOperationalOvsdbNodeAugmentation);
+                    if (queueToOper != null) {
+                        List<T> updateToOperationalValues =
+                                helper.readValues(queueToOper);
+                        assertExpectedExist(updateToTestCase.expectedValues, updateToOperationalValues);
+                    }
+
+                    // DELETE handled by TestQueue
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testCRUDQueueExternalIds() throws InterruptedException {
+        testCRUDQueue(new SouthboundQueuesExternalIdsBuilder(), "QueueExternalIds",
+                new SouthboundQueuesExternalIdsHelper());
+    }
+
+    @Test
+    public void testCRUDQueueOtherConfig() throws InterruptedException {
+        testCRUDQueue(new SouthboundQueuesOtherConfigBuilder(), "QueueOtherConfig",
+                new SouthboundQueuesOtherConfigHelper());
+    }
+
+    @Test
+    public void testCRUDQueueDscp() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        String testQueueId = "testQueueDscp";
+
+        // CREATE: and update the test queue with starting values.
+        try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId), new Short("0"), null, null)) {
+            for (Short dscp = 1; dscp < 64; dscp++) {
+                QueuesBuilder queuesBuilder = new QueuesBuilder();
+                queuesBuilder.setQueueId(new Uri(testQueueId));
+                InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(Queues.class, queuesBuilder.build().getKey());
+                final NotifyingDataChangeListener queueOperationalListener =
+                        new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queueIid);
+                queueOperationalListener.registerDataChangeListener();
+
+                queuesBuilder.setDscp(dscp);
+                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                        queueIid, queuesBuilder.build()));
+                queueOperationalListener.waitForUpdate(OVSDB_ROUNDTRIP_TIMEOUT);
+
+                // READ: Read the test queue and ensure changes are propagated to the OPERATIONAL data store
+                // assumption is that CONFIGURATION was updated if OPERATIONAL is correct
+                OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                        LogicalDatastoreType.OPERATIONAL);
+                Queues operQueue = getQueue(new Uri(testQueueId), ovsdbNodeAugmentation);
+                Assert.assertNotNull(operQueue);
+                Short operDscp = operQueue.getDscp();
+                Assert.assertNotNull(operDscp);
+                Assert.assertEquals(dscp, operDscp);
+            }
+
+            // DELETE handled by TestQueue
+        }
+
+    }
+
+    private <T> void testCRUDQos(
+            KeyValueBuilder<T> builder, String prefix, SouthboundQosHelper<T> helper)
+            throws InterruptedException {
+
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+
+        // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
+        // the update has been performed.
+        List<SouthboundTestCase<T>> updateFromTestCases = generateKeyValueTestCases(builder, prefix + "From");
+        List<SouthboundTestCase<T>> updateToTestCases = generateKeyValueTestCases(builder, prefix + "To");
+
+        for (SouthboundTestCase<T> updateFromTestCase : updateFromTestCases) {
+            for (SouthboundTestCase<T> updateToTestCase : updateToTestCases) {
+                String testQosId = String.format("%s_%s", prefix, updateToTestCase.name);
+
+                // CREATE: and update the test qos with starting values.
+                try (TestQos testQos = new TestQos(connectionInfo, new Uri(testQosId), SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB), null, null)) {
+                    QosEntriesBuilder qosBuilder = new QosEntriesBuilder();
+                    qosBuilder.setQosId(new Uri(testQosId));
+                    InstanceIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                            .augmentation(OvsdbNodeAugmentation.class)
+                            .child(QosEntries.class, qosBuilder.build().getKey());
+                    final NotifyingDataChangeListener qosConfigurationListener =
+                            new NotifyingDataChangeListener(LogicalDatastoreType.CONFIGURATION, qosIid);
+                    qosConfigurationListener.registerDataChangeListener();
+                    final NotifyingDataChangeListener qosOperationalListener =
+                            new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qosIid);
+                    qosOperationalListener.registerDataChangeListener();
+
+                    helper.writeValues(qosBuilder, updateFromTestCase.inputValues);
+                    Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                            qosIid, qosBuilder.build()));
+                    qosConfigurationListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+                    // READ: Read the test queue and ensure changes are propagated to the CONFIGURATION data store,
+                    // then repeat for OPERATIONAL data store
+                    OvsdbNodeAugmentation updateFromConfigurationOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.CONFIGURATION);
+                    QosEntries qosFromConfig = getQos(new Uri(testQosId), updateFromConfigurationOvsdbNodeAugmentation);
+                    if (qosFromConfig != null) {
+                        List<T> updateFromConfigurationValues =
+                                helper.readValues(qosFromConfig);
+                        assertExpectedExist(updateFromTestCase.expectedValues, updateFromConfigurationValues);
+                    }
+
+                    qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+                    OvsdbNodeAugmentation updateFromOperationalOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.OPERATIONAL);
+                    QosEntries qosFromOper = getQos(new Uri(testQosId), updateFromOperationalOvsdbNodeAugmentation);
+                    if (qosFromOper != null) {
+                        List<T> updateFromOperationalValues =
+                                helper.readValues(qosFromOper);
+                        assertExpectedExist(updateFromTestCase.expectedValues, updateFromOperationalValues);
+                    }
+
+                    // UPDATE:  update the values
+                    QosEntriesBuilder qosUpdateBuilder = new QosEntriesBuilder();
+                    qosUpdateBuilder.setQosId(new Uri(testQosId));
+                    helper.writeValues(qosUpdateBuilder, updateToTestCase.inputValues);
+                    Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                            qosIid, qosUpdateBuilder.build()));
+                    qosConfigurationListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+                    // READ: the test queue and ensure changes are propagated to the CONFIGURATION data store,
+                    // then repeat for OPERATIONAL data store
+                    OvsdbNodeAugmentation updateToConfigurationOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.CONFIGURATION);
+                    QosEntries qosToConfig = getQos(new Uri(testQosId), updateToConfigurationOvsdbNodeAugmentation);
+                    if (qosToConfig != null) {
+                        List<T> updateToConfigurationValues =
+                                helper.readValues(qosToConfig);
+                        assertExpectedExist(updateToTestCase.expectedValues, updateToConfigurationValues);
+                    }
+
+                    qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+                    OvsdbNodeAugmentation updateToOperationalOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                            LogicalDatastoreType.OPERATIONAL);
+                    QosEntries qosToOper = getQos(new Uri(testQosId), updateToOperationalOvsdbNodeAugmentation);
+                    if (qosToOper != null) {
+                        List<T> updateToOperationalValues =
+                                helper.readValues(qosToOper);
+                        assertExpectedExist(updateToTestCase.expectedValues, updateToOperationalValues);
+                    }
+
+                    // DELETE handled by TestQueue
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testCRUDQosExternalIds() throws InterruptedException {
+        testCRUDQos(new SouthboundQosExternalIdsBuilder(), "QosExternalIds",
+                new SouthboundQosExternalIdsHelper());
+    }
+
+    @Test
+    public void testCRUDQosOtherConfig() throws InterruptedException {
+        testCRUDQos(new SouthboundQosOtherConfigBuilder(), "QosOtherConfig",
+                new SouthboundQosOtherConfigHelper());
+    }
+    @Test
+    public void testCRUDQosQueues() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        String testQosId = "testQosQueues";
+
+        // CREATE: and update the test queue with starting values.
+        try (TestQos testQos = new TestQos(connectionInfo, new Uri(testQosId),
+                SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB), null, null);
+                TestQueue testQueue1 = new TestQueue(connectionInfo, new Uri("queue1"), new Short("12"), null, null);
+                TestQueue testQueue2 = new TestQueue(connectionInfo, new Uri("queue2"), new Short("35"), null, null)) {
+            QosEntriesBuilder qosBuilder = new QosEntriesBuilder();
+            qosBuilder.setQosId(new Uri(testQosId));
+            InstanceIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(QosEntries.class, qosBuilder.build().getKey());
+            final NotifyingDataChangeListener qosOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qosIid);
+            qosOperationalListener.registerDataChangeListener();
+
+            // READ, UPDATE:  Read the UUIDs of the Queue rows and add them to the
+            // configuration of the Qos row.
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            Queues operQueue1 = getQueue(new Uri("queue1"), ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQueue1);
+            Uuid queue1Uuid = new Uuid(operQueue1.getQueueUuid().getValue());
+            Queues operQueue2 = getQueue(new Uri("queue2"), ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQueue2);
+            Uuid queue2Uuid = new Uuid(operQueue2.getQueueUuid().getValue());
+
+            List<QueueList> queueList = new ArrayList<>();
+            queueList.add(new QueueListBuilder().setQueueNumber(new Long("0"))
+                    .setQueueUuid(queue1Uuid).build());
+            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1"))
+                    .setQueueUuid(queue2Uuid).build());
+            qosBuilder.setQueueList(queueList);
+
+            Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    qosIid, qosBuilder.build()));
+            qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+            // READ: Read the test qos and ensure changes are propagated to the OPERATIONAL data store
+            // assumption is that CONFIGURATION was updated if OPERATIONAL is correct
+            ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            QosEntries operQos = getQos(new Uri(testQosId), ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQos);
+            List<QueueList> operQueueList = operQos.getQueueList();
+            Assert.assertNotNull(operQueueList);
+            for (QueueList queueEntry : queueList) {
+                Assert.assertTrue(operQueueList.contains(queueEntry));
+            }
+
+            // DELETE one queue from queue list and check that one remains
+            KeyedInstanceIdentifier<QueueList, QueueListKey> qosQueueIid = qosIid
+                        .child(QueueList.class, new QueueListKey(new Long("0")));
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qosQueueIid));
+            qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+            // READ: Read the test qos and ensure changes are propagated to the OPERATIONAL data store
+            // assumption is that CONFIGURATION was updated if OPERATIONAL is correct
+            ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            operQos = getQos(new Uri(testQosId), ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQos);
+            operQueueList = operQos.getQueueList();
+            Assert.assertNotNull(operQueueList);
+            for (QueueList queueEntry : queueList) {
+                if (queueEntry.getQueueUuid().equals(queue2Uuid))
+                    Assert.assertTrue(operQueueList.contains(queueEntry));
+                else if (queueEntry.getQueueUuid().equals(queue1Uuid)) {
+                    Assert.assertFalse(operQueueList.contains(queueEntry));
+                } else {
+                    Assert.assertTrue("Unknown queue entry in qos queue list", false);
+                }
+            }
+
+            // DELETE  queue list and check that list is empty
+            qosQueueIid = qosIid
+                    .child(QueueList.class, new QueueListKey(new Long("1")));
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qosQueueIid));
+            qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+            ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                    LogicalDatastoreType.OPERATIONAL);
+            operQos = getQos(new Uri(testQosId), ovsdbNodeAugmentation);
+            Assert.assertNotNull(operQos);
+            operQueueList = operQos.getQueueList();
+            Assert.assertNotNull(operQueueList);
+            Assert.assertTrue(operQueueList.isEmpty());
+        }
     }
 
     /**
@@ -1623,6 +2343,94 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         public final void reset() {
             this.counter = COUNTER_START;
+        }
+    }
+
+    private static final class SouthboundQueuesExternalIdsBuilder extends KeyValueBuilder<QueuesExternalIds> {
+        @Override
+        protected Builder<QueuesExternalIds> builder() {
+            return new QueuesExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<QueuesExternalIds> builder, String key) {
+            ((QueuesExternalIdsBuilder) builder).setQueuesExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<QueuesExternalIds> builder, String value) {
+            ((QueuesExternalIdsBuilder) builder).setQueuesExternalIdValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return true;
+        }
+    }
+
+    private static final class SouthboundQueuesOtherConfigBuilder extends KeyValueBuilder<QueuesOtherConfig> {
+        @Override
+        protected Builder<QueuesOtherConfig> builder() {
+            return new QueuesOtherConfigBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<QueuesOtherConfig> builder, String key) {
+            ((QueuesOtherConfigBuilder) builder).setQueueOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<QueuesOtherConfig> builder, String value) {
+            ((QueuesOtherConfigBuilder) builder).setQueueOtherConfigValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return false;
+        }
+    }
+
+    private static final class SouthboundQosExternalIdsBuilder extends KeyValueBuilder<QosExternalIds> {
+        @Override
+        protected Builder<QosExternalIds> builder() {
+            return new QosExternalIdsBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<QosExternalIds> builder, String key) {
+            ((QosExternalIdsBuilder) builder).setQosExternalIdKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<QosExternalIds> builder, String value) {
+            ((QosExternalIdsBuilder) builder).setQosExternalIdValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return true;
+        }
+    }
+
+    private static final class SouthboundQosOtherConfigBuilder extends KeyValueBuilder<QosOtherConfig> {
+        @Override
+        protected Builder<QosOtherConfig> builder() {
+            return new QosOtherConfigBuilder();
+        }
+
+        @Override
+        protected void setKey(Builder<QosOtherConfig> builder, String key) {
+            ((QosOtherConfigBuilder) builder).setOtherConfigKey(key);
+        }
+
+        @Override
+        protected void setValue(Builder<QosOtherConfig> builder, String value) {
+            ((QosOtherConfigBuilder) builder).setOtherConfigValue(value);
+        }
+
+        @Override
+        protected boolean isValueMandatory() {
+            return false;
         }
     }
 

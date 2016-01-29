@@ -385,6 +385,7 @@ import com.google.common.util.concurrent.CheckedFuture;
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceExternalIds", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateOptions", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceOtherConfig", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceLldp", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interf, OVSDB_INTERFACE_TYPE, ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setInterfaceUuid(any(Uuid.class));

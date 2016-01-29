@@ -1011,6 +1011,20 @@ module ovsdb {
             }
         }
 
+        list interface-lldp {
+            description "Auto Attach Configuration for LLDP";
+
+            key "lldp-key";
+            leaf lldp-key {
+                description "lldp name/key";
+                type string;
+            }
+            leaf lldp-value {
+                description "lldp value";
+                type string;
+            }
+        }
+
         leaf qos {
             description "The unique identifier of the QoS entry for this port.";
             type yang:uuid;

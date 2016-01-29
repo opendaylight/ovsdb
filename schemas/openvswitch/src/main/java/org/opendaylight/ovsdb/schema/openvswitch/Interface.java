@@ -191,4 +191,9 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="error", method=MethodType.SETDATA, fromVersion="7.7.0")
     void setError(Set<String> error);
 
+    @TypedColumn(name="lldp", method=MethodType.GETCOLUMN, fromVersion="7.12.1")
+    Column<GenericTableSchema, Map<String, String>> getLldpColumn();
+    @TypedColumn(name="lldp", method=MethodType.SETDATA, fromVersion="7.12.1")
+    void setLldp(Map<String, String> lldp);
+
 }

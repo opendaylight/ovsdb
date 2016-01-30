@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_e3452571",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-30T21:46:30Z",
+      "side": 1,
+      "message": "given that these are the methods within arp responder service, in my opinion, we should avoid using Arp in the method name, because it actually sounds like handle \"ArpPort\" event, which actually don\u0027t make sense :).",
+      "revId": "e89ef5d8f3ff1e703b8981679ae040714bf63db4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_235f0d43",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-01-30T21:46:30Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 85,
+        "startChar": 25,
+        "endLine": 85,
+        "endChar": 28
+      },
+      "revId": "e89ef5d8f3ff1e703b8981679ae040714bf63db4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

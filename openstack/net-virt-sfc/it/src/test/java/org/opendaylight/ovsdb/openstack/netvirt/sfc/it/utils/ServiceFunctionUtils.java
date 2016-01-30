@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.utils;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc.it.utils;
 
 import java.util.ArrayList;
 import java.util.List;

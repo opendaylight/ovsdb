@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.utils;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc.it.utils;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
 

@@ -95,9 +95,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <excludes>
+        <!--  <excludes>
             <exclude>**/NetvirtSfcIT.java</exclude>
-          </excludes>
+          </excludes>-->
         </configuration>
       </plugin>
     </plugins>

@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -200,18 +201,22 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
-        List<InterfaceLldp> interfaceLldpList =
-                terminationPoint.getInterfaceLldp();
-        if (interfaceLldpList != null && !interfaceLldpList.isEmpty()) {
-            Map<String, String> interfaceLldpMap = new HashMap<>();
-            for (InterfaceLldp interfaceLldp : interfaceLldpList) {
-                interfaceLldpMap.put(interfaceLldp.getLldpKey(), interfaceLldp.getLldpValue());
+        try {
+            List<InterfaceLldp> interfaceLldpList =
+                    terminationPoint.getInterfaceLldp();
+            if (interfaceLldpList != null && !interfaceLldpList.isEmpty()) {
+                Map<String, String> interfaceLldpMap = new HashMap<>();
+                for (InterfaceLldp interfaceLldp : interfaceLldpList) {
+                    interfaceLldpMap.put(interfaceLldp.getLldpKey(), interfaceLldp.getLldpValue());
+                }
+                try {
+                    ovsInterface.setLldp(ImmutableMap.copyOf(interfaceLldpMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB interface lldp");
+                }
             }
-            try {
-                ovsInterface.setLldp(ImmutableMap.copyOf(interfaceLldpMap));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB interface lldp");
-            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.info("lldp column for Interface Table unsupported for this version of ovsdb schema {}", e.getMessage());
         }
     }
 

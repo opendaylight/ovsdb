@@ -129,4 +129,9 @@ public interface Bridge extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="flow_tables", method=MethodType.SETDATA, fromVersion="6.5.0")
     void setFlowTables(Map<Long, UUID> flowTables);
 
+    @TypedColumn(name="auto_attach", method=MethodType.GETCOLUMN, fromVersion="7.11.2")
+    Column<GenericTableSchema, Set<UUID>> getAutoAttachColumn();
+
+    @TypedColumn(name="auto_attach", method=MethodType.SETDATA, fromVersion="7.11.2")
+    void setAutoAttach(Set<UUID> autoAttach);
 }

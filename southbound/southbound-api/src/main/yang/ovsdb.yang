@@ -629,6 +629,10 @@ module ovsdb {
                 description "An identifier used for AutoAttach table in the MD-SAL.";
                 type inet:uri;
             }
+            leaf bridge-id {
+                description "Node-id of the Bridge table from where Autoattach table can be referenced.";
+                type inet:uri;
+            }
             leaf autoattach-uuid {
                 description "The unique identifier of the autoattach table.";
                 type yang:uuid;
@@ -657,6 +661,23 @@ module ovsdb {
                     type uint16 {
                         range "0..4095";
                     }
+                }
+            }
+            list autoattach-external-ids {
+                description
+                   "Key-value pairs for use by external frameworks that integrate with
+                    Open vSwitch, rather than by Open vSwitch itself.";
+
+                key "autoattach-external-id-key";
+                leaf autoattach-external-id-key {
+                    description "external-id name/key";
+                    type string;
+                    mandatory true;
+                }
+                leaf autoattach-external-id-value {
+                    description "autoattach-external-id value";
+                    type string;
+                    mandatory true;
                 }
             }
         }

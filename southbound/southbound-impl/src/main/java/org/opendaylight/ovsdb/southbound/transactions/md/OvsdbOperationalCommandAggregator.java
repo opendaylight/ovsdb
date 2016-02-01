@@ -36,6 +36,8 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         commands.add(new OvsdbControllerRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbPortUpdateCommand(key, updates, dbSchema));
         commands.add(new OvsdbPortRemoveCommand(key, updates, dbSchema));
+        commands.add(new OvsdbAutoAttachUpdateCommand(key, updates, dbSchema));
+        commands.add(new OvsdbAutoAttachRemovedCommand(key, updates, dbSchema));
     }
 
     @Override

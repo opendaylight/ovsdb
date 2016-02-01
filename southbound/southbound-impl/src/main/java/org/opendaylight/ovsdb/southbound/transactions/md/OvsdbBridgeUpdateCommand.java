@@ -228,11 +228,28 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setFailMode(ovsdbBridgeAugmentationBuilder, bridge);
         setOpenFlowNodeRef(ovsdbBridgeAugmentationBuilder, bridge);
         setManagedBy(ovsdbBridgeAugmentationBuilder);
+        setAutoAttach(ovsdbBridgeAugmentationBuilder, bridge);
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.build());
         return bridgeNodeBuilder.build();
+    }
+
+    private void setAutoAttach(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        try {
+            if (bridge.getAutoAttachColumn() != null
+                    && bridge.getAutoAttachColumn().getData() != null
+                    && !bridge.getAutoAttachColumn().getData().isEmpty()) {
+                Set<UUID> uuids = bridge.getAutoAttachColumn().getData();
+                for (UUID uuid : uuids) {
+                    ovsdbBridgeAugmentationBuilder.setAutoAttach(new Uuid(uuid.toString()));
+                }
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("auto_attach column for Bridge Table unsupported for this version of ovsdb schema. {}", e);
+        }
     }
 
     private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {

@@ -1,0 +1,164 @@
+/*
+ * Copyright (c) 2016 Inocybe Technologies and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.ovsdb.southbound.ovsdb.transact;
+
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.CheckedFuture;
+
+public class AutoAttachRemovedCommand extends AbstractTransactCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(AutoAttachRemovedCommand.class);
+
+    public AutoAttachRemovedCommand(BridgeOperationalState state,
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        super(state, changes);
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction) {
+
+        // TODO: Fix after ovs community supports external_ids column in AutoAttach Table
+        if (true) {
+            LOG.debug("CRUD operations not supported from ODL for auto_attach column for"
+                    + " this version of ovsdb schema due to missing external_ids column");
+            return;
+        }
+
+        @SuppressWarnings("unused")
+        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original =
+                TransactUtils.extractOriginal(getChanges(), OvsdbNodeAugmentation.class);
+
+        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated =
+                TransactUtils.extractUpdated(getChanges(), OvsdbNodeAugmentation.class);
+
+        Iterator<InstanceIdentifier<OvsdbNodeAugmentation>> itr = original.keySet().iterator();
+        while (itr.hasNext()) {
+            InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = itr.next();
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = original.get(ovsdbNodeIid);
+            OvsdbNodeAugmentation updatedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
+
+            if (ovsdbNodeAugmentation != null && updatedOvsdbNodeAugmentation != null) {
+                List<Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
+                List<Autoattach> updatedAutoattachList = updatedOvsdbNodeAugmentation.getAutoattach();
+                if (origAutoattachList != null && !origAutoattachList.isEmpty()) {
+                    for (Autoattach origAutoattach : origAutoattachList) {
+                        OvsdbNodeAugmentation currentOvsdbNode =
+                                getOperationalState().getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                        List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
+
+                        boolean found = false;
+                        if (updatedAutoattachList != null && !updatedAutoattachList.isEmpty()) {
+                            for (Autoattach updatedAutoattach : updatedAutoattachList) {
+                                if (origAutoattach.getAutoattachId().equals(updatedAutoattach.getAutoattachId())) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!found) {
+                            LOG.debug("Received request to delete Autoattach entry {}", origAutoattach.getAutoattachId());
+                            Uuid autoattachUuid = getAutoAttachUuid(currentAutoAttach, origAutoattach.getAutoattachId());
+                            OvsdbBridgeAugmentation bridgeAugmentation = getBridge(ovsdbNodeIid, autoattachUuid);
+                            if (autoattachUuid != null && bridgeAugmentation != null) {
+                                UUID uuid = new UUID(autoattachUuid.getValue());
+                                AutoAttach autoattach = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class, null);
+                                  transaction.add(op.delete(autoattach.getSchema())
+                                          .where(autoattach.getUuidColumn().getSchema().opEqual(uuid))
+                                          .build());
+                                  transaction.add(op.comment("AutoAttach: Deleting {} " + uuid
+                                          + " attached to " + bridgeAugmentation.getBridgeName().getValue()));
+
+                                  Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                                          Bridge.class,null);
+
+                                  transaction.add(op.mutate(bridge.getSchema())
+                                          .addMutation(bridge.getAutoAttachColumn().getSchema(),
+                                                  Mutator.DELETE, Sets.newHashSet(uuid))
+                                          .where(bridge.getNameColumn().getSchema()
+                                                  .opEqual(bridgeAugmentation.getBridgeName().getValue())).build());
+
+                                  transaction.add(op.comment("Bridge: Mutating " + bridgeAugmentation.getBridgeName().getValue()
+                                          + " to remove autoattach column " + uuid));
+                            } else {
+                                LOG.warn("Unable to delete AutoAttach {} for node {} because it was not found in the operational store, "
+                                        + "and thus we cannot retrieve its UUID", origAutoattach.getAutoattachId(), ovsdbNodeIid);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Uuid getAutoAttachUuid(List<Autoattach> currentAutoAttach, Uri autoAttachId) {
+        if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
+            for (Autoattach autoAttach : currentAutoAttach) {
+                if (autoAttach.getAutoattachUuid().equals(autoAttachId)) {
+                    return autoAttach.getAutoattachUuid();
+                }
+            }
+        }
+        return null;
+    }
+
+    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<OvsdbNodeAugmentation> key, Uuid aaUuid) {
+        Preconditions.checkNotNull(aaUuid);
+        OvsdbBridgeAugmentation bridge = null;
+        InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
+        ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
+        CheckedFuture<Optional<Node>, ReadFailedException> future =
+              transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid);
+        try {
+            Optional<Node> nodeOptional = future.get();
+            if (nodeOptional.isPresent()) {
+                bridge = nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class);
+                if(bridge != null && bridge.getAutoAttach() != null
+                        && bridge.getAutoAttach().equals(aaUuid)) {
+                    LOG.info("Found bridge {} with auto-attach {}", bridge.getBridgeName().getValue(), aaUuid);
+                } else {
+                    bridge = null;
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Error reading from datastore",e);
+        }
+        transaction.close();
+        return bridge;
+    }
+}

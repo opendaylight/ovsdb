@@ -1037,6 +1037,38 @@ module ovsdb {
         }
     }
 
+    grouping ovsdb-autoattach-attributes {
+        leaf system-name {
+            type string;
+            description "The  system_name string is exported in LLDP messages.  It should uniquely identify the bridge in the network.";
+        }
+
+        leaf system-description {
+            type string;
+            description "The system_description string is exported in LLDP messages. It should describe the type of software and hardware.";
+        }
+        list mappings {
+            description "Map  of integer-integer pairs, key in range 0 to 16,777,215, value in range 0 to 4,095. A mapping from SPB network Individual Service Identifier  (ISID) to VLAN id.";
+            key "mappings-key";
+            leaf mappings-key {
+                type uint32 {
+                    range "0..16777215";
+                }
+            }
+            leaf mappings-value {
+                type uint16 {
+                    range "0..4095";
+                }
+            }
+        }
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augmentation for auto attach configuration within a bridge";
+        ext:augment-identifier "ovsdb-bridge-augmentation";
+        uses ovsdb-autoattach-attributes;
+    }
+
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-bridge-augmentation";

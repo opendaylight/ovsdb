@@ -35,6 +35,7 @@ public class TransactCommandAggregator implements TransactCommand {
         commands.add(new TerminationPointCreateCommand(state,changes));
         commands.add(new TerminationPointDeleteCommand(state, changes));
         commands.add(new OvsdbNodeUpdateCommand(changes));
+        commands.add(new AutoAttachUpdateCommand(state, changes));
         commands.add(new QosUpdateCommand(state, changes));
         commands.add(new QosRemovedCommand(state, changes));
         commands.add(new QueueUpdateCommand(state, changes));

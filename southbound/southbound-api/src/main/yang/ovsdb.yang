@@ -629,6 +629,10 @@ module ovsdb {
                 description "An identifier used for AutoAttach table in the MD-SAL.";
                 type inet:uri;
             }
+            leaf bridge-id {
+                description "Node-id of the Bridge table from where Autoattach table can be referenced.";
+                type inet:uri;
+            }
             leaf autoattach-uuid {
                 description "The unique identifier of the autoattach table.";
                 type yang:uuid;

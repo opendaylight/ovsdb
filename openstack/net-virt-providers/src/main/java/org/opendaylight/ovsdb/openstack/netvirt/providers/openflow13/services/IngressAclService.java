@@ -69,8 +69,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     private volatile SecurityGroupCacheManger securityGroupCacheManger;
     private static final int PORT_RANGE_MIN = 1;
     private static final int PORT_RANGE_MAX = 65535;
-    private static final String IP_VERSION_4 = "IPv4";
-    private static final String IP_VERSION_6 = "IPv6";
 
     public IngressAclService() {
         super(Service.INGRESS_ACL);
@@ -109,7 +107,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 continue;
             }
 
-            if ("ingress".equals(portSecurityRule.getSecurityRuleDirection())) {
+            if (NeutronSecurityRule.DIRECTION_INGRESS.equals(portSecurityRule.getSecurityRuleDirection())) {
                 LOG.debug("programPortSecurityGroup: Rule matching IP and ingress is: {} ", portSecurityRule);
                 if (null != portSecurityRule.getSecurityRemoteGroupID()) {
                     //Remote Security group is selected
@@ -145,8 +143,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                         long localPort, NeutronSecurityRule portSecurityRule,
                                         Neutron_IPs vmIp, boolean write) {
         String securityRuleEtherType = portSecurityRule.getSecurityRuleEthertype();
-        boolean isIpv6 = securityRuleEtherType.equals(IP_VERSION_6);
-        if (!securityRuleEtherType.equals(IP_VERSION_6) && !securityRuleEtherType.equals(IP_VERSION_4)) {
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(securityRuleEtherType);
+        if (!isIpv6 && !NeutronSecurityRule.ETHERTYPE_IPV4.equals(securityRuleEtherType)) {
             LOG.debug("programPortSecurityRule: SecurityRuleEthertype {} does not match IPv4/v6.", securityRuleEtherType);
             return;
         }
@@ -422,7 +420,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_TCP_" + segmentationId + "_" + dstMac + "_";
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(portSecurityRule.getSecurityRuleEthertype());
         if (isIpv6) {
             matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,null,dstMac);
         } else {
@@ -500,7 +498,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                NeutronSecurityRule portSecurityRule, String srcAddress,
                                boolean write, Integer protoPortMatchPriority ) {
         boolean portRange = false;
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(portSecurityRule.getSecurityRuleEthertype());
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Ingress_UDP_" + segmentationId + "_" + dstMac + "_";
         if (isIpv6)  {
@@ -568,7 +566,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             NeutronSecurityRule portSecurityRule, String srcAddress,
             boolean write, Integer protoPortMatchPriority) {
 
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(portSecurityRule.getSecurityRuleEthertype());
         if (isIpv6) {
             ingressAclIcmpV6(dpidLong, segmentationId, dstMac, portSecurityRule, srcAddress, write, protoPortMatchPriority);
         } else {

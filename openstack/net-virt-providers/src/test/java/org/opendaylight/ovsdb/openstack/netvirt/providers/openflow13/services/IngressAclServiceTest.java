@@ -128,8 +128,8 @@ public class IngressAclServiceTest {
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 
         portSecurityRule = mock(NeutronSecurityRule.class);
-        when(portSecurityRule.getSecurityRuleEthertype()).thenReturn("IPv4");
-        when(portSecurityRule.getSecurityRuleDirection()).thenReturn("ingress");
+        when(portSecurityRule.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
+        when(portSecurityRule.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
 
         List<NeutronSecurityRule> portSecurityList = new ArrayList<>();
         portSecurityList.add(portSecurityRule);
@@ -147,8 +147,8 @@ public class IngressAclServiceTest {
         neutronDestIpList.add(neutron_ip_dest_2);
 
         portSecurityIpv6Rule = mock(NeutronSecurityRule.class);
-        when(portSecurityIpv6Rule.getSecurityRuleEthertype()).thenReturn("IPv6");
-        when(portSecurityIpv6Rule.getSecurityRuleDirection()).thenReturn("ingress");
+        when(portSecurityIpv6Rule.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV6);
+        when(portSecurityIpv6Rule.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
 
         List<NeutronSecurityRule> portSecurityIpv6List = new ArrayList<>();
         portSecurityIpv6List.add(portSecurityIpv6Rule);
@@ -177,15 +177,15 @@ public class IngressAclServiceTest {
     @Test
     public void testProgramPortSecurityGroupWithIncompleteRule() throws Exception {
         NeutronSecurityRule portSecurityRule1 = mock(NeutronSecurityRule.class);
-        when(portSecurityRule1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(portSecurityRule1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         when(portSecurityRule1.getSecurityRuleDirection()).thenReturn("not_ingress");  // other direction
 
         NeutronSecurityRule portSecurityRule2 = mock(NeutronSecurityRule.class);
         when(portSecurityRule2.getSecurityRuleEthertype()).thenReturn(null);
-        when(portSecurityRule2.getSecurityRuleDirection()).thenReturn("ingress");
+        when(portSecurityRule2.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
 
         NeutronSecurityRule portSecurityRule3 = mock(NeutronSecurityRule.class);
-        when(portSecurityRule3.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(portSecurityRule3.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         when(portSecurityRule3.getSecurityRuleDirection()).thenReturn(null);
 
         NeutronSecurityRule portSecurityRule4 = mock(NeutronSecurityRule.class);
@@ -279,7 +279,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -307,7 +307,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddTcp1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(20);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -335,7 +335,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(15);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(15);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -363,7 +363,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveTcp1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(15);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(15);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -391,7 +391,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -427,7 +427,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddTcp2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -463,7 +463,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -501,7 +501,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveTcp2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -538,7 +538,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -563,7 +563,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddTcpAll1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -588,7 +588,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -613,7 +613,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveTcpAll1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -638,7 +638,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -670,7 +670,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddTcpAll2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -702,7 +702,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -736,7 +736,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveTcpAll2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -770,7 +770,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -798,7 +798,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddUdp1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -826,7 +826,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -854,7 +854,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveUdp1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -882,7 +882,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -918,7 +918,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddUdp2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -954,7 +954,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -990,7 +990,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveUdp2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1026,7 +1026,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -1051,7 +1051,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIPv6AddUdpAll1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1076,7 +1076,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -1101,7 +1101,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveUdpAll1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1126,7 +1126,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -1159,7 +1159,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddUdpAll2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1192,7 +1192,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -1225,7 +1225,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveUdpAll2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1258,7 +1258,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddIcmp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(10);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(10);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -1286,7 +1286,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddIcmp1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("icmpv6");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMPV6);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(10);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(10);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1315,7 +1315,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveIcmp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -1343,7 +1343,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveIcmp1() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("icmpv6");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMPV6);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(20);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityIpv6Rule.getSecurityRuleRemoteIpPrefix()).thenReturn("::/64");
@@ -1371,7 +1371,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddIcmp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(30);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(30);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -1406,7 +1406,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6AddIcmp2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("icmpv6");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMPV6);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(30);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(30);
         when(portSecurityIpv6Rule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -1442,7 +1442,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveIcmp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(40);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(40);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -1477,7 +1477,7 @@ public class IngressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleIpv6RemoveIcmp2() throws Exception {
-        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn("icmpv6");
+        when(portSecurityIpv6Rule.getSecurityRuleProtocol()).thenReturn(NeutronSecurityRule.PROTOCOL_ICMPV6);
         when(portSecurityIpv6Rule.getSecurityRulePortMax()).thenReturn(40);
         when(portSecurityIpv6Rule.getSecurityRulePortMin()).thenReturn(40);
         when(portSecurityIpv6Rule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");

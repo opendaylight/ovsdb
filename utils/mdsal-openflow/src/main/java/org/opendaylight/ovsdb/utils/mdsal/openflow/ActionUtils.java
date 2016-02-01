@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -268,16 +268,24 @@ public final class ActionUtils {
                                          DstChoice dstChoice,
                                          int endOffset,
                                          boolean groupBucket) {
+        return nxMoveRegAction(srcChoice, dstChoice, 0, 0, endOffset, groupBucket);
+    }
+
+    public static Action nxMoveRegAction(SrcChoice srcChoice,
+                                         DstChoice dstChoice,
+                                         int srcStartOffset,
+                                         int dstStartOffset,
+                                         int dstEndOffset,
+                                         boolean groupBucket) {
         NxRegMove r = new NxRegMoveBuilder()
             .setSrc(new SrcBuilder()
                 .setSrcChoice(srcChoice)
-                .setStart(0)
-                .setEnd(endOffset)
+                .setStart(srcStartOffset)
                 .build())
             .setDst(new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.nx.action.reg.move.grouping.nx.reg.move.DstBuilder()
                 .setDstChoice(dstChoice)
-                .setStart(0)
-                .setEnd(endOffset)
+                .setStart(dstStartOffset)
+                .setEnd(dstEndOffset)
                 .build())
             .build();
         if (groupBucket) {

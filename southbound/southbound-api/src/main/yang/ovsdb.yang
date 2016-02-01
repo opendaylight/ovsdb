@@ -321,6 +321,10 @@ module ovsdb {
             }
         }
 
+        leaf auto-attach {
+            description "The unique identifier of the auto_attach entry for this bridge.";
+            type yang:uuid;
+        }
     }
 
     grouping ovsdb-connection-info-attributes {
@@ -506,9 +510,10 @@ module ovsdb {
                 description "The list of queues used by the QoS";
                 key "queue-number";
                 leaf queue-number {
-                	description "The queue number of the record in the QoS entry";
-                	type uint32;
+                    description "The queue number of the record in the QoS entry";
+                    type uint32;
                 }
+
                 leaf queue-uuid {
                     description "The unique identifier of the queue record.";
                     type yang:uuid;
@@ -614,6 +619,44 @@ module ovsdb {
                 }
                 leaf queue-other-config-value {
                     type string;
+                }
+            }
+        }
+
+        list autoattach {
+            key "autoattach-id";
+            leaf autoattach-id {
+                description "An identifier used for AutoAttach table in the MD-SAL.";
+                type inet:uri;
+            }
+            leaf autoattach-uuid {
+                description "The unique identifier of the autoattach table.";
+                type yang:uuid;
+            }
+            leaf system-name {
+                type string;
+                description "The  system_name string is exported in LLDP messages.
+                    It should uniquely identify the bridge in the network.";
+            }
+            leaf system-description {
+                type string;
+                description "The system_description string is exported in LLDP messages.
+                    It should describe the type of software and hardware.";
+            }
+            list mappings {
+                description "Map  of integer-integer pairs, key in range 0 to 16,777,215,
+                    value in range 0 to 4,095. A mapping from SPB network Individual Service
+                    Identifier  (ISID) to VLAN id.";
+                key "mappings-key";
+                leaf mappings-key {
+                    type uint32 {
+                        range "0..16777215";
+                    }
+                }
+                leaf mappings-value {
+                    type uint16 {
+                        range "0..4095";
+                    }
                 }
             }
         }

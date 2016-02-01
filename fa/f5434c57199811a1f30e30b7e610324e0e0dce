@@ -1,0 +1,9 @@
+Code-Review+1: Stephen Kitt <skitt@redhat.com>
+Code-Review+1: Alexis de Talhouët <adetalhouet@inocybe.com>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Submitted-by: Sam Hague <shague@redhat.com>
+Submitted-at: Mon, 01 Feb 2016 20:23:27 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/33864
+Project: ovsdb
+Branch: refs/heads/master

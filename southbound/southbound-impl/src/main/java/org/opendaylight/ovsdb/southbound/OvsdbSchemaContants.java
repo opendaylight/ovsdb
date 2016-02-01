@@ -28,7 +28,8 @@ public class OvsdbSchemaContants {
         MIRROR("Mirror", "Bridge", "mirrors"),
         MANAGER("Manager", "Open_vSwitch", "manager_options"),
         CONTROLLER("Controller", "Bridge", "controller"),
-        FLOWSAMPLECOLLECTORSET("Flow_Sample_Collector_Set",null,null);
+        FLOWSAMPLECOLLECTORSET("Flow_Sample_Collector_Set",null,null),
+        AUTOATTACH("AutoAttach", "Bridge", "auto_attach");
 
         private final String tableName;
         private final String parentTableName;

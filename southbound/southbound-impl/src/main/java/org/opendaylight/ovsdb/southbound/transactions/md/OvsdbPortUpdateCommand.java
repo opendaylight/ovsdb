@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -450,20 +451,24 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private void updateInterfaceLldp(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
-        Map<String, String> interfaceLldpMap = interf.getLldpColumn().getData();
-        if (interfaceLldpMap != null && !interfaceLldpMap.isEmpty()) {
-            List<InterfaceLldp> interfaceLldpList = new ArrayList<>();
-            for (String interfaceLldpKeyString : interfaceLldpMap.keySet()) {
-                String interfaceLldpValueString = interfaceLldpMap.get(interfaceLldpKeyString);
-                if (interfaceLldpKeyString != null && interfaceLldpValueString!=null) {
-                    interfaceLldpList.add(new InterfaceLldpBuilder()
-                            .setKey(new InterfaceLldpKey(interfaceLldpKeyString))
-                            .setLldpKey(interfaceLldpKeyString)
-                            .setLldpValue(interfaceLldpValueString)
-                            .build());
+        try {
+            Map<String, String> interfaceLldpMap = interf.getLldpColumn().getData();
+            if (interfaceLldpMap != null && !interfaceLldpMap.isEmpty()) {
+                List<InterfaceLldp> interfaceLldpList = new ArrayList<>();
+                for (String interfaceLldpKeyString : interfaceLldpMap.keySet()) {
+                    String interfaceLldpValueString = interfaceLldpMap.get(interfaceLldpKeyString);
+                    if (interfaceLldpKeyString != null && interfaceLldpValueString!=null) {
+                        interfaceLldpList.add(new InterfaceLldpBuilder()
+                                .setKey(new InterfaceLldpKey(interfaceLldpKeyString))
+                                .setLldpKey(interfaceLldpKeyString)
+                                .setLldpValue(interfaceLldpValueString)
+                                .build());
+                    }
                 }
+                ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
             }
-            ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }
 

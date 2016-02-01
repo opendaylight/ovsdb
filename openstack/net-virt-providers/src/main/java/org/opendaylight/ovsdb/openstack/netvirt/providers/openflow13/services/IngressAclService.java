@@ -98,8 +98,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 continue;
             }
 
-            if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
-                    && "ingress".equals(portSecurityRule.getSecurityRuleDirection())) {
+            if (org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.ETHERTYPE_IPV4.equals(
+                    portSecurityRule.getSecurityRuleEthertype())
+                    && org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_INGRESS.equals(
+                    portSecurityRule.getSecurityRuleDirection())) {
                 LOG.debug("programPortSecurityGroup: Rule matching IPv4 and ingress is: {} ", portSecurityRule);
                 if (null != portSecurityRule.getSecurityRemoteGroupID()) {
                     //Remote Security group is selected

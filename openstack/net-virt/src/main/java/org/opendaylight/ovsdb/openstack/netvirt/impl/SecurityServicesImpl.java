@@ -495,15 +495,18 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             if (dpid == 0L) {
                 return;
             }
-            if ("IPv4".equals(securityRule.getSecurityRuleEthertype())
-                    && "ingress".equals(securityRule.getSecurityRuleDirection())) {
-
-                ingressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
-                                                           securityRule, vmIp, write);
-            } else if (securityRule.getSecurityRuleEthertype().equals("IPv4")
-                    && securityRule.getSecurityRuleDirection().equals("egress")) {
-                egressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
-                                                          securityRule, vmIp, write);
+            if (org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.ETHERTYPE_IPV4.equals(
+                    securityRule.getSecurityRuleEthertype())) {
+                if (org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_INGRESS.equals(
+                        securityRule.getSecurityRuleDirection())) {
+                    ingressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                            securityRule, vmIp, write);
+                } else if (org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_EGRESS
+                        .equals(
+                        securityRule.getSecurityRuleDirection())) {
+                    egressAclProvider.programPortSecurityRule(dpid, segmentationId, attachedMac, localPort,
+                            securityRule, vmIp, write);
+                }
             }
         }
     }

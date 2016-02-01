@@ -101,8 +101,10 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 continue;
             }
 
-            if ("IPv4".equals(portSecurityRule.getSecurityRuleEthertype())
-                    && portSecurityRule.getSecurityRuleDirection().equals("egress")) {
+            if (org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.ETHERTYPE_IPV4.equals(
+                    portSecurityRule.getSecurityRuleEthertype())
+                    && org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_EGRESS.equals(
+                    portSecurityRule.getSecurityRuleDirection())) {
                 LOG.debug("programPortSecurityGroup: Acl Rule matching IPv4 and ingress is: {} ", portSecurityRule);
                 if (null != portSecurityRule.getSecurityRemoteGroupID()) {
                     //Remote Security group is selected

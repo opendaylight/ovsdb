@@ -119,8 +119,10 @@ public class EgressAclServiceTest {
 
         portSecurityRule = mock(NeutronSecurityRule.class);
 
-        when(portSecurityRule.getSecurityRuleEthertype()).thenReturn("IPv4");
-        when(portSecurityRule.getSecurityRuleDirection()).thenReturn("egress");
+        when(portSecurityRule.getSecurityRuleEthertype()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.ETHERTYPE_IPV4);
+        when(portSecurityRule.getSecurityRuleDirection()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_EGRESS);
 
         List<NeutronSecurityRule> portSecurityList = new ArrayList<>();
         portSecurityList.add(portSecurityRule);
@@ -261,15 +263,18 @@ public class EgressAclServiceTest {
     @Test
     public void testProgramPortSecurityGroupWithIncompleteRule() throws Exception {
         NeutronSecurityRule portSecurityRule1 = mock(NeutronSecurityRule.class);
-        when(portSecurityRule1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(portSecurityRule1.getSecurityRuleEthertype()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.ETHERTYPE_IPV4);
         when(portSecurityRule1.getSecurityRuleDirection()).thenReturn("not_egress");  // other direction
 
         NeutronSecurityRule portSecurityRule2 = mock(NeutronSecurityRule.class);
         when(portSecurityRule2.getSecurityRuleEthertype()).thenReturn(null);
-        when(portSecurityRule2.getSecurityRuleDirection()).thenReturn("egress");
+        when(portSecurityRule2.getSecurityRuleDirection()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_EGRESS);
 
         NeutronSecurityRule portSecurityRule3 = mock(NeutronSecurityRule.class);
-        when(portSecurityRule3.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(portSecurityRule3.getSecurityRuleEthertype()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.ETHERTYPE_IPV4);
         when(portSecurityRule3.getSecurityRuleDirection()).thenReturn(null);
 
         NeutronSecurityRule portSecurityRule4 = mock(NeutronSecurityRule.class);
@@ -344,7 +349,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -370,7 +376,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(30);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(30);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -397,7 +404,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(40);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(40);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -430,7 +438,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -464,7 +473,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -485,7 +495,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -509,7 +520,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddTcpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -540,7 +552,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveTcpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_TCP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -572,7 +585,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -598,7 +612,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -624,7 +639,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -659,7 +675,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(50);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(50);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -695,7 +712,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -718,7 +736,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdpAll1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -741,7 +760,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddUdpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -772,7 +792,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveUdpAll2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("udp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_UDP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(PORT_RANGE_MAX);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(PORT_RANGE_MIN);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -803,7 +824,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddIcmp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(10);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(10);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -830,7 +852,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveIcmp1() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(20);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(20);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -857,7 +880,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleAddIcmp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(30);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(30);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn("0.0.0.0/24");
@@ -893,7 +917,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleRemoveIcmp2() throws Exception {
-        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("icmp");
+        when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.PROTOCOL_ICMP);
         when(portSecurityRule.getSecurityRulePortMax()).thenReturn(40);
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(40);
         when(portSecurityRule.getSecurityRemoteGroupID()).thenReturn("85cc3048-abc3-43cc-89b3-377341426ac5");
@@ -942,7 +967,8 @@ public class EgressAclServiceTest {
      */
     @Test
     public void testProgramPortSecurityACLRuleInvalidDirection() throws Exception {
-        when(portSecurityRule.getSecurityRuleDirection()).thenReturn("ingress");
+        when(portSecurityRule.getSecurityRuleDirection()).thenReturn(
+                org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityRule.DIRECTION_INGRESS);
 
         egressAclServiceSpy.programPortSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup,PORT_UUID,false);
 

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
@@ -84,6 +85,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
         setDataPathType(bridge, ovsdbManagedNode);
         setOpenDaylightExternalIds(bridge, iid, ovsdbManagedNode);
         setOpenDaylightOtherConfig(bridge, ovsdbManagedNode);
+        setAutoAttach(bridge, ovsdbManagedNode);
         if (!operationalBridgeOptional.isPresent()) {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
@@ -97,6 +99,18 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
                     .where(extraBridge.getNameColumn().getSchema().opEqual(existingBridgeName))
                     .build());
             stampInstanceIdentifier(transaction, iid.firstIdentifierOf(Node.class),existingBridgeName);
+        }
+    }
+
+
+
+    private void setAutoAttach(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode) {
+        try {
+            if (ovsdbManagedNode.getAutoAttach() != null) {
+                bridge.setAutoAttach(Sets.newHashSet(new UUID(ovsdbManagedNode.getAutoAttach().getValue())));
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("auto_attach column for Bridge Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }
 

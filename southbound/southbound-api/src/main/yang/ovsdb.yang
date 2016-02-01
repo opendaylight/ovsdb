@@ -654,7 +654,7 @@ module ovsdb {
                     }
                 }
                 leaf mappings-value {
-                    type uint16 {
+                    type uint32 {
                         range "0..4095";
                     }
                 }

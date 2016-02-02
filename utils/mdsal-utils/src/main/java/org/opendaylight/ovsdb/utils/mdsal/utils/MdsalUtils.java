@@ -7,8 +7,8 @@
  */
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -18,6 +18,9 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
@@ -51,6 +54,35 @@ public class MdsalUtils {
             result = true;
         } catch (TransactionCommitFailedException e) {
             LOG.warn("Failed to delete {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes delete as a blocking transaction for the specified instance
+     * identifier list.
+     *
+     * @param <D>
+     *            the data object type
+     * @param store
+     *            {@link LogicalDatastoreType} which should be modified
+     * @param pathList
+     *            the path list
+     * @return the result of the request
+     */
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
+            final LogicalDatastoreType store, final List<InstanceIdentifier<D>> pathList) {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        for (InstanceIdentifier<D> path : pathList) {
+            transaction.delete(store, path);
+        }
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete {} ", pathList, e);
         }
         return result;
     }

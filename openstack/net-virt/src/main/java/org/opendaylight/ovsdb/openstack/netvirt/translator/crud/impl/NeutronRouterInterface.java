@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Network
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronRouterCRUD;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.l3.attributes.Routes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.Routers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.Router;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.RouterBuilder;
@@ -138,8 +139,8 @@ public class NeutronRouterInterface extends  AbstractNeutronInterface<Router, Ne
         routerBuilder.setAdminStateUp(router.getAdminStateUp());
         routerBuilder.setDistributed(router.getDistributed());
         if (router.getRoutes() != null) {
-            List<String> routes = new ArrayList<>();
-            for (String route : router.getRoutes()) {
+            List<Routes> routes = new ArrayList<>();
+            for (Routes route : router.getRoutes()) {
                 routes.add(route);
             }
             routerBuilder.setRoutes(routes);
@@ -212,8 +213,8 @@ public class NeutronRouterInterface extends  AbstractNeutronInterface<Router, Ne
             result.setGatewayPortId(String.valueOf(router.getGatewayPortId().getValue()));
         }
         if (router.getRoutes() != null) {
-            List<String> routes = new ArrayList<>();
-            for (String route : router.getRoutes()) {
+            List<Routes> routes = new ArrayList<>();
+            for (Routes route : router.getRoutes()) {
                 routes.add(route);
             }
             result.setRoutes(routes);

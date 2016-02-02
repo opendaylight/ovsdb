@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
 
     public UcastMacsRemoteUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {

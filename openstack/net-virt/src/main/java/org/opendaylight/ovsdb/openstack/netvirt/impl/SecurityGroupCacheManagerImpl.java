@@ -88,6 +88,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         LOG.debug("In removeFromCache remoteSgUuid:" + remoteSgUuid + " portUuid:" + portUuid);
         Set<String> portList = securityGroupCache.get(remoteSgUuid);
         if (null == portList) {
+            LOG.debug("The port list is empty for security group:" + remoteSgUuid);
             return;
         }
         for (Iterator<String> iterator = portList.iterator(); iterator.hasNext();) {
@@ -110,6 +111,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         LOG.debug("In processPortAdded securityGroupUuid:" + securityGroupUuid + " NeutronPort:" + port);
         Set<String> portList = this.securityGroupCache.get(securityGroupUuid);
         if (null == portList) {
+            LOG.debug("The port list is empty for security group:" + securityGroupUuid);
             return;
         }
         for (String cachedportUuid : portList) {
@@ -120,7 +122,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
             if (null == cachedport) {
                 LOG.error("In processPortAdded cachedport port not found in neuton cache:"
                             + " cachedportUuid:" + cachedportUuid);
-                return;
+                continue;
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
             for (NeutronSecurityRule securityRule : remoteSecurityRules) {
@@ -142,6 +144,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         LOG.debug("In processPortRemoved securityGroupUuid:" + securityGroupUuid + " port:" + port);
         Set<String> portList = this.securityGroupCache.get(securityGroupUuid);
         if (null == portList) {
+            LOG.debug("The port list is empty for security group:" + securityGroupUuid);
             return;
         }
         for (String cachedportUuid : portList) {
@@ -154,7 +157,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
                 if (null == cachedport) {
                     LOG.error("In processPortRemoved cachedport port not found in neuton cache:"
                                 + " cachedportUuid:" + cachedportUuid);
-                    return;
+                    continue;
                 }
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);

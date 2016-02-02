@@ -38,7 +38,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
@@ -47,21 +49,28 @@ import org.opendaylight.ovsdb.utils.hwvtepsouthbound.utils.HwvtepSouthboundUtils
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -73,6 +82,9 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.CheckedFuture;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -97,13 +109,16 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     private static final int OVSDB_ROUNDTRIP_TIMEOUT = 10000;
 
+    private static DataBroker dataBroker = null;
     private static MdsalUtils mdsalUtils = null;
+    private static HwvtepSouthboundUtils hwvtepUtils = null;
     private static boolean setup = false;
     private static int testMethodsRemaining;
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;
     private static Node hwvtepNode;
+    private InstanceIdentifier<Node> iid;
 
     @Inject
     private BundleContext bundleContext;
@@ -261,7 +276,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
         //dataBroker = getSession().getSALService(DataBroker.class);
         Thread.sleep(3000);
-        DataBroker dataBroker = HwvtepSouthboundProvider.getDb();
+        dataBroker = HwvtepSouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bundleContext.getProperty(SERVER_IPADDRESS);
@@ -283,8 +298,9 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
 
         mdsalUtils = new MdsalUtils(dataBroker);
+        hwvtepUtils =  new HwvtepSouthboundUtils(mdsalUtils);
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
+        iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
         final DataTreeIdentifier<Node> treeId =
                         new DataTreeIdentifier<Node>(LogicalDatastoreType.OPERATIONAL, iid);
 
@@ -354,6 +370,18 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
             LOG.info("Woke up, waited {} for deletion of {}", (System.currentTimeMillis() - _start), iid);
+        }
+    }
+
+    private static void waitForOperationalUpdation(InstanceIdentifier<Node> iid) throws InterruptedException {
+        synchronized (OPERATIONAL_LISTENER) {
+            long _start = System.currentTimeMillis();
+            LOG.info("Waiting for OPERATIONAL DataChanged updation on {}", iid);
+            while (!OPERATIONAL_LISTENER.isUpdated(iid)
+                    && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
+            }
+            LOG.info("Woke up, waited {} for updation of {}", (System.currentTimeMillis() - _start), iid);
         }
     }
 
@@ -517,6 +545,256 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         InstanceIdentifier<Node> psIid =
                         HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName));
                 return mdsalUtils.read(dataStore, psIid);
+    }
+
+    @Test
+    public void testAddDeleteLogicalSwitch() throws InterruptedException {
+        LOG.info("Start testing method testAddDeleteLogicalSwitch.");
+        String lsName1 = "ls1";
+        NodeId nodeId = hwvtepNode.getNodeId();
+
+        addAndVerifyLogicalSwitch(nodeId, HwvtepSouthboundUtils.createLogicalSwitch(lsName1, "ls1desc", "1000"));
+        deleteAndVerifyLogicalSwitch(nodeId, lsName1);
+        LOG.info("End testing method testAddDeleteLogicalSwitch.");
+    }
+
+    private void addAndVerifyLogicalSwitch(NodeId nodeId, LogicalSwitches logicalSwitch) throws InterruptedException {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        HwvtepSouthboundUtils.putLogicalSwitch(transaction, nodeId, logicalSwitch);
+        submitTransaction(transaction);
+        waitForOperationalUpdation(iid);
+
+        verifyGetLogicalSwitch(nodeId, logicalSwitch.getHwvtepNodeName().getValue());
+    }
+
+    @Test
+    public void testAddDeleteLogicalSwitches() throws InterruptedException {
+        LOG.info("Start testing method testAddDeleteLogicalSwitches.");
+        NodeId nodeId = hwvtepNode.getNodeId();
+
+        String lsName1 = "ls11";
+        String lsName2 = "ls12";
+        String lsName3 = "ls13";
+        LogicalSwitches ls1 = HwvtepSouthboundUtils.createLogicalSwitch(lsName1, "ls11desc1", "1100");
+        LogicalSwitches ls2 = HwvtepSouthboundUtils.createLogicalSwitch(lsName2, "ls12desc2", "1200");
+        LogicalSwitches ls3 = HwvtepSouthboundUtils.createLogicalSwitch(lsName3, "ls13desc3", "1300");
+
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        HwvtepSouthboundUtils.putLogicalSwitches(transaction, nodeId, Lists.newArrayList(ls1, ls2, ls3));
+        submitTransaction(transaction);
+        waitForOperationalUpdation(iid);
+
+        verifyGetLogicalSwitch(nodeId, lsName1);
+        verifyGetLogicalSwitch(nodeId, lsName2);
+        verifyGetLogicalSwitch(nodeId, lsName3);
+
+        deleteAndVerifyLogicalSwitch(nodeId, lsName1);
+        deleteAndVerifyLogicalSwitch(nodeId, lsName2);
+        deleteAndVerifyLogicalSwitch(nodeId, lsName3);
+        LOG.info("End testing method testAddDeleteLogicalSwitches.");
+    }
+
+    private void deleteAndVerifyLogicalSwitch(NodeId nodeId, String lsName) throws InterruptedException {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        LOG.info("Deleting LogicalSwitch : name: {}", lsName);
+        HwvtepSouthboundUtils.deleteLogicalSwitch(transaction, nodeId, lsName);
+        submitTransaction(transaction);
+        waitForOperationalUpdation(iid);
+
+        LogicalSwitches logicalSwitch = hwvtepUtils.getLogicalSwitch(nodeId, lsName);
+        LOG.info("LogicalSwitch: name: {} logicalSwitch: {}", lsName, logicalSwitch);
+        Assert.assertNull(logicalSwitch);
+    }
+
+    private void verifyGetLogicalSwitch(NodeId nodeId, String lsName) {
+        LogicalSwitches logicalSwitch = hwvtepUtils.getLogicalSwitch(nodeId, lsName);
+        LOG.info("LogicalSwitch: name: {} logicalSwitch: {}", lsName, logicalSwitch);
+        Assert.assertNotNull(logicalSwitch);
+    }
+
+    @Test
+    public void testAddDeleteRemoteUcastMac() throws InterruptedException {
+        LOG.info("Start testing method testAddDeleteRemoteUcastMac.");
+        NodeId nodeId = hwvtepNode.getNodeId();
+
+        String lsName1 = "ls11";
+        String mac1 = "11:11:11:11:11:11";
+        String ip1 = "1.1.1.1";
+        String physicalLocator = "11.11.11.11";
+
+        // FIXME: Currently adding logical switch entry and RemoteUcastMacs
+        // entry cannot be done in single transaction, creating logical switch
+        // before adding RemoteUcastMacs entries
+        LogicalSwitches ls = HwvtepSouthboundUtils.createLogicalSwitch(lsName1, "ls11desc", "1100");
+        addAndVerifyLogicalSwitch(nodeId, ls);
+
+        WriteTransaction txPutRuMacs = dataBroker.newWriteOnlyTransaction();
+        HwvtepPhysicalLocatorAugmentation phyLoc = HwvtepSouthboundUtils
+                .createHwvtepPhysicalLocatorAugmentation(physicalLocator);
+        HwvtepSouthboundUtils.putPhysicalLocator(txPutRuMacs, nodeId, phyLoc);
+
+        RemoteUcastMacs remoteMac1 = HwvtepSouthboundUtils.createRemoteUcastMac(nodeId, mac1,
+                new IpAddress(ip1.toCharArray()), lsName1, phyLoc);
+
+        HwvtepSouthboundUtils.putRemoteUcastMacs(txPutRuMacs, nodeId, Lists.newArrayList(remoteMac1));
+
+        // Submitting PhysicalLocator and RemoteUcastMacs entries in a single
+        // transation.
+        submitTransaction(txPutRuMacs);
+        waitForOperationalUpdation(iid);
+
+        verifyForNotNullGetRemoteUcastMac(nodeId, mac1);
+
+        WriteTransaction txDelRuMacs = dataBroker.newWriteOnlyTransaction();
+        HwvtepSouthboundUtils.deleteRemoteUcastMacs(txDelRuMacs, nodeId, Lists.newArrayList(mac1));
+        submitTransaction(txDelRuMacs);
+        waitForOperationalUpdation(iid);
+
+        verifyForNullGetRemoteUcastMac(nodeId, mac1);
+
+        deleteAndVerifyLogicalSwitch(nodeId, lsName1);
+        LOG.info("End testing method testAddDeleteRemoteUcastMac.");
+    }
+
+    @Ignore("not ready yet")
+    @Test
+    public void testAddDeleteRemoteUcastMacs() throws InterruptedException {
+        LOG.info("Start testing method testAddDeleteRemoteUcastMacs.");
+        NodeId nodeId = hwvtepNode.getNodeId();
+
+        String lsName1 = "ls22";
+        String mac1 = "22:11:11:11:11:11";
+        String mac2 = "22:22:22:22:22:22";
+        String mac3 = "22:33:33:33:33:33";
+        String ip1 = "1.1.1.1";
+        String ip2 = "2.2.2.2";
+        String ip3 = "3.3.3.3";
+        String physicalLocator = "20.20.20.20";
+
+        // FIXME: Currently adding logical switch entry and RemoteUcastMacs
+        // entry cannot be done in single transaction, creating logical switch
+        // before adding RemoteUcastMacs entries
+        LogicalSwitches ls = HwvtepSouthboundUtils.createLogicalSwitch(lsName1, "ls22desc", "2200");
+        addAndVerifyLogicalSwitch(nodeId, ls);
+
+        WriteTransaction txPutRuMacs = dataBroker.newWriteOnlyTransaction();
+        HwvtepPhysicalLocatorAugmentation phyLoc = HwvtepSouthboundUtils
+                .createHwvtepPhysicalLocatorAugmentation(physicalLocator);
+        HwvtepSouthboundUtils.putPhysicalLocator(txPutRuMacs, nodeId, phyLoc);
+
+        RemoteUcastMacs remoteMac1 = HwvtepSouthboundUtils.createRemoteUcastMac(nodeId, mac1,
+                new IpAddress(ip1.toCharArray()), lsName1, phyLoc);
+        RemoteUcastMacs remoteMac2 = HwvtepSouthboundUtils.createRemoteUcastMac(nodeId, mac2,
+                new IpAddress(ip2.toCharArray()), lsName1, phyLoc);
+        RemoteUcastMacs remoteMac3 = HwvtepSouthboundUtils.createRemoteUcastMac(nodeId, mac3,
+                new IpAddress(ip3.toCharArray()), lsName1, phyLoc);
+
+        HwvtepSouthboundUtils.putRemoteUcastMacs(txPutRuMacs, nodeId,
+                Lists.newArrayList(remoteMac1, remoteMac2, remoteMac3));
+
+        // Submitting PhysicalLocator and RemoteUcastMacs entries in a single
+        // transation.
+        submitTransaction(txPutRuMacs);
+        waitForOperationalUpdation(iid);
+
+        verifyForNotNullGetRemoteUcastMac(nodeId, mac1);
+        verifyForNotNullGetRemoteUcastMac(nodeId, mac2);
+        verifyForNotNullGetRemoteUcastMac(nodeId, mac3);
+
+        WriteTransaction txDelRuMacs = dataBroker.newWriteOnlyTransaction();
+        HwvtepSouthboundUtils.deleteRemoteUcastMacs(txDelRuMacs, nodeId, Lists.newArrayList(mac1, mac2, mac3));
+        submitTransaction(txDelRuMacs);
+        waitForOperationalUpdation(iid);
+
+        verifyForNullGetRemoteUcastMac(nodeId, mac1);
+        verifyForNullGetRemoteUcastMac(nodeId, mac2);
+        verifyForNullGetRemoteUcastMac(nodeId, mac3);
+
+        deleteAndVerifyLogicalSwitch(nodeId, lsName1);
+        LOG.info("End testing method testAddDeleteRemoteUcastMacs.");
+    }
+
+    private void verifyForNullGetRemoteUcastMac(NodeId nodeId, String mac) {
+        RemoteUcastMacs ruMacAfterDelete = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
+                HwvtepSouthboundUtils.createRemoteUcastMacsInstanceIdentifier(nodeId, new MacAddress(mac)));
+        LOG.info("VerifyForNotNull RemoteUcastMacs: name: {} RemoteUcastMacs: {}", mac, ruMacAfterDelete);
+        Assert.assertNull(ruMacAfterDelete);
+    }
+
+    private void verifyForNotNullGetRemoteUcastMac(NodeId nodeId, String mac) {
+        RemoteUcastMacs ruMac = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
+                HwvtepSouthboundUtils.createRemoteUcastMacsInstanceIdentifier(nodeId, new MacAddress(mac)));
+        LOG.info("VerifyForNotNull RemoteUcastMacs: name: {} RemoteUcastMacs: {}", mac, ruMac);
+        Assert.assertNotNull(ruMac);
+    }
+
+    @Ignore("Not ready yet. Need to dynamically add physical switch and physical port entries. Also need to cleanup created data.")
+    @Test
+    public void testUpdateVlanBindings() throws InterruptedException {
+        LOG.info("Start testing method testUpdateVlanBindings.");
+
+        // TODO: Need to dynamically add physical switch and physical port
+        // entries.
+        String phySwitchName = "s2";
+        String phyPort = "s2-eth1";
+        String lsName = "lsVlanVni";
+
+        NodeId nodeId = hwvtepNode.getNodeId();
+        addAndVerifyLogicalSwitch(nodeId, HwvtepSouthboundUtils.createLogicalSwitch(lsName, lsName + "desc", "2000"));
+
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        VlanBindings vlanBinding = HwvtepSouthboundUtils.createVlanBinding(nodeId, 200, lsName);
+
+        HwvtepSouthboundUtils.mergeVlanBindings(transaction, nodeId, phySwitchName, phyPort,
+                Lists.newArrayList(vlanBinding));
+        submitTransaction(transaction);
+        waitForOperationalUpdation(iid);
+
+        verifyForNotNullMergeVlanBinding(nodeId, phySwitchName, phyPort, vlanBinding);
+
+        // TODO: Cleanup created data
+        LOG.info("End testing method testUpdateVlanBindings.");
+    }
+
+    private void verifyForNotNullMergeVlanBinding(NodeId nodeId, String phySwitchName, String phyPortName,
+            VlanBindings vlanBindingToVerify) {
+        HwvtepPhysicalPortAugmentation phyPort = hwvtepUtils.getPhysicalPort(nodeId, phySwitchName, phyPortName);
+
+        LOG.info("VerifyForNotNull PhysicalPort: phySwitchName: {}, phyPortName: {} HwvtepPhysicalPortAugmentation: {}",
+                phySwitchName, phyPortName, phyPort);
+        Assert.assertNotNull(phyPort);
+        List<VlanBindings> lstVlanBindings = phyPort.getVlanBindings();
+        LOG.info("Vlan bindings: {}", phyPort.getVlanBindings());
+        Assert.assertNotNull(lstVlanBindings);
+        for (VlanBindings vb : lstVlanBindings) {
+            if (vb.getVlanIdKey().getValue().equals(vlanBindingToVerify.getVlanIdKey().getValue())) {
+                if (!vb.getLogicalSwitchRef().getValue().equals(vlanBindingToVerify.getLogicalSwitchRef().getValue())) {
+                    Assert.assertTrue(
+                            "Mismatch logicalSwitchRef. Found logicalSwitchRef: " + vb.getLogicalSwitchRef().getValue()
+                                    + ", expecting: " + vlanBindingToVerify.getVlanIdKey().getValue(),
+                            false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Submit transaction.
+     *
+     * @param transaction
+     *            the transaction
+     * @return the result of the request
+     */
+    public static boolean submitTransaction(final WriteTransaction transaction) {
+        boolean result = false;
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Transaction commit failed {} ", e);
+        }
+        return result;
     }
 
 }

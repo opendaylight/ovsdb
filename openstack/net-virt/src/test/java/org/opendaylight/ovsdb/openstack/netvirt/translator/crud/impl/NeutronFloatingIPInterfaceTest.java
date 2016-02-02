@@ -10,39 +10,33 @@ package org.opendaylight.ovsdb.openstack.netvirt.translator.crud.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.floatingips.attributes.Floatingips;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.floatingips.attributes.floatingips.Floatingip;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.floatingips.attributes.floatingips.FloatingipBuilder;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * Unit test for {@link NeutronFloatingIPInterface}
  */
-public class NeutronFloatingIPInterfaceTest {
+public class NeutronFloatingIPInterfaceTest extends AbstractDataBrokerTest {
     /**
      * UUID_VALUE used for testing different scenarios.
      */
@@ -59,33 +53,40 @@ public class NeutronFloatingIPInterfaceTest {
      * STATUS used for testing different scenarios.
      */
     private static final String STATUS = "ACTIVE";
-    /**
-     * Floatingip object reference for unit testing.
-     */
-    private Floatingip floatingip = new FloatingipBuilder().setUuid(new Uuid(UUID_VALUE)).build();
+
+    private NeutronFloatingIPInterface getTestInterface(DataBroker broker) {
+        ProviderContext providerContext = mock(ProviderContext.class);
+        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
+        return new NeutronFloatingIPInterface(providerContext);
+    }
 
     /**
      * Test that checks if @{NeutronFloatingIPInterface#floatingIPExists} is called
      * and then checks that floating Ip exists or not.
      */
     @Test
-    public void testFloatingIPExists() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
-        when(broker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        // First case: floatingIPExists() is expected to return true because the datastore contains a matching floating IP.
-        CheckedFuture succeedingFuture = mock(CheckedFuture.class);
-        when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingip));
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(succeedingFuture);
-        assertTrue("Should return true, when floatingIPExists success.", neutronFloatingIPInterface.floatingIPExists(UUID_VALUE));
-        // Second case: the datastore has no matching floating IP, expect false
-        CheckedFuture failingFuture = mock(CheckedFuture.class);
-        when(failingFuture.checkedGet()).thenReturn(Optional.absent());
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(failingFuture);
-        assertFalse("Should return false for negative case.", neutronFloatingIPInterface.floatingIPExists(UUID_VALUE));
+    public void testFloatingIPExists() throws TransactionCommitFailedException {
+        // floatingIPExists() returns true if the underlying data broker contains the node, false otherwise
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
+
+        // First case: the underlying data broker returns nothing (we haven't inserted the IP yet)
+        assertFalse(testInterface.floatingIPExists(UUID_VALUE));
+
+        // Add an IP
+        addTestFloatingIP(broker, testInterface);
+
+        // Second case: the underlying data broker returns something
+        assertTrue(testInterface.floatingIPExists(UUID_VALUE));
+    }
+
+    private void addTestFloatingIP(DataBroker broker, NeutronFloatingIPInterface testInterface)
+            throws TransactionCommitFailedException {
+        WriteTransaction writeTransaction = broker.newWriteOnlyTransaction();
+        Floatingip floatingip = new FloatingipBuilder().setUuid(new Uuid(UUID_VALUE)).build();
+        writeTransaction.put(LogicalDatastoreType.CONFIGURATION,
+                testInterface.createInstanceIdentifier(floatingip), floatingip);
+        writeTransaction.submit().checkedGet();
     }
 
     /**
@@ -93,24 +94,21 @@ public class NeutronFloatingIPInterfaceTest {
      * and then checks that it gets floating Ip or not.
      */
     @Test
-    public void testGetFloatingIP() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
-        when(broker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        // First case: getFloatingIP is expected to return a valid object.
-        CheckedFuture succeedingFuture = mock(CheckedFuture.class);
-        when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingip));
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(succeedingFuture);
-        NeutronFloatingIP neutronFloatingIPReceived = neutronFloatingIPInterface.getFloatingIP(UUID_VALUE);
-        assertEquals("UUID mismatch", UUID_VALUE, neutronFloatingIPReceived.getID());
-        // Second case: getFloatingIP returns null object.
-        CheckedFuture failingFuture = mock(CheckedFuture.class);
-        when(failingFuture.checkedGet()).thenReturn(Optional.absent());
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(failingFuture);
-        assertNull("Should be null for negative case.", neutronFloatingIPInterface.getFloatingIP(UUID_VALUE));
+    public void testGetFloatingIP() throws TransactionCommitFailedException {
+        // getFloatingIP() returns the floating IP if the underlying data broker contains the node, null otherwise
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
+
+        // First case: the underlying data broker returns nothing (we haven't inserted the IP yet)
+        assertNull(testInterface.getFloatingIP(UUID_VALUE));
+
+        // Add an IP
+        addTestFloatingIP(broker, testInterface);
+
+        // Second case: the underlying data broker returns something
+        final NeutronFloatingIP returnedFloatingIp = testInterface.getFloatingIP(UUID_VALUE);
+        assertNotNull(returnedFloatingIp);
+        assertEquals("UUID mismatch", UUID_VALUE, returnedFloatingIp.getID());
     }
 
     /**
@@ -118,30 +116,22 @@ public class NeutronFloatingIPInterfaceTest {
      * and then checks that it gets all floating Ips in a list or not.
      */
     @Test
-    public void testGetAllFloatingIPs() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
-        when(broker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        // First case: getAllFloatingIPs returns a list of valid objects.
-        CheckedFuture succeedingFuture = mock(CheckedFuture.class);
-        List<Floatingip> floatingipList = new ArrayList<>();
-        floatingipList.add(floatingip);
-        Floatingips floatingips = mock(Floatingips.class);
-        NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
-        when(floatingips.getFloatingip()).thenReturn(floatingipList);
-        when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingips));
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(succeedingFuture);
-        List<NeutronFloatingIP> actualFloatingIps = neutronFloatingIPInterface.getAllFloatingIPs();
-        assertEquals("There should be one floating IP", 1, actualFloatingIps.size());
-        assertEquals("UUID mismatch", UUID_VALUE, actualFloatingIps.get(0).getID());
-        // Second case: getAllFloatingIPs not returns a list of valid objects.
-        CheckedFuture failingFuture = mock(CheckedFuture.class);
-        when(failingFuture.checkedGet()).thenReturn(Optional.absent());
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(failingFuture);
-        assertTrue("Non-empty list of floating IPs", neutronFloatingIPInterface.getAllFloatingIPs().isEmpty());
+    public void testGetAllFloatingIPs() throws TransactionCommitFailedException {
+        // getAllFloatingIPs() returns all the floating IPs in the underlying data broker
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
+
+        // First case: the underlying data broker returns nothing (we haven't inserted the IP yet)
+        assertTrue("Non-empty list of floating IPs", testInterface.getAllFloatingIPs().isEmpty());
+
+        // Add an IP
+        addTestFloatingIP(broker, testInterface);
+
+        // Second case: the underlying data broker returns something
+        final List<NeutronFloatingIP> allFloatingIPs = testInterface.getAllFloatingIPs();
+        assertFalse("Empty list of floating IPs", allFloatingIPs.isEmpty());
+        assertEquals("Incorrect number of floating IPs", 1, allFloatingIPs.size());
+        assertEquals("UUID mismatch", UUID_VALUE, allFloatingIPs.get(0).getID());
     }
 
     /**
@@ -150,28 +140,20 @@ public class NeutronFloatingIPInterfaceTest {
      * ensures floating ip addition by invoking MD-SAL add.
      */
     @Test
-    public void testAddFloatingIP() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        WriteTransaction writeTransaction = mock(WriteTransaction.class);
-        NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
-        when(broker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        when(neutronFloatingIP.getID()).thenReturn(UUID_VALUE);
-        //First case: addFloatingIP returns false, the datastore has a matching floating IP.
-        CheckedFuture succeedingFuture = mock(CheckedFuture.class);
-        when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingip));
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(succeedingFuture);
-        assertFalse("Should return false, floating Ip already exists.", neutronFloatingIPInterface.addFloatingIP(neutronFloatingIP));
-        //Second case: addFloatingIP returns true, the datastore has no matching floating IP, so invokes addMd() to write on datastore.
-        CheckedFuture failingFuture = mock(CheckedFuture.class);
-        when(broker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-        when(failingFuture.checkedGet()).thenReturn(Optional.absent());
-        when(writeTransaction.submit()).thenReturn(failingFuture);
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(failingFuture);
-        assertTrue("Should return true for addFloatingIP success.", neutronFloatingIPInterface.addFloatingIP(neutronFloatingIP));
+    public void testAddFloatingIP() throws TransactionCommitFailedException {
+        // addFloatingIP() adds the given floating IP if it isn't already in the data store
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
+
+        // First case: addFloatingIP() adds the floating IP
+        NeutronFloatingIP insertedFloatingIp = new NeutronFloatingIP();
+        insertedFloatingIp.setID(UUID_VALUE);
+        assertTrue("Floating IP already present", testInterface.addFloatingIP(insertedFloatingIp));
+
+        // TODO Retrieve the floating IP directly and make sure it's correct
+
+        // Second case: the floating IP is already present
+        assertFalse("Floating IP missing", testInterface.addFloatingIP(insertedFloatingIp));
     }
 
     /**
@@ -180,30 +162,21 @@ public class NeutronFloatingIPInterfaceTest {
      * removal by invoking MD-SAL remove.
      */
     @Test
-    public void testRemoveFloatingIP() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        WriteTransaction writeTransaction = mock(WriteTransaction.class);
-        NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
-        when(broker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        when(neutronFloatingIP.getID()).thenReturn(UUID_VALUE);
-        //First case: removeFloatingIP returns true by ensuring floating ip removal in datastore.
-        CheckedFuture succeedingFuture = mock(CheckedFuture.class);
-        when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingip));
-        when(writeTransaction.submit()).thenReturn(succeedingFuture);
-        when(broker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(succeedingFuture);
-        assertTrue("Should return true for removeFloatingIP success.", neutronFloatingIPInterface.removeFloatingIP(UUID_VALUE));
-        // Second case: removeFloatingIP returns false for negative case.
-        CheckedFuture failingFuture = mock(CheckedFuture.class);
-        when(broker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-        when(failingFuture.checkedGet()).thenReturn(Optional.absent());
-        when(writeTransaction.submit()).thenReturn(failingFuture);
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(failingFuture);
-        assertFalse("Should return false for negative case.", neutronFloatingIPInterface.removeFloatingIP(UUID_VALUE));
+    public void testRemoveFloatingIP() throws TransactionCommitFailedException {
+        // removeFloatingIP() removes the given floating IP if it's present in the data store
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
+
+        // First case: the floating IP isn't present
+        assertFalse("Floating IP present", testInterface.removeFloatingIP(UUID_VALUE));
+
+        // Add an IP
+        addTestFloatingIP(broker, testInterface);
+
+        // Second case: the floating IP is present
+        assertTrue("Floating IP absent", testInterface.removeFloatingIP(UUID_VALUE));
+
+        // TODO Attempt to retrieve the floating IP and make sure it's absent
     }
 
     /**
@@ -212,30 +185,23 @@ public class NeutronFloatingIPInterfaceTest {
      * updation by invoking MD-SAL update.
      */
     @Test
-    public void testUpdateFloatingIP() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        WriteTransaction writeTransaction = mock(WriteTransaction.class);
-        NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
-        when(broker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        when(neutronFloatingIP.getID()).thenReturn(UUID_VALUE);
-        //First case: updateFloatingIP returns true by ensuring floating ip updation in datastore.
-        CheckedFuture succeedingFuture = mock(CheckedFuture.class);
-        when(succeedingFuture.checkedGet()).thenReturn(Optional.of(floatingip));
-        when(writeTransaction.submit()).thenReturn(succeedingFuture);
-        when(broker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(succeedingFuture);
-        assertTrue("Should return true for updateFloatingIP success.", neutronFloatingIPInterface.updateFloatingIP(UUID_VALUE, neutronFloatingIP));
-        //Second case: updateFloatingIP returns false for negative case.
-        CheckedFuture failingFuture = mock(CheckedFuture.class);
-        when(broker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-        when(failingFuture.checkedGet()).thenReturn(Optional.absent());
-        when(writeTransaction.submit()).thenReturn(failingFuture);
-        when(readOnlyTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class))).thenReturn(failingFuture);
-        assertFalse("Should return false for negative case.", neutronFloatingIPInterface.updateFloatingIP(UUID_VALUE, neutronFloatingIP));
+    public void testUpdateFloatingIP() throws TransactionCommitFailedException {
+        // updateFloatingIP() updates the given floating IP only if it's already in the data store
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
+
+        // First case: the floating IP isn't present
+        NeutronFloatingIP testFloatingIp = new NeutronFloatingIP();
+        testFloatingIp.setID(UUID_VALUE);
+        assertFalse("Floating IP present", testInterface.updateFloatingIP(UUID_VALUE, testFloatingIp));
+
+        // Add an IP
+        addTestFloatingIP(broker, testInterface);
+
+        // Second case: the floating IP is present
+        assertTrue("Floating IP absent", testInterface.updateFloatingIP(UUID_VALUE, testFloatingIp));
+
+        // TODO Change some attributes and make sure they're updated
     }
 
     /**
@@ -244,10 +210,8 @@ public class NeutronFloatingIPInterfaceTest {
      */
     @Test
     public void testToMd() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
         NeutronFloatingIP neutronFloatingIP = new NeutronFloatingIP();
         neutronFloatingIP.setID(UUID_VALUE);
         neutronFloatingIP.setFloatingNetworkUUID(UUID_VALUE);
@@ -257,15 +221,15 @@ public class NeutronFloatingIPInterfaceTest {
         neutronFloatingIP.setTenantUUID(UUID_VALUE);
         neutronFloatingIP.setRouterUUID(UUID_VALUE);
         neutronFloatingIP.setStatus(STATUS);
-        Floatingip floatingipReceived = neutronFloatingIPInterface.toMd(neutronFloatingIP);
-        assertEquals("UUID mismatch", UUID_VALUE, String.valueOf(floatingipReceived.getUuid().getValue()));
-        assertEquals("FloatingNetworkId mismatch", UUID_VALUE, String.valueOf(floatingipReceived.getFloatingNetworkId().getValue()));
-        assertEquals("Port ID mismatch", UUID_VALUE, String.valueOf(floatingipReceived.getPortId().getValue()));
+        Floatingip floatingipReceived = testInterface.toMd(neutronFloatingIP);
+        assertEquals("UUID mismatch", UUID_VALUE, floatingipReceived.getUuid().getValue());
+        assertEquals("FloatingNetworkId mismatch", UUID_VALUE, floatingipReceived.getFloatingNetworkId().getValue());
+        assertEquals("Port ID mismatch", UUID_VALUE, floatingipReceived.getPortId().getValue());
         assertEquals("Fixed IP Address mismatch", FIXED_IP_ADDRESS, String.valueOf(floatingipReceived.getFixedIpAddress().getValue()));
         assertEquals("Floating IP Address mismatch", FLOATING_IP_ADDRESS, String.valueOf(floatingipReceived.getFloatingIpAddress().getValue()));
-        assertEquals("Tenant Id mismatch", UUID_VALUE, String.valueOf(floatingipReceived.getTenantId().getValue()));
-        assertEquals("Router Id mismatch", UUID_VALUE, String.valueOf(floatingipReceived.getRouterId().getValue()));
-        assertEquals("Status mismatch", STATUS, String.valueOf(floatingipReceived.getStatus()));
+        assertEquals("Tenant Id mismatch", UUID_VALUE, floatingipReceived.getTenantId().getValue());
+        assertEquals("Router Id mismatch", UUID_VALUE, floatingipReceived.getRouterId().getValue());
+        assertEquals("Status mismatch", STATUS, floatingipReceived.getStatus());
     }
 
     /**
@@ -274,9 +238,8 @@ public class NeutronFloatingIPInterfaceTest {
      */
     @Test
     public void testFromMd() throws Exception {
-        ProviderContext providerContext = mock(ProviderContext.class);
-        DataBroker broker = mock(DataBroker.class);
-        when(providerContext.getSALService(DataBroker.class)).thenReturn(broker);
+        DataBroker broker = getDataBroker();
+        NeutronFloatingIPInterface testInterface = getTestInterface(broker);
         Floatingip actualfloatingip = new FloatingipBuilder()
                 .setUuid(new Uuid(UUID_VALUE))
                 .setFixedIpAddress(
@@ -287,8 +250,7 @@ public class NeutronFloatingIPInterfaceTest {
                 .setPortId(new Uuid(UUID_VALUE))
                 .setRouterId(new Uuid(UUID_VALUE)).setStatus(STATUS)
                 .setTenantId(new Uuid(UUID_VALUE)).build();
-        NeutronFloatingIPInterface neutronFloatingIPInterface = new NeutronFloatingIPInterface(providerContext);
-        NeutronFloatingIP neutronFloatingIPReceived = neutronFloatingIPInterface.fromMd(actualfloatingip);
+        NeutronFloatingIP neutronFloatingIPReceived = testInterface.fromMd(actualfloatingip);
         assertEquals("UUID mismatch", UUID_VALUE, neutronFloatingIPReceived.getID());
         assertEquals("FloatingNetworkId mismatch", UUID_VALUE, neutronFloatingIPReceived.getFloatingNetworkUUID());
         assertEquals("Port ID mismatch", UUID_VALUE, neutronFloatingIPReceived.getPortUUID());

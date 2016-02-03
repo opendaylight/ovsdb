@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_722434af",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-02-03T09:46:20Z",
+      "side": 1,
+      "message": "I\u0027d prefer using create instead of construct.\nWhy do we need a separate method for create and then add? add method should create and add to data store.",
+      "range": {
+        "startLine": 245,
+        "startChar": 7,
+        "endLine": 245,
+        "endChar": 16
+      },
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_5275b096",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-02-03T09:46:20Z",
+      "side": 1,
+      "message": "NodeIds are supposed to be opaque. Don\u0027t do string-fu to figure out manging node. Why is this needed? PhysicalSwitch already has a field called ManagedBy which will provide this information.",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_32510c0f",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 546,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-02-03T09:46:20Z",
+      "side": 1,
+      "message": "This should return PhysicalPort attributes from TerminationPoint instead of raw termination point.",
+      "range": {
+        "startLine": 546,
+        "startChar": 28,
+        "endLine": 546,
+        "endChar": 43
+      },
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d23a60cc",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-02-03T09:46:20Z",
+      "side": 1,
+      "message": "use Nodes instead of Devices.",
+      "range": {
+        "startLine": 557,
+        "startChar": 34,
+        "endLine": 557,
+        "endChar": 41
+      },
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_725b942e",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-02-03T09:46:20Z",
+      "side": 1,
+      "message": "topology should never be null, if it is null we have much bigger problems and would\u0027ve been caught earlier. Just return topology.getNode()",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

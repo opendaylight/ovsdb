@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_52ead00f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T10:15:57Z",
+      "side": 1,
+      "message": "Nice catch; ideally this should be a separate patch so we can just merge it...",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d24b8029",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T10:15:57Z",
+      "side": 1,
+      "message": "Just use concatenation here, the compiler is clever enough to do the right thing and it\u0027s much more readable:\n\n    String tpKeyStr \u003d encapType + \u0027:\u0027 + pLog.getDstIp().getValue();",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f25044d6",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T10:15:57Z",
+      "side": 1,
+      "message": "No need for StringBuilder:\n\n    String physSwitchNodeId \u003d nodeId.getValue() + \u0027/\u0027 + HwvtepSouthboundConstants.PSWITCH_URI_PREFIX + \u0027/\u0027 + physicalSwitchName;",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_722434af",
         "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
         "patchSetId": 1
@@ -99,6 +150,23 @@
       "writtenOn": "2016-02-03T09:46:20Z",
       "side": 1,
       "message": "topology should never be null, if it is null we have much bigger problems and would\u0027ve been caught earlier. Just return topology.getNode()",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_52d13056",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T10:15:57Z",
+      "side": 1,
+      "message": "\"pathList\" would be better as \"instanceIdentifiers\", and ideally simply `Iterable\u003cInstanceIdentifier\u003cD\u003e\u003e` since all this methods needs is to be able to iterate over it.",
       "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

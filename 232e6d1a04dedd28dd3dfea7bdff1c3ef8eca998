@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_9dc9097c",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_d24b8029",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_f25044d6",
         "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2016-02-03T10:15:57Z",
       "side": 1,
       "message": "No need for StringBuilder:\n\n    String physSwitchNodeId \u003d nodeId.getValue() + \u0027/\u0027 + HwvtepSouthboundConstants.PSWITCH_URI_PREFIX + \u0027/\u0027 + physicalSwitchName;",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_fdc81576",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_f25044d6",
       "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -76,6 +112,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_1da5f9b4",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Changed to create.",
+      "parentUuid": "9a3d3df0_722434af",
+      "range": {
+        "startLine": 245,
+        "startChar": 7,
+        "endLine": 245,
+        "endChar": 16
+      },
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_5275b096",
         "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
         "patchSetId": 1
@@ -93,6 +153,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_7dac05a1",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Deleted the method",
+      "parentUuid": "9a3d3df0_5275b096",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_32510c0f",
         "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
         "patchSetId": 1
@@ -104,6 +182,30 @@
       "writtenOn": "2016-02-03T09:46:20Z",
       "side": 1,
       "message": "This should return PhysicalPort attributes from TerminationPoint instead of raw termination point.",
+      "range": {
+        "startLine": 546,
+        "startChar": 28,
+        "endLine": 546,
+        "endChar": 43
+      },
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bd95ed41",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 546,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Updated to return HwvtepPhysicalPortAugmentation object instead of TerminationPoint",
+      "parentUuid": "9a3d3df0_32510c0f",
       "range": {
         "startLine": 546,
         "startChar": 28,
@@ -139,6 +241,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_9d90e94f",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_d23a60cc",
+      "range": {
+        "startLine": 557,
+        "startChar": 34,
+        "endLine": 557,
+        "endChar": 41
+      },
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_725b942e",
         "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
         "patchSetId": 1
@@ -156,6 +282,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_fd9f755d",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_725b942e",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_52d13056",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtils.java",
         "patchSetId": 1
@@ -167,6 +311,24 @@
       "writtenOn": "2016-02-03T10:15:57Z",
       "side": 1,
       "message": "\"pathList\" would be better as \"instanceIdentifiers\", and ideally simply `Iterable\u003cInstanceIdentifier\u003cD\u003e\u003e` since all this methods needs is to be able to iterate over it.",
+      "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1d8cd934",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2016-02-03T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_52d13056",
       "revId": "232e6d1a04dedd28dd3dfea7bdff1c3ef8eca998",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

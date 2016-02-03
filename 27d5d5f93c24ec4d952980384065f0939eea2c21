@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_3889eb26",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpServiceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T16:37:07Z",
+      "side": 1,
+      "message": "This drives a private method, which seems pointless to me: it would be better to check the behaviour you expect via testHandlePortEvent() or testProgramStaticRuleStage1().",
+      "revId": "27d5d5f93c24ec4d952980384065f0939eea2c21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_188ce734",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpServiceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T16:37:07Z",
+      "side": 1,
+      "message": "The same comment re testing private methods applies here. If someone corrects the spelling mistake in the method name everything is going to break, which is a strong indicator that the test is too closely tied to the implementation.",
+      "revId": "27d5d5f93c24ec4d952980384065f0939eea2c21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bd720d7a",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpServiceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-03T16:37:07Z",
+      "side": 1,
+      "message": "Please use ServiceHelper.overrideGlobalInstance instead of mocking getGlobalInstance.",
+      "revId": "27d5d5f93c24ec4d952980384065f0939eea2c21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

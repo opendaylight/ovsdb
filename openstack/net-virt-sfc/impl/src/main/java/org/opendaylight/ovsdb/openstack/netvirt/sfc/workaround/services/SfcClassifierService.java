@@ -133,7 +133,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         initFlowBuilder(flowBuilder, flowName, getTable(), FlowID.FLOW_INGRESSCLASS,
                 (short)nshHeader.getNshNsp(), nshHeader.getNshNsi());
 
-        MatchBuilder matchBuilder = buildMatch(matches);
+        MatchBuilder matchBuilder = new AclMatches(matches).buildMatch();
         MatchUtils.addNxRegMatch(matchBuilder,
                 MatchUtils.RegMatch.of(FlowUtils.REG_FIELD, FlowUtils.REG_VALUE_FROM_LOCAL));
         flowBuilder.setMatch(matchBuilder.build());
@@ -506,31 +506,6 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
         actionList.add(new ActionBuilder()
                 .setKey(new ActionKey(count)).setOrder(count).setAction(loadChainTunVnid).build());
         return actionList;
-    }
-
-    public MatchBuilder buildMatch(Matches matches) {
-        MatchBuilder matchBuilder = new MatchBuilder();
-
-        if (matches.getAceType() instanceof AceIp) {
-            AceIp aceIp = (AceIp)matches.getAceType();
-            if (aceIp.getAceIpVersion() instanceof AceIpv4) {
-                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
-                MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
-                        aceIp.getDestinationPortRange().getLowerPort().getValue());
-            } else {
-                MatchUtils.createIpProtocolMatch(matchBuilder, aceIp.getProtocol());
-                MatchUtils.addLayer4Match(matchBuilder, aceIp.getProtocol().intValue(), 0,
-                        aceIp.getDestinationPortRange().getLowerPort().getValue());
-            }
-        } else if (matches.getAceType() instanceof AceEth) {
-            AceEth aceEth = (AceEth) matches.getAceType();
-            MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(aceEth.getSourceMacAddress().getValue()));
-            MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(aceEth.getDestinationMacAddress().getValue()),
-                    new MacAddress(aceEth.getDestinationMacAddressMask().getValue()));
-        }
-
-        LOG.info("buildMatch: {}", matchBuilder.build());
-        return matchBuilder;
     }
 
     private static FlowID flowSet[] = {FlowID.FLOW_INGRESSCLASS, FlowID.FLOW_EGRESSCLASS,

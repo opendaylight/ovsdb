@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -37,6 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
@@ -96,12 +98,15 @@ public class MatchUtils {
     public static final short ICMP_SHORT = 1;
     public static final short TCP_SHORT = 6;
     public static final short UDP_SHORT = 17;
+    public static final short SCTP_SHORT = 132;
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
     public static final String ICMP = "icmp";
     public static final String ICMPV6 = "icmpv6";
     public static final short ALL_ICMP = -1;
+    public static final long ETHERTYPE_IPV4 = 0x0800;
+    public static final long ETHERTYPE_IPV6 = 0x86dd;
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -145,6 +150,27 @@ public class MatchUtils {
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(etherType));
         ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        return matchBuilder;
+    }
+
+    public static MatchBuilder createEthSrcDstMatch(MatchBuilder matchBuilder, MacAddress srcMac, MacAddress dstMac) {
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        if (srcMac != null) {
+            EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
+            ethSourceBuilder.setAddress(new MacAddress(srcMac));
+            ethernetMatch.setEthernetSource(ethSourceBuilder.build());
+        }
+        if (dstMac != null) {
+            EthernetDestinationBuilder ethDestinationBuild = new EthernetDestinationBuilder();
+            ethDestinationBuild.setAddress(new MacAddress(dstMac));
+            ethernetMatch.setEthernetDestination(ethDestinationBuild.build());
+        }
+        if (matchBuilder.getEthernetMatch() != null && matchBuilder.getEthernetMatch().getEthernetType() != null) {
+            ethernetMatch.setEthernetType(matchBuilder.getEthernetMatch().getEthernetType());
+        }
+
         matchBuilder.setEthernetMatch(ethernetMatch.build());
 
         return matchBuilder;
@@ -1255,6 +1281,20 @@ public class MatchUtils {
     }
 
     /**
+     * Add a DSCP match to an existing match
+     * @param matchBuilder Map matchBuilder MatchBuilder Object with a match
+     * @param dscpValue
+     * @return {@link MatchBuilder}
+     */
+    public static MatchBuilder addDscp(MatchBuilder matchBuilder, short dscpValue) {
+        createEtherTypeMatch(matchBuilder, new EtherType(ETHERTYPE_IPV4));
+        return matchBuilder.setIpMatch(
+                new IpMatchBuilder()
+                        .setIpDscp(new Dscp(dscpValue))
+                        .build());
+    }
+
+    /**
      * Add a layer4 match to an existing match
      *
      * @param matchBuilder Map matchBuilder MatchBuilder Object with a match
@@ -1286,6 +1326,16 @@ public class MatchUtils {
                 udpMatch.setUdpDestinationPort(new PortNumber(destPort));
             }
             matchBuilder.setLayer4Match(udpMatch.build());
+        } else if (SCTP_SHORT == protocol) {
+            ipmatch.setIpProtocol(SCTP_SHORT);
+            SctpMatchBuilder sctpMatchBuilder = new SctpMatchBuilder();
+            if (0 != srcPort) {
+                sctpMatchBuilder.setSctpSourcePort(new PortNumber(srcPort));
+            }
+            if (0 != destPort) {
+                sctpMatchBuilder.setSctpDestinationPort(new PortNumber(destPort));
+            }
+            matchBuilder.setLayer4Match(sctpMatchBuilder.build());
         }
         matchBuilder.setIpMatch(ipmatch.build());
 

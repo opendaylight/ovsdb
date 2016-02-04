@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interfa
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_NetworkReference;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronRouterAware;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.l3.attributes.Routes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.Routers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.Router;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.router.Interfaces;
@@ -125,8 +126,8 @@ public class NeutronRouterChangeListener implements ClusteredDataChangeListener,
             result.setGatewayPortId(String.valueOf(router.getGatewayPortId().getValue()));
         }
         if (router.getRoutes() != null) {
-            List<String> routes = new ArrayList<>();
-            for (String route : router.getRoutes()) {
+            List<Routes> routes = new ArrayList<>();
+            for (Routes route : router.getRoutes()) {
                 routes.add(route);
             }
             result.setRoutes(routes);

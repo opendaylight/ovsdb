@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.l3.attributes.Routes;
+
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 
@@ -51,7 +53,7 @@ public class NeutronRouter implements Serializable, INeutronObject {
     String gatewayPortId;
 
     @XmlElement (name = "routes")
-    List<String> routes;
+    List<Routes> routes;
 
     /* Holds a map of OpenStackRouterInterfaces by subnet UUID
      * used for internal mapping to DOVE
@@ -135,11 +137,11 @@ public class NeutronRouter implements Serializable, INeutronObject {
         this.gatewayPortId = gatewayPortId;
     }
 
-    public List<String> getRoutes() {
+    public List<Routes> getRoutes() {
         return routes;
     }
 
-    public void setRoutes(List<String> routes) {
+    public void setRoutes(List<Routes> routes) {
         this.routes = routes;
     }
 

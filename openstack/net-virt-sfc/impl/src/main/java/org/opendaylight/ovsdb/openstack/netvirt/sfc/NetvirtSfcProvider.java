@@ -79,6 +79,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("NetvirtSfcProvider Closed");
         aclListener.close();
         classifierListener.close();
+        rspListener.close();
     }
 
     private void addToPipeline(INetvirtSfcOF13Provider provider) {

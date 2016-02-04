@@ -41,13 +41,13 @@ public class FlowCache {
             flowMap.remove(flowId);
             if (flowMap.isEmpty()) {
                 flowCache.remove(rspName);
-                LOG.info("removeFlow: removed flowMap {}({}) from cache size {} - {}", rspName, flowId,
-                        flowCache.size(), flowCache);
+                LOG.info("removeFlow: removed flowMap {}({}) from cache size {}", rspName, flowId,
+                        flowCache.size());
             } else {
                 flowCache.put(rspName, flowMap);
             }
         }
-        LOG.info("removeFlow: removed {}({}) from cache size {} - {}", rspName, flowId, flowCache.size(), flowCache);
+        LOG.info("removeFlow: removed {}({}) from cache size {}", rspName, flowId, flowCache.size());
     }
 
     public Map<Integer, InstanceIdentifier<Flow>> getFlows(String rspName) {

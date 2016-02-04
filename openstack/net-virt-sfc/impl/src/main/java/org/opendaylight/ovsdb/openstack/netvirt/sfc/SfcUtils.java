@@ -104,24 +104,31 @@ public class SfcUtils {
         return mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
     }
 
-    public Ace getAce(String name) {
+    public Ace getAce(RenderedServicePath rsp) {
+        return getAce(rsp.getName().getValue(), rsp.getParentServiceFunctionPath().getValue(),
+                rsp.getServiceChainName().getValue());
+    }
+
+    // TODO: optimize this by adding a ACL to RSP mapping in the netvirt-classifier when the ACL is processed
+    public Ace getAce(String rspName, String sfpName, String sfcName) {
         Ace aceFound = null;
         AccessLists accessLists = readAccessLists();
         if (accessLists != null) {
             List<Acl> acls = accessLists.getAcl();
             if (acls != null) {
-                for (Acl acl :acls) {
+                for (Acl acl : acls) {
                     AccessListEntries accessListEntries = acl.getAccessListEntries();
                     if (accessListEntries != null) {
                         List<Ace> aces = accessListEntries.getAce();
                         for (Ace ace : aces) {
                             RedirectToSfc sfcRedirect = ace.getActions().getAugmentation(RedirectToSfc.class);
-                            if ((sfcRedirect != null) &&
-                                    (sfcRedirect.getRspName().equals(name) ||
-                                    (sfcRedirect.getSfcName().equals(name)) ||
-                                    (sfcRedirect.getSfpName().equals(name)))) {
-                                aceFound = ace;
-                                break;
+                            if (sfcRedirect != null) {
+                                if ((sfcRedirect.getRspName() != null && sfcRedirect.getRspName().equals(rspName)) ||
+                                    (sfcRedirect.getSfcName() != null && sfcRedirect.getSfcName().equals(sfcName)) ||
+                                    (sfcRedirect.getSfpName() != null && sfcRedirect.getSfpName().equals(sfpName))) {
+                                    aceFound = ace;
+                                    break;
+                                }
                             }
                         }
                     }

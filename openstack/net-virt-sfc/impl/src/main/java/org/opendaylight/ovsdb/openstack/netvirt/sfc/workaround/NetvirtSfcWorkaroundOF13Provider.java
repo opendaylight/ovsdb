@@ -96,32 +96,31 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     @Override
     public void addClassifierRules(Acl acl) {
-        String aclName = acl.getAclName();
-        Classifiers classifiers = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, sfcUtils.getClassifierIid());
-        if (classifiers == null) {
-            LOG.debug("addClassifierRules: No Classifiers found");
-            return;
-        }
-
-        LOG.debug("addClassifierRules: Classifiers: {}", classifiers);
-        for (Classifier classifier : classifiers.getClassifier()) {
-            if (classifier.getAcl().equals(aclName)) {
-                for (Ace ace : acl.getAccessListEntries().getAce()) {
-                    processAclEntry(ace);
-                }
-            }
+        for (Ace ace : acl.getAccessListEntries().getAce()) {
+            processAclEntry(ace);
         }
     }
 
     @Override
     public void removeClassifierRules(Acl acl) {
-
+        for (Ace ace : acl.getAccessListEntries().getAce()) {
+            RenderedServicePath rsp = getRenderedServicePath(ace);
+            if (rsp == null) {
+                LOG.warn("Failed to get renderedServicePatch for entry: {}", ace);
+                return;
+            }
+            sfcClassifierService.clearFlows(dataBroker, rsp.getName().getValue());
+        }
     }
 
     @Override
     public void removeRsp(RenderedServicePath change) {
-        LOG.info("removeRsp not implemented yet");
         sfcClassifierService.clearFlows(dataBroker, change.getName().getValue());
+    }
+
+    @Override
+    public void addRsp(RenderedServicePath change) {
+        handleRenderedServicePath(change);
     }
 
     @Override
@@ -346,12 +345,13 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     private Ace getAceFromRenderedServicePath(RenderedServicePath rsp) {
         Preconditions.checkNotNull(rsp, "RSP cannot be null");
-        Ace ace = null;
-        String rspName = rsp.getName().getValue();
-        String rspNameSuffix = "_rsp";
-        String sfcName = rspName.substring(0, rspName.length() - rspNameSuffix.length());
-        LOG.info("getAceFromRenderedServicePath: rsp: {}, sfcName: {}", rsp, sfcName);
-        ace = sfcUtils.getAce(sfcName);
+        Ace ace;
+        //String rspName = rsp.getName().getValue();
+        //String rspNameSuffix = "_rsp";
+        //String sfcName = rspName.substring(0, rspName.length() - rspNameSuffix.length());
+        //String sfcName = rsp.getServiceChainName().getValue()
+        //LOG.info("getAceFromRenderedServicePath: rsp: {}, sfcName: {}", rsp, sfcName);
+        ace = sfcUtils.getAce(rsp);
 
         return ace;
     }
@@ -359,16 +359,17 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private RenderedServicePath getRenderedServicePath (Ace entry) {
         RenderedServicePath rsp = null;
         RedirectToSfc sfcRedirect = entry.getActions().getAugmentation(RedirectToSfc.class);
-        LOG.debug("Processing ACL entry = {} sfcRedirect = {}", entry.getRuleName(), sfcRedirect);
+        LOG.debug("getRenderedServicePath: Processing ACL entry = {} sfcRedirect = {}",
+                entry.getRuleName(), sfcRedirect);
         if (sfcRedirect == null) {
-            LOG.warn("processAClEntry: sfcRedirect is null");
+            LOG.warn("getRenderedServicePath: sfcRedirect is null");
             return null;
         }
 
         if (sfcRedirect.getRspName() != null) {
             rsp = getRenderedServicePathFromRsp(sfcRedirect.getRspName());
         } else if (sfcRedirect.getSfpName() != null) {
-            LOG.warn("getRenderedServicePath: sfp not handled yet");
+            LOG.warn("getRenderedServicePath: by sfp not handled yet");
         } else {
             rsp = getRenderedServicePathFromSfc(entry);
         }
@@ -382,9 +383,10 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
 
     private RenderedServicePath getRenderedServicePathFromSfc (Ace entry) {
         RedirectToSfc sfcRedirect = entry.getActions().getAugmentation(RedirectToSfc.class);
-        LOG.debug("Processing ACL entry = {} sfcRedirect = {}", entry.getRuleName(), sfcRedirect);
+        LOG.debug("getRenderedServicePathFromSfc: Processing ACL entry = {} sfcRedirect = {}",
+                entry.getRuleName(), sfcRedirect);
         if (sfcRedirect == null) {
-            LOG.warn("processAClEntry: sfcRedirect is null");
+            LOG.warn("getRenderedServicePathFromSfc: sfcRedirect is null");
             return null;
         }
 
@@ -395,13 +397,18 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             return null;
         }
 
-        LOG.debug("Processing Redirect to SFC = {}, SFP = {}", sfcName, sfp);
+        LOG.debug("getRenderedServicePathFromSfc: Processing Redirect to SFC = {}, SFP = {}", sfcName, sfp);
         // If RSP doesn't exist, create an RSP.
         String sfpName = sfp.getName().getValue();
         RenderedServicePath rsp = sfcUtils.getRspforSfp(sfpName);
         String rspName = sfp.getName().getValue() + "_rsp";
         if (rsp == null) {
-            LOG.info("No configured RSP corresponding to SFP = {}, Creating new RSP = {}", sfpName, rspName);
+            if (!sfcRedirect.isRenderRsp()) {
+                LOG.info("getRenderedServicePathFromSfc: will not create RSP");
+                return null;
+            }
+            LOG.info("getRenderedServicePathFromSfc: No configured RSP corresponding to SFP = {}, "
+                    + "Creating new RSP = {}", sfpName, rspName);
             CreateRenderedPathInput rspInput = new CreateRenderedPathInputBuilder()
                     .setParentServiceFunctionPath(sfpName)
                     .setName(rspName)
@@ -409,13 +416,14 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                     .build();
             rsp = SfcProviderRenderedPathAPI.createRenderedServicePathAndState(sfp, rspInput);
             if (rsp == null) {
-                LOG.warn("failed to add RSP");
+                LOG.warn("getRenderedServicePathFromSfc: failed to add RSP");
                 return null;
             }
 
             // If SFP is symmetric, create RSP in the reverse direction.
             if (sfp.isSymmetric()) {
-                LOG.info("SFP = {} is symmetric, installing RSP in the reverse direction!!", sfpName);
+                LOG.warn("getRenderedServicePathFromSfc: symmetric RSP is not supported yet");
+                /*LOG.info("SFP = {} is symmetric, installing RSP in the reverse direction!!", sfpName);
                 String rspNameRev = rspName + "-Reverse";
                 RenderedServicePath rspReverse = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
                         sfcUtils.getRspId(rspNameRev));
@@ -425,7 +433,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                         LOG.warn("failed to add reverse RSP");
                         return null;
                     }
-                }
+                }*/
             }
         }
         return rsp;

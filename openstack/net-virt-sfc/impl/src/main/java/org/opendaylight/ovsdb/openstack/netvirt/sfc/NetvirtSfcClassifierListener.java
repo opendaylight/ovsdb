@@ -72,9 +72,9 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
 
     @Override
     public void remove(final InstanceIdentifier<Classifier> identifier,
-                       final Classifier removeDataObj) {
-        Preconditions.checkNotNull(removeDataObj, "Added object can not be null!");
-        String aclName = removeDataObj.getAcl();
+                       final Classifier change) {
+        Preconditions.checkNotNull(change, "Added object can not be null!");
+        String aclName = change.getAcl();
         // Read the ACL information from data store and make sure it exists.
         Acl acl = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
         if (acl == null) {
@@ -87,17 +87,16 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
 
     @Override
     public void update(final InstanceIdentifier<Classifier> identifier,
-                       final Classifier original, final Classifier update) {
+                       final Classifier original, final Classifier change) {
         //TODO
 
     }
 
     @Override
     public void add(final InstanceIdentifier<Classifier> identifier,
-                    final Classifier addDataObj) {
-        Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
-        String aclName = addDataObj.getAcl();
-        LOG.debug("Adding classifier iid = {}, dataObj = {}", identifier, addDataObj);
+                    final Classifier change) {
+        Preconditions.checkNotNull(change, "Added object can not be null!");
+        String aclName = change.getAcl();
         // Read the ACL information from data store and make sure it exists.
         Acl acl = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, getIetfAclIid(aclName));
         if (acl == null) {

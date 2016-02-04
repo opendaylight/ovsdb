@@ -57,8 +57,7 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
             try {
                 listenerRegistration.close();
             } catch (final Exception e) {
-                LOG.warn("Error while stopping IETF ACL ChangeListener: {}", e.getMessage());
-                LOG.debug("Error while stopping IETF ACL ChangeListener..", e);
+                LOG.warn("Error while stopping IETF ACL ChangeListener", e);
             }
             listenerRegistration = null;
         }
@@ -66,22 +65,25 @@ public class NetvirtSfcAclListener extends AbstractDataTreeListener<Acl> {
 
     @Override
     public void remove(final InstanceIdentifier<Acl> identifier,
-                       final Acl removeDataObj) {
-        Preconditions.checkNotNull(removeDataObj, "Removed object can not be null!");
-        provider.removeClassifierRules(removeDataObj);
+                       final Acl change) {
+        Preconditions.checkNotNull(change, "Removed object can not be null!");
+        provider.removeClassifierRules(change);
     }
 
     @Override
     public void update(final InstanceIdentifier<Acl> identifier,
-                       final Acl original, final Acl update) {
+                       final Acl original, final Acl change) {
+        Preconditions.checkNotNull(original, "Updated original object can not be null!");
+        Preconditions.checkNotNull(original, "Updated update object can not be null!");
+        remove(identifier, original);
+        provider.addClassifierRules(change);
     }
 
     @Override
     public void add(final InstanceIdentifier<Acl> identifier,
-                    final Acl addDataObj) {
-        Preconditions.checkNotNull(addDataObj, "Added object can not be null!");
-        LOG.debug("Adding accesslist iid = {}, dataObj = {}", identifier, addDataObj);
-        provider.addClassifierRules(addDataObj);
+                    final Acl change) {
+        Preconditions.checkNotNull(change, "Added object can not be null!");
+        provider.addClassifierRules(change);
     }
 
     public InstanceIdentifier<Acl> getIetfAclIid() {

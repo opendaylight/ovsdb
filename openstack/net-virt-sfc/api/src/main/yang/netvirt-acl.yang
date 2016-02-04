@@ -30,5 +30,9 @@ module netvirt-sfc-acl {
         leaf rsp-name {
             type string;
         }
+        leaf render-rsp {
+            type boolean;
+            default "false";
+        }
     }
 }

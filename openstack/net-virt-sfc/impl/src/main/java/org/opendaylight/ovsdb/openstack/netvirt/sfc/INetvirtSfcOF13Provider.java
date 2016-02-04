@@ -46,4 +46,5 @@ public interface INetvirtSfcOF13Provider {
     public void setDependencies(ServiceReference serviceReference);
     void updateRsp(RenderedServicePath change);
     void removeRsp(RenderedServicePath change);
+    void addRsp(RenderedServicePath change);
 }

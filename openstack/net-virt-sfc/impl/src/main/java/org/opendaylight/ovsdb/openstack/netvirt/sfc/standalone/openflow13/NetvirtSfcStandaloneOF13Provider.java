@@ -453,10 +453,16 @@ public class NetvirtSfcStandaloneOF13Provider implements INetvirtSfcOF13Provider
 
     @Override
     public void removeRsp(RenderedServicePath change) {
-
+        LOG.warn("removeRsp is not implemented yet");
     }
+
+    @Override
+    public void addRsp(RenderedServicePath change) {
+        LOG.warn("addRsp is not implemented yet");
+    }
+
     @Override
     public void updateRsp(RenderedServicePath change) {
-
+        LOG.warn("updateRsp is not implemented yet");
     }
 }

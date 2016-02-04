@@ -51,8 +51,10 @@ public class AclUtils extends AbstractUtils {
         return actionsBuilder.setPacketHandling(new PermitBuilder().setPermit(permit).build());
     }
 
-    public ActionsBuilder actionsBuilder(ActionsBuilder actionsBuilder, String sfcName) {
-        RedirectToSfcBuilder redirectToSfcBuilder = new RedirectToSfcBuilder().setSfcName(sfcName);
+    public ActionsBuilder actionsBuilder(ActionsBuilder actionsBuilder, String sfcName, boolean renderRsp) {
+        RedirectToSfcBuilder redirectToSfcBuilder = new RedirectToSfcBuilder()
+                .setSfcName(sfcName)
+                .setRenderRsp(renderRsp);
 
         return actionsBuilder.addAugmentation(RedirectToSfc.class, redirectToSfcBuilder.build());
     }

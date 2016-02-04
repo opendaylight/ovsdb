@@ -49,24 +49,24 @@ public class RspListener extends AbstractDataTreeListener<RenderedServicePath> {
     }
 
     @Override
-    public void remove(InstanceIdentifier<RenderedServicePath> identifier, RenderedServicePath change) {
-        Preconditions.checkNotNull(change, "Object can not be null!");
-        LOG.debug("remove RenderedServicePath iid = {}, change = {}", identifier, change);
+    public void remove(final InstanceIdentifier<RenderedServicePath> identifier, final RenderedServicePath change) {
+        Preconditions.checkNotNull(change, "Removed object can not be null!");
         provider.removeRsp(change);
     }
 
     @Override
-    public void update(InstanceIdentifier<RenderedServicePath> identifier, RenderedServicePath original,
+    public void update(final InstanceIdentifier<RenderedServicePath> identifier, final RenderedServicePath original,
                        RenderedServicePath change) {
-        Preconditions.checkNotNull(change, "Object can not be null!");
-        LOG.debug("Update RenderedServicePath iid = {}, change = {}", identifier, change);
-        //provider.addClassifierRules(update);
+        Preconditions.checkNotNull(original, "Updated original object can not be null!");
+        Preconditions.checkNotNull(original, "Updated update object can not be null!");
+        remove(identifier, original);
+        provider.addRsp(change);
     }
 
     @Override
-    public void add(InstanceIdentifier<RenderedServicePath> identifier, RenderedServicePath change) {
-        Preconditions.checkNotNull(change, "Object can not be null!");
-        LOG.debug("Add RenderedServicePath iid = {}, change = {}", identifier, change);
+    public void add(final InstanceIdentifier<RenderedServicePath> identifier, final RenderedServicePath change) {
+        Preconditions.checkNotNull(change, "Created object can not be null!");
+        provider.addRsp(change);
     }
 
     @Override

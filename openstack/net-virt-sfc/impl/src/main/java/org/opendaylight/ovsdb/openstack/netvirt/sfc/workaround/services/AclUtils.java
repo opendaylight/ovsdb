@@ -1,12 +1,12 @@
 /*
- * Copyright © 2015 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright © 2016 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.sfc.it.utils;
+package org.opendaylight.ovsdb.openstack.netvirt.sfc.workaround.services;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +27,17 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.packet.fiel
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfcBuilder;
 
-public class AclUtils extends AbstractUtils {
-    public MatchesBuilder matchesBuilder(MatchesBuilder matchesBuilder, int destPort) {
+public class AclUtils {
+    private static final String ACLNAME= "httpAcl";
+    private static final String RULENAME= "httpRule";
+    private static final String SFCNAME = "SFC";
+
+    public MatchesBuilder matchesBuilder(MatchesBuilder matchesBuilder, int dstPort) {
         SourcePortRangeBuilder sourcePortRangeBuilder = new SourcePortRangeBuilder()
                 .setLowerPort(PortNumber.getDefaultInstance("0"))
                 .setUpperPort(PortNumber.getDefaultInstance("0"));
 
-        PortNumber portNumber = new PortNumber(destPort);
+        PortNumber portNumber = new PortNumber(dstPort);
         DestinationPortRangeBuilder destinationPortRangeBuilder = new DestinationPortRangeBuilder()
                 .setLowerPort(portNumber)
                 .setUpperPort(portNumber);
@@ -84,11 +88,27 @@ public class AclUtils extends AbstractUtils {
                 .setAccessListEntries(accessListEntriesBuilder.build());
     }
 
-    public AccessListsBuilder accesslistsbuilder(AccessListsBuilder accessListsBuilder,
+    public AccessListsBuilder accessListsbuilder(AccessListsBuilder accessListsBuilder,
                                                  AclBuilder aclBuilder) {
         List<Acl> aclList = new ArrayList<>();
         aclList.add(aclBuilder.build());
 
         return accessListsBuilder.setAcl(aclList);
+    }
+
+    public AccessListsBuilder accessListsBuilder(boolean renderRsp) {
+        String ruleName = RULENAME;
+        String sfcName = SFCNAME;
+        MatchesBuilder matchesBuilder = matchesBuilder(new MatchesBuilder(), 80);
+        ActionsBuilder actionsBuilder = actionsBuilder(new ActionsBuilder(), sfcName, renderRsp);
+        AceBuilder accessListEntryBuilder =
+                aceBuilder(new AceBuilder(), ruleName, matchesBuilder, actionsBuilder);
+        AccessListEntriesBuilder accessListEntriesBuilder =
+                accessListEntriesBuidler(new AccessListEntriesBuilder(), accessListEntryBuilder);
+        AclBuilder accessListBuilder =
+                aclBuilder(new AclBuilder(), ACLNAME, accessListEntriesBuilder);
+        AccessListsBuilder accessListsBuilder =
+                accessListsbuilder(new AccessListsBuilder(), accessListBuilder);
+        return accessListsBuilder;
     }
 }

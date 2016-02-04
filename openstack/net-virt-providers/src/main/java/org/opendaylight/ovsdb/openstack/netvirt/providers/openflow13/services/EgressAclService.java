@@ -25,18 +25,13 @@ import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefix;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpPrefixBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
@@ -55,7 +50,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -74,8 +68,6 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     private static final int DHCPV6_DESTINATION_PORT = 546;
     private static final String HOST_MASK = "/32";
     private static final String V6_HOST_MASK = "/128";
-    private static final String IP_VERSION_4 = "IPv4";
-    private static final String IP_VERSION_6 = "IPv6";
     private static final int PORT_RANGE_MIN = 1;
     private static final int PORT_RANGE_MAX = 65535;
 
@@ -115,7 +107,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 continue;
             }
 
-            if (portSecurityRule.getSecurityRuleDirection().equals("egress")) {
+            if (NeutronSecurityRule.DIRECTION_EGRESS.equals(portSecurityRule.getSecurityRuleDirection())) {
                 LOG.debug("programPortSecurityGroup: Acl Rule matching IP and ingress is: {} ", portSecurityRule);
                 if (null != portSecurityRule.getSecurityRemoteGroupID()) {
                     //Remote Security group is selected
@@ -152,8 +144,8 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                         long localPort, NeutronSecurityRule portSecurityRule,
                                         Neutron_IPs vmIp, boolean write) {
         String securityRuleEtherType = portSecurityRule.getSecurityRuleEthertype();
-        boolean isIpv6 = securityRuleEtherType.equals(IP_VERSION_6);
-        if (!securityRuleEtherType.equals(IP_VERSION_6) && !securityRuleEtherType.equals(IP_VERSION_4)) {
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(securityRuleEtherType);
+        if (!isIpv6 && !NeutronSecurityRule.ETHERTYPE_IPV4.equals(securityRuleEtherType)) {
             LOG.debug("programPortSecurityRule: SecurityRuleEthertype {} does not match IPv4/v6.", securityRuleEtherType);
             return;
         }
@@ -448,7 +440,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_TCP_" + segmentationId + "_" + srcMac + "_";
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(portSecurityRule.getSecurityRuleEthertype());
         if (isIpv6) {
             matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);
         } else {
@@ -512,7 +504,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             NeutronSecurityRule portSecurityRule, String dstAddress,
             boolean write, Integer protoPortMatchPriority) {
 
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(portSecurityRule.getSecurityRuleEthertype());
         if (isIpv6) {
             egressAclIcmpV6(dpidLong, segmentationId, srcMac, portSecurityRule, dstAddress, write, protoPortMatchPriority);
         } else {
@@ -633,7 +625,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         boolean portRange = false;
         MatchBuilder matchBuilder = new MatchBuilder();
         String flowId = "Egress_UDP_" + segmentationId + "_" + srcMac + "_";
-        boolean isIpv6 = portSecurityRule.getSecurityRuleEthertype().equals(IP_VERSION_6);
+        boolean isIpv6 = NeutronSecurityRule.ETHERTYPE_IPV6.equals(portSecurityRule.getSecurityRuleEthertype());
         if (isIpv6) {
             matchBuilder = MatchUtils.createV6EtherMatchWithType(matchBuilder,srcMac,null);
         } else {

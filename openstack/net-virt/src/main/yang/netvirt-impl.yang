@@ -30,6 +30,9 @@ module netvirt-impl {
                     }
                 }
             }
+            leaf conntrack-enabled {
+                type boolean;
+            }
         }
     }
 }

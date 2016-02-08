@@ -37,6 +37,7 @@ public class ConfigActivator implements BundleActivator {
     private ServiceTracker ingressAclProviderTracker;
     private ServiceTracker egressAclProviderTracker;
     private ServiceTracker icmpEchoProviderTracker;
+    private boolean conntrackEnabled = false;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -141,7 +142,7 @@ public class ConfigActivator implements BundleActivator {
                         INeutronSecurityGroupAware.class.getName(), AbstractHandler.class.getName()},
                 portSecurityHandlerProperties, portSecurityHandler);
 
-        final SecurityServicesImpl securityServices = new SecurityServicesImpl();
+        final SecurityServicesImpl securityServices = new SecurityServicesImpl(conntrackEnabled);
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
@@ -515,5 +516,9 @@ public class ConfigActivator implements BundleActivator {
             LOG.warn("Service registration for {} failed to return a ServiceRegistration instance", impl.getClass());
         }
         return serviceRegistration;
+    }
+
+    public void setConntrackEnabled(boolean conntrackEnabled) {
+        this.conntrackEnabled = conntrackEnabled;
     }
 }

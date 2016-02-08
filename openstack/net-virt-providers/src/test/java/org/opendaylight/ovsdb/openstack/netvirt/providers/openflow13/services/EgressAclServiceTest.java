@@ -958,9 +958,9 @@ public class EgressAclServiceTest {
     public void testProgramFixedSecurityACLAdd1() throws Exception {
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, true);
 
-        verify(writeTransaction, times(0)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(1)).submit();
+        verify(commitFuture, times(1)).get();
     }
     /**
      *  Test With isLastPortInBridge false isComputeNode false
@@ -970,9 +970,9 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, false);
 
-        verify(writeTransaction, times(0)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
+        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(1)).submit();
+        verify(commitFuture, times(1)).get();
     }
 
     /**
@@ -983,9 +983,9 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
 
-        verify(writeTransaction, times(6)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(3)).submit();
-        verify(commitFuture, times(3)).get();
+        verify(writeTransaction, times(10)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(5)).submit();
+        verify(commitFuture, times(5)).get();
     }
 
     /**
@@ -996,9 +996,9 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
 
-        verify(writeTransaction, times(3)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(3)).submit();
-        verify(commitFuture, times(3)).get();
+        verify(writeTransaction, times(5)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(5)).submit();
+        verify(commitFuture, times(5)).get();
     }
 
     /**
@@ -1035,10 +1035,10 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true, true, true);
 
-        verify(writeTransaction, times(8)).put(any(LogicalDatastoreType.class),
+        verify(writeTransaction, times(10)).put(any(LogicalDatastoreType.class),
                                                any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(4)).submit();
-        verify(commitFuture, times(4)).get();
+        verify(writeTransaction, times(5)).submit();
+        verify(commitFuture, times(5)).get();
     }
 
     /**
@@ -1049,9 +1049,9 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true, true, false);
 
-        verify(writeTransaction, times(4)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(4)).submit();
-        verify(commitFuture, times(4)).get();
+        verify(writeTransaction, times(5)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(5)).submit();
+        verify(commitFuture, times(5)).get();
     }
 
     /**

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_c14a75c4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-02-10T16:10:49Z",
+      "side": 1,
+      "message": "I could be missing something but I couldn\u0027t find where getFloatingIPAdress() is used in the delete code path anywhere except in logging statements. If this is correct,  I would say it is better to not set that value value to null so that it shows up in log statements and makes them a little more readable. +1\u0027ing anyway since not really functional.",
+      "range": {
+        "startLine": 1464,
+        "startChar": 20,
+        "endLine": 1464,
+        "endChar": 83
+      },
+      "revId": "9aa71675db827cbf28954b63423c0919f4e37e90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

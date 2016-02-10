@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_25ad2c9d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-02-10T22:16:37Z",
+      "side": 1,
+      "message": "should this be neutronNetwork \u003d xxxx?",
+      "revId": "809340383d42e59ec4ba153e595e901692ef96e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e52ce404",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-02-10T22:16:37Z",
+      "side": 1,
+      "message": "Does this cache need to be added to the  populateL3ForwardingCaches() so that if clustering is used and a new ODL node becomes master if rebuilds the cache?",
+      "revId": "809340383d42e59ec4ba153e595e901692ef96e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_45915051",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-02-10T22:16:37Z",
+      "side": 1,
+      "message": "same comment, should neutronNetwork be set?",
+      "revId": "809340383d42e59ec4ba153e595e901692ef96e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

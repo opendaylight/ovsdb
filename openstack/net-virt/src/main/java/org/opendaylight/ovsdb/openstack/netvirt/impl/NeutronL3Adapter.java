@@ -429,6 +429,13 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
         final boolean isDelete = action == Action.DELETE;
 
+        if (action == Action.DELETE) {
+            /*
+             * Bug 5164: Cleanup Floating IP OpenFlow Rules when port is deleted.
+             */
+            this.cleanupFloatingIPRules(neutronPort);
+        }
+
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_GATEWAY)){
             if (!isDelete) {
                 LOG.info("Port {} is network router gateway interface, "
@@ -1447,6 +1454,21 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
              subnetIdToRouterInterfaceCache.remove(neutronRouterInterface.getSubnetUUID());
          }
      }
+
+    private void cleanupFloatingIPRules(final NeutronPort neutronPort) {
+
+        List<NeutronFloatingIP> neutronFloatingIps = neutronFloatingIpCache.getAllFloatingIPs();
+        if(neutronFloatingIps != null && !neutronFloatingIps.isEmpty()) {
+            for (NeutronFloatingIP neutronFloatingIP : neutronFloatingIps) {
+                if (neutronFloatingIP.getPortUUID().equalsIgnoreCase(neutronPort.getPortUUID())) {
+                    // set Floating IP to null, so event will be treated as delete.
+                    neutronFloatingIP.setFloatingIPAddress(null);
+                    handleNeutronFloatingIPEvent(neutronFloatingIP, Action.DELETE);
+                }
+            }
+        }
+    }
+
 
     private void triggerGatewayMacResolver(final NeutronPort gatewayPort){
 

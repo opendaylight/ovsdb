@@ -42,6 +42,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interface;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
@@ -148,12 +149,14 @@ public class NeutronL3AdapterTest {
         NeutronPort neutronPort = mock(NeutronPort.class);
         when(neutronPort.getDeviceOwner()).thenReturn(OWNER_ROUTER_INTERFACE);
         when(neutronPort.getFixedIPs()).thenReturn(list_neutronIP);
+        INeutronFloatingIPCRUD neutronFloatingIpCache = mock(INeutronFloatingIPCRUD.class);
 
         // init instance variables
         MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , mock(INeutronPortCRUD.class));
         subnetIdToRouterInterfaceCache.put(UUID, mock(NeutronRouter_Interface.class));
         MemberModifier.field(NeutronL3Adapter.class, "subnetIdToRouterInterfaceCache").set(neutronL3Adapter , subnetIdToRouterInterfaceCache);
         MemberModifier.field(NeutronL3Adapter.class, "portCleanupCache").set(neutronL3Adapter , portCleanupCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronFloatingIpCache").set(neutronL3Adapter , neutronFloatingIpCache);
 
         // Suppress the called to these functions
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "updateL3ForNeutronPort", NeutronPort.class, boolean.class));

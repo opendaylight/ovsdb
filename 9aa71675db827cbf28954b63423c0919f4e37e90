@@ -22,6 +22,30 @@
       "revId": "9aa71675db827cbf28954b63423c0919f4e37e90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_61d729c0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-02-10T16:36:32Z",
+      "side": 1,
+      "message": "Hi Joshua,\nThanks for the review.\n\nYes, you are correct, I can take this out.\n\nIn the delete code, there is this check:\n\n   if (neutronFloatingIP.getFixedIPAddress() \u003d\u003d null) {\n            action \u003d Action.DELETE;\n        } else {\n            action \u003d actionIn;\n        }\n\n\nwhich I was attempting to address. But, as you correctly observed, setting floating ip address to null is not needed. I will removed these lines.\n\nThanks",
+      "parentUuid": "9a3d3df0_c14a75c4",
+      "range": {
+        "startLine": 1464,
+        "startChar": 20,
+        "endLine": 1464,
+        "endChar": 83
+      },
+      "revId": "9aa71675db827cbf28954b63423c0919f4e37e90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

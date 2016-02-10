@@ -133,6 +133,30 @@
       "revId": "9aa71675db827cbf28954b63423c0919f4e37e90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_05aaa8d3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-02-10T18:51:41Z",
+      "side": 1,
+      "message": "Thanks Sam. I\u0027m removing these lines.\n\nAccording to Neutron folks, we should not expect a floating ip to be deleted when a port is deleted. Part of email from Miguel below, and my response, included.\n\nI\u0027ll take a closer look to see if ODL neutron code is not handling some event, but my debugging indicates only neutron port delete event being received.\n\n\u003e\n\u003e It seems like Miguel\u0027s suggestions below would work.\n\u003e\n\u003e I do have a question regarding #2. Does neutron send an event/notification when a floating IP is disassociated from a port? When debugging earlier, all I observed was a port delete event.\n\n\nI actually don’t know, and probably you’re right. I’d guess that, speaking of the MechanismDriver API [1] if it happens, it should be in the port_update events.\n\n\n[1] https://github.com/openstack/neutron/blob/master/neutron/plugins/ml2/driver_api.py#L549\n\n\u003e\n\u003e Thanks,\n\u003e Vic\n\u003e\n\u003e\u003e What Jakub said is correct,\n\u003e\u003e\n\u003e\u003e Once you got the floating IP allocated, you have to explicitly return it\n\u003e\u003e if you don’t want it anymore.\n\u003e\u003e\n\u003e\u003e That happens because you may want to start another server and keep\n\u003e\u003e the floating IP which could have associated DNS records, and you don’t\n\u003e\u003e want to go back to your DNS to repoint it because you got a different IP address.\n\u003e\u003e\n\u003e\u003e You may delete the corresponding floating IP OF rules for a port if:\n\u003e\u003e  1) the port is deleted, or,\n\u003e\u003e  2) if the floating IP is dissociated from such port.\n\u003e\u003e\n\u003e\u003e But you shall not expect a floating ip to be deleted if the port is deleted.\n\u003e\u003e\n\u003e\u003e I hope it helps,\n\u003e\u003e\n\u003e\u003e Cheers,\n\u003e\u003e Miguel Ángel Ajo.",
+      "parentUuid": "9a3d3df0_a102d108",
+      "range": {
+        "startLine": 1464,
+        "startChar": 20,
+        "endLine": 1464,
+        "endChar": 83
+      },
+      "revId": "9aa71675db827cbf28954b63423c0919f4e37e90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

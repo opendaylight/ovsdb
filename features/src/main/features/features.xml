@@ -38,7 +38,8 @@
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
     <feature version="${neutron.version}">odl-neutron-service</feature>
     <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>

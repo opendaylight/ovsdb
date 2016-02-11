@@ -771,6 +771,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         flowId = FlowNames.getArpResponder(SF1IP);
         verifyFlow(nodeInfo.datapathId, flowId, Service.ARP_RESPONDER);
 
+        LOG.info("check for flows!!!!!!!!!!!!!");
+        Thread.sleep(30000);
         InstanceIdentifier<Flow> flowIid = createFlowIid(nodeInfo.datapathId, flowId,
                 pipelineOrchestrator.getTable(Service.CLASSIFIER));
 

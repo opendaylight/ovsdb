@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -34,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
@@ -51,10 +49,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfigBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -73,12 +67,6 @@ import com.google.common.collect.ImmutableBiMap;
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
     private static final String N_CONNECTIONS_STR = "n_connections";
-
-    private static NodeId createNodeId(OvsdbConnectionInstance client) {
-        NodeKey key = client.getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
-        return key.getNodeId();
-
-    }
 
     public static IpAddress createIpAddress(InetAddress address) {
         IpAddress ip = null;
@@ -486,7 +474,7 @@ public class SouthboundMapper {
     }
 
     public static String createQosType(Class<? extends QosTypeBase> qosTypeClass) {
-    String qosType = SouthboundConstants.DATAPATH_TYPE_MAP.get(QosTypeBase.class);
+        String qosType = SouthboundConstants.QOS_TYPE_MAP.get(QosTypeBase.class);
 
         if (qosTypeClass != null && !qosTypeClass.equals(QosTypeBase.class)) {
             qosType = SouthboundConstants.QOS_TYPE_MAP.get(qosTypeClass);
@@ -499,22 +487,20 @@ public class SouthboundMapper {
 
 
     public static InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
-        InstanceIdentifier<Node> iid = null;
         if (ovs.getExternalIdsColumn() != null
                 && ovs.getExternalIdsColumn().getData() != null
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+            return (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
         } else {
             String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
                     + ovs.getUuid().toString();
             NodeId nodeId = new NodeId(new Uri(nodeString));
             NodeKey nodeKey = new NodeKey(nodeId);
-            iid = InstanceIdentifier.builder(NetworkTopology.class)
+            return InstanceIdentifier.builder(NetworkTopology.class)
                     .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                     .child(Node.class,nodeKey)
                     .build();
         }
-        return iid;
     }
 }

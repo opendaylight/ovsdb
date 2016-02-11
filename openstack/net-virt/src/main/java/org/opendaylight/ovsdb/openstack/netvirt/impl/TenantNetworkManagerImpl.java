@@ -24,7 +24,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,7 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
     private INeutronPortCRUD neutronPortCache;
     private VlanConfigurationCache vlanConfigurationCache;
     private Southbound southbound;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     @Override
     public int getInternalVlan(Node node, String networkId) {
@@ -108,6 +108,13 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
                 return network.getNetworkUUID();
             }
         }
+        for (String networkUuid : neutronL3Adapter.getNetworkCleanupCache().keySet()) {
+            NeutronNetwork network = neutronL3Adapter.getNetworkFromCleanupCache(networkUuid);
+            if (network.getProviderSegmentationID() != null &&
+                    network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) {
+                return network.getNetworkUUID();
+            }
+        }
         return null;
     }
 
@@ -122,8 +129,15 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
             NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+            if ( null == neutronPort) {
+                LOG.debug("neutronPort is null, checking the clean up cache.");
+                neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
+            }
             if (neutronPort != null) {
                 neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
+                if (null == neutronNetwork) {
+                    neutronNetwork = neutronL3Adapter.getNetworkFromCleanupCache(neutronPort.getNetworkUUID());
+                }
                 if (neutronNetwork != null) {
                     LOG.debug("mapped to {}", neutronNetwork);
                 } else {
@@ -150,6 +164,10 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
             neutronPort = neutronPortCache.getPort(neutronPortId);
+            if (null == neutronPort) {
+                LOG.debug("neutronPort is null checking the clean up cache.");
+                neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
+            }
         }
         if (neutronPort != null) {
             LOG.debug("mapped to {}", neutronPort);
@@ -172,6 +190,10 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
 
     private boolean isInterfacePresentInTenantNetwork (String portId, String networkId) {
         NeutronPort neutronPort = neutronPortCache.getPort(portId);
+        if (null == neutronPort) {
+            LOG.debug("neutronPort is null checking the clean up cache.");
+            neutronPort = neutronL3Adapter.getPortFromCleanupCache(portId);
+        }
         return neutronPort != null && neutronPort.getNetworkUUID().equalsIgnoreCase(networkId);
     }
 
@@ -181,6 +203,8 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
                 (VlanConfigurationCache) ServiceHelper.getGlobalInstance(VlanConfigurationCache.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+        neutronL3Adapter =
+                (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
     }
 
     @Override

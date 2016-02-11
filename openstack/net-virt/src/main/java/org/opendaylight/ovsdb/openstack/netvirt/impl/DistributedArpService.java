@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
@@ -47,6 +48,7 @@ public class DistributedArpService implements ConfigInterface {
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile ArpProvider arpProvider;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     private Southbound southbound;
     private Boolean flgDistributedARPEnabled = true;
@@ -138,7 +140,10 @@ public class DistributedArpService implements ConfigInterface {
     private void handleNeutornPortForArp(NeutronPort neutronPort, Action action) {
 
         final String networkUUID = neutronPort.getNetworkUUID();
-        final NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(networkUUID);
+        NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(networkUUID);
+        if (null == neutronNetwork) {
+            neutronNetwork = neutronL3Adapter.getNetworkFromCleanupCache(networkUUID);
+        }
         final String providerSegmentationId = neutronNetwork != null ?
                                               neutronNetwork.getProviderSegmentationID() : null;
         final String tenantMac = neutronPort.getMacAddress();
@@ -223,6 +228,8 @@ public class DistributedArpService implements ConfigInterface {
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+        neutronL3Adapter =
+                (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
         initMembers();
     }
 

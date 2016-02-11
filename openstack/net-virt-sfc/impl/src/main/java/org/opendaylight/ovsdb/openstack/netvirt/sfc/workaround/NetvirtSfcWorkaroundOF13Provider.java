@@ -243,6 +243,8 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             NshUtils nshHeader = new NshUtils();
             nshHeader.setNshNsp(rsp.getPathId());
             nshHeader.setNshNsi(firstHop.getServiceIndex());
+            Ip sffIp = sfcUtils.getSffIp(lastHop.getServiceFunctionForwarder());
+            nshHeader.setNshMetaC1(NshUtils.convertIpAddressToLong(sffIp.getIp().getIpv4Address()));
             if (isSffOnBridge(bridgeNode, serviceFunctionForwarder)) {
                 LOG.info("handleSff: sff and bridge are the same: {} - {}, skipping first sff",
                         bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());

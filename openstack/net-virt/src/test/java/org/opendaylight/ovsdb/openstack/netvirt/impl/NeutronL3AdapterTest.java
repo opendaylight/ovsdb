@@ -132,14 +132,16 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testhandleNeutronSubnetEvent() throws Exception {
-        // Nothing to be done here
+        Map<String,NeutronNetwork> networkCleanupCache = new HashMap<>();
+        // Mock variables
+        MemberModifier.field(NeutronL3Adapter.class, "networkCleanupCache").set(neutronL3Adapter , networkCleanupCache);
         neutronL3Adapter.handleNeutronSubnetEvent(mock(NeutronSubnet.class), Action.ADD);
     }
 
     @Test
     public void testHandleNeutronPortEvent() throws Exception {
         Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<>();
-        Set<NeutronPort> portCleanupCache = new HashSet<>();
+        Map<String,NeutronPort> portCleanupCache = new HashMap<>();
         // Mock variables
         Neutron_IPs neutronIP = mock(Neutron_IPs.class);
         when(neutronIP.getSubnetUUID()).thenReturn(UUID);
@@ -399,6 +401,9 @@ public class NeutronL3AdapterTest {
     @Test
     public void testHandleNeutronNetworkEvent() throws Exception {
         // Nothing to be done here
+        Map<String,NeutronNetwork> networkCleanupCache = new HashMap<>();
+        // Mock variables
+        MemberModifier.field(NeutronL3Adapter.class, "networkCleanupCache").set(neutronL3Adapter , networkCleanupCache);
         Whitebox.invokeMethod(neutronL3Adapter, "handleNeutronNetworkEvent", mock(NeutronNetwork.class), Action.ADD);
     }
 

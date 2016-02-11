@@ -186,6 +186,7 @@ public class SouthboundHandler extends AbstractHandler
         if (neutronPort != null) {
             LOG.debug("Clean up the NeutronPortCache ");
             neutronL3Adapter.removePortFromCleanupCache(neutronPort);
+            neutronL3Adapter.removeNetworkFromCleanupCache(neutronPort.getNetworkUUID());
         } else {
             LOG.trace("Nothing to Clean up in the NeutronPortCache ");
         }

@@ -19,8 +19,10 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -363,12 +365,12 @@ public class SecurityServicesImplTest {
      */
     @Test
     public void testGetVmListForSecurityGroup() {
-        List<NeutronPort> portList = new ArrayList<>();
-        portList.add(neutronPort_Vm1);
-        portList.add(neutronPort_Vm2);
-        portList.add(neutronPort_Vm3);
-        portList.add(neutronPort_Dhcp);
-        when(neutronL3Adapter.getPortCleanupCache()).thenReturn(new HashSet<NeutronPort>(portList));
+        Map<String,NeutronPort> portMap = new HashMap<>();
+        portMap.put("Uuid1",neutronPort_Vm1);
+        portMap.put("Uuid2",neutronPort_Vm2);
+        portMap.put("Uuid3",neutronPort_Vm3);
+        portMap.put("Uuid4",neutronPort_Dhcp);
+        when(neutronL3Adapter.getPortCleanupCache()).thenReturn(portMap);
         List<Neutron_IPs> ipList = securityServicesImpl.getVmListForSecurityGroup(NEUTRON_PORT_ID_VM_1, SECURITY_GROUP_ID_2);
         assertEquals(ipList,neutron_IPs_2);
     }

@@ -132,14 +132,20 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testhandleNeutronSubnetEvent() throws Exception {
-        // Nothing to be done here
+        Map<String,NeutronNetwork> networkCleanupCache = new HashMap<>();
+        INeutronNetworkCRUD neutronNetworkCache = mock(INeutronNetworkCRUD.class);
+        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
+        when(neutronNetworkCache.getNetwork(anyString())).thenReturn(neutronNetwork);
+        // Mock variables
+        MemberModifier.field(NeutronL3Adapter.class, "networkCleanupCache").set(neutronL3Adapter , networkCleanupCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronNetworkCache").set(neutronL3Adapter , neutronNetworkCache);
         neutronL3Adapter.handleNeutronSubnetEvent(mock(NeutronSubnet.class), Action.ADD);
     }
 
     @Test
     public void testHandleNeutronPortEvent() throws Exception {
         Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache = new HashMap<>();
-        Set<NeutronPort> portCleanupCache = new HashSet<>();
+        Map<String,NeutronPort> portCleanupCache = new HashMap<>();
         // Mock variables
         Neutron_IPs neutronIP = mock(Neutron_IPs.class);
         when(neutronIP.getSubnetUUID()).thenReturn(UUID);
@@ -399,6 +405,9 @@ public class NeutronL3AdapterTest {
     @Test
     public void testHandleNeutronNetworkEvent() throws Exception {
         // Nothing to be done here
+        Map<String,NeutronNetwork> networkCleanupCache = new HashMap<>();
+        // Mock variables
+        MemberModifier.field(NeutronL3Adapter.class, "networkCleanupCache").set(neutronL3Adapter , networkCleanupCache);
         Whitebox.invokeMethod(neutronL3Adapter, "handleNeutronNetworkEvent", mock(NeutronNetwork.class), Action.ADD);
     }
 
@@ -858,6 +867,31 @@ public class NeutronL3AdapterTest {
 
     @Test
     public void testSetDependencies() throws Exception {
+        Map<String,NeutronNetwork> networkCleanupCache = new HashMap<>();
+        INeutronNetworkCRUD neutronNetworkCache = mock(INeutronNetworkCRUD.class);
+        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
+        List <NeutronNetwork> neutronNetworkList = new ArrayList<NeutronNetwork>();
+        neutronNetworkList.add(neutronNetwork);
+        when(neutronNetworkCache.getAllNetworks()).thenReturn(neutronNetworkList);
+
+        Map<String,NeutronPort> portCleanupCache = new HashMap<>();
+        INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        List <NeutronPort> neutronPortList = new ArrayList<NeutronPort>();
+        neutronPortList.add(neutronPort);
+        when(neutronPortCache.getAllPorts()).thenReturn(neutronPortList);
+        // Mock variables
+        MemberModifier.field(NeutronL3Adapter.class, "networkCleanupCache").set(neutronL3Adapter , networkCleanupCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronNetworkCache").set(neutronL3Adapter , neutronNetworkCache);
+        MemberModifier.field(NeutronL3Adapter.class, "portCleanupCache").set(neutronL3Adapter , portCleanupCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , neutronPortCache);
+
+
+        when(neutronPort.getDeviceOwner()).thenReturn(OWNER_ROUTER_INTERFACE);
+        MemberModifier.field(NeutronL3Adapter.class, "portCleanupCache").set(neutronL3Adapter , portCleanupCache);
+
+
+
         EventDispatcher eventDispatcher = mock(EventDispatcher.class);
         TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
         ConfigurationService configurationService = mock(ConfigurationService.class);

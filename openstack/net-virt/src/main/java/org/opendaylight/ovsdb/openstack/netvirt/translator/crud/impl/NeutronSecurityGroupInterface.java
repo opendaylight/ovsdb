@@ -127,7 +127,7 @@ public class NeutronSecurityGroupInterface extends AbstractNeutronInterface<Secu
         List<NeutronSecurityRule> rules = new ArrayList<NeutronSecurityRule>();
         String sgId = group.getUuid().getValue();
         for (NeutronSecurityRule rule: srCrud.getAllNeutronSecurityRules()) {
-            if (rule.getSecurityRuleGroupID() == sgId) {
+            if (rule.getSecurityRuleGroupID().equals(sgId)) {
                 rules.add(rule);
             }
         }

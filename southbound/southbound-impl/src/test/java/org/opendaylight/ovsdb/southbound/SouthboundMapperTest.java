@@ -94,12 +94,6 @@ public class SouthboundMapperTest {
     }
 
     @Test
-    public void testCreateNodeId() throws Exception {
-        PowerMockito.mockStatic(SouthboundMapper.class, Mockito.RETURNS_MOCKS);
-        assertTrue("Returned value is not an NodeId", Whitebox.invokeMethod(SouthboundMapper.class, "createNodeId", null) instanceof NodeId);
-    }
-
-    @Test
     public void testCreateManagedNodeId() throws Exception {
         PowerMockito.mockStatic(SouthboundMapper.class, Mockito.RETURNS_MOCKS);
         assertTrue("Returned value is not an NodeId", SouthboundMapper.createManagedNodeId(null) instanceof NodeId);

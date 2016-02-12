@@ -397,7 +397,8 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         /*For every port check whether security grouplist contains the current
          * security group.*/
         try {
-            for (NeutronPort neutronPort:neutronL3Adapter.getPortCleanupCache()) {
+            for (String neutronPortUuid:neutronL3Adapter.getPortCleanupCache().keySet()) {
+                NeutronPort neutronPort = neutronL3Adapter.getPortCleanupCache().get(neutronPortUuid);
                 if (!neutronPort.getDeviceOwner().contains("compute")) {
                     LOG.debug("getVMListForSecurityGroup : the port {} is not "
                             + "compute port belongs to {}", neutronPort.getID(), neutronPort.getDeviceOwner());
@@ -438,6 +439,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return;
             }
             NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            if (null == neutronNetwork) {
+                neutronNetwork = neutronL3Adapter.getNetworkFromCleanupCache(port.getNetworkUUID());
+            }
             if (neutronNetwork == null) {
                 return;
             }
@@ -480,6 +484,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                 return;
             }
             NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
+            if (null == neutronNetwork) {
+                neutronNetwork = neutronL3Adapter.getNetworkFromCleanupCache(port.getNetworkUUID());
+            }
             if (neutronNetwork == null) {
                 return;
             }

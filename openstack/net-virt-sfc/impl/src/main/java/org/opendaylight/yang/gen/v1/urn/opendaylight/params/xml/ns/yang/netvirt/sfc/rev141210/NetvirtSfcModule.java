@@ -38,6 +38,7 @@ public class NetvirtSfcModule extends AbstractNetvirtSfcModule {
         LOG.info("Netvirt SFC module initialization.");
         NetvirtSfcProvider sfcProvider = new NetvirtSfcProvider(bundleContext);
         sfcProvider.setOf13Provider(getOf13provider());
+        sfcProvider.setAddSfFlows(getAddsfflows());
         getBrokerDependency().registerProvider(sfcProvider);
         return sfcProvider;
     }

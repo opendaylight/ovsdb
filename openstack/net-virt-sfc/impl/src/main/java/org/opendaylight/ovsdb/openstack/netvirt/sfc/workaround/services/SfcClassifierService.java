@@ -149,10 +149,17 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             getNshAction(nshHeader, actionList);
 
-            ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dataPathId, vxGpeOfPort)));
-            ab.setOrder(actionList.size());
-            ab.setKey(new ActionKey(actionList.size()));
-            actionList.add(ab.build());
+            if (vxGpeOfPort != 0) {
+                ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dataPathId, vxGpeOfPort)));
+                ab.setOrder(actionList.size());
+                ab.setKey(new ActionKey(actionList.size()));
+                actionList.add(ab.build());
+            } else {
+                ab.setAction(ActionUtils.nxResubmitAction(null, Service.CLASSIFIER.getTable()));
+                ab.setOrder(actionList.size());
+                ab.setKey(new ActionKey(actionList.size()));
+                actionList.add(ab.build());
+            }
 
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);

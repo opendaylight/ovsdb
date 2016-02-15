@@ -63,8 +63,10 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
     private DataBroker dataBroker;
     private static final String VXGPE = "vxgpe";
     public static final String TUNNEL_ENDPOINT_KEY = "local_ip";
+    private Boolean addSfFlows;
 
-    public NetvirtSfcWorkaroundOF13Provider(final DataBroker dataBroker, MdsalUtils mdsalUtils, SfcUtils sfcUtils) {
+    public NetvirtSfcWorkaroundOF13Provider(final DataBroker dataBroker, MdsalUtils mdsalUtils,
+                                            SfcUtils sfcUtils, Boolean addSfFlows) {
         Preconditions.checkNotNull(dataBroker, "Input dataBroker cannot be NULL!");
         Preconditions.checkNotNull(mdsalUtils, "Input mdsalUtils cannot be NULL!");
         Preconditions.checkNotNull(sfcUtils, "Input sfcUtils cannot be NULL!");
@@ -72,6 +74,7 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
         this.dataBroker = dataBroker;
         this.mdsalUtils = mdsalUtils;
         this.sfcUtils = sfcUtils;
+        this.addSfFlows = addSfFlows;
     }
 
     public void setSfcClassifierService(ISfcClassifierService sfcClassifierService) {
@@ -251,16 +254,19 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
                 Ip ip = sfcUtils.getSfIp(serviceFunction);
                 nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
                 nshHeader.setNshTunUdpPort(ip.getPort());
+                sfcClassifierService.programIngressClassifier(dataPathId, ruleName, matches,
+                        rsp.getPathId(), rsp.getStartingIndex(),
+                        nshHeader, 0, rsp.getName().getValue(), true);
             } else {
                 LOG.info("handleSff: sff and bridge are not the same: {} - {}, sending to first sff",
                         bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
                 Ip ip = sfcUtils.getSffIp(serviceFunctionForwarder);
                 nshHeader.setNshTunIpDst(ip.getIp().getIpv4Address());
                 nshHeader.setNshTunUdpPort(ip.getPort());
+                sfcClassifierService.programIngressClassifier(dataPathId, ruleName, matches,
+                        rsp.getPathId(), rsp.getStartingIndex(),
+                        nshHeader, vxGpeOfPort, rsp.getName().getValue(), true);
             }
-            sfcClassifierService.programIngressClassifier(dataPathId, ruleName, matches,
-                    rsp.getPathId(), rsp.getStartingIndex(),
-                    nshHeader, vxGpeOfPort, rsp.getName().getValue(), true);
         } else if (hop == lastHop) {
             LOG.info("handleSff: last hop processing {} - {}",
                     bridgeNode.getNodeId().getValue(), serviceFunctionForwarder.getName().getValue());
@@ -298,8 +304,10 @@ public class NetvirtSfcWorkaroundOF13Provider implements INetvirtSfcOF13Provider
             }
             //should be sffdplport, but they should all be the same 6633/4790
             // TODO: Coexistence: SFC flows should take this using new sf dpl augmentation
-            //sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
-            //sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
+            if (addSfFlows == true) {
+                sfcClassifierService.program_sfEgress(dataPathId, sfIpPort, true);
+                sfcClassifierService.program_sfIngress(dataPathId, sfIpPort, sfOfPort, sfIpAddr, sfDplName, true);
+            }
             sfcClassifierService.programStaticArpEntry(dataPathId, 0L, sfMac, sfIpAddr,
                     rsp.getName().getValue(), true);
         } else {

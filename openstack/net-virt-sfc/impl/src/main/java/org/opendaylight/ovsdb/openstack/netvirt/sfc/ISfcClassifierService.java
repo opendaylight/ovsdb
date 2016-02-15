@@ -28,10 +28,10 @@ public interface ISfcClassifierService {
     void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
                                        long sfOfPort, int tunnelId, String rspName, boolean write);
 
-    void program_sfEgress(long dataPathId, int dstPort, boolean write);
+    void program_sfEgress(long dataPathId, int dstPort, String rspName, boolean write);
 
     void program_sfIngress(long dataPathId, int dstPort, long sfOfPort,
-                           String ipAddress, String sfDplName, boolean write);
+                           String ipAddress, String sfDplName, String rspName, boolean write);
 
     void programStaticArpEntry(long dataPathId, long ofPort, String macAddressStr,
                                String ipAddress, String rspName, boolean write);

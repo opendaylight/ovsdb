@@ -21,16 +21,24 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev14070
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunctionBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sl.rev140701.VxlanGpe;
+import org.opendaylight.yang.gen.v1.urn.ericsson.params.xml.ns.yang.sfc.sf.ovs.rev160107.SfDplOvsAugmentation;
+import org.opendaylight.yang.gen.v1.urn.ericsson.params.xml.ns.yang.sfc.sf.ovs.rev160107.SfDplOvsAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.ericsson.params.xml.ns.yang.sfc.sf.ovs.rev160107.connected.port.OvsPortBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 
 public class ServiceFunctionUtils extends AbstractUtils {
     public SfDataPlaneLocatorBuilder sfDataPlaneLocatorBuilder(SfDataPlaneLocatorBuilder sfDataPlaneLocatorBuilder,
                                                                String ip, int port, String dplName, String sffName) {
+        SfDplOvsAugmentationBuilder sfDplOvsAugmentationBuilder = new SfDplOvsAugmentationBuilder();
+        OvsPortBuilder ovsPortBuilder = new OvsPortBuilder().setPortId(dplName);
+        sfDplOvsAugmentationBuilder.setOvsPort(ovsPortBuilder.build());
+
         return sfDataPlaneLocatorBuilder
+                .addAugmentation(SfDplOvsAugmentation.class, sfDplOvsAugmentationBuilder.build())
                 .setLocatorType(ipBuilder(ip, port).build())
-                .setName(new SfDataPlaneLocatorName(dplName))
+                .setName(SfDataPlaneLocatorName.getDefaultInstance(dplName))
                 .setTransport(VxlanGpe.class)
-                .setServiceFunctionForwarder(new SffName(sffName));
+                .setServiceFunctionForwarder(SffName.getDefaultInstance(sffName));
     }
 
     public ServiceFunctionBuilder serviceFunctionBuilder(ServiceFunctionBuilder serviceFunctionBuilder,

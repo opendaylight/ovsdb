@@ -31,6 +31,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
     private NetvirtSfcAclListener aclListener;
     private NetvirtSfcClassifierListener classifierListener;
     private RspListener rspListener;
+    private Boolean addSfFlows;
 
     public void setOf13Provider(String of13Provider) {
         LOG.info("of13Provider is: {}", of13Provider);
@@ -64,7 +65,7 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         if (of13Provider.equals("standalone")) {
             provider = new NetvirtSfcStandaloneOF13Provider(dataBroker);
         } else {
-            provider = new NetvirtSfcWorkaroundOF13Provider(dataBroker, mdsalUtils, sfcUtils);
+            provider = new NetvirtSfcWorkaroundOF13Provider(dataBroker, mdsalUtils, sfcUtils, addSfFlows);
         }
         aclListener = new NetvirtSfcAclListener(provider, dataBroker);
         classifierListener = new NetvirtSfcClassifierListener(provider, dataBroker);
@@ -114,5 +115,10 @@ public class NetvirtSfcProvider implements BindingAwareProvider, AutoCloseable {
         return registerService(bundleContext,
                 new String[] {AbstractServiceInstance.class.getName(),interfaceClassName},
                 properties, impl);
+    }
+
+    public void setAddSfFlows(Boolean addSfFlows) {
+        LOG.info("setAddSfFlows: addSfFlows is {}", addSfFlows);
+        this.addSfFlows = addSfFlows;
     }
 }

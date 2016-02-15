@@ -20,7 +20,10 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.SffOvsBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.SffOvsLocatorOptionsAugmentation;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.SffOvsLocatorOptionsAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.SffOvsNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.SffOvsNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.bridge.OvsBridgeBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.node.OvsNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.options.OvsOptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.ServiceFunctionForwardersBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
@@ -31,6 +34,9 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev1407
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.SffDataPlaneLocatorBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.service.function.dictionary.SffSfDataPlaneLocatorBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.service.function.forwarder.sff.data.plane.locator.DataPlaneLocatorBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class ServiceFunctionForwarderUtils extends AbstractUtils {
     public OvsOptionsBuilder ovsOptionsBuilder(OvsOptionsBuilder ovsOptionsBuilder, int port) {
@@ -87,16 +93,23 @@ public class ServiceFunctionForwarderUtils extends AbstractUtils {
             ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder,
             String sffName, String serviceNodeName, String bridgeName,
             List<SffDataPlaneLocator> sffDataPlaneLocatorList,
-            List<ServiceFunctionDictionary> serviceFunctionDictionaryList) {
+            List<ServiceFunctionDictionary> serviceFunctionDictionaryList,
+            OvsdbNodeRef ovsdbNodeRef) {
 
         SffOvsBridgeAugmentationBuilder sffOvsBridgeAugmentationBuilder = new SffOvsBridgeAugmentationBuilder();
         sffOvsBridgeAugmentationBuilder.setOvsBridge(ovsBridgeBuilder(new OvsBridgeBuilder(), bridgeName).build());
+
+        SffOvsNodeAugmentationBuilder sffOvsNodeAugmentationBuilder = new SffOvsNodeAugmentationBuilder();
+        OvsNodeBuilder ovsNodeBuilder = new OvsNodeBuilder();
+        ovsNodeBuilder.setNodeId(ovsdbNodeRef);
+        sffOvsNodeAugmentationBuilder.setOvsNode(ovsNodeBuilder.build());
 
         return serviceFunctionForwarderBuilder
                 .setName(new SffName(sffName))
                 .setServiceNode(new SnName(serviceNodeName))
                 .setServiceFunctionDictionary(serviceFunctionDictionaryList)
                 .setSffDataPlaneLocator(sffDataPlaneLocatorList)
+                .addAugmentation(SffOvsNodeAugmentation.class, sffOvsNodeAugmentationBuilder.build())
                 .addAugmentation(SffOvsBridgeAugmentation.class, sffOvsBridgeAugmentationBuilder.build());
     }
 
@@ -108,7 +121,8 @@ public class ServiceFunctionForwarderUtils extends AbstractUtils {
 
     public ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder(
             String sffName, String sffIp, int port, String sffDplName,
-            String sfIp, String snName, String bridgeName, String sfName, String sfDplName) {
+            String sfIp, String snName, String bridgeName, String sfName, String sfDplName,
+            OvsdbNodeRef ovsdbNodeRef) {
 
         DataPlaneLocatorBuilder dataPlaneLocatorBuilder =
                 dataPlaneLocatorBuilder(new DataPlaneLocatorBuilder(), sffIp, port);
@@ -128,7 +142,7 @@ public class ServiceFunctionForwarderUtils extends AbstractUtils {
         ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
                 serviceFunctionForwarderBuilder(
                         new ServiceFunctionForwarderBuilder(), sffName, snName, bridgeName,
-                        sffDataPlaneLocatorList, serviceFunctionDictionaryList);
+                        sffDataPlaneLocatorList, serviceFunctionDictionaryList, ovsdbNodeRef);
         return serviceFunctionForwarderBuilder;
     }
 }

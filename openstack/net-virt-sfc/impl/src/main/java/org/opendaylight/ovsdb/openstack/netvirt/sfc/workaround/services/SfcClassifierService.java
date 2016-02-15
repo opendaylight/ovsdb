@@ -149,10 +149,17 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             getNshAction(nshHeader, actionList);
 
-            ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dataPathId, vxGpeOfPort)));
-            ab.setOrder(actionList.size());
-            ab.setKey(new ActionKey(actionList.size()));
-            actionList.add(ab.build());
+            if (vxGpeOfPort != 0) {
+                ab.setAction(ActionUtils.outputAction(FlowUtils.getNodeConnectorId(dataPathId, vxGpeOfPort)));
+                ab.setOrder(actionList.size());
+                ab.setKey(new ActionKey(actionList.size()));
+                actionList.add(ab.build());
+            } else {
+                ab.setAction(ActionUtils.nxResubmitAction(null, Service.CLASSIFIER.getTable()));
+                ab.setOrder(actionList.size());
+                ab.setKey(new ActionKey(actionList.size()));
+                actionList.add(ab.build());
+            }
 
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);
@@ -328,7 +335,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
     // packet from sf to sff that need to go out local
     @Override
-    public void program_sfEgress(long dataPathId, int dstPort, boolean write) {
+    public void program_sfEgress(long dataPathId, int dstPort, String rspName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = FlowNames.getSfEgress(dstPort);
@@ -352,16 +359,16 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             isb.setInstruction(instructions);
             flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
+            writeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_SFEGRESS);
         } else {
-            removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_SFEGRESS);
         }
     }
 
     // looped back sff to sf packets
     @Override
     public void program_sfIngress(long dataPathId, int dstPort, long sfOfPort,
-                                  String ipAddress, String sfDplName, boolean write) {
+                                  String ipAddress, String sfDplName, String rspName, boolean write) {
         NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dataPathId);
         FlowBuilder flowBuilder = new FlowBuilder();
         String flowName = FlowNames.getSfIngress(dstPort, ipAddress);
@@ -386,9 +393,9 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
 
             isb.setInstruction(instructions);
             flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
+            writeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_SFINGRESS);
         } else {
-            removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder, rspName, FlowID.FLOW_SFINGRESS);
         }
     }
 
@@ -509,7 +516,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
     }
 
     private static FlowID flowSet[] = {FlowID.FLOW_INGRESSCLASS, FlowID.FLOW_EGRESSCLASS,
-            FlowID.FLOW_EGRESSCLASSBYPASS, FlowID.FLOW_SFARP};
+            FlowID.FLOW_EGRESSCLASSBYPASS, FlowID.FLOW_SFARP, FlowID.FLOW_SFINGRESS, FlowID.FLOW_SFEGRESS};
 
     @Override
     public void clearFlows(DataBroker dataBroker, String rspName) {

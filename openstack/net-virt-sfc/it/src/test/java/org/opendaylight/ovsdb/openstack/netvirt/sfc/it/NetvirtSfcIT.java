@@ -121,6 +121,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.Sfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev150105.SfcBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -523,6 +524,10 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
     }
 
     private ServiceFunctionForwardersBuilder serviceFunctionForwardersBuilder() {
+        return serviceFunctionForwardersBuilder(null);
+    }
+
+    private ServiceFunctionForwardersBuilder serviceFunctionForwardersBuilder(OvsdbNodeRef ovsdbNodeRef) {
         String sf1Name = SF1NAME;
         String sf1Ip = SF1IP;
         String sf1DplName = SF1DPLNAME;
@@ -535,7 +540,8 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
         ServiceFunctionForwarderBuilder serviceFunctionForwarderBuilder =
                 serviceFunctionForwarderUtils.serviceFunctionForwarderBuilder(
-                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Ip, sn1Name, bridge1Name, sf1Name, sf1DplName);
+                        sff1Name, sff1Ip, port, sffDpl1Name, sf1Ip, sn1Name, bridge1Name, sf1Name, sf1DplName,
+                        ovsdbNodeRef);
         List<ServiceFunctionForwarder>  serviceFunctionForwarderList = serviceFunctionForwarderUtils.list(
                 new ArrayList<ServiceFunctionForwarder>(), serviceFunctionForwarderBuilder);
 
@@ -738,8 +744,14 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, rspIid);
         rspOperationalListener.registerDataChangeListener();
 
+        OvsdbBridgeAugmentation bridgeAugmentation = southbound.extractBridgeAugmentation(nodeInfo.bridgeNode);
+        OvsdbNodeRef ovsdbNodeRef = null;
+        if (bridgeAugmentation != null) {
+            ovsdbNodeRef = bridgeAugmentation.getManagedBy();
+        }
+
         testModelPut(serviceFunctionsBuilder(), ServiceFunctions.class);
-        testModelPut(serviceFunctionForwardersBuilder(), ServiceFunctionForwarders.class);
+        testModelPut(serviceFunctionForwardersBuilder(ovsdbNodeRef), ServiceFunctionForwarders.class);
         testModelPut(serviceFunctionChainsBuilder(), ServiceFunctionChains.class);
         testModelPut(serviceFunctionPathsBuilder(), ServiceFunctionPaths.class);
 
@@ -770,6 +782,11 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         verifyFlow(nodeInfo.datapathId, flowId, Service.CLASSIFIER);
         flowId = FlowNames.getArpResponder(SF1IP);
         verifyFlow(nodeInfo.datapathId, flowId, Service.ARP_RESPONDER);
+        // Only verify these flows if NetVirt adds them and not SFC
+        //flowId = FlowNames.getSfEgress(GPEUDPPORT);
+        //verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
+        //flowId = FlowNames.getSfIngress(GPEUDPPORT, SF1IP);
+        //verifyFlow(nodeInfo.datapathId, flowId, Service.CLASSIFIER.getTable());
 
         LOG.info("check for flows!!!!!!!!!!!!!");
         Thread.sleep(30000);

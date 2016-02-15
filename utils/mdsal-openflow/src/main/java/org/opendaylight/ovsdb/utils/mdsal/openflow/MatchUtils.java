@@ -107,6 +107,14 @@ public class MatchUtils {
     public static final short ALL_ICMP = -1;
     public static final long ETHERTYPE_IPV4 = 0x0800;
     public static final long ETHERTYPE_IPV6 = 0x86dd;
+    public static final int UNTRACKED_CT_STATE = 0x00;
+    public static final int UNTRACKED_CT_STATE_MASK = 0x20;
+    public static final int TRACKED_EST_CT_STATE = 0x22;
+    public static final int TRACKED_EST_CT_STATE_MASK = 0x22;
+    public static final int TRACKED_NEW_CT_STATE = 0x21;
+    public static final int TRACKED_NEW_CT_STATE_MASK = 0x21;
+    public static final int NEW_CT_STATE = 0x01;
+    public static final int NEW_CT_STATE_MASK = 0x01;
 
     /**
      * Create Ingress Port Match dpidLong, inPort

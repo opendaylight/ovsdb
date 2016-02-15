@@ -285,7 +285,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         String flowName = "Ingress_Fixed_Conntrk_Untrk_" + segmentationId + "_" + localPort + "_";
         matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,null,attachMac);
-        matchBuilder = MatchUtils.addCtState(matchBuilder,0x00, 0x80);
+        matchBuilder = MatchUtils.addCtState(matchBuilder,MatchUtils.UNTRACKED_CT_STATE, MatchUtils.UNTRACKED_CT_STATE_MASK);
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
         FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
@@ -323,7 +323,8 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         String flowName = "Ingress_Fixed_Conntrk_TrkEst_" + segmentationId + "_" + localPort + "_";
         matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,null,attachMac);
-        matchBuilder = MatchUtils.addCtState(matchBuilder,0x82, 0x82);
+        matchBuilder = MatchUtils.addCtState(matchBuilder,MatchUtils.TRACKED_EST_CT_STATE,
+                                             MatchUtils.TRACKED_EST_CT_STATE_MASK);
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
         FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
@@ -351,7 +352,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         String flowName = "Ingress_Fixed_Conntrk_NewDrop_" + segmentationId + "_" + localPort + "_";
         matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,null,attachMac);
-        matchBuilder = MatchUtils.addCtState(matchBuilder,0x01, 0x01);
+        matchBuilder = MatchUtils.addCtState(matchBuilder,MatchUtils.NEW_CT_STATE, MatchUtils.NEW_CT_STATE_MASK);
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
         FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(priority);
@@ -725,7 +726,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                           boolean write, boolean drop, boolean isCtCommit) {
         MatchBuilder matchBuilder1 = matchBuilder;
         if (isCtCommit) {
-            matchBuilder1 = MatchUtils.addCtState(matchBuilder1,0x81, 0x81);
+            matchBuilder1 = MatchUtils.addCtState(matchBuilder1,MatchUtils.TRACKED_NEW_CT_STATE, MatchUtils.TRACKED_NEW_CT_STATE_MASK);
         }
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder1.build());

@@ -211,7 +211,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 */
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (ovsdbDeviceEntityOwnershipListener != null) {
             ovsdbDeviceEntityOwnershipListener.close();
         }

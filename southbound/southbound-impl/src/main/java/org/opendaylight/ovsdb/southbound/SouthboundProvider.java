@@ -97,7 +97,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         LOG.info("SouthboundProvider Closed");
         cm.close();
         ovsdbDataChangeListener.close();

@@ -64,7 +64,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         registration.close();
     }
 

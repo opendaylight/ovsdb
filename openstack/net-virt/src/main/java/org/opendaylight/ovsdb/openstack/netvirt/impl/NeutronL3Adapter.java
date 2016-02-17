@@ -57,6 +57,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -1400,14 +1401,34 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                     if(externalSubnet.getGatewayIP() != null){
                         LOGGER.info("Trigger MAC resolution for gateway ip {}", externalSubnet.getGatewayIP());
 
-                        gatewayMacResolver.resolveMacAddress(
+                        Neutron_IPs neutronIP = null;
+                        for (Neutron_IPs nIP : gatewayPort.getFixedIPs()) {
+                            InetAddress ipAddress;
+                            try {
+                                ipAddress = InetAddress.getByAddress(nIP.getIpAddress().getBytes());
+                            } catch (UnknownHostException e) {
+                                LOGGER.warn("unknown host exception {}", e);
+                                continue;
+                            }
+                            if (ipAddress instanceof Inet4Address) {
+                                neutronIP = nIP;
+                                break;
+                            }
+                        }
+                        if (neutronIP == null) {
+                            // TODO IPv6 neighbor discovery
+                            LOGGER.debug("Ignoring gateway ports with IPv6 only fixed ip {}",
+                                         gatewayPort.getFixedIPs());
+                        } else {
+                            gatewayMacResolver.resolveMacAddress(
                                 this, /* gatewayMacResolverListener */
                                 null, /* externalNetworkBridgeDpid */
                                 true, /* refreshExternalNetworkBridgeDpidIfNeeded */
                                 new Ipv4Address(externalSubnet.getGatewayIP()),
-                                new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
+                                new Ipv4Address(neutronIP.getIpAddress()),
                                 new MacAddress(gatewayPort.getMacAddress()),
                                 true /* periodicRefresh */);
+                        }
                     }else{
                         LOGGER.warn("No gateway IP address found for external subnet {}",externalSubnet);
                     }

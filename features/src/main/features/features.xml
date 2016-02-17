@@ -15,11 +15,6 @@
   <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-features/{{VERSION}}/xml/features</repository>
 
-  <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
-           version='${project.version}'>
-    <feature version="${project.version}">odl-ovsdb-library</feature>
-  </feature>
-
   <feature name="odl-ovsdb-schema-openvswitch" description="OVSDB :: Schema :: Open_vSwitch"
            version='${project.version}'>
     <feature version="${project.version}">odl-ovsdb-library</feature>

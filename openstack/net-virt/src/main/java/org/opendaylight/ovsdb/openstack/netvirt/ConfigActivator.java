@@ -196,22 +196,14 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{EventDispatcher.class.getName()}, null, eventDispatcher);
 
-        Dictionary<String, Object> neutronL3AdapterProperties = new Hashtable<>();
-        neutronL3AdapterProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                AbstractEvent.HandlerType.NEUTRON_L3_ADAPTER);
         final NeutronL3Adapter neutronL3Adapter = new NeutronL3Adapter(
                 new NeutronModelsDataStoreHelper(this.providerContext.getSALService(DataBroker.class)));
-        registerService(context,
-                new String[]{NeutronL3Adapter.class.getName(), GatewayMacResolverListener.class.getName()},
-                neutronL3AdapterProperties, neutronL3Adapter);
+        registerAbstractHandlerService(context, new Class[] {NeutronL3Adapter.class, GatewayMacResolverListener.class},
+                AbstractEvent.HandlerType.NEUTRON_L3_ADAPTER, neutronL3Adapter);
 
-        Dictionary<String, Object> distributedArpServiceProperties = new Hashtable<>();
-        distributedArpServiceProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                AbstractEvent.HandlerType.DISTRIBUTED_ARP_SERVICE);
         final DistributedArpService distributedArpService = new DistributedArpService();
-        registerService(context,
-                new String[]{DistributedArpService.class.getName()},
-                distributedArpServiceProperties, distributedArpService);
+        registerAbstractHandlerService(context, new Class[] {DistributedArpService.class},
+                AbstractEvent.HandlerType.DISTRIBUTED_ARP_SERVICE, distributedArpService);
 
         OpenstackRouter openstackRouter = new OpenstackRouter();
         registerService(context,

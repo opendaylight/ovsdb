@@ -158,7 +158,7 @@ public class SouthboundUtils {
         try {
             inetAddress = InetAddress.getByName(addressStr);
         } catch (UnknownHostException e) {
-            LOG.warn("Could not allocate InetAddress");
+            LOG.warn("Could not allocate InetAddress", e);
         }
 
         IpAddress address = SouthboundMapper.createIpAddress(inetAddress);

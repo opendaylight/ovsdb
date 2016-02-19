@@ -43,7 +43,7 @@ public class RspListener extends AbstractDataTreeListener<RenderedServicePath> {
             LOG.info("Registering Data Change Listener for NetvirtSfc RenderedServicePath configuration.");
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
-            LOG.warn("Netvirt RenderedServicePath DataChange listener registration failed!");
+            LOG.warn("Netvirt RenderedServicePath DataChange listener registration failed!", e);
             throw new IllegalStateException("RspListener startup failed! System needs restart.", e);
         }
     }

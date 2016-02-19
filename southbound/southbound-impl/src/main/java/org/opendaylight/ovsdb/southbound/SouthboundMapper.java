@@ -240,7 +240,7 @@ public class SouthboundMapper {
             protocols = bridge.getProtocolsColumn().getData();
         } catch (SchemaVersionMismatchException e) {
             // We don't care about the exception stack trace here
-            LOG.warn("protocols not supported by this version of ovsdb: {}", e.getMessage());
+            LOG.warn("protocols not supported by this version of ovsdb", e);
         }
         List<ProtocolEntry> protocolList = new ArrayList<>();
         if (protocols != null && protocols.size() > 0) {

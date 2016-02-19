@@ -342,7 +342,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
             Thread.sleep(1000);
             super.setup();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to setup test", e);
         }
 
         getProperties();
@@ -377,7 +377,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.warn("Failed to get provider context", e);
                 }
             }
         }
@@ -386,7 +386,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Failed to sleep after get provider context", e);
         }
         return providerContext;
     }
@@ -414,7 +414,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.warn("Failed to get {}", NETVIRT_TOPOLOGY_ID, e);
                 }
             }
         }
@@ -979,7 +979,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
             try {
                 listener.close();
             } catch (Exception ex) {
-                LOG.warn("Failed to close registration {}, iid {}", listener, ex);
+                LOG.warn("Failed to close registration {}", listener, ex);
             }
         }
         LOG.info("waitList size {}", waitList.size());

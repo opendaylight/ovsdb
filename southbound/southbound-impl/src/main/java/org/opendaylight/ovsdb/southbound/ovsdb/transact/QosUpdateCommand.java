@@ -112,7 +112,7 @@ public class QosUpdateCommand extends AbstractTransactCommand {
                 try {
                     qos.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
                 } catch (NullPointerException e) {
-                    LOG.warn("Incomplete Qos external IDs");
+                    LOG.warn("Incomplete Qos external IDs", e);
                 }
 
                 List<QosOtherConfig> otherConfigs = qosEntry.getQosOtherConfig();

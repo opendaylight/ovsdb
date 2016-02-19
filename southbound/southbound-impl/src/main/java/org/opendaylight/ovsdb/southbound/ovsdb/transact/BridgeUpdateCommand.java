@@ -152,7 +152,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
             try {
                 bridge.setOtherConfig(ImmutableMap.copyOf(otherConfigMap));
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete bridge other config");
+                LOG.warn("Incomplete bridge other config", e);
             }
         }
     }

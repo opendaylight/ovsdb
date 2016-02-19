@@ -173,7 +173,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
             try {
                 ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB interface options");
+                LOG.warn("Incomplete OVSDB interface options", e);
             }
         }
     }
@@ -192,7 +192,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
             try {
                 ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB interface external_ids");
+                LOG.warn("Incomplete OVSDB interface external_ids", e);
             }
         }
     }
@@ -212,11 +212,11 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
                 try {
                     ovsInterface.setLldp(ImmutableMap.copyOf(interfaceLldpMap));
                 } catch (NullPointerException e) {
-                    LOG.warn("Incomplete OVSDB interface lldp");
+                    LOG.warn("Incomplete OVSDB interface lldp", e);
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema", e);
         }
     }
 
@@ -253,7 +253,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
             try {
                 port.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB port external_ids");
+                LOG.warn("Incomplete OVSDB port external_ids", e);
             }
         }
     }

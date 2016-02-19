@@ -94,6 +94,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                     try {
                         queuesBuilder.setDscp(new Short(dscp.iterator().next().toString()));
                     } catch (NumberFormatException e) {
+                        LOG.warn("Failed to set DSCP", e);
                         queuesBuilder.setDscp(new Short("0"));
                     }
                 }

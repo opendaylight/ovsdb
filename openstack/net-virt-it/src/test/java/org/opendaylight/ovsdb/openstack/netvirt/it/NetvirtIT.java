@@ -227,7 +227,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         try {
             super.setup();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to setup test", e);
         }
 
         getProperties();
@@ -261,7 +261,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.warn("Failed to get provider context", e);
                 }
             }
         }
@@ -270,7 +270,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Failed to get sleep after get provider context", e);
         }
         return providerContext;
     }
@@ -298,7 +298,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.warn("Failed to get {}", NETVIRT_TOPOLOGY_ID, e);
                 }
             }
         }

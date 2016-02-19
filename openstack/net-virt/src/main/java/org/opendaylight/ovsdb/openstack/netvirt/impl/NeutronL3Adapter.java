@@ -1214,12 +1214,12 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         }
 
         if (status.isSuccess()) {
-            LOG.debug("ProgramRouterInterface {} for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{}",
+            LOG.debug("programRouterInterfaceStage2 {} for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{}",
                          routingProvider == null ? "skipped" : "programmed",
                          macAddress, address, mask, node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          actionForNode);
         } else {
-            LOG.error("ProgramRouterInterface failed for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{} status:{}",
+            LOG.error("programRouterInterfaceStage2 failed for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{} status:{}",
                          macAddress, address, mask, node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          actionForNode, status);
         }

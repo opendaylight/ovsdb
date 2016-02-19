@@ -165,7 +165,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                         return;
                     }
                 } catch (UnknownHostException e) {
-                    LOG.warn("Invalid IP address {}", ipaddress);
+                    LOG.warn("Invalid IP address {}", ipaddress, e);
                     return;
                 }
             }
@@ -266,7 +266,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                                                Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
                     }
                 } catch(UnknownHostException e) {
-                    LOG.warn("Invalid IP address {}", srcAddress.getIpAddress());
+                    LOG.warn("Invalid IP address {}", srcAddress.getIpAddress(), e);
                 }
             }
         }

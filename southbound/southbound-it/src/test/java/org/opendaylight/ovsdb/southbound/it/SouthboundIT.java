@@ -297,7 +297,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         try {
             super.setup();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to setup test", e);
         }
         //dataBroker = getSession().getSALService(DataBroker.class);
         Thread.sleep(3000);

@@ -168,6 +168,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         try {
             result = monitor.get();
         } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Failed to monitor {}", dbSchema, e);
             return null;
         }
         return transformingCallback(result, dbSchema);
@@ -199,6 +200,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         try {
             result = monitor.get();
         } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Failed to monitor {}", dbSchema, e);
             return null;
         }
         return transformingCallback(result, dbSchema);
@@ -222,7 +224,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         try {
             result = cancelMonitor.get();
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Exception when canceling monitor handler {}", handler.getId());
+            LOG.error("Exception when canceling monitor handler {}", handler.getId(), e);
         }
 
         if (result == null) {
@@ -332,6 +334,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                                 sfuture.set(schema);
                             }
                         } catch (Exception e) {
+                            LOG.warn("Failed to populate schema {}:{}", dbNames, schema, e);
                             sfuture.setException(e);
                         }
                         return null;

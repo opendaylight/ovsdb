@@ -75,7 +75,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
                                 ovs.getExternalIdsColumn().getData());
                 transaction.add(mutate);
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB Node external IDs");
+                LOG.warn("Incomplete OVSDB Node external IDs", e);
             }
 
 

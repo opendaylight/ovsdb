@@ -103,7 +103,7 @@ public class TyperUtilsTest {
             method.setAccessible(true);
             method.invoke(TyperUtils.class, schema, from, to);
         } catch (NoSuchMethodException e) {
-            LOG.error("Can't find TyperUtils::checkVersion(), TyperUtilsTest::callCheckVersion() may be obsolete");
+            LOG.error("Can't find TyperUtils::checkVersion(), TyperUtilsTest::callCheckVersion() may be obsolete", e);
         } catch (IllegalAccessException e) {
             LOG.error("Error invoking TyperUtils::checkVersion(), please check TyperUtilsTest::callCheckVersion()", e);
         } catch (InvocationTargetException e) {

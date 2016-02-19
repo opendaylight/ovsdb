@@ -125,7 +125,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                     }
                 }
             } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Exception attempting to createTransactionInvokers {}: {}",connectionInfo,e);
+                LOG.warn("Exception attempting to createTransactionInvokers {}", connectionInfo, e);
             }
         }
     }
@@ -180,7 +180,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                                 ovs.getExternalIdsColumn().getData());
                 transaction.add(mutate);
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB Node external IDs");
+                LOG.warn("Incomplete OVSDB Node external IDs", e);
             }
 
 

@@ -274,7 +274,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 }
             }
         } catch (CandidateAlreadyRegisteredException e) {
-            LOG.warn("OVSDB entity {} was already registered for {} ownership", candidateEntity, e);
+            LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
 
     }

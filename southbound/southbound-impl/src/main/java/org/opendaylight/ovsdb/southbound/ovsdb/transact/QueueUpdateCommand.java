@@ -109,7 +109,7 @@ public class QueueUpdateCommand extends AbstractTransactCommand {
                 try {
                     queue.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
                 } catch (NullPointerException e) {
-                    LOG.warn("Incomplete Queue external IDs");
+                    LOG.warn("Incomplete Queue external IDs", e);
                 }
 
                 List<QueuesOtherConfig> otherConfigs = queueEntry.getQueuesOtherConfig();

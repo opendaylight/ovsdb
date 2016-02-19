@@ -89,7 +89,7 @@ public class FlowUtils {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to get flow {}", flowBuilder.getFlowName(), e);
         }
 
         LOG.info("Cannot find data for Flow {} in {}", flowBuilder.getFlowName(), store);

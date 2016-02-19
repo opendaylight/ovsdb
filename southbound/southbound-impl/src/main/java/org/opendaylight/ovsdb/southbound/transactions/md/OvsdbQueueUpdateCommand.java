@@ -91,11 +91,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 queuesBuilder.setQueueUuid(new Uuid(entry.getKey().toString()));
                 Collection<Long> dscp = queue.getDscpColumn().getData();
                 if (!dscp.isEmpty()) {
-                    try {
-                        queuesBuilder.setDscp(new Short(dscp.iterator().next().toString()));
-                    } catch (NumberFormatException e) {
-                        queuesBuilder.setDscp(new Short("0"));
-                    }
+                    queuesBuilder.setDscp(dscp.iterator().next().shortValue());
                 }
                 setOtherConfig(transaction, queuesBuilder, oldQueue, queue, nodeIId);
                 setExternalIds(transaction, queuesBuilder, oldQueue, queue, nodeIId);

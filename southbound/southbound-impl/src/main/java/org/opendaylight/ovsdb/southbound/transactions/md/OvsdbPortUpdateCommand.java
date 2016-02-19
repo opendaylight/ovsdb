@@ -468,6 +468,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
             }
         } catch (SchemaVersionMismatchException e) {
+            // We don't care about the exception stack trace here
             LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }

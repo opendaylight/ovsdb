@@ -94,10 +94,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getRemotePort(),
                 externalClient.getConnectionInfo().getLocalAddress(),
                 externalClient.getConnectionInfo().getLocalPort());
-        OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
-
-        // Register Cluster Ownership for ConnectionInfo
-        registerEntityForOwnership(client);
+        if(externalClient.getSchema(SouthboundConstants.OPEN_V_SWITCH) != null) {
+            OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
+            // Register Cluster Ownership for ConnectionInfo
+            registerEntityForOwnership(client);
+        }
     }
 
     public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {

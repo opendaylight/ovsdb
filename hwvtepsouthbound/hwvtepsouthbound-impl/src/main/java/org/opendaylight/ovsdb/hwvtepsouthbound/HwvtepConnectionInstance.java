@@ -112,7 +112,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }
             } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Exception attempting to createTransactionInvokers {}: {}",connectionInfo,e);
+                LOG.warn("Exception attempting to createTransactionInvokers {}", connectionInfo, e);
             }
         }
     }

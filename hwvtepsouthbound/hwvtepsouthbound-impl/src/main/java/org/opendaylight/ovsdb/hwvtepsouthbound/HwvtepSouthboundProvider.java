@@ -91,7 +91,7 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
             }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("HWVTEP Southbound Provider instance entity {} was already "
-                    + "registered for {} ownership", instanceEntity, e);
+                    + "registered for ownership", instanceEntity, e);
         }
     }
 
@@ -150,7 +150,7 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
                 transaction.cancel();
             }
         } catch (Exception e) {
-            LOG.error("Error initializing hwvtep topology {}",e);
+            LOG.error("Error initializing hwvtep topology", e);
         }
     }
 

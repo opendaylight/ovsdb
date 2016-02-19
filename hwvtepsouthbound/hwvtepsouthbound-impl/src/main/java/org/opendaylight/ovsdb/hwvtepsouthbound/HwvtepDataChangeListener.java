@@ -61,7 +61,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             LOG.trace("Registering on path: {}", treeId);
             registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
         } catch (final Exception e) {
-            LOG.warn("HwvtepDataChangeListener registration failed");
+            LOG.warn("HwvtepDataChangeListener registration failed", e);
             //TODO: Should we throw an exception here?
         }
     }

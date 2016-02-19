@@ -226,7 +226,7 @@ public class DistributedArpServiceTest {
         PowerMockito.when(southbound.getDataPathId(any(Node.class))).thenReturn(45L);
 
         //Assert check for correct Dp Id.
-        assertEquals("Error, did not return the correct Dpid", 45L, Whitebox.invokeMethod(distributedArpService, "getDatapathIdIntegrationBridge", mock(Node.class)));
+        assertEquals("Error, did not return the correct Dpid", 45, (long)Whitebox.invokeMethod(distributedArpService, "getDatapathIdIntegrationBridge", mock(Node.class)));
     }
 
     /**

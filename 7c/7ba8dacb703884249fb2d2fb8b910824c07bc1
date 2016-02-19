@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Submitted-by: Vishal Thapar <vishal.thapar@ericsson.com>
+Submitted-at: Fri, 19 Feb 2016 08:21:59 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/34913
+Project: ovsdb
+Branch: refs/heads/stable/beryllium

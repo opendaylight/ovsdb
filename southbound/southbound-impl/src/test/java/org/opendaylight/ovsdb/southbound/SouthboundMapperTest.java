@@ -11,8 +11,6 @@ package org.opendaylight.ovsdb.southbound;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -62,15 +59,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
 
-public class SouthboundMapperTest extends AbstractDataBrokerTest {
+public class SouthboundMapperTest {
 
     @Test
     public void testCreateIpAddress() throws Exception {
@@ -315,8 +310,6 @@ public class SouthboundMapperTest extends AbstractDataBrokerTest {
     @Test
     public void testCreateConnectionInfo() throws Exception {
         OvsdbClient client = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);
-        ConnectionInfoBuilder connectionInfoBuilder = mock(ConnectionInfoBuilder.class);
-        PowerMockito.whenNew(ConnectionInfoBuilder.class).withNoArguments().thenReturn(connectionInfoBuilder);
 
         InetAddress remoteAddress = InetAddress.getByAddress(new byte[] {1, 2, 3, 4});
         when(client.getConnectionInfo().getRemoteAddress()).thenReturn(remoteAddress);
@@ -435,14 +428,6 @@ public class SouthboundMapperTest extends AbstractDataBrokerTest {
         Column<GenericTableSchema, Boolean> isConnectedColumn = mock(Column.class);
         when(manager.getIsConnectedColumn()).thenReturn(isConnectedColumn);
         when(isConnectedColumn.getData()).thenReturn(true);
-        ManagerEntryBuilder managerEntryBuilder = mock(ManagerEntryBuilder.class);
-        PowerMockito.whenNew(ManagerEntryBuilder.class).withNoArguments().thenReturn(managerEntryBuilder);
-        PowerMockito.whenNew(Uri.class).withAnyArguments().thenReturn(mock(Uri.class));
-        when(managerEntryBuilder.setTarget(any(Uri.class))).thenReturn(managerEntryBuilder);
-        when(managerEntryBuilder.setNumberOfConnections(any(Long.class))).thenReturn(managerEntryBuilder);
-        when(managerEntryBuilder.setConnected(true)).thenReturn(managerEntryBuilder);
-
-        when(managerEntryBuilder.build()).thenReturn(managerEntry);
 
         assertEquals(Collections.singletonList(new ManagerEntryBuilder()
                 .setConnected(true)
@@ -463,15 +448,16 @@ public class SouthboundMapperTest extends AbstractDataBrokerTest {
     @Test
     public void testGetInstanceIdentifier() throws Exception {
         OpenVSwitch ovs = mock(OpenVSwitch.class);
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
+        InstanceIdentifier iid = InstanceIdentifier.create(Node.class);
         Column<GenericTableSchema, Map<String, String>> externalIdColumn = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(externalIdColumn);
         Map<String, String> externalIdMap = new HashMap<>();
         when(externalIdColumn.getData()).thenReturn(externalIdMap);
         // if true
         externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "test");
-        PowerMockito.mockStatic(SouthboundUtil.class);
-        when((InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(anyString())).thenReturn(iid);
+        InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
+        when(iidc.bindingDeserializer("test")).thenReturn(iid);
+        SouthboundUtil.setInstanceIdentifierCodec(iidc);
         assertEquals("Incorrect Instance Identifier received", iid, SouthboundMapper.getInstanceIdentifier(ovs));
         // if false
         externalIdMap.clear();

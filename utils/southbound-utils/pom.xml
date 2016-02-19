@@ -6,13 +6,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.4.0-Beryllium</version>
+    <version>0.4.1-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>utils.southbound-utils</artifactId>
-  <version>1.2.1-Beryllium</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>

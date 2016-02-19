@@ -534,7 +534,7 @@ public class SfcClassifierService extends AbstractServiceInstance implements Con
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             LOG.debug("Transaction success for deletion of Flow {}", path);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to remove flow {}", path, e);
             modification.cancel();
         }
     }

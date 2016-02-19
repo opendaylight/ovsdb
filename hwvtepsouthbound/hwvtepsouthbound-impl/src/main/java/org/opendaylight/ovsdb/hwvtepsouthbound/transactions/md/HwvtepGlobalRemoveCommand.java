@@ -64,7 +64,7 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (Exception e) {
-            LOG.warn("Failure to delete ovsdbNode {}", e);
+            LOG.warn("Failure to delete ovsdbNode", e);
         }
     }
 

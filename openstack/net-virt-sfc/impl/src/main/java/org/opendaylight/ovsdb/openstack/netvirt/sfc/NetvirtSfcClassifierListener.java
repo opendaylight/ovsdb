@@ -53,7 +53,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
             LOG.info("Registering Data Change Listener for NetvirtSfc Classifier configuration.");
             listenerRegistration = db.registerDataTreeChangeListener(treeId, this);
         } catch (final Exception e) {
-            LOG.warn("Netvirt Classifier DataChange listener registration fail!");
+            LOG.warn("Netvirt Classifier DataChange listener registration fail!", e);
             throw new IllegalStateException("NetvirtSfcClassifierListener startup fail! System needs restart.", e);
         }
     }
@@ -64,7 +64,7 @@ public class NetvirtSfcClassifierListener extends AbstractDataTreeListener<Class
             try {
                 listenerRegistration.close();
             } catch (final Exception e) {
-                LOG.warn("Error to stop Netvirt Classifier DataChange listener: {}", e.getMessage());
+                LOG.warn("Error to stop Netvirt Classifier DataChange listener", e);
             }
             listenerRegistration = null;
         }

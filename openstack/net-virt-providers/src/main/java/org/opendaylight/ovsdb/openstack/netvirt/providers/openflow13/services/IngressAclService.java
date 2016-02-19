@@ -163,7 +163,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         return;
                     }
                 } catch(UnknownHostException e) {
-                    LOG.warn("Invalid IP address {}", ipaddress);
+                    LOG.warn("Invalid IP address {}", ipaddress, e);
                     return;
                 }
             }

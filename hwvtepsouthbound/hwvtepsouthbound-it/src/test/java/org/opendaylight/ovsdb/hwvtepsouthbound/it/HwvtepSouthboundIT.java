@@ -257,7 +257,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         try {
             super.setup();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to setup test", e);
         }
         //dataBroker = getSession().getSALService(DataBroker.class);
         Thread.sleep(3000);
@@ -269,7 +269,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         try {
             portNumber = Integer.parseInt(portStr);
         } catch (NumberFormatException e) {
-            fail("Invalid port number " + portStr + System.lineSeparator() + usage());
+            fail("Invalid port number " + portStr + System.lineSeparator() + usage() + e);
         }
 
         connectionType = bundleContext.getProperty(CONNECTION_TYPE);

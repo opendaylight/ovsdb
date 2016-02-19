@@ -772,7 +772,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
             }
         } catch (Exception e) {
-            LOG.error("Exception in programming Local Rules for " + intf + " on " + node, e);
+            LOG.error("Exception in programming Local Rules for {} on {}", intf, node, e);
         }
     }
 
@@ -811,7 +811,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 programLocalSecurityGroupRules(attachedMac, node, intf, dpid, localPort, segmentationId, false);
             }
         } catch (Exception e) {
-            LOG.error("Exception in removing Local Rules for " + intf + " on " + node, e);
+            LOG.error("Exception in removing Local Rules for {} on {}", intf, node, e);
         }
     }
 
@@ -867,7 +867,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 }
             }
         } catch (Exception e) {
-            LOG.trace("", e);
+            LOG.warn("Failed to program tunnel rules, node {}, intf {}", node, intf, e);
         }
     }
 
@@ -919,7 +919,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 }
             }
         } catch (Exception e) {
-            LOG.error("", e);
+            LOG.error("Failed to remove tunnel rules, node {}, intf {}", node, intf, e);
         }
     }
 
@@ -1191,7 +1191,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                         MdsalHelper.createOvsdbInterfaceType(intf.getInterfaceType()),
                         src, dst);
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("handleInterfaceDelete: failed to delete tunnel port", e);
             }
         } else if (phyIfName.contains(intf.getName())) {
             deletePhysicalPort(srcNode, intf.getName());
@@ -1556,7 +1556,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to get group {}", groupBuilder.getGroupName(), e);
         }
 
         LOG.debug("Cannot find data for Group " + groupBuilder.getGroupName());
@@ -1576,7 +1576,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 commitFuture.get();  // TODO: Make it async (See bug 1362)
                 LOG.debug("Transaction success for write of Group " + groupBuilder.getGroupName());
             } catch (InterruptedException|ExecutionException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Failed to write group {}", groupBuilder.getGroupName(), e);
             }
         }
     }
@@ -1594,7 +1594,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 commitFuture.get();  // TODO: Make it async (See bug 1362)
                 LOG.debug("Transaction success for deletion of Group " + groupBuilder.getGroupName());
             } catch (InterruptedException|ExecutionException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Failed to remove group {}", groupBuilder.getGroupName(), e);
             }
         }
     }
@@ -1618,7 +1618,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 commitFuture.get();  // TODO: Make it async (See bug 1362)
                 LOG.debug("Transaction success for write of Flow " + flowBuilder.getFlowName());
             } catch (InterruptedException|ExecutionException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Failed to write flows {}", flowBuilder.getFlowName(), e);
             }
         }
     }

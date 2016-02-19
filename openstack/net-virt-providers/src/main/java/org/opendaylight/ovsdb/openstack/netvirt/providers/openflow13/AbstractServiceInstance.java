@@ -166,7 +166,7 @@ public abstract class AbstractServiceInstance {
                 commitFuture.checkedGet();  // TODO: Make it async (See bug 1362)
                 LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Failed to write flow {}", flowBuilder.getFlowName(), e);
                 modification.cancel();
             }
         }
@@ -182,7 +182,7 @@ public abstract class AbstractServiceInstance {
                 commitFuture.get();  // TODO: Make it async (See bug 1362)
                 LOG.debug("Transaction success for deletion of Flow {}", flowBuilder.getFlowName());
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Failed to remove flow {}", flowBuilder.getFlowName(), e);
                 modification.cancel();
             }
         }
@@ -197,7 +197,7 @@ public abstract class AbstractServiceInstance {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to get flow {}", flowBuilder.getFlowName(), e);
         }
 
         LOG.debug("Cannot find data for Flow {}", flowBuilder.getFlowName());
@@ -215,7 +215,7 @@ public abstract class AbstractServiceInstance {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to get openflow node {}", nodeId, e);
         }
 
         LOG.debug("Cannot find data for Node {}", nodeId);

@@ -121,11 +121,11 @@ public class DistributedArpService implements ConfigInterface {
         }
 
         if (status.isSuccess()) {
-            LOG.debug("ProgramStaticArp {} for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{}",
+            LOG.debug("programStaticRuleStage2 {} for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{}",
                          arpProvider == null ? "skipped" : "programmed",
                          macAddress, address, dpid, segOrOfPort, action);
         } else {
-            LOG.error("ProgramStaticArp failed for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{} status:{}",
+            LOG.error("programStaticRuleStage2 failed for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{} status:{}",
                          macAddress, address, dpid, segOrOfPort, action, status);
         }
         return status;

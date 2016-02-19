@@ -355,7 +355,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                         }
                     }
                 } catch (Exception e) {
-                    LOG.warn("Error getting local ip address {}", e);
+                    LOG.warn("Error getting local ip address", e);
                 }
             }
         }

@@ -175,7 +175,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         Node ovsdbNode = southbound.readOvsdbNode(bridgeNode);
         if (ovsdbNode == null) {
             //this should never happen
-            LOG.error("createLocalNetwork could not find ovsdbNode from bridge node " + bridgeNode);
+            LOG.error("createLocalNetwork could not find ovsdbNode from bridge node {}", bridgeNode);
             return false;
         }
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
@@ -183,7 +183,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 try {
                     isCreated = createBridges(bridgeNode, ovsdbNode, network);
                 } catch (Exception e) {
-                    LOG.error("Error creating internal vlan net network " + bridgeNode, e);
+                    LOG.error("Error creating internal vlan net network {}--{}", bridgeNode, network, e);
                 }
             } else {
                 isCreated = true;
@@ -194,7 +194,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 try {
                     isCreated = createBridges(bridgeNode, ovsdbNode, network);
                 } catch (Exception e) {
-                    LOG.error("Error creating internal vxlan/gre net network " + bridgeNode, e);
+                    LOG.error("Error creating internal vxlan/gre net network {}--{}", bridgeNode, network, e);
                 }
             } else {
                 isCreated = true;
@@ -503,7 +503,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                     return addressString;
                 }
             } catch (UnknownHostException e) {
-                LOG.error("Host {} is invalid", addressString);
+                LOG.error("Host {} is invalid", addressString, e);
             }
         }
 
@@ -514,7 +514,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                     return addressString;
                 }
             } catch (UnknownHostException e) {
-                LOG.error("Host {} is invalid", addressString);
+                LOG.error("Host {} is invalid", addressString, e);
             }
         }
 
@@ -529,7 +529,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 openFlowPort = Short.parseShort(portString);
             } catch (NumberFormatException e) {
                 LOG.warn("Invalid port:{}, use default({})", portString,
-                        openFlowPort);
+                        openFlowPort, e);
             }
         }
         return openFlowPort;

@@ -438,6 +438,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             // Bug 5164: Cleanup Floating IP OpenFlow Rules when port is deleted.
             this.cleanupFloatingIPRules(neutronPort);
         }
+        else if (action == Action.UPDATE){
+            // Bug 5353: VM restart cause floatingIp flows to be removed
+            this.updateFloatingIPRules(neutronPort);
+        }
 
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_GATEWAY)){
             if (!isDelete) {
@@ -1456,6 +1460,17 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             for (NeutronFloatingIP neutronFloatingIP : neutronFloatingIps) {
                 if (neutronFloatingIP.getPortUUID().equals(neutronPort.getPortUUID())) {
                     handleNeutronFloatingIPEvent(neutronFloatingIP, Action.DELETE);
+                }
+            }
+        }
+    }
+
+    private void updateFloatingIPRules(final NeutronPort neutronPort) {
+        List<NeutronFloatingIP> neutronFloatingIps = neutronFloatingIpCache.getAllFloatingIPs();
+        if (neutronFloatingIps != null) {
+            for (NeutronFloatingIP neutronFloatingIP : neutronFloatingIps) {
+                if (neutronFloatingIP.getPortUUID().equals(neutronPort.getPortUUID())) {
+                    handleNeutronFloatingIPEvent(neutronFloatingIP, Action.UPDATE);
                 }
             }
         }

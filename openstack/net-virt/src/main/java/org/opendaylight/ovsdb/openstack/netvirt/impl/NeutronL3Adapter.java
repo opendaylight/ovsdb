@@ -45,6 +45,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloating
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronFloatingIPAware;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronIAwareUtil;
 import org.opendaylight.ovsdb.utils.neutron.utils.NeutronModelsDataStoreHelper;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -98,6 +99,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     private volatile GatewayMacResolver gatewayMacResolver;
     private volatile SecurityServicesManager securityServicesManager;
     private volatile IcmpEchoProvider icmpEchoProvider;
+    private volatile INeutronFloatingIPAware floatingIPHandler;
 
     private class FloatIpData {
         // br-int of node where floating ip is associated with tenant port
@@ -438,6 +440,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         if (action == Action.DELETE) {
             // Bug 5164: Cleanup Floating IP OpenFlow Rules when port is deleted.
             this.cleanupFloatingIPRules(neutronPort);
+        }
+        else if (action == Action.UPDATE){
+            // Bug 5353: VM restart cause floatingIp flows to be removed
+            this.updateFloatingIPRules(neutronPort);
         }
 
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_GATEWAY)){
@@ -1462,6 +1468,17 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         }
     }
 
+    private void updateFloatingIPRules(final NeutronPort neutronPort) {
+        List<NeutronFloatingIP> neutronFloatingIps = neutronFloatingIpCache.getAllFloatingIPs();
+        if (neutronFloatingIps != null) {
+            for (NeutronFloatingIP neutronFloatingIP : neutronFloatingIps) {
+                if (neutronFloatingIP.getPortUUID().equals(neutronPort.getPortUUID())) {
+                    floatingIPHandler.neutronFloatingIPUpdated(neutronFloatingIP);
+                }
+            }
+        }
+    }
+
 
     private void triggerGatewayMacResolver(final NeutronPort gatewayPort){
 
@@ -1643,6 +1660,8 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
         securityServicesManager =
                 (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
+        floatingIPHandler =
+                (INeutronFloatingIPAware) ServiceHelper.getGlobalInstance(INeutronFloatingIPAware.class, this);
 
         initL3AdapterMembers();
     }

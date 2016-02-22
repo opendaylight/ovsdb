@@ -43,11 +43,13 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -375,11 +377,36 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void cleanEntityOperationalData(Entity entity) {
 
-        InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) SouthboundUtil
-                .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
+        //Do explicit cleanup rather than using OvsdbNodeRemoveCommand, because there
+        // are chances that other controller instance went down abruptly and it does
+        // not clear manager entry, which OvsdbNodeRemoveCommand look for before cleanup.
 
-        final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        SouthboundUtil.deleteNode(transaction, nodeIid);
+        @SuppressWarnings("unchecked") final InstanceIdentifier<Node> nodeIid =
+                (InstanceIdentifier<Node>) SouthboundUtil
+                        .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
+
+        txInvoker.invoke(new TransactionCommand() {
+            @Override
+            public void execute(ReadWriteTransaction transaction) {
+                Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
+                if (ovsdbNodeOpt.isPresent()) {
+                    Node ovsdbNode = ovsdbNodeOpt.get();
+                    OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                    if (nodeAugmentation != null) {
+                        if (nodeAugmentation.getManagedNodeEntry() != null) {
+                            for (ManagedNodeEntry managedNode : nodeAugmentation.getManagedNodeEntry()) {
+                                transaction.delete(
+                                        LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                            }
+                        } else {
+                            LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
+                        }
+                    }
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
+                }
+            }
+        });
+
     }
 
     private OpenVSwitch getOpenVswitchTableEntry(OvsdbConnectionInstance connectionInstance) {

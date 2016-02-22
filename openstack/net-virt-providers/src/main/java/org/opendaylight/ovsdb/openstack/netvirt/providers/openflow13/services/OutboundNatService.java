@@ -145,14 +145,6 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
     @Override
     public Status programIpRewriteExclusion(Long dpid, String segmentationId, String excludedCidr,
                                             Action action) {
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpid);
-        FlowBuilder flowBuilder = new FlowBuilder();
-        String flowName = "OutboundNATExclusion_" + segmentationId + "_" + excludedCidr;
-        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(1024);
-
-        MatchBuilder matchBuilder = new MatchBuilder();
-        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
-
         String ipAddress = excludedCidr.substring(0, excludedCidr.indexOf("/"));
         InetAddress inetAddress;
         try {
@@ -167,6 +159,15 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
                       excludedCidr);
             return new Status(StatusCode.NOTIMPLEMENTED);
         }
+
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpid);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        String flowName = "OutboundNATExclusion_" + segmentationId + "_" + excludedCidr;
+        FlowUtils.initFlowBuilder(flowBuilder, flowName, getTable()).setPriority(1024);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(excludedCidr));
         flowBuilder.setMatch(matchBuilder.build());
 

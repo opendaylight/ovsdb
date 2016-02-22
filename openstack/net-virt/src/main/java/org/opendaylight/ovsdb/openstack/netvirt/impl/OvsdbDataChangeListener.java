@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Sam Hague (shague@redhat.com)
  */
-public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseable {
+public class OvsdbDataChangeListener implements ClusteredDataChangeListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataChangeListener.class);
     private DataBroker dataBroker = null;
     private ListenerRegistration<DataChangeListener> registration;

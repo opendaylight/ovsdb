@@ -3,7 +3,7 @@ module netvirt {
     namespace "urn:opendaylight:params:xml:ns:yang:netvirt";
     prefix "netvirt";
 
-    revision "2015-01-05" {
+    revision "2015-12-27" {
         description "Initial revision of netvirt model";
     }
 }

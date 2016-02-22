@@ -1,17 +1,15 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-/**
- * @file   ServiceHelper.java
- *
- * @brief  This class verifies {@link ServiceHelper}
- */
 
 package org.opendaylight.ovsdb.utils.servicehelper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -25,6 +23,18 @@ import org.osgi.framework.ServiceReference;
  */
 public final class ServiceHelper {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceHelper.class);
+    private static final Map<Class<?>, Object> OVERRIDES = new HashMap<>();
+
+    /**
+     * Override a global instance. This should generally only be used for testing.
+     *
+     * @param clazz The target class.
+     * @param instance The instance to return for the class.
+     */
+    public static <T> void overrideGlobalInstance(Class<T> clazz, T instance) {
+        ServiceHelper.OVERRIDES.put(clazz, instance);
+    }
+
     /**
      * Retrieve global instance of a class via OSGI registry, if
      * there are many only the first is returned.
@@ -47,6 +57,9 @@ public final class ServiceHelper {
      */
     public static Object getGlobalInstance(Class<?> clazz, Object bundle,
                                            String serviceFilter) {
+        if (OVERRIDES.containsKey(clazz)) {
+            return OVERRIDES.get(clazz);
+        }
         Object[] instances = getGlobalInstances(clazz, bundle, serviceFilter);
         if (instances != null && instances.length > 0) {
             return instances[0];
@@ -63,7 +76,7 @@ public final class ServiceHelper {
      * @param bundle The caller
      * @param serviceFilter LDAP filter to be applied in the search
      */
-    public static Object[] getGlobalInstances(Class<?> clazz, Object bundle,
+    private static Object[] getGlobalInstances(Class<?> clazz, Object bundle,
                                               String serviceFilter) {
         Object instances[] = null;
         try {

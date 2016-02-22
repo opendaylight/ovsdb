@@ -141,23 +141,23 @@ public class PortSecurityHandler extends AbstractHandler
     private void processNeutronSecurityRuleAdded(NeutronSecurityRule neutronSecurityRule) {
         List<NeutronPort> portList = getPortWithSecurityGroup(neutronSecurityRule.getSecurityRuleGroupID());
         for (NeutronPort port:portList) {
-            syncSecurityGroup(neutronSecurityRule,port,neutronSecurityRule.getSecurityRuleGroupID(),true);
+            syncSecurityGroup(neutronSecurityRule,port,true);
         }
     }
 
     private void processNeutronSecurityRuleDeleted(NeutronSecurityRule neutronSecurityRule) {
         List<NeutronPort> portList = getPortWithSecurityGroup(neutronSecurityRule.getSecurityRuleGroupID());
         for (NeutronPort port:portList) {
-            syncSecurityGroup(neutronSecurityRule,port,neutronSecurityRule.getSecurityRuleGroupID(),false);
+            syncSecurityGroup(neutronSecurityRule,port,false);
         }
     }
 
     private void syncSecurityGroup(NeutronSecurityRule  securityRule,NeutronPort port,
-                                   String neutronSecurityGroupId,boolean write) {
+                                   boolean write) {
 
         if (null != securityRule.getSecurityRemoteGroupID()) {
             List<Neutron_IPs> vmIpList  = securityServicesManager
-                    .getVmListForSecurityGroup(port.getID(), neutronSecurityGroupId);
+                    .getVmListForSecurityGroup(port.getID(), securityRule.getSecurityRemoteGroupID());
             for (Neutron_IPs vmIp :vmIpList ) {
                 securityServicesManager.syncSecurityRule(port, securityRule, vmIp, write);
             }

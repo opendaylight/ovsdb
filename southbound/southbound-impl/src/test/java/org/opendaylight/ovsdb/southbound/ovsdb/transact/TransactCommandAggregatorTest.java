@@ -35,7 +35,7 @@ import org.powermock.reflect.Whitebox;
 @PrepareForTest({})
 @RunWith(PowerMockRunner.class)
 public class TransactCommandAggregatorTest {
-    private static final int NUMBER_OF_COMMANDS = 11;
+    private static final int NUMBER_OF_COMMANDS = 15;
     private List<TransactCommand> commands = new ArrayList<>();
     private TransactCommandAggregator transactCommandAggregator;
     @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
@@ -56,6 +56,10 @@ public class TransactCommandAggregatorTest {
         commands.add(mock(TerminationPointCreateCommand.class));
         commands.add(mock(TerminationPointDeleteCommand.class));
         commands.add(mock(OvsdbNodeUpdateCommand.class));
+        commands.add(mock(QosUpdateCommand.class));
+        commands.add(mock(QosRemovedCommand.class));
+        commands.add(mock(QueueUpdateCommand.class));
+        commands.add(mock(QueueRemovedCommand.class));
         commands.add(mock(TerminationPointUpdateCommand.class));
         MemberModifier.field(TransactCommandAggregator.class, "commands").set(transactCommandAggregator, commands);
     }

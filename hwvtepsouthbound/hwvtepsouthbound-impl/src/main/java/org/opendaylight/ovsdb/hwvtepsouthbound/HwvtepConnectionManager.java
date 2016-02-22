@@ -30,7 +30,9 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -406,11 +408,16 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     private void cleanEntityOperationalData(Entity entity) {
-        InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) HwvtepSouthboundUtil
-                .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
+        @SuppressWarnings("unchecked") final InstanceIdentifier<Node> nodeIid =
+                (InstanceIdentifier<Node>) HwvtepSouthboundUtil
+                        .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
-        final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        HwvtepSouthboundUtil.deleteNode(transaction, nodeIid);
+        txInvoker.invoke(new TransactionCommand() {
+            @Override
+            public void execute(ReadWriteTransaction transaction) {
+                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
+            }
+        });
     }
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {

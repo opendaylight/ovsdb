@@ -14,6 +14,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.ovsdb.openstack.netvirt.ClusterAwareMdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
@@ -26,7 +27,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronSe
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronSubnetChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronLoadBalancerPoolChangeListener;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl.NeutronLoadBalancerPoolMemberChangeListener;
-import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -48,13 +48,13 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     private static DataBroker dataBroker = null;
     private static Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
     private OvsdbDataChangeListener ovsdbDataChangeListener = null;
-    private static MdsalUtils mdsalUtils = null;
+    private static ClusterAwareMdsalUtils mdsalUtils = null;
 
     public OvsdbInventoryServiceImpl(ProviderContext providerContext) {
         dataBroker = providerContext.getSALService(DataBroker.class);
         LOG.info("OvsdbInventoryServiceImpl initialized");
         ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
-        mdsalUtils = new MdsalUtils(dataBroker);
+        mdsalUtils = new ClusterAwareMdsalUtils(dataBroker);
     }
 
     @Override

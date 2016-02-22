@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2013, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,7 +11,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.DistributedArpService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -40,6 +42,7 @@ public class SouthboundHandler extends AbstractHandler
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
+    private volatile DistributedArpService distributedArpService;
     private volatile NodeCacheManager nodeCacheManager;
     private volatile OvsdbInventoryService ovsdbInventoryService;
     private volatile Southbound southbound;
@@ -88,6 +91,7 @@ public class SouthboundHandler extends AbstractHandler
         } else {
             LOG.debug("No tenant network found on node: <{}> for interface: <{}>", node, tp);
         }
+        distributedArpService.processInterfaceEvent(node, tp, network, Action.UPDATE);
         neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
     }
 
@@ -96,6 +100,7 @@ public class SouthboundHandler extends AbstractHandler
         LOG.debug("handleInterfaceDelete: node: <{}>, isLastInstanceOnNode: {}, interface: <{}>",
                 node, isLastInstanceOnNode, intf);
 
+        distributedArpService.processInterfaceEvent(node, intf, network, Action.DELETE);
         neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.DELETE);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
         if (isInterfaceOfInterest(intf, phyIfName)) {
@@ -170,6 +175,22 @@ public class SouthboundHandler extends AbstractHandler
                 LOG.error("Error fetching Interface Rows for node {}", node, e);
             }
         }
+        //remove neutronPort from the CleanupCache, if it has the entry.
+        NeutronPort neutronPort = null;
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(ovsdbTerminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId != null) {
+            LOG.trace("Clean up the NeutronPortCache for {} ", neutronPortId);
+            neutronPort = neutronL3Adapter.getPortFromCleanupCache(neutronPortId);
+        }
+        if (neutronPort != null) {
+            LOG.debug("Clean up the NeutronPortCache ");
+            neutronL3Adapter.removePortFromCleanupCache(neutronPort);
+            neutronL3Adapter.removeNetworkFromCleanupCache(neutronPort.getNetworkUUID());
+        } else {
+            LOG.trace("Nothing to Clean up in the NeutronPortCache ");
+        }
+
     }
 
     private boolean isInterfaceOfInterest(OvsdbTerminationPointAugmentation terminationPoint, List<String> phyIfName) {
@@ -381,6 +402,8 @@ public class SouthboundHandler extends AbstractHandler
         nodeCacheManager.cacheListenerAdded(serviceReference, this);
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        distributedArpService =
+                (DistributedArpService) ServiceHelper.getGlobalInstance(DistributedArpService.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =

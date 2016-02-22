@@ -21,6 +21,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
@@ -33,6 +34,25 @@ import com.google.common.collect.Maps;
 
 public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListener, PipelineOrchestrator {
     private static final Logger LOG = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
+
+    /**
+     * Return the current table offset
+     * @return The table offset
+     */
+    @Override
+    public short getTableOffset() {
+        return NetvirtProvidersProvider.getTableOffset();
+    }
+
+    /**
+     * Return the offset adjusted table for the given {@link Service}
+     * @param service Identifies the openflow {@link Service}
+     * @return The table id
+     */
+    @Override
+    public short getTable(Service service) {
+        return (short)(getTableOffset() + service.getTable());
+    }
 
     public List<Service> getStaticPipeline() {
         return staticPipeline;
@@ -119,11 +139,14 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
                     while (true) {
                         Node node = queue.take();
                         LOG.info(">>>>> dequeue: {}", node);
-                        for (Service service : staticPipeline) {
-                            AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            if (serviceInstance != null && southbound.getBridge(node) != null) {
-                                serviceInstance.programDefaultPipelineRule(node);
+                        if (southbound.getBridge(node) != null) {
+                            for (Service service : staticPipeline) {
+                                AbstractServiceInstance serviceInstance = getServiceInstance(service);
+                                if (serviceInstance != null) {
+                                    serviceInstance.programDefaultPipelineRule(node);
+                                }
                             }
+                            // TODO: might need a flow to go from table 0 to the pipeline
                         }
                     }
                 } catch (Exception e) {

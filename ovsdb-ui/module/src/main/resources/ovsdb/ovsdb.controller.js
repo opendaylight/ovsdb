@@ -9,7 +9,9 @@ define(['jquery', 'underscore', 'app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', '
   'use strict';
 
   var RootOvsdbCtrl = function ($rootScope, cssInjector) {
-    $rootScope['section_logo'] = 'logo_ovsdb';
+    // transparent 1px gif picture
+    $rootScope['section_logo'] = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
     cssInjector.add('src/app/ovsdb/css/select2.min.css');
     cssInjector.add('src/app/ovsdb/css/toggle-switch.css');
 

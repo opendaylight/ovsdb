@@ -104,7 +104,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
                     transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 }
                 // Update with Deleted VlanBindings
-                if (oldPPRows.get(pPortUpdateEntry.getKey()) != null) {
+                if (oldPPRows.get(pPortUpdateEntry.getKey()) != null
+                        && oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn() != null) {
                     List<InstanceIdentifier<VlanBindings>> vBIiList = new ArrayList<>();
                     Map<Long, UUID> oldVb = oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn().getData();
                     Map<Long, UUID> updatedVb = pPortUpdateEntry.getValue().getVlanBindingsColumn().getData();

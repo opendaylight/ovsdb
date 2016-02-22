@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -43,6 +44,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
@@ -126,7 +130,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     interfaceOldRows.remove(interfaceUUID);
                 }
                 tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-                if (portOldRows.containsKey(portUpdate.getKey())) {
+                if (portOldRows.containsKey(portUpdate.getKey()) && !portQosCleared(portUpdate)) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
                 } else {
@@ -236,6 +240,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateVlan(port, ovsdbTerminationPointBuilder);
         updateVlanTrunks(port, ovsdbTerminationPointBuilder);
         updateVlanMode(port, ovsdbTerminationPointBuilder);
+        updateQos(port, ovsdbTerminationPointBuilder);
         updatePortExternalIds(port, ovsdbTerminationPointBuilder);
         updatePortOtherConfig(port, ovsdbTerminationPointBuilder);
     }
@@ -253,6 +258,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterfaceExternalIds(interf, ovsdbTerminationPointBuilder);
         updateOptions(interf, ovsdbTerminationPointBuilder);
         updateInterfaceOtherConfig(interf, ovsdbTerminationPointBuilder);
+        updateInterfaceLldp(interf, ovsdbTerminationPointBuilder);
     }
 
     private void updateVlan(final Port port,
@@ -305,6 +311,19 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             } else {
                 LOG.debug("Invalid vlan mode {}.", vlanType);
             }
+        }
+    }
+
+    private void updateQos(final Port port,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        if (port.getQosColumn() == null) {
+            return;
+        }
+        Collection<UUID> qosUuidCol = port.getQosColumn().getData();
+        if (!qosUuidCol.isEmpty()) {
+            Iterator<UUID> itr = qosUuidCol.iterator();
+            UUID qosUuid = itr.next();
+            ovsdbTerminationPointBuilder.setQos(new Uuid(qosUuid.toString()));
         }
     }
 
@@ -429,6 +448,30 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
+    private void updateInterfaceLldp(final Interface interf,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        try {
+            Map<String, String> interfaceLldpMap = interf.getLldpColumn().getData();
+            if (interfaceLldpMap != null && !interfaceLldpMap.isEmpty()) {
+                List<InterfaceLldp> interfaceLldpList = new ArrayList<>();
+                for (String interfaceLldpKeyString : interfaceLldpMap.keySet()) {
+                    String interfaceLldpValueString = interfaceLldpMap.get(interfaceLldpKeyString);
+                    if (interfaceLldpKeyString != null && interfaceLldpValueString!=null) {
+                        interfaceLldpList.add(new InterfaceLldpBuilder()
+                                .setKey(new InterfaceLldpKey(interfaceLldpKeyString))
+                                .setLldpKey(interfaceLldpKeyString)
+                                .setLldpValue(interfaceLldpValueString)
+                                .build());
+                    }
+                }
+                ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+        }
+    }
+
     private void updateInterfaceOtherConfig(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
@@ -445,6 +488,23 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+        }
+    }
+
+    private boolean portQosCleared(Entry<UUID, Port> portUpdate) {
+        if (portUpdate.getValue().getQosColumn() == null) {
+            return false;
+        }
+        Collection<UUID> newQos = portUpdate.getValue().getQosColumn().getData();
+        if (portOldRows.get(portUpdate.getKey()).getQosColumn() == null) {
+            return false;
+        }
+        Collection<UUID> oldQos = portOldRows.get(portUpdate.getKey()).getQosColumn().getData();
+
+        if (newQos.isEmpty() && !oldQos.isEmpty()) {
+            return true;
+        } else {
+            return false;
         }
     }
 

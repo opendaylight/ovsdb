@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,24 +20,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
+        .Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link ConfigurationServiceImpl}
  */
-@PrepareForTest({ConfigProperties.class, ServiceHelper.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ConfigurationServiceImplTest {
 
     @InjectMocks private ConfigurationServiceImpl configurationServiceImpl;
@@ -65,8 +61,7 @@ public class ConfigurationServiceImplTest {
 
     @Test
     public void testIsL3FowardingEnable() {
-        PowerMockito.mockStatic(ConfigProperties.class);
-        when(ConfigProperties.getProperty(any(Class.class), eq("ovsdb.l3.fwd.enabled"))).thenReturn(IS_FOWARDING_ENABLE);
+        ConfigProperties.overrideProperty("ovsdb.l3.fwd.enabled", IS_FOWARDING_ENABLE);
 
         assertTrue("Error, l3 fowarding should be activated", configurationServiceImpl.isL3ForwardingEnabled());
     }
@@ -78,12 +73,10 @@ public class ConfigurationServiceImplTest {
     public void testGetDefaultGatewayMacAddress(){
         Node node = mock(Node.class);
         NodeId nodeId = mock(NodeId.class);
-        PowerMockito.mockStatic(ConfigProperties.class);
 
         when(node.getNodeId()).thenReturn(nodeId);
         when(nodeId.getValue()).thenReturn("nodeIdValue");
-        PowerMockito.when(ConfigProperties.getProperty(configurationServiceImpl.getClass(),
-                "ovsdb.l3gateway.mac." + node.getNodeId().getValue())).thenReturn("gateway");
+        ConfigProperties.overrideProperty("ovsdb.l3gateway.mac." + node.getNodeId().getValue(), "gateway");
 
         assertEquals("Error, did not return the defaultGatewayMacAddress of the node", "gateway",
                 configurationServiceImpl.getDefaultGatewayMacAddress(node));
@@ -93,8 +86,7 @@ public class ConfigurationServiceImplTest {
     public void testSetDependencies() throws Exception {
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, configurationServiceImpl)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         configurationServiceImpl.setDependencies(mock(ServiceReference.class));
 

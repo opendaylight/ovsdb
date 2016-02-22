@@ -41,8 +41,16 @@ public class NeutronSecurityRule implements Serializable, INeutronObject {
     @XmlElement(name = "id")
     String securityRuleUUID;
 
+    public static final String DIRECTION_EGRESS = "egress";
+    public static final String DIRECTION_INGRESS = "ingress";
+
     @XmlElement(name = "direction")
     String securityRuleDirection;
+
+    public static final String PROTOCOL_ICMP = "icmp";
+    public static final String PROTOCOL_TCP = "tcp";
+    public static final String PROTOCOL_UDP = "udp";
+    public static final String PROTOCOL_ICMPV6 = "icmpv6";
 
     @XmlElement(name = "protocol")
     String securityRuleProtocol;
@@ -52,6 +60,9 @@ public class NeutronSecurityRule implements Serializable, INeutronObject {
 
     @XmlElement(name = "port_range_max")
     Integer securityRulePortMax;
+
+    public static final String ETHERTYPE_IPV4 = "IPv4";
+    public static final String ETHERTYPE_IPV6 = "IPv6";
 
     @XmlElement(name = "ethertype")
     String securityRuleEthertype;

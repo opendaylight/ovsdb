@@ -43,6 +43,13 @@ public interface SecurityServicesManager {
      * @return the dhcp server port
      */
     NeutronPort getDhcpServerPort(OvsdbTerminationPointAugmentation intf);
+    /**
+     * Gets the NeutronPort from the cleanup cache.
+     *
+     * @param intf the intf
+     * @return the NeutronPort stored in the cleanupCache of NeutronL3Adapter
+     */
+    NeutronPort getNeutronPortFromCache(OvsdbTerminationPointAugmentation intf);
 
     /**
       * Check if the given interface corresponds to a DHCP server port.
@@ -104,4 +111,9 @@ public interface SecurityServicesManager {
      * @param write whether to add/delete flow.
      */
     void syncSecurityRule(NeutronPort port, NeutronSecurityRule securityRule,Neutron_IPs vmIp, boolean write);
+    /**
+     * Is connection tracking enabled or not by the user (default is false).
+     * @return whether connection tracking enabled.
+     */
+    boolean isConntrackEnabled();
 }

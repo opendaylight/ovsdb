@@ -11,6 +11,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 import java.util.Collection;
 
 import com.google.common.base.Preconditions;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -27,21 +29,20 @@ public abstract class AbstractDataTreeListener<T extends DataObject> implements 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataTreeListener.class);
     protected INetvirtSfcOF13Provider provider;
     protected final Class<T> clazz;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     public AbstractDataTreeListener(INetvirtSfcOF13Provider provider, Class<T> clazz) {
         this.provider = Preconditions.checkNotNull(provider, "provider can not be null!");
         this.clazz = Preconditions.checkNotNull(clazz, "Class can not be null!");
     }
 
-    @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<T>> changes) {
-        Preconditions.checkNotNull(changes, "Changes may not be null!");
-
-        LOG.info("Received Data Tree Changed ...", changes);
+    private void processChanges(Collection<DataTreeModification<T>> changes) {
+        LOG.info("onDataTreeChanged: Received Data Tree Changed ...", changes);
         for (DataTreeModification<T> change : changes) {
             final InstanceIdentifier<T> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<T> mod = change.getRootNode();
-            LOG.info("Received Data Tree Changed Update of Type={} for Key={}", mod.getModificationType(), key);
+            LOG.info("onDataTreeChanged: Received Data Tree Changed Update of Type={} for Key={}",
+                    mod.getModificationType(), key);
             switch (mod.getModificationType()) {
                 case DELETE:
                     remove(key, mod.getDataBefore());
@@ -60,5 +61,16 @@ public abstract class AbstractDataTreeListener<T extends DataObject> implements 
                     throw new IllegalArgumentException("Unhandled modification type " + mod.getModificationType());
             }
         }
+    }
+
+    @Override
+    public void onDataTreeChanged(final Collection<DataTreeModification<T>> changes) {
+        Preconditions.checkNotNull(changes, "Changes may not be null!");
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                processChanges(changes);
+            }
+        });
     }
 }

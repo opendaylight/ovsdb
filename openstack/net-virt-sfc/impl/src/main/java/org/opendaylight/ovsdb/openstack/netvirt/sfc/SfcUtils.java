@@ -8,15 +8,20 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
+import java.util.List;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.sfc.provider.api.SfcProviderAclAPI;
+import org.opendaylight.sfc.provider.api.SfcProviderRenderedPathAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServiceFunctionAPI;
 import org.opendaylight.sfc.provider.api.SfcProviderServicePathAPI;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.RspName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.common.rev151017.SfName;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.RenderedServicePaths;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.path.first.hop.info.RenderedServicePathFirstHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.RenderedServicePathKey;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.rsp.rev140701.rendered.service.paths.rendered.service.path.RenderedServicePathHop;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.ServiceFunctions;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunctionKey;
@@ -24,8 +29,13 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev1407
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPaths;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sl.rev140701.data.plane.locator.locator.type.Ip;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.AccessLists;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.Acl;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.AccessListEntries;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.Ace;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.acl.rev150105.RedirectToSfc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.classifier.rev150105.Classifiers;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -76,17 +86,61 @@ public class SfcUtils {
         return rspFound;
     }
 
-    public ServiceFunctionPath getSfp(String redirectSfc) {
+    public ServiceFunctionPath getSfp(String sfcName) {
         ServiceFunctionPath sfpFound = null;
         ServiceFunctionPaths sfps = SfcProviderServicePathAPI.readAllServiceFunctionPaths();
         if (sfps != null) {
             for (ServiceFunctionPath sfp: sfps.getServiceFunctionPath()) {
-                if (sfp.getServiceChainName().getValue().equalsIgnoreCase(redirectSfc)) {
+                if (sfp.getServiceChainName().getValue().equalsIgnoreCase(sfcName)) {
                     sfpFound = sfp;
                 }
             }
         }
         return sfpFound;
+    }
+
+    private AccessLists readAccessLists() {
+        InstanceIdentifier<AccessLists> path = InstanceIdentifier.create(AccessLists.class);
+        return mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
+    }
+
+    public Ace getAce(RenderedServicePath rsp) {
+        return getAce(rsp.getName().getValue(), rsp.getParentServiceFunctionPath().getValue(),
+                rsp.getServiceChainName().getValue());
+    }
+
+    // TODO: optimize this by adding a ACL to RSP mapping in the netvirt-classifier when the ACL is processed
+    public Ace getAce(String rspName, String sfpName, String sfcName) {
+        Ace aceFound = null;
+        AccessLists accessLists = readAccessLists();
+        if (accessLists != null) {
+            List<Acl> acls = accessLists.getAcl();
+            if (acls != null) {
+                for (Acl acl : acls) {
+                    AccessListEntries accessListEntries = acl.getAccessListEntries();
+                    if (accessListEntries != null) {
+                        List<Ace> aces = accessListEntries.getAce();
+                        for (Ace ace : aces) {
+                            RedirectToSfc sfcRedirect = ace.getActions().getAugmentation(RedirectToSfc.class);
+                            if (sfcRedirect != null) {
+                                if ((sfcRedirect.getRspName() != null && sfcRedirect.getRspName().equals(rspName)) ||
+                                    (sfcRedirect.getSfcName() != null && sfcRedirect.getSfcName().equals(sfcName)) ||
+                                    (sfcRedirect.getSfpName() != null && sfcRedirect.getSfpName().equals(sfpName))) {
+                                    aceFound = ace;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (aceFound != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        LOG.info("getAce: {}", aceFound);
+        return aceFound;
     }
 
     public IpAddress getSfIpAddress(String sfname) {
@@ -148,5 +202,25 @@ public class SfcUtils {
         }
 
         return (Ip)serviceFunctionForwarder.getSffDataPlaneLocator().get(0).getDataPlaneLocator().getLocatorType();
+    }
+
+    public RenderedServicePathHop getFirstHop(RenderedServicePath rsp) {
+        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
+        if (pathHopList.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return null;
+        }
+
+        return pathHopList.get(0);
+    }
+
+    public RenderedServicePathHop getLastHop(RenderedServicePath rsp) {
+        List<RenderedServicePathHop> pathHopList = rsp.getRenderedServicePathHop();
+        if (pathHopList.isEmpty()) {
+            LOG.warn("handleRenderedServicePath: RSP {} has empty hops!!", rsp.getName());
+            return null;
+        }
+
+        return pathHopList.get(pathHopList.size()-1);
     }
 }

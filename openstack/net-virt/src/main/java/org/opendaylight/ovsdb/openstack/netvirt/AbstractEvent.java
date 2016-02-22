@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -28,7 +28,8 @@ public abstract class AbstractEvent {
         NEUTRON_LOAD_BALANCER_POOL,
         NEUTRON_LOAD_BALANCER_POOL_MEMBER,
         NODE,
-        NEUTRON_L3_ADAPTER;
+        NEUTRON_L3_ADAPTER,
+        DISTRIBUTED_ARP_SERVICE;
 
         public static final int size = HandlerType.values().length;
     }

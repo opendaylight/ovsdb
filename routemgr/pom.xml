@@ -8,13 +8,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <groupId>org.opendaylight.ovsdb</groupId>
   <parent>
-    <artifactId>commons</artifactId>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../commons/parent</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>1.7.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
   <artifactId>routemgr-aggregator</artifactId>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.3.0-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <packaging>pom</packaging>
   <description>The OVSDB routemgr project is a project for OpenDaylight that will implement the routing aspects of Openstack integration, vSwitches and a network virtualization implementation.</description>

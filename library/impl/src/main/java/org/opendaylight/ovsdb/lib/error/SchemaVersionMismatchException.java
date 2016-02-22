@@ -16,16 +16,8 @@ import org.opendaylight.ovsdb.lib.notation.Version;
  */
 public class SchemaVersionMismatchException extends RuntimeException {
 
-    public SchemaVersionMismatchException(String message) {
-        super(message);
-    }
-
-    public SchemaVersionMismatchException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     public SchemaVersionMismatchException(Version schemaVersion, Version fromVersion, Version untilVersion) {
-        this("The schema version used to access the table/column (" + schemaVersion + ") does not match the required " +
-                "version (from " + fromVersion + " to " + untilVersion + ")");
+        super("The schema version used to access the table/column (" + schemaVersion + ") does not match the required"
+                + " version (from " + fromVersion + " to " + untilVersion + ")");
     }
 }

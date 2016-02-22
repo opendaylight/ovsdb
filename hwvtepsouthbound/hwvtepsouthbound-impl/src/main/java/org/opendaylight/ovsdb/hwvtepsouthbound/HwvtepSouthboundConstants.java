@@ -20,6 +20,7 @@ public class HwvtepSouthboundConstants {
 
     public static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
     public static final String HWVTEP_URI_PREFIX = "hwvtep";
+    public static final String PSWITCH_URI_PREFIX = "physicalswitch";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
     public static final String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
     public static final String UUID = "uuid";

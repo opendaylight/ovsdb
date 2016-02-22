@@ -1,0 +1,20 @@
+module netvirt-providers-config {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:providers:config";
+    prefix "netvirt-providers-config";
+
+    revision "2016-01-09" {
+        description "Initial revision of the netvirt providers config";
+    }
+
+    container netvirt-providers-config {
+        description "Configuration for NetvirtProviders";
+
+        config true;
+
+        leaf table-offset {
+            description "The table-offset is used to set the starting table for the netvirt pipeline";
+            type uint8;
+        }
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -20,14 +19,21 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
@@ -37,24 +43,17 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105
+        .OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
+        .Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link SecurityServicesImpl}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SecurityServicesImplTest {
 
     @InjectMocks private SecurityServicesImpl securityServicesImpl;
@@ -82,6 +81,7 @@ public class SecurityServicesImplTest {
     @Mock OvsdbTerminationPointAugmentation tp;
     @Mock IngressAclProvider ingressAclService;
     @Mock EgressAclProvider egressAclService;
+    @Mock NeutronL3Adapter neutronL3Adapter;
 
     private static final String NEUTRON_PORT_ID_VM_1 = "neutronID_VM_1";
     private static final String NEUTRON_PORT_ID_VM_2 = "neutronID_VM_2";
@@ -163,7 +163,7 @@ public class SecurityServicesImplTest {
     }
 
     /**
-     * Test method {@link SecurityServicesImpl#isPortSecurityReady(Interface)}
+     * Test method {@link SecurityServicesImpl#isPortSecurityReady(OvsdbTerminationPointAugmentation)}
      */
     @Test
     public void testIsPortSecurityReady(){
@@ -171,7 +171,7 @@ public class SecurityServicesImplTest {
     }
 
     /**
-     * Test method {@link SecurityServicesImpl#getSecurityGroupInPortList(Interface)}
+     * Test method {@link SecurityServicesImpl#getSecurityGroupInPortList(OvsdbTerminationPointAugmentation)}
      */
     @Test
     public void testSecurityGroupInPort(){
@@ -365,12 +365,12 @@ public class SecurityServicesImplTest {
      */
     @Test
     public void testGetVmListForSecurityGroup() {
-        List<NeutronPort> portList = new ArrayList<>();
-        portList.add(neutronPort_Vm1);
-        portList.add(neutronPort_Vm2);
-        portList.add(neutronPort_Vm3);
-        portList.add(neutronPort_Dhcp);
-        when(neutronPortCache.getAllPorts()).thenReturn(portList);
+        Map<String,NeutronPort> portMap = new HashMap<>();
+        portMap.put("Uuid1",neutronPort_Vm1);
+        portMap.put("Uuid2",neutronPort_Vm2);
+        portMap.put("Uuid3",neutronPort_Vm3);
+        portMap.put("Uuid4",neutronPort_Dhcp);
+        when(neutronL3Adapter.getPortCleanupCache()).thenReturn(portMap);
         List<Neutron_IPs> ipList = securityServicesImpl.getVmListForSecurityGroup(NEUTRON_PORT_ID_VM_1, SECURITY_GROUP_ID_2);
         assertEquals(ipList,neutron_IPs_2);
     }
@@ -460,8 +460,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleAdditionEgress() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("egress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_EGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, true);
         verify(egressAclService, times(1)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(true));
     }
@@ -473,8 +473,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleAdditionIngress() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("ingress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, true);
         verify(ingressAclService, times(1)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(true));
     }
@@ -486,8 +486,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleDeletionEgress() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("egress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_EGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, false);
         verify(egressAclService, times(1)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
     }
@@ -499,8 +499,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleDeletionIngress() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("ingress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, false);
         verify(ingressAclService, times(1)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
     }
@@ -512,8 +512,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleDeletionIngressPortNull() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("ingress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(null, neutronSecurityRule_1, neutron_ip_1, false);
         verify(ingressAclService, times(0)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
     }
@@ -526,8 +526,8 @@ public class SecurityServicesImplTest {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
         when(neutronPort_Vm1.getSecurityGroups()).thenReturn(null);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("ingress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, false);
         verify(ingressAclService, times(0)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
     }
@@ -539,8 +539,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleDeletionIngressAttachedMacNull() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("ingress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         when(southbound.getInterfaceExternalIdsValue(any(OvsdbTerminationPointAugmentation.class),eq("attached-mac"))).thenReturn(null);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, false);
         verify(ingressAclService, times(0)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
@@ -554,8 +554,8 @@ public class SecurityServicesImplTest {
     public void testSyncSecurityRuleDeletionIngressNonIpV4() {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
-        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("ingress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv6");
+        when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn(NeutronSecurityRule.DIRECTION_INGRESS);
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV6);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, false);
         verify(ingressAclService, times(0)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
     }
@@ -568,7 +568,7 @@ public class SecurityServicesImplTest {
         List<NeutronSecurityRule> securityRuleList = new ArrayList<>();
         securityRuleList.add(neutronSecurityRule_1);
         when(neutronSecurityRule_1.getSecurityRuleDirection()).thenReturn("outgress");
-        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn("IPv4");
+        when(neutronSecurityRule_1.getSecurityRuleEthertype()).thenReturn(NeutronSecurityRule.ETHERTYPE_IPV4);
         securityServicesImpl.syncSecurityRule(neutronPort_Vm1, neutronSecurityRule_1, neutron_ip_1, false);
         verify(ingressAclService, times(0)).programPortSecurityRule(eq(new Long(1)), eq("1000"), eq("attached-mac"), eq(2L), eq(neutronSecurityRule_1), eq(neutron_ip_1), eq(false));
     }
@@ -577,8 +577,7 @@ public class SecurityServicesImplTest {
     public void testSetDependencies() throws Exception {
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, securityServicesImpl)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         securityServicesImpl.setDependencies(mock(ServiceReference.class));
 

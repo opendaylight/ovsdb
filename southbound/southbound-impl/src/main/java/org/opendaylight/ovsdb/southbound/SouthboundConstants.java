@@ -38,6 +38,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHfsc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHtb;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import com.google.common.collect.ImmutableBiMap;
@@ -48,10 +51,20 @@ public class SouthboundConstants {
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "terminationpoint";
+    public static final String QOS_URI_PREFIX = "qos";
+    public static final String QUEUE_URI_PREFIX = "queue";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
     public static final String DEFAULT_OPENFLOW_PORT = "6653";
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static final String UUID = "uuid";
+    public static final String QOS_LINUX_HTB = "linux-htb";
+    public static final String QOS_LINUX_HFSC = "linux-hfsc";
+    public static final ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
+        = new ImmutableBiMap.Builder<Class<? extends QosTypeBase>,String>()
+            .put(QosTypeLinuxHtb.class,QOS_LINUX_HTB)
+            .put(QosTypeLinuxHfsc.class,QOS_LINUX_HFSC)
+            .build();
+
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
         = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
             .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
@@ -94,6 +107,8 @@ public class SouthboundConstants {
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
+    public static final String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";
+    public static final String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
 
     public enum VLANMODES {
         ACCESS("access"),

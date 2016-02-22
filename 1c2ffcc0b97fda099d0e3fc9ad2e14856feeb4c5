@@ -16,6 +16,24 @@
       "revId": "1c2ffcc0b97fda099d0e3fc9ad2e14856feeb4c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4bb811c8",
+        "filename": "openstack/net-virt-sfc/it/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/sfc/it/NetvirtSfcIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-22T08:50:18Z",
+      "side": 1,
+      "message": "We can\u0027t get the same behaviour with the failure message as with the logger; the latter handles exceptions specially (on a new line, with the stacktrace etc.). I added the call to fail() so the test would abort early in this case, and the failure reason becomes \"Failed to setup test: java.lang.NullPointerException\" or whatever, hence the \": \" to introduce the exception\u0027s message... We could use System.lineSeparator() instead if you\u0027d rather (but IDEs don\u0027t always handle multi-line failure messages in their test views).",
+      "parentUuid": "9a3d3df0_6d57f2ca",
+      "revId": "1c2ffcc0b97fda099d0e3fc9ad2e14856feeb4c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

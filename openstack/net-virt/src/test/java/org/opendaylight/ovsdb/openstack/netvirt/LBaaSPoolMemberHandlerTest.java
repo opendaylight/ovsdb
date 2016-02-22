@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,9 +20,8 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,33 +29,34 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancer;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPool;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronLoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronNetworkCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronPortCRUD;
+import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronSubnetCRUD;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link LBaaSPoolMemberHandler}
  */
-@PrepareForTest({NeutronCacheUtils.class, ServiceHelper.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LBaaSPoolMemberHandlerTest {
 
     @InjectMocks LBaaSPoolMemberHandler lBaaSPoolMemberHandler;
@@ -65,46 +65,67 @@ public class LBaaSPoolMemberHandlerTest {
     @Mock private INeutronLoadBalancerCRUD neutronLBCache;
     @Mock private LoadBalancerProvider loadBalancerProvider;
     @Mock private NodeCacheManager nodeCacheManager;
+    @Mock private INeutronPortCRUD neutronPortCache;
+    @Mock private INeutronNetworkCRUD neutronNetworkCache;
+    @Mock private INeutronSubnetCRUD neutronSubnetCache;
 
     private NeutronLoadBalancerPoolMember neutronLBMember;
 
     @Before
     public void setUp() {
-        neutronLBMember = mock(NeutronLoadBalancerPoolMember.class);
-        when(neutronLBMember.getID()).thenReturn("pool_memberID");
-        when(neutronLBMember.getPoolMemberAddress()).thenReturn("pool_member_address");
-        when(neutronLBMember.getPoolMemberSubnetID()).thenReturn("pool_member_subnetID");
-        when(neutronLBMember.getPoolMemberProtoPort()).thenReturn(1);
-        when(neutronLBMember.getPoolID()).thenReturn("poolID");
+        neutronLBMember = new NeutronLoadBalancerPoolMember();
+        neutronLBMember.setID("pool_memberID");
+        neutronLBMember.setPoolMemberAddress("pool_member_address");
+        neutronLBMember.setPoolMemberSubnetID("pool_member_subnetID");
+        neutronLBMember.setPoolMemberProtoPort(1);
+        neutronLBMember.setPoolID("poolID");
 
-        Map.Entry<String,String> providerInfo = mock(Entry.class);
-        when(providerInfo.getKey()).thenReturn("key");
-        when(providerInfo.getValue()).thenReturn("value");
+        lBaaSPoolMemberHandler.setDependencies(neutronPortCache);
+        final NeutronPort neutronPort = new NeutronPort();
+        final Neutron_IPs neutronIP1 = new Neutron_IPs();
+        neutronIP1.setSubnetUUID("pool_member_subnetID");
+        neutronIP1.setIpAddress("pool_member_address");
+        final Neutron_IPs neutronIP2 = new Neutron_IPs();
+        neutronIP2.setSubnetUUID("pool_member_subnetID");
+        neutronIP2.setIpAddress("vip_address");
+        final List<Neutron_IPs> neutronIPs = new ArrayList<>();
+        neutronIPs.add(neutronIP1);
+        neutronIPs.add(neutronIP2);
+        neutronPort.setFixedIPs(neutronIPs);
+        neutronPort.setMacAddress("mac_address");
+        when(neutronPortCache.getAllPorts()).thenReturn(Collections.singletonList(neutronPort));
 
-        PowerMockito.mockStatic(NeutronCacheUtils.class);
-        when(NeutronCacheUtils.getMacAddress(any(INeutronPortCRUD.class), anyString(), anyString())).thenReturn("mac_address");
-        when(NeutronCacheUtils.getProviderInformation(any(INeutronNetworkCRUD.class), any(INeutronSubnetCRUD.class), anyString())).thenReturn(providerInfo);
+        lBaaSPoolMemberHandler.setDependencies(neutronSubnetCache);
+        final NeutronSubnet neutronSubnet = new NeutronSubnet();
+        neutronSubnet.setID("pool_member_subnetID");
+        neutronSubnet.setNetworkUUID("pool_member_networkUUID");
+        when(neutronSubnetCache.getAllSubnets()).thenReturn(Collections.singletonList(neutronSubnet));
+
+        lBaaSPoolMemberHandler.setDependencies(neutronNetworkCache);
+        final NeutronNetwork neutronNetwork = new NeutronNetwork();
+        neutronNetwork.setNetworkUUID("pool_member_networkUUID");
+        neutronNetwork.setProviderNetworkType("key");
+        neutronNetwork.setProviderSegmentationID("value");
+        when(neutronNetworkCache.getAllNetworks()).thenReturn(Collections.singletonList(neutronNetwork));
 
         List<NeutronLoadBalancerPoolMember> members = new ArrayList<>();
-        NeutronLoadBalancerPoolMember neutronLBPoolMember = mock(NeutronLoadBalancerPoolMember.class);
-        when(neutronLBPoolMember.getPoolMemberAdminStateIsUp()).thenReturn(true);
-        when(neutronLBPoolMember.getPoolMemberSubnetID()).thenReturn("subnetID");
-        when(neutronLBPoolMember.getID()).thenReturn("pool_memberID1");
-        when(neutronLBPoolMember.getPoolMemberProtoPort()).thenReturn(1);
+        NeutronLoadBalancerPoolMember neutronLBPoolMember = new NeutronLoadBalancerPoolMember();
+        neutronLBPoolMember.setPoolMemberAdminStateIsUp(true);
+        neutronLBPoolMember.setPoolMemberSubnetID("pool_member_subnetID");
+        neutronLBPoolMember.setID("pool_memberID1");
+        neutronLBPoolMember.setPoolMemberProtoPort(1);
         members.add(neutronLBPoolMember);
 
-        NeutronLoadBalancerPool neutronLBPool = mock(NeutronLoadBalancerPool.class);
-        when(neutronLBPool.getLoadBalancerPoolProtocol()).thenReturn(LoadBalancerConfiguration.PROTOCOL_TCP);
-        when(neutronLBPool.getLoadBalancerPoolMembers()).thenReturn(members);
+        NeutronLoadBalancerPool neutronLBPool = new NeutronLoadBalancerPool();
+        neutronLBPool.setLoadBalancerPoolProtocol(LoadBalancerConfiguration.PROTOCOL_TCP);
+        neutronLBPool.setLoadBalancerPoolMembers(members);
         when(neutronLBPoolCache.getNeutronLoadBalancerPool(anyString())).thenReturn(neutronLBPool);
 
-        List<NeutronLoadBalancer> list_neutronLB = new ArrayList<>();
-        NeutronLoadBalancer neutronLB = mock(NeutronLoadBalancer.class);
-        when(neutronLB.getLoadBalancerName()).thenReturn("load_balancer_name");
-        when(neutronLB.getLoadBalancerVipAddress()).thenReturn("vip_address");
-        when(neutronLB.getLoadBalancerVipSubnetID()).thenReturn("subnetID");
-        list_neutronLB.add(neutronLB);
-        when(neutronLBCache.getAllNeutronLoadBalancers()).thenReturn(list_neutronLB);
+        NeutronLoadBalancer neutronLB = new NeutronLoadBalancer();
+        neutronLB.setLoadBalancerName("load_balancer_name");
+        neutronLB.setLoadBalancerVipAddress("vip_address");
+        neutronLB.setLoadBalancerVipSubnetID("pool_member_subnetID");
+        when(neutronLBCache.getAllNeutronLoadBalancers()).thenReturn(Collections.singletonList(neutronLB));
     }
 
     /**
@@ -112,20 +133,16 @@ public class LBaaSPoolMemberHandlerTest {
      */
     @Test
     public void testCanCreateNeutronLoadBalancerPoolMember() {
-        when(neutronLBMember.getPoolID())
-                                    .thenReturn(null)  // to test HTTP_BAD_REQUEST
-                                    .thenReturn("poolID"); // to test HTTP_OK
-
-        Map.Entry<String,String> providerInfo = mock(Entry.class);
-        when(providerInfo.getKey()).thenReturn("key");
-        when(providerInfo.getValue()).thenReturn("value");
-        when(NeutronCacheUtils.getProviderInformation(any(INeutronNetworkCRUD.class), any(INeutronSubnetCRUD.class), anyString()))
-                                    .thenReturn(providerInfo)
-                                    .thenReturn(null); // to test HTTP_NOT_ACCEPTABLE
-
-
+        // HTTP_BAD_REQUEST
+        neutronLBMember.setPoolID(null);
         assertEquals("Error, canCreateNeutronLoadBalancerPoolMember() didn't return the correct HTTP flag", HttpURLConnection.HTTP_BAD_REQUEST, lBaaSPoolMemberHandler.canCreateNeutronLoadBalancerPoolMember(neutronLBMember));
+
+        // HTTP_OK
+        neutronLBMember.setPoolID("poolID");
         assertEquals("Error, canCreateNeutronLoadBalancerPoolMember() didn't return the correct HTTP flag", HttpURLConnection.HTTP_OK, lBaaSPoolMemberHandler.canCreateNeutronLoadBalancerPoolMember(neutronLBMember));
+
+        // HTTP_NOT_ACCEPTABLE
+        when(neutronNetworkCache.getAllNetworks()).thenReturn(Collections.<NeutronNetwork>emptyList());
         assertEquals("Error, canCreateNeutronLoadBalancerPoolMember() didn't return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, lBaaSPoolMemberHandler.canCreateNeutronLoadBalancerPoolMember(neutronLBMember));
     }
 
@@ -134,7 +151,7 @@ public class LBaaSPoolMemberHandlerTest {
      */
     @Test
     public void testCanUpdateNeutronLoadBalancerPoolMember() {
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_IMPLEMENTED, lBaaSPoolMemberHandler.canUpdateNeutronLoadBalancerPoolMember(any(NeutronLoadBalancerPoolMember.class), any(NeutronLoadBalancerPoolMember.class)));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_IMPLEMENTED, lBaaSPoolMemberHandler.canUpdateNeutronLoadBalancerPoolMember(null, null));
     }
 
     /**
@@ -142,20 +159,16 @@ public class LBaaSPoolMemberHandlerTest {
      */
     @Test
     public void testCanDeleteNeutronLoadBalancerPoolMember() {
-        when(neutronLBMember.getPoolID())
-                                    .thenReturn(null)  // to test HTTP_BAD_REQUEST
-                                    .thenReturn("poolID"); // to test HTTP_OK
-
-        Map.Entry<String,String> providerInfo = mock(Entry.class);
-        when(providerInfo.getKey()).thenReturn("key");
-        when(providerInfo.getValue()).thenReturn("value");
-        when(NeutronCacheUtils.getProviderInformation(any(INeutronNetworkCRUD.class), any(INeutronSubnetCRUD.class), anyString()))
-                                    .thenReturn(providerInfo)
-                                    .thenReturn(null); // to test HTTP_NOT_ACCEPTABLE
-
-
+        // HTTP_BAD_REQUEST
+        neutronLBMember.setPoolID(null);
         assertEquals("Error, canDeleteNeutronLoadBalancerPoolMember() didn't return the correct HTTP flag", HttpURLConnection.HTTP_BAD_REQUEST, lBaaSPoolMemberHandler.canDeleteNeutronLoadBalancerPoolMember(neutronLBMember));
+
+        // HTTP_OK
+        neutronLBMember.setPoolID("poolID");
         assertEquals("Error, canDeleteNeutronLoadBalancerPoolMember() didn't return the correct HTTP flag", HttpURLConnection.HTTP_OK, lBaaSPoolMemberHandler.canDeleteNeutronLoadBalancerPoolMember(neutronLBMember));
+
+        // HTTP_NOT_ACCEPTABLE
+        when(neutronNetworkCache.getAllNetworks()).thenReturn(Collections.<NeutronNetwork>emptyList());
         assertEquals("Error, canDeleteNeutronLoadBalancerPoolMember() didn't return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, lBaaSPoolMemberHandler.canDeleteNeutronLoadBalancerPoolMember(neutronLBMember));
     }
 
@@ -193,9 +206,6 @@ public class LBaaSPoolMemberHandlerTest {
     public void testExtractLBConfiguration() {
         LoadBalancerConfiguration lbConfig = lBaaSPoolMemberHandler.extractLBConfiguration(neutronLBMember);
 
-        verify(neutronLBPoolCache, times(1)).getNeutronLoadBalancerPool(anyString());
-        verify(neutronLBCache, times(1)).getAllNeutronLoadBalancers();
-
         // make sure the load balancer configuration was correctly populated
         assertEquals("Error, did not return the correct value",  "key", lbConfig.getProviderNetworkType());
         assertEquals("Error, did not return the correct value",  "value", lbConfig.getProviderSegmentationId());
@@ -215,10 +225,9 @@ public class LBaaSPoolMemberHandlerTest {
         LoadBalancerProvider loadBalancerProvider = mock(LoadBalancerProvider.class);
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, lBaaSPoolMemberHandler)).thenReturn(eventDispatcher);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(LoadBalancerProvider.class, lBaaSPoolMemberHandler)).thenReturn(loadBalancerProvider);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, lBaaSPoolMemberHandler)).thenReturn(nodeCacheManager);
+        ServiceHelper.overrideGlobalInstance(EventDispatcher.class, eventDispatcher);
+        ServiceHelper.overrideGlobalInstance(LoadBalancerProvider.class, loadBalancerProvider);
+        ServiceHelper.overrideGlobalInstance(NodeCacheManager.class, nodeCacheManager);
 
         lBaaSPoolMemberHandler.setDependencies(mock(ServiceReference.class));
 

@@ -19,4 +19,5 @@ public interface ClassifierProvider {
     void programTunnelIn(Long dpidLong, String segmentationId, Long ofPort, boolean write);
     void programVlanIn(Long dpidLong, String segmentationId, Long ethPort, boolean write);
     void programLLDPPuntRule(Long dpidLong);
+    void programGotoTable(Long dpidLong, boolean write);
 }

@@ -139,6 +139,16 @@ class OvsdbNode:
 
 # ======================================================================
 
+def make_it_a_string(param):
+    result = ""
+    try:
+        result = str( param )
+    except:
+        pass
+    return result
+
+# ======================================================================
+
 def printError(msg):
     sys.stderr.write(msg)
 
@@ -345,8 +355,8 @@ def parseTopologyJsonNodeOvsdb(indent, mdsalTreeType, topologyId, nodeIndex, nod
     connectionInfoRaw = node.get('ovsdb:connection-info')
     connectionInfo = {}
     if type(connectionInfoRaw) is dict:
-        connectionInfo['inetMgr'] = connectionInfoRaw.get('local-ip') + ':' + str( connectionInfoRaw.get('local-port') )
-        connectionInfo['inetNode'] = connectionInfoRaw.get('remote-ip') + ':' + str( connectionInfoRaw.get('remote-port') )
+        connectionInfo['inetMgr'] = make_it_a_string(connectionInfoRaw.get('local-ip')) + ':' + make_it_a_string(connectionInfoRaw.get('local-port'))
+        connectionInfo['inetNode'] = make_it_a_string(connectionInfoRaw.get('remote-ip')) + ':' + make_it_a_string(connectionInfoRaw.get('remote-port'))
     otherConfigsRaw = node.get('ovsdb:openvswitch-other-configs')
     otherLocalIp = ''
     if type(otherConfigsRaw) is list:

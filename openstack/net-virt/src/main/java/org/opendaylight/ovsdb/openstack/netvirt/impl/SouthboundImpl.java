@@ -16,11 +16,11 @@ import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.openstack.netvirt.ClusterAwareMdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
@@ -65,7 +65,7 @@ public class SouthboundImpl implements Southbound {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundImpl.class);
     private final DataBroker databroker;
     private static final String PATCH_PORT_TYPE = "patch";
-    private final MdsalUtils mdsalUtils;
+    private final ClusterAwareMdsalUtils mdsalUtils;
 
     /**
      * Class constructor setting the data broker.
@@ -74,7 +74,7 @@ public class SouthboundImpl implements Southbound {
      */
     public SouthboundImpl(DataBroker dataBroker) {
         this.databroker = dataBroker;
-        mdsalUtils = new MdsalUtils(dataBroker);
+        mdsalUtils = new ClusterAwareMdsalUtils(dataBroker);
     }
 
     public DataBroker getDatabroker() {
@@ -194,7 +194,6 @@ public class SouthboundImpl implements Southbound {
             BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
             bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(MdsalHelper.DISABLE_IN_BAND);
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
-            bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(MdsalHelper.DISABLE_IN_BAND);
             List<BridgeOtherConfigs> bridgeOtherConfigsList = new ArrayList<>();
             bridgeOtherConfigsList.add(bridgeOtherConfigsBuilder.build());
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(bridgeOtherConfigsList);
@@ -311,12 +310,8 @@ public class SouthboundImpl implements Southbound {
     }
 
     public String getDatapathId(Node node) {
-        String datapathId = null;
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
-        if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
-            datapathId = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
-        }
-        return datapathId;
+        return getDatapathId(ovsdbBridgeAugmentation);
     }
 
     public String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {

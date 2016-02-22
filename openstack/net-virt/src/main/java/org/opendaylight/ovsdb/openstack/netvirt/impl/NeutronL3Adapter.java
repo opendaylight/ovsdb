@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,17 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
@@ -32,6 +22,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolver;
 import org.opendaylight.ovsdb.openstack.netvirt.api.GatewayMacResolverListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IcmpEchoProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
@@ -71,10 +62,16 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Neutron L3 Adapter implements a hub-like adapter for the various Neutron events. Based on
@@ -99,6 +96,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     private volatile RoutingProvider routingProvider;
     private volatile GatewayMacResolver gatewayMacResolver;
     private volatile SecurityServicesManager securityServicesManager;
+    private volatile IcmpEchoProvider icmpEchoProvider;
 
     private class FloatIpData {
         // br-int of node where floating ip is associated with tenant port
@@ -135,11 +133,12 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     private String externalRouterMac;
     private Boolean enabled = false;
-    private Boolean flgDistributedARPEnabled = true;
     private Boolean isCachePopulationDone = false;
-    private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
+    private Map<String, NeutronPort> portCleanupCache;
+    private Map<String, NeutronNetwork> networkCleanupCache;
 
     private Southbound southbound;
+    private DistributedArpService distributedArpService;
     private NeutronModelsDataStoreHelper neutronModelsDataStoreHelper;
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
@@ -167,18 +166,13 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             if (this.externalRouterMac == null) {
                 this.externalRouterMac = DEFAULT_EXT_RTR_MAC;
             }
-
             this.enabled = true;
             LOG.info("OVSDB L3 forwarding is enabled");
-            if (configurationService.isDistributedArpDisabled()) {
-                this.flgDistributedARPEnabled = false;
-                LOG.info("Distributed ARP responder is disabled");
-            } else {
-                LOG.debug("Distributed ARP responder is enabled");
-            }
         } else {
             LOG.debug("OVSDB L3 forwarding is disabled");
         }
+        this.portCleanupCache = new HashMap<>();
+        this.networkCleanupCache = new HashMap<>();
     }
 
     //
@@ -190,6 +184,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             LOG.error("Unable to process abstract event " + abstractEvent);
             return;
         }
+        if (!this.enabled) {
+            return;
+        }
+
         NeutronL3AdapterEvent ev = (NeutronL3AdapterEvent) abstractEvent;
         switch (ev.getAction()) {
             case UPDATE:
@@ -408,6 +406,9 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
      */
     public void handleNeutronSubnetEvent(final NeutronSubnet subnet, Action action) {
         LOG.debug("Neutron subnet {} event : {}", action, subnet.toString());
+        if (action == Action.ADD) {
+            this.storeNetworkInCleanupCache(neutronNetworkCache.getNetwork(subnet.getNetworkUUID()));
+        }
     }
 
     /**
@@ -421,25 +422,33 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOG.debug("Neutron port {} event : {}", action, neutronPort.toString());
 
-        this.processSecurityGroupUpdate(neutronPort);
+        if (action == Action.UPDATE) {
+            // FIXME: Bug 4971 Move cleanup cache to SG Impl
+            this.updatePortInCleanupCache(neutronPort, neutronPort.getOriginalPort());
+            this.processSecurityGroupUpdate(neutronPort);
+        }
+
         if (!this.enabled) {
             return;
         }
 
         final boolean isDelete = action == Action.DELETE;
 
+        if (action == Action.DELETE) {
+            // Bug 5164: Cleanup Floating IP OpenFlow Rules when port is deleted.
+            this.cleanupFloatingIPRules(neutronPort);
+        }
+
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_GATEWAY)){
-            if(!isDelete){
-                Node externalBridgeNode = getExternalBridgeNode();
-                if(externalBridgeNode != null){
-                    LOG.info("Port {} is network router gateway interface, "
-                            + "triggering gateway resolution for the attached external network on node {}", neutronPort, externalBridgeNode);
-                    this.triggerGatewayMacResolver(externalBridgeNode, neutronPort);
-                }else{
-                    LOG.error("Did not find Node that has external bridge (br-ex), Gateway resolution failed");
-                }
+            if (!isDelete) {
+                LOG.info("Port {} is network router gateway interface, "
+                        + "triggering gateway resolution for the attached external network", neutronPort);
+                this.triggerGatewayMacResolver(neutronPort);
             }else{
                 NeutronNetwork externalNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
+                if (null == externalNetwork) {
+                    externalNetwork = this.getNetworkFromCleanupCache(neutronPort.getNetworkUUID());
+                }
 
                 if (externalNetwork != null && externalNetwork.isRouterExternal()) {
                     final NeutronSubnet externalSubnet = getExternalNetworkSubnet(neutronPort);
@@ -540,12 +549,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             this.updateL3ForNeutronPort(neutronPort, currPortShouldBeDeleted);
         }
 
-        if (isDelete) {
-            /*
-             *  Bug 4277: Remove the router interface cache only after deleting the neutron port l3 flows.
-             */
-            this.cleanupRouterCache(neutronRouterInterface);
-        }
     }
 
     /**
@@ -693,7 +696,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
         // Respond to ARPs for the floating ip address by default, via the patch port that connects br-int to br-ex
         //
-        if (programStaticArpStage1(dpId, encodeExcplicitOFPort(ofPort), floatingIpMac, floatingIpAddress,
+        if (distributedArpService.programStaticRuleStage1(dpId, encodeExcplicitOFPort(ofPort), floatingIpMac, floatingIpAddress,
                 Action.ADD)) {
             final FloatIpData floatIpData = new FloatIpData(dpId, ofPort, providerSegmentationId, floatingIpMac,
                     floatingIpAddress, fixedIpAddress, neutronRouterMac);
@@ -711,7 +714,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             return;
         }
 
-        if (programStaticArpStage1(floatIpData.dpid, encodeExcplicitOFPort(floatIpData.ofPort), floatIpData.macAddress,
+        if (distributedArpService.programStaticRuleStage1(floatIpData.dpid, encodeExcplicitOFPort(floatIpData.ofPort), floatIpData.macAddress,
                 floatIpData.floatingIpAddress, Action.DELETE)) {
             floatIpDataMapCache.remove(neutronFloatingIPUuid);
             LOG.info("Floating IP {} un-programmed ARP mac {} on {} dpid {}",
@@ -756,6 +759,9 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
      */
     public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         LOG.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
+        if (action == Action.UPDATE) {
+            this.updateNetworkInCleanupCache(neutronNetwork);
+        }
     }
 
     //
@@ -775,11 +781,17 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                                      final NeutronNetwork neutronNetwork, Action action) {
         LOG.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, bridgeNode.getNodeId().getValue(), intf.getName(), neutronNetwork);
+
+        final NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
+        if (action != Action.DELETE && neutronPort != null) {
+            // FIXME: Bug 4971 Move cleanup cache to SG Impl
+            storePortInCleanupCache(neutronPort);
+        }
+
         if (!this.enabled) {
             return;
         }
 
-        final NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
         final Long dpId = getDpidForIntegrationBridge(bridgeNode);
         final Uuid interfaceUuid = intf.getInterfaceUuid();
 
@@ -828,15 +840,17 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         final String networkUUID = neutronPort.getNetworkUUID();
         final String routerMacAddress = networkIdToRouterMacCache.get(networkUUID);
 
-        // If there is no router interface handling the networkUUID, we are done
-        if (routerMacAddress == null || routerMacAddress.isEmpty()) {
-            return;
-        }
+        if(!isDelete) {
+            // If there is no router interface handling the networkUUID, we are done
+            if (routerMacAddress == null || routerMacAddress.isEmpty()) {
+                return;
+            }
 
-        // If this is the neutron port for the router interface itself, ignore it as well. Ports that represent the
-        // router interface are handled via handleNeutronRouterInterfaceEvent.
-        if (routerMacAddress.equalsIgnoreCase(neutronPort.getMacAddress())) {
-            return;
+            // If this is the neutron port for the router interface itself, ignore it as well. Ports that represent the
+            // router interface are handled via handleNeutronRouterInterfaceEvent.
+            if (routerMacAddress.equalsIgnoreCase(neutronPort.getMacAddress())) {
+                return;
+            }
         }
 
         final NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(networkUUID);
@@ -872,14 +886,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 // Configure L3 fwd. We do that regardless of tenant network present, because these rules are
                 // still needed when routing to subnets non-local to node (bug 2076).
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
-
-                // Configure distributed ARP responder
-                if (flgDistributedARPEnabled) {
-                    // Arp rule is only needed when segmentation exists in the given node (bug 4752).
-                    boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
-                    final Action actionForNode = arpNeeded ? action : Action.DELETE;
-                    programStaticArpStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
-                }
             }
         }
     }
@@ -892,10 +898,6 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
          */
         try {
             NeutronPort originalPort = neutronPort.getOriginalPort();
-            if (null == originalPort) {
-                LOG.debug("processSecurityGroupUpdate: originalport is empty");
-                return;
-            }
             List<NeutronSecurityGroup> addedGroup = getsecurityGroupChanged(neutronPort,
                                                                             neutronPort.getOriginalPort());
             List<NeutronSecurityGroup> deletedGroup = getsecurityGroupChanged(neutronPort.getOriginalPort(),
@@ -915,7 +917,13 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
     private List<NeutronSecurityGroup> getsecurityGroupChanged(NeutronPort port1, NeutronPort port2) {
         LOG.trace("getsecurityGroupChanged:" + "Port1:" + port1 + "Port2" + port2);
+        if (port1 == null) {
+            return null;
+        }
         List<NeutronSecurityGroup> list1 = new ArrayList<>(port1.getSecurityGroups());
+        if (port2 == null) {
+            return list1;
+        }
         List<NeutronSecurityGroup> list2 = new ArrayList<>(port2.getSecurityGroups());
         for (Iterator<NeutronSecurityGroup> iterator = list1.iterator(); iterator.hasNext();) {
             NeutronSecurityGroup securityGroup1 = iterator.next();
@@ -1055,7 +1063,8 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                             actionForNode);
                 }
                 // Enable ARP responder by default, because router interface needs to be responded always.
-                programStaticArpStage1(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                distributedArpService.programStaticRuleStage1(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                programIcmpEcho(dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
             }
 
             // Compute action to be programmed. In the case of rewrite exclusions, we must never program rules
@@ -1067,7 +1076,11 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             }
         }
 
-        // Keep cache for finding router's mac from network uuid -- NOTE: remove is done later, via cleanupRouterCache()
+        if (isDelete) {
+            networkIdToRouterMacCache.remove(neutronNetwork.getNetworkUUID());
+            networkIdToRouterIpListCache.remove(neutronNetwork.getNetworkUUID());
+            subnetIdToRouterInterfaceCache.remove(subnet.getSubnetUUID());
+        }
     }
 
     private void programFlowForNetworkFromExternal(final Node node,
@@ -1213,47 +1226,39 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         return status;
     }
 
-    private boolean programStaticArpStage1(Long dpid, String segOrOfPort,
+    private boolean programIcmpEcho(Long dpid, String segOrOfPort,
                                            String macAddress, String ipStr,
                                            Action action) {
         if (action == Action.DELETE ) {
-            LOG.trace("Deleting Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {}",
+            LOG.trace("Deleting Flow : programIcmpEcho dpid {} segOrOfPort {} mac {} ip {} action {}",
                     dpid, segOrOfPort, macAddress, ipStr, action);
         }
         if (action == Action.ADD) {
-            LOG.trace("Adding Flow : programStaticArpStage1 dpid {} segOrOfPort {} mac {} ip {} action {} is already done",
+            LOG.trace("Adding Flow : programIcmpEcho dpid {} segOrOfPort {} mac {} ip {} action {}",
                     dpid, segOrOfPort, macAddress, ipStr, action);
         }
 
-        Status status = this.programStaticArpStage2(dpid, segOrOfPort, macAddress, ipStr, action);
-        return status.isSuccess();
-    }
-
-    private Status programStaticArpStage2(Long dpid,
-                                          String segOrOfPort,
-                                          String macAddress,
-                                          String address,
-                                          Action action) {
-        Status status;
-        try {
-            InetAddress inetAddress = InetAddress.getByName(address);
-            status = arpProvider == null ?
-                     new Status(StatusCode.SUCCESS) :
-                     arpProvider.programStaticArpEntry(dpid, segOrOfPort,
-                                                       macAddress, inetAddress, action);
-        } catch (UnknownHostException e) {
-            status = new Status(StatusCode.BADREQUEST);
+        Status status = new Status(StatusCode.UNSUPPORTED);
+        if (icmpEchoProvider != null){
+            try {
+                InetAddress inetAddress = InetAddress.getByName(ipStr);
+                status = icmpEchoProvider.programIcmpEchoEntry(dpid, segOrOfPort,
+                                                macAddress, inetAddress, action);
+            } catch (UnknownHostException e) {
+                status = new Status(StatusCode.BADREQUEST);
+            }
         }
 
         if (status.isSuccess()) {
-            LOG.debug("ProgramStaticArp {} for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{}",
-                         arpProvider == null ? "skipped" : "programmed",
-                         macAddress, address, dpid, segOrOfPort, action);
+            LOG.debug("programIcmpEcho {} for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{}",
+                    icmpEchoProvider == null ? "skipped" : "programmed",
+                    macAddress, ipStr, dpid, segOrOfPort, action);
         } else {
-            LOG.error("ProgramStaticArp failed for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{} status:{}",
-                         macAddress, address, dpid, segOrOfPort, action, status);
+            LOG.error("programIcmpEcho failed for mac:{} addr:{} dpid:{} segOrOfPort:{} action:{} status:{}",
+                    macAddress, ipStr, dpid, segOrOfPort, action, status);
         }
-        return status;
+
+        return status.isSuccess();
     }
 
     private boolean programInboundIpRewriteStage1(Long dpid, Long inboundOFPort, String providerSegmentationId,
@@ -1405,7 +1410,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     }
 
     private Long getDpidForExternalBridge(Node node) {
-        // Check if node is integration bridge; and only then return its dpid
+        // Check if node is external bridge; and only then return its dpid
         if (southbound.getBridge(node, configurationService.getExternalBridgeName()) != null) {
             return southbound.getDataPathId(node);
         }
@@ -1444,24 +1449,21 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         return null;
     }
 
-     private void cleanupRouterCache(final NeutronRouter_Interface neutronRouterInterface) {
-         /*
-          *  Fix for 4277
-          *  Remove the router cache only after deleting the neutron
-          *  port l3 flows.
-          */
-         final NeutronPort neutronPort = neutronPortCache.getPort(neutronRouterInterface.getPortUUID());
+    private void cleanupFloatingIPRules(final NeutronPort neutronPort) {
 
-         if (neutronPort != null) {
-             networkIdToRouterMacCache.remove(neutronPort.getNetworkUUID());
-             networkIdToRouterIpListCache.remove(neutronPort.getNetworkUUID());
-             subnetIdToRouterInterfaceCache.remove(neutronRouterInterface.getSubnetUUID());
-         }
-     }
+        List<NeutronFloatingIP> neutronFloatingIps = neutronFloatingIpCache.getAllFloatingIPs();
+        if (neutronFloatingIps != null && !neutronFloatingIps.isEmpty()) {
+            for (NeutronFloatingIP neutronFloatingIP : neutronFloatingIps) {
+                if (neutronFloatingIP.getPortUUID().equals(neutronPort.getPortUUID())) {
+                    handleNeutronFloatingIPEvent(neutronFloatingIP, Action.DELETE);
+                }
+            }
+        }
+    }
 
-    public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){
 
-        Preconditions.checkNotNull(node);
+    private void triggerGatewayMacResolver(final NeutronPort gatewayPort){
+
         Preconditions.checkNotNull(gatewayPort);
         NeutronNetwork externalNetwork = neutronNetworkCache.getNetwork(gatewayPort.getNetworkUUID());
 
@@ -1471,36 +1473,18 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
 
                 // TODO: address IPv6 case.
                 if (externalSubnet != null &&
-                    externalSubnet.getIpVersion() == 4 &&
-                    gatewayPort.getFixedIPs() != null) {
-                    LOG.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
-                    ListenableFuture<MacAddress> gatewayMacAddress =
-                        gatewayMacResolver.resolveMacAddress(this,
-                                                             getDpidForExternalBridge(node),
-                                                             new Ipv4Address(externalSubnet.getGatewayIP()),
-                                                             new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
-                                                             new MacAddress(gatewayPort.getMacAddress()),
-                                                             true);
-                    if(gatewayMacAddress != null){
-                        Futures.addCallback(gatewayMacAddress, new FutureCallback<MacAddress>(){
-                            @Override
-                            public void onSuccess(MacAddress result) {
-                                if(result != null){
-                                    if(!result.getValue().equals(externalRouterMac)){
-                                        updateExternalRouterMac(result.getValue());
-                                        LOG.info("Resolved MAC address for gateway IP {} is {}", externalSubnet.getGatewayIP(),result.getValue());
-                                    }
-                                }else{
-                                    LOG.warn("MAC address resolution failed for gateway IP {}", externalSubnet.getGatewayIP());
-                                }
-                            }
+                        externalSubnet.getIpVersion() == 4 &&
+                        gatewayPort.getFixedIPs() != null) {
+                    LOG.info("Trigger MAC resolution for gateway ip {}", externalSubnet.getGatewayIP());
 
-                            @Override
-                            public void onFailure(Throwable t) {
-                                LOG.warn("MAC address resolution failed for gateway IP {}", externalSubnet.getGatewayIP());
-                            }
-                        }, gatewayMacResolverPool);
-                    }
+                    gatewayMacResolver.resolveMacAddress(
+                            this, /* gatewayMacResolverListener */
+                            null, /* externalNetworkBridgeDpid */
+                            true, /* refreshExternalNetworkBridgeDpidIfNeeded */
+                            new Ipv4Address(externalSubnet.getGatewayIP()),
+                            new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
+                            new MacAddress(gatewayPort.getMacAddress()),
+                            true /* periodicRefresh */);
                 } else {
                     LOG.warn("No gateway IP address found for external network {}", externalNetwork);
                 }
@@ -1510,6 +1494,83 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         }
     }
 
+
+    private void storePortInCleanupCache(NeutronPort port) {
+        this.portCleanupCache.put(port.getPortUUID(),port);
+    }
+
+
+    private void updatePortInCleanupCache(NeutronPort updatedPort,NeutronPort originalPort) {
+        removePortFromCleanupCache(originalPort);
+        storePortInCleanupCache(updatedPort);
+    }
+
+    public void removePortFromCleanupCache(NeutronPort port) {
+        if(port != null) {
+            this.portCleanupCache.remove(port.getPortUUID());
+        }
+    }
+
+    public Map<String, NeutronPort> getPortCleanupCache() {
+        return this.portCleanupCache;
+    }
+
+    public NeutronPort getPortFromCleanupCache(String portid) {
+        for (String neutronPortUuid : this.portCleanupCache.keySet()) {
+            if (neutronPortUuid.equals(portid)) {
+                LOG.info("getPortFromCleanupCache: Matching NeutronPort found {}", portid);
+                return this.portCleanupCache.get(neutronPortUuid);
+            }
+        }
+        return null;
+    }
+
+    private void storeNetworkInCleanupCache(NeutronNetwork network) {
+        this.networkCleanupCache.put(network.getNetworkUUID(), network);
+    }
+
+
+    private void updateNetworkInCleanupCache(NeutronNetwork network) {
+        for (String neutronNetworkUuid:this.networkCleanupCache.keySet()) {
+            if (neutronNetworkUuid.equals(network.getNetworkUUID())) {
+                this.networkCleanupCache.remove(neutronNetworkUuid);
+            }
+        }
+        this.networkCleanupCache.put(network.getNetworkUUID(), network);
+    }
+
+    public void removeNetworkFromCleanupCache(String networkid) {
+        NeutronNetwork network = null;
+        for (String neutronNetworkUuid:this.networkCleanupCache.keySet()) {
+            if (neutronNetworkUuid.equals(networkid)) {
+                network = networkCleanupCache.get(neutronNetworkUuid);
+                break;
+            }
+        }
+        if (network != null) {
+            for (String neutronPortUuid:this.portCleanupCache.keySet()) {
+                if (this.portCleanupCache.get(neutronPortUuid).getNetworkUUID().equals(network.getNetworkUUID())) {
+                    LOG.info("This network is used by another port", network);
+                    return;
+                }
+            }
+            this.networkCleanupCache.remove(network.getNetworkUUID());
+        }
+    }
+
+    public Map<String, NeutronNetwork> getNetworkCleanupCache() {
+        return this.networkCleanupCache;
+    }
+
+    public NeutronNetwork getNetworkFromCleanupCache(String networkid) {
+        for (String neutronNetworkUuid:this.networkCleanupCache.keySet()) {
+            if (neutronNetworkUuid.equals(networkid)) {
+                LOG.info("getPortFromCleanupCache: Matching NeutronPort found {}", networkid);
+                return networkCleanupCache.get(neutronNetworkUuid);
+            }
+        }
+        return null;
+    }
     /**
      * Return String that represents OF port with marker explicitly provided (reverse of MatchUtils:parseExplicitOFPort)
      *
@@ -1519,7 +1580,20 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     public static String encodeExcplicitOFPort(Long ofPort) {
         return "OFPort|" + ofPort.toString();
     }
-
+    private void initNetworkCleanUpCache() {
+        if (this.neutronNetworkCache != null) {
+            for (NeutronNetwork neutronNetwork : neutronNetworkCache.getAllNetworks()) {
+                networkCleanupCache.put(neutronNetwork.getNetworkUUID(), neutronNetwork);
+            }
+        }
+    }
+    private void initPortCleanUpCache() {
+        if (this.neutronPortCache != null) {
+            for (NeutronPort neutronPort : neutronPortCache.getAllPorts()) {
+                portCleanupCache.put(neutronPort.getPortUUID(), neutronPort);
+            }
+        }
+    }
     @Override
     public void setDependencies(ServiceReference serviceReference) {
         eventDispatcher =
@@ -1539,6 +1613,8 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 (RoutingProvider) ServiceHelper.getGlobalInstance(RoutingProvider.class, this);
         l3ForwardingProvider =
                 (L3ForwardingProvider) ServiceHelper.getGlobalInstance(L3ForwardingProvider.class, this);
+        distributedArpService =
+                 (DistributedArpService) ServiceHelper.getGlobalInstance(DistributedArpService.class, this);
         nodeCacheManager =
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =
@@ -1547,6 +1623,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                 (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
         securityServicesManager =
                 (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
+
         initL3AdapterMembers();
     }
 
@@ -1554,8 +1631,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
     public void setDependencies(Object impl) {
         if (impl instanceof INeutronNetworkCRUD) {
             neutronNetworkCache = (INeutronNetworkCRUD)impl;
+            initNetworkCleanUpCache();
         } else if (impl instanceof INeutronPortCRUD) {
             neutronPortCache = (INeutronPortCRUD)impl;
+            initPortCleanUpCache();
         } else if (impl instanceof INeutronSubnetCRUD) {
             neutronSubnetCache = (INeutronSubnetCRUD)impl;
         } else if (impl instanceof INeutronFloatingIPCRUD) {
@@ -1572,7 +1651,10 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
             l3ForwardingProvider = (L3ForwardingProvider)impl;
         }else if (impl instanceof GatewayMacResolver) {
             gatewayMacResolver = (GatewayMacResolver)impl;
+        }else if (impl instanceof IcmpEchoProvider) {
+            icmpEchoProvider = (IcmpEchoProvider)impl;
         }
+
         populateL3ForwardingCaches();
     }
 }

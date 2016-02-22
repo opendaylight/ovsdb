@@ -30,3 +30,7 @@ Contents
 - NetvirtSfc.json.postman_collection : Collection of REST-APIs to interact with Netvirt-Sfc.
 
 - Ovsdb-HwvtepSouthbound-Collection.json.postman_collection : Collection contains Restconf request for doing CRUD operations (hwvtep global node, physical switch, logical switch, physical locator, and physical port) on hwvtepsouthbound plugin running in standalone controller.
+
+- Qos-and-Queue-Collection-Environment-Variables.postman_environment : Postman environment file that defines variables used by the Qos-and-Queue-Collection.json.postman_collection
+
+- Qos-and-Queue-Collection.json.postman_collection - Collection of Postman Restconf commands for doing CRUD operations on Qos and Queue entries.

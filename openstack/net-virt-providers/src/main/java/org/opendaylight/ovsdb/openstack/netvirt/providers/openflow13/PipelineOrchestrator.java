@@ -24,6 +24,8 @@ public interface PipelineOrchestrator {
     Service getNextServiceInPipeline(Service service);
     AbstractServiceInstance getServiceInstance(Service service);
     Map<Service, AbstractServiceInstance> getServiceRegistry();
+    short getTableOffset();
+    short getTable(Service service);
     List<Service> getStaticPipeline();
     void enqueue(Node node);
     void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance);

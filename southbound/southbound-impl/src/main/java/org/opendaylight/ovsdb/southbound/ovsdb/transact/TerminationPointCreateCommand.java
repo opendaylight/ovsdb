@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
@@ -38,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
@@ -121,6 +123,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         createInterfaceOptions(terminationPoint, ovsInterface);
         createInterfaceOtherConfig(terminationPoint, ovsInterface);
         createInterfaceExternalIds(terminationPoint, ovsInterface);
+        createInterfaceLldp(terminationPoint, ovsInterface);
     }
 
     private void createInterfaceType(final OvsdbTerminationPointAugmentation terminationPoint,
@@ -219,6 +222,29 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete OVSDB interface other_config", e);
             }
+        }
+    }
+
+    private void createInterfaceLldp(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        try {
+            List<InterfaceLldp> interfaceLldpList =
+                    terminationPoint.getInterfaceLldp();
+            if (interfaceLldpList != null && !interfaceLldpList.isEmpty()) {
+                Map<String, String> interfaceLldpMap = new HashMap<>();
+                for (InterfaceLldp interfaceLldp : interfaceLldpList) {
+                    interfaceLldpMap.put(interfaceLldp.getLldpKey(), interfaceLldp.getLldpValue());
+                }
+                try {
+                    ovsInterface.setLldp(ImmutableMap.copyOf(interfaceLldpMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB interface lldp");
+                }
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }
 

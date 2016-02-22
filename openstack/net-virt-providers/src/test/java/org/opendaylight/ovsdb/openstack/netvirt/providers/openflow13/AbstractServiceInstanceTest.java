@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +34,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -42,10 +44,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.base.Optional;
@@ -54,7 +55,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link AbstractServiceInstance}
  */
-//@PrepareForTest(ServiceHelper.class)
 @RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")
 public class AbstractServiceInstanceTest {
@@ -71,7 +71,7 @@ public class AbstractServiceInstanceTest {
     private final String NODE_ID = Constants.INTEGRATION_BRIDGE + ":" +  ID;
 
     /**
-     * Test method {@link AbstractServiceInstance#isBridgeInPipeline(String)}
+     * Test method {@link AbstractServiceInstance#isBridgeInPipeline(Node)}
      */
     @Test
     public void testIsBridgeInPipeline() {
@@ -85,7 +85,23 @@ public class AbstractServiceInstanceTest {
     @Test
     public void testGetTable() {
         abstractServiceInstance.setService(service);
-        assertEquals("Error, getTable() did not return the correct value", 70, abstractServiceInstance.getTable());
+        assertEquals("Error, getTable() did not return the correct value",
+                service.getTable(), abstractServiceInstance.getTable());
+
+        when(orchestrator.getTableOffset()).thenReturn(Service.DIRECTOR.getTable());
+        assertEquals("Error, getTable() did not return the correct value",
+                (short)(Service.DIRECTOR.getTable() + service.getTable()), abstractServiceInstance.getTable());
+    }
+
+    /**
+     * Test method {@link AbstractServiceInstance@getTable(Service}
+     */
+    @Test
+    public void testGetTableWithService() {
+        when(orchestrator.getTableOffset()).thenReturn((short)0);
+        abstractServiceInstance.setService(service);
+        assertEquals("Error, getTables(service) did not return the correct value",
+                Service.L2_FORWARDING.getTable(), abstractServiceInstance.getTable(Service.L2_FORWARDING));
     }
 
     @Test
@@ -140,6 +156,9 @@ public class AbstractServiceInstanceTest {
         FlowBuilder flowBuilder = mock(FlowBuilder.class);
         when(flowBuilder.getKey()).thenReturn(mock(FlowKey.class));
 
+        NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
+        MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));
+
         abstractServiceInstance.writeFlow(flowBuilder, nodeBuilder);
 
         //verify(transaction, times(1)).put(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class), any(DataObject.class), eq(true));
@@ -162,6 +181,9 @@ public class AbstractServiceInstanceTest {
 
         FlowBuilder flowBuilder = mock(FlowBuilder.class);
         when(flowBuilder.getKey()).thenReturn(mock(FlowKey.class));
+
+        NetvirtProvidersProvider netvirtProvider = mock(NetvirtProvidersProvider.class);
+        MemberModifier.field(NetvirtProvidersProvider.class, "hasProviderEntityOwnership").set(netvirtProvider, new AtomicBoolean(true));
 
         abstractServiceInstance.removeFlow(flowBuilder, nodeBuilder);
         verify(transaction, times(1)).delete(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class));
@@ -193,7 +215,7 @@ public class AbstractServiceInstanceTest {
     }
 
     /**
-     * Test method {@link AbstractServiceInstance#programDefaultPipelineRule(String)}
+     * Test method {@link AbstractServiceInstance#programDefaultPipelineRule(Node)}
      */
     @Test
     public void testProgramDefaultPipelineRule() {
@@ -222,18 +244,17 @@ public class AbstractServiceInstanceTest {
         verify(abstractServiceInstance, times(1)).writeFlow(any(FlowBuilder.class), any(NodeBuilder.class));
     }
 
-//    @Test TODO - re-activate test
+    @Test
     public void testSetDependencies() throws Exception {
         PipelineOrchestrator pipelineOrchestrator = mock(PipelineOrchestrator.class);
         Southbound southbound = mock(Southbound.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, abstractServiceInstance)).thenReturn(pipelineOrchestrator);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, abstractServiceInstance)).thenReturn(southbound);
+        ServiceHelper.overrideGlobalInstance(PipelineOrchestrator.class, pipelineOrchestrator);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
 
         abstractServiceInstance.setDependencies(mock(ServiceReference.class), mock(AbstractServiceInstance.class));
 
-        assertEquals("Error, did not return the correct object", getField("pipelineOrchestrator"), pipelineOrchestrator);
+        assertEquals("Error, did not return the correct object", getField("orchestrator"), pipelineOrchestrator);
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
     }
 

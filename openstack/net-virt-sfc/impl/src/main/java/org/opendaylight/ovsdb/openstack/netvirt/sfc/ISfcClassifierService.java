@@ -9,12 +9,13 @@
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
 import java.net.InetAddress;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.access.control.list.rev150317.access.lists.acl.access.list.entries.ace.Matches;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 
 public interface ISfcClassifierService {
-    void programIngressClassifier(long dataPathId, String ruleName, Matches matches,
-                                  NshUtils nshHeader, long vxGpeOfPort, boolean write);
+    void programIngressClassifier(long dataPathId, String ruleName, Matches matches, long nsp, short nsi,
+                                  NshUtils nshHeader, long vxGpeOfPort, String rspName, boolean write);
 
     void programSfcTable(long dataPathId, long vxGpeOfPort, short goToTableId, boolean write);
 
@@ -22,10 +23,10 @@ public interface ISfcClassifierService {
                                   int tunnelOfPort, int tunnelId, short gotoTableId, boolean write);
 
     void programEgressClassifier(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
-                                 long sfOfPort, int tunnelId, boolean write);
+                                 long sfOfPort, int tunnelId, String rspName, boolean write);
 
     void programEgressClassifierBypass(long dataPathId, long vxGpeOfPort, long nsp, short nsi,
-                                       long sfOfPort, int tunnelId, boolean write);
+                                       long sfOfPort, int tunnelId, String rspName, boolean write);
 
     void program_sfEgress(long dataPathId, int dstPort, boolean write);
 
@@ -33,5 +34,7 @@ public interface ISfcClassifierService {
                            String ipAddress, String sfDplName, boolean write);
 
     void programStaticArpEntry(long dataPathId, long ofPort, String macAddressStr,
-                               String ipAddress, boolean write);
+                               String ipAddress, String rspName, boolean write);
+
+    void clearFlows(DataBroker dataBroker, String rspName);
 }

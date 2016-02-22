@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.impl;
 
 import java.util.Map.Entry;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -38,37 +39,30 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableBiMap;
 
-public class NeutronSecurityRuleDataChangeListener implements DataChangeListener, AutoCloseable {
+public class NeutronSecurityRuleDataChangeListener implements ClusteredDataChangeListener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(NeutronSecurityRuleDataChangeListener.class);
 
-    private static final ImmutableBiMap<Class<? extends DirectionBase>, String> DIRECTION_MAP
-        = new ImmutableBiMap.Builder<Class<? extends DirectionBase>, String>()
-        .put(DirectionEgress.class, "egress")
-        .put(DirectionIngress.class, "ingress").build();
-    private static final ImmutableBiMap<Class<? extends ProtocolBase>,String> PROTOCOL_MAP
-            = new ImmutableBiMap.Builder<Class<? extends ProtocolBase>,String>()
-            .put(ProtocolIcmp.class,"icmp")
-            .put(ProtocolTcp.class,"tcp")
-            .put(ProtocolUdp.class,"udp")
-            .put(ProtocolIcmpV6.class,"icmpv6")
-            .build();
-    private static final ImmutableBiMap<Class<? extends EthertypeBase>,String> ETHERTYPE_MAP
-            = new ImmutableBiMap.Builder<Class<? extends EthertypeBase>,String>()
-            .put(EthertypeV4.class,"IPv4")
-            .put(EthertypeV6.class,"IPv6")
-            .build();
+    private static final ImmutableBiMap<Class<? extends DirectionBase>, String> DIRECTION_MAP = ImmutableBiMap.of(
+            DirectionEgress.class, NeutronSecurityRule.DIRECTION_EGRESS,
+            DirectionIngress.class, NeutronSecurityRule.DIRECTION_INGRESS);
+    private static final ImmutableBiMap<Class<? extends ProtocolBase>, String> PROTOCOL_MAP = ImmutableBiMap.of(
+            ProtocolIcmp.class, NeutronSecurityRule.PROTOCOL_ICMP,
+            ProtocolTcp.class, NeutronSecurityRule.PROTOCOL_TCP,
+            ProtocolUdp.class, NeutronSecurityRule.PROTOCOL_UDP,
+            ProtocolIcmpV6.class, NeutronSecurityRule.PROTOCOL_ICMPV6);
+    private static final ImmutableBiMap<Class<? extends EthertypeBase>,String> ETHERTYPE_MAP = ImmutableBiMap.of(
+            EthertypeV4.class, NeutronSecurityRule.ETHERTYPE_IPV4,
+            EthertypeV6.class, NeutronSecurityRule.ETHERTYPE_IPV6);
 
     private ListenerRegistration<DataChangeListener> registration;
-    private DataBroker db;
 
     public NeutronSecurityRuleDataChangeListener(DataBroker db) {
-        this.db = db;
         InstanceIdentifier<SecurityRule> path = InstanceIdentifier
                 .create(Neutron.class).child(SecurityRules.class)
                 .child(SecurityRule.class);
         LOG.debug("Register listener for Neutron Secutiry rules model data changes");
-        registration = this.db.registerDataChangeListener(
+        registration = db.registerDataChangeListener(
                 LogicalDatastoreType.CONFIGURATION, path, this,
                 DataChangeScope.ONE);
 
@@ -163,12 +157,10 @@ public class NeutronSecurityRuleDataChangeListener implements DataChangeListener
                     .getEthertype()));
         }
         if (rule.getPortRangeMin() != null) {
-            answer.setSecurityRulePortMin(Integer.valueOf(rule
-                    .getPortRangeMin()));
+            answer.setSecurityRulePortMin(rule.getPortRangeMin());
         }
         if (rule.getPortRangeMax() != null) {
-            answer.setSecurityRulePortMax(Integer.valueOf(rule
-                    .getPortRangeMax()));
+            answer.setSecurityRulePortMax(rule.getPortRangeMax());
         }
         if (rule.getId() != null) {
             answer.setID(rule.getId().getValue());

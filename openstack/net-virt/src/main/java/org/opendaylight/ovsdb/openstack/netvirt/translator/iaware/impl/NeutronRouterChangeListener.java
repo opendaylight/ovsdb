@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -23,6 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_Interfa
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronRouter_NetworkReference;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.iaware.INeutronRouterAware;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.l3.attributes.Routes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.Routers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.Router;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.routers.router.Interfaces;
@@ -34,7 +36,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NeutronRouterChangeListener implements DataChangeListener, AutoCloseable{
+public class NeutronRouterChangeListener implements ClusteredDataChangeListener, AutoCloseable{
     private static final Logger LOG = LoggerFactory.getLogger(NeutronRouterChangeListener.class);
 
     private ListenerRegistration<DataChangeListener> registration;
@@ -124,8 +126,8 @@ public class NeutronRouterChangeListener implements DataChangeListener, AutoClos
             result.setGatewayPortId(String.valueOf(router.getGatewayPortId().getValue()));
         }
         if (router.getRoutes() != null) {
-            List<String> routes = new ArrayList<>();
-            for (String route : router.getRoutes()) {
+            List<Routes> routes = new ArrayList<>();
+            for (Routes route : router.getRoutes()) {
                 routes.add(route);
             }
             result.setRoutes(routes);

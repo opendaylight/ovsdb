@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 import java.net.InetAddress;
 import java.util.Map;
@@ -28,7 +29,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
@@ -305,5 +308,20 @@ public class OvsdbConnectionManagerTest {
         //TODO: Write unit tests for entity ownership service related code.
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership", OvsdbConnectionInstance.class));
         assertEquals("ERROR", client, ovsdbConnectionManager.connect(PowerMockito.mock(InstanceIdentifier.class), ovsdbNode));
+    }
+
+    @Test
+    public void testHandleOwnershipChanged() throws Exception {
+        Entity entity = new Entity("entityType", "entityName");
+        ConnectionInfo key = mock(ConnectionInfo.class);
+
+        OvsdbConnectionInstance ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker, iid);
+        entityConnectionMap.put(entity, ovsdbConnectionInstance);
+
+        MemberModifier.field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnectionManager, entityConnectionMap);
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "putConnectionInstance", ConnectionInfo.class, OvsdbConnectionInstance.class));
+        EntityOwnershipChange ownershipChange = new EntityOwnershipChange(entity, true, false, false);
+        Whitebox.invokeMethod(ovsdbConnectionManager, "handleOwnershipChanged", ownershipChange);
+        PowerMockito.verifyPrivate(ovsdbConnectionManager, times(1)).invoke("putConnectionInstance", key, ovsdbConnectionInstance);
     }
 }

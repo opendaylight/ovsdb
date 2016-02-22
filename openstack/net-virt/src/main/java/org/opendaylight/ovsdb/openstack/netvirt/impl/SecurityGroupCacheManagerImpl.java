@@ -34,20 +34,24 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Aswin Suryanarayanan.
  */
 
-public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityGroupCacheManger{
+public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityGroupCacheManger {
 
     private final Map<String, Set<String>> securityGroupCache = new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(SecurityGroupCacheManagerImpl.class);
     private volatile SecurityServicesManager securityServicesManager;
     private volatile INeutronPortCRUD neutronPortCache;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     @Override
     public void portAdded(String securityGroupUuid, String portUuid) {
         LOG.debug("In portAdded securityGroupUuid:" + securityGroupUuid + " portUuid:" + portUuid);
         NeutronPort port = neutronPortCache.getPort(portUuid);
         if (port == null) {
-            LOG.debug("In portAdded no neutron port found:" + " portUuid:" + portUuid);
-            return;
+            port = neutronL3Adapter.getPortFromCleanupCache(portUuid);
+            if (port == null) {
+                LOG.error("In portAdded no neutron port found:" + " portUuid:" + portUuid);
+                return;
+            }
         }
         processPortAdded(securityGroupUuid,port);
     }
@@ -56,9 +60,13 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
     public void portRemoved(String securityGroupUuid, String portUuid) {
         LOG.debug("In portRemoved securityGroupUuid:" + securityGroupUuid + " portUuid:" + portUuid);
         NeutronPort port = neutronPortCache.getPort(portUuid);
+
         if (port == null) {
-            LOG.debug("In portRemoved no neutron port found:" + " portUuid:" + portUuid);
-            return;
+            port = neutronL3Adapter.getPortFromCleanupCache(portUuid);
+            if (port == null) {
+                LOG.error("In portRemoved no neutron port found:" + " portUuid:" + portUuid);
+                return;
+            }
         }
         processPortRemoved(securityGroupUuid,port);
     }
@@ -79,6 +87,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         LOG.debug("In removeFromCache remoteSgUuid:" + remoteSgUuid + " portUuid:" + portUuid);
         Set<String> portList = securityGroupCache.get(remoteSgUuid);
         if (null == portList) {
+            LOG.debug("The port list is empty for security group:" + remoteSgUuid);
             return;
         }
         for (Iterator<String> iterator = portList.iterator(); iterator.hasNext();) {
@@ -101,6 +110,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         LOG.debug("In processPortAdded securityGroupUuid:" + securityGroupUuid + " NeutronPort:" + port);
         Set<String> portList = this.securityGroupCache.get(securityGroupUuid);
         if (null == portList) {
+            LOG.debug("The port list is empty for security group:" + securityGroupUuid);
             return;
         }
         for (String cachedportUuid : portList) {
@@ -109,7 +119,9 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
             }
             NeutronPort cachedport = neutronPortCache.getPort(cachedportUuid);
             if (null == cachedport) {
-                return;
+                LOG.error("In processPortAdded cachedport port not found in neuton cache:"
+                            + " cachedportUuid:" + cachedportUuid);
+                continue;
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
             for (NeutronSecurityRule securityRule : remoteSecurityRules) {
@@ -131,6 +143,7 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
         LOG.debug("In processPortRemoved securityGroupUuid:" + securityGroupUuid + " port:" + port);
         Set<String> portList = this.securityGroupCache.get(securityGroupUuid);
         if (null == portList) {
+            LOG.debug("The port list is empty for security group:" + securityGroupUuid);
             return;
         }
         for (String cachedportUuid : portList) {
@@ -138,8 +151,13 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
                 continue;
             }
             NeutronPort cachedport = neutronPortCache.getPort(cachedportUuid);
-            if (null == cachedport) {
-                return;
+            if (cachedport == null) {
+                cachedport = neutronL3Adapter.getPortFromCleanupCache(cachedportUuid);
+                if (null == cachedport) {
+                    LOG.error("In processPortRemoved cachedport port not found in neuton cache:"
+                                + " cachedportUuid:" + cachedportUuid);
+                    continue;
+                }
             }
             List<NeutronSecurityRule> remoteSecurityRules = retrieveSecurityRules(securityGroupUuid, cachedportUuid);
             for (NeutronSecurityRule securityRule : remoteSecurityRules) {
@@ -160,8 +178,12 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
          */
         LOG.debug("In retrieveSecurityRules securityGroupUuid:" + securityGroupUuid + " portUuid:" + portUuid);
         NeutronPort port = neutronPortCache.getPort(portUuid);
-        if (null == port) {
-            return null;
+        if (port == null) {
+            port = neutronL3Adapter.getPortFromCleanupCache(portUuid);
+            if (null == port) {
+                LOG.error("In retrieveSecurityRules no neutron port found:" + " portUuid:" + portUuid);
+                return null;
+            }
         }
         List<NeutronSecurityRule> remoteSecurityRules = new ArrayList<>();
         List<NeutronSecurityGroup> securityGroups = port.getSecurityGroups();
@@ -200,6 +222,8 @@ public class SecurityGroupCacheManagerImpl implements ConfigInterface, SecurityG
 
     @Override
     public void setDependencies(ServiceReference serviceReference) {
+        neutronL3Adapter =
+                (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
         securityServicesManager =
                 (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
         neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);

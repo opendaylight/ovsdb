@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableBiMap;
 
-public class NeutronNetworkChangeListener implements DataChangeListener, AutoCloseable {
+public class NeutronNetworkChangeListener implements ClusteredDataChangeListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(NeutronNetworkChangeListener.class);
 
     private static final ImmutableBiMap<Class<? extends NetworkTypeBase>,String> NETWORK_MAP

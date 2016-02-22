@@ -450,4 +450,19 @@ public class NetvirtSfcStandaloneOF13Provider implements INetvirtSfcOF13Provider
         nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
+
+    @Override
+    public void removeRsp(RenderedServicePath change) {
+        LOG.warn("removeRsp is not implemented yet");
+    }
+
+    @Override
+    public void addRsp(RenderedServicePath change) {
+        LOG.warn("addRsp is not implemented yet");
+    }
+
+    @Override
+    public void updateRsp(RenderedServicePath change) {
+        LOG.warn("updateRsp is not implemented yet");
+    }
 }

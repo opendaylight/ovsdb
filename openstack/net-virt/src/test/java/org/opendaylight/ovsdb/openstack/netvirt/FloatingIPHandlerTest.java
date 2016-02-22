@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,21 +21,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronFloatingIP;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link FloatingIPHandler}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class FloatingIPHandlerTest {
 
     @InjectMocks FloatingIPHandler floatingHandler;
@@ -80,14 +77,13 @@ public class FloatingIPHandlerTest {
         EventDispatcher eventDispatcher = mock(EventDispatcher.class);
         NeutronL3Adapter neutronL3Adapter = mock(NeutronL3Adapter.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, floatingHandler)).thenReturn(eventDispatcher);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, floatingHandler)).thenReturn(neutronL3Adapter);
+        ServiceHelper.overrideGlobalInstance(EventDispatcher.class, eventDispatcher);
+        ServiceHelper.overrideGlobalInstance(NeutronL3Adapter.class, neutronL3Adapter);
 
         floatingHandler.setDependencies(mock(ServiceReference.class));
 
-        assertEquals("Error, did not return the correct object", floatingHandler.eventDispatcher, eventDispatcher);
-        assertEquals("Error, did not return the correct object", getNeutronL3Adapter(), neutronL3Adapter);
+        assertEquals("Error, did not return the correct object", eventDispatcher, floatingHandler.eventDispatcher);
+        assertEquals("Error, did not return the correct object", neutronL3Adapter, getNeutronL3Adapter());
     }
 
     private NeutronL3Adapter getNeutronL3Adapter() throws Exception {

@@ -10,9 +10,13 @@ package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
@@ -25,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv6MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.MetadataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TcpFlagMatchBuilder;
@@ -32,6 +37,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.SctpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
@@ -43,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev14
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg5;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmOfEthDst;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.ExtensionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.GeneralAugMatchNodesNodeTableFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.GeneralAugMatchNodesNodeTableFlowBuilder;
@@ -51,6 +59,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ge
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.general.extension.list.grouping.ExtensionListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxCtStateKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxCtZoneKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg0Key;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg1Key;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg2Key;
@@ -60,12 +70,23 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg6Key;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg7Key;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxTunIdKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfTcpDstKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfTcpSrcKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfUdpDstKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmOfUdpSrcKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.ct.state.grouping.NxmNxCtStateBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.ct.zone.grouping.NxmNxCtZoneBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.reg.grouping.NxmNxRegBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.tun.id.grouping.NxmNxTunIdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNspKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNsiKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsi.grouping.NxmNxNsiBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.eth.dst.grouping.NxmOfEthDstBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.tcp.src.grouping.NxmOfTcpSrcBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.tcp.dst.grouping.NxmOfTcpDstBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.udp.dst.grouping.NxmOfUdpDstBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.udp.src.grouping.NxmOfUdpSrcBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,11 +98,23 @@ public class MatchUtils {
     public static final short ICMP_SHORT = 1;
     public static final short TCP_SHORT = 6;
     public static final short UDP_SHORT = 17;
+    public static final short SCTP_SHORT = 132;
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
     private static final int TCP_SYN = 0x0002;
     public static final String ICMP = "icmp";
+    public static final String ICMPV6 = "icmpv6";
     public static final short ALL_ICMP = -1;
+    public static final long ETHERTYPE_IPV4 = 0x0800;
+    public static final long ETHERTYPE_IPV6 = 0x86dd;
+    public static final int UNTRACKED_CT_STATE = 0x00;
+    public static final int UNTRACKED_CT_STATE_MASK = 0x20;
+    public static final int TRACKED_EST_CT_STATE = 0x22;
+    public static final int TRACKED_EST_CT_STATE_MASK = 0x22;
+    public static final int TRACKED_NEW_CT_STATE = 0x21;
+    public static final int TRACKED_NEW_CT_STATE_MASK = 0x21;
+    public static final int NEW_CT_STATE = 0x01;
+    public static final int NEW_CT_STATE_MASK = 0x01;
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -125,6 +158,27 @@ public class MatchUtils {
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(etherType));
         ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        return matchBuilder;
+    }
+
+    public static MatchBuilder createEthSrcDstMatch(MatchBuilder matchBuilder, MacAddress srcMac, MacAddress dstMac) {
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        if (srcMac != null) {
+            EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
+            ethSourceBuilder.setAddress(new MacAddress(srcMac));
+            ethernetMatch.setEthernetSource(ethSourceBuilder.build());
+        }
+        if (dstMac != null) {
+            EthernetDestinationBuilder ethDestinationBuild = new EthernetDestinationBuilder();
+            ethDestinationBuild.setAddress(new MacAddress(dstMac));
+            ethernetMatch.setEthernetDestination(ethDestinationBuild.build());
+        }
+        if (matchBuilder.getEthernetMatch() != null && matchBuilder.getEthernetMatch().getEthernetType() != null) {
+            ethernetMatch.setEthernetType(matchBuilder.getEthernetMatch().getEthernetType());
+        }
+
         matchBuilder.setEthernetMatch(ethernetMatch.build());
 
         return matchBuilder;
@@ -220,11 +274,39 @@ public class MatchUtils {
 
         // Build the ICMPv4 Match
         Icmpv4MatchBuilder icmpv4match = new Icmpv4MatchBuilder();
-        if (type != ALL_ICMP || code != ALL_ICMP) {
+        if (type != ALL_ICMP) {
             icmpv4match.setIcmpv4Type(type);
+        }
+        if (code != ALL_ICMP) {
             icmpv4match.setIcmpv4Code(code);
         }
         matchBuilder.setIcmpv4Match(icmpv4match.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     * Match ICMPv6 code and type
+     *
+     * @param matchBuilder MatchBuilder Object
+     * @param type         short representing an ICMP type
+     * @param code         short representing an ICMP code
+     * @return matchBuilder Map MatchBuilder Object with a match
+     */
+    public static MatchBuilder createICMPv6Match(MatchBuilder matchBuilder, short type, short code) {
+
+        // Build the IPv6 Match required per OVS Syntax
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol((short) 58);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        // Build the ICMPv6 Match
+        Icmpv6MatchBuilder icmpv6match = new Icmpv6MatchBuilder();
+        if (type != ALL_ICMP || code != ALL_ICMP) {
+            icmpv6match.setIcmpv6Type(type);
+            icmpv6match.setIcmpv6Code(code);
+        }
+        matchBuilder.setIcmpv6Match(icmpv6match.build());
 
         return matchBuilder;
     }
@@ -407,6 +489,35 @@ public class MatchUtils {
         EthernetMatchBuilder ethType = new EthernetMatchBuilder();
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethType.build());
+
+        IpMatchBuilder ipMmatch = new IpMatchBuilder();
+        if (ipProtocol == TCP_SHORT) {
+            ipMmatch.setIpProtocol(TCP_SHORT);
+        }
+        else if (ipProtocol == UDP_SHORT) {
+            ipMmatch.setIpProtocol(UDP_SHORT);
+        }
+        else if (ipProtocol == ICMP_SHORT) {
+            ipMmatch.setIpProtocol(ICMP_SHORT);
+        }
+        matchBuilder.setIpMatch(ipMmatch.build());
+        return matchBuilder;
+    }
+
+    /**
+     * Create  TCP Port Match
+     *
+     * @param matchBuilder MatchBuilder Object without a match yet
+     * @param ipProtocol   Integer representing the IP protocol
+     * @return matchBuilder Map MatchBuilder Object with a match
+     */
+    public static MatchBuilder createIpv6ProtocolMatch(MatchBuilder matchBuilder, short ipProtocol) {
+
+        EthernetMatchBuilder ethType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
         ethType.setEthernetType(ethTypeBuilder.build());
         matchBuilder.setEthernetMatch(ethType.build());
 
@@ -904,7 +1015,7 @@ public class MatchUtils {
     }
 
     /**
-     * Create a DHCP match with pot provided.
+     * Create a DHCP match with port provided.
      *
      * @param matchBuilder the match builder
      * @param srcPort the source port
@@ -917,6 +1028,36 @@ public class MatchUtils {
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
+     * Create a DHCP match with port provided.
+     *
+     * @param matchBuilder the match builder
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return the DHCP match
+     */
+    public static MatchBuilder createDhcpv6Match(MatchBuilder matchBuilder,
+                                                 int srcPort, int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
         ethernetMatch.setEthernetType(ethTypeBuilder.build());
         matchBuilder.setEthernetMatch(ethernetMatch.build());
 
@@ -970,6 +1111,42 @@ public class MatchUtils {
     }
 
     /**
+     * Creates DHCPv6 server packet match with DHCP mac address and port.
+     *
+     * @param matchBuilder the matchbuilder
+     * @param dhcpServerMac MAc address of the DHCP server of the subnet
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return the DHCP server match
+     */
+    public static MatchBuilder createDhcpv6ServerMatch(MatchBuilder matchBuilder, String dhcpServerMac, int srcPort,
+            int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
+        ethSourceBuilder.setAddress(new MacAddress(dhcpServerMac));
+        ethernetMatch.setEthernetSource(ethSourceBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
      * Creates a Match with src ip address mac address set.
      * @param matchBuilder MatchBuilder Object
      * @param srcip String containing an IPv4 prefix
@@ -995,13 +1172,38 @@ public class MatchUtils {
     }
 
     /**
+     * Creates a Match with src ip address mac address set.
+     * @param matchBuilder MatchBuilder Object
+     * @param srcip String containing an IPv6 prefix
+     * @param srcMac The source macAddress
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createSrcL3Ipv6MatchWithMac(MatchBuilder matchBuilder, Ipv6Prefix srcip, MacAddress srcMac) {
+
+        Ipv6MatchBuilder ipv6MatchBuilder = new Ipv6MatchBuilder();
+        ipv6MatchBuilder.setIpv6Source(new Ipv6Prefix(srcip));
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        eth.setEthernetSource(new EthernetSourceBuilder()
+                .setAddress(srcMac)
+                .build());
+
+        matchBuilder.setLayer3Match(ipv6MatchBuilder.build());
+        matchBuilder.setEthernetMatch(eth.build());
+        return matchBuilder;
+
+    }
+
+    /**
      * Creates a ether net match with ether type set to 0x0800L.
      * @param matchBuilder MatchBuilder Object
      * @param srcMac The source macAddress
      * @param dstMac The destination mac address
      * @return matchBuilder Map Object with a match
      */
-    public static MatchBuilder createEtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
+    public static MatchBuilder createV4EtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
     {
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
@@ -1018,6 +1220,32 @@ public class MatchUtils {
         matchBuilder.setEthernetMatch(eth.build());
         return matchBuilder;
     }
+
+    /**
+     * Creates a ether net match with ether type set to 0x86DDL.
+     * @param matchBuilder MatchBuilder Object
+     * @param srcMac The source macAddress
+     * @param dstMac The destination mac address
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createV6EtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
+    {
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        if (null != srcMac) {
+            eth.setEthernetSource(new EthernetSourceBuilder()
+            .setAddress(new MacAddress(srcMac)).build());
+        }
+        if (null != dstMac) {
+            eth.setEthernetDestination(new EthernetDestinationBuilder()
+                           .setAddress(new MacAddress(dstMac)).build());
+        }
+        matchBuilder.setEthernetMatch(eth.build());
+        return matchBuilder;
+    }
+
     /**
      * Adds remote Ip prefix to existing match.
      * @param matchBuilder The match builder
@@ -1038,10 +1266,46 @@ public class MatchUtils {
 
         return matchBuilder;
     }
+
+    /**
+     * Adds remote Ipv6 prefix to existing match.
+     * @param matchBuilder The match builder
+     * @param sourceIpPrefix The source IP prefix
+     * @param destIpPrefix The destination IP prefix
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder addRemoteIpv6Prefix(MatchBuilder matchBuilder,
+                                                   Ipv6Prefix sourceIpPrefix,Ipv6Prefix destIpPrefix) {
+        Ipv6MatchBuilder ipv6match = new Ipv6MatchBuilder();
+        if (null != sourceIpPrefix) {
+            ipv6match.setIpv6Source(sourceIpPrefix);
+        }
+        if (null != destIpPrefix) {
+            ipv6match.setIpv6Destination(destIpPrefix);
+        }
+        matchBuilder.setLayer3Match(ipv6match.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     * Add a DSCP match to an existing match
+     * @param matchBuilder Map matchBuilder MatchBuilder Object with a match
+     * @param dscpValue
+     * @return {@link MatchBuilder}
+     */
+    public static MatchBuilder addDscp(MatchBuilder matchBuilder, short dscpValue) {
+        createEtherTypeMatch(matchBuilder, new EtherType(ETHERTYPE_IPV4));
+        return matchBuilder.setIpMatch(
+                new IpMatchBuilder()
+                        .setIpDscp(new Dscp(dscpValue))
+                        .build());
+    }
+
     /**
      * Add a layer4 match to an existing match
      *
-     * @param matchBuilder Map matchBuilder MatchBuilder Object without a match
+     * @param matchBuilder Map matchBuilder MatchBuilder Object with a match
      * @param protocol The layer4 protocol
      * @param srcPort The src port
      * @param destPort The destination port
@@ -1070,12 +1334,127 @@ public class MatchUtils {
                 udpMatch.setUdpDestinationPort(new PortNumber(destPort));
             }
             matchBuilder.setLayer4Match(udpMatch.build());
+        } else if (SCTP_SHORT == protocol) {
+            ipmatch.setIpProtocol(SCTP_SHORT);
+            SctpMatchBuilder sctpMatchBuilder = new SctpMatchBuilder();
+            if (0 != srcPort) {
+                sctpMatchBuilder.setSctpSourcePort(new PortNumber(srcPort));
+            }
+            if (0 != destPort) {
+                sctpMatchBuilder.setSctpDestinationPort(new PortNumber(destPort));
+            }
+            matchBuilder.setLayer4Match(sctpMatchBuilder.build());
         }
         matchBuilder.setIpMatch(ipmatch.build());
 
         return matchBuilder;
     }
 
+    /**
+     * Add a layer4 match to an existing match with mask
+     *
+     * @param matchBuilder Map matchBuilder MatchBuilder Object with a match.
+     * @param protocol The layer4 protocol
+     * @param srcPort The src port
+     * @param destPort The destination port
+     * @param mask the mask for the port
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder addLayer4MatchWithMask(MatchBuilder matchBuilder,
+                                                      int protocol, int srcPort, int destPort,int mask) {
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+
+        NxAugMatchNodesNodeTableFlow nxAugMatch = null;
+        GeneralAugMatchNodesNodeTableFlow genAugMatch = null;
+        if (protocol == TCP_SHORT) {
+            ipmatch.setIpProtocol(TCP_SHORT);
+            if (0 != srcPort) {
+                NxmOfTcpSrcBuilder tcpSrc = new NxmOfTcpSrcBuilder();
+                tcpSrc.setPort(new PortNumber(srcPort));
+                tcpSrc.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder().setNxmOfTcpSrc(tcpSrc.build()).build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfTcpSrcKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            } else if (0 != destPort) {
+                NxmOfTcpDstBuilder tcpDst = new NxmOfTcpDstBuilder();
+                tcpDst.setPort(new PortNumber(destPort));
+                tcpDst.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmOfTcpDst(tcpDst.build())
+                .build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfTcpDstKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            }
+
+        } else if (UDP_SHORT == protocol) {
+            ipmatch.setIpProtocol(UDP_SHORT);
+            UdpMatchBuilder udpMatch = new UdpMatchBuilder();
+            if (0 != srcPort) {
+                NxmOfUdpSrcBuilder udpSrc = new NxmOfUdpSrcBuilder();
+                udpSrc.setPort(new PortNumber(srcPort));
+                udpSrc.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder().setNxmOfUdpSrc(udpSrc.build()).build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfUdpSrcKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            } else if (0 != destPort) {
+                NxmOfUdpDstBuilder udpDst = new NxmOfUdpDstBuilder();
+                udpDst.setPort(new PortNumber(destPort));
+                udpDst.setMask(mask);
+                nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmOfUdpDst(udpDst.build())
+                .build();
+                genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmOfUdpDstKey.class)
+                                                   .setExtension(new ExtensionBuilder()
+                                                   .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                                 .build()).build())).build();
+            }
+        }
+        matchBuilder.setIpMatch(ipmatch.build());
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, genAugMatch);
+        return matchBuilder;
+    }
+
+    public static MatchBuilder addCtState(MatchBuilder matchBuilder,int ct_state, int mask) {
+        NxmNxCtStateBuilder ctStateBuilder = new NxmNxCtStateBuilder();
+        ctStateBuilder.setCtState((long)ct_state);
+        ctStateBuilder.setMask((long)mask);
+        NxAugMatchNodesNodeTableFlow nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder()
+        .setNxmNxCtState(ctStateBuilder.build())
+        .build();
+        GeneralAugMatchNodesNodeTableFlow genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+        .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmNxCtStateKey.class)
+                                           .setExtension(new ExtensionBuilder()
+                                           .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                         .build()).build())).build();
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, genAugMatch);
+        return matchBuilder;
+    }
+
+    public static MatchBuilder addCtZone(MatchBuilder matchBuilder,int ct_zone) {
+        NxmNxCtZoneBuilder ctZoneBuilder = new NxmNxCtZoneBuilder();
+        ctZoneBuilder.setCtZone(ct_zone);
+        NxAugMatchNodesNodeTableFlow nxAugMatch = new NxAugMatchNodesNodeTableFlowBuilder()
+        .setNxmNxCtZone(ctZoneBuilder.build())
+        .build();
+        GeneralAugMatchNodesNodeTableFlow genAugMatch = new GeneralAugMatchNodesNodeTableFlowBuilder()
+        .setExtensionList(ImmutableList.of(new ExtensionListBuilder().setExtensionKey(NxmNxCtZoneKey.class)
+                                           .setExtension(new ExtensionBuilder()
+                                           .addAugmentation(NxAugMatchNodesNodeTableFlow.class, nxAugMatch)
+                                                         .build()).build())).build();
+        matchBuilder.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, genAugMatch);
+        return matchBuilder;
+    }
 
     public static class RegMatch {
         final Class<? extends NxmNxReg> reg;
@@ -1226,6 +1605,67 @@ public class MatchUtils {
      */
     public static Ipv4Prefix iPv4PrefixFromIPv4Address(String ipv4AddressString) {
         return new Ipv4Prefix(ipv4AddressString + "/32");
+    }
+
+    /**
+     * Create ipv6 prefix from ipv6 address, by appending /128 mask
+     *
+     * @param ipv6AddressString the ip address, in string format
+     * @return Ipv6Prefix with ipv6Address and /128 mask
+     */
+    public static Ipv6Prefix iPv6PrefixFromIPv6Address(String ipv6AddressString) {
+        return new Ipv6Prefix(ipv6AddressString + "/128");
+    }
+
+    /**
+     * Converts port range into a set of masked port ranges.
+     *
+     * @param portMin the strating port of the range.
+     * @param portMax the ending port of the range.
+     * @return the map contianing the port no and their mask.
+     *
+     */
+    public static Map<Integer,Integer>  getLayer4MaskForRange(int portMin, int portMax) {
+        int [] offset = {32768,16384,8192,4096,2048,1024,512,256,128,64,32,16,8,4,2,1};
+        int[] mask = {0x8000,0xC000,0xE000,0xF000,0xF800,0xFC00,0xFE00,0xFF00,
+            0xFF80,0xFFC0,0xFFE0,0xFFF0,0xFFF8,0xFFFC,0xFFFE,0xFFFF};
+        int noOfPorts = portMax - portMin + 1;
+        String binaryNoOfPorts = Integer.toBinaryString(noOfPorts);
+        int medianOffset = 16 - binaryNoOfPorts.length();
+        int medianLength = offset[medianOffset];
+        int median = 0;
+        for (int tempMedian = 0;tempMedian < portMax;) {
+            tempMedian = medianLength + tempMedian;
+            if (portMin < tempMedian) {
+                median = tempMedian;
+                break;
+            }
+        }
+        Map<Integer,Integer> portMap = new HashMap<Integer,Integer>();
+        int tempMedian = 0;
+        int currentMedain = median;
+        for (int tempMedianOffset = medianOffset;16 > tempMedianOffset;tempMedianOffset++) {
+            tempMedian = currentMedain - offset[tempMedianOffset];
+            if (portMin <= tempMedian) {
+                for (;portMin <= tempMedian;) {
+                    portMap.put(tempMedian, mask[tempMedianOffset]);
+                    currentMedain = tempMedian;
+                    tempMedian = tempMedian - offset[tempMedianOffset];
+                }
+            }
+        }
+        currentMedain = median;
+        for (int tempMedianOffset = medianOffset;16 > tempMedianOffset;tempMedianOffset++) {
+            tempMedian = currentMedain + offset[tempMedianOffset];
+            if (portMax >= tempMedian - 1) {
+                for (;portMax >= tempMedian - 1;) {
+                    portMap.put(currentMedain, mask[tempMedianOffset]);
+                    currentMedain = tempMedian;
+                    tempMedian = tempMedian  + offset[tempMedianOffset];
+                }
+            }
+        }
+        return portMap;
     }
 
     /**

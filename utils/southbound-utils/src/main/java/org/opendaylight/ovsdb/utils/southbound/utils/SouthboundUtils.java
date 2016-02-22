@@ -119,6 +119,10 @@ public class SouthboundUtils {
         return SouthboundMapper.createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, String bridgeName) {
+        return createInstanceIdentifier(key, new OvsdbBridgeName(bridgeName));
+    }
+
     public InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(Node node, String portName){
 
         InstanceIdentifier<TerminationPoint> terminationPointPath = InstanceIdentifier
@@ -176,13 +180,20 @@ public class SouthboundUtils {
     }
 
     public boolean addOvsdbNode(final ConnectionInfo connectionInfo) {
+        return addOvsdbNode(connectionInfo, OVSDB_UPDATE_TIMEOUT);
+    }
+
+    public boolean addOvsdbNode(final ConnectionInfo connectionInfo, long timeout) {
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
                 createInstanceIdentifier(connectionInfo),
                 createNode(connectionInfo));
-        try {
-            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        } catch (InterruptedException e) {
-            LOG.warn("Interrupted while waiting after adding OVSDB node {}", connectionInfoToString(connectionInfo), e);
+        if (timeout != 0) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted while waiting after adding OVSDB node {}",
+                        connectionInfoToString(connectionInfo), e);
+            }
         }
         return result;
     }
@@ -193,26 +204,40 @@ public class SouthboundUtils {
     }
 
     public boolean deleteOvsdbNode(final ConnectionInfo connectionInfo) {
+        return deleteOvsdbNode(connectionInfo, OVSDB_UPDATE_TIMEOUT);
+    }
+
+    public boolean deleteOvsdbNode(final ConnectionInfo connectionInfo, long timeout) {
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
                 createInstanceIdentifier(connectionInfo));
-        try {
-            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        } catch (InterruptedException e) {
-            LOG.warn("Interrupted while waiting after deleting OVSDB node {}", connectionInfoToString(connectionInfo),
-                    e);
+        if (timeout != 0) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted while waiting after deleting OVSDB node {}",
+                        connectionInfoToString(connectionInfo), e);
+            }
         }
         return result;
     }
 
     public Node connectOvsdbNode(final ConnectionInfo connectionInfo) {
-        addOvsdbNode(connectionInfo);
+        return connectOvsdbNode(connectionInfo, OVSDB_UPDATE_TIMEOUT);
+    }
+
+    public Node connectOvsdbNode(final ConnectionInfo connectionInfo, long timeout) {
+        addOvsdbNode(connectionInfo, timeout);
         Node node = getOvsdbNode(connectionInfo);
         LOG.info("Connected to {}", connectionInfoToString(connectionInfo));
         return node;
     }
 
     public boolean disconnectOvsdbNode(final ConnectionInfo connectionInfo) {
-        deleteOvsdbNode(connectionInfo);
+        return disconnectOvsdbNode(connectionInfo, OVSDB_UPDATE_TIMEOUT);
+    }
+
+    public boolean disconnectOvsdbNode(final ConnectionInfo connectionInfo, long timeout) {
+        deleteOvsdbNode(connectionInfo, timeout);
         LOG.info("Disconnected from {}", connectionInfoToString(connectionInfo));
         return true;
     }
@@ -272,13 +297,18 @@ public class SouthboundUtils {
     }
 
     public boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName) {
+        return deleteBridge(connectionInfo, bridgeName, OVSDB_UPDATE_TIMEOUT);
+    }
 
+    public boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName, long timeout) {
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
                 createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName)));
-        try {
-            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-        } catch (InterruptedException e) {
-            LOG.warn("Interrupted while waiting after deleting bridge {}", bridgeName, e);
+        if (timeout != 0) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted while waiting after deleting bridge {}", bridgeName, e);
+            }
         }
         return result;
     }
@@ -289,6 +319,18 @@ public class SouthboundUtils {
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
         return protocolList;
+    }
+
+    public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
+                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
+                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             final List<BridgeExternalIds> externalIds,
+                             final List<ControllerEntry> controllerEntries,
+                             final List<BridgeOtherConfigs> otherConfigs,
+                             final String dpid) throws InterruptedException {
+        return addBridge(connectionInfo, bridgeIid, bridgeName, bridgeNodeId, setProtocolEntries, failMode,
+                setManagedBy, dpType, externalIds, controllerEntries, otherConfigs, dpid);
     }
 
     /*
@@ -314,7 +356,7 @@ public class SouthboundUtils {
                              final List<BridgeExternalIds> externalIds,
                              final List<ControllerEntry> controllerEntries,
                              final List<BridgeOtherConfigs> otherConfigs,
-                             final String dpid) throws InterruptedException {
+                             final String dpid, long timeout) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         if (bridgeIid == null) {
@@ -356,7 +398,9 @@ public class SouthboundUtils {
                 ovsdbBridgeAugmentationBuilder.toString());
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 bridgeIid, bridgeNodeBuilder.build());
-        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+        if (timeout != 0) {
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+        }
         return result;
     }
 

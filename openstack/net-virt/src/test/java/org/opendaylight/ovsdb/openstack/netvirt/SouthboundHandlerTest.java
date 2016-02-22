@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.SouthboundEvent.Type;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
@@ -38,6 +39,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener.Ovsdb
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.DistributedArpService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -47,15 +49,11 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test fort {@link SouthboundHandler}
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SouthboundHandlerTest {
 
     @InjectMocks private SouthboundHandler southboundHandler;
@@ -65,6 +63,7 @@ public class SouthboundHandlerTest {
     @Mock private BridgeConfigurationManager bridgeConfigurationManager;
     @Mock private TenantNetworkManager tenantNetworkManager;
     @Mock private NetworkingProviderManager networkingProviderManager;
+    @Mock private DistributedArpService distributedArpService;
     @Mock private NeutronL3Adapter neutronL3Adapter;
     @Mock private NodeCacheManager nodeCacheManager;
     @Mock private OvsdbInventoryService ovsdbInventoryService;
@@ -175,16 +174,20 @@ public class SouthboundHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.ADD);
         southboundHandler.processEvent(ev);
+        verify(distributedArpService, times(1)).processInterfaceEvent(any(Node.class), any(OvsdbTerminationPointAugmentation.class), any(NeutronNetwork.class), any(Action.class));
         verify(neutronL3Adapter, times(1)).handleInterfaceEvent(any(Node.class), any(OvsdbTerminationPointAugmentation.class), any(NeutronNetwork.class), any(Action.class));
         verify(networkingProvider, times(1)).handleInterfaceUpdate(any(NeutronNetwork.class), any(Node.class), any(OvsdbTerminationPointAugmentation.class));
+        Mockito.reset(distributedArpService);
         Mockito.reset(neutronL3Adapter);
         Mockito.reset(networkingProvider);
 
         when(ev.getAction()).thenReturn(Action.UPDATE);
         southboundHandler.processEvent(ev);
+        verify(distributedArpService, times(1)).processInterfaceEvent(any(Node.class), any(OvsdbTerminationPointAugmentation.class), any(NeutronNetwork.class), any(Action.class));
         verify(neutronL3Adapter, times(1)).handleInterfaceEvent(any(Node.class), any(OvsdbTerminationPointAugmentation.class), any(NeutronNetwork.class), any(Action.class));
         verify(networkingProvider, times(1)).handleInterfaceUpdate(any(NeutronNetwork.class), any(Node.class), any(OvsdbTerminationPointAugmentation.class));
         Mockito.reset(neutronL3Adapter);
+        Mockito.reset(distributedArpService);
         Mockito.reset(networkingProvider);
 
 //        List<String> phyIfName = new ArrayList<String>();
@@ -225,8 +228,10 @@ public class SouthboundHandlerTest {
 
         when(ev.getAction()).thenReturn(Action.ADD);
         southboundHandler.processEvent(ev);
+        verify(distributedArpService, times(1)).processInterfaceEvent(any(Node.class), any(OvsdbTerminationPointAugmentation.class), any(NeutronNetwork.class), any(Action.class));
         verify(neutronL3Adapter, times(1)).handleInterfaceEvent(any(Node.class), any(OvsdbTerminationPointAugmentation.class), any(NeutronNetwork.class), any(Action.class));
         verify(networkingProvider, times(1)).handleInterfaceUpdate(any(NeutronNetwork.class), any(Node.class), any(OvsdbTerminationPointAugmentation.class));
+        Mockito.reset(distributedArpService);
         Mockito.reset(neutronL3Adapter);
         Mockito.reset(networkingProvider);
     }
@@ -239,20 +244,21 @@ public class SouthboundHandlerTest {
         BridgeConfigurationManager bridgeConfigurationManager = mock(BridgeConfigurationManager.class);
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
         NeutronL3Adapter neutronL3Adapter = mock(NeutronL3Adapter.class);
+        DistributedArpService distributedArpService = mock(DistributedArpService.class);
         Southbound southbound = mock(Southbound.class);
         EventDispatcher eventDispatcher = mock(EventDispatcher.class);
         OvsdbInventoryService ovsdbInventoryService = mock(OvsdbInventoryService.class);
 
-        PowerMockito.mockStatic(ServiceHelper.class);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(ConfigurationService.class, southboundHandler)).thenReturn(configurationService);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, southboundHandler)).thenReturn(networkingProviderManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(TenantNetworkManager.class, southboundHandler)).thenReturn(tenantNetworkManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, southboundHandler)).thenReturn(bridgeConfigurationManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, southboundHandler)).thenReturn(nodeCacheManager);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, southboundHandler)).thenReturn(neutronL3Adapter);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, southboundHandler)).thenReturn(southbound);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, southboundHandler)).thenReturn(eventDispatcher);
-        PowerMockito.when(ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, southboundHandler)).thenReturn(ovsdbInventoryService);
+        ServiceHelper.overrideGlobalInstance(ConfigurationService.class, configurationService);
+        ServiceHelper.overrideGlobalInstance(NetworkingProviderManager.class, networkingProviderManager);
+        ServiceHelper.overrideGlobalInstance(TenantNetworkManager.class, tenantNetworkManager);
+        ServiceHelper.overrideGlobalInstance(BridgeConfigurationManager.class, bridgeConfigurationManager);
+        ServiceHelper.overrideGlobalInstance(NodeCacheManager.class, nodeCacheManager);
+        ServiceHelper.overrideGlobalInstance(DistributedArpService.class, distributedArpService);
+        ServiceHelper.overrideGlobalInstance(NeutronL3Adapter.class, neutronL3Adapter);
+        ServiceHelper.overrideGlobalInstance(Southbound.class, southbound);
+        ServiceHelper.overrideGlobalInstance(EventDispatcher.class, eventDispatcher);
+        ServiceHelper.overrideGlobalInstance(OvsdbInventoryService.class, ovsdbInventoryService);
 
         southboundHandler.setDependencies(mock(ServiceReference.class));
         assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
@@ -260,6 +266,7 @@ public class SouthboundHandlerTest {
         assertEquals("Error, did not return the correct object", getField("tenantNetworkManager"), tenantNetworkManager);
         assertEquals("Error, did not return the correct object", getField("bridgeConfigurationManager"), bridgeConfigurationManager);
         assertEquals("Error, did not return the correct object", getField("nodeCacheManager"), nodeCacheManager);
+        assertEquals("Error, did not return the correct object", getField("distributedArpService"), distributedArpService);
         assertEquals("Error, did not return the correct object", getField("neutronL3Adapter"), neutronL3Adapter);
         assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
         assertEquals("Error, did not return the correct object", getField("ovsdbInventoryService"), ovsdbInventoryService);

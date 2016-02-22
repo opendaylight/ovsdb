@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2015, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,9 +16,12 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IcmpEchoProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
@@ -39,12 +42,11 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityGroupCacheManger;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.DistributedArpService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NodeCacheManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OvsdbInventoryServiceImpl;
@@ -102,6 +104,7 @@ public class ConfigActivator implements BundleActivator {
     private List<ServiceRegistration<?>> translatorCRUDRegistrations = new ArrayList<>();
     private List<Pair<Object, ServiceRegistration>> servicesAndRegistrations = new ArrayList<>();
     private ProviderContext providerContext;
+    private boolean conntrackEnabled = false;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -169,7 +172,7 @@ public class ConfigActivator implements BundleActivator {
                 new Class[] {INeutronSecurityRuleAware.class, INeutronSecurityGroupAware.class},
                 AbstractEvent.HandlerType.NEUTRON_PORT_SECURITY, portSecurityHandler);
 
-        final SecurityServicesImpl securityServices = new SecurityServicesImpl();
+        final SecurityServicesImpl securityServices = new SecurityServicesImpl(conntrackEnabled);
         registerService(context,
                 new String[]{SecurityServicesManager.class.getName()}, null, securityServices);
 
@@ -201,6 +204,14 @@ public class ConfigActivator implements BundleActivator {
         registerService(context,
                 new String[]{NeutronL3Adapter.class.getName(), GatewayMacResolverListener.class.getName()},
                 neutronL3AdapterProperties, neutronL3Adapter);
+
+        Dictionary<String, Object> distributedArpServiceProperties = new Hashtable<>();
+        distributedArpServiceProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.DISTRIBUTED_ARP_SERVICE);
+        final DistributedArpService distributedArpService = new DistributedArpService();
+        registerService(context,
+                new String[]{DistributedArpService.class.getName()},
+                distributedArpServiceProperties, distributedArpService);
 
         OpenstackRouter openstackRouter = new OpenstackRouter();
         registerService(context,
@@ -238,16 +249,16 @@ public class ConfigActivator implements BundleActivator {
         // addingService may not be called if the service is already available when the ServiceTracker
         // is started
         trackService(context, INeutronNetworkCRUD.class, tenantNetworkManager, networkHandler, lBaaSHandler,
-                lBaaSPoolHandler, lBaaSPoolMemberHandler, neutronL3Adapter);
+                lBaaSPoolHandler, lBaaSPoolMemberHandler, neutronL3Adapter, distributedArpService);
         trackService(context, INeutronSubnetCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler,
                 securityServices, neutronL3Adapter);
         trackService(context, INeutronPortCRUD.class, tenantNetworkManager, lBaaSHandler, lBaaSPoolHandler,
-                lBaaSPoolMemberHandler, securityServices, neutronL3Adapter);
+                lBaaSPoolMemberHandler, securityServices, neutronL3Adapter, distributedArpService);
         trackService(context, INeutronFloatingIPCRUD.class, neutronL3Adapter);
         trackService(context, INeutronLoadBalancerCRUD.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
         trackService(context, INeutronLoadBalancerPoolCRUD.class, lBaaSHandler, lBaaSPoolMemberHandler);
         trackService(context, LoadBalancerProvider.class, lBaaSHandler, lBaaSPoolHandler, lBaaSPoolMemberHandler);
-        trackService(context, ArpProvider.class, neutronL3Adapter);
+        trackService(context, ArpProvider.class, neutronL3Adapter, distributedArpService);
         trackService(context, InboundNatProvider.class, neutronL3Adapter);
         trackService(context, OutboundNatProvider.class, neutronL3Adapter);
         trackService(context, RoutingProvider.class, neutronL3Adapter);
@@ -255,6 +266,7 @@ public class ConfigActivator implements BundleActivator {
         trackService(context, GatewayMacResolver.class, neutronL3Adapter);
         trackService(context, IngressAclProvider.class, securityServices);
         trackService(context, EgressAclProvider.class, securityServices);
+        trackService(context, IcmpEchoProvider.class, neutronL3Adapter);
 
         // We no longer need to track the services, avoid keeping references around
         servicesAndRegistrations.clear();
@@ -326,5 +338,9 @@ public class ConfigActivator implements BundleActivator {
         }
         servicesAndRegistrations.add(Pair.of(impl, serviceRegistration));
         return serviceRegistration;
+    }
+
+    public void setConntrackEnabled(boolean conntrackEnabled) {
+        this.conntrackEnabled = conntrackEnabled;
     }
 }

@@ -2,6 +2,176 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_259176f1",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_058ef2cf",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_65bede66",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_45c3daec",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a5b46682",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_85b9627b",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e5b14e90",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_c5aeca2d",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_25a8561f",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_05a55246",
+        "filename": "utils/hwvtepsouthbound-utils/src/main/java/org/opendaylight/ovsdb/utils/hwvtepsouthbound/utils/HwvtepSouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T08:32:12Z",
+      "side": 1,
+      "message": "For Sam: a transaction is provided as the first argument here.",
+      "revId": "4e4956e9121cd43af0e733894ce260811b761334",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_fe6bbdee",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtils.java",
         "patchSetId": 4

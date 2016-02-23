@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_57ea6bac",
+        "filename": "routemgr/routemgr-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T15:58:00Z",
+      "side": 1,
+      "message": "This needs to be 0.5.0-SNAPSHOT for Boron.",
+      "revId": "6fd6a7697fd8eb9c050d5ade89a48aea0b40c981",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_77fccf72",
+        "filename": "routemgr/routemgr-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T15:58:00Z",
+      "side": 1,
+      "message": "This needs to be 1.6.4 for Boron.",
+      "revId": "6fd6a7697fd8eb9c050d5ade89a48aea0b40c981",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_97f6b38d",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-02-23T15:58:00Z",
+      "side": 1,
+      "message": "This broke very recently and now needs to be 1.6.4 for Boron.",
+      "revId": "6fd6a7697fd8eb9c050d5ade89a48aea0b40c981",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

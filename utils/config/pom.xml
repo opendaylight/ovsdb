@@ -45,10 +45,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
 
-  <properties>
-    <powermock.version>1.6.4</powermock.version>
-  </properties>
-
   <dependencies>
     <!-- testing dependencies -->
     <dependency>
@@ -61,19 +57,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
       <scope>test</scope>
-      <version>${powermock.version}</version>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-core</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
       <scope>test</scope>
-      <version>${powermock.version}</version>
     </dependency>
   </dependencies>
 

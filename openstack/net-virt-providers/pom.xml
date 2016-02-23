@@ -46,7 +46,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <liblldp.version>0.11.0-SNAPSHOT</liblldp.version>
     <openflowplugin.version>0.3.0-SNAPSHOT</openflowplugin.version>
-    <powermock.version>1.6.4</powermock.version>
     <sonar.jacoco.itReportPath>../net-virt-it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
 
@@ -155,31 +154,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-core</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-support</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-reflect</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class DistributedArpService implements ConfigInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedArpService.class);
+    private static final String DHCP_DEVICE_OWNER = "network:dhcp";
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
@@ -52,6 +54,8 @@ public class DistributedArpService implements ConfigInterface {
 
     private Southbound southbound;
     private Boolean flgDistributedARPEnabled = true;
+
+    private HashMap<String, List<Neutron_IPs>> dhcpPortIpCache = new HashMap();
 
     private void initMembers() {
         Preconditions.checkNotNull(configurationService);
@@ -72,10 +76,10 @@ public class DistributedArpService implements ConfigInterface {
     public void handlePortEvent(NeutronPort neutronPort, Action action) {
         LOG.debug("neutronPort Event {} action event {} ", neutronPort, action);
         if (action == Action.DELETE) {
-            this.handleNeutornPortForArp(neutronPort, action);
+            this.handleNeutronPortForArp(neutronPort, action);
         } else {
             for (NeutronPort neutronPort1 : neutronPortCache.getAllPorts()) {
-               this.handleNeutornPortForArp(neutronPort1, action);
+               this.handleNeutronPortForArp(neutronPort1, action);
             }
         }
     }
@@ -137,7 +141,13 @@ public class DistributedArpService implements ConfigInterface {
      * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
      * @param neutronPort An instance of NeutronPort object.
      */
-    private void handleNeutornPortForArp(NeutronPort neutronPort, Action action) {
+    private void handleNeutronPortForArp(NeutronPort neutronPort, Action action) {
+        if (!flgDistributedARPEnabled) {
+            return;
+        }
+
+        //treat UPDATE as ADD
+        final Action actionToPerform = action == Action.DELETE ? Action.DELETE : Action.ADD;
 
         final String networkUUID = neutronPort.getNetworkUUID();
         NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(networkUUID);
@@ -146,48 +156,65 @@ public class DistributedArpService implements ConfigInterface {
         }
         final String providerSegmentationId = neutronNetwork != null ?
                                               neutronNetwork.getProviderSegmentationID() : null;
-        final String tenantMac = neutronPort.getMacAddress();
+        final String macAddress = neutronPort.getMacAddress();
         if (providerSegmentationId == null || providerSegmentationId.isEmpty() ||
-            tenantMac == null || tenantMac.isEmpty()) {
+            macAddress == null || macAddress.isEmpty()) {
             // done: go no further w/out all the info needed...
             return;
         }
 
-        final boolean isDelete = action == Action.DELETE;
-        final Action action1 = isDelete ? Action.DELETE : Action.ADD;
-
-
         List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (nodes.isEmpty()) {
             LOG.trace("updateL3ForNeutronPort has no nodes to work with");
+            //Do not exit, we still may need to clean up this entry from the dhcpPortToIpCache
         }
+
+        //Neutron removes the DHCP port's IP before deleting it. As such,
+        //when it comes time to delete the port, the ARP rule can not
+        //be removed because we simply don't know the IP. To mitigate this,
+        //we cache the dhcp ports IPs (BUG 5408).
+        String owner = neutronPort.getDeviceOwner();
+        boolean isDhcpPort = owner != null && owner.equals(DHCP_DEVICE_OWNER);
+        List<Neutron_IPs> fixedIps = neutronPort.getFixedIPs();
+        if((null == fixedIps || fixedIps.isEmpty())
+                        && actionToPerform == Action.DELETE && isDhcpPort){
+            fixedIps = dhcpPortIpCache.get(neutronPort.getPortUUID());
+            if(fixedIps == null) {
+                return;
+            }
+        }
+
         for (Node node : nodes) {
+            // Arp rule is only needed when segmentation exists in the given node (bug 4752).
+            boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
+            final Action actionForNode = arpNeeded ? actionToPerform : Action.DELETE;
+
             final Long dpid = getDatapathIdIntegrationBridge(node);
             if (dpid == null) {
                 continue;
             }
-            if (neutronPort.getFixedIPs() == null) {
-                continue;
-            }
-            for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
-                final String tenantIpStr = neutronIP.getIpAddress();
-                if (tenantIpStr.isEmpty()) {
+
+            for (Neutron_IPs neutronIP : fixedIps) {
+                final String ipAddress = neutronIP.getIpAddress();
+                if (ipAddress.isEmpty()) {
                     continue;
                 }
-                // Configure distributed ARP responder
-                if (flgDistributedARPEnabled) {
-                    // Arp rule is only needed when segmentation exists in the given node (bug 4752).
-                    boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
-                    final Action actionForNode = arpNeeded ? action1 : Action.DELETE;
-                    programStaticRuleStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
-                }
+
+                programStaticRuleStage1(dpid, providerSegmentationId, macAddress, ipAddress, actionForNode);
             }
+        }
+
+        //use action instead of actionToPerform - only write to the cache when the port is created
+        if(isDhcpPort && action == Action.ADD){
+            dhcpPortIpCache.put(neutronPort.getPortUUID(), fixedIps);
+        } else if (isDhcpPort && action == Action.DELETE) {
+            dhcpPortIpCache.remove(neutronPort.getPortUUID());
         }
     }
 
     /**
      * Check if node is integration bridge, then return its datapathID.
-     * @param bridgeNode An instance of Node object.
+     * @param node An instance of Node object.
      */
     private Long getDatapathIdIntegrationBridge(Node node) {
         if (southbound.getBridge(node, configurationService.getIntegrationBridgeName()) != null) {

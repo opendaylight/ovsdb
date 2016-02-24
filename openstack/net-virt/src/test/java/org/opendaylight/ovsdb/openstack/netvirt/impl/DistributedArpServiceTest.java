@@ -120,15 +120,15 @@ public class DistributedArpServiceTest {
         PowerMockito.when(neutronPortCache, "getAllPorts").thenReturn(list_neutronPort);
 
         // Suppress the called to these functions.
-        MemberModifier.suppress(MemberMatcher.method(DistributedArpService.class, "handleNeutornPortForArp", NeutronPort.class, Action.class));
+        MemberModifier.suppress(MemberMatcher.method(DistributedArpService.class, "handleNeutronPortForArp", NeutronPort.class, Action.class));
 
         //Case 1: Delete Action.
         Whitebox.invokeMethod(distributedArpService, "handlePortEvent", neutronPortOne, Action.DELETE);
-        PowerMockito.verifyPrivate(distributedArpService, times(1)).invoke("handleNeutornPortForArp", any(NeutronPort.class), eq(Action.DELETE));
+        PowerMockito.verifyPrivate(distributedArpService, times(1)).invoke("handleNeutronPortForArp", any(NeutronPort.class), eq(Action.DELETE));
 
         //Case 2: Add Action.
         Whitebox.invokeMethod(distributedArpService, "handlePortEvent", neutronPortOne, Action.ADD);
-        PowerMockito.verifyPrivate(distributedArpService, times(2)).invoke("handleNeutornPortForArp", any(NeutronPort.class), eq(Action.ADD));
+        PowerMockito.verifyPrivate(distributedArpService, times(2)).invoke("handleNeutronPortForArp", any(NeutronPort.class), eq(Action.ADD));
     }
 
     /**
@@ -199,12 +199,12 @@ public class DistributedArpServiceTest {
         MemberModifier.suppress(MemberMatcher.method(DistributedArpService.class, "programStaticRuleStage1", Long.class, String.class, String.class, String.class, Action.class));
 
         //Case 1: Add Action.
-        Whitebox.invokeMethod(distributedArpService, "handleNeutornPortForArp", neutronPort, Action.ADD);
+        Whitebox.invokeMethod(distributedArpService, "handleNeutronPortForArp", neutronPort, Action.ADD);
         PowerMockito.verifyPrivate(distributedArpService, times(1)).invoke("getDatapathIdIntegrationBridge", any(Node.class));
         Mockito.verify(distributedArpService, times(1)).programStaticRuleStage1(anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
 
         //Case 2: Delete Action.
-        Whitebox.invokeMethod(distributedArpService, "handleNeutornPortForArp", neutronPort, Action.DELETE);
+        Whitebox.invokeMethod(distributedArpService, "handleNeutronPortForArp", neutronPort, Action.DELETE);
         PowerMockito.verifyPrivate(distributedArpService, times(2)).invoke("getDatapathIdIntegrationBridge", any(Node.class));
         Mockito.verify(distributedArpService, times(1)).programStaticRuleStage1(anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
     }

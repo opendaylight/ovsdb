@@ -13,6 +13,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -32,6 +33,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdLocalConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdParams;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -39,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
@@ -164,12 +169,59 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                     // local and remote must exist
                     newTunnel.setLocal(localUUID);
                     newTunnel.setRemote(remoteUUID);
-                    //TODO Set BFD Params
+                    setBfdParams(newTunnel, tunnel);
+                    setBfdLocalConfigs(newTunnel, tunnel);
+                    setBfdRemoteConfigs(newTunnel, tunnel);
                     transaction.add(op.insert(newTunnel).withId(tunnelUuid));
                     tunnels.add(new UUID(tunnelUuid));
                 }
             }
             physicalSwitch.setTunnels(tunnels);
+        }
+    }
+
+    private void setBfdParams(Tunnel tunnel, Tunnels psAugTunnel) {
+        List<BfdParams> bfdParams = psAugTunnel.getBfdParams();
+        if(bfdParams != null) {
+            Map<String, String> bfdParamMap = new HashMap<>();
+            for(BfdParams bfdParam : bfdParams) {
+                bfdParamMap.put(bfdParam.getBfdParamKey(), bfdParam.getBfdParamValue());
+            }
+            try {
+                tunnel.setBfdParams(ImmutableMap.copyOf(bfdParamMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete BFD Params for tunnel", e);
+            }
+        }
+    }
+
+    private void setBfdLocalConfigs(Tunnel tunnel, Tunnels psAugTunnel) {
+        List<BfdLocalConfigs> bfdLocalConfigs = psAugTunnel.getBfdLocalConfigs();
+        if(bfdLocalConfigs != null) {
+            Map<String, String> configLocalMap = new HashMap<>();
+            for(BfdLocalConfigs localConfig : bfdLocalConfigs) {
+                configLocalMap.put(localConfig.getBfdLocalConfigKey(), localConfig.getBfdLocalConfigValue());
+            }
+            try {
+                tunnel.setBfdConfigLocal(ImmutableMap.copyOf(configLocalMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete BFD LocalConfig for tunnel", e);
+            }
+        }
+    }
+
+    private void setBfdRemoteConfigs(Tunnel tunnel, Tunnels psAugTunnel) {
+        List<BfdRemoteConfigs> bfdRemoteConfigs = psAugTunnel.getBfdRemoteConfigs();
+        if(bfdRemoteConfigs != null) {
+            Map<String, String> configRemoteMap = new HashMap<>();
+            for(BfdRemoteConfigs remoteConfig : bfdRemoteConfigs) {
+                configRemoteMap.put(remoteConfig.getBfdRemoteConfigKey(), remoteConfig.getBfdRemoteConfigValue());
+            }
+            try {
+                tunnel.setBfdConfigRemote(ImmutableMap.copyOf(configRemoteMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete BFD RemoteConfig for tunnel", e);
+            }
         }
     }
 

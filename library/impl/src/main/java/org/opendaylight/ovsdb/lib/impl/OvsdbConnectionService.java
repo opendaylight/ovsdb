@@ -25,6 +25,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -270,6 +272,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             channel.pipeline().addLast(
                                  new JsonRpcDecoder(100000),
                                  new StringEncoder(CharsetUtil.UTF_8),
+                                 new IdleStateHandler(60, 0, 0),
+                                 new ReadTimeoutHandler(600),
                                  new ExceptionHandler());
 
                             handleNewPassiveConnection(channel);
@@ -394,5 +398,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public void close() throws Exception {
         LOG.info("OvsdbConnectionService closed");
+    }
+
+    @Override
+    public OvsdbClient getClient(Channel channel) {
+        for (OvsdbClient client : connections.keySet()) {
+            Channel ctx = connections.get(client);
+            if (ctx.equals(channel)) {
+                return client;
+            }
+        }
+        return null;
     }
 }

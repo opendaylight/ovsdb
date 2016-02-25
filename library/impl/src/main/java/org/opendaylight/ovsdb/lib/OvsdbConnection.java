@@ -8,8 +8,11 @@
 
 package org.opendaylight.ovsdb.lib;
 
+import io.netty.channel.Channel;
+
 import java.net.InetAddress;
 import java.util.Collection;
+
 import javax.net.ssl.SSLContext;
 
 /**
@@ -81,4 +84,6 @@ public interface OvsdbConnection {
      * @return Collection of all the active OVSDB Connections
      */
     Collection<OvsdbClient> getConnections();
+
+    OvsdbClient getClient(Channel channel);
 }

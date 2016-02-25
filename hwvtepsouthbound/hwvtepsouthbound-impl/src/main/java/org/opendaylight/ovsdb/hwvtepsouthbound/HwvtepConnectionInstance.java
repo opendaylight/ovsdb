@@ -199,6 +199,11 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         client.stopEchoService();
     }
 
+    @Override
+    public void echo() {
+        client.echo();
+    }
+
     public OvsdbConnectionInfo getConnectionInfo() {
         return client.getConnectionInfo();
     }

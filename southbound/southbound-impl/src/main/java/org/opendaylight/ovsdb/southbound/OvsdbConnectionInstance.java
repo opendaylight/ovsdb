@@ -370,4 +370,9 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     public void setOvsdbNodeAugmentation(OvsdbNodeAugmentation ovsdbNodeCreateData) {
         this.initialCreateData = ovsdbNodeCreateData;
     }
+
+    @Override
+    public void echo() {
+        client.echo();
+    }
 }

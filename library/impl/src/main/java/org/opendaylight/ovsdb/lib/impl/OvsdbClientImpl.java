@@ -235,6 +235,11 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
+    public void echo() {
+        rpc.echo();
+    }
+
+    @Override
     public void lock(String lockId, LockAquisitionCallback lockedCallBack, LockStolenCallback stolenCallback) {
         throw new UnsupportedOperationException("not yet implemented");
     }

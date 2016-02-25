@@ -125,7 +125,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     private void setTunnels(Node node, PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch pSwitch) {
         if (pSwitch.getTunnels() != null && pSwitch.getTunnels().getData() != null
-                && pSwitch.getTunnels().getData().isEmpty()) {
+                && !pSwitch.getTunnels().getData().isEmpty()) {
             Set<UUID> uuidList = pSwitch.getTunnels().getData();
             List<Tunnels> tunnelList = new ArrayList<>();
             TunnelsBuilder tBuilder = new TunnelsBuilder();

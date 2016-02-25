@@ -69,6 +69,24 @@
       "revId": "a801b34013fd1f2f2fe07db81ffb19b3188adfe1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4071fe42",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-02-25T09:37:01Z",
+      "side": 1,
+      "message": "Looks like it was a review comment from Ryan to add this: https://git.opendaylight.org/gerrit/#/c/19551/",
+      "parentUuid": "9a3d3df0_20979a49",
+      "revId": "a801b34013fd1f2f2fe07db81ffb19b3188adfe1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

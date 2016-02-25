@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,9 +11,10 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.annotation.Nonnull;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -28,6 +29,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
@@ -39,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 public class BridgeUpdateCommand extends AbstractTransactCommand {
@@ -127,33 +128,23 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
         Map<String, String> externalIdMap = new HashMap<>();
         externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, SouthboundUtil.serializeInstanceIdentifier(iid));
         // Set user provided external ids
-        List<BridgeExternalIds> bridgeExternalId = ovsdbManagedNode.getBridgeExternalIds();
-        if (bridgeExternalId != null) {
-            for (BridgeExternalIds externalId : bridgeExternalId) {
-                externalIdMap.put(externalId.getBridgeExternalIdKey(), externalId.getBridgeExternalIdValue());
-            }
-        }
         try {
-            bridge.setExternalIds(ImmutableMap.copyOf(externalIdMap));
+            YangUtils.copyYangKeyValueListToMap(externalIdMap, ovsdbManagedNode.getBridgeExternalIds(),
+                    BridgeExternalIds::getBridgeExternalIdKey, BridgeExternalIds::getBridgeExternalIdValue);
         } catch (NullPointerException e) {
             LOG.warn("Incomplete bridge external Id", e);
         }
+        bridge.setExternalIds(externalIdMap);
     }
 
 
 
-    private void setOpenDaylightOtherConfig(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode) {
-        List<BridgeOtherConfigs> bridgeOtherConfig = ovsdbManagedNode.getBridgeOtherConfigs();
-        if (bridgeOtherConfig != null) {
-            Map<String, String> otherConfigMap = new HashMap<>();
-            for (BridgeOtherConfigs otherConf : bridgeOtherConfig) {
-                otherConfigMap.put(otherConf.getBridgeOtherConfigKey(), otherConf.getBridgeOtherConfigValue());
-            }
-            try {
-                bridge.setOtherConfig(ImmutableMap.copyOf(otherConfigMap));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete bridge other config", e);
-            }
+    private void setOpenDaylightOtherConfig(@Nonnull Bridge bridge, @Nonnull OvsdbBridgeAugmentation ovsdbManagedNode) {
+        try {
+            bridge.setOtherConfig(YangUtils.convertYangKeyValueListToMap(ovsdbManagedNode.getBridgeOtherConfigs(),
+                    BridgeOtherConfigs::getBridgeOtherConfigKey, BridgeOtherConfigs::getBridgeOtherConfigValue));
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete bridge other config", e);
         }
     }
 

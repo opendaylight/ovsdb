@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -48,6 +48,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
@@ -59,7 +60,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -160,20 +160,15 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            Map<String, String> externalIdsMap = new HashMap<>();
 
             List<OpenvswitchExternalIds> externalIds = this.initialCreateData.getOpenvswitchExternalIds();
-
-            if (externalIds != null) {
-                for (OpenvswitchExternalIds externalId : externalIds) {
-                    externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-                }
-            }
 
             stampInstanceIdentifier(transaction,this.instanceIdentifier.firstIdentifierOf(Node.class));
 
             try {
-                ovs.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                ovs.setExternalIds(
+                        YangUtils.convertYangKeyValueListToMap(externalIds, OpenvswitchExternalIds::getExternalIdKey,
+                                OpenvswitchExternalIds::getExternalIdValue));
                 Mutate<GenericTableSchema> mutate = op.mutate(ovs)
                             .addMutation(ovs.getExternalIdsColumn().getSchema(),
                                 Mutator.INSERT,
@@ -187,12 +182,10 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
             List<OpenvswitchOtherConfigs> otherConfigs = this.initialCreateData.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
-                Map<String, String> otherConfigsMap = new HashMap<>();
-                for (OpenvswitchOtherConfigs otherConfig : otherConfigs) {
-                    otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
-                }
                 try {
-                    ovs.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
+                    ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,
+                            OpenvswitchOtherConfigs::getOtherConfigKey,
+                            OpenvswitchOtherConfigs::getOtherConfigValue));
                     transaction.add(op.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
                         Mutator.INSERT,
                         ovs.getOtherConfigColumn().getData()));

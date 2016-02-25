@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Intel Corporation and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Intel Corporation and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +21,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
@@ -30,8 +30,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 public class OvsdbNodeUpdateCommand implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
@@ -55,20 +53,12 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            Map<String, String> externalIdsMap = new HashMap<>();
-
-            List<OpenvswitchExternalIds> externalIds = ovsdbNode.getOpenvswitchExternalIds();
-
-            if (externalIds != null) {
-                for (OpenvswitchExternalIds externalId : externalIds) {
-                    externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-                }
-            }
 
             stampInstanceIdentifier(transaction,ovsdbNodeEntry.getKey().firstIdentifierOf(Node.class));
 
             try {
-                ovs.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                ovs.setExternalIds(YangUtils.convertYangKeyValueListToMap(ovsdbNode.getOpenvswitchExternalIds(),
+                        OpenvswitchExternalIds::getExternalIdKey, OpenvswitchExternalIds::getExternalIdValue));
                 Mutate<GenericTableSchema> mutate = op.mutate(ovs)
                             .addMutation(ovs.getExternalIdsColumn().getSchema(),
                                 Mutator.INSERT,
@@ -82,12 +72,9 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
             List<OpenvswitchOtherConfigs> otherConfigs = ovsdbNode.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
-                Map<String, String> otherConfigsMap = new HashMap<>();
-                for (OpenvswitchOtherConfigs otherConfig : otherConfigs) {
-                    otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
-                }
                 try {
-                    ovs.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
+                    ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,
+                            OpenvswitchOtherConfigs::getOtherConfigKey, OpenvswitchOtherConfigs::getOtherConfigValue));
                     transaction.add(op.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
                         Mutator.INSERT,
                         ovs.getOtherConfigColumn().getData()));

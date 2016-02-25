@@ -110,6 +110,11 @@ public interface OvsdbClient {
     ListenableFuture<Boolean> unLock(String lockId);
 
     /**
+     * ovsdb echo operation
+     */
+    void echo();
+
+    /**
      * Starts the echo service. The {@code callbackFilters} can be used to get notified on the absence of echo
      * notifications from the remote device and control the frequency of such notifications.
      * @param callbackFilters callbacks for notifying the client of missing echo calls from remote.

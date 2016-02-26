@@ -167,12 +167,12 @@ public class MatchUtils {
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         if (srcMac != null) {
             EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
-            ethSourceBuilder.setAddress(new MacAddress(srcMac));
+            ethSourceBuilder.setAddress(srcMac);
             ethernetMatch.setEthernetSource(ethSourceBuilder.build());
         }
         if (dstMac != null) {
             EthernetDestinationBuilder ethDestinationBuild = new EthernetDestinationBuilder();
-            ethDestinationBuild.setAddress(new MacAddress(dstMac));
+            ethDestinationBuild.setAddress(dstMac);
             ethernetMatch.setEthernetDestination(ethDestinationBuild.build());
         }
         if (matchBuilder.getEthernetMatch() != null && matchBuilder.getEthernetMatch().getEthernetType() != null) {
@@ -195,7 +195,7 @@ public class MatchUtils {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
-        ethSourceBuilder.setAddress(new MacAddress(sMacAddr));
+        ethSourceBuilder.setAddress(sMacAddr);
         ethernetMatch.setEthernetSource(ethSourceBuilder.build());
         matchBuilder.setEthernetMatch(ethernetMatch.build());
 
@@ -231,7 +231,7 @@ public class MatchUtils {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
-        ethDestinationBuilder.setAddress(new MacAddress(dMacAddr));
+        ethDestinationBuilder.setAddress(dMacAddr);
         if (mask != null) {
             ethDestinationBuilder.setMask(mask);
         }
@@ -725,7 +725,7 @@ public class MatchUtils {
         ethernetMatch.setEthernetType(ethTypeBuilder.build());
 
         EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
-        ethDestinationBuilder.setAddress(new MacAddress(attachedMac));
+        ethDestinationBuilder.setAddress(attachedMac);
         ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
 
         matchBuilder.setEthernetMatch(ethernetMatch.build());
@@ -770,7 +770,7 @@ public class MatchUtils {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetDestinationBuilder ethDestBuilder = new EthernetDestinationBuilder();
-        ethDestBuilder.setAddress(new MacAddress(dMacAddr));
+        ethDestBuilder.setAddress(dMacAddr);
         if (mask != null) {
             ethDestBuilder.setMask(mask);
         }
@@ -819,7 +819,7 @@ public class MatchUtils {
         ethernetMatch.setEthernetType(ethTypeBuilder.build());
 
         EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
-        ethSourceBuilder.setAddress(new MacAddress(attachedMac));
+        ethSourceBuilder.setAddress(attachedMac);
         ethernetMatch.setEthernetSource(ethSourceBuilder.build());
 
         matchBuilder.setEthernetMatch(ethernetMatch.build());
@@ -902,7 +902,7 @@ public class MatchUtils {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetSourceBuilder ethSrcBuilder = new EthernetSourceBuilder();
-        ethSrcBuilder.setAddress(new MacAddress(dMacAddr));
+        ethSrcBuilder.setAddress(dMacAddr);
         if (mask != null) {
             ethSrcBuilder.setMask(mask);
         }
@@ -985,7 +985,7 @@ public class MatchUtils {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
-        ethDestinationBuilder.setAddress(new MacAddress(dMacAddr));
+        ethDestinationBuilder.setAddress(dMacAddr);
         if (mask != null) {
             ethDestinationBuilder.setMask(mask);
         }
@@ -1156,7 +1156,7 @@ public class MatchUtils {
     public static MatchBuilder createSrcL3Ipv4MatchWithMac(MatchBuilder matchBuilder, Ipv4Prefix srcip, MacAddress srcMac) {
 
         Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
-        ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix(srcip));
+        ipv4MatchBuilder.setIpv4Source(srcip);
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x0800L));
         EthernetMatchBuilder eth = new EthernetMatchBuilder();
@@ -1181,7 +1181,7 @@ public class MatchUtils {
     public static MatchBuilder createSrcL3Ipv6MatchWithMac(MatchBuilder matchBuilder, Ipv6Prefix srcip, MacAddress srcMac) {
 
         Ipv6MatchBuilder ipv6MatchBuilder = new Ipv6MatchBuilder();
-        ipv6MatchBuilder.setIpv6Source(new Ipv6Prefix(srcip));
+        ipv6MatchBuilder.setIpv6Source(srcip);
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
         ethTypeBuilder.setType(new EtherType(0x86DDL));
         EthernetMatchBuilder eth = new EthernetMatchBuilder();

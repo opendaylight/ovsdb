@@ -96,7 +96,14 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 client.getConnectionInfo().getRemotePort(),
                 client.getConnectionInfo().getLocalAddress(),
                 client.getConnectionInfo().getLocalPort());
-        if(client.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP) != null) {
+        List<String> databases = new ArrayList<>();
+        try {
+            databases = client.getDatabases().get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Unable to fetch database list");
+        }
+
+        if(databases.contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {
             HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(client);
             registerEntityForOwnership(hwClient);
         }

@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -85,6 +87,8 @@ public class OvsdbConnectionManagerTest {
         when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(8080);
         when(externalClient.getConnectionInfo().getLocalAddress()).thenReturn(mock(InetAddress.class));
         when(externalClient.getConnectionInfo().getLocalPort()).thenReturn(8080);
+        List<String> databases = Arrays.asList("Open_vSwitch");
+        when(externalClient.getDatabases().get()).thenReturn(databases);
 
         PowerMockito.mockStatic(SouthboundUtil.class);
         when(SouthboundUtil.connectionInfoToString(any(ConnectionInfo.class))).thenReturn("192.18.120.31:8080");

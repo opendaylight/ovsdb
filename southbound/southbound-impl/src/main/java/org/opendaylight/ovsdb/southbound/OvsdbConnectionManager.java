@@ -94,7 +94,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getRemotePort(),
                 externalClient.getConnectionInfo().getLocalAddress(),
                 externalClient.getConnectionInfo().getLocalPort());
-        if(externalClient.getSchema(SouthboundConstants.OPEN_V_SWITCH) != null) {
+        List<String> databases = new ArrayList<>();
+        try {
+            databases = externalClient.getDatabases().get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Unable to fetch database list");
+        }
+
+        if(databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
             OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
             // Register Cluster Ownership for ConnectionInfo
             registerEntityForOwnership(client);

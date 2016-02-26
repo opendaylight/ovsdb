@@ -64,6 +64,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.net.InetAddresses;
 
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
@@ -144,7 +145,7 @@ public class SouthboundMapper {
 
     public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
         if (ip.getIpv4Address() != null) {
-            return InetAddress.getByName(ip.getIpv4Address().getValue());
+            return InetAddresses.forString(ip.getIpv4Address().getValue());
         } else if (ip.getIpv6Address() != null) {
             return InetAddress.getByName(ip.getIpv6Address().getValue());
         } else {

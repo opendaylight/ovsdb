@@ -1,6 +1,6 @@
 module netvirt {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:netvirt";
+    namespace "urn:opendaylight:netvirt";
     prefix "netvirt";
 
     revision "2015-12-27" {

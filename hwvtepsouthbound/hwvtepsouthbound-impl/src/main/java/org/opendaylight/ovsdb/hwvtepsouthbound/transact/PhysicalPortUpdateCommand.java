@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -89,12 +89,13 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 //create a physical port
                 setName(physicalPort, port, operationalPhysicalPortOptional);
                 String portUuid = "PhysicalPort_" + HwvtepSouthboundMapper.getRandomUUID();
+                LOG.trace("execute: creating physical port: {}", physicalPort);
                 transaction.add(op.insert(physicalPort).withId(portUuid));
                 //update physical switch table
                 PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
                 physicalSwitch.setName(physicalSwitchBelong.getHwvtepNodeName().getValue());
                 physicalSwitch.setPorts(Sets.newHashSet(new UUID(portUuid)));
-                LOG.info("execute: physical switch: {}", physicalSwitch);
+                LOG.trace("execute: mutating physical switch: {}", physicalSwitch);
                 transaction.add(op.mutate(physicalSwitch)
                         .addMutation(physicalSwitch.getPortsColumn().getSchema(), Mutator.INSERT,
                                 physicalSwitch.getPortsColumn().getData())
@@ -107,6 +108,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 PhysicalPort extraPhyscialPort =
                         TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
                 extraPhyscialPort.setName("");
+                LOG.trace("execute: updating physical port: {}", physicalPort);
                 transaction.add(op.update(physicalPort)
                         .where(extraPhyscialPort.getNameColumn().getSchema().opEqual(existingPhysicalPortName))
                         .build());

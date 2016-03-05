@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -94,16 +94,25 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Global.class);
             global.setSwitches(Sets.newHashSet(new UUID(pswitchUuid)));
 
-            LOG.debug("execute: physical switch: {}", physicalSwitch);
+            LOG.trace("execute: create physical switch: {}", physicalSwitch);
             transaction.add(op.mutate(global)
                     .addMutation(global.getSwitchesColumn().getSchema(), Mutator.INSERT,
                             global.getSwitchesColumn().getData()));
         } else {
             PhysicalSwitchAugmentation updatedPhysicalSwitch = operationalPhysicalSwitchOptional.get();
             String existingPhysicalSwitchName = updatedPhysicalSwitch.getHwvtepNodeName().getValue();
+            /* In case TOR devices don't allow creation of PhysicalSwitch name might be null
+             * as user is only adding configurable parameters to MDSAL like BFD params
+             * 
+             * TODO Note: Consider handling tunnel udpate/remove in separate command
+             */
+            if(existingPhysicalSwitchName == null) {
+                existingPhysicalSwitchName = operationalPhysicalSwitchOptional.get().getHwvtepNodeName().getValue();
+            }
             // Name is immutable, and so we *can't* update it.  So we use extraPhysicalSwitch for the schema stuff
             PhysicalSwitch extraPhysicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
             extraPhysicalSwitch.setName("");
+            LOG.trace("execute: updating physical switch: {}", physicalSwitch);
             transaction.add(op.update(physicalSwitch)
                     .where(extraPhysicalSwitch.getNameColumn().getSchema().opEqual(existingPhysicalSwitchName))
                     .build());

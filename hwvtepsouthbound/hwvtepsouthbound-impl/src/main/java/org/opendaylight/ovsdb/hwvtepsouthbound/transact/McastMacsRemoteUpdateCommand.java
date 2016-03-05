@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
 
     public McastMacsRemoteUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -74,12 +74,14 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             setLogicalSwitch(mcastMacsRemote, mac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(mcastMacsRemote, mac, operationalMacOptional);
+                LOG.trace("execute: create RemoteMcastMac entry: {}", mcastMacsRemote);
                 transaction.add(op.insert(mcastMacsRemote));
             } else {
                 RemoteMcastMacs updatedMac = operationalMacOptional.get();
                 String existingMac = updatedMac.getMacEntryKey().getValue();
                 McastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), McastMacsRemote.class);
-                extraMac.setMac("");;
+                extraMac.setMac("");
+                LOG.trace("execute: update RemoteMcastMac entry: {}", mcastMacsRemote);
                 transaction.add(op.update(mcastMacsRemote)
                         .where(extraMac.getMacColumn().getSchema().opEqual(existingMac))
                         .build());

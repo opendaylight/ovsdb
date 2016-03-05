@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,10 +24,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -38,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
 
     public UcastMacsRemoteUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -77,12 +75,14 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             setLogicalSwitch(ucastMacsRemote, remoteUcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(ucastMacsRemote, remoteUcastMac, operationalMacOptional);
+                LOG.trace("execute: creating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.insert(ucastMacsRemote));
             } else {
                 RemoteUcastMacs updatedMac = operationalMacOptional.get();
                 String existingMac = updatedMac.getMacEntryKey().getValue();
                 UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
-                extraMac.setMac("");;
+                extraMac.setMac("");
+                LOG.trace("execute: updating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.update(ucastMacsRemote)
                         .where(extraMac.getMacColumn().getSchema().opEqual(existingMac))
                         .build());

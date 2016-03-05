@@ -53,6 +53,10 @@ module hwvtep {
             description "MAC address entry";
             type yang:mac-address;
         }
+        leaf mac-entry-uuid {
+            description "The unique identifier of the mac-entry";
+            type yang:uuid;
+        }
         leaf logical-switch-ref {
             description "The logical switch to which this mapping applies";
             type hwvtep-logical-switch-ref;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(McastMacsLocalUpdateCommand.class);
 
     public McastMacsLocalUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -74,12 +74,14 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
             setLogicalSwitch(mcastMacsLocal, localMcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(mcastMacsLocal, localMcastMac, operationalMacOptional);
+                LOG.trace("execute: create LocalMcastMac entry: {}", mcastMacsLocal);
                 transaction.add(op.insert(mcastMacsLocal));
             } else {
                 LocalMcastMacs updatedMac = operationalMacOptional.get();
                 String existingMac = updatedMac.getMacEntryKey().getValue();
                 McastMacsLocal extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), McastMacsLocal.class);
-                extraMac.setMac("");;
+                extraMac.setMac("");
+                LOG.trace("execute: update LocalMcastMac entry: {}", mcastMacsLocal);
                 transaction.add(op.update(mcastMacsLocal)
                         .where(extraMac.getMacColumn().getSchema().opEqual(existingMac))
                         .build());

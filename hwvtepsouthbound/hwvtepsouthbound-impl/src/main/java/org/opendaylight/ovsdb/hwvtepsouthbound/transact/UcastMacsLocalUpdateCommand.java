@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalUpdateCommand.class);
 
     public UcastMacsLocalUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -77,15 +77,19 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
             setLogicalSwitch(ucastMacsLocal, localUcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(ucastMacsLocal, localUcastMac, operationalMacOptional);
+                LOG.trace("execute: creating LocalUcastMac entry: {}", ucastMacsLocal);
                 transaction.add(op.insert(ucastMacsLocal));
+                transaction.add(op.comment("UcastMacLocal: Creating " + localUcastMac.getMacEntryKey().getValue()));
             } else {
                 LocalUcastMacs updatedMac = operationalMacOptional.get();
                 String existingMac = updatedMac.getMacEntryKey().getValue();
                 UcastMacsLocal extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsLocal.class);
-                extraMac.setMac("");;
+                extraMac.setMac("");
+                LOG.trace("execute: updating LocalUcastMac entry: {}", ucastMacsLocal);
                 transaction.add(op.update(ucastMacsLocal)
                         .where(extraMac.getMacColumn().getSchema().opEqual(existingMac))
                         .build());
+                transaction.add(op.comment("UcastMacLocal: Updating " + localUcastMac.getMacEntryKey().getValue()));
             }
         }
     }

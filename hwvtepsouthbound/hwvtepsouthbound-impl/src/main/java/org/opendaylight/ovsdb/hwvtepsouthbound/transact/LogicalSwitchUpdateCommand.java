@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -71,16 +71,20 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
             setTunnelKey(logicalSwitch, lswitch);
             if (!operationalSwitchOptional.isPresent()) {
                 setName(logicalSwitch, lswitch, operationalSwitchOptional);
+                LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);
                 transaction.add(op.insert(logicalSwitch));
+                transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
             } else {
                 LogicalSwitches updatedLSwitch = operationalSwitchOptional.get();
                 String existingLogicalSwitchName = updatedLSwitch.getHwvtepNodeName().getValue();
                 // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
                 LogicalSwitch extraLogicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);
                 extraLogicalSwitch.setName("");
+                LOG.trace("execute: updating LogicalSwitch entry: {}", logicalSwitch);
                 transaction.add(op.update(logicalSwitch)
                         .where(extraLogicalSwitch.getNameColumn().getSchema().opEqual(existingLogicalSwitchName))
                         .build());
+                transaction.add(op.comment("Logical Switch: Updating " + existingLogicalSwitchName));
             }
         }
     }

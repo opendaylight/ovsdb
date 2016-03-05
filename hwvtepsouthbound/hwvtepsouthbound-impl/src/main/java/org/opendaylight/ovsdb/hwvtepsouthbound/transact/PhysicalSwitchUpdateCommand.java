@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -90,23 +90,37 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             setName(physicalSwitch, physicalSwitchAugmentation, operationalPhysicalSwitchOptional);
             String pswitchUuid = "PhysicalSwitch_" + HwvtepSouthboundMapper.getRandomUUID();
             transaction.add(op.insert(physicalSwitch).withId(pswitchUuid));
+            transaction.add(op.comment("Physical Switch: Creating " +
+                            physicalSwitchAugmentation.getHwvtepNodeName().getValue()));
             //update global table
             Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Global.class);
             global.setSwitches(Sets.newHashSet(new UUID(pswitchUuid)));
 
-            LOG.debug("execute: physical switch: {}", physicalSwitch);
+            LOG.trace("execute: create physical switch: {}", physicalSwitch);
             transaction.add(op.mutate(global)
                     .addMutation(global.getSwitchesColumn().getSchema(), Mutator.INSERT,
                             global.getSwitchesColumn().getData()));
+            transaction.add(op.comment("Global: Mutating " +
+                            physicalSwitchAugmentation.getHwvtepNodeName().getValue() + " " + pswitchUuid));
         } else {
             PhysicalSwitchAugmentation updatedPhysicalSwitch = operationalPhysicalSwitchOptional.get();
             String existingPhysicalSwitchName = updatedPhysicalSwitch.getHwvtepNodeName().getValue();
+            /* In case TOR devices don't allow creation of PhysicalSwitch name might be null
+             * as user is only adding configurable parameters to MDSAL like BFD params
+             * 
+             * TODO Note: Consider handling tunnel udpate/remove in separate command
+             */
+            if(existingPhysicalSwitchName == null) {
+                existingPhysicalSwitchName = operationalPhysicalSwitchOptional.get().getHwvtepNodeName().getValue();
+            }
             // Name is immutable, and so we *can't* update it.  So we use extraPhysicalSwitch for the schema stuff
             PhysicalSwitch extraPhysicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
             extraPhysicalSwitch.setName("");
+            LOG.trace("execute: updating physical switch: {}", physicalSwitch);
             transaction.add(op.update(physicalSwitch)
                     .where(extraPhysicalSwitch.getNameColumn().getSchema().opEqual(existingPhysicalSwitchName))
                     .build());
+            transaction.add(op.comment("Physical Switch: Updating " + existingPhysicalSwitchName));
         }
     }
 
@@ -156,11 +170,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                 Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.getKey());
                 Tunnel newTunnel = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class);
                 String tunnelUuid = null;
-                if(!opTunnelOpt.isPresent()) {
-                    tunnelUuid = "Tunnel_" + HwvtepSouthboundMapper.getRandomUUID();
-                } else {
-                    tunnelUuid = opTunnelOpt.get().getTunnelUuid().getValue();
-                }
+
                 UUID localUUID = getLocatorUUID(transaction,
                                 (InstanceIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
                 UUID remoteUUID = getLocatorUUID(transaction,
@@ -172,10 +182,21 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                     setBfdParams(newTunnel, tunnel);
                     setBfdLocalConfigs(newTunnel, tunnel);
                     setBfdRemoteConfigs(newTunnel, tunnel);
-                    transaction.add(op.insert(newTunnel).withId(tunnelUuid));
+                    if(!opTunnelOpt.isPresent()) {
+                        tunnelUuid = "Tunnel_" + HwvtepSouthboundMapper.getRandomUUID();
+                        transaction.add(op.insert(newTunnel).withId(tunnelUuid));
+                        transaction.add(op.comment("Tunnel: Creating " + tunnelUuid));
+                    } else {
+                        tunnelUuid = opTunnelOpt.get().getTunnelUuid().getValue();
+                        transaction.add(op.update(newTunnel)
+                                        .where(newTunnel.getUuidColumn().getSchema().opEqual(new UUID(tunnelUuid)))
+                                        .build());
+                        transaction.add(op.comment("Tunnel: Updating " + tunnelUuid));
+                    }
                     tunnels.add(new UUID(tunnelUuid));
                 }
             }
+            //TODO: Revisit this on testing udpate/delete tunnels.
             physicalSwitch.setTunnels(tunnels);
         }
     }

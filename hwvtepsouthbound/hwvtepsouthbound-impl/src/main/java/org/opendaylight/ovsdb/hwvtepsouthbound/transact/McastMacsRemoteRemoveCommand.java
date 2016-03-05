@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteRemoveCommand.class);
 
     public McastMacsRemoteRemoveCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -60,18 +61,13 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
                     getOperationalState().getRemoteMcastMacs(instanceIdentifier, mac.getKey());
             McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     McastMacsRemote.class, null);
-            if (operationalMacOptional.isPresent()) {
+            if (operationalMacOptional.isPresent() && operationalMacOptional.get().getMacEntryUuid() != null) {
                 //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
                 //TODO: locator in config DS is not deleted
-                String macString = null;
-                if (mac.getMacEntryKey().equals(HwvtepSouthboundConstants.UNKNOWN_DST_MAC)) {
-                    macString = HwvtepSouthboundConstants.UNKNOWN_DST_STRING;
-                } else {
-                    macString = mac.getMacEntryKey().getValue();
-                }
-                transaction.add(op.delete(mcastMacsRemote.getSchema())
-                        .where(mcastMacsRemote.getMacColumn().getSchema().opEqual(macString)).build());
-                transaction.add(op.comment("Remote McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
+                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                transaction.add(op.delete(mcastMacsRemote.getSchema()).
+                        where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+                transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
             } else {
                 LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());

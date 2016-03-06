@@ -1496,7 +1496,7 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
                     for (Neutron_IPs nIP : gatewayPort.getFixedIPs()) {
                         InetAddress ipAddress;
                         try {
-                            ipAddress = InetAddress.getByAddress(nIP.getIpAddress().getBytes());
+                            ipAddress = InetAddress.getByName(nIP.getIpAddress());
                         } catch (UnknownHostException e) {
                             LOG.warn("unknown host exception {}", e);
                             continue;

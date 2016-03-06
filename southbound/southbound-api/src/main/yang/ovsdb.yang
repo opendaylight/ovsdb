@@ -204,7 +204,7 @@ module ovsdb {
             Semicolon-delimited set of universally unique identifier(s)
             for the network with which this bridge is associated on a
             Citrix XenServer host. The network identifiers are RFC 4122
-            UUIDs as displayed by, e.g., xe network−list.";
+            UUIDs as displayed by, e.g., xe network-list.";
 
             key "bridge-external-id-key";
             leaf bridge-external-id-key {
@@ -266,12 +266,12 @@ module ovsdb {
                nonnegative integer.
 
              other_config : stp-system-id: optional string
-                The bridge’s STP identifier (the lower 48 bits of the
+                The bridge's STP identifier (the lower 48 bits of the
                 bridge-id) in the form xx:xx:xx:xx:xx:xx. By default, the
                 identifier is the MAC address of the bridge.
 
              other_config : stp-priority: optional string
-                containing an integer, in range 0 to 65,535 The bridge’s relative priority
+                containing an integer, in range 0 to 65,535 The bridge's relative priority
                 value for determining the root bridge (the upper 16 bits of
                 the bridgeid).  A bridge with the lowest bridge-id is elected
                 the root. By default, the priority is 0x8000.
@@ -397,14 +397,14 @@ module ovsdb {
                   with Open vSwitch.
 
             external_ids : system-id: optional string
-               A unique identifier for the Open vSwitch’s physical host.
+               A unique identifier for the Open vSwitch's physical host.
                The form of the identifier depends on the type of the host.
                On a Citrix XenServer, this will likely be the same as
                external_ids:xs-system-uuid.
 
            external_ids : xs-system-uuid: optional string
                The Citrix XenServer universally unique identifier for the
-                physical host as displayed by xe-host−list.";
+                physical host as displayed by xe-host-list.";
 
             key "external-id-key";
             leaf external-id-key {
@@ -427,7 +427,7 @@ module ovsdb {
                in the following tables: Port, Interface , Mirror.
 
             other_config : flow-restore-wait: optional string
-               either true or false When ovs−vswitchd starts up, it has an empty flow
+               either true or false When ovs-vswitchd starts up, it has an empty flow
                table and therefore it handles all arriving packets in its
                default fashion according to its configuration, by
                dropping them or sending them to an OpenFlow controller or
@@ -446,8 +446,8 @@ module ovsdb {
             other_config : pmd-cpu-mask: optional string
                Specifies CPU mask for setting the cpu affinity of
                PMD (Poll Mode Driver) threads. Value should be in the form
-               of hex string, similar to the dpdk EAL ’-c COREMASK’ option
-               input or the ’taskset’ mask input.
+               of hex string, similar to the dpdk EAL '-c COREMASK' option
+               input or the 'taskset' mask input.
 
             other_config : n-handler-threads: optional string
                containing an integer, at least 1 Specifies the number of threads for
@@ -585,14 +585,14 @@ module ovsdb {
 
                 other_config : max-rate optional string
                     containing an integer, at least 1.
-                    Maximum allowed bandwidth, in bit/s. Optional. If specified, the queue’s rate will not be allowed
+                    Maximum allowed bandwidth, in bit/s. Optional. If specified, the queue's rate will not be allowed
                     to exceed the specified value, even if excess bandwidth is available. If unspecified, defaults to no
                     limit.
 
                 other_config : burst optional string
                     containing an integer, at least 1.
-                    Burst size, in bits. This is the maximum amount of ‘‘credits’’ that a queue can accumulate while it
-                    is idle. Optional. Details of the linux−htb implementation require a minimum burst size, so a
+                    Burst size, in bits. This is the maximum amount of ''credits'' that a queue can accumulate while it
+                    is idle. Optional. Details of the linux-htb implementation require a minimum burst size, so a
                     too-small burst will be silently ignored.
 
                 other_config : priority optional string.
@@ -609,7 +609,7 @@ module ovsdb {
 
                 other_config : max-rate optional string
                     containing an integer, at least 1.
-                    Maximum allowed bandwidth, in bit/s. Optional. If specified, the queue’s rate will not be allowed
+                    Maximum allowed bandwidth, in bit/s. Optional. If specified, the queue's rate will not be allowed
                     to exceed the specified value, even if excess bandwidth is available. If unspecified, defaults to no
                     limit..";
 
@@ -815,6 +815,7 @@ module ovsdb {
 
         list trunks {
             description "Represents the trunks of a termination point.";
+            key "trunk";
             leaf trunk {
                 type ethertype:vlan-id;
             }
@@ -861,13 +862,13 @@ module ovsdb {
 
             other_config : bond-detect-mode: optional string
                either miimon or carrier The means used to detect link failures. Defaults to
-               carrier which uses each interface’s carrier to detect failures.
+               carrier which uses each interface's carrier to detect failures.
                When set to miimon, will check for failures by polling each
-               interface’s MII.
+               interface's MII.
 
             other_config : bond-miimon-interval: optional string
                containing an integer The interval, in milliseconds, between successive
-               attempts to poll each interface’s MII. Relevant only when
+               attempts to poll each interface's MII. Relevant only when
                other_config:bond-detect-mode is miimon
 
             other_config : lacp-system-id: optional string
@@ -908,17 +909,17 @@ module ovsdb {
             other_config : stp-enable: optional string
                either true or false. If spanning tree is enabled on the bridge, member ports are
                enabled by default (with the exception of bond, internal, and
-               mirror ports which do not work with STP). If this column’s
+               mirror ports which do not work with STP). If this column's
                value is false spanning tree is disabled on the port.
 
             other_config : stp-port-num: optional string
                containing an integer, in range 1 to 255 The port number used for the lower 8
                bits of the port-id. By default, the numbers will be assigned
-               automatically. If any port’s number is manually configured on
+               automatically. If any port's number is manually configured on
                a bridge, then they must all be.
 
             other_config : stp-port-priority: optional string
-               containing an integer, in range 0 to 255 The port’s relative priority value
+               containing an integer, in range 0 to 255 The port's relative priority value
                for determining the root port (the upper 8 bits of the port-id).
 
             other_config : stp-path-cost: optional string
@@ -931,11 +932,11 @@ module ovsdb {
                  If rapid spanning tree is enabled on the bridge, member ports
                  are enabled by default (with the exception of bond, internal,
                  and mirror ports which do not work with RSTP). If this
-                 column’s value is false rapid spanning tree is disabled on
+                 column's value is false rapid spanning tree is disabled on
                  the port.
 
              other_config : rstp-port-priority: optional string
-                 containing an integer, in range 0 to 240 The port’s relative priority value
+                 containing an integer, in range 0 to 240 The port's relative priority value
                  for determining the root port, in multiples of 16. By default,
                  the port priority is 0x80 (128).
 
@@ -944,7 +945,7 @@ module ovsdb {
                  as the lower 12 bits of the port-id.
 
              other_config : rstp-port-path-cost: optional string
-                 containing an integer The port path cost. The Port’s contribution, when it
+                 containing an integer The port path cost. The Port's contribution, when it
                  is the Root Port, to the Root Path Cost for the Bridge.
 
              other_config : rstp-port-admin-edge: optional string
@@ -996,7 +997,7 @@ module ovsdb {
             external_ids : fake-bridge-id-*: optional string
                External IDs for a fake bridge (see the fake_bridge column) are defined by
                prefixing a Bridge external_ids key with
-               fake−bridge−, e.g. fake−bridge−xs−network−uuids.";
+               fake-bridge-, e.g. fake-bridge-xs-network-uuids.";
 
             key "external-id-key";
             leaf external-id-key {
@@ -1015,7 +1016,7 @@ module ovsdb {
             description "Interface external ids
 
             external_ids : attached-mac: optional string.
-               The MAC address programmed into the ‘‘virtual hardware’’ for this interface, in
+               The MAC address programmed into the ''virtual hardware'' for this interface, in
                the form xx:xx:xx:xx:xx:xx. For Citrix XenServer, this is the
                value of the MAC field in the VIF record for this interface.
 

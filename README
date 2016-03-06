@@ -1,38 +1,121 @@
 DIRECTORY ORGANIZATION
 ======================
 
-- commons/parent: contains the parent pom.xml for all ovsdb projects.
-- ovsdb: contains the ovsdb SB plugin
-- distribution/opendaylight: will build a working controller distribution
-  based on the controller + ovsdb modules
+- commons
+  +-- parent : Contains Parent pom.xml for all the ovsdb modules.
 
-HOW TO BUILD
-============
+- features : This folder contains all the Karaf related files.
 
-In order to build it's required to have JDK 1.7+ and Maven 3+, to get
-a build going it's needed to:
+- hwvtepsouthbound : Contains the hw_vtep southbound plugin.
 
-cd commons/parent
-mvn clean install
+- karaf : Builds a working controller distribution based on the controller + ovsdb modules and other
+          dependant modules such as openflowplugin
 
-or if you want to avoid SNAPSHOT checking
+- library : Contains Schema-independent library that is a reference implementation for RFC 7047.
+            This module doesn't depend on any of the Opendaylight components.
+            This library module can also be used independently in a non-OSGi environment.
 
-cd commons/parent
-mvn clean install -nsu
+- openstack
+  +-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
+                 for Network Virtualization.
+  +-- net-virt-providers : Mostly contains data-path programming functionality via OpenFlow or potentially
+                           other protocols.
+  +-- net-virt-sfc : SFC implementation using the OVSDB project.
 
-HOW TO RUN
-============
+- ovsdb-ui : Contains the DLUX implementation for displaying network virtualization
 
-Upon successful completion of a build
+- resources : Contains some useful resources such as scripts, testing utilities and tools used for deployment
+              or testing the binaries generated from the OVSDB project.
 
-cd distribution/opendaylight/target/distribution.ovsdb-1.0.0-SNAPSHOT-osgipackage/opendaylight/
-./run.sh
+- schemas :
+  +-- openvswitch : Schema wrapper that represents http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf
+  +-- hardwarevtep: Schema wrapper that represents http://openvswitch.org/docs/vtep.5.pdf
 
-Wait for the osgi console to startup and then point a browser at 
+- southbound : contains the plugin for converting from the OVSDB protocol to mdsal and vice-versa.
 
-http:localhost:8080/
+- utils : MD-SAL OpenFlow and OVSDB common utilities.
 
+HOW TO BUILD & RUN
+==================
 
+Pre-requisites : JDK 1.7+, Maven 3+
 
+1. Building a Karaf Feature and deploying it in an Opendaylight Karaf distribution :
+   1. From the root ovsdb/ directory, execute "mvn clean install"
 
+   2. Unzip the karaf-<VERSION_NUMBER>-SNAPSHOT.zip file created from step 1 in the directory ovsdb/karaf/target/:
+      "unzip karaf-<VERSION_NUMBER>-SNAPSHOT.zip"
 
+   3. Once karaf has started and you see the Opendaylight ascii art in the console, the last step
+      is to start the OVSDB plugin framework with the following command in the karaf console:
+      "feature:install odl-ovsdb-openstack" (without quotation marks).
+
+   Sample output from Karaf console :
+
+   opendaylight-user@root>feature:list -i | grep ovsdb
+   odl-ovsdb-southbound-api          | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: api
+   odl-ovsdb-southbound-impl         | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: impl
+   odl-ovsdb-southbound-impl-rest    | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: impl :: REST
+   odl-ovsdb-southbound-impl-ui      | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: impl :: UI
+   odl-ovsdb-library                 | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-library-1.2.1-SNAPSHOT        | OpenDaylight :: library
+   odl-ovsdb-openstack               | 1.2.1-SNAPSHOT   | x         | ovsdb-1.2.1-SNAPSHOT                    | OpenDaylight :: OVSDB :: OpenStack Network Virtual
+
+2. Building a bundle and deploying it in an Opendaylight Karaf distribution :
+   This method can be used to update and test new code in a bundle. If the bundle of interest is rebuilt as a
+   snapshot with the same version as what it already defined in a feature repo then that new bundle will be used
+   when the feature is loaded in karaf. If karaf is already running with the feature loaded then follow the steps
+   below to load the new bundle:
+
+   1. Find the bundle id of the bundle you are going to rebuild:
+      - bundle:list -s | grep <bundlename>, i.e. bundle:list -s | grep odl-ovsdb-plugin
+
+   2. Instruct karaf to watch the new bundle and reload it if it changes:
+      - bundle:watch <id>
+      - The id is the value returned in 1 above.
+      - You can also watch the bundle URL itself:
+        - bundle:watch mvn:org.opendaylight.ovsdb/plugin/1.0.2-SNAPSHOT
+
+   3. Rebuild bundle.
+      - cd bundle dir, i.e. cd ovsdb/plugin
+      - mvn clean install. This will install the new bundle into the local mvn repo.
+
+   4. karaf will see the changed bundle and reload it.
+
+Running The Integration Tests
+=============================
+
+To run the integration tests locally the following components are required:
+
+ - Docker
+ - Fig or Docker Compose
+
+To install docker, follow the installation guide for your platform:
+   http://docs.docker.com/installation/
+
+To install fig:
+   http://www.fig.sh/install.html
+
+To install Docker Compose:
+   http://docs.docker.com/compose/install/
+
+To run the integration tests:
+
+    mvn clean install
+    # The first time you need to set everything up
+    fig up -d
+    # Later runs only need the containers to be started
+    fig start
+    # OSX
+    mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=$(boot2docker ip 2>/dev/null) -Dovsdbserver.port=6640
+    # Linux
+    mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=127.0.0.1 -Dovsdbserver.port=6640
+    fig stop
+
+On Linux you'll generally need to run fig as root (sudo fig ...).
+
+If you're using Docker Compose, replace "fig" above with "docker-compose" and ignore the warnings.
+
+Skipping unit tests and karaf tests
+====================
+
+mvn clean install -Dmaven.test.skip=true -Dskip.karaf=true

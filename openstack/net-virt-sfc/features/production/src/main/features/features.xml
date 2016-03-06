@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright © 2015 Red Hat, Inc. and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-ovsdb-sfc-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/southbound-features/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.sfc/features-sfc/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
+  <feature name='odl-ovsdb-sfc-api' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: api'>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-api/{{VERSION}}</bundle>
+  </feature>
+  <feature name='odl-ovsdb-sfc' version='${project.version}' description='OpenDaylight :: ovsdb-sfc'>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+    <feature version='${openflowplugin.version}'>odl-openflowplugin-nxm-extensions</feature>
+    <feature version='${project.version}'>odl-ovsdb-southbound-impl</feature>
+    <feature version='${project.version}'>odl-ovsdb-openstack</feature>
+    <feature version='${sfc.version}'>odl-sfc-provider</feature>
+    <feature version='${sfc.version}'>odl-sfcofl2</feature>
+    <feature version='${project.version}'>odl-ovsdb-sfc-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-impl/{{VERSION}}</bundle>
+    <configfile finalname="${configfile.directory}/openstack.net-virt-sfc.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-impl/{{VERSION}}/xml/config</configfile>
+  </feature>
+  <feature name='odl-ovsdb-sfc-rest' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: REST'>
+    <feature version="${project.version}">odl-ovsdb-sfc</feature>
+    <feature version="${restconf.version}">odl-restconf</feature>
+  </feature>
+  <feature name='odl-ovsdb-sfc-ui' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: UI'>
+    <feature version="${project.version}">odl-ovsdb-sfc-rest</feature>
+    <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${dlux.version}">odl-dlux-yangui</feature>
+  </feature>
+
+</features>

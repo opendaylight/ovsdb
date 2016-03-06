@@ -2,9 +2,35 @@
 This directory contains all the associated scripts and configuration files that can be used by developers and
 administrators working on ovsdb project in general.
 
-Contents 
+Contents
 --------
 
-1. Mininet_Demo_OVSDB_OF.json.postman_collection : Collection of REST-APIs used in the Mininet demo (http://www.youtube.com/watch?v=8iWhMVlflwE)
+- localhost.json.postman_environment : Environment that associates address and port to localhost:8080 in templates for the collections below.
 
-2. OVSDB_Northbound_APIs.json.postman_collection : Collection of REST-APIs detailing on all the ovsdb.northbound APIs.
+- Mininet_Demo_OVSDB_OF.json.postman_collection : Collection of REST-APIs used in the Mininet demo (http://www.youtube.com/watch?v=8iWhMVlflwE)
+
+- Neutron-v2.0-LBaaS-API-Examples_July15.json.postman_collection.txt : Collection of REST-APIs to interact with LBaas pool/pool member/loadbalancer.
+
+- showOvsdbMdsal.py : Dumps mdsal related info from running ODL that is related to ovsdb and netvirt. Use 'showOvsdbMdsal.py -h' for usage
+
+- ODL-Clustering.json.postman_collection : Collection contains Restconf request to fetch clustering service related data to check the state of 3 node cluster and inventory/topology shards.
+    - Please import and load 3-Node-Cluster-Setup-Environment-Variables.postman_environment file, because Restconf request present in this collection depends on the variable defined in this collection.
+
+- Ovsdb-Southbound-Collection-for-Single-Node-Cluster.json.postman_collection : Collection contains Restconf request for doing CRUD operations (connection, bridge, termination point) on southbound plugin running in standalone controller.
+    - Please import and load Single-Node-Cluster-Setup-Environment-Variables.postman_environment file, because Restconf request present in this collection depends on the variable defined in this collection.
+
+- Ovsdb-Southbound-Collection-for-3-Node-Cluster.json.postman_collection :
+    - Please import and load 3-Node-Cluster-Setup-Environment-Variables.postman_environment file, because Restconf request present in this collection depends on the variable defined in this collection.
+
+
+- Single-Node-Cluster-Setup-Environment-Variables.postman_environment : Postman environment file that defines variables for Restconf request for southbound plugin running in Single controller instance
+
+- 3-Node-Cluster-Setup-Environment-Variables.postman_environment : Postman environment file that defines variables for Restconf request for southbound plugin running in 3 node cluster environment
+
+- NetvirtSfc.json.postman_collection : Collection of REST-APIs to interact with Netvirt-Sfc.
+
+- Ovsdb-HwvtepSouthbound-Collection.json.postman_collection : Collection contains Restconf request for doing CRUD operations (hwvtep global node, physical switch, logical switch, physical locator, and physical port) on hwvtepsouthbound plugin running in standalone controller.
+
+- Qos-and-Queue-Collection-Environment-Variables.postman_environment : Postman environment file that defines variables used by the Qos-and-Queue-Collection.json.postman_collection
+
+- Qos-and-Queue-Collection.json.postman_collection - Collection of Postman Restconf commands for doing CRUD operations on Qos and Queue entries.

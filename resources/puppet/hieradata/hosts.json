@@ -1,0 +1,28 @@
+{
+  "hosts": {
+    "opendaylight": {
+      "name": "opendaylight",
+      "ipaddress": "192.168.50.1"
+    },
+    "mininet": {
+      "name": "mininet",
+      "ipaddress": "192.168.50.15"
+    },
+    "devstack-control": {
+      "name": "devstack-control",
+      "ipaddress": "192.168.50.20"
+    },
+    "devstack-compute-1": {
+      "name": "devstack-compute-1",
+      "ipaddress": "192.168.50.21"
+    },
+    "devstack-compute-2": {
+      "name": "devstack-compute-2",
+      "ipaddress": "192.168.50.22"
+    },
+    "devstack-compute-3": {
+      "name": "devstack-compute-3",
+      "ipaddress": "192.168.50.23"
+    }
+  }
+}

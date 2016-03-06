@@ -1,0 +1,153 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.ovsdb.southbound.ovsdb.transact;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
+public class DataChangesManagedByOvsdbNodeEvent implements
+    AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> {
+
+    private InstanceIdentifier<?> iid;
+    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
+    private Map<InstanceIdentifier<?>, DataObject> createdData = null;
+    private Map<InstanceIdentifier<?>, DataObject> updatedData = null;
+    private Map<InstanceIdentifier<?>, DataObject> originalData = null;
+    private Set<InstanceIdentifier<?>> removedPaths;
+
+    public DataChangesManagedByOvsdbNodeEvent(InstanceIdentifier<?> iid,
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+        this.iid = iid;
+        this.event = event;
+    }
+
+    private Map<InstanceIdentifier<?>, DataObject> filter(Map<InstanceIdentifier<?>,
+            DataObject> data) {
+        Map<InstanceIdentifier<?>, DataObject> result
+            = new HashMap<>();
+        for (Entry<InstanceIdentifier<?>, DataObject> entry: data.entrySet()) {
+            if (isManagedBy(entry.getKey())) {
+                result.put(entry.getKey(),entry.getValue());
+            } else {
+                Class<?> type = entry.getKey().getTargetType();
+                if (type.equals(OvsdbNodeAugmentation.class)
+                        || type.equals(OvsdbTerminationPointAugmentation.class)
+                        || type.equals(Node.class)) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
+        if (this.createdData  == null) {
+            this.createdData = filter(event.getCreatedData());
+        }
+        return this.createdData;
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
+        if (this.updatedData == null) {
+            this.updatedData = filter(event.getUpdatedData());
+        }
+        return this.updatedData;
+    }
+
+    @Override
+    public Set<InstanceIdentifier<?>> getRemovedPaths() {
+        if (this.removedPaths == null) {
+            this.removedPaths = new HashSet<>();
+            for (InstanceIdentifier<?> path: event.getRemovedPaths()) {
+                if (isManagedBy(path)) {
+                    this.removedPaths.add(path);
+                }
+            }
+        }
+        return this.removedPaths;
+    }
+
+    private boolean isManagedBy(InstanceIdentifier<?> bridgeIid) {
+
+        // Did we just create the containing node?
+        InstanceIdentifier<?> managedBy = getManagedByIid(event.getCreatedData() , bridgeIid);
+        if (managedBy != null && managedBy.equals(iid)) {
+            return true;
+        }
+
+        // Did we just update the containing node?
+        managedBy = getManagedByIid(event.getUpdatedData() , bridgeIid);
+        if (managedBy != null && managedBy.equals(iid)) {
+            return true;
+        }
+
+        // Did we have the containing node already (note: we never get here unless we are deleting it)
+        managedBy = getManagedByIid(event.getOriginalData() , bridgeIid);
+        if (managedBy != null && managedBy.equals(iid)) {
+            return true;
+        }
+        return false;
+
+    }
+
+    private InstanceIdentifier<?> getManagedByIid(Map<InstanceIdentifier<?>, DataObject> map,
+            InstanceIdentifier<?> iidToCheck) {
+        // Get the InstanceIdentifier of the containing node
+        InstanceIdentifier<Node> nodeEntryIid = iidToCheck.firstIdentifierOf(Node.class);
+
+        // Look for the Node in the created/updated data
+        DataObject dataObject = null;
+        if (map != null && map.get(nodeEntryIid) != null) {
+            dataObject = map.get(nodeEntryIid);
+        }
+        // If we are contained in a bridge managed by this iid
+        if (dataObject != null && dataObject instanceof Node) {
+            Node node = (Node)dataObject;
+            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            if (bridge != null && bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(this.iid)) {
+                return bridge.getManagedBy().getValue();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
+        if (this.originalData == null) {
+            this.originalData = filter(event.getOriginalData());
+        }
+        return this.originalData;
+    }
+
+    @Override
+    public DataObject getOriginalSubtree() {
+        // TODO Auto-generated method stub
+        return event.getOriginalSubtree();
+    }
+
+    @Override
+    public DataObject getUpdatedSubtree() {
+        // TODO Auto-generated method stub
+        return event.getUpdatedSubtree();
+    }
+
+}

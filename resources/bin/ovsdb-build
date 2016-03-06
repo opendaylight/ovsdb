@@ -1,0 +1,162 @@
+#!/usr/bin/env python
+# Copyright (c) 2014 Hewlett-Packard Development Company, L.P.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Author: Dave Tucker
+
+import argparse
+import os
+from subprocess import call
+from sys import exit
+
+CTRL_GIT = "https://git.opendaylight.org/gerrit/p/controller.git"
+OVSDB_GIT = "https://git.opendaylight.org/gerrit/p/ovsdb.git"
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--reclone',
+                        help='Reclone the Controller/OVSDB repos',
+                        action='store_true')
+    parser.add_argument('-b', '--rebuild',
+                        help='Build the Controller Project',
+                        action='store_true')
+    parser.add_argument('-of13', '--openflow13',
+                        help='Enable OpenFlow 1.3 Support',
+                        action='store_true')
+    parser.add_argument('-v', '--verbose',
+                        help='Verbose output',
+                        action='store_true')
+    parser.add_argument('-g', '--gerrit',
+                        metavar='CHANGE_ID',
+                        help='Gerrit Change ID',
+                        type=int)
+    parser.add_argument('-start', '--start',
+                        help='Start the controller',
+                        default=True,
+                        action='store_true')
+    parser.add_argument('-stop', '--stop',
+                        help='Stop the controller',
+                        action='store_true')
+    parser.add_argument('-d', '--directory',
+                        help='directory',
+                        type=str)
+    parser.add_argument('-t', '--tmux',
+                        help='Create tmux session',
+                        action='store_true')
+    args = parser.parse_args()
+
+    builder = OvsdbBuilder(args.verbose, args.openflow13,
+                           args.directory)
+
+    if args.stop:
+        builder.stop_controller()
+        exit(0)
+
+    if args.reclone:
+        print("---> Recloning Controller")
+        builder.reclone(builder.ctrl_root, CTRL_GIT)
+        print("---> Recloning OVSDB")
+        builder.reclone(builder.ovsdb_root, OVSDB_GIT)
+
+    if args.rebuild:
+        print("---> Building Controller")
+        builder.build(builder.ctrl_build)
+
+    if args.gerrit:
+        print("---> Checking out patch from Gerrit")
+        builder.gerrit(args.gerrit)
+
+    print("---> Building OVSDB")
+    builder.build(builder.ovsdb_root, args.verbose)
+    print("---> Copying OVSDB JARs")
+    builder.copy_jars()
+
+    if args.start:
+        print("---> Running Controller")
+        builder.run_controller()
+
+    if args.tmux:
+        builder.tmux()
+        print("To attach to the session please run: \n\n"
+              "    tmux -2 attach-session -t odl\n\n")
+
+
+class OvsdbBuilder(object):
+
+    def __init__(self,
+                 verbose=False,
+                 of13=False,
+                 directory=os.path.expanduser('~')):
+        self.root_dir = directory
+        self.ctrl_root = self.root_dir + "/controller"
+        self.ctrl_build = (self.root_dir +
+                           "/opendaylight/distribution/opendaylight")
+        self.ctrl_exec = (self.ctrl_build +
+                          "/target/distribution.opendaylight-osgipackage" +
+                          "/opendaylight")
+        self.ctrl_plugin = self.ctrl_build + "/plugin"
+        self.ovsdb_root = self.root_dir + "/ovsdb"
+        self.verbose = verbose
+
+    def reclone(self, location, repo):
+        try:
+            os.chdir(location)
+            command = "git checkout master"
+            command = "git pull"
+            if not self.verbose:
+                command += " > /dev/null"
+            call(command, shell=True)
+        except OSError:
+            command = "git clone %s" % repo
+            if not self.verbose:
+                command += " > /dev/null"
+            call(command, shell=True)
+
+    def gerrit(self, patch):
+        os.chdir(self.ovsdb_root)
+        command = "git review -d %i" % patch
+        call(command, shell=True)
+
+    def build(self, location, verbose):
+        os.chdir(location)
+        command = "mvn clean install"
+        if not verbose:
+            command += " > /dev/null"
+        call(command, shell=True)
+
+    def copy_jars(self):
+        os.chdir(self.ovsdb_root)
+        command = ("find . -name ovsdb*.jar -exec cp {} %s \;"
+                   % self.ctrl_plugin)
+        call(command, shell=True)
+
+    def stop_controller(self):
+        os.chdir(self.root_dir)
+        command = "sh " + self.ctrl_exec + "/run.sh -stop"
+        call(command, shell=True)
+
+    def run_controller(self):
+        os.chdir(self.root_dir)
+        command = "sh " + self.ctrl_exec + "/run.sh -start -debug"
+        if (self.of13):
+            command += " -of13"
+        call(command, shell=True)
+
+    def tmux(self):
+        tmux = ["tmux new-session -d -s odl",
+                "tmux new-window -t odl:1 -n 'OSGi' 'telnet 127.0.0.1 2400'",
+                "tmux new-window -t odl:2 -n 'OVSDB Source' 'cd %s'"
+                % self.ovsdb_root,
+                "tmux new-window -t odl:3 -n 'Ctrl Source' 'cd %s'"
+                % self.ctrl_root,
+                "tmux select-window -t odl:1",
+                ]
+        call(" ; ".join(tmux), shell=True)
+
+if __name__ == "__main__":
+    main()
+

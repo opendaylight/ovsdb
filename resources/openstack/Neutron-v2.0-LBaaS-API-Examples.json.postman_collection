@@ -1,0 +1,305 @@
+{
+   "id":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+   "name":"Neutron-v2.0-LBaaS-API-Examples",
+   "description":"A collection of OpenStack Neutron v2.0 REST API calls for Postman. Import these into Postman and use to validate the OpenDaylight Neutron NB-API interfaces.\n\nResources:\n- Postman http://www.getpostman.com\n- Neutron v2.0 https://wiki.openstack.org/wiki/Neutron/APIv2-specification",
+   "order":[
+      "ab56feb7-741c-09a1-6d61-5b70d3efb00d",
+      "9042ff64-a91c-1ed1-d358-84efe27c5a0c",
+      "a0477924-0f54-3c9b-f801-504619ac848e",
+      "81160a47-b9e5-f5a2-3436-06f315a22252",
+      "38db7b1b-3215-ef48-b03e-3c35b4392962",
+      "09a6d683-9f53-9f42-d26e-6a153fa1e095",
+      "c51aee6b-3a7f-a599-3e48-bf74c8519312",
+      "3ccccdb1-1804-6ede-9ad0-77b9d74346c4",
+      "88cb3b1b-085f-957a-7b8f-a3dc3ccfa11f",
+      "7a989db7-a585-c65e-69c4-a693003090a2",
+      "cdc484d4-59b3-c6dc-765e-2310da116137",
+      "76409539-7a91-d18c-5c38-b3a5ee3bd371",
+      "aefb1037-96a1-be86-84c5-26c43149f678"
+   ],
+   "folders":[
+      {
+         "id":"126c18b5-94b8-689b-c932-371cddb543f2",
+         "name":"Neutron Firewall as a Service (FWaaS)",
+         "description":"",
+         "order":[
+            "747f9a54-e64f-57f6-ce6d-8ad358817696",
+            "7ef5413c-7f22-ac12-5444-f9be6a7c029e",
+            "ed8face9-6585-8a9b-9e09-870e3a5e5546",
+            "09bcfbe4-b01a-3615-820f-7fc3a2261e05",
+            "a1efd833-3d79-1621-9aa5-61b0fecec94a",
+            "a183a8b3-bddb-dc04-ae73-3beb11af4d04"
+         ],
+         "collection_name":"Neutron-v2.0-API-Examples",
+         "collection_id":"bd9b142f-e3ad-452d-f088-eed1b741b937"
+      },
+      {
+         "id":"770b37d2-85c3-d373-28de-4913009875f8",
+         "name":"Neutron Load Balancer as a Service (LBaaS)",
+         "description":"",
+         "order":[
+            "4ecb4af3-e10b-6710-bbcf-af2b80a8887f",
+            "8c4d8a07-64c5-f821-4799-d528f01e88cc",
+            "a483b6c9-2f07-f59e-effa-883591fee938",
+            "5c73f0bc-7502-26e1-42e1-c918ecbd56ae",
+            "b6761938-4918-6120-c181-33f5d8c9f1a5",
+            "a896a2b2-3273-2ff0-c801-1cbecdc2cc85",
+            "033e8332-94d9-b9cd-6b2d-4adb37dd8a9c",
+            "c9f46dde-6b6d-0def-ae83-7885be0dbf87"
+         ],
+         "collection_name":"Neutron-v2.0-API-Examples",
+         "collection_id":"bd9b142f-e3ad-452d-f088-eed1b741b937"
+      },
+      {
+         "id":"7b2236c6-cd5b-1bc0-fd02-737efb4995dc",
+         "name":"Neutron Port Security",
+         "description":"",
+         "order":[
+            "f9de4b7d-8b08-fb14-d557-3cf81d7465f4",
+            "9fe0d840-dcd3-6d3e-d410-e88538858e3a",
+            "c9cc2212-1f16-ead6-5dc0-073aed1e2c61",
+            "1387de10-9981-2ecb-32b8-4cc4806894cf",
+            "56d38607-d1dc-adba-a3fd-7e4d63e6c75d",
+            "4f72cdab-70f1-dba9-3986-3305c7ef18c8",
+            "f01b7f99-0aeb-739f-eb4a-cd467320b85c"
+         ],
+         "collection_name":"Neutron-v2.0-API-Examples",
+         "collection_id":"bd9b142f-e3ad-452d-f088-eed1b741b937"
+      },
+      {
+         "id":"2ad17469-46b9-3b8e-0686-b361e092c755",
+         "name":"Neutron Port, Network, Subnet, CRUD",
+         "description":"",
+         "order":[
+            "55aab7d7-6159-c4fb-5b3f-42cbb55c4e7b",
+            "1215e515-a4ff-7d7e-acbf-905c6706db86",
+            "9d37dcb1-e1e6-9fae-01ea-cc30aeb874a6",
+            "78eb34fc-1933-c019-bf7f-fdae9652f9cd",
+            "94c4ed8e-8e48-2384-38b0-5497fe05ba7a",
+            "83af7fdb-53b2-3818-006e-bb52b8304e6a",
+            "ef3c7339-ba4d-124d-7e1f-67d9ab638277"
+         ],
+         "collection_name":"Neutron-v2.0-API-Examples",
+         "collection_id":"bd9b142f-e3ad-452d-f088-eed1b741b937"
+      },
+      {
+         "id":"f080abc2-2590-5b74-dd6d-3acc19090bce",
+         "name":"Neutron Router, CRUD",
+         "description":"",
+         "order":[
+            "a209e7b3-9d00-bd9a-b920-39fd577b52c6",
+            "5542be98-775d-3a61-2709-59b0d692e453",
+            "828984bd-db02-aec4-d154-cd8e7f2b559b",
+            "ec4ca40c-be6e-d76b-81a3-8fd328180132",
+            "9e7c7b50-1580-c7e2-70a0-445b42e218b1",
+            "84b71139-7a9a-2f27-d0f6-745b8dbe876f",
+            "41940ad7-cec0-99c5-204a-eceab3aa7b78",
+            "e6b74bbb-cf2f-9eec-e530-537f1c065f8e",
+            "7370da7f-234e-3f7a-ed12-e384131d886d",
+            "7b61cef4-38da-3a4e-c968-38a98f31e85d",
+            "ba73a129-a385-0554-7e6c-dc687ea78bbb",
+            "62417324-b809-5a83-d3f3-cd4fef07bbe5",
+            "70ae1c0d-5b58-0c2a-5b62-d186a74059ab",
+            "846c29b1-07fd-3d7d-f997-845ba91232b9"
+         ],
+         "collection_name":"Neutron-v2.0-API-Examples",
+         "collection_id":"bd9b142f-e3ad-452d-f088-eed1b741b937"
+      }
+   ],
+   "timestamp":1394529177458,
+   "synced":false,
+   "requests":[
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"09a6d683-9f53-9f42-d26e-6a153fa1e095",
+         "name":"Get Neutron Load Balancer  Pool",
+         "description":"Return a Neutron v2.0  Load Balancer Pool.",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/pools/",
+         "method":"GET",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":[
+
+         ],
+         "dataMode":"params",
+         "responses":[
+
+         ],
+         "version":2
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"38db7b1b-3215-ef48-b03e-3c35b4392962",
+         "name":"Post Add Neutron Load Balancer Pool",
+         "description":"Example posting of a Neutron v2.0  Load Balancer Pool.",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/pools/",
+         "method":"POST",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n  \"pool\": {\n    \"id\": \"332abe93-f488-41ba-870b-2ac66be7f853\",\n    \"tenant_id\": \"19eaa775-cf5d-49bc-902e-2f85f668d995\",\n    \"name\": \"Example pool\",\n    \"description\": \"\",\n    \"protocol\": \"http\",\n    \"lb_algorithm\": \"ROUND_ROBIN\",\n    \"session_persistence\": {\n    },\n    \"healthmonitor_id\": null,\n    \"members\": [{\n      \"id\": \"a183a8b3-bddb-dc04-ae73-3beb11af4d04\",\n \"tenant_id\": \"c778d7b543914fc68df8b44f57035f0b\",\n \"address\": \"10.0.0.7\",\n \"protocol_port\":80,\n \"subnet_id\": \"5966ebd4-b456-4e11-a3a3-def0d3f432d4\",\n      \"admin_state_up\": true\n }],\n    \"admin_state_up\": true,\n    \"status\": \"ACTIVE\"\n  }\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1410588134504
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"3ccccdb1-1804-6ede-9ad0-77b9d74346c4",
+         "name":"Get Neutron Load Balancers",
+         "description":"Return a Neutron v2.0  Load Balancer (LBaaS).",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/loadbalancers/",
+         "method":"GET",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":[
+
+         ],
+         "dataMode":"params",
+         "responses":[
+
+         ],
+         "version":2
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"76409539-7a91-d18c-5c38-b3a5ee3bd371",
+         "name":"Get Neutron Load Balancer Pool Members",
+         "description":"Return Neutron v2.0  Load Balancer (LBaaS). pool members",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/pools/332abe93-f488-41ba-870b-2ac66be7f853/members",
+         "method":"GET",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411258713277
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"7a989db7-a585-c65e-69c4-a693003090a2",
+         "name":"Delete Neutron Load Balancer",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/loadbalancers/8992a43f-83af-4b49-9afd-c2bfbd82d7d7",
+         "method":"DELETE",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"",
+         "dataMode":"raw",
+         "timestamp":0,
+         "responses":[
+
+         ],
+         "version":2
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"81160a47-b9e5-f5a2-3436-06f315a22252",
+         "name":"Post Add Neutron Network Port 2",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/ports/",
+         "method":"POST",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n  \"port\": {\n    \"status\": \"UP\",\n    \"binding:host_id\": \"\",\n    \"name\": \"private-port\",\n    \"allowed_address_pairs\": [\n    ],\n    \"admin_state_up\": true,\n    \"network_id\": \"e9330b1f-a2ef-4160-a991-169e56ab17f5\",\n    \"tenant_id\": \"19eaa775-cf5d-49bc-902e-2f85f668d995\",\n    \"binding:vif_details\": {\n    },\n    \"binding:vnic_type\": \"normal\",\n    \"binding:vif_type\": \"unbound\",\n    \"device_owner\": \"\",\n    \"mac_address\": \"fa:16:3e:c9:cb:f4\",\n    \"binding:profile\": {\n    },\n    \"fixed_ips\": [\n      {\n        \"subnet_id\": \"5966ebd4-b456-4e11-a3a3-def0d3f432d4\",\n        \"ip_address\": \"10.0.0.8\"\n      }\n    ],\n    \"id\": \"65c0ee9f-d634-4522-8954-51021b570b0e\",\n    \"security_groups\": [\n      \"f0ac4394-7e4a-4409-9701-ba8be283dbc3\"\n    ],\n    \"device_id\": \"\"\n  }\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411259165825
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"88cb3b1b-085f-957a-7b8f-a3dc3ccfa11f",
+         "name":"Post Add Neutron Load Balancer",
+         "description":"Example posting of a Neutron v2.0  Load Balancer (LBaaS).",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/loadbalancers/",
+         "method":"POST",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n  \"loadbalancer\": {\n    \"id\": \"8992a43f-83af-4b49-9afd-c2bfbd82d7d7\",\n    \"name\": \"Example LB\",\n    \"description\": \"A very simple example load balancer.\",\n    \"vip_address\": \"10.0.0.5\",\n    \"vip_subnet_id\": \"5966ebd4-b456-4e11-a3a3-def0d3f432d4\",\n    \"tenant_id\": \"c778d7b543914fc68df8b44f57035f0b\",\n    \"status\": \"PENDING_CREATE\"\n  }\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1410506408065
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"9042ff64-a91c-1ed1-d358-84efe27c5a0c",
+         "name":"Post Add Neutron Subnet",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/subnets/",
+         "method":"POST",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n  \"subnet\": {\n    \"name\": \"\",\n    \"enable_dhcp\": true,\n    \"network_id\": \"e9330b1f-a2ef-4160-a991-169e56ab17f5\",\n    \"tenant_id\": \"19eaa775-cf5d-49bc-902e-2f85f668d995\",\n    \"dns_nameservers\": [\n    ],\n    \"allocation_pools\": [\n      {\n        \"start\": \"10.0.0.2\",\n        \"end\": \"10.0.0.254\"\n      }\n    ],\n    \"host_routes\": [\n    ],\n    \"ip_version\": 4,\n    \"gateway_ip\": \"10.0.0.1\",\n    \"cidr\": \"10.0.0.0/24\",\n    \"id\": \"5966ebd4-b456-4e11-a3a3-def0d3f432d4\"\n  }\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411259299009
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"a0477924-0f54-3c9b-f801-504619ac848e",
+         "name":"Post Add Neutron Network Port",
+         "description":"Post a list of Neutron v2.0 Port",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/ports/",
+         "method":"POST",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n  \"port\": {\n    \"status\": \"UP\",\n    \"binding:host_id\": \"\",\n    \"name\": \"private-port\",\n    \"allowed_address_pairs\": [\n    ],\n    \"admin_state_up\": true,\n    \"network_id\": \"e9330b1f-a2ef-4160-a991-169e56ab17f5\",\n    \"tenant_id\": \"19eaa775-cf5d-49bc-902e-2f85f668d995\",\n    \"binding:vif_details\": {\n    },\n    \"binding:vnic_type\": \"normal\",\n    \"binding:vif_type\": \"unbound\",\n    \"device_owner\": \"\",\n    \"mac_address\": \"fa:16:3e:c9:cb:f0\",\n    \"binding:profile\": {\n    },\n    \"fixed_ips\": [\n      {\n        \"subnet_id\": \"5966ebd4-b456-4e11-a3a3-def0d3f432d4\",\n        \"ip_address\": \"10.0.0.7\"\n      }\n    ],\n    \"id\": \"65c0ee9f-d634-4522-8954-51021b570b0d\",\n    \"security_groups\": [\n      \"f0ac4394-7e4a-4409-9701-ba8be283dbc3\"\n    ],\n    \"device_id\": \"\"\n  }\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411259172338
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"ab56feb7-741c-09a1-6d61-5b70d3efb00d",
+         "name":"Post Add Neutron Network",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/networks/",
+         "method":"POST",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n   \"networks\":[\n      {\n         \"status\":\"ACTIVE\",\n         \"subnets\":[\n         ],\n         \"name\":\"sample_network_89\",\n         \"provider:physical_network\":null,\n   \"admin_state_up\":false,\n   \"tenant_id\":\"19eaa775-cf5d-49bc-902e-2f85f668d995\",\n   \"provider:network_type\":\"local\",\n   \"router:external\":false,\n   \"shared\":false,\n   \"id\":\"e9330b1f-a2ef-4160-a991-169e56ab17f5\",\n   \"provider:segmentation_id\":89\n}\n  ]\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411259104205
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"aefb1037-96a1-be86-84c5-26c43149f678",
+         "name":"Delete Neutron Load Balancer Pool Member",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/pools/332abe93-f488-41ba-870b-2ac66be7f853/members/a183a8b3-bddb-dc04-ae73-3beb11af4d05",
+         "method":"DELETE",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411230459830
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"c51aee6b-3a7f-a599-3e48-bf74c8519312",
+         "name":"Delete Neutron Load Balancer Pool",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/pools/332abe93-f488-41ba-870b-2ac66be7f853",
+         "method":"DELETE",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"",
+         "dataMode":"raw",
+         "timestamp":0,
+         "responses":[
+
+         ],
+         "version":2
+      },
+      {
+         "collectionId":"f2eafc5e-f558-a4b5-dffd-37c9209df60b",
+         "id":"cdc484d4-59b3-c6dc-765e-2310da116137",
+         "name":"Post Add LoadBalancer Pool Member",
+         "description":"",
+         "url":"http://127.0.0.1:8080/controller/nb/v2/neutron/pools/332abe93-f488-41ba-870b-2ac66be7f853/members/",
+         "method":"PUT",
+         "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+         "data":"{\n  \"member\": {\n      \"id\": \"a183a8b3-bddb-dc04-ae73-3beb11af4d05\",\n \"tenant_id\": \"c778d7b543914fc68df8b44f57035f0b\",\n \"address\": \"10.0.0.8\",\n \"protocol_port\":80,\n \"subnet_id\": \"5966ebd4-b456-4e11-a3a3-def0d3f432d4\",\n      \"admin_state_up\": true,\n    \"weight\": 1,\n    \"status\": \"UP\"\n }\n}",
+         "dataMode":"raw",
+         "timestamp":0,
+         "version":2,
+         "time":1411230445515
+      }
+   ]
+}

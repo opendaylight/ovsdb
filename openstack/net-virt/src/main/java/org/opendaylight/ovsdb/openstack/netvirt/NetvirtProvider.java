@@ -47,6 +47,14 @@ public class NetvirtProvider implements BindingAwareProvider, AutoCloseable {
         return false;
     }
 
+    public static boolean isMasterElected(){
+        if (entityOwnershipService != null) {
+            Optional<EntityOwnershipState> state = entityOwnershipService.getOwnershipState(ownerInstanceEntity);
+            return state.isPresent() && state.get().hasOwner();
+        }
+        return false;
+    }
+
     @Override
     public void close() throws Exception {
         LOG.info("NetvirtProvider closed");

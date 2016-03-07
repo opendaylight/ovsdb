@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.ClusterAwareMdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
@@ -87,6 +88,13 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     public void setDependencies(Object impl) {}
 
     private void initializeNetvirtTopology() {
+        while(!NetvirtProvider.isMasterElected()){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                LOG.warn("Netvirt thread waiting on Netvirt Ownership Election is interrupted");
+            }
+        }
         final TopologyId topologyId = new TopologyId(new Uri(Constants.NETVIRT_TOPOLOGY_ID));
         InstanceIdentifier<Topology> path =
                 InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));

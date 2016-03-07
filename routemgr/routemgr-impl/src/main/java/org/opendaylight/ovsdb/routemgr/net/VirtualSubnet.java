@@ -48,6 +48,10 @@ public class VirtualSubnet  {
         poolList         = new ArrayList();
     }
 
+    public VirtualSubnet() {
+        init();
+    }
+
     public VirtualSubnet setSubnetUUID(Uuid subnetUUID) {
         this.subnetUUID = subnetUUID;
         return this;

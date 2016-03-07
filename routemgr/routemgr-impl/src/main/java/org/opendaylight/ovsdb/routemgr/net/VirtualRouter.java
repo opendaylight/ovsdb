@@ -37,6 +37,10 @@ public class VirtualRouter  {
         this.interfaces = new HashMap<>();
     }
 
+    public VirtualRouter() {
+        init();
+    }
+
     public Uuid getRouterUUID() {
         return routerUUID;
     }

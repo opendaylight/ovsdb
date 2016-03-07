@@ -31,6 +31,11 @@ public class IfMgr {
     private HashMap<Uuid, VirtualPort> vintfs;
     private HashMap<Uuid, List<VirtualPort>> unprocessedRouterIntfs;
     private HashMap<Uuid, List<VirtualPort>> unprocessedSubnetIntfs;
+    private static final IfMgr IFMGR_INSTANCE = new IfMgr();
+
+    private IfMgr () {
+        init();
+    }
 
     void init() {
         this.vrouters = new HashMap<>();
@@ -39,6 +44,10 @@ public class IfMgr {
         this.unprocessedRouterIntfs = new HashMap<>();
         this.unprocessedSubnetIntfs = new HashMap<>();
         logger.info("IfMgr is enabled");
+    }
+
+    public static IfMgr getIfMgrInstance() {
+        return IFMGR_INSTANCE;
     }
 
     /**
@@ -59,6 +68,11 @@ public class IfMgr {
             vrouters.put(rtrUuid, rtr);
 
             List<VirtualPort> intfList = unprocessedRouterIntfs.get(rtrUuid);
+
+            if (intfList == null) {
+                logger.info ("intfList is null for {}", rtrUuid);
+                return;
+            }
 
             for (VirtualPort intf : intfList) {
                 if (intf != null) {
@@ -128,7 +142,10 @@ public class IfMgr {
             vsubnets.put(snetId, snet);
 
             List<VirtualPort> intfList = unprocessedSubnetIntfs.get(snetId);
-
+            if (intfList == null) {
+                logger.info ("interfaces are not available for the subnet {}", snetId);
+                return;
+            }
             for (VirtualPort intf : intfList) {
                 if (intf != null) {
                     intf.setSubnet(snet);
@@ -207,8 +224,8 @@ public class IfMgr {
         return;
     }
 
-    public void addHostIntf(Uuid portId, Uuid hostId, Uuid snetId,
-                            Uuid networkId, IpAddress fixedIp, String macAddress) {
+    public void addHostIntf(Uuid portId, Uuid snetId, Uuid networkId,
+                            IpAddress fixedIp, String macAddress) {
         VirtualPort intf = vintfs.get(portId);
         if (intf == null) {
             intf = new VirtualPort();
@@ -221,7 +238,6 @@ public class IfMgr {
 
         if (intf != null) {
             intf.setIntfUUID(portId)
-                    .setNodeUUID(hostId)
                     .setSubnetID(snetId)
                     .setIpAddr(fixedIp)
                     .setNetworkID(networkId)

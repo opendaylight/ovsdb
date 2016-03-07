@@ -59,6 +59,7 @@ public class NetDataListener implements DataChangeListener {
 
     public NetDataListener(DataBroker dataBroker) {
         this.dataService = dataBroker;
+        this.ifMgr = IfMgr.getIfMgrInstance();
     }
 
     public void registerDataChangeListener() {
@@ -258,7 +259,6 @@ public class NetDataListener implements DataChangeListener {
             } else {
                 // Add host interface
                 ifMgr.addHostIntf(port.getUuid(),
-                        new Uuid(port.getDeviceId()),
                         fixedip.getSubnetId(),
                         port.getNetworkId(),
                         fixedip.getIpAddress(),

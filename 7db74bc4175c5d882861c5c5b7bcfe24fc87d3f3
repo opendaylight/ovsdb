@@ -16,6 +16,24 @@
       "revId": "7db74bc4175c5d882861c5c5b7bcfe24fc87d3f3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e2b2b6e3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/OvsdbInventoryServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-08T21:58:00Z",
+      "side": 1,
+      "message": "Yes and it\u0027s going to be very quick, because there is no other candidate to contest the election.",
+      "parentUuid": "9a3d3df0_3f4e753b",
+      "revId": "7db74bc4175c5d882861c5c5b7bcfe24fc87d3f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

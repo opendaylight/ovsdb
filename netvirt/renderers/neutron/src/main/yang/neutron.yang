@@ -1,0 +1,35 @@
+module neutron {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:neutron";
+    prefix "neutron";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+
+    description
+        "Service definition for NetVirt Neutron renderer";
+
+    revision "2016-03-08" {
+        description
+            "Initial revision";
+    }
+
+    identity neutron {
+        base config:module-type;
+        config:java-name-prefix Neutron;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case neutron {
+            when "/config:modules/config:module/config:type = 'neutron'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+}

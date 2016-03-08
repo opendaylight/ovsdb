@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_9fd98159",
+        "filename": "routemgr/routemgr-impl/src/main/java/org/opendaylight/ovsdb/routemgr/net/IfMgr.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-03-08T14:50:30Z",
+      "side": 0,
+      "message": "I think the original plan could be to store the hostId/nodeUUID (i.e, from the BindingProfile for the port). We can revisit this later.",
+      "range": {
+        "startLine": 210,
+        "startChar": 46,
+        "endLine": 210,
+        "endChar": 52
+      },
+      "revId": "2966809674835c33a3b2498e0f1090b3f40a6184",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

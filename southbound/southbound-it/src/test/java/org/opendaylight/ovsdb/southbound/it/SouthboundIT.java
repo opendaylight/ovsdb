@@ -77,6 +77,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
@@ -89,6 +92,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.AutoattachExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.AutoattachExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.Mappings;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
@@ -139,6 +146,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Integration tests for southbound-impl
@@ -836,6 +845,172 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.warn("Sleep interrupted while waiting for bridge deletion (bridge {})", bridgeName, e);
             }
         }
+    }
+
+    private static class TestAutoAttach implements AutoCloseable {
+        private final ConnectionInfo connectionInfo;
+        private final Uri autoattachId;
+        private final Uri bridgeId;
+
+        public TestAutoAttach (final ConnectionInfo connectionInfo,
+                final Uri autoattachId,
+                final Uri bridgeId,
+                @Nullable final String systemName,
+                @Nullable final String systemDescription,
+                @Nullable final List<Mappings> mappings,
+                @Nullable final List<AutoattachExternalIds> externalIds) {
+            this.connectionInfo = connectionInfo;
+            this.autoattachId = autoattachId;
+            this.bridgeId = bridgeId;
+
+            Autoattach aaEntry = new AutoattachBuilder()
+                    .setAutoattachId(autoattachId)
+                    .setBridgeId(bridgeId)
+                    .setSystemName(systemName)
+                    .setSystemDescription(systemDescription)
+                    .setMappings(mappings)
+                    .setAutoattachExternalIds(externalIds)
+                    .build();
+            InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(Autoattach.class, aaEntry.getKey());
+            final NotifyingDataChangeListener aaOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
+            aaOperationalListener.registerDataChangeListener();
+
+            Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, iid, aaEntry));
+            try {
+                aaOperationalListener.waitForCreation(OVSDB_ROUNDTRIP_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for queue {}", iid, e);
+            }
+        }
+        @Override
+        public void close() {
+            final InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(Autoattach.class, new AutoattachKey(this.autoattachId));
+            final NotifyingDataChangeListener qosOperationalListener =
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
+            qosOperationalListener.registerDataChangeListener();
+
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
+            try {
+                qosOperationalListener.waitForDeletion(OVSDB_ROUNDTRIP_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for qos deletion (qos {})", iid, e);
+            }
+        }
+    }
+
+    // FIXME: Remove ignore annotation after ovs supports external_ids column to test CRUD
+    @Ignore
+    @Test
+    public void testCRUDAutoAttach() throws InterruptedException {
+        // FIXME: Perform schema version verification and assume test passed when table is unsupported in schema
+
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+        String testAutoattachId = new String("testAutoattachEntry");
+        String testSystemName = new String("testSystemName");
+        String testSystemDescription = new String("testSystemDescription");
+        String testAutoattachExternalKey = new String("testAutoattachExternalKey");
+        String testAutoattachExternalValue = new String("testAutoattachExternalValue");
+
+        try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
+            OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+            Assert.assertNotNull(bridge);
+
+            // CREATE: Create Autoattach table
+            NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
+                    connectionInfo, bridge.getBridgeName()));
+            String bridgeId = nodeId.getValue();
+            try(TestAutoAttach testAutoattach = new TestAutoAttach(connectionInfo, new Uri(testAutoattachId),
+                    new Uri(bridgeId), testSystemName, testSystemDescription, null, null)) {
+
+                // READ: Read md-sal operational datastore to see if the AutoAttach table was created
+                // and if Bridge table was updated with AutoAttach Uuid
+                OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                        LogicalDatastoreType.OPERATIONAL);
+                Autoattach operAa = getAutoAttach(ovsdbNodeAugmentation, new Uri(testAutoattachId));
+                Assert.assertNotNull(operAa);
+                Assert.assertEquals(testSystemName, operAa.getSystemName());
+                bridge = getBridge(connectionInfo);
+                Uuid aaUuid = new Uuid(operAa.getAutoattachUuid().getValue());
+                Assert.assertEquals(aaUuid, bridge.getAutoAttach());
+
+                // UPDATE: Update mappings column of AutoAttach table that was created
+                List<Mappings> mappings = ImmutableList.of(new MappingsBuilder().setMappingsKey(100L).setMappingsValue(200).build());
+                Autoattach updatedAa = new AutoattachBuilder()
+                        .setAutoattachId(new Uri(testAutoattachId))
+                        .setMappings(mappings)
+                        .build();
+                InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(Autoattach.class, updatedAa.getKey());
+                final NotifyingDataChangeListener aaOperationalListener =
+                        new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
+                aaOperationalListener.registerDataChangeListener();
+                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                        iid, updatedAa));
+                aaOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+                // UPDATE: Update external_ids column of AutoAttach table that was created
+                List<AutoattachExternalIds> externalIds = new ArrayList<>();
+                externalIds.add(new AutoattachExternalIdsBuilder()
+                        .setAutoattachExternalIdKey(testAutoattachExternalKey)
+                        .setAutoattachExternalIdValue(testAutoattachExternalValue)
+                        .build());
+                updatedAa = new AutoattachBuilder()
+                        .setAutoattachId(new Uri(testAutoattachId))
+                        .setAutoattachExternalIds(externalIds)
+                        .build();
+                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                        iid, updatedAa));
+                aaOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+
+                // READ: Read the updated AutoAttach table for latest mappings and external_ids column value
+                ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                        LogicalDatastoreType.OPERATIONAL);
+                operAa = getAutoAttach(ovsdbNodeAugmentation, new Uri(testAutoattachId));
+                Assert.assertNotNull(operAa);
+                List<Mappings> operMappingsList = operAa.getMappings();
+                for (Mappings operMappings: operMappingsList) {
+                    Assert.assertEquals(mappings.get(operMappingsList.indexOf(operMappings)).getMappingsKey(), operMappings.getMappingsKey());
+                    Assert.assertEquals(mappings.get(operMappingsList.indexOf(operMappings)).getMappingsValue(), operMappings.getMappingsValue());
+                }
+                List<AutoattachExternalIds> operExternalIds = operAa.getAutoattachExternalIds();
+                externalIds.add(new AutoattachExternalIdsBuilder()
+                        .setAutoattachExternalIdKey(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY)
+                        .setAutoattachExternalIdValue(operAa.getAutoattachId().getValue())
+                        .build());
+                for (AutoattachExternalIds operExternalId : operExternalIds) {
+                    Assert.assertEquals(externalIds.get(operExternalIds.indexOf(operExternalId)).getAutoattachExternalIdKey(),
+                            operExternalId.getAutoattachExternalIdKey());
+                    Assert.assertEquals(externalIds.get(operExternalIds.indexOf(operExternalId)).getAutoattachExternalIdValue(),
+                            operExternalId.getAutoattachExternalIdValue());
+                }
+
+                // DELETE: Delete AutoAttach table
+                Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
+                aaOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
+                ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
+                        LogicalDatastoreType.OPERATIONAL);
+                operAa = getAutoAttach(ovsdbNodeAugmentation, new Uri(testAutoattachId));
+                Assert.assertNull(operAa);
+            }
+        }
+    }
+
+    private Autoattach getAutoAttach(OvsdbNodeAugmentation ovsdbNodeAugmentation, Uri uri) {
+        if (ovsdbNodeAugmentation.getAutoattach() != null
+                && !ovsdbNodeAugmentation.getAutoattach().isEmpty()) {
+            for (Autoattach aa : ovsdbNodeAugmentation.getAutoattach()) {
+                if (aa.getKey().getAutoattachId().equals(uri)) {
+                    return aa;
+                }
+            }
+        }
+        return null;
     }
 
     private static class TestQos implements AutoCloseable {

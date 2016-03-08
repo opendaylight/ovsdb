@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev150712
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev150712.ProtocolTcp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.constants.rev150712.ProtocolUdp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150712.Neutron;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.secgroups.rev150712.SecurityRuleAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.secgroups.rev150712.security.rules.attributes.SecurityRules;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.secgroups.rev150712.security.rules.attributes.security.rules.SecurityRule;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.secgroups.rev150712.security.rules.attributes.security.rules.SecurityRuleBuilder;
@@ -42,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableBiMap;
-
+import com.google.common.collect.ImmutableList;
 
 public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<SecurityRule, NeutronSecurityRule> implements INeutronSecurityRuleCRUD {
 
@@ -51,14 +52,11 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
     private static final ImmutableBiMap<Class<? extends DirectionBase>, String> DIRECTION_MAP = ImmutableBiMap.of(
             DirectionEgress.class, NeutronSecurityRule.DIRECTION_EGRESS,
             DirectionIngress.class, NeutronSecurityRule.DIRECTION_INGRESS);
-    private static final ImmutableBiMap<Class<? extends ProtocolBase>, String> PROTOCOL_MAP = ImmutableBiMap.of(
-            ProtocolIcmp.class, NeutronSecurityRule.PROTOCOL_ICMP,
-            ProtocolTcp.class, NeutronSecurityRule.PROTOCOL_TCP,
-            ProtocolUdp.class, NeutronSecurityRule.PROTOCOL_UDP,
-            ProtocolIcmpV6.class, NeutronSecurityRule.PROTOCOL_ICMPV6);
     private static final ImmutableBiMap<Class<? extends EthertypeBase>,String> ETHERTYPE_MAP = ImmutableBiMap.of(
             EthertypeV4.class, NeutronSecurityRule.ETHERTYPE_IPV4,
             EthertypeV6.class, NeutronSecurityRule.ETHERTYPE_IPV6);
+    private static final ImmutableList<String> PROTOCOL_LIST
+            = ImmutableList.of("icmp", "tcp", "udp", "icmpv6");
 
     NeutronSecurityRuleInterface(ProviderContext providerContext) {
         super(providerContext);
@@ -180,7 +178,7 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
                     rule.getRemoteIpPrefix().getIpv4Prefix().getValue():rule.getRemoteIpPrefix().getIpv6Prefix().getValue());
         }
         if (rule.getProtocol() != null) {
-            answer.setSecurityRuleProtocol(PROTOCOL_MAP.get(rule.getProtocol()));
+            answer.setSecurityRuleProtocol(String.valueOf(rule.getProtocol().getValue()));
         }
         if (rule.getEthertype() != null) {
             answer.setSecurityRuleEthertype(ETHERTYPE_MAP.get(rule.getEthertype()));
@@ -219,9 +217,13 @@ public class NeutronSecurityRuleInterface extends AbstractNeutronInterface<Secur
             securityRuleBuilder.setRemoteIpPrefix(new IpPrefix(securityRule.getSecurityRuleRemoteIpPrefix().toCharArray()));
         }
         if (securityRule.getSecurityRuleProtocol() != null) {
-            ImmutableBiMap<String, Class<? extends ProtocolBase>> mapper =
-                    PROTOCOL_MAP.inverse();
-            securityRuleBuilder.setProtocol(mapper.get(securityRule.getSecurityRuleProtocol()));
+            try {
+                securityRuleBuilder.setProtocol(new SecurityRuleAttributes.Protocol(Short.valueOf(securityRule.getSecurityRuleProtocol())));
+            } catch (NumberFormatException e) {
+                if (PROTOCOL_LIST.contains(securityRule.getSecurityRuleProtocol())) {
+                    securityRuleBuilder.setProtocol(new SecurityRuleAttributes.Protocol(securityRule.getSecurityRuleProtocol()));
+                }
+            }
         }
         if (securityRule.getSecurityRuleEthertype() != null) {
             ImmutableBiMap<String, Class<? extends EthertypeBase>> mapper =

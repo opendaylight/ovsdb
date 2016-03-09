@@ -22,6 +22,30 @@
       "revId": "445bed1d2bc07128574d16478a43787c9af26a53",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a81b6d7f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-09T13:14:40Z",
+      "side": 1,
+      "message": "Most definitely: Object.equals() is just\n\n    public boolean equals(Object obj) {\n        return (this \u003d\u003d obj);\n    }",
+      "parentUuid": "9a3d3df0_287abdbc",
+      "range": {
+        "startLine": 157,
+        "startChar": 65,
+        "endLine": 157,
+        "endChar": 72
+      },
+      "revId": "445bed1d2bc07128574d16478a43787c9af26a53",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_ad77ff9e",
+        "filename": "netvirt/renderers/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-03-09T03:47:59Z",
+      "side": 1,
+      "message": "This is okay and as Sam mentioned won\u0027t conflict with NN. When we split out netvirt this would become org.opendaylight.netvirt. My question would be if it should be called renderer.neutron instead of just neutron. More from a \u0027name reflects purpose/path\u0027 than avoiding conflict. If all modules are going to be renderer/* then this is fine as it is.",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 19,
+        "endChar": 34
+      },
+      "revId": "71e92fb0fe8b1d0be42addd39543813c2201964e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_8d7afb85",
+        "filename": "netvirt/renderers/neutron/src/main/config/default-config.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-03-09T03:47:59Z",
+      "side": 1,
+      "message": "This won\u0027t work. Needs to match with namespace we have in the yang file. If you were to add a feature using this bundle you will see errors in SingleFeatureTest.",
+      "range": {
+        "startLine": 12,
+        "startChar": 18,
+        "endLine": 12,
+        "endChar": 61
+      },
+      "revId": "71e92fb0fe8b1d0be42addd39543813c2201964e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ed6d87cd",
+        "filename": "netvirt/renderers/neutron/src/main/yang/neutron.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-03-09T03:47:59Z",
+      "side": 1,
+      "message": "default-config.xml needs to match this.",
+      "range": {
+        "startLine": 3,
+        "startChar": 15,
+        "endLine": 3,
+        "endChar": 66
+      },
+      "revId": "71e92fb0fe8b1d0be42addd39543813c2201964e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

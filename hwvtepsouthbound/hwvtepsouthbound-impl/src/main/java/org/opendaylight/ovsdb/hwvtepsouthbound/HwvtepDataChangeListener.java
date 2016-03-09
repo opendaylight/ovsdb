@@ -153,7 +153,8 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                 HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
                 HwvtepGlobalAugmentation hgOriginal = original.getAugmentation(HwvtepGlobalAugmentation.class);
                 // Check if user has updated connection information
-                if (hgUpdated != null && hgOriginal != null && hgUpdated.getConnectionInfo() != null) {
+                if (hgUpdated != null && hgOriginal != null && hgUpdated.getConnectionInfo() != null
+                                && !hgUpdated.getConnectionInfo().equals(hgOriginal.getConnectionInfo())) {
                     OvsdbClient client = hcm.getClient(hgUpdated.getConnectionInfo());
                     if (client == null) {
                         try {

@@ -39,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
@@ -124,6 +125,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         createInterfaceOtherConfig(terminationPoint, ovsInterface);
         createInterfaceExternalIds(terminationPoint, ovsInterface);
         createInterfaceLldp(terminationPoint, ovsInterface);
+        createInterfaceBfd(terminationPoint, ovsInterface);
     }
 
     private void createInterfaceType(final OvsdbTerminationPointAugmentation terminationPoint,
@@ -236,6 +238,24 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             }
         } catch (SchemaVersionMismatchException e) {
             LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema", e);
+        }
+    }
+
+    private void createInterfaceBfd(final OvsdbTerminationPointAugmentation terminationPoint,
+                    final Interface ovsInterface) {
+
+        try {
+            List<InterfaceBfd> interfaceBfdList = terminationPoint.getInterfaceBfd();
+            if (interfaceBfdList != null && !interfaceBfdList.isEmpty()) {
+                try {
+                    ovsInterface.setBfd(YangUtils.convertYangKeyValueListToMap(interfaceBfdList,
+                                    InterfaceBfd::getBfdKey, InterfaceBfd::getBfdValue));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB interface bfd", e);
+                }
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("bfd column for Interface Table unsupported for this version of ovsdb schema", e);
         }
     }
 

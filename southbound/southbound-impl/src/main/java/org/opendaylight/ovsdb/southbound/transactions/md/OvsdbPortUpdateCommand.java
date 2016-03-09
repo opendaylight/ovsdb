@@ -42,6 +42,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdStatusBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdStatusKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
@@ -259,6 +265,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateOptions(interf, ovsdbTerminationPointBuilder);
         updateInterfaceOtherConfig(interf, ovsdbTerminationPointBuilder);
         updateInterfaceLldp(interf, ovsdbTerminationPointBuilder);
+        updateInterfaceBfd(interf, ovsdbTerminationPointBuilder);
+        updateInterfaceBfdStatus(interf, ovsdbTerminationPointBuilder);
     }
 
     private void updateVlan(final Port port,
@@ -489,6 +497,56 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+        }
+    }
+
+    private void updateInterfaceBfdStatus(final Interface interf,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        try {
+            Map<String, String> interfaceBfdStatusMap = interf.getBfdStatusColumn().getData();
+            if (interfaceBfdStatusMap != null && !interfaceBfdStatusMap.isEmpty()) {
+                List<InterfaceBfdStatus> interfaceBfdStatusList = new ArrayList<>();
+                for (String interfaceBfdStatusKeyString : interfaceBfdStatusMap.keySet()) {
+                    String interfaceBfdStatusValueString = interfaceBfdStatusMap.get(interfaceBfdStatusKeyString);
+                    if (interfaceBfdStatusKeyString != null && interfaceBfdStatusValueString!=null) {
+                        interfaceBfdStatusList.add(new InterfaceBfdStatusBuilder()
+                                .setKey(new InterfaceBfdStatusKey(interfaceBfdStatusKeyString))
+                                .setBfdStatusKey(interfaceBfdStatusKeyString)
+                                .setBfdStatusValue(interfaceBfdStatusValueString)
+                                .build());
+                    }
+                }
+                ovsdbTerminationPointBuilder.setInterfaceBfdStatus(interfaceBfdStatusList);
+            }
+        } catch (SchemaVersionMismatchException e) {
+            // We don't care about the exception stack trace here
+            LOG.debug("bfd-status column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+        }
+    }
+
+    private void updateInterfaceBfd(final Interface interf,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        try {
+            Map<String, String> interfaceBfdMap = interf.getBfdColumn().getData();
+            if (interfaceBfdMap != null && !interfaceBfdMap.isEmpty()) {
+                List<InterfaceBfd> interfaceBfdList = new ArrayList<>();
+                for (String interfaceBfdKeyString : interfaceBfdMap.keySet()) {
+                    String interfaceBfdValueString = interfaceBfdMap.get(interfaceBfdKeyString);
+                    if (interfaceBfdKeyString != null && interfaceBfdValueString!=null) {
+                        interfaceBfdList.add(new InterfaceBfdBuilder()
+                                .setKey(new InterfaceBfdKey(interfaceBfdKeyString))
+                                .setBfdKey(interfaceBfdKeyString)
+                                .setBfdValue(interfaceBfdValueString)
+                                .build());
+                    }
+                }
+                ovsdbTerminationPointBuilder.setInterfaceBfd(interfaceBfdList);
+            }
+        } catch (SchemaVersionMismatchException e) {
+            // We don't care about the exception stack trace here
+            LOG.debug("bfd column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }
 

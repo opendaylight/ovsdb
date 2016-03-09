@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_c83d11df",
+        "filename": "netvirt/renderers/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-03-09T13:22:52Z",
+      "side": 1,
+      "message": "I think after the split, it would be org.opendaylight.netvirt.neutron, so that\u0027s probably still okay.  I was assuming all of the northbound/southbound renderers would be in the renderers directory.  I was thinking that we would also have a \"services\" directory for NetVirt code (L2, L3, NAT, etc.).\n\nI\u0027m not against making it more readable, though.",
+      "parentUuid": "9a3d3df0_ad77ff9e",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 19,
+        "endChar": 34
+      },
+      "revId": "71e92fb0fe8b1d0be42addd39543813c2201964e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_8d7afb85",
         "filename": "netvirt/renderers/neutron/src/main/config/default-config.xml",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-09T03:47:59Z",
       "side": 1,
       "message": "This won\u0027t work. Needs to match with namespace we have in the yang file. If you were to add a feature using this bundle you will see errors in SingleFeatureTest.",
+      "range": {
+        "startLine": 12,
+        "startChar": 18,
+        "endLine": 12,
+        "endChar": 61
+      },
+      "revId": "71e92fb0fe8b1d0be42addd39543813c2201964e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_5317f244",
+        "filename": "netvirt/renderers/neutron/src/main/config/default-config.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-03-09T13:22:52Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "9a3d3df0_8d7afb85",
       "range": {
         "startLine": 12,
         "startChar": 18,

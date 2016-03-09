@@ -1,6 +1,8 @@
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.routemgr.impl.rev141210;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.ovsdb.routemgr.net.OvsdbDataListener;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
@@ -22,6 +24,7 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
 
     private final static Logger LOG = LoggerFactory.getLogger(RoutemgrImplModule.class);
     private NetDataListener     netDataListener;
+    private OvsdbDataListener ovsdbDataListener;
     private PktHandler          ipPktHandler;
     private Registration        packetListener = null;
 
@@ -49,8 +52,14 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
 
         IPv6RtrFlow.setSalFlow (salFlowService);
 
+        Preconditions.checkNotNull(dataService);
+        Preconditions.checkNotNull(rpcRegistryDependency);
+
         netDataListener = new NetDataListener (dataService);
         netDataListener.registerDataChangeListener();
+
+        ovsdbDataListener = new OvsdbDataListener(dataService);
+        ovsdbDataListener.registerDataChangeListener();
 
         ipPktHandler = new PktHandler();
         ipPktHandler.setDataBrokerService(dataService);
@@ -73,6 +82,10 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
                 if (packetListener != null)
                 {
                     packetListener.close();
+                }
+
+                if (ovsdbDataListener != null) {
+                    ovsdbDataListener.closeListeners();
                 }
 
                 if(netDataListener != null) {

@@ -22,6 +22,30 @@
       "revId": "37e59d69b8caf6c3259a177bcc706fa170205c83",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_33422eae",
+        "filename": "netvirt/renderers/neutron/src/main/config/default-config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-03-09T15:21:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_13c28a84",
+      "range": {
+        "startLine": 20,
+        "startChar": 30,
+        "endLine": 20,
+        "endChar": 73
+      },
+      "revId": "37e59d69b8caf6c3259a177bcc706fa170205c83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

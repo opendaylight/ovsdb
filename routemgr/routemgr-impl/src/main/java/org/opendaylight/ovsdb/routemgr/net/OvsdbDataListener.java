@@ -52,6 +52,7 @@ public class OvsdbDataListener implements DataChangeListener {
         this.dataService    = dataBroker;
         this.processedNodes = new HashMap<>();
         this.ipv6RtrFlow    = new IPv6RtrFlow();
+        this.ifMgr = IfMgr.getIfMgrInstance();
     }
 
     public void registerDataChangeListener() {

@@ -46,12 +46,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv6MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.AddFlowOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowOutput;
@@ -71,7 +75,7 @@ public class IPv6RtrFlow {
     private static final Logger LOG = LoggerFactory.getLogger(IPv6RtrFlow.class);
     private static SalFlowService salFlow;
     private AtomicLong ipv6FlowId = new AtomicLong();
-    private AtomicLong ipv6Cookie = new AtomicLong(0x4000000000000000L);
+    private AtomicLong ipv6Cookie = new AtomicLong();
     private static final short TABEL_FOR_ICMPv6_FLOW = 0;
     private static int FLOW_HARD_TIMEOUT = 0;
     private static int FLOW_IDLE_TIMEOUT = 0;
@@ -90,8 +94,16 @@ public class IPv6RtrFlow {
         salFlow = salFlowService;
     }
 
+    private long getDataPathId(String dpId) {
+        long dpid = 0L;
+        if (dpId != null) {
+            dpid = new BigInteger(dpId.replaceAll(":", ""), 16).longValue();
+        }
+        return dpid;
+    }
+
     public void addIcmpv6Flow2Controller(String dpId) {
-        String nodeName = OPENFLOW_NODE_PREFIX + dpId;
+        String nodeName = OPENFLOW_NODE_PREFIX + getDataPathId(dpId);
 
         final InstanceIdentifier<Node> nodeIid = InstanceIdentifier.builder(Nodes.class)
                 .child(Node.class, new NodeKey(new NodeId(nodeName))).build();
@@ -171,11 +183,20 @@ public class IPv6RtrFlow {
                 .setCookie(new FlowCookie(BigInteger.valueOf(ipv6Cookie.incrementAndGet())))
                 .setFlags(new FlowModFlags(false, false, false, false, false));
 
+        MatchBuilder matchBuilder = new MatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x86DDL));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(eth.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol((short) 58);
+        matchBuilder.setIpMatch(ipmatch.build());
+
         final Icmpv6MatchBuilder icmpv6match = new Icmpv6MatchBuilder();
         icmpv6match.setIcmpv6Type((short) ICMPv6_TYPE);
-
-        Match match = new MatchBuilder().setIcmpv6Match(icmpv6match.build()).build();
-
+        matchBuilder.setIcmpv6Match(icmpv6match.build());
 
         Action sendToControllerAction = new ActionBuilder().setOrder(0)
                 .setKey(new ActionKey(0))
@@ -192,7 +213,7 @@ public class IPv6RtrFlow {
                 .setInstruction(new ApplyActionsCaseBuilder().setApplyActions(applyActions).build())
                 .build();
 
-        icmpv6Flow.setMatch(match);
+        icmpv6Flow.setMatch(matchBuilder.build());
         icmpv6Flow.setInstructions(new InstructionsBuilder().setInstruction(
                 ImmutableList.of(sendToControllerInstruction)).build());
         icmpv6Flow.setId(createFlowId(nodeIid));
@@ -200,7 +221,7 @@ public class IPv6RtrFlow {
     }
 
     public void removeIcmpv6Flow2Controller(String dpId) {
-        String nodeName = OPENFLOW_NODE_PREFIX + dpId;
+        String nodeName = OPENFLOW_NODE_PREFIX + getDataPathId(dpId);
 
         final InstanceIdentifier<Node> nodeIid = InstanceIdentifier.builder(Nodes.class)
                 .child(Node.class, new NodeKey(new NodeId(nodeName))).build();

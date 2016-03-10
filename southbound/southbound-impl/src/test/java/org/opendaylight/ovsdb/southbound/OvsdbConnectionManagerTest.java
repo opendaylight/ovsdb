@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
@@ -37,10 +39,12 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.services.service.Instance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -66,6 +70,7 @@ public class OvsdbConnectionManagerTest {
     @Mock private EntityOwnershipService entityOwnershipService;
     @Mock private OvsdbConnection ovsdbConnection;
     @Mock private OvsdbClient externalClient;
+    @Mock private ReconciliationManager reconciliationManager;
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
@@ -78,6 +83,7 @@ public class OvsdbConnectionManagerTest {
         MemberModifier.field(OvsdbConnectionManager.class, "db").set(ovsdbConnectionManager, db);
         MemberModifier.field(OvsdbConnectionManager.class, "txInvoker").set(ovsdbConnectionManager, txInvoker);
         MemberModifier.field(OvsdbConnectionManager.class, "entityOwnershipService").set(ovsdbConnectionManager, entityOwnershipService);
+        MemberModifier.field(OvsdbConnectionManager.class, "reconciliationManager").set(ovsdbConnectionManager, reconciliationManager);
         MemberModifier.field(OvsdbConnectionManager.class, "ovsdbConnection")
                 .set(ovsdbConnectionManager, ovsdbConnection);
         entityConnectionMap = new ConcurrentHashMap<>();
@@ -159,7 +165,13 @@ public class OvsdbConnectionManagerTest {
         instanceIdentifiers = new ConcurrentHashMap<>();
         MemberModifier.field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnectionManager, instanceIdentifiers);
 
-
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "reconcileConnection",
+                InstanceIdentifier.class, OvsdbNodeAugmentation.class));
+        ReadOnlyTransaction tx = mock(ReadOnlyTransaction.class);
+        when(db.newReadOnlyTransaction()).thenReturn(tx);
+        when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
+                .thenReturn(mock(CheckedFuture.class));
+        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
         ovsdbConnectionManager.disconnected(externalClient);
         Map<ConnectionInfo,OvsdbConnectionInstance> testClients = Whitebox.getInternalState(ovsdbConnectionManager, "clients");
         assertEquals("Error, size of the hashmap is incorrect", 0, testClients.size());

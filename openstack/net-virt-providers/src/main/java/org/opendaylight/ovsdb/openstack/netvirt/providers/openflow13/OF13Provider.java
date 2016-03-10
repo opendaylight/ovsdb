@@ -9,8 +9,11 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -19,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.NeutronSecurityGroup;
@@ -56,12 +60,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
@@ -88,6 +90,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -133,6 +136,8 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     public static final String NAME = "OF13Provider";
     private volatile BundleContext bundleContext;
     private volatile Southbound southbound;
+
+    private Set<String> intBridgesWithoutVmPorts = new HashSet<String>();
 
     public OF13Provider() {
         this.dataBroker = NetvirtProvidersProvider.getDataBroker();
@@ -822,8 +827,9 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
                                      OvsdbTerminationPointAugmentation intf, boolean local) {
         LOG.debug("programTunnelRules: node: {}, intf: {}, local: {}, tunnelType: {}, "
-                        + "segmentationId: {}, dstAddr: {}",
-                node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst.getHostAddress());
+                        + "segmentationId: {}, dstAddr: {}, provMaps: {}",
+                node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst.getHostAddress(),
+                southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH, configurationService.getProviderMappingsKey()));
         try {
             long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -1103,17 +1109,73 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         }
     }
 
+    private void triggerInterfaceUpdatesTo(Node ovsdbDestNode) {
+
+        LOG.debug("triggerInterfaceUpdatesTo: Node {} ", ovsdbDestNode);
+
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
+                nodeCacheManager.getOvsdbNodes();
+        nodes.remove(ovsdbDestNode.getNodeId());
+
+        for(Node ovsdbNode : nodes.values()) {
+            for(Node bridgeNode: southbound.getAllBridgesOnOvsdbNode(ovsdbNode)) {
+                List<OvsdbTerminationPointAugmentation> ports = southbound.extractTerminationPointAugmentations(bridgeNode);
+                for(OvsdbTerminationPointAugmentation port : ports) {
+
+                    NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(port);
+                    if(null != neutronNetwork) {
+                        handleInterfaceUpdate(neutronNetwork, bridgeNode, port, ovsdbDestNode);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean bridgeHasVmPort(Node bridgeNode) {
+        String intBridgeName = configurationService.getIntegrationBridgeName();
+        String extBridgeName = configurationService.getExternalBridgeName();
+        for(TerminationPoint tp : bridgeNode.getTerminationPoint()) {
+            String tpName = tp.getTpId().getValue();
+            if(tpName == null || (!tpName.equals(intBridgeName) && !tpName.equals(extBridgeName))) {
+                OvsdbTerminationPointAugmentation tpAug = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if(tpAug != null && southbound.getOFPort(tpAug) != 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
+        return handleInterfaceUpdate(network, srcNode, intf, null);
+    }
+
+    private boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
+                                         OvsdbTerminationPointAugmentation intf, Node singleDestNode) {
+        LOG.debug("handleInterfaceUpdate: network: {} srcNode: {}, intf: {}, singleDestNode: {}",
+                network.getProviderSegmentationID(), srcNode.getNodeId(), intf.getName(), singleDestNode);
         Preconditions.checkNotNull(nodeCacheManager);
-        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
-                nodeCacheManager.getOvsdbNodes();
+
+        boolean programmingMissedFlows = null != singleDestNode;
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = null;
+        if(programmingMissedFlows) {
+            nodes = new HashMap<>();
+            nodes.put(singleDestNode.getNodeId(), singleDestNode);
+        } else {
+            nodes = nodeCacheManager.getOvsdbNodes();
+        }
+
         nodes.remove(southbound.extractBridgeOvsdbNodeId(srcNode));
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();
         Node srcBridgeNode = southbound.getBridgeNode(srcNode, configurationService.getIntegrationBridgeName());
-        programLocalRules(networkType, network.getProviderSegmentationID(), srcBridgeNode, intf);
+
+        if(!programmingMissedFlows) {
+            programLocalRules(networkType, network.getProviderSegmentationID(), srcBridgeNode, intf);
+        }
 
         if (isVlan(networkType)) {
             programVlanRules(network, srcNode, intf);
@@ -1151,10 +1213,33 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             }
         }
 
+        //If there are no VM ports on the integration bridge, we remember that state (in the inner "if").
+        //When that integration bridge gets a port (in the "else if"), we trigger updates to write
+        //tunnel flows for ports on other nodes that were created before this node came alive.
+        String srcNodeId = srcNode.getNodeId().getValue();
+        if (!programmingMissedFlows && srcNodeId != null
+                        && srcNodeId.endsWith(configurationService.getIntegrationBridgeName())) {
+            String nodeId = srcNode.getNodeId().getValue();
+
+            if (!bridgeHasVmPort(srcNode)) {
+                intBridgesWithoutVmPorts.add(nodeId);
+            } else if (intBridgesWithoutVmPorts.contains(nodeId)) {
+                Node ovsdbNode = southbound.getOvsdbNodeFromBridge(srcNode);
+                if(ovsdbNode != null) {
+                    triggerInterfaceUpdatesTo(ovsdbNode);
+                }
+                intBridgesWithoutVmPorts.remove(nodeId);
+            }
+        }
+
         return true;
     }
 
     private void triggerInterfaceUpdates(Node node) {
+        triggerInterfaceUpdates(node, null);
+    }
+
+    private void triggerInterfaceUpdates(Node node, Node singleDestNode) {
         LOG.debug("enter triggerInterfaceUpdates for {}", node.getNodeId());
         List<OvsdbTerminationPointAugmentation> ports = southbound.extractTerminationPointAugmentations(node);
         if (ports != null && !ports.isEmpty()) {

@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_a5da7314",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T12:33:07Z",
+      "side": 1,
+      "message": "This could block for a while. Can you make this async?",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_45c8c754",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T12:33:07Z",
+      "side": 1,
+      "message": "reconciler (sic)",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a5c39336",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T12:33:07Z",
+      "side": 1,
+      "message": "I don\u0027t see where you set stop to false.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_85be4fac",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T12:33:07Z",
+      "side": 1,
+      "message": "This should have a close method to shutdown the executors.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_85ec8fbc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T12:33:07Z",
+      "side": 1,
+      "message": "I think this should be warn.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_050fdf88",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T12:33:07Z",
+      "side": 1,
+      "message": "You shouldn\u0027t use wall clock time as it can drift. It would be better to use a guava Stopwatch and check elapsed time. On retry, reset it.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -161,6 +161,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_5b29c4e4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T21:24:29Z",
+      "side": 1,
+      "message": "cachedThreadPool uses a SynchronousQueue which has no capacity and thus no actual queue. It\u0027s a handoff. So when a task is submitted if there\u0027s no thread waiting at the backend of the SynchronousQueue, it spawns a new one. The number of threads is unbounded. Threads are purged after 60 sec of idle time but large bursts of non-short-lived tasks within that time can cause native thread exhaustion (I\u0027ve seen this happen in the past). That\u0027s why the javadocs say it\u0027s useful for short-lived tasks, more or less ones that won\u0027t block on anything. I added the newBoundedCachedThreadPool to bound the threads and queue size.",
+      "parentUuid": "9a3d3df0_bb31f05b",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_85df6fd5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2

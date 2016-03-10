@@ -36,6 +36,40 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_259f8304",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T13:00:22Z",
+      "side": 1,
+      "message": "This creates an unbounded thread pool which can be dangerous. Connection attempts may not be short-lived tasks. What if hundreds of connections went down fairly quickly? You might run of of system threads. I think you should use SpecialExecutors.newBoundedCachedThreadPool in yang tools.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_85df6fd5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-10T13:00:22Z",
+      "side": 1,
+      "message": "Actually this would never happen since it\u0027s unbounded but doesn\u0027t hurt to check in case that\u0027s changed...",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_a5c39336",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2

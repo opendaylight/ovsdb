@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -40,7 +41,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 public class TerminationPointUpdateCommand extends AbstractTransactCommand {
@@ -166,12 +166,9 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
 
         //Configure optional input
         if (terminationPoint.getOptions() != null) {
-            Map<String, String> optionsMap = new HashMap<>();
-            for (Options option : terminationPoint.getOptions()) {
-                optionsMap.put(option.getOption(), option.getValue());
-            }
             try {
-                ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
+                ovsInterface.setOptions(YangUtils.convertYangKeyValueListToMap(terminationPoint.getOptions(),
+                        Options::getOption, Options::getValue));
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete OVSDB interface options", e);
             }
@@ -185,12 +182,9 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
         List<InterfaceExternalIds> interfaceExternalIds =
                 terminationPoint.getInterfaceExternalIds();
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            Map<String, String> externalIdsMap = new HashMap<>();
-            for (InterfaceExternalIds externalId: interfaceExternalIds) {
-                externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-            }
             try {
-                ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                ovsInterface.setExternalIds(YangUtils.convertYangKeyValueListToMap(interfaceExternalIds,
+                        InterfaceExternalIds::getExternalIdKey, InterfaceExternalIds::getExternalIdValue));
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete OVSDB interface external_ids", e);
             }
@@ -205,12 +199,9 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
             List<InterfaceLldp> interfaceLldpList =
                     terminationPoint.getInterfaceLldp();
             if (interfaceLldpList != null && !interfaceLldpList.isEmpty()) {
-                Map<String, String> interfaceLldpMap = new HashMap<>();
-                for (InterfaceLldp interfaceLldp : interfaceLldpList) {
-                    interfaceLldpMap.put(interfaceLldp.getLldpKey(), interfaceLldp.getLldpValue());
-                }
                 try {
-                    ovsInterface.setLldp(ImmutableMap.copyOf(interfaceLldpMap));
+                    ovsInterface.setLldp(YangUtils.convertYangKeyValueListToMap(interfaceLldpList,
+                            InterfaceLldp::getLldpKey, InterfaceLldp::getLldpValue));
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete OVSDB interface lldp", e);
                 }
@@ -246,12 +237,9 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
 
         List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            Map<String, String> externalIdsMap = new HashMap<>();
-            for (PortExternalIds externalId: portExternalIds) {
-                externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-            }
             try {
-                port.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                port.setExternalIds(YangUtils.convertYangKeyValueListToMap(portExternalIds,
+                        PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue));
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete OVSDB port external_ids", e);
             }
@@ -302,13 +290,9 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
         List<PortOtherConfigs> portOtherConfigs =
                 terminationPoint.getPortOtherConfigs();
         if (portOtherConfigs != null && !portOtherConfigs.isEmpty()) {
-            Map<String, String> otherConfigsMap = new HashMap<>();
-            for (PortOtherConfigs portOtherConfig : portOtherConfigs) {
-                otherConfigsMap.put(portOtherConfig.getOtherConfigKey(),
-                        portOtherConfig.getOtherConfigValue());
-            }
             try {
-                ovsPort.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
+                ovsPort.setOtherConfig(YangUtils.convertYangKeyValueListToMap(portOtherConfigs,
+                        PortOtherConfigs::getOtherConfigKey, PortOtherConfigs::getOtherConfigValue));
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete OVSDB port other_config", e);
             }

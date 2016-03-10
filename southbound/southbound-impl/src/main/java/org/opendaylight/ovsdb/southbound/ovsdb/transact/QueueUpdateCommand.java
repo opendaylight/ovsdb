@@ -17,20 +17,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
@@ -38,8 +33,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 public class QueueUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueUpdateCommand.class);
@@ -98,31 +91,21 @@ public class QueueUpdateCommand extends AbstractTransactCommand {
                     uuid = new UUID(queueUuid.getValue());
                 }
 
-                List<QueuesExternalIds> externalIds = queueEntry.getQueuesExternalIds();
                 Map<String, String> externalIdsMap = new HashMap<>();
-                if (externalIds != null) {
-                    for (QueuesExternalIds externalId : externalIds) {
-                        externalIdsMap.put(externalId.getQueuesExternalIdKey(), externalId.getQueuesExternalIdValue());
-                    }
-                }
-                externalIdsMap.put(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY, queueEntry.getQueueId().getValue());
                 try {
-                    queue.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                    YangUtils.copyYangKeyValueListToMap(externalIdsMap, queueEntry.getQueuesExternalIds(),
+                            QueuesExternalIds::getQueuesExternalIdKey, QueuesExternalIds::getQueuesExternalIdValue);
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete Queue external IDs", e);
                 }
+                externalIdsMap.put(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY, queueEntry.getQueueId().getValue());
+                queue.setExternalIds(externalIdsMap);
 
-                List<QueuesOtherConfig> otherConfigs = queueEntry.getQueuesOtherConfig();
-                if (otherConfigs != null) {
-                    Map<String, String> otherConfigsMap = new HashMap<>();
-                    for (QueuesOtherConfig otherConfig : otherConfigs) {
-                        otherConfigsMap.put(otherConfig.getQueueOtherConfigKey(), otherConfig.getQueueOtherConfigValue());
-                    }
-                    try {
-                        queue.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
-                    } catch (NullPointerException e) {
-                        LOG.warn("Incomplete Queue other_config", e);
-                    }
+                try {
+                    queue.setOtherConfig(YangUtils.convertYangKeyValueListToMap(queueEntry.getQueuesOtherConfig(),
+                            QueuesOtherConfig::getQueueOtherConfigKey, QueuesOtherConfig::getQueueOtherConfigValue));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete Queue other_config", e);
                 }
                 if (uuid == null) {
                     transaction.add(op.insert(queue)).build();

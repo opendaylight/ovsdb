@@ -18,7 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -42,6 +45,9 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
+import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -75,6 +81,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private EntityOwnershipService entityOwnershipService;
     private OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
     private OvsdbConnection ovsdbConnection;
+    private final ReconciliationManager reconciliationManager;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,
                                   EntityOwnershipService entityOwnershipService,
@@ -84,6 +91,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         this.entityOwnershipService = entityOwnershipService;
         this.ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
         this.ovsdbConnection = ovsdbConnection;
+        this.reconciliationManager = new ReconciliationManager(db);
     }
 
     @Override
@@ -162,10 +170,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //Controller initiated connection can be terminated from switch side.
             //So cleanup the instance identifier cache.
             removeInstanceIdentifier(key);
+            retryConnection(ovsdbConnectionInstance.getInstanceIdentifier(),
+                    ovsdbConnectionInstance.getOvsdbNodeAugmentation(),
+                    CONNECTION_RECONCILIATION_TRIGGER.ON_DISCONNECT);
         } else {
             LOG.warn("disconnected : Connection instance not found for OVSDB Node {} ", key);
         }
         LOG.trace("OvsdbConnectionManager: exit disconnected client: {}", client);
+
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,
@@ -325,6 +337,20 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return ovsdbConnectionInstance.getHasDeviceOwnership();
     }
 
+    public void reconcileConnection(InstanceIdentifier<Node> iid, OvsdbNodeAugmentation ovsdbNode){
+        this.retryConnection(iid, ovsdbNode,
+                CONNECTION_RECONCILIATION_TRIGGER.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
+
+    }
+
+    public void stopConnectionReconciliationIfActive(InstanceIdentifier<?> iid, OvsdbNodeAugmentation ovsdbNode) {
+        final ReconciliationTask task = new ConnectionReconciliationTask(
+                reconciliationManager,
+                this,
+                iid,
+                ovsdbNode);
+        reconciliationManager.dequeue(task);
+    }
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
         LOG.debug("handleOwnershipChanged: {} event received for device {}",
@@ -515,6 +541,54 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity());
     }
 
+    private void retryConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode,
+                                 CONNECTION_RECONCILIATION_TRIGGER trigger) {
+        final ReconciliationTask task = new ConnectionReconciliationTask(
+                reconciliationManager,
+                this,
+                iid,
+                ovsdbNode);
+
+        if(reconciliationManager.isEnqueued(task)){
+            return;
+        }
+        switch(trigger){
+            case ON_CONTROLLER_INITIATED_CONNECTION_FAILURE:
+                reconciliationManager.enqueueForRetry(task);
+                break;
+            case ON_DISCONNECT:
+            {
+                ReadOnlyTransaction tx = db.newReadOnlyTransaction();
+                CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture =
+                        tx.read(LogicalDatastoreType.CONFIGURATION,iid);
+
+                final OvsdbConnectionManager connectionManager = this;
+                Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
+                    @Override
+                    public void onSuccess(@Nullable Optional<Node> node) {
+                        if (node.isPresent()) {
+                            LOG.info("Disconnected/Failed connection {} was controller initiated, attempting " +
+                                    "reconnection",ovsdbNode.getConnectionInfo());
+                            reconciliationManager.enqueue(task);
+
+                        } else {
+                            LOG.debug("Connection {} was switch initiated, no reconciliation is required"
+                                    ,ovsdbNode.getConnectionInfo());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        LOG.warn("Read Config/DS for Node failed! {}", iid, t);
+                    }
+                });
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     private class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private OvsdbConnectionManager cm;
         private EntityOwnershipListenerRegistration listenerRegistration;
@@ -530,5 +604,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             cm.handleOwnershipChanged(ownershipChange);
         }
+    }
+
+    private enum CONNECTION_RECONCILIATION_TRIGGER {
+        //Reconciliation trigger for scenario where controller's attempt
+        // to connect to switch fails on config data store notification
+        ON_CONTROLLER_INITIATED_CONNECTION_FAILURE,
+
+        //Reconciliation trigger for the scenario where controller
+        // initiated connection disconnects.
+        ON_DISCONNECT
     }
 }

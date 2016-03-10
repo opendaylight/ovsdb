@@ -110,6 +110,9 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             if (originalDataObject.get(instanceIdentifier) instanceof OvsdbNodeAugmentation) {
                 try {
                     cm.disconnect((OvsdbNodeAugmentation) originalDataObject.get(instanceIdentifier));
+                    cm.stopConnectionReconciliationIfActive(
+                            instanceIdentifier.firstIdentifierOf(Node.class),(OvsdbNodeAugmentation) originalDataObject
+                                    .get(instanceIdentifier));
                 } catch (UnknownHostException e) {
                     LOG.warn("Failed to disconnect ovsdbNode", e);
                 }
@@ -128,7 +131,14 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                         if (original.getValue() instanceof OvsdbNodeAugmentation) {
                             try {
                                 cm.disconnect((OvsdbNodeAugmentation) original.getValue());
-                                cm.connect((InstanceIdentifier<Node>) original.getKey(),value);
+                                cm.stopConnectionReconciliationIfActive(
+                                        original.getKey(),(OvsdbNodeAugmentation) original.getValue());
+
+                                OvsdbClient newClient = cm.connect((InstanceIdentifier<Node>) original.getKey(),value);
+                                if(newClient == null) {
+                                    cm.reconcileConnection((InstanceIdentifier<Node>) original.getKey(),value);
+                                }
+
                             } catch (UnknownHostException e) {
                                 LOG.warn("Failed to disconnect to ovsdbNode", e);
                             }
@@ -152,8 +162,12 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                               + "to same device, hence dropping the request {}", key, ovsdbNode);
                 } else {
                     try {
-                        cm.connect((InstanceIdentifier<Node>) created.getKey(),
+                        OvsdbClient client = cm.connect((InstanceIdentifier<Node>) created.getKey(),
                                 (OvsdbNodeAugmentation) created.getValue());
+                        if(client == null) {
+                            cm.reconcileConnection((InstanceIdentifier<Node>) created.getKey(),
+                                    (OvsdbNodeAugmentation) created.getValue());
+                        }
                     } catch (UnknownHostException e) {
                         LOG.warn("Failed to connect to ovsdbNode", e);
                     }

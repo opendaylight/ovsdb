@@ -138,7 +138,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
                                     HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId()), pLoc);
                     tBuilder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(tpPath));
                 }
-
+                tBuilder.setTunnelUuid(new Uuid(uuid.toString()));
                 setBfdLocalConfigs(tBuilder, tunnel);
                 setBfdRemoteConfigs(tBuilder, tunnel);
                 setBfdParams(tBuilder, tunnel);

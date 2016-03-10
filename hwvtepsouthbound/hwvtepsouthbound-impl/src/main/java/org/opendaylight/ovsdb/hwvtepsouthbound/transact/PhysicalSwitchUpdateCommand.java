@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -84,29 +84,44 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         setDescription(physicalSwitch, physicalSwitchAugmentation);
         setManagementIps(physicalSwitch, physicalSwitchAugmentation);
         setTunnuleIps(physicalSwitch, physicalSwitchAugmentation);
-        setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation);
+        setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation,
+                        operationalPhysicalSwitchOptional.isPresent());
         if (!operationalPhysicalSwitchOptional.isPresent()) {
             //create a physical switch
             setName(physicalSwitch, physicalSwitchAugmentation, operationalPhysicalSwitchOptional);
             String pswitchUuid = "PhysicalSwitch_" + HwvtepSouthboundMapper.getRandomUUID();
             transaction.add(op.insert(physicalSwitch).withId(pswitchUuid));
+            transaction.add(op.comment("Physical Switch: Creating " +
+                            physicalSwitchAugmentation.getHwvtepNodeName().getValue()));
             //update global table
             Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Global.class);
             global.setSwitches(Sets.newHashSet(new UUID(pswitchUuid)));
 
-            LOG.debug("execute: physical switch: {}", physicalSwitch);
+            LOG.trace("execute: create physical switch: {}", physicalSwitch);
             transaction.add(op.mutate(global)
                     .addMutation(global.getSwitchesColumn().getSchema(), Mutator.INSERT,
                             global.getSwitchesColumn().getData()));
+            transaction.add(op.comment("Global: Mutating " +
+                            physicalSwitchAugmentation.getHwvtepNodeName().getValue() + " " + pswitchUuid));
         } else {
             PhysicalSwitchAugmentation updatedPhysicalSwitch = operationalPhysicalSwitchOptional.get();
             String existingPhysicalSwitchName = updatedPhysicalSwitch.getHwvtepNodeName().getValue();
+            /* In case TOR devices don't allow creation of PhysicalSwitch name might be null
+             * as user is only adding configurable parameters to MDSAL like BFD params
+             * 
+             * TODO Note: Consider handling tunnel udpate/remove in separate command
+             */
+            if(existingPhysicalSwitchName == null) {
+                existingPhysicalSwitchName = operationalPhysicalSwitchOptional.get().getHwvtepNodeName().getValue();
+            }
             // Name is immutable, and so we *can't* update it.  So we use extraPhysicalSwitch for the schema stuff
             PhysicalSwitch extraPhysicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
             extraPhysicalSwitch.setName("");
+            LOG.trace("execute: updating physical switch: {}", physicalSwitch);
             transaction.add(op.update(physicalSwitch)
                     .where(extraPhysicalSwitch.getNameColumn().getSchema().opEqual(existingPhysicalSwitchName))
                     .build());
+            transaction.add(op.comment("Physical Switch: Updating " + existingPhysicalSwitchName));
         }
     }
 
@@ -147,36 +162,62 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     @SuppressWarnings("unchecked")
     private void setTunnels(TransactionBuilder transaction, InstanceIdentifier<Node> iid,
-                    PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+                    PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation,
+                    boolean pSwitchExists) {
         //TODO: revisit this code for optimizations
         //TODO: needs more testing
         if(physicalSwitchAugmentation.getTunnels() != null) {
-            Set<UUID> tunnels = Sets.newHashSet();
             for(Tunnels tunnel: physicalSwitchAugmentation.getTunnels()) {
                 Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.getKey());
                 Tunnel newTunnel = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class);
-                String tunnelUuid = null;
-                if(!opTunnelOpt.isPresent()) {
-                    tunnelUuid = "Tunnel_" + HwvtepSouthboundMapper.getRandomUUID();
-                } else {
-                    tunnelUuid = opTunnelOpt.get().getTunnelUuid().getValue();
-                }
+
                 UUID localUUID = getLocatorUUID(transaction,
                                 (InstanceIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
                 UUID remoteUUID = getLocatorUUID(transaction,
                                 (InstanceIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue());
                 if(localUUID != null && remoteUUID != null) {
+                    UUID uuid;
                     // local and remote must exist
                     newTunnel.setLocal(localUUID);
                     newTunnel.setRemote(remoteUUID);
                     setBfdParams(newTunnel, tunnel);
                     setBfdLocalConfigs(newTunnel, tunnel);
                     setBfdRemoteConfigs(newTunnel, tunnel);
-                    transaction.add(op.insert(newTunnel).withId(tunnelUuid));
-                    tunnels.add(new UUID(tunnelUuid));
+                    if(!opTunnelOpt.isPresent()) {
+                        String tunnelUuid = "Tunnel_" + HwvtepSouthboundMapper.getRandomUUID();
+                        transaction.add(op.insert(newTunnel).withId(tunnelUuid));
+                        transaction.add(op.comment("Tunnel: Creating " + tunnelUuid));
+                        if(!pSwitchExists) {
+                            //TODO: Figure out a way to handle this
+                            LOG.warn("Tunnel configuration requires pre-existing physicalSwitch");
+                        } else {
+                            // TODO: Can we reuse physicalSwitch instead?
+                            PhysicalSwitch pSwitch =
+                                            TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                                                            PhysicalSwitch.class);
+                            pSwitch.setTunnels(Sets.newHashSet(new UUID(tunnelUuid)));
+                            pSwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
+                            transaction.add(op.mutate(pSwitch)
+                                            .addMutation(pSwitch.getTunnels().getSchema(), Mutator.INSERT,
+                                                    pSwitch.getTunnels().getData())
+                                            .where(pSwitch.getNameColumn().getSchema().
+                                                            opEqual(pSwitch.getNameColumn().getData()))
+                                            .build());
+                            transaction.add(op.comment("PhysicalSwitch: Mutating " + tunnelUuid));
+                        }
+                        uuid = new UUID(tunnelUuid);
+                    } else {
+                        uuid = new UUID (opTunnelOpt.get().getTunnelUuid().getValue());
+                        Tunnel extraTunnel =
+                                TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class, null);
+                        extraTunnel.getUuidColumn().setData(uuid);
+                        transaction.add(op.update(newTunnel)
+                                        .where(extraTunnel.getUuidColumn().getSchema().opEqual(uuid))
+                                        .build());
+                        transaction.add(op.comment("Tunnel: Updating " + uuid));
+                    }
                 }
             }
-            physicalSwitch.setTunnels(tunnels);
         }
     }
 

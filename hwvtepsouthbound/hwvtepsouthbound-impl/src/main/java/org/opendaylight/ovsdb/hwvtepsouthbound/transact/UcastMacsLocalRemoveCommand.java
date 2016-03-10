@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalRemoveCommand.class);
 
     public UcastMacsLocalRemoveCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -57,14 +58,15 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand {
             LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<LocalUcastMacs> operationalMacOptional =
                     getOperationalState().getLocalUcastMacs(instanceIdentifier, mac.getKey());
-            UcastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+            UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     UcastMacsLocal.class, null);
-            if (operationalMacOptional.isPresent()) {
+            if (operationalMacOptional.isPresent() && operationalMacOptional.get().getMacEntryUuid() != null) {
                 //when mac entry is deleted, its referenced locators are deleted automatically.
                 //locators in config DS is not deleted and user need to be removed explicitly by user.
-                transaction.add(op.delete(mcastMacsLocal.getSchema())
-                        .where(mcastMacsLocal.getMacColumn().getSchema().opEqual(mac.getMacEntryKey().getValue())).build());
-                transaction.add(op.comment("Local UcastMacLocal: Deleting " + mac.getMacEntryKey().getValue()));
+                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                transaction.add(op.delete(ucastMacsLocal.getSchema()).
+                        where(ucastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+                transaction.add(op.comment("UcastMacLocal: Deleting " + mac.getMacEntryKey().getValue()));
             } else {
                 LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());

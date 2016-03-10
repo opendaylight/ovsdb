@@ -29,8 +29,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
@@ -156,7 +158,7 @@ public class OvsdbConnectionManagerTest {
         instanceIdentifiers = new ConcurrentHashMap<>();
         MemberModifier.field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnectionManager, instanceIdentifiers);
 
-
+        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "reconcileConnection", OvsdbConnectionInstance.class));
         ovsdbConnectionManager.disconnected(externalClient);
         Map<ConnectionInfo,OvsdbConnectionInstance> testClients = Whitebox.getInternalState(ovsdbConnectionManager, "clients");
         assertEquals("Error, size of the hashmap is incorrect", 0, testClients.size());

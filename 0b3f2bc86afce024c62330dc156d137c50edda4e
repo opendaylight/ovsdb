@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_3b7a0024",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "yup.",
+      "parentUuid": "9a3d3df0_a5da7314",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_45c8c754",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-03-10T12:33:07Z",
       "side": 1,
       "message": "reconciler (sic)",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_3be5e008",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_45c8c754",
       "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_3b93205c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "Assuming that we can hit this scenario, isn\u0027t it that once the all the attempts are done and there is no more job in queue, these created thread will be cleaned up? You mean JVM native thread? I think in that case these java thread will be in queue for scheduler to schedule it right ? This question are just for my understanding, having bounded queue is safe way to go about, but i thought cachedthreadpool, will kind of help you extend the pool and shrink it back is required.",
+      "parentUuid": "9a3d3df0_259f8304",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_85df6fd5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2016-03-10T13:00:22Z",
       "side": 1,
       "message": "Actually this would never happen since it\u0027s unbounded but doesn\u0027t hurt to check in case that\u0027s changed...",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1b829cff",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "yeah, API says it\u0027s possible so lets report it, may be OOM on the way :)",
+      "parentUuid": "9a3d3df0_85df6fd5",
       "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_fb84180c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "i was thinking of doing it in case of InterruptedException, than i was having a thought whether we do really have to do it :). I didn\u0027t write the logic of shutting down these pools, so i might have to use this flag to shutdown this while loop, else ThreadPool.shutdown() won\u0027t finish.",
+      "parentUuid": "9a3d3df0_a5c39336",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_85be4fac",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2016-03-10T12:33:07Z",
       "side": 1,
       "message": "This should have a close method to shutdown the executors.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_5b7f0415",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "yeah, that\u0027s the missing part, that\u0027s where i will use stop flag. Thanks for pointing out.",
+      "parentUuid": "9a3d3df0_85be4fac",
       "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

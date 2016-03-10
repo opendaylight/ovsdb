@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_db2e74fa",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_a5da7314",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_45c8c754",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2
@@ -63,6 +81,24 @@
         "id": 65
       },
       "writtenOn": "2016-03-10T20:29:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_45c8c754",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_3b3de02b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
       "side": 1,
       "message": "Done",
       "parentUuid": "9a3d3df0_45c8c754",
@@ -107,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_bb31f05b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_3b93205c",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_85df6fd5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2
@@ -135,6 +189,24 @@
       "writtenOn": "2016-03-10T20:29:19Z",
       "side": 1,
       "message": "yeah, API says it\u0027s possible so lets report it, may be OOM on the way :)",
+      "parentUuid": "9a3d3df0_85df6fd5",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1b357c45",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "9a3d3df0_85df6fd5",
       "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
@@ -177,6 +249,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_fb37f84a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_a5c39336",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_85be4fac",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 2
@@ -212,6 +302,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_5b4264ae",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_5b7f0415",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_85ec8fbc",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
         "patchSetId": 2
@@ -229,6 +337,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_9bf18c97",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "yup, kept it info for debugging.",
+      "parentUuid": "9a3d3df0_85ec8fbc",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_050fdf88",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
         "patchSetId": 2
@@ -240,6 +366,24 @@
       "writtenOn": "2016-03-10T12:33:07Z",
       "side": 1,
       "message": "You shouldn\u0027t use wall clock time as it can drift. It would be better to use a guava Stopwatch and check elapsed time. On retry, reset it.",
+      "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7bec88bb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-10T21:11:32Z",
+      "side": 1,
+      "message": "it\u0027s approximate timing, so even if it drifts, we don\u0027t care much about it.",
+      "parentUuid": "9a3d3df0_050fdf88",
       "revId": "0b3f2bc86afce024c62330dc156d137c50edda4e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

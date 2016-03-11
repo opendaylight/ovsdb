@@ -1075,6 +1075,143 @@ module ovsdb {
             }
         }
 
+        list interface-bfd {
+            description "BFD configuration for a particular interface.
+                BFD, defined in RFC 5880 and RFC 5881, allows point-to-point
+                detection of connectivity failures by occasional transmission of
+                BFD control messages.
+
+                bfd : enable: optional string, either true or false
+                       True to enable BFD on this Interface. If not specified, BFD
+                       will be disabled by default.
+
+                bfd : min_rx: optional string
+                       containing an integer, at least 1.
+                       The shortest interval, in milliseconds, at which this BFD session
+                       offers to receive BFD control messages.  The remote endpoint may
+                       choose to send messages at a slower rate.  Defaults to 1000.
+
+                bfd : min_tx: optional string
+                       containing an integer, at least 1.
+                       The shortest interval, in milliseconds, at which this BFD session is
+                       willing to transmit BFD control messages.  Messages will actually be
+                       transmitted at a slower rate if the remote endpoint is not willing to
+                       receive as quickly as specified.  Defaults to 100.
+
+                bfd : decay_min_rx: optional string
+                       containing an integer
+                       An alternate receive interval, in milliseconds, that must be greater
+                       than or equal to bfd:min_rx.  The implementation switches from
+                       bfd:min_rx to bfd:decay_min_rx when there is no obvious incoming
+                       data traffic at the interface, to reduce the CPU and bandwidth cost
+                       of monitoring an idle interface.  This feature may be disabled by
+                       setting a value of 0. This feature is reset whenever bfd:decay_min_rx
+                       bfd:min_rx changes.
+
+                bfd : forwarding_if_rx: optional string, either true or false
+                       When true, traffic received on the Interface is used to
+                       indicate the capability of packet I/O. BFD control packets are
+                       still transmitted and received.  At least one BFD control
+                       packet must be received every 100 * bfd:min_rx amount of time.
+                       Otherwise, even if traffic are received, the bfd-status:forwarding
+                       will be false.
+
+                bfd : cpath_down: optional string, either true or false
+                       Set to true to notify the remote endpoint that traffic should not be
+                       forwarded to this system for some reason other than a connectivity
+                       failure on the interface being monitored.  The typical underlying
+                       reason is concatenated path down, that is, that connectivity
+                       beyond the local system is down.  Defaults to false.
+
+                bfd : cpath_down: optional string, either true or false
+                       Set to true to notify the remote endpoint that traffic should not be
+                       forwarded to this system for some reason other than a connectivity
+                       failure on the interface being monitored.  The typical underlying
+                       reason is concatenated path down, that is, that connectivity
+                       beyond the local system is down.  Defaults to false.
+
+                bfd : check_tnl_key: optional string, either true or false
+                       Set to true to make BFD accept only control messages with a tunnel
+                       key of zero.  By default, BFD accepts control messages with any
+                       tunnel key.
+
+                bfd : bfd_local_dst_mac: optional string, mac address
+                       Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx
+                       to set the MAC used as destination for transmitted BFD packets. The
+                       default is 00:23:20:00:00:01
+
+                bfd : bfd_remote_dst_mac: optional string, mac address
+                       Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx
+                       to set the MAC used for checking the destination of received BFD packets.
+                       Packets with different destination MAC will not be considered as BFD packets.
+                       If not specified the destination MAC address of received BFD packets
+                       are not checked.
+
+                bfd : bfd_src_ip: optional string, ip address
+                       Set to an IPv4 address to set the IP address used as source
+                       for transmitted BFD packets.  The default is 169.254.1.1
+
+                bfd : bfd_dst_ip: optional string, ip address
+                       Set to an IPv4 address to set the IP address used as destination
+                       for transmitted BFD packets.  The default is 169.254.1.0";
+
+            key "bfd-key";
+            leaf bfd-key {
+                description "bfd name/key";
+                type string;
+            }
+            leaf bfd-value {
+                description "bfd value";
+                type string;
+            }
+        }
+
+        list interface-bfd-status {
+            description "BFD status for a particular interface.
+                The switch sets key-value pairs in the bfd_status column to
+                report the status of BFD on this interface.  When BFD is not
+                enabled, with bfd:enable, the switch clears all key-value
+                pairs from bfd_status.
+
+                bfd_status : state: optional string, one of [admin_down, down, init, up]
+                       Reports the state of the BFD session.  The BFD session is fully
+                       healthy and negotiated if UP.
+
+                bfd_status : forwarding: optional string, true or false
+                       Reports whether the BFD session believes this Interface
+                       may be used to forward traffic.  Typically this means
+                       the local session is signaling UP, and the remote
+                       system isn't signaling a problem such as concatenated path down.
+
+                bfd_status : diagnostic: optional string
+                       A diagnostic code specifying the local system's reason for the
+                       last change in session state. The error messages are defined in
+                       section 4.1 of [RFC 5880].
+
+                bfd_status : remote_state: optional string, one of [admin_down, down, init, up]
+                       Reports the state of the remote endpoint's BFD session.
+
+                bfd_status : remote_diagnostic: optional string
+                       A diagnostic code specifying the remote system's reason for the
+                       last change in session state. The error messages are defined in
+                       section 4.1 of [RFC 5880].
+
+                bfd_status : flap_count: optional string, 
+                       containing an integer, minimum 0
+                       Counts the number of bfd_status:forwarding flaps since start.
+                       A flap is considered as a change of the bfd_status:forwarding value.";
+
+            key "bfd-status-key";
+            leaf bfd-status-key {
+                description "bfd-status name/key";
+                type string;
+            }
+            leaf bfd-status-value {
+                description "bfd-status value";
+                type string;
+            }
+        }
+
         leaf qos {
             description "The unique identifier of the QoS entry for this port.";
             type yang:uuid;

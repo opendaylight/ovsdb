@@ -1,0 +1,158 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_96bde304",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1112,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "you know we should make this a util since we do this in a couple places. Might as well just pass in the node we don\u0027t want included. Not needed now though.",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_56c7db95",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1115,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "nitpick, but sonar will complain about not ahving a space between for/if/etc and (",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_b6d6274d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "also curious why not use the \"List\u003cOvsdbTerminationPointAugmentation\u003e ports \u003d southbound.extractTerminationPointAugmentations(bridgeNode);\"\n\npattern as above in the triggerInterfaceUpdatesTo() method. That provides some protection to gt a bridgeaugmentation and will also read from mdsal the terminationPoints if needed.",
+      "range": {
+        "startLine": 1132,
+        "startChar": 45,
+        "endLine": 1132,
+        "endChar": 64
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_36db377d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "this should be wrapped with if(terminationPoints !\u003d null \u0026\u0026 !terminationPoints.isEmpty()){ because it could come back null. There is no guarantee that terminationPoints are on the node.",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_564ebb3b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1134,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "I don\u0027t know if this could ever be null, though I guess it doesn\u0027t hurt to check it. But what is the intention here if it is null such that you want to go into the block?",
+      "range": {
+        "startLine": 1134,
+        "startChar": 15,
+        "endLine": 1134,
+        "endChar": 21
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f6438f10",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "general comment, but this method here was added to solve this problem",
+      "range": {
+        "startLine": 1199,
+        "startChar": 24,
+        "endLine": 1199,
+        "endChar": 51
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1641d30a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "would a better algorithm be to just do the work when the new node comes up and just get all the other nodes for that tenant network and program the remote rules? That is the root of the problem, right - the normal flow is the interface update causes forward rules on the local node and reverse rules on the remote nodes to be added for that interface. But then the reverse rules for the existing interfaces are not included.",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_36497731",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T01:47:31Z",
+      "side": 1,
+      "message": "there is an existing method, readOvsdbNode(), already here in the SouthboundImpl that can be used.",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

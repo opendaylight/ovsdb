@@ -230,6 +230,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_ac953834",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-11T15:52:51Z",
+      "side": 1,
+      "message": "How does it not have the trigger logic since to get here the new node had to have a port added and get to this point. Then this method should be programming the reverse flows for the existing nodes.\n\nWe have needed the optimizations of only modifying flows on nodes with ports in the same tenant network. But that seems like a different fix. Seems like it is just this programTunnelRulesInNewNode() that is not working correctly. Fix that and fix the bug. Then work on optimization.",
+      "parentUuid": "9a3d3df0_964de3c6",
+      "range": {
+        "startLine": 1199,
+        "startChar": 24,
+        "endLine": 1199,
+        "endChar": 51
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1641d30a",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
         "patchSetId": 2

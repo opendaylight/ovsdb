@@ -56,6 +56,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.FlowSampleCollectorSet;
@@ -107,12 +108,14 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private UUID testQueueUuid = null;
     private UUID testSFlowUuid = null;
     private UUID testSslUuid = null;
+    private UUID testAutoattachUuid = null;
     private Version flowSampleCollectorSetFromVersion = Version.fromString("7.1.0");
     private Version flowTableFromVersion = Version.fromString("6.5.0");
     private Version prefixesAddedVersion = Version.fromString("7.4.0");
     private Version externalIdAddedVerson = Version.fromString("7.5.0");
     private Version ipfixFromVersion = Version.fromString("7.1.0");
     private Version ipfixCacheFromVersion = Version.fromString("7.3.0");
+    private Version autoAttachFromVersion = Version.fromString("7.11.2");
 
     private static Map<String, Map<UUID, Row>> tableCache = new HashMap<>();
     private static Map<String, Map<UUID, Row>> getTableCache () {
@@ -997,6 +1000,78 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         testBridgeUuid = bridgeInsert();
         portAndInterfaceInsert();
         portAndInterfaceDelete();
+        bridgeDelete(testBridgeUuid);
+    }
+
+    public void autoAttachInsert() throws ExecutionException, InterruptedException {
+        String autoattachUuid = "testAutoattachUuid";
+        String systemName = "testSystemName";
+        String systemDescription = "testSystemDescription";
+        Map<Long, Long> mappings = ImmutableMap.of(100L, 200L);
+
+        // FIXME: Add external_ids column when it is supported in ovs
+        AutoAttach autoattach = getClient().createTypedRowWrapper(AutoAttach.class);
+        autoattach.setSystemName(systemName);
+        autoattach.setSystemDescription(systemDescription);
+        autoattach.setMappings(mappings);
+
+        Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
+        TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
+                .add(op.insert(autoattach.getSchema())
+                        .withId(autoattachUuid)
+                        .value(autoattach.getSystemNameColumn())
+                        .value(autoattach.getSystemDescriptionColumn())
+                        .value(autoattach.getMappingsColumn()))
+                .add(op.comment("Autoattach: Inserting " + autoattachUuid))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getAutoAttachColumn().getSchema(), Mutator.INSERT,
+                                Sets.newHashSet(new UUID(autoattachUuid)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
+                        .build())
+                .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
+
+        int insertAutoattachOperationIndex = 0;
+        List<OperationResult> operationResults = executeTransaction(transactionBuilder,
+                "Insert and Mutate operation results for AutoAttach and Bridge");
+
+        testAutoattachUuid = operationResults.get(insertAutoattachOperationIndex).getUuid();
+        assertNotNull(ASSERT_TRANS_UUID, testAutoattachUuid);
+
+        // Verify that the local cache was updated with the remote changes
+        Row autoattachRow = getTableCache().get(autoattach.getSchema().getName()).get(testAutoattachUuid);
+        AutoAttach monitoredAutoattach = getClient().getTypedRowWrapper(AutoAttach.class, autoattachRow);
+        assertEquals(autoattach.getSystemNameColumn().getData(), monitoredAutoattach.getSystemNameColumn().getData());
+    }
+
+    public void autoAttachDelete() throws ExecutionException, InterruptedException {
+        AutoAttach autoattach = getClient().getTypedRowWrapper(AutoAttach.class, null);
+        Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA).get();
+        TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
+                .add(op.delete(autoattach.getSchema())
+                        .where(autoattach.getUuidColumn().getSchema().opEqual(testAutoattachUuid))
+                        .build())
+                .add(op.comment("AutoAttach: Deleting " + testAutoattachUuid))
+                .add(op.mutate(bridge.getSchema()) // Delete auto_attach column in the Bridge table
+                        .addMutation(bridge.getAutoAttachColumn().getSchema(), Mutator.DELETE,
+                                Sets.newHashSet(testAutoattachUuid)))
+                .add(op.comment("Bridge: Mutating " + testAutoattachUuid))
+                .add(op.commit(true));
+        executeTransaction(transactionBuilder, "AutoAttach, Bridge auto_attach column: Delete operation results");
+
+        // Verify if autoattach was deleted
+        autoattach = getClient().getTypedRowWrapper(AutoAttach.class, null);
+        assertNull(autoattach.getUuid());
+    }
+
+    @Test
+    public void testAutoAttach() throws ExecutionException, InterruptedException {
+        // Don't run this test if the table is not supported
+        assumeTrue(schemaVersion.compareTo(autoAttachFromVersion) >= 0);
+
+        testBridgeUuid = bridgeInsert();
+        autoAttachInsert();
+        autoAttachDelete();
         bridgeDelete(testBridgeUuid);
     }
 

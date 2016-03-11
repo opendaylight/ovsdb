@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_165a7382",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1115,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-11T08:23:51Z",
+      "side": 1,
+      "message": "Done. + I fixed some more of these in the file.",
+      "parentUuid": "9a3d3df0_56c7db95",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_b6d6274d",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
         "patchSetId": 2
@@ -76,6 +94,48 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_5657db57",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-11T08:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_36db377d",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f65c2f7f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-11T08:23:51Z",
+      "side": 1,
+      "message": "I may have misunderstood something but I specifically did not want to read from the MdSal in case it had changed in the mean time. I want to inspect just the objects that came in on the event.",
+      "parentUuid": "9a3d3df0_b6d6274d",
+      "range": {
+        "startLine": 1132,
+        "startChar": 45,
+        "endLine": 1132,
+        "endChar": 64
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_564ebb3b",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
         "patchSetId": 2
@@ -87,6 +147,30 @@
       "writtenOn": "2016-03-11T01:47:31Z",
       "side": 1,
       "message": "I don\u0027t know if this could ever be null, though I guess it doesn\u0027t hurt to check it. But what is the intention here if it is null such that you want to go into the block?",
+      "range": {
+        "startLine": 1134,
+        "startChar": 15,
+        "endLine": 1134,
+        "endChar": 21
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_36521767",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1134,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-11T08:23:51Z",
+      "side": 1,
+      "message": "Right. Mainly it was defensive programming. Basically I assumed that the _safer_ thing was to continue and if the augmentation has an OF port return true. I\u0027m less sure of that now since it means we could technically return a false value if that termination point were the br-ex/int but did not have a name. I also had assumed that not having a name was at least highly unlikely so I assumed it didn\u0027t matter too much. Since it is all so unlikely, I\u0027ll change it to not go into the block.",
+      "parentUuid": "9a3d3df0_564ebb3b",
       "range": {
         "startLine": 1134,
         "startChar": 15,
@@ -122,6 +206,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_964de3c6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-11T08:23:51Z",
+      "side": 1,
+      "message": "Yeah, I was wondering about that because of the name of that function. However, it doesn\u0027t do the job because it\u0027s lacking the trigger logic I added. We really need to track the states and do the crawl on all the old ports only when necessary, not for every destination.",
+      "parentUuid": "9a3d3df0_f6438f10",
+      "range": {
+        "startLine": 1199,
+        "startChar": 24,
+        "endLine": 1199,
+        "endChar": 51
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1641d30a",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
         "patchSetId": 2
@@ -133,6 +241,24 @@
       "writtenOn": "2016-03-11T01:47:31Z",
       "side": 1,
       "message": "would a better algorithm be to just do the work when the new node comes up and just get all the other nodes for that tenant network and program the remote rules? That is the root of the problem, right - the normal flow is the interface update causes forward rules on the local node and reverse rules on the remote nodes to be added for that interface. But then the reverse rules for the existing interfaces are not included.",
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_96e4c3ac",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-11T08:23:51Z",
+      "side": 1,
+      "message": "I had started out thinking that was the direction to go but changed my mind. Currently, when you add a port on an ovsdb node net-virt goes and configures tunnel flows for all other ovsdb nodes, whether or not they have any ports attached. Ultimately, it is completely unnecessary to configure tunnel flows on bridges that do not have any ports and for the time being I\u0027ve left it this way. However, included in this fix is the ability to detect (a) when a node has no ports and (b) detect when it gets its first port. Using (a) and (b) we could easily achieve the desired (in my opinion) optimization of not configuring unnecessary tunnel flows on nodes with no ports. I did not take that final step because I didn\u0027t want to touch the working parts of this code since it\u0027s a little bit of a rush job and an SR release. But I do think we should go in that direction eventually.",
+      "parentUuid": "9a3d3df0_1641d30a",
       "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_cc9ebcb8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-11T14:52:04Z",
+      "side": 1,
+      "message": "I\u0027m not sure I follow exactly. Perhaps you can explain on hangout. It sounds like you want to increase the timeout period after each execution (and failure). You can do that by re-submitting a one-shot timer task each time with a different delay instead of using a repeated, fixed rate timer.",
+      "parentUuid": "9a3d3df0_168393cc",
+      "revId": "1d571c46936e7775391f66455c92a420013d3810",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_d62f6b3d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 3

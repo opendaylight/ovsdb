@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_96c7a363",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-11T03:27:57Z",
+      "side": 1,
+      "message": "Looking at this some more, this is the only task that you run on the thread pool and it runs permanently. So essentially you\u0027re doing your own queuing via reconciliationTasksQueue, which is unbounded, with a single thread. So the setup of max threads and queue size on the \"reconcilers\" executor isn\u0027t really doing anything as it\u0027s essentially a single thread executor.\n\nI think what you want to do is make ReconciliationTask Runnable and enqueue on the \"reconcilers\" executor.  If a ReconciliationTask fails, have it submit a Runnable to the scheduled executor for retry (one-time schedule), unless the max retries is reached in which case stop. You could create an abstract base class for ReconciliationTask to handle this logic, with abstract method reconcileConfiguration. The Runnable submitted to the scheduled executor would simply enqueue on the \"reconcilers\" executor. \n\nSo the \"reconcilers\" executor would handle the parallel reconciliation work and the single-threaded scheduled executor would be used to time the retries and submit the work to the \"reconcilers\" executor for parallelism. I\u0027ve used this pattern before. \n\nThis would simplify it and you could get rid of the 2 unbounded queues (reconciliationTasksQueue and retryConnectionTaskCache).\n\nYou could also do this with just a scheduled executor with 10 threads and set allowCoreThreadTimeOut  and keepAliveTime to clean them up when idle. However the queue is unbounded in scheduled executor so it\u0027s not really ideal for blocking and/or potential long running tasks..",
+      "revId": "1d571c46936e7775391f66455c92a420013d3810",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d62f6b3d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-11T03:27:57Z",
+      "side": 1,
+      "message": "These 2 lines could be combined but not a big deal.",
+      "revId": "1d571c46936e7775391f66455c92a420013d3810",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -254,6 +254,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_63a7bebd",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-12T17:20:34Z",
+      "side": 1,
+      "message": "\u003e We have needed the optimizations of only modifying flows \n\u003eon nodes with ports in the same tenant network. But that \n\u003eseems like a different fix.\n\nIt *is* a differect fix but it can\u0027t come before this fix because you need to be able to detect when a bridge gets its first port and then work the flows.\n\n\u003eSeems like it is just this programTunnelRulesInNewNode() \n\u003ethat is not working correctly. Fix that and fix the bug. \n\u003eThen work on optimization.\n\nSo from everything I can see it seems that this function was introduced to solve this bug but for the life of me I can not understand how it possibly could. I\u0027m new to this and it is completely possible I\u0027m missing something but here\u0027s how I see it. In order to solve this bug you need to (a) detect when a bridge is new and ready for configuration and most importantly and basically (b) iterate through *all* other ports on all other existing bridges and configure flows to talk to this new bridge. However, the looping logic (b) does not exist anywhere in the code. The NewNode function loops through ports only on the bridge that triggered the current SB event that is being handled. The missing logic is in this patch at line 1115.",
+      "parentUuid": "9a3d3df0_ac953834",
+      "range": {
+        "startLine": 1199,
+        "startChar": 24,
+        "endLine": 1199,
+        "endChar": 51
+      },
+      "revId": "f5d07b5d0e411c83357af3bfdd7b8af68a761cfb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1641d30a",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
         "patchSetId": 2

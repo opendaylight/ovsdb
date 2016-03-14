@@ -836,7 +836,6 @@ module ovsdb {
 
         list trunks {
             description "Represents the trunks of a termination point.";
-            key "trunk";
             leaf trunk {
                 type ethertype:vlan-id;
             }

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_86a490ba",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T05:08:56Z",
+      "side": 1,
+      "message": "I missed to pass it to Executors.newScheduledThreadPool.",
+      "parentUuid": "9a3d3df0_43c71a64",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_83a482ba",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2016-03-12T18:05:51Z",
       "side": 1,
       "message": "You just need a single thread for this since tasks are short-lived, i.e. they just re-submit or re-schedule if necessary.",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_66a7ccbd",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T05:08:56Z",
+      "side": 1,
+      "message": "Well for connection reconciliation yes, but there can be scenario where it\u0027s not going to be short lived. Like reconciliation of switch configuration, so i used threadpool rather then single thread.",
+      "parentUuid": "9a3d3df0_83a482ba",
       "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_a6ad549d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T05:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_03987276",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_a3ad469d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
         "patchSetId": 6
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_c6aa1884",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T05:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_a3ad469d",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_838be21d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
         "patchSetId": 6
@@ -98,6 +170,24 @@
       "writtenOn": "2016-03-12T18:05:51Z",
       "side": 1,
       "message": "This could end up negative if the last connection attempt took longer than the next scheduled interval or if clock drift occurred. The possibility is small but there.\n\nYou should use System.nanoTime to avoid the possibility of clock drift. If the delay is negative, cap it at 10000.\n\nOr you could simplify it and just schedule the next try starting at the end of the last try instead of factoring in the elapsed time, i.e. use fixed delay instead of fixed rate. So just return \"connectionAttempt.get() * 10000\" and remove lastRetryTimestamp or isTaskReadyForRetry. Eg if the first connection attempt took 10 sec to fail is there much point in trying again immediately as it will most likely fail again? Maybe if the OS retries under the hood during that time but I\u0027m not sure if that\u0027s the case.",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_06988076",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T05:08:56Z",
+      "side": 1,
+      "message": "isTaskReadyForRetry is requires for other switch configuration reconciliation. For those scenarios, they probably will check the operational data store for certain configuration and if that\u0027s there is ready for retry else not. retryDelayInMills, will be the time interval after which they have to check for the readyness. \nAlso in the connection reconciliation there is a possibility that machine is rebooting and it takes more then 10 seconds, so first attempt will fail, but then in the second attempt it can connect.",
+      "parentUuid": "9a3d3df0_838be21d",
       "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -51,8 +52,12 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     public OvsdbAutoAttachUpdateCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedAutoAttachRows = TyperUtils.extractRowsUpdated(AutoAttach.class,getUpdates(), getDbSchema());
-        oldAutoAttachRows = TyperUtils.extractRowsOld(AutoAttach.class, getUpdates(), getDbSchema());
+        try {
+            updatedAutoAttachRows = TyperUtils.extractRowsUpdated(AutoAttach.class, getUpdates(), getDbSchema());
+            oldAutoAttachRows = TyperUtils.extractRowsOld(AutoAttach.class, getUpdates(), getDbSchema());
+        } catch (IllegalArgumentException e) {
+            LOG.debug("AutoAttach not supported on this OVS", e);
+        }
     }
 
     @Override

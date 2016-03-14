@@ -40,7 +40,11 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
     public OvsdbAutoAttachRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        removedAutoAttachRows = TyperUtils.extractRowsRemoved(AutoAttach.class, getUpdates(), getDbSchema());
+        try {
+            removedAutoAttachRows = TyperUtils.extractRowsRemoved(AutoAttach.class, getUpdates(), getDbSchema());
+        } catch (IllegalArgumentException e) {
+            LOG.debug("AutoAttach not supported on this OVS", e);
+        }
     }
 
     @Override

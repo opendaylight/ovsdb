@@ -64,6 +64,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand {
                 //when mac entry is deleted, its referenced locators are deleted automatically.
                 //locators in config DS is not deleted and need to be removed explicitly by user.
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                ucastMacsRemote.getUuidColumn().setData(macEntryUUID);
                 transaction.add(op.delete(ucastMacsRemote.getSchema()).
                         where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));

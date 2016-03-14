@@ -77,16 +77,19 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
                 LOG.trace("execute: create LocalMcastMac entry: {}", mcastMacsLocal);
                 transaction.add(op.insert(mcastMacsLocal));
                 transaction.add(op.comment("McastMacLocal: Creating " + localMcastMac.getMacEntryKey().getValue()));
-            } else {
-                LocalMcastMacs updatedMac = operationalMacOptional.get();
-                String existingMac = updatedMac.getMacEntryKey().getValue();
-                McastMacsLocal extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), McastMacsLocal.class);
-                extraMac.setMac("");
+            } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
+                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                McastMacsLocal extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                                McastMacsLocal.class, null);
+                extraMac.getUuidColumn().setData(macEntryUUID);
                 LOG.trace("execute: update LocalMcastMac entry: {}", mcastMacsLocal);
                 transaction.add(op.update(mcastMacsLocal)
-                        .where(extraMac.getMacColumn().getSchema().opEqual(existingMac))
+                        .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                         .build());
-                transaction.add(op.comment("McastMacLocal: Updating " + localMcastMac.getMacEntryKey().getValue()));
+                transaction.add(op.comment("McastMacLocal: Updating " + macEntryUUID));
+            } else {
+                LOG.warn("Unable to update localMcastMacs {} because uuid not found in the operational store",
+                                localMcastMac.getMacEntryKey().getValue());
             }
         }
     }

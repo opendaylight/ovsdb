@@ -78,16 +78,18 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 LOG.trace("execute: creating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.insert(ucastMacsRemote));
                 transaction.add(op.comment("UcastMacRemote: Creating " + remoteUcastMac.getMacEntryKey().getValue()));
-            } else {
-                RemoteUcastMacs updatedMac = operationalMacOptional.get();
-                String existingMac = updatedMac.getMacEntryKey().getValue();
+            } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
+                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
                 UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
                 extraMac.setMac("");
                 LOG.trace("execute: updating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.update(ucastMacsRemote)
-                        .where(extraMac.getMacColumn().getSchema().opEqual(existingMac))
+                        .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                         .build());
                 transaction.add(op.comment("UcastMacRemote: Updating " + remoteUcastMac.getMacEntryKey().getValue()));
+            } else {
+                LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
+                                remoteUcastMac.getMacEntryKey().getValue());
             }
         }
     }

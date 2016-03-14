@@ -247,22 +247,22 @@ module hwvtep {
             uses hwvtep-logical-switch-attributes;
         }
         list local-ucast-macs {
-            key "mac-entry-key";
+            key "mac-entry-key logical-switch-ref";
             uses hwvtep-mac-table-generic-attributes;
             uses hwvtep-ucast-mac-table-attributes;
         }
         list remote-ucast-macs {
-            key "mac-entry-key";
+            key "mac-entry-key logical-switch-ref";
             uses hwvtep-mac-table-generic-attributes;
             uses hwvtep-ucast-mac-table-attributes;
         }
         list local-mcast-macs {
-            key "mac-entry-key";
+            key "mac-entry-key logical-switch-ref";
             uses hwvtep-mac-table-generic-attributes;
             uses hwvtep-mcast-mac-table-attributes;
         }
         list remote-mcast-macs{
-            key "mac-entry-key";
+            key "mac-entry-key logical-switch-ref";
             uses hwvtep-mac-table-generic-attributes;
             uses hwvtep-mcast-mac-table-attributes;
         }

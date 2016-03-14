@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_cce7d7aa",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T18:44:45Z",
+      "side": 1,
+      "message": "Switch reconciliation is next step for reconciliation. There are two task (1) attempting to reconcile the config (e.g connection) (immediate operation) and (2) checking controller is ready to attempt the reconciliation (periodic check operation). (1) is definitely not short lived task (connection attempts takes time) (2) can be a short lived or could not. I was thinking of using the one thread pool for both, but there is a possibility that task that does (2) might get starved by task (1) if we use the same thread pool, and we won\u0027t be able to achieve the periodicity we want for (2). So by using different thread pool, we are giving them dedicated threads for processing. If we will use the same thread pool, we probably have to assign more threads, so i thought having two dedicated threadpool for these different task will be better. Queue for taskTriager will be dependent on the bounded queue of reconciler, so i think that should not be a issue. Thoughts?",
+      "parentUuid": "9a3d3df0_a9ad259d",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_23c2d652",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 6

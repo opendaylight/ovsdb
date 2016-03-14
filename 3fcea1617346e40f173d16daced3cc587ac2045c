@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_a9ad259d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-14T12:03:04Z",
+      "side": 1,
+      "message": "Where is the code for switch reconciliation? My point is that you\u0027re already using a separate thread pool. If you\u0027re going to use a thread pool for the scheduled executor then why use a separate thread pool as well? Well, remember the reason we went with the other thread pool - it\u0027s bounded whereas a scheduled executor thread pool is unbounded (the queue, that is).  So by re-introducing an unbounded thread pool, we\u0027re back to the original problem. \n\nSo you need to ensure the scheduled executor tasks are short-lived. Re: the check for retry, either make it async or run it on the reconcilers thread pool.",
+      "parentUuid": "9a3d3df0_66a7ccbd",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_23c2d652",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 6

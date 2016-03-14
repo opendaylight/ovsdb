@@ -191,6 +191,24 @@
       "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_469e0864",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-14T05:30:17Z",
+      "side": 1,
+      "message": "But in this case i think i can just return true for isTaskReadyForRetry(), i don\u0027t have to re-check the time interval, that will make it simple.",
+      "parentUuid": "9a3d3df0_06988076",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

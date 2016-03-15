@@ -43,6 +43,7 @@ public class DistributedArpService implements ConfigInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedArpService.class);
     private static final String DHCP_DEVICE_OWNER = "network:dhcp";
+    private static final String ROUTER_INTERFACE_DEVICE_OWNER = "network:router_interface";
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
@@ -185,8 +186,11 @@ public class DistributedArpService implements ConfigInterface {
         }
 
         for (Node node : nodes) {
-            // Arp rule is only needed when segmentation exists in the given node (bug 4752).
-            boolean arpNeeded = tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
+            // Arp rule is only needed when segmentation exists in the given node (bug 4752)
+            // or in case the port is a router interface
+            boolean isRouterInterface = owner != null && owner.equals(ROUTER_INTERFACE_DEVICE_OWNER);
+            boolean arpNeeded = isRouterInterface ||
+                    tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
             final Action actionForNode = arpNeeded ? actionToPerform : Action.DELETE;
 
             final Long dpid = getDatapathIdIntegrationBridge(node);

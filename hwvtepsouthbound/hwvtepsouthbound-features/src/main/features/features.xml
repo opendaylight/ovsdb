@@ -21,7 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-api/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-ovsdb-hwvtepsouthbound' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound'>
-    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-hwvtepsouthbound-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-impl/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
@@ -35,12 +35,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </feature>
   <feature name='odl-ovsdb-hwvtepsouthbound-rest' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: REST'>
     <feature version="${project.version}">odl-ovsdb-hwvtepsouthbound</feature>
-    <feature version="${mdsal.version}">odl-restconf</feature>
+    <feature version="${controller.mdsal.version}">odl-restconf</feature>
   </feature>
   <feature name='odl-ovsdb-hwvtepsouthbound-ui' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: UI'>
     <feature version="${project.version}">odl-ovsdb-hwvtepsouthbound-rest</feature>
-    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${controller.mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${controller.mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${dlux.version}">odl-dlux-yangui</feature>
   </feature>
   <feature name='odl-ovsdb-hwvtepsouthbound-test' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: test'>

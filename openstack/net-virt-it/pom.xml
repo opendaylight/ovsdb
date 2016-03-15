@@ -42,6 +42,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
 
   <properties>
+    <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
     <karaf.distro.groupId>org.opendaylight.ovsdb</karaf.distro.groupId>
     <karaf.distro.artifactId>karaf</karaf.distro.artifactId>
     <karaf.distro.version>${project.version}</karaf.distro.version>
@@ -67,7 +68,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${controller.mdsal.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_f279d22f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-03-15T12:24:06Z",
+      "side": 1,
+      "message": "I think you missed it. \n\u003c/controller.mdsal.version\u003e",
+      "revId": "2a8e468df6991da5881cf027aeb8ea79266025b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_52751e30",
+        "filename": "library/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-03-15T12:24:06Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "2a8e468df6991da5881cf027aeb8ea79266025b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_32705a3f",
+        "filename": "openstack/net-virt-sfc/features/production/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-03-15T12:24:06Z",
+      "side": 1,
+      "message": "and here too.",
+      "revId": "2a8e468df6991da5881cf027aeb8ea79266025b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_9292064a",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-03-15T12:24:06Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "2a8e468df6991da5881cf027aeb8ea79266025b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

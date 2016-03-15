@@ -1,4 +1,4 @@
-module neutron {
+module netvirt-neutron {
     yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:netvirt:neutron";
     prefix "neutron";
@@ -14,14 +14,14 @@ module neutron {
             "Initial revision";
     }
 
-    identity neutron {
+    identity netvirt-neutron {
         base config:module-type;
         config:java-name-prefix Neutron;
     }
 
     augment "/config:modules/config:module/config:configuration" {
-        case neutron {
-            when "/config:modules/config:module/config:type = 'neutron'";
+        case netvirt-neutron {
+            when "/config:modules/config:module/config:type = 'netvirt-neutron'";
             container broker {
                 uses config:service-ref {
                     refine type {

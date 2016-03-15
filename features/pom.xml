@@ -286,6 +286,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>neutron</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- DLUX dependency for the UI -->
     <dependency>
       <groupId>org.opendaylight.dlux</groupId>

@@ -29,7 +29,7 @@
 
   <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization"
            version='${project.version}'>
-    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
     <feature version="${neutron.version}">odl-neutron-service</feature>
     <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
@@ -49,7 +49,7 @@
 
   <feature name="odl-ovsdb-openstack-clusteraware" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization - Cluster Aware"
            version='${project.version}'>
-    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model-li</feature>
     <feature version="${neutron.version}">odl-neutron-service</feature>
     <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
@@ -81,7 +81,7 @@
   <feature name='odl-netvirt-ui' version='${project.version}' description='OpenDaylight :: netvirt :: UI'>
     <feature version="${project.version}">odl-netvirt-rest</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${controller.mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
   <feature name='odl-netvirt-hwgw' version='${project.version}' description='OpenDaylight :: netvirt :: Hardware Gateway'>
     <feature version="${project.version}">odl-netvirt-api</feature>

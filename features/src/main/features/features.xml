@@ -81,10 +81,15 @@
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
-  <feature name='odl-netvirt-hwgw' version='${project.version}' description='OpenDaylight :: netvirt :: Hardware Gateway'>
-    <feature version="${project.version}">odl-netvirt-api</feature>
+  <feature name='odl-netvirt-hwgw' version='${project.version}' description='OpenDaylight :: netvirt :: Hardware Gateway Renderer'>
+    <feature version="${project.version}">odl-netvirt-ui</feature>
     <feature version='${project.version}'>odl-ovsdb-hwvtepsouthbound</feature>
     <bundle>mvn:org.opendaylight.ovsdb/hwgw/{{VERSION}}</bundle>
+  </feature>
+  <feature name='odl-netvirt-neutron' version='${project.version}' description='OpenDaylight :: netvirt :: Neutron Renderer'>
+    <feature version="${project.version}">odl-netvirt-ui</feature>
+    <feature version="${neutron.version}">odl-neutron-service</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/neutron/{{VERSION}}</bundle>
   </feature>
 
 </features>

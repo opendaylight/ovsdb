@@ -1,4 +1,4 @@
-module neutron {
+module netvirt-neutron {
     yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:netvirt:neutron";
     prefix "neutron";

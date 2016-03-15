@@ -86,5 +86,11 @@
     <feature version='${project.version}'>odl-ovsdb-hwvtepsouthbound</feature>
     <bundle>mvn:org.opendaylight.ovsdb/hwgw/{{VERSION}}</bundle>
   </feature>
+    <feature name='odl-netvirt-neutron' version='${project.version}' description='OpenDaylight :: netvirt :: Neutron Renderer'>
+    <feature version="${neutron.version}">odl-neutron-service</feature>
+    <feature version="${project.version}">odl-netvirt-ui</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/neutron/{{VERSION}}</bundle>
+  </feature>
+
 
 </features>

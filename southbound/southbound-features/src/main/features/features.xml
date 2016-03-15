@@ -20,7 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.ovsdb/southbound-api/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-ovsdb-southbound-impl' version='${project.version}' description='OpenDaylight :: southbound :: impl '>
-    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-southbound-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
@@ -46,7 +46,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-ovsdb-southbound-impl-ui' version='${project.version}' description='OpenDaylight :: southbound :: impl :: UI'>
     <feature version="${project.version}">odl-ovsdb-southbound-impl-rest</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${controller.mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
   <feature name='odl-ovsdb-southbound-test' version='${project.version}' description='OpenDaylight :: southbound :: test'>
     <feature version="${project.version}">odl-ovsdb-southbound-impl</feature>

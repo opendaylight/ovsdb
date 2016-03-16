@@ -158,6 +158,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null));
 
             removeConnectionInstance(key);
+
+            //Controller initiated connection can be terminated from switch side.
+            //So cleanup the instance identifier cache.
+            removeInstanceIdentifier(key);
         } else {
             LOG.warn("disconnected : Connection instance not found for OVSDB Node {} ", key);
         }

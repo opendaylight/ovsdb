@@ -22,6 +22,30 @@
       "revId": "40bc91575832423381065bf63d7f9c0099b442bf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_7eca91a2",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-03-16T19:09:23Z",
+      "side": 1,
+      "message": "OK, I will take care of this in my next patch.",
+      "parentUuid": "9a3d3df0_8f6f7cfb",
+      "range": {
+        "startLine": 85,
+        "startChar": 42,
+        "endLine": 85,
+        "endChar": 57
+      },
+      "revId": "40bc91575832423381065bf63d7f9c0099b442bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

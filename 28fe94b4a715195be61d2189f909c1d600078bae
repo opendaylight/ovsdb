@@ -42,6 +42,29 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_586b7d84",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-03-16T03:53:00Z",
+      "side": 1,
+      "message": "nitpick: Copyright.\n\nI agree with Sam, that we can add this in a later patch, let us get the base module in first.",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "28fe94b4a715195be61d2189f909c1d600078bae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_3d002b01",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 1
@@ -110,6 +133,46 @@
         "endLine": 43,
         "endChar": 88
       },
+      "revId": "28fe94b4a715195be61d2189f909c1d600078bae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_980865db",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-03-16T03:53:00Z",
+      "side": 1,
+      "message": "I am bit hazy on how DCLs work, but I think for an update operation they provide original+delta instead of original+new, right? Factor that in when porting code from existing listener, unless am mistaken.",
+      "range": {
+        "startLine": 60,
+        "startChar": 20,
+        "endLine": 60,
+        "endChar": 30
+      },
+      "revId": "28fe94b4a715195be61d2189f909c1d600078bae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_386679bb",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-03-16T03:53:00Z",
+      "side": 1,
+      "message": "I know this is WiP, but I find it good to add at least a debug/trace log statement instead of leaving it empty.",
       "revId": "28fe94b4a715195be61d2189f909c1d600078bae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_8f6f7cfb",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-03-16T17:01:34Z",
+      "side": 1,
+      "message": "I think we should make this odl-netvirt-ui to be consistent w/odl-netvirt-neutron.",
+      "range": {
+        "startLine": 85,
+        "startChar": 42,
+        "endLine": 85,
+        "endChar": 57
+      },
+      "revId": "40bc91575832423381065bf63d7f9c0099b442bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

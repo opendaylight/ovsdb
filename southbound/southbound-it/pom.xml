@@ -40,6 +40,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
+  <properties>
+    <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -59,7 +62,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${controller.mdsal.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

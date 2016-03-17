@@ -25,7 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-sfc-api/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-ovsdb-sfc' version='${project.version}' description='OpenDaylight :: ovsdb-sfc'>
-    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version='${openflowplugin.version}'>odl-openflowplugin-nxm-extensions</feature>
@@ -47,7 +47,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-ovsdb-sfc-ui' version='${project.version}' description='OpenDaylight :: ovsdb-sfc :: UI'>
     <feature version="${project.version}">odl-ovsdb-sfc-rest</feature>
     <feature version="${restconf.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${controller.mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${dlux.version}">odl-dlux-yangui</feature>
   </feature>
 

@@ -42,7 +42,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <maven>3.1.1</maven>
   </prerequisites>
   <properties>
-    <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
+    <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
     <restconf.version>1.4.0-SNAPSHOT</restconf.version>
     <neutron.version>0.7.0-SNAPSHOT</neutron.version>
     <openflowplugin.version>0.3.0-SNAPSHOT</openflowplugin.version>
@@ -62,7 +62,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${controller.mdsal.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -119,7 +119,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>${mdsal.version}</version>
+      <version>${controller.mdsal.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>

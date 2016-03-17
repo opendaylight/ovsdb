@@ -120,12 +120,20 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstance(key);
         if (hwvtepConnectionInstance != null) {
+            // Unregister Entity ownership as soon as possible ,so this instance should
+            // not be used as a candidate in Entity election (given that this instance is
+            // about to disconnect as well), if current owner get disconnected from
+            // HWVTEP device.
+            unregisterEntityForOwnership(hwvtepConnectionInstance);
+
             //TODO: remove all the hwvtep nodes
             txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
+
             removeConnectionInstance(key);
 
-            // Unregister Cluster Ownership for ConnectionInfo
-            unregisterEntityForOwnership(hwvtepConnectionInstance);
+            //Controller initiated connection can be terminated from switch side.
+            //So cleanup the instance identifier cache.
+            removeInstanceIdentifier(key);
         } else {
             LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
         }

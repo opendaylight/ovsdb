@@ -73,8 +73,12 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     public PhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
-        updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        try {
+            updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
+        } catch (IllegalArgumentException e) {
+            LOG.debug("Tunnel Table not supported on this HWVTEP device", e.getMessage());
+        }
     }
 
     @Override
@@ -124,7 +128,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private void setTunnels(Node node, PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch pSwitch) {
-        if (pSwitch.getTunnels() != null && pSwitch.getTunnels().getData() != null
+        if (updatedTunnelRows != null && pSwitch.getTunnels() != null && pSwitch.getTunnels().getData() != null
                 && !pSwitch.getTunnels().getData().isEmpty()) {
             Set<UUID> uuidList = pSwitch.getTunnels().getData();
             List<Tunnels> tunnelList = new ArrayList<>();

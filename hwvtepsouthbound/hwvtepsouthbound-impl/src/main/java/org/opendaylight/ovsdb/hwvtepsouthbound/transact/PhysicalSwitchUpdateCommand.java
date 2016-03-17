@@ -21,6 +21,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -84,8 +85,12 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         setDescription(physicalSwitch, physicalSwitchAugmentation);
         setManagementIps(physicalSwitch, physicalSwitchAugmentation);
         setTunnuleIps(physicalSwitch, physicalSwitchAugmentation);
-        setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation,
-                        operationalPhysicalSwitchOptional.isPresent());
+        try {
+            setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation,
+                            operationalPhysicalSwitchOptional.isPresent());
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("tunnels table unsupported for this version of HWVTEP schema", e);
+        }
         if (!operationalPhysicalSwitchOptional.isPresent()) {
             //create a physical switch
             setName(physicalSwitch, physicalSwitchAugmentation, operationalPhysicalSwitchOptional);

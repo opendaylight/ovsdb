@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a42497e_38c139e5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "Since this does a retry, should we call this method retryConnection as well?",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_d801353b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "Minor thing but enums are classes and thus should follow standard class naming.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_98b68d89",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "Since this class has the role of \"reconciliation manager\", I think this should be called connectionTaskManager.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_589525e3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "Is this thread-safe? Why not just initialize connectionReconciliationManager and make it final instead of lazily creating?",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_386819f5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "Callers above aren\u0027t expecting this to return null. It seems that only ConnectionReconciliationTasks are allowed to be queued. Why is that? If certain tasks shouldn\u0027t be queued then this class shouldn\u0027t be called for them. Also it seems this class is designed to work with ReconciliationTask instances in general so I don\u0027t think it should assume certain implementations and special case them.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_58bc056d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "You should make these private with getters.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_f88fd1ca",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/TaskManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "\"cancleTask\" (sic)",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_d88815c9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/TaskManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "abstract is redundant - please remove.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_78a46157",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTaskManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T19:33:09Z",
+      "side": 1,
+      "message": "Add blank line for neatness/readability.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -141,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "7a42497e_33c15ae5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-19T20:58:45Z",
+      "side": 1,
+      "message": "The TaskManager Map is IID -\u003e Future which is generic. I\u0027m assuming there can be multiple task types per IID which is why you were planning on a TaskManager per type. However this can be done with one TaskManager/Map by using the ReconciliationTask as the key and letting each ReconciliationTask implement hashCode/equals appropriately, i.e. hash on getClass() and IID. \n\nAnother way would be to have a TaskManager per type but you can do it generically via a Class -\u003e TaskManager map.\n\nI think either way is cleaner than an if/then/else of instanceof checks and having to change this code every time a new ReconciliationTask type is added.  I would lean towards the single TaskManager approach though.",
+      "parentUuid": "7a42497e_d37bd627",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_58bc056d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
         "patchSetId": 11

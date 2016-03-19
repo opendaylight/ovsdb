@@ -175,6 +175,24 @@
     },
     {
       "key": {
+        "uuid": "7a42497e_3394ba36",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/TaskManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-19T04:36:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a42497e_f88fd1ca",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_d88815c9",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/TaskManager.java",
         "patchSetId": 11
@@ -192,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "7a42497e_1376de3e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/TaskManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-19T04:36:13Z",
+      "side": 1,
+      "message": "i was planing to make this class as an abstract class, but then changed it to interface, and forgot to clean it up :), thanks for catching this :).",
+      "parentUuid": "7a42497e_d88815c9",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_78a46157",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTaskManager.java",
         "patchSetId": 11
@@ -203,6 +239,24 @@
       "writtenOn": "2016-03-18T19:33:09Z",
       "side": 1,
       "message": "Add blank line for neatness/readability.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_538fc623",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTaskManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-19T04:36:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a42497e_78a46157",
       "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

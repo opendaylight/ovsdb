@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -1622,9 +1622,9 @@ public class IngressAclServiceTest {
 
         ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, true, MAC_ADDRESS, true);
 
-        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(4)).submit();
-        verify(commitFuture, times(4)).checkedGet();
+        verify(writeTransaction, times(6)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(6)).submit();
+        verify(commitFuture, times(6)).checkedGet();
     }
     /**
      *  Test With isConntrackEnabled true isComputeNode true
@@ -1635,9 +1635,9 @@ public class IngressAclServiceTest {
 
         ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, true, MAC_ADDRESS, false);
 
-        verify(writeTransaction, times(4)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(4)).submit();
-        verify(commitFuture, times(4)).get();
+        verify(writeTransaction, times(6)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(6)).submit();
+        verify(commitFuture, times(6)).get();
     }
 
 }

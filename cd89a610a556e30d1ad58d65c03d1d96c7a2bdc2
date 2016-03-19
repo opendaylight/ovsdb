@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "7a42497e_9382eefe",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-19T04:32:04Z",
+      "side": 1,
+      "message": "yeah i was thinking of connectionReconciliationTaskManager, but i think it make sense to name it connectionTaskManager.",
+      "parentUuid": "7a42497e_98b68d89",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_589525e3",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 11
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "7a42497e_73876210",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-19T04:32:04Z",
+      "side": 1,
+      "message": "not really. I don\u0027t think so we need to lazily initialize it.",
+      "parentUuid": "7a42497e_589525e3",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_386819f5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 11
@@ -81,6 +117,24 @@
       "writtenOn": "2016-03-18T19:33:09Z",
       "side": 1,
       "message": "Callers above aren\u0027t expecting this to return null. It seems that only ConnectionReconciliationTasks are allowed to be queued. Why is that? If certain tasks shouldn\u0027t be queued then this class shouldn\u0027t be called for them. Also it seems this class is designed to work with ReconciliationTask instances in general so I don\u0027t think it should assume certain implementations and special case them.",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_d37bd627",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-19T04:32:04Z",
+      "side": 1,
+      "message": "As of now we only have ConnectionReconciliationTasks, but in future we will have other task as well and they will have their own task manager, and we will add those in here as well. Each task manager cache the task of that type. So somebody need to know the task manager of that specific task, and i think this class is probably the one that should have that. other thoughts?",
+      "parentUuid": "7a42497e_386819f5",
       "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

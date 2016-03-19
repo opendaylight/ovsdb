@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2013 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,6 +23,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.M
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpTargetHardwareAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetDestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
@@ -50,7 +52,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev14
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg5;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg6;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmOfEthDst;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.ExtensionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.GeneralAugMatchNodesNodeTableFlow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.GeneralAugMatchNodesNodeTableFlowBuilder;
@@ -82,7 +83,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNsiKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsi.grouping.NxmNxNsiBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.eth.dst.grouping.NxmOfEthDstBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.tcp.src.grouping.NxmOfTcpSrcBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.tcp.dst.grouping.NxmOfTcpDstBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.of.udp.dst.grouping.NxmOfUdpDstBuilder;
@@ -107,14 +107,16 @@ public class MatchUtils {
     public static final short ALL_ICMP = -1;
     public static final long ETHERTYPE_IPV4 = 0x0800;
     public static final long ETHERTYPE_IPV6 = 0x86dd;
+    public static final long ETHERTYPE_ARP = 0x0806L;
     public static final int UNTRACKED_CT_STATE = 0x00;
     public static final int UNTRACKED_CT_STATE_MASK = 0x20;
     public static final int TRACKED_EST_CT_STATE = 0x22;
-    public static final int TRACKED_EST_CT_STATE_MASK = 0x22;
+    public static final int TRACKED_REL_CT_STATE = 0x24;
     public static final int TRACKED_NEW_CT_STATE = 0x21;
+    public static final int TRACKED_INV_CT_STATE = 0x30;
+    public static final int TRACKED_INV_CT_STATE_MASK = 0x30;
+    public static final int TRACKED_CT_STATE_MASK = 0x37;
     public static final int TRACKED_NEW_CT_STATE_MASK = 0x21;
-    public static final int NEW_CT_STATE = 0x01;
-    public static final int NEW_CT_STATE_MASK = 0x01;
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -344,6 +346,29 @@ public class MatchUtils {
                 .setArpOp(FlowUtils.ARP_OP_REQUEST);
         matchBuilder.setLayer3Match(arpDstMatch.build());
 
+        return matchBuilder;
+    }
+
+    /**
+     * Builds the arp match with src and destintion mac address.
+     * @param matchBuilder the match builder
+     * @param srcMac the src mac address , will not be added to match if null.
+     * @param dstMac the destination mac address, will not be added to match if null.
+     * @return the match builder with the matches
+     */
+    public static MatchBuilder addArpMacMatch(MatchBuilder matchBuilder, String srcMac, String dstMac) {
+        ArpMatchBuilder arpMatch = new ArpMatchBuilder();
+        if (null != srcMac) {
+            ArpSourceHardwareAddressBuilder arpSrc = new ArpSourceHardwareAddressBuilder();
+            arpSrc.setAddress(new MacAddress(srcMac));
+            arpMatch.setArpSourceHardwareAddress(arpSrc.build());
+        }
+        if (null != dstMac) {
+            ArpTargetHardwareAddressBuilder arpDst = new ArpTargetHardwareAddressBuilder();
+            arpDst.setAddress(new MacAddress(dstMac));
+            arpMatch.setArpTargetHardwareAddress(arpDst.build());
+        }
+        matchBuilder.setLayer3Match(arpMatch.build());
         return matchBuilder;
     }
 
@@ -1203,10 +1228,10 @@ public class MatchUtils {
      * @param dstMac The destination mac address
      * @return matchBuilder Map Object with a match
      */
-    public static MatchBuilder createV4EtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
+    public static MatchBuilder createV4EtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac, Long type)
     {
         EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
-        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethTypeBuilder.setType(new EtherType(type));
         EthernetMatchBuilder eth = new EthernetMatchBuilder();
         eth.setEthernetType(ethTypeBuilder.build());
         if (null != srcMac) {

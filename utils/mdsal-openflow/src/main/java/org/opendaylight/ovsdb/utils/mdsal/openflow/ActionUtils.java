@@ -8,7 +8,9 @@
 
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
+import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
+
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action;
@@ -32,7 +34,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetFieldBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TunnelBuilder;
@@ -104,6 +109,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfIpSrcCaseBuilder;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public final class ActionUtils {
     public static Action dropAction() {
@@ -449,6 +455,14 @@ public final class ActionUtils {
         return new NxActionMultipathNodesNodeTableFlowApplyActionsCaseBuilder().setNxMultipath(r).build();
     }
 
+    /**
+     * Builds the  conntrack action.
+     * @param flags the flags for the action
+     * @param zoneSrc the zoneSrc
+     * @param conntrackZone the conntrackZone
+     * @param recircTable the recirc table if it is a recirc action
+     * @return the conntrack action.
+     */
     public static Action nxConntrackAction(Integer flags, Long zoneSrc,
                                            Integer conntrackZone, Short recircTable) {
         NxConntrack r = new NxConntrackBuilder()
@@ -460,6 +474,23 @@ public final class ActionUtils {
         return new NxActionConntrackNodesNodeTableFlowApplyActionsCaseBuilder().setNxConntrack(r).build();
     }
 
+    /**
+     * Builds the apply action builder for the action
+     * @param action the conntrack action.
+     * @return the apply action builder.
+     */
+    public static ApplyActionsBuilder conntrackActionBuilder(Action action) {
+        ActionBuilder ab = new ActionBuilder();
+        ab.setAction(action);
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList =
+                Lists.newArrayList();
+        actionList.add(ab.build());
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+        return aab;
+    }
     /**
      * Accepts a MAC address and returns the corresponding long, where the
      * MAC bytes are set on the lower order bytes of the long.

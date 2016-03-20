@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -420,14 +420,13 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             LOG.info("isControllerConnected try {}: looking for controller: {}", i, controllerTarget);
             OvsdbBridgeAugmentation bridge =
                     southboundUtils.getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
-            Assert.assertNotNull(bridge);
-            Assert.assertNotNull(bridge.getControllerEntry());
-            controllerEntry = bridge.getControllerEntry().iterator().next();
-            Assert.assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
-            if (controllerEntry.isIsConnected()) {
-                Assert.assertTrue("Controller is not connected", controllerEntry.isIsConnected());
-                connected = true;
-                break;
+            if (bridge != null && bridge.getControllerEntry() != null) {
+                controllerEntry = bridge.getControllerEntry().iterator().next();
+                Assert.assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
+                if (controllerEntry.isIsConnected()) {
+                    connected = true;
+                    break;
+                }
             }
             Thread.sleep(1000);
         }

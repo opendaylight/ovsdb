@@ -30,6 +30,16 @@
   </scm>
 
   <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>southbound-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- testing dependencies -->
     <dependency>
       <groupId>junit</groupId>

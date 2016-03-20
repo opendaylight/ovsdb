@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -56,6 +56,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.it.ItUtils;
+import org.opendaylight.ovsdb.utils.it.NodeInfo;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.FlowUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -93,6 +95,7 @@ import org.slf4j.LoggerFactory;
 public class NetvirtIT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(NetvirtIT.class);
     private static DataBroker dataBroker = null;
+    private static ItUtils itUtils;
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
@@ -240,6 +243,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         }
 
         dataBroker = getDatabroker(getProviderContext());
+        itUtils = new ItUtils(dataBroker);
         mdsalUtils = new MdsalUtils(dataBroker);
         assertNotNull("mdsalUtils should not be null", mdsalUtils);
         assertTrue("Did not find " + NETVIRT_TOPOLOGY_ID, getNetvirtTopology());
@@ -350,7 +354,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         LOG.info("testNetVirt: should be connected: {}", ovsdbNode.getNodeId());
 
         assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
-                + " is not connected", isControllerConnected(connectionInfo));
+                + " is not connected", itUtils.isControllerConnected(connectionInfo));
 
         Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
         Thread.sleep(1000);
@@ -372,7 +376,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         LOG.info("testNetVirt: should be connected: {}", ovsdbNode.getNodeId());
 
         assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
-                + " is not connected", isControllerConnected(connectionInfo));
+                + " is not connected", itUtils.isControllerConnected(connectionInfo));
 
         // Verify the pipeline flows were installed
         Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
@@ -401,38 +405,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Thread.sleep(1000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
         LOG.info("testAddDeleteOvsdbNodeWithTableOffset exit");
-    }
-
-    private boolean isControllerConnected(ConnectionInfo connectionInfo) throws InterruptedException {
-        LOG.info("isControllerConnected enter");
-        Boolean connected = false;
-        ControllerEntry controllerEntry;
-        Node ovsdbNode = southboundUtils.getOvsdbNode(connectionInfo);
-        assertNotNull("ovsdb node not found", ovsdbNode);
-
-        BridgeConfigurationManager bridgeConfigurationManager =
-                (BridgeConfigurationManager) ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, this);
-        assertNotNull("Could not find BridgeConfigurationManager Service", bridgeConfigurationManager);
-        String controllerTarget = bridgeConfigurationManager.getControllersFromOvsdbNode(ovsdbNode).get(0);
-        Assert.assertNotNull("Failed to get controller target", controllerTarget);
-
-        for (int i = 0; i < 10; i++) {
-            LOG.info("isControllerConnected try {}: looking for controller: {}", i, controllerTarget);
-            OvsdbBridgeAugmentation bridge =
-                    southboundUtils.getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
-            Assert.assertNotNull(bridge);
-            Assert.assertNotNull(bridge.getControllerEntry());
-            controllerEntry = bridge.getControllerEntry().iterator().next();
-            Assert.assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
-            if (controllerEntry.isIsConnected()) {
-                Assert.assertTrue("Controller is not connected", controllerEntry.isIsConnected());
-                connected = true;
-                break;
-            }
-            Thread.sleep(1000);
-        }
-        LOG.info("isControllerConnected exit: {} - {}", connected, controllerTarget);
-        return connected;
     }
 
     @Ignore
@@ -473,21 +445,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     public void testNetVirt() throws InterruptedException {
         LOG.info("testNetVirt: starting test");
         ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        assertNotNull("connection failed", ovsdbNode);
-        LOG.info("testNetVirt: should be connected: {}", ovsdbNode.getNodeId());
-
-        //TODO use controller value rather that ovsdb connectionInfo or change log
-        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
-                + " is not connected", isControllerConnected(connectionInfo));
-
-        // Verify the pipeline flows were installed
-        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
-        assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
-        long datapathId = southbound.getDataPathId(bridgeNode);
-        String datapathIdString = southbound.getDatapathId(bridgeNode);
-        LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
-        assertNotEquals("datapathId was not found", datapathId, 0);
+        NodeInfo nodeInfo = itUtils.createNodeInfo(connectionInfo, null);
+        nodeInfo.connect();
+        LOG.info("testNetVirt: should be connected: {}", nodeInfo.ovsdbNode.getNodeId());
 
         List<Service> staticPipeline = pipelineOrchestrator.getStaticPipeline();
         List<Service> staticPipelineFound = Lists.newArrayList();
@@ -496,19 +456,18 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 staticPipelineFound.add(service);
             }
             String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(service);
-            verifyFlow(datapathId, flowId, service);
+            verifyFlow(nodeInfo.datapathId, flowId, service);
         }
         assertEquals("did not find all expected flows in static pipeline",
                 staticPipeline.size(), staticPipelineFound.size());
 
-        southboundUtils.addTerminationPoint(bridgeNode, NetvirtITConstants.PORT_NAME, "internal", null, null, 0L);
+        southboundUtils.addTerminationPoint(nodeInfo.bridgeNode, NetvirtITConstants.PORT_NAME, "internal", null, null, 0L);
         Thread.sleep(1000);
         OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                southbound.getTerminationPointOfBridge(bridgeNode, NetvirtITConstants.PORT_NAME);
+                southbound.getTerminationPointOfBridge(nodeInfo.bridgeNode, NetvirtITConstants.PORT_NAME);
         Assert.assertNotNull("Did not find " + NetvirtITConstants.PORT_NAME, ovsdbTerminationPointAugmentation);
-        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
-        Thread.sleep(1000);
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+
+        nodeInfo.disconnect();
     }
 
     @Test
@@ -522,12 +481,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         final String dhcpPortId ="521e29d6-67b8-4b3c-8633-027d21195115";
 
         ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(addressStr, portStr);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        assertNotNull("connection failed", ovsdbNode);
-        LOG.info("testNetVirtFixedSG: should be connected: {}", ovsdbNode.getNodeId());
+        NodeInfo nodeInfo = itUtils.createNodeInfo(connectionInfo, null);
+        nodeInfo.connect();
+        LOG.info("testNetVirtFixedSG: should be connected: {}", nodeInfo.ovsdbNode.getNodeId());
 
         // Verify the minimum version required for this test
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = nodeInfo.ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
         String ovsVersion = ovsdbNodeAugmentation.getOvsVersion();
@@ -541,16 +500,6 @@ public class NetvirtIT extends AbstractMdsalTestBase {
             return;
         }
 
-        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
-                + " is not connected", isControllerConnected(connectionInfo));
-
-        Node bridgeNode = southbound.getBridgeNode(ovsdbNode, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
-        assertNotNull("bridge " + NetvirtITConstants.INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
-        long datapathId = southbound.getDataPathId(bridgeNode);
-        String datapathIdString = southbound.getDatapathId(bridgeNode);
-        LOG.info("testNetVirtFixedSG: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
-        assertNotEquals("datapathId was not found", datapathId, 0);
-
         NeutronNetwork nn = neutronUtils.createNeutronNetwork(networkId, tenantId,
                 NetworkHandler.NETWORK_TYPE_VXLAN, "100");
         NeutronSubnet ns = neutronUtils.createNeutronSubnet(subnetId, tenantId, networkId, "10.0.0.0/24");
@@ -563,23 +512,22 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
         externalIds.put("iface-id", portId);
-        southboundUtils.addTerminationPoint(bridgeNode, portName, "internal", null, externalIds, 3L);
-        southboundUtils.addTerminationPoint(bridgeNode, "vm1", "internal", null, null, 0L);
-        southboundUtils.addTerminationPoint(bridgeNode, "vm2", "internal", null, null, 0L);
+        southboundUtils.addTerminationPoint(nodeInfo.bridgeNode, portName, "internal", null, externalIds, 3L);
+        southboundUtils.addTerminationPoint(nodeInfo.bridgeNode, "vm1", "internal", null, null, 0L);
+        southboundUtils.addTerminationPoint(nodeInfo.bridgeNode, "vm2", "internal", null, null, 0L);
         Map<String, String> options = Maps.newHashMap();
         options.put("key", "flow");
         options.put("remote_ip", "192.168.120.32");
-        southboundUtils.addTerminationPoint(bridgeNode, "vx", "vxlan", options, null, 4L);
+        southboundUtils.addTerminationPoint(nodeInfo.bridgeNode, "vx", "vxlan", options, null, 4L);
         Thread.sleep(1000);
 
         String flowId = "Egress_DHCP_Client"  + "_Permit_";
-        verifyFlow(datapathId, flowId, Service.EGRESS_ACL);
+        verifyFlow(nodeInfo.datapathId, flowId, Service.EGRESS_ACL);
 
-        testDefaultSG(nport, datapathId, nn, tenantId, portId);
+        testDefaultSG(nport, nodeInfo.datapathId, nn, tenantId, portId);
         Thread.sleep(1000);
-        Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
-        Thread.sleep(1000);
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+
+        nodeInfo.disconnect();
     }
 
     private void testDefaultSG(NeutronPort nport, long datapathId, NeutronNetwork nn, String tenantId, String portId)

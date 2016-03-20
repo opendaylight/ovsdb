@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>it</artifactId>
+        <version>1.2.2-SNAPSHOT</version>
+        <relativePath>../../commons/it</relativePath>
+    </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.opendaylight.ovsdb</groupId>
+  <artifactId>it-utils</artifactId>
+  <version>1.2.3-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <!--
+  <developers>
+    <developer>
+      <name>Anil Vishnoi</name>
+      <email>vishnoianil@gmail.com</email>
+      <url>https://github.com/vishnoianil</url>
+    </developer>
+  </developers>
+  -->
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
+
+  <dependencies>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-binding-api</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>southbound-api</artifactId>
+          <version>${project.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>utils.mdsal-utils</artifactId>
+          <version>${project.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>utils.southbound-utils</artifactId>
+          <version>${project.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>openstack.net-virt</artifactId>
+          <version>${project.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>utils.servicehelper</artifactId>
+          <version>${project.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <scope>compile</scope>
+      </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.opendaylight.ovsdb.utils.it
+            </Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

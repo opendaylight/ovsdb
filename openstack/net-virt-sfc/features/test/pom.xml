@@ -41,5 +41,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <artifactId>utils.southbound-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.it-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

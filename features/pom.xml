@@ -281,6 +281,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>hwgw</artifactId>
+      <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hwvtepsouthbound-features</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
@@ -290,6 +297,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>${project.groupId}</groupId>
       <artifactId>neutron</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>neutron</artifactId>
+      <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
     <!-- DLUX dependency for the UI -->
     <dependency>

@@ -9,15 +9,13 @@ package org.opendaylight.ovsdb.southbound.it;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -35,6 +33,7 @@ import javax.inject.Inject;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -45,6 +44,9 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
@@ -147,7 +149,10 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Integration tests for southbound-impl
@@ -170,6 +175,22 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
     private static DataBroker dataBroker;
+    private static Version autoAttachFromVersion = Version.fromString("7.11.2");
+
+    private static Version schemaVersion;
+    private Version getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    private static OvsdbClient ovsdbClient;
+    private OvsdbClient getClient() {
+        return ovsdbClient;
+    }
+
+    private static DatabaseSchema dbSchema;
+    private DatabaseSchema getDbSchema() {
+        return dbSchema;
+    }
 
     @Inject
     private BundleContext bundleContext;
@@ -359,6 +380,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 connectionType, addressStr, portStr);
 
         return new Option[] {
+                propagateSystemProperties(
+                        SouthboundITConstants.SERVER_IPADDRESS,
+                        SouthboundITConstants.SERVER_PORT,
+                        SouthboundITConstants.CONNECTION_TYPE),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
                         SouthboundITConstants.SERVER_IPADDRESS, addressStr),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
@@ -412,6 +437,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 iid, OPERATIONAL_LISTENER, AsyncDataBroker.DataChangeScope.SUBTREE);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
+        try {
+            ovsdbClient = SouthboundIntegrationTestUtils.getTestConnection(this);
+            assertNotNull("Invalid Client. Check connection params", ovsdbClient);
+
+            dbSchema = ovsdbClient.getSchema(SouthboundIntegrationTestUtils.OPEN_VSWITCH_SCHEMA).get();
+            assertNotNull("Invalid dbSchema.", dbSchema);
+            schemaVersion = dbSchema.getVersion();
+            LOG.info("{} schema version = {}", SouthboundIntegrationTestUtils.OPEN_VSWITCH_SCHEMA, schemaVersion);
+        } catch (Exception e) {
+            LOG.warn("Exception : "+e.getMessage());
+        }
 
         // Let's count the test methods (we need to use this instead of @AfterClass on teardown() since the latter is
         // useless with pax-exam)
@@ -903,11 +939,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    // FIXME: Remove ignore annotation after ovs supports external_ids column to test CRUD
-    @Ignore
     @Test
     public void testCRUDAutoAttach() throws InterruptedException {
-        // FIXME: Perform schema version verification and assume test passed when table is unsupported in schema
+        // Don't run this test if the table is not supported
+        assumeTrue(getSchemaVersion().compareTo(autoAttachFromVersion) >= 0);
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         String testAutoattachId = new String("testAutoattachEntry");

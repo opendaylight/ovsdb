@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_7d99f76d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-21T22:15:21Z",
+      "side": 1,
+      "message": "Looks like these methods could go in the InstructionUtils.",
+      "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_1dbb93c5",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-21T22:15:21Z",
+      "side": 1,
+      "message": "could this be moved to MatchUtils so it can be shared between the ingress and egress?",
+      "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_9dc68348",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 698,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-21T22:15:21Z",
+      "side": 1,
+      "message": "Even this could be moved to FlowUtils.",
+      "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

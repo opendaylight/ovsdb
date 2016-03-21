@@ -137,7 +137,9 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
     }
 
     private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<OvsdbNodeAugmentation> key, Uuid aaUuid) {
-        Preconditions.checkNotNull(aaUuid);
+        if (aaUuid == null) {
+            return null;
+        }
         OvsdbBridgeAugmentation bridge = null;
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {

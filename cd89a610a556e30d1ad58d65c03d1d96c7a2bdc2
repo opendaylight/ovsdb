@@ -159,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_5dbb5b72",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T01:43:35Z",
+      "side": 1,
+      "message": "I also liked the first approach, but we don\u0027t need Map for that right? any idea about Guava Sets.newConcurrentHashSet()?",
+      "parentUuid": "7a42497e_33c15ae5",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_58bc056d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
         "patchSetId": 11

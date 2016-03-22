@@ -1,0 +1,146 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_9dfe8337",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "I think the checkstyle rules would have this as a normal class and not all uppercase. The elements would be all uppercase but not the class itself.",
+      "range": {
+        "startLine": 609,
+        "startChar": 17,
+        "endLine": 609,
+        "endChar": 50
+      },
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_5ded1b8b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "would it make sense to move this call into disconnect() - similar to how retryConnection() is in connected().",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_bd01bf3b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "same comment, move it into connect()?",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_bd889fc7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "I think this would be good to have a javadoc describing the high-level flow of things.",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_ddf80b4c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "could you make local vars or constants for these values so it is easy to understand what the values are?",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_3d95afe4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "can a shorter name be used? I think this string is so long that it get\u0027s truncated",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_5da4fb56",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "nitpick, but checkstyle will pule on the no space after if stuff.",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_9d85e3af",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-22T01:42:52Z",
+      "side": 1,
+      "message": "Or maybe here would be better place for the high-level flow.",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

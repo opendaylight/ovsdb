@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_e6d734ec",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "yeah, I missed to change this one. It\u0027s a class, so need to be renamed.",
+      "parentUuid": "5a3f45e8_9dfe8337",
+      "range": {
+        "startLine": 609,
+        "startChar": 17,
+        "endLine": 609,
+        "endChar": 50
+      },
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_5ded1b8b",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
         "patchSetId": 12
@@ -36,6 +60,24 @@
       "writtenOn": "2016-03-22T01:42:52Z",
       "side": 1,
       "message": "would it make sense to move this call into disconnect() - similar to how retryConnection() is in connected().",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_86359048",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "yes, In case of connect() we can\u0027t push it inside the connect() for the reason i mentioned below in the comment. So to make the control flow clear, i put the reconciliation decision making in this class, so that we should not trigger reconciliation from random points in the control flow.",
+      "parentUuid": "5a3f45e8_5ded1b8b",
       "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_2630fc55",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "connect method is used by the retry task as well, so if we put it inside connect() it will keep adding new task to the reconcile queue every time it fails, so we will end up with many duplicate task for the reconciliation of the same conneciton.",
+      "parentUuid": "5a3f45e8_bd01bf3b",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_bd889fc7",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 12
@@ -70,6 +130,24 @@
       "writtenOn": "2016-03-22T01:42:52Z",
       "side": 1,
       "message": "I think this would be good to have a javadoc describing the high-level flow of things.",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_663a0438",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "Yes, i can add that.",
+      "parentUuid": "5a3f45e8_bd889fc7",
       "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -93,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_c63e7829",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a3f45e8_ddf80b4c",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_3d95afe4",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 12
@@ -104,6 +200,24 @@
       "writtenOn": "2016-03-22T01:42:52Z",
       "side": 1,
       "message": "can a shorter name be used? I think this string is so long that it get\u0027s truncated",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_a63b6c37",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "you mean in profiler? how about \"ovsdb-recon-task-triager\"?",
+      "parentUuid": "5a3f45e8_3d95afe4",
       "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -127,6 +241,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_064980d0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "yeah, java 8 :/, will fix it.",
+      "parentUuid": "5a3f45e8_5da4fb56",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_9d85e3af",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
         "patchSetId": 12
@@ -138,6 +270,24 @@
       "writtenOn": "2016-03-22T01:42:52Z",
       "side": 1,
       "message": "Or maybe here would be better place for the high-level flow.",
+      "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_e64574b4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-22T19:40:50Z",
+      "side": 1,
+      "message": "yup.",
+      "parentUuid": "5a3f45e8_9d85e3af",
       "revId": "bb46a52d02c81d0ae8093e7dac7faaf40ab481d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

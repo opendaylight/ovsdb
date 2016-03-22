@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_4063701a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-22T11:26:59Z",
+      "side": 1,
+      "message": "You mean store the ReconciliationTasks in a Set? But you need the Future so you can cancel it - that was the whole point of tracking the tasks.... unless you store the Future in the ReconciliationTask but it wouldn\u0027t seem clean for ReconciliationManager to leak its internal bookkeeping.",
+      "parentUuid": "5a3f45e8_5dbb5b72",
+      "revId": "cd89a610a556e30d1ad58d65c03d1d96c7a2bdc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a42497e_58bc056d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
         "patchSetId": 11

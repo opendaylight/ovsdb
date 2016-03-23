@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_6c81434a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-03-23T11:51:05Z",
+      "side": 1,
+      "message": "I have moved some of the common methods to the corresponding Utils. Later I will optimize ingress/egress acl service to make it the most of the common code to a new class AclService from which Ingress/Egress Acl service can extend",
+      "parentUuid": "5a3f45e8_7d99f76d",
+      "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_1dbb93c5",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_acd98b85",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-03-23T11:51:05Z",
+      "side": 1,
+      "message": "Same as the other.",
+      "parentUuid": "5a3f45e8_1dbb93c5",
+      "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_9dc68348",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2016-03-21T22:15:21Z",
       "side": 1,
       "message": "Even this could be moved to FlowUtils.",
+      "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_0ce7df41",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 698,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-03-23T11:51:05Z",
+      "side": 1,
+      "message": "Same as the other.",
+      "parentUuid": "5a3f45e8_9dc68348",
       "revId": "47124fbac287a1a203e688329150916ae9a5e9f4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -11,13 +11,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.1-Beryllium-SR1</version>
     <relativePath/>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt-sfc-karaf</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.2-Beryllium-SR1</version>
   <name>${project.artifactId}</name>
   <prerequisites>
     <maven>3.1.1</maven>

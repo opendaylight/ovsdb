@@ -12,12 +12,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.1-Beryllium-SR1</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt-sfc-features-test</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.2-Beryllium-SR1</version>
   <name>${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>

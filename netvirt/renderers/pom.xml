@@ -9,13 +9,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>1.6.1-Beryllium-SR1</version>
+    <version>1.6.2-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>renderers-aggregator</artifactId>
-  <version>1.2.2-Beryllium-SR1</version>
+  <version>1.2.3-SNAPSHOT</version>
   <name>renderers</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>

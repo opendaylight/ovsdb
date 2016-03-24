@@ -185,6 +185,7 @@ public class DistributedArpService implements ConfigInterface {
             }
         }
 
+        List<Neutron_IPs> network_Ips = neutronPort.getFixedIPs();
         for (Node node : nodes) {
             // Arp rule is only needed when segmentation exists in the given node (bug 4752)
             // or in case the port is a router interface
@@ -192,7 +193,6 @@ public class DistributedArpService implements ConfigInterface {
             boolean arpNeeded = isRouterInterface ||
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
             final Action actionForNode = arpNeeded ? actionToPerform : Action.DELETE;
-
             final Long dpid = getDatapathIdIntegrationBridge(node);
             if (dpid == null) {
                 continue;
@@ -204,9 +204,29 @@ public class DistributedArpService implements ConfigInterface {
                     continue;
                 }
 
-                programStaticRuleStage1(dpid, providerSegmentationId, macAddress, ipAddress, actionForNode);
-            }
-        }
+                // Arp rules for dhcp port should be removed from compute node
+                // when delete the last VM instance belongs to the network (bug 5456)
+                if (false == arpNeeded && Action.DELETE == actionForNode && null != network_Ips && !network_Ips.isEmpty()) {
+                    for (NeutronPort port : neutronPortCache.getAllPorts()) {
+                         if (!port.getDeviceOwner().equalsIgnoreCase(ROUTER_INTERFACE_DEVICE_OWNER)) {
+                             final String portMacAddress = port.getMacAddress();
+                             if ( null == portMacAddress || portMacAddress.isEmpty()) {
+                                return;
+                             }
+                             for (Neutron_IPs neutronIPAddr : port.getFixedIPs()) {
+                                 final String portIPAddress = neutronIPAddr.getIpAddress();
+                                 if (null == portIPAddress || portIPAddress.isEmpty()) {
+                                     continue;
+                                 }
+                             programStaticRuleStage1(dpid, providerSegmentationId, portMacAddress, portIPAddress, Action.DELETE);
+                             }
+                          }
+                    }
+                 } else {
+                     programStaticRuleStage1(dpid, providerSegmentationId, macAddress, ipAddress, actionForNode);
+              }
+              }
+          }
 
         //use action instead of actionToPerform - only write to the cache when the port is created
         if(isDhcpPort && action == Action.ADD){

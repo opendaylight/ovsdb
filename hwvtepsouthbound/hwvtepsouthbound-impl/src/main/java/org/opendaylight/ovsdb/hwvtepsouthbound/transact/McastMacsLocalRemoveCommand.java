@@ -65,6 +65,7 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand {
                 //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
                 //TODO: locator in config DS is not deleted
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                mcastMacsLocal.getUuidColumn().setData(macEntryUUID);
                 transaction.add(op.delete(mcastMacsLocal.getSchema()).
                         where(mcastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("McastMacLocal: Deleting " + mac.getMacEntryKey().getValue()));

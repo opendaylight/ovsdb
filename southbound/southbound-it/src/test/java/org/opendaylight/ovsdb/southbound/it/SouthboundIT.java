@@ -11,13 +11,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -35,9 +32,11 @@ import javax.inject.Inject;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -45,6 +44,9 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
@@ -147,7 +149,10 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Integration tests for southbound-impl
@@ -162,6 +167,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     private static final int OVSDB_ROUNDTRIP_TIMEOUT = 10000;
     private static final String FORMAT_STR = "%s_%s_%d";
+    private static final Version AUTOATTACH_FROM_VERSION = Version.fromString("7.11.2");
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;
@@ -170,6 +176,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
     private static DataBroker dataBroker;
+    private static Version schemaVersion;
+    private static OvsdbClient ovsdbClient;
+    private static DatabaseSchema dbSchema;
 
     @Inject
     private BundleContext bundleContext;
@@ -359,6 +368,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 connectionType, addressStr, portStr);
 
         return new Option[] {
+                propagateSystemProperties(
+                        SouthboundITConstants.SERVER_IPADDRESS,
+                        SouthboundITConstants.SERVER_PORT,
+                        SouthboundITConstants.CONNECTION_TYPE),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
                         SouthboundITConstants.SERVER_IPADDRESS, addressStr),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
@@ -412,6 +425,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 iid, OPERATIONAL_LISTENER, AsyncDataBroker.DataChangeScope.SUBTREE);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
+        try {
+            ovsdbClient = SouthboundIntegrationTestUtils.getTestConnection(this);
+            assertNotNull("Invalid Client. Check connection params", ovsdbClient);
+
+            dbSchema = ovsdbClient.getSchema(SouthboundIntegrationTestUtils.OPEN_VSWITCH_SCHEMA).get();
+            assertNotNull("Invalid dbSchema.", dbSchema);
+            schemaVersion = dbSchema.getVersion();
+            LOG.info("{} schema version = {}", SouthboundIntegrationTestUtils.OPEN_VSWITCH_SCHEMA, schemaVersion);
+        } catch (Exception e) {
+            fail("Error accessing schemaVersion in SouthboundIT setUp()." + usage());
+        }
 
         // Let's count the test methods (we need to use this instead of @AfterClass on teardown() since the latter is
         // useless with pax-exam)
@@ -903,11 +927,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    // FIXME: Remove ignore annotation after ovs supports external_ids column to test CRUD
-    @Ignore
     @Test
     public void testCRUDAutoAttach() throws InterruptedException {
-        // FIXME: Perform schema version verification and assume test passed when table is unsupported in schema
+        final boolean isOldSchema = schemaVersion.compareTo(AUTOATTACH_FROM_VERSION) < 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         String testAutoattachId = new String("testAutoattachEntry");
@@ -926,12 +948,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             String bridgeId = nodeId.getValue();
             try(TestAutoAttach testAutoattach = new TestAutoAttach(connectionInfo, new Uri(testAutoattachId),
                     new Uri(bridgeId), testSystemName, testSystemDescription, null, null)) {
-
                 // READ: Read md-sal operational datastore to see if the AutoAttach table was created
                 // and if Bridge table was updated with AutoAttach Uuid
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
                         LogicalDatastoreType.OPERATIONAL);
                 Autoattach operAa = getAutoAttach(ovsdbNodeAugmentation, new Uri(testAutoattachId));
+
+                // skip tests after verifying that Autoattach doesn't break with unsupported schema
+                Assume.assumeFalse(isOldSchema);
+
                 Assert.assertNotNull(operAa);
                 Assert.assertEquals(testSystemName, operAa.getSystemName());
                 bridge = getBridge(connectionInfo);
@@ -950,8 +975,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 final NotifyingDataChangeListener aaOperationalListener =
                         new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
                 aaOperationalListener.registerDataChangeListener();
-                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        iid, updatedAa));
+                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, iid, updatedAa));
                 aaOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
 
                 // UPDATE: Update external_ids column of AutoAttach table that was created
@@ -964,8 +988,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         .setAutoattachId(new Uri(testAutoattachId))
                         .setAutoattachExternalIds(externalIds)
                         .build();
-                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                        iid, updatedAa));
+                Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, iid, updatedAa));
                 aaOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
 
                 // READ: Read the updated AutoAttach table for latest mappings and external_ids column value
@@ -997,6 +1020,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         LogicalDatastoreType.OPERATIONAL);
                 operAa = getAutoAttach(ovsdbNodeAugmentation, new Uri(testAutoattachId));
                 Assert.assertNull(operAa);
+            } catch (AssumptionViolatedException e) {
+                LOG.warn("Skipped test for Autoattach due to unsupported schema", e);
+            } catch (Exception e) {
+                fail("Unexpected exception in CRUD test for Autoattach table for schema:" + schemaVersion.toString() +". " + e);
             }
         }
     }

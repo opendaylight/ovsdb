@@ -153,6 +153,10 @@ public class OvsdbConnectionManagerTest {
 
       //TODO: Write unit tests for EntityOwnershipService
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "unregisterEntityForOwnership", OvsdbConnectionInstance.class));
+        instanceIdentifiers = new ConcurrentHashMap<>();
+        MemberModifier.field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnectionManager, instanceIdentifiers);
+
+
         ovsdbConnectionManager.disconnected(externalClient);
         Map<ConnectionInfo,OvsdbConnectionInstance> testClients = Whitebox.getInternalState(ovsdbConnectionManager, "clients");
         assertEquals("Error, size of the hashmap is incorrect", 0, testClients.size());

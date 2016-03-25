@@ -33,11 +33,20 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbQueueRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -79,6 +88,7 @@ public class QosUpdateCommand implements TransactCommand {
         }
         OvsdbNodeAugmentation operNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
         List<QosEntries> operQosEntries = operNode.getQosEntries();
+        List<Queues> operQueues = operNode.getQueues();
 
         if (qosEntries != null) {
             for (QosEntries qosEntry : qosEntries) {
@@ -88,17 +98,15 @@ public class QosUpdateCommand implements TransactCommand {
                     qos.setType(SouthboundMapper.createQosType(qosEntry.getQosType()));
                 }
 
-                Uuid qosUuid = getQosEntryUuid(operQosEntries, qosEntry.getQosId());
-                UUID uuid = null;
-                if (qosUuid != null) {
-                    uuid = new UUID(qosUuid.getValue());
-                }
-
                 List<QueueList> queueList = qosEntry.getQueueList();
                 Map<Long, UUID>newQueueList = new HashMap<>();
                 if (queueList != null && !queueList.isEmpty()) {
                     for (QueueList queue : queueList) {
-                        newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
+                        if (queue.getQueueRef() != null) {
+                            newQueueList.put(queue.getQueueNumber(), new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
+                        } else if (queue.getQueueUuid() != null) {
+                            newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
+                        }
                     }
                 }
                 qos.setQueues(newQueueList);
@@ -116,6 +124,12 @@ public class QosUpdateCommand implements TransactCommand {
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete Qos external IDs", e);
                 }
+                externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                        SouthboundUtil.serializeInstanceIdentifier(
+                        SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))));
+                qos.setExternalIds(externalIdsMap);
 
                 List<QosOtherConfig> otherConfigs = qosEntry.getQosOtherConfig();
                 if (otherConfigs != null) {
@@ -129,9 +143,14 @@ public class QosUpdateCommand implements TransactCommand {
                         LOG.warn("Incomplete Qos other_config", e);
                     }
                 }
-                if (uuid == null) {
-                    transaction.add(op.insert(qos)).build();
+
+                Uuid operQosUuid = getQosEntryUuid(operQosEntries, qosEntry.getQosId());
+                if (operQosUuid == null) {
+                    UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX +
+                            TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
+                    transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
                 } else {
+                    UUID uuid = new UUID(operQosUuid.getValue());
                     Qos extraQos = TyperUtils.getTypedRowWrapper(
                             transaction.getDatabaseSchema(), Qos.class, null);
                     extraQos.getUuidColumn().setData(uuid);
@@ -141,6 +160,19 @@ public class QosUpdateCommand implements TransactCommand {
                 transaction.build();
             }
         }
+    }
+
+    private String getQueueUuid(OvsdbQueueRef queueRef, OvsdbNodeAugmentation operNode) {
+        QueuesKey queueKey = queueRef.getValue().firstKeyOf(Queues.class);
+        if (operNode.getQueues() != null && !operNode.getQueues().isEmpty()) {
+            for (Queues queue : operNode.getQueues()) {
+                if (queue.getQueueId().equals(queueKey.getQueueId())) {
+                    return queue.getQueueUuid().getValue();
+                }
+            }
+        }
+        return SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
+            TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes());
     }
 
     private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {

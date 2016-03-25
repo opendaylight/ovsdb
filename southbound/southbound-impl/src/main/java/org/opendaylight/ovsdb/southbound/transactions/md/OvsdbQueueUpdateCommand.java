@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsBuilder;
@@ -109,12 +110,21 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private String getQueueId(Queue queue) {
         if (queue.getExternalIdsColumn() != null
-                && queue.getExternalIdsColumn().getData() != null
-                && queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY)) {
-            return queue.getExternalIdsColumn().getData().get(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY);
-        } else {
-            return SouthboundConstants.QUEUE_URI_PREFIX + "://" + queue.getUuid().toString();
+                && queue.getExternalIdsColumn().getData() != null) {
+            if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+                InstanceIdentifier<Queues> queueIid = (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
+                        queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                if (queueIid != null) {
+                    QueuesKey queuesKey = queueIid.firstKeyOf(Queues.class);
+                    if (queuesKey != null) {
+                        return queuesKey.getQueueId().getValue();
+                    }
+                }
+            } else if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY)) {
+                return queue.getExternalIdsColumn().getData().get(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY);
+            }
         }
+        return SouthboundConstants.QUEUE_URI_PREFIX + "://" + queue.getUuid().toString();
     }
 
     private void setOtherConfig(ReadWriteTransaction transaction,

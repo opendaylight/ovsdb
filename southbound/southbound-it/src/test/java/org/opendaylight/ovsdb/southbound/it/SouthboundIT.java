@@ -2124,7 +2124,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private Queues getQueue(Uri queueId, OvsdbNodeAugmentation node) {
         for (Queues queue : node.getQueues()) {
-            if (queue.getKey().getQueueId().equals(queueId))
+            if (queue.getKey().getQueueId().getValue().equals(queueId.getValue()))
                 return queue;
         }
         return null;
@@ -2458,7 +2458,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             List<QueueList> operQueueList = operQos.getQueueList();
             Assert.assertNotNull(operQueueList);
             for (QueueList queueEntry : queueList) {
-                Assert.assertTrue(operQueueList.contains(queueEntry));
+                Assert.assertTrue(isQueueInList(operQueueList, queueEntry));
             }
 
             // DELETE one queue from queue list and check that one remains
@@ -2476,10 +2476,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             operQueueList = operQos.getQueueList();
             Assert.assertNotNull(operQueueList);
             for (QueueList queueEntry : queueList) {
-                if (queueEntry.getQueueUuid().equals(queue2Uuid))
-                    Assert.assertTrue(operQueueList.contains(queueEntry));
-                else if (queueEntry.getQueueUuid().equals(queue1Uuid)) {
-                    Assert.assertFalse(operQueueList.contains(queueEntry));
+                if (queueEntry.getQueueUuid().equals(queue2Uuid)) {
+                    Assert.assertTrue(isQueueInList(operQueueList, queueEntry));
+                } else if (queueEntry.getQueueUuid().equals(queue1Uuid)) {
+                    Assert.assertFalse(isQueueInList(operQueueList, queueEntry));
                 } else {
                     Assert.assertTrue("Unknown queue entry in qos queue list", false);
                 }
@@ -2499,6 +2499,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(operQueueList);
             Assert.assertTrue(operQueueList.isEmpty());
         }
+    }
+
+    private Boolean isQueueInList(List<QueueList> queueList, QueueList queue) {
+        for (QueueList queueEntry : queueList) {
+            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())
+                && queueEntry.getQueueUuid().equals(queue.getQueueUuid())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

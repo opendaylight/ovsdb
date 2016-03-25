@@ -34,6 +34,16 @@ module ovsdb {
         type instance-identifier;
     }
 
+    typedef ovsdb-qos-ref {
+        description "A reference to a ovsdb QoS entry";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-queue-ref {
+        description "A reference to an ovsdb queue entry";
+        type instance-identifier;
+    }
+
     typedef ovsdb-bridge-name {
         type string;
     }
@@ -514,6 +524,11 @@ module ovsdb {
                     type uint32;
                 }
 
+                leaf queue-ref {
+                    description "Instance identifier to a Queue in the MD-SAL.";
+                    type ovsdb-queue-ref;
+                }
+
                 leaf queue-uuid {
                     description "The unique identifier of the queue record.";
                     type yang:uuid;
@@ -783,6 +798,26 @@ module ovsdb {
 
     identity qos-type-linux-hfsc {
         description "linux hierarchical fair service curve classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-linux-sfq {
+        description "linux stochastic fairness queueing classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-linux-codel {
+        description "linux controlled delay classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-linux-fq-codel {
+        description "linux fair queueing controlled delay classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-egress-policer {
+        description "DPDK user space egress policer";
         base qos-type-base;
     }
 
@@ -1240,6 +1275,37 @@ module ovsdb {
         leaf qos {
             description "The unique identifier of the QoS entry for this port.";
             type yang:uuid;
+        }
+
+        list qos-entry {
+            key "qos-key";
+            max-elements 1;
+            leaf qos-key {
+                description "Fixed key to reference the QoS entry in MD-SAL.";
+                type uint32 {
+                    range "1..1";
+                }
+                mandatory true;
+            }
+            leaf qos-ref {
+                description "Instance identifier of a QoS entry in the MD-SAL.";
+                type ovsdb-qos-ref;
+                mandatory true;
+            }
+        }
+
+        leaf ingress-policing-rate {
+            description "Maximum rate for data received on this interface in kbps.
+                Data received faster than this rate is dropped.  Set to 0 (default)
+                to disable policing";
+            type uint32;
+        }
+
+        leaf ingress-policing-burst {
+            description "Maximum burst size for data received on this interface in kb.
+                The default burst size if set to 0 is 1000 kb.  This value has no
+                effect if ingress-policing-rate is 0.";
+            type uint32;
         }
     }
 

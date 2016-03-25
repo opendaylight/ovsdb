@@ -87,12 +87,6 @@ public class QueueUpdateCommand implements TransactCommand {
                     }
                 }
 
-                Uuid queueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
-                UUID uuid = null;
-                if (queueUuid != null) {
-                    uuid = new UUID(queueUuid.getValue());
-                }
-
                 Map<String, String> externalIdsMap = new HashMap<>();
                 try {
                     YangUtils.copyYangKeyValueListToMap(externalIdsMap, queueEntry.getQueuesExternalIds(),
@@ -109,9 +103,14 @@ public class QueueUpdateCommand implements TransactCommand {
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete Queue other_config", e);
                 }
-                if (uuid == null) {
-                    transaction.add(op.insert(queue)).build();
+
+                Uuid operQueueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
+                if (operQueueUuid == null) {
+                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
+                            TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
+                    transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
                 } else {
+                    UUID uuid = new UUID(operQueueUuid.getValue());
                     transaction.add(op.update(queue)).build();
                     Queue extraQueue = TyperUtils.getTypedRowWrapper(
                             transaction.getDatabaseSchema(), Queue.class, null);

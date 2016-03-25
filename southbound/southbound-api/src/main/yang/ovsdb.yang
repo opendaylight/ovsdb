@@ -514,9 +514,15 @@ module ovsdb {
                     type uint32;
                 }
 
+                leaf queue-id {
+                    description "An identifier used for Queue entries in the MD-SAL.";
+                    type inet:uri;
+                }
+
                 leaf queue-uuid {
                     description "The unique identifier of the queue record.";
                     type yang:uuid;
+                    status deprecated;
                 }
             }
             list qos-external-ids {
@@ -778,6 +784,26 @@ module ovsdb {
 
     identity qos-type-linux-hfsc {
         description "linux hierarchical fair service curve classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-linux-sfq {
+        description "linux stochastic fairness queueing classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-linux-codel {
+        description "linux controlled delay classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-linux-fq-codel {
+        description "linux fair queueing controlled delay classifier";
+        base qos-type-base;
+    }
+
+    identity qos-type-egress-policer {
+        description "DPDK user space egress policer";
         base qos-type-base;
     }
 
@@ -1216,7 +1242,7 @@ module ovsdb {
                        last change in session state. The error messages are defined in
                        section 4.1 of [RFC 5880].
 
-                bfd_status : flap_count: optional string, 
+                bfd_status : flap_count: optional string,
                        containing an integer, minimum 0
                        Counts the number of bfd_status:forwarding flaps since start.
                        A flap is considered as a change of the bfd_status:forwarding value.";
@@ -1234,7 +1260,31 @@ module ovsdb {
 
         leaf qos {
             description "The unique identifier of the QoS entry for this port.";
+            status deprecated;
             type yang:uuid;
+        }
+
+        list qos-entry {
+            key "qos-id";
+            max-elements 1;
+            leaf qos-id {
+                description "An identifier used for QoS entries in the MD-SAL.";
+                type inet:uri;
+            }
+        }
+
+        leaf ingress-policing-rate {
+            description "Maximum rate for data received on this interface in kbps.
+                Data received faster than this rate is dropped.  Set to 0 (default)
+                to disable policing";
+            type uint32;
+        }
+
+        leaf ingress-policing-burst {
+            description "Maximum burst size for data received on this interface in kb.
+                The default burst size if set to 0 is 1000 kb.  This value has no
+                effect if ingress-policing-rate is 0.";
+            type uint32;
         }
     }
 

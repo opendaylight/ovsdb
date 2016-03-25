@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -197,7 +198,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         PowerMockito.whenNew(OvsdbTerminationPointAugmentationBuilder.class).withNoArguments().thenReturn(tpAugmentationBuilder);
-        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint", OvsdbTerminationPointAugmentationBuilder.class, Port.class));
+        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint", ReadWriteTransaction.class,
+                InstanceIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class, Node.class, Entry.class));
 
         Column<GenericTableSchema, Set<UUID>> interfacesColumn = mock(Column.class);
         when(port.getInterfacesColumn()).thenReturn(interfacesColumn);
@@ -240,21 +242,31 @@ import com.google.common.util.concurrent.CheckedFuture;
         verify(transaction, times(2)).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(TerminationPoint.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testBuildTerminationPoint() throws Exception {
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Port portUpdate = mock(Port.class);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        InstanceIdentifier<TerminationPoint> tpPath = mock(InstanceIdentifier.class);
+        Entry<UUID,Port> portEntry = mock(Entry.class);
+        Node node = mock(Node.class);
+        when(portEntry.getValue()).thenReturn(mock(Port.class));
+        when(portEntry.getValue().getName()).thenReturn(PORT_NAME);
+        when(portEntry.getValue().getUuid()).thenReturn(mock(UUID.class));
         when(portUpdate.getName()).thenReturn(PORT_NAME);
         when(portUpdate.getUuid()).thenReturn(mock(UUID.class));
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
         when(tpAugmentationBuilder.setName(anyString())).thenReturn(tpAugmentationBuilder);
         when(tpAugmentationBuilder.setPortUuid(any(Uuid.class))).thenReturn(tpAugmentationBuilder);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePort", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePort", 
+                ReadWriteTransaction.class, Node.class, InstanceIdentifier.class, Entry.class, OvsdbTerminationPointAugmentationBuilder.class));
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", tpAugmentationBuilder, portUpdate);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", transaction, tpPath, tpAugmentationBuilder, node, portEntry);
         verify(tpAugmentationBuilder).setName(anyString());
         verify(tpAugmentationBuilder).setPortUuid(any(Uuid.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePort", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePort", any(ReadWriteTransaction.class), any(Node.class),
+                any(InstanceIdentifier.class), any(Entry.class), any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
     @Test
@@ -402,9 +414,13 @@ import com.google.common.util.concurrent.CheckedFuture;
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceOtherConfig", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testUpdatePort() throws Exception {
-        Port port = mock(Port.class);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        Node node = mock(Node.class);
+        InstanceIdentifier<TerminationPoint> tpPath = (InstanceIdentifier<TerminationPoint>) mock(InstanceIdentifier.class);
+        Entry<UUID, Port> port = mock(Entry.class);
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateVlan", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
@@ -413,7 +429,7 @@ import com.google.common.util.concurrent.CheckedFuture;
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePortExternalIds", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePortOtherConfig", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePort", port, ovsdbTerminationPointBuilder);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePort", transaction, node, tpPath, port, ovsdbTerminationPointBuilder);
 
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlan", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlanTrunks", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));

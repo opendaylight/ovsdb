@@ -492,4 +492,35 @@ public class TransactUtils {
         mutate.setMutations(mutations);
         return mutate;
     }
+    
+    /**
+     * This method converts byte array into String format without ":" inserted.
+     *
+     * @param bytes
+     *            The byte array to convert to string
+     * @return The hexadecimal representation of the byte array. If bytes is
+     *         null, "null" string is returned
+     */
+    public static String bytesToHexString(byte[] bytes) {
+
+        if (bytes == null) {
+            return "null";
+        }
+
+        String ret = "";
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < bytes.length; i++) {
+            if (i > 0) {
+                ret += ":";
+            }
+            short u8byte = (short) (bytes[i] & 0xff);
+            String tmp = Integer.toHexString(u8byte);
+            if (tmp.length() == 1) {
+                buf.append("0");
+            } 
+            buf.append(tmp);
+        }
+        ret = buf.toString();
+        return ret;
+    }
 }

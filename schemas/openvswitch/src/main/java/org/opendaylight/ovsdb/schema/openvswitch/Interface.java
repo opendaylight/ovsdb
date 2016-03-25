@@ -42,14 +42,14 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     void setOptions(Map<String, String> options);
 
     @TypedColumn(name="ingress_policing_rate", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, Set<Long>> getIngressPolicingRateColumn();
+    Column<GenericTableSchema, Long> getIngressPolicingRateColumn();
     @TypedColumn(name="ingress_policing_rate", method=MethodType.SETDATA, fromVersion="1.0.0")
-    void setIngressPolicingRate(Set<Long> ingressPolicingRate);
+    void setIngressPolicingRate(Long ingressPolicingRate);
 
     @TypedColumn(name="ingress_policing_burst", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, Set<Long>> getIngressPolicingBurstColumn();
+    Column<GenericTableSchema, Long> getIngressPolicingBurstColumn();
     @TypedColumn(name="ingress_policing_burst", method=MethodType.SETDATA, fromVersion="1.0.0")
-    void setIngressPolicingBurst(Set<Long> ingressPolicingBurst);
+    void setIngressPolicingBurst(Long ingressPolicingBurst);
 
     @TypedColumn(name="mac_in_use", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     Column<GenericTableSchema,Set<String>> getMacInUseColumn();

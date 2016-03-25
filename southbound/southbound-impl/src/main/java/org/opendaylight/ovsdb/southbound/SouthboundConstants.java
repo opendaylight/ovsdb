@@ -39,8 +39,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeEgressPolicer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHfsc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHtb;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxCodel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxFqCodel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxSfq;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import com.google.common.collect.ImmutableBiMap;
@@ -60,10 +64,18 @@ public class SouthboundConstants {
     public static final String UUID = "uuid";
     public static final String QOS_LINUX_HTB = "linux-htb";
     public static final String QOS_LINUX_HFSC = "linux-hfsc";
+    public static final String QOS_LINUX_SFQ = "linux-sfq";
+    public static final String QOS_LINUX_CODEL = "linux-codel";
+    public static final String QOS_LINUX_FQ_CODEL = "linux-fq_codel";
+    public static final String QOS_EGRESS_POLICER = "egress-policer";
     public static final ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
         = new ImmutableBiMap.Builder<Class<? extends QosTypeBase>,String>()
             .put(QosTypeLinuxHtb.class,QOS_LINUX_HTB)
             .put(QosTypeLinuxHfsc.class,QOS_LINUX_HFSC)
+            .put(QosTypeLinuxSfq.class,QOS_LINUX_SFQ)
+            .put(QosTypeLinuxCodel.class,QOS_LINUX_CODEL)
+            .put(QosTypeLinuxFqCodel.class,QOS_LINUX_FQ_CODEL)
+            .put(QosTypeEgressPolicer.class,QOS_EGRESS_POLICER)
             .build();
 
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP

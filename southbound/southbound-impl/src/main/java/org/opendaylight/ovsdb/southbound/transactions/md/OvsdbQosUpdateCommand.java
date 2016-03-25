@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
+import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -30,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsBuilder;
@@ -53,12 +55,14 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private Map<UUID, Qos> updatedQosRows;
     private Map<UUID, Qos> oldQosRows;
+    private Map<UUID, Queue> updatedQueueRows;
 
     public OvsdbQosUpdateCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedQosRows = TyperUtils.extractRowsUpdated(Qos.class,getUpdates(), getDbSchema());
         oldQosRows = TyperUtils.extractRowsOld(Qos.class, getUpdates(), getDbSchema());
+        updatedQueueRows = TyperUtils.extractRowsUpdated(Queue.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -98,7 +102,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                         SouthboundMapper.createQosType(qos.getTypeColumn().getData().toString()));
                 setOtherConfig(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
                 setExternalIds(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
-                setQueueList(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
+                setQueueList(transaction, qosEntryBuilder, oldQos, qos, nodeIId, ovsdbNode.get());
 
                 QosEntries qosEntry = qosEntryBuilder.build();
                 LOG.debug("Update Ovsdb Node {} with qos entries {}",ovsdbNode.get(), qosEntry);
@@ -118,6 +122,36 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             return qos.getExternalIdsColumn().getData().get(SouthboundConstants.QOS_ID_EXTERNAL_ID_KEY);
         } else {
             return SouthboundConstants.QOS_URI_PREFIX + "://" + qos.getUuid().toString();
+        }
+    }
+
+    private Queue getQueue(UUID queueUuid)
+    {
+        for (Entry<UUID, Queue> entry : updatedQueueRows.entrySet()) {
+            if (entry.getKey().equals(queueUuid)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private Uri getQueueId(UUID queueUuid, Node ovsdbNode) {
+        Queue queue = getQueue(queueUuid);
+        if (queue != null && queue.getExternalIdsColumn() != null
+                && queue.getExternalIdsColumn().getData() != null
+                && queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY)) {
+            return new Uri(queue.getExternalIdsColumn().getData().get(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY));
+        } else {
+            OvsdbNodeAugmentation node = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+            if (node.getQueues() != null && !node.getQueues().isEmpty()) {
+                for (Queues q : node.getQueues()) {
+                    if (q.getQueueUuid().equals(new Uuid(queueUuid.toString()))) {
+                        return q.getQueueId();
+                    }
+                }
+            }
+            LOG.debug("Queue ID was not found Ovsdb Node {} with queue UUID {}", node, queueUuid);
+            return new Uri(SouthboundConstants.QUEUE_URI_PREFIX + "://" + queueUuid.toString());
         }
     }
 
@@ -223,7 +257,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private void setQueueList(ReadWriteTransaction transaction,
             QosEntriesBuilder qosEntryBuilder, Qos oldQos, Qos qos,
-            InstanceIdentifier<Node> nodeIId) {
+            InstanceIdentifier<Node> nodeIId, Node ovsdbNode) {
         Map<Long,UUID> oldQueueList = null;
         Map<Long,UUID> queueList = null;
 
@@ -237,7 +271,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             removeOldQueues(transaction, qosEntryBuilder, oldQueueList, qos, nodeIId);
         }
         if (queueList != null && !queueList.isEmpty()) {
-            setNewQueues(qosEntryBuilder, queueList);
+            setNewQueues(qosEntryBuilder, queueList, ovsdbNode);
         }
     }
 
@@ -257,12 +291,13 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void setNewQueues(QosEntriesBuilder qosEntryBuilder,
-            Map<Long, UUID> queueList) {
+            Map<Long, UUID> queueList, Node ovsdbNode) {
         Set<Entry<Long, UUID>> queueEntries = queueList.entrySet();
         List<QueueList> newQueueList = new ArrayList<>();
         for (Entry<Long, UUID> queueEntry : queueEntries) {
             newQueueList.add(
                     new QueueListBuilder().setQueueNumber(queueEntry.getKey())
+                    .setQueueId(getQueueId(queueEntry.getValue(), ovsdbNode))
                     .setQueueUuid(new Uuid(queueEntry.getValue().toString())).build());
         }
         qosEntryBuilder.setQueueList(newQueueList);

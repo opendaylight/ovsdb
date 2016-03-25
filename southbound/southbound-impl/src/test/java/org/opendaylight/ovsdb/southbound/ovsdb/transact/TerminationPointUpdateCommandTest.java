@@ -40,13 +40,17 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TerminationPointUpdateCommand.class, TransactUtils.class, TyperUtils.class, VlanMode.class, TerminationPointCreateCommand.class, InstanceIdentifier.class})
@@ -68,9 +72,10 @@ public class TerminationPointUpdateCommandTest {
         PowerMockito.mockStatic(TransactUtils.class);
         PowerMockito.when(TransactUtils.extractCreated(any(AsyncDataChangeEvent.class), eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
-                TransactionBuilder.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class));
+                TransactionBuilder.class, BridgeOperationalState.class,
+                InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class));
         doNothing().when(terminationPointUpdateCommand)
-                .updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
+                .updateTerminationPoint(any(TransactionBuilder.class), any(BridgeOperationalState.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
 
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated = new HashMap<>();
         updated.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
@@ -85,9 +90,14 @@ public class TerminationPointUpdateCommandTest {
     @Test
     public void testUpdateTerminationPoint() throws Exception {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
+        BridgeOperationalState state = mock(BridgeOperationalState.class);
         InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
         OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
+        Optional<Node> optNode = (Optional<Node>)mock(Optional.class);
+        when(state.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
+        when(state.getBridgeNode(any(InstanceIdentifier.class)).get()).thenReturn(mock(Node.class));
+        when(state.getBridgeNode(any(InstanceIdentifier.class)).get().getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
 
         // Test updateInterface()
         Interface ovsInterface = mock(Interface.class);
@@ -124,7 +134,7 @@ public class TerminationPointUpdateCommandTest {
         when(op.update(any(Port.class))).thenReturn(update);
         when(extraPort.getNameColumn()).thenReturn(column);
 
-        terminationPointUpdateCommand.updateTerminationPoint(transaction, iid, terminationPoint);
+        terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint);
         verify(transaction, times(2)).add(any(Operation.class));
     }
 

@@ -30,18 +30,22 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbQosRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdKey;
@@ -62,6 +66,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -87,6 +94,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Interface> interfaceUpdatedRows;
     private Map<UUID, Interface> interfaceOldRows;
     private Map<UUID, Bridge> bridgeUpdatedRows;
+    private Map<UUID, Qos> qosUpdatedRows;
     public OvsdbPortUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -95,6 +103,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         interfaceUpdatedRows = TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema);
         interfaceOldRows = TyperUtils.extractRowsOld(Interface.class, updates, dbSchema);
         bridgeUpdatedRows = TyperUtils.extractRowsUpdated(Bridge.class, updates, dbSchema);
+        qosUpdatedRows = TyperUtils.extractRowsUpdated(Qos.class, updates, dbSchema);
     }
 
     @Override
@@ -127,7 +136,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         getInstanceIdentifier(bridgeIid.get(), portUpdate.getValue());
                 OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
-                buildTerminationPoint(tpAugmentationBuilder,portUpdate.getValue());
+                buildTerminationPoint(transaction, tpPath, tpAugmentationBuilder, node, portUpdate);
                 UUID interfaceUUID = (UUID)portUpdate.getValue().getInterfacesColumn().getData().toArray()[0];
                 if (interfaceUpdatedRows.containsKey(interfaceUUID)) {
                     buildTerminationPoint(tpAugmentationBuilder,
@@ -170,14 +179,16 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
 
     }
-    private void buildTerminationPoint(OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder,
-            Port portUpdate) {
+    private void buildTerminationPoint(ReadWriteTransaction transaction,
+            InstanceIdentifier<TerminationPoint> tpPath,
+            OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder,
+            Node node, Entry<UUID, Port> portUpdate) {
 
         tpAugmentationBuilder
-                .setName(portUpdate.getName());
+                .setName(portUpdate.getValue().getName());
         tpAugmentationBuilder.setPortUuid(new Uuid(
-                portUpdate.getUuid().toString()));
-        updatePort(portUpdate, tpAugmentationBuilder);
+                portUpdate.getValue().getUuid().toString()));
+        updatePort(transaction, node, tpPath, portUpdate, tpAugmentationBuilder);
     }
 
     private void buildTerminationPoint(OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder,
@@ -238,15 +249,16 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterface(interfaceUpdate, type,ovsdbTerminationPointBuilder);
     }
 
-    private void updatePort(final Port port,
+    private void updatePort(final ReadWriteTransaction transaction, final Node node,
+            final InstanceIdentifier<TerminationPoint> tpPath, final Entry<UUID, Port> port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
-        updateVlan(port, ovsdbTerminationPointBuilder);
-        updateVlanTrunks(port, ovsdbTerminationPointBuilder);
-        updateVlanMode(port, ovsdbTerminationPointBuilder);
-        updateQos(port, ovsdbTerminationPointBuilder);
-        updatePortExternalIds(port, ovsdbTerminationPointBuilder);
-        updatePortOtherConfig(port, ovsdbTerminationPointBuilder);
+        updateVlan(port.getValue(), ovsdbTerminationPointBuilder);
+        updateVlanTrunks(port.getValue(), ovsdbTerminationPointBuilder);
+        updateVlanMode(port.getValue(), ovsdbTerminationPointBuilder);
+        updateQos(transaction, node, tpPath, port, ovsdbTerminationPointBuilder);
+        updatePortExternalIds(port.getValue(), ovsdbTerminationPointBuilder);
+        updatePortOtherConfig(port.getValue(), ovsdbTerminationPointBuilder);
     }
 
     private void updateInterface(final Interface interf,
@@ -265,6 +277,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterfaceLldp(interf, ovsdbTerminationPointBuilder);
         updateInterfaceBfd(interf, ovsdbTerminationPointBuilder);
         updateInterfaceBfdStatus(interf, ovsdbTerminationPointBuilder);
+        updateInterfacePolicing(interf, ovsdbTerminationPointBuilder);
     }
 
     private void updateVlan(final Port port,
@@ -320,17 +333,81 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateQos(final Port port,
-            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
-        if (port.getQosColumn() == null) {
+    private void updateQos(final ReadWriteTransaction transaction, final Node node, InstanceIdentifier<TerminationPoint> tpPath,
+            final Entry<UUID, Port> port, final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        if (port.getValue() == null) {
             return;
         }
-        Collection<UUID> qosUuidCol = port.getQosColumn().getData();
+        Collection<UUID> qosUuidCol = port.getValue().getQosColumn().getData();
         if (!qosUuidCol.isEmpty()) {
-            Iterator<UUID> itr = qosUuidCol.iterator();
-            UUID qosUuid = itr.next();
+            UUID qosUuid = qosUuidCol.iterator().next();
             ovsdbTerminationPointBuilder.setQos(new Uuid(qosUuid.toString()));
+
+            NodeId nodeId = node.getNodeId();
+            OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+
+            // Delete an older QoS entry
+            if (portOldRows.containsKey(port.getKey()) &&
+                    portOldRows.get(port.getKey()).getQosColumn() != null) {
+                Collection<UUID> oldQos = portOldRows.get(port.getKey()).getQosColumn().getData();
+                if (!oldQos.isEmpty()) {
+                    UUID oldQosUuid = oldQos.iterator().next();
+                    if (!oldQosUuid.equals(qosUuid)) {
+                        InstanceIdentifier<QosEntries> oldQosIid = getQosIid(nodeId, ovsdbNode, oldQosUuid);
+                        if (oldQosIid != null) {
+                            InstanceIdentifier<QosEntry> oldPortQosIid = tpPath
+                                .augmentation(OvsdbTerminationPointAugmentation.class)
+                                .child(QosEntry.class,
+                                      new QosEntryKey(new Long(SouthboundConstants.PORT_QOS_LIST_KEY)));
+//                                    new QosEntryKey(new OvsdbQosRef(oldQosIid)));
+                            transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid);
+                        }
+                    }
+                }
+            }
+
+            InstanceIdentifier<QosEntries> qosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
+            if (qosIid != null) {
+                List<QosEntry> qosList = new ArrayList<>();
+                OvsdbQosRef qosRef = new OvsdbQosRef(qosIid);
+                qosList.add(new QosEntryBuilder()
+                    .setKey(new QosEntryKey(new Long(SouthboundConstants.PORT_QOS_LIST_KEY)))
+                    .setQosRef(qosRef).build());
+                ovsdbTerminationPointBuilder.setQosEntry(qosList);
+            }
         }
+    }
+
+    private InstanceIdentifier<QosEntries> getQosIid(NodeId nodeId, OvsdbNodeAugmentation ovsdbNode, UUID qosUuid) {
+        // Search for the QoS entry first in the operational datastore
+        for (QosEntries qosEntry : ovsdbNode.getQosEntries()) {
+            if (qosEntry.getQosUuid().equals(new Uuid(qosUuid.toString()))) {
+                return SouthboundMapper.createInstanceIdentifier(nodeId)
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()));
+            }
+        }
+
+        // Search for the QoS entry in the current OVS updates
+        for (Entry<UUID, Qos> qosUpdate : qosUpdatedRows.entrySet()) {
+            Qos qos = qosUpdate.getValue();
+            if (qos.getUuid().equals(qosUuid)) {
+                if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+                    return (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
+                            qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                } else {
+                    return SouthboundMapper.createInstanceIdentifier(nodeId)
+                            .augmentation(OvsdbNodeAugmentation.class)
+                            .child(QosEntries.class, new QosEntriesKey(
+                                    new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())));
+                }
+            }
+        }
+        LOG.debug("QoS UUID {} assigned to port not found in operational node {} or QoS updates", qosUuid, ovsdbNode);
+        return SouthboundMapper.createInstanceIdentifier(nodeId)
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(QosEntries.class, new QosEntriesKey(
+                        new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())));
     }
 
     private void updateOfPort(final Interface interf,
@@ -545,6 +622,38 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         } catch (SchemaVersionMismatchException e) {
             // We don't care about the exception stack trace here
             LOG.debug("bfd column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+        }
+    }
+
+    private void updateInterfacePolicing(final Interface interf,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Long ingressPolicingRate = null;
+        if (interf.getIngressPolicingRateColumn() != null) {
+            ingressPolicingRate = interf.getIngressPolicingRateColumn().getData();
+        }
+        if (ingressPolicingRate != null) {
+            if (ingressPolicingRate >= 0) {
+                ovsdbTerminationPointBuilder
+                    .setIngressPolicingRate(ingressPolicingRate);
+            } else {
+                LOG.debug("Received negative value for ingressPolicingRate from ovsdb for {} {}",
+                        interf.getName(),ingressPolicingRate);
+            }
+        }
+
+        Long ingressPolicingBurst = null;
+        if (interf.getIngressPolicingBurstColumn() != null) {
+            ingressPolicingBurst = interf.getIngressPolicingBurstColumn().getData();
+        }
+        if (ingressPolicingBurst != null) {
+            if (ingressPolicingBurst >= 0) {
+                ovsdbTerminationPointBuilder
+                    .setIngressPolicingBurst(ingressPolicingBurst);
+            } else {
+                LOG.debug("Received negative value for ingressPolicingBurst from ovsdb for {} {}",
+                        interf.getName(),ingressPolicingBurst);
+            }
         }
     }
 

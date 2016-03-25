@@ -40,8 +40,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeEgressPolicer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHfsc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHtb;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxCodel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxFqCodel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxSfq;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import com.google.common.collect.ImmutableBiMap;
@@ -53,7 +57,10 @@ public class SouthboundConstants {
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "terminationpoint";
     public static final String QOS_URI_PREFIX = "qos";
+    public static final String QOS_NAMED_UUID_PREFIX = "QOS";
+    public static final Integer PORT_QOS_LIST_KEY = 1;
     public static final String QUEUE_URI_PREFIX = "queue";
+    public static final String QUEUE_NAMED_UUID_PREFIX = "QUEUE";
     public static final String AUTOATTACH_URI_PREFIX = "autoattach";
     public static final String AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION = "7.11.2";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
@@ -62,10 +69,20 @@ public class SouthboundConstants {
     public static final String UUID = "uuid";
     public static final String QOS_LINUX_HTB = "linux-htb";
     public static final String QOS_LINUX_HFSC = "linux-hfsc";
+    // The following four QoS types are present in OVS 2.5+
+    // Refer to http://openvswitch.org/support/dist-docs/ovs-vswitchd.conf.db.5.txt
+    public static final String QOS_LINUX_SFQ = "linux-sfq";
+    public static final String QOS_LINUX_CODEL = "linux-codel";
+    public static final String QOS_LINUX_FQ_CODEL = "linux-fq_codel";
+    public static final String QOS_EGRESS_POLICER = "egress-policer";
     public static final ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
         = new ImmutableBiMap.Builder<Class<? extends QosTypeBase>,String>()
             .put(QosTypeLinuxHtb.class,QOS_LINUX_HTB)
             .put(QosTypeLinuxHfsc.class,QOS_LINUX_HFSC)
+            .put(QosTypeLinuxSfq.class,QOS_LINUX_SFQ)
+            .put(QosTypeLinuxCodel.class,QOS_LINUX_CODEL)
+            .put(QosTypeLinuxFqCodel.class,QOS_LINUX_FQ_CODEL)
+            .put(QosTypeEgressPolicer.class,QOS_EGRESS_POLICER)
             .build();
 
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
@@ -111,8 +128,6 @@ public class SouthboundConstants {
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
-    public static final String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";
-    public static final String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
     public static final String AUTOATTACH_ID_EXTERNAL_ID_KEY = "opendaylight-autoattach-id";
 
     public enum VLANMODES {

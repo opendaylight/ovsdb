@@ -70,7 +70,7 @@ public class TerminationPointUpdateCommandTest {
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
                 TransactionBuilder.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class));
         doNothing().when(terminationPointUpdateCommand)
-                .updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
+                .updateTerminationPoint(any(TransactionBuilder.class), any(BridgeOperationalState.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
 
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated = new HashMap<>();
         updated.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
@@ -85,6 +85,7 @@ public class TerminationPointUpdateCommandTest {
     @Test
     public void testUpdateTerminationPoint() throws Exception {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
+        BridgeOperationalState state = mock(BridgeOperationalState.class);
         InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
         OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
@@ -124,7 +125,7 @@ public class TerminationPointUpdateCommandTest {
         when(op.update(any(Port.class))).thenReturn(update);
         when(extraPort.getNameColumn()).thenReturn(column);
 
-        terminationPointUpdateCommand.updateTerminationPoint(transaction, iid, terminationPoint);
+        terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint);
         verify(transaction, times(2)).add(any(Operation.class));
     }
 

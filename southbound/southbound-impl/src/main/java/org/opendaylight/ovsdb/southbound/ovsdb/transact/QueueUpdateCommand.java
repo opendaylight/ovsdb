@@ -79,9 +79,11 @@ public class QueueUpdateCommand implements TransactCommand {
                 }
 
                 Uuid queueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
-                UUID uuid = null;
+                UUID uuid;
                 if (queueUuid != null) {
                     uuid = new UUID(queueUuid.getValue());
+                } else {
+                	uuid = new UUID(queueEntry.getQueueId().getValue());
                 }
 
                 Map<String, String> externalIdsMap = new HashMap<>();
@@ -100,8 +102,8 @@ public class QueueUpdateCommand implements TransactCommand {
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete Queue other_config", e);
                 }
-                if (uuid == null) {
-                    transaction.add(op.insert(queue)).build();
+                if (queueUuid == null) {
+                    transaction.add(op.insert(queue).withId(uuid.toString())).build();
                 } else {
                     transaction.add(op.update(queue)).build();
                     Queue extraQueue = TyperUtils.getTypedRowWrapper(

@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
@@ -62,6 +63,7 @@ public class QosUpdateCommand implements TransactCommand {
         }
         OvsdbNodeAugmentation operNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
         List<QosEntries> operQosEntries = operNode.getQosEntries();
+        List<Queues> operQueues = operNode.getQueues();
 
         if (qosEntries != null) {
             for (QosEntries qosEntry : qosEntries) {
@@ -81,7 +83,9 @@ public class QosUpdateCommand implements TransactCommand {
                 Map<Long, UUID>newQueueList = new HashMap<>();
                 if (queueList != null && !queueList.isEmpty()) {
                     for (QueueList queue : queueList) {
-                        newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
+                    	String queueUuid = getQueueUuid(queue.getQueueId(), operNode);
+//                        newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
+                        newQueueList.put(queue.getQueueNumber(), new UUID(queueUuid));
                     }
                 }
                 qos.setQueues(newQueueList);
@@ -114,6 +118,17 @@ public class QosUpdateCommand implements TransactCommand {
                 transaction.build();
             }
         }
+    }
+    
+    private String getQueueUuid(Uri queueId, OvsdbNodeAugmentation operNode) {
+    	if (operNode.getQueues() != null && !operNode.getQueues().isEmpty()) {
+    		for (Queues queue : operNode.getQueues()) {
+    			if (queue.getQueueId().equals(queueId)) {
+    				return queue.getQueueUuid().getValue();
+    			}
+    		}
+    	}
+    	return queueId.getValue();
     }
 
     private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {

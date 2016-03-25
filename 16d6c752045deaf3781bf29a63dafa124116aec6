@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_b0b6f988",
+        "filename": "utils/it-utils/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "We\u0027ll need to remember to change this when we cherry-pick this patch to master.",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_90bbfd71",
+        "filename": "utils/it-utils/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "You might as well remove this ;-).",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_30aae919",
+        "filename": "utils/it-utils/src/main/java/org/opendaylight/ovsdb/utils/it/ItUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "Since you\u0027re splitting this out, you get to write some Javadocs here (and for isControllerConnected)...",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_10a7ed50",
+        "filename": "utils/it-utils/src/main/java/org/opendaylight/ovsdb/utils/it/ItUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "AFAICS\n\n    boolean connected \u003d false;\n\nshould be sufficient, or better yet, just use returns ...",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_7063d11a",
+        "filename": "utils/it-utils/src/main/java/org/opendaylight/ovsdb/utils/it/ItUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "... here",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_506855f5",
+        "filename": "utils/it-utils/src/main/java/org/opendaylight/ovsdb/utils/it/ItUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "... and\n\n    return false;\n\nhere.",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_b06d5907",
+        "filename": "utils/it-utils/src/main/java/org/opendaylight/ovsdb/utils/it/NodeInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "Some Javadocs would be nice here too.",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_9072dde3",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-25T08:58:32Z",
+      "side": 1,
+      "message": "SCM tells us this, I\u0027d like to see what this class is for ;-).",
+      "revId": "16d6c752045deaf3781bf29a63dafa124116aec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

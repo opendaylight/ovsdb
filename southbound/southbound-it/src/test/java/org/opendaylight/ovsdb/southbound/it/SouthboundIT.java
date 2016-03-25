@@ -2124,7 +2124,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private Queues getQueue(Uri queueId, OvsdbNodeAugmentation node) {
         for (Queues queue : node.getQueues()) {
-            if (queue.getKey().getQueueId().equals(queueId))
+            if (queue.getKey().getQueueId().getValue().equals(queueId.getValue()))
                 return queue;
         }
         return null;

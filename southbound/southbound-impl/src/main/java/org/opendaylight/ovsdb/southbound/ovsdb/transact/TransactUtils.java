@@ -480,4 +480,41 @@ public class TransactUtils {
         mutate.setMutations(mutations);
         return mutate;
     }
+
+    /**
+     * This method builds a string by concatenating the 2 character
+     * hexadecimal representation of each byte from the input byte array.
+     *
+     * For example: an input byte array containing:
+     *   bytes[0] = 'a'
+     *   bytes[1] = 'b'
+     *   bytes[2] = 'c'
+     *   bytes[3] = '-'
+     *   bytes[4] = '1'
+     *   bytes[5] = '2'
+     *   bytes[6] = '3'
+     * returns the string "6162632d313233"
+     *
+     * @param bytes
+     *            The byte array to convert to string
+     * @return The hexadecimal representation of the byte array. If bytes is
+     *         null, the string "" is returned
+     */
+    public static String bytesToHexString(byte[] bytes) {
+
+        if (bytes == null) {
+            return "";
+        }
+
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < bytes.length; i++) {
+            short u8byte = (short) (bytes[i] & 0xff);
+            String tmp = Integer.toHexString(u8byte);
+            if (tmp.length() == 1) {
+                buf.append("0");
+            }
+            buf.append(tmp);
+        }
+        return buf.toString();
+    }
 }

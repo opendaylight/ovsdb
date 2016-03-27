@@ -144,6 +144,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_f7c1c480",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-27T12:36:21Z",
+      "side": 1,
+      "message": "Well no. The cachedThreadPool(s) is used to do the actual work. The scheduler tasks just dole out the work to cachedThreadPool(s), they\u0027re basically just pass-thru.",
+      "parentUuid": "9a3d3df0_97d3185f",
+      "revId": "3fcea1617346e40f173d16daced3cc587ac2045c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_23c2d652",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 6

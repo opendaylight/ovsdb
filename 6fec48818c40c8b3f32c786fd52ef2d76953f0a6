@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_1c79d593",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-27T10:19:27Z",
+      "side": 1,
+      "message": "Question: To me the new code looks like it\u0027ll remove ARP rules for existing VMs. Is this code only executed after all VMs are removed? Also, shouldn\u0027t there be some check that the port in fact belongs to DHCP? Very possible that I missed something.",
+      "range": {
+        "startLine": 208,
+        "startChar": 35,
+        "endLine": 208,
+        "endChar": 39
+      },
+      "revId": "6fec48818c40c8b3f32c786fd52ef2d76953f0a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_3c74919b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-03-27T10:19:27Z",
+      "side": 1,
+      "message": "I don\u0027t understand why you would return here. Why isn\u0027t it a \"continue\"? Perhaps the next port will be OK...",
+      "range": {
+        "startLine": 214,
+        "startChar": 32,
+        "endLine": 214,
+        "endChar": 38
+      },
+      "revId": "6fec48818c40c8b3f32c786fd52ef2d76953f0a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

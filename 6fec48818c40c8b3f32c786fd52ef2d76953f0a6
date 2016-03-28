@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_5c87dd0f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 869
+      },
+      "writtenOn": "2016-03-28T11:06:56Z",
+      "side": 1,
+      "message": "thanks for your response.\nYes, this code will execute only after removing all VM\u0027s belongs to particular network in compute node.\nconsider the below scenario,\nassume we have created 1 network\ncreated 2VM\u0027s in control node and 1 VM in compute node.\nnow compute node will have 4 ARP entries including DHCP.\nwhile removing VM from compute node ARP needed for the node \nreturns false so all the 4 ARP entries should removed including DHCP.\nfrom port cache we are retrieving all the IP\u0027s and removing ARP flows for the particular network.",
+      "parentUuid": "3a4c51b2_1c79d593",
+      "range": {
+        "startLine": 208,
+        "startChar": 35,
+        "endLine": 208,
+        "endChar": 39
+      },
+      "revId": "6fec48818c40c8b3f32c786fd52ef2d76953f0a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_3c74919b",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
         "patchSetId": 2
@@ -60,6 +84,30 @@
       "writtenOn": "2016-03-27T10:19:27Z",
       "side": 1,
       "message": "I don\u0027t understand why you would return here. Why isn\u0027t it a \"continue\"? Perhaps the next port will be OK...",
+      "range": {
+        "startLine": 214,
+        "startChar": 32,
+        "endLine": 214,
+        "endChar": 38
+      },
+      "revId": "6fec48818c40c8b3f32c786fd52ef2d76953f0a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_fc9ea962",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/DistributedArpService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 869
+      },
+      "writtenOn": "2016-03-28T11:06:56Z",
+      "side": 1,
+      "message": "thanks for your comments\ni changed return as continue",
+      "parentUuid": "3a4c51b2_3c74919b",
       "range": {
         "startLine": 214,
         "startChar": 32,

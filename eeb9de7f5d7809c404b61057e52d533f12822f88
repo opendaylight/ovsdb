@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_826e1ec8",
+        "filename": "routemgr/routemgr-api/src/main/yang/neighbor-discovery.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 5197
+      },
+      "writtenOn": "2016-03-29T11:02:32Z",
+      "side": 1,
+      "message": "To maintain consistency, please rename code to icmp6-code.",
+      "revId": "eeb9de7f5d7809c404b61057e52d533f12822f88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

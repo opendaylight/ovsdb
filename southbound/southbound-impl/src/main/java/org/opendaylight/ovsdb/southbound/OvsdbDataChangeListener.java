@@ -94,11 +94,11 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         for (Entry<InstanceIdentifier<Node>, OvsdbConnectionInstance> connectionInstanceEntry :
                 connectionInstancesFromChanges(changes).entrySet()) {
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getValue();
-            connectionInstance.transact(new TransactCommandAggregator(
+            connectionInstance.transact(new TransactCommandAggregator(),
                     new BridgeOperationalState(db, changes),
                     new DataChangesManagedByOvsdbNodeEvent(
                             connectionInstance.getInstanceIdentifier(),
-                            changes)));
+                            changes));
         }
     }
 

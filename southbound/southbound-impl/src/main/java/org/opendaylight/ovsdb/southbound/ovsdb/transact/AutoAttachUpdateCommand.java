@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -48,18 +47,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-public class AutoAttachUpdateCommand extends AbstractTransactCommand {
+public class AutoAttachUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachUpdateCommand.class);
 
-    public AutoAttachUpdateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
 
         // FIXME: Fix if loop after ovs community supports external_ids column in AutoAttach Table
         if (true) {
@@ -72,24 +72,21 @@ public class AutoAttachUpdateCommand extends AbstractTransactCommand {
             return;
         }
 
-        @SuppressWarnings("unused")
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated =
-        TransactUtils.extractCreatedOrUpdated(getChanges(), OvsdbNodeAugmentation.class);
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry
                 : createdOrUpdated.entrySet()) {
-            updateAutoAttach(transaction, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
+            updateAutoAttach(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
         }
     }
 
-    private void updateAutoAttach(TransactionBuilder transaction,
+    private void updateAutoAttach(TransactionBuilder transaction, BridgeOperationalState state,
             InstanceIdentifier<OvsdbNodeAugmentation> iid,
             OvsdbNodeAugmentation ovsdbNode) {
 
         List<Autoattach> autoAttachList = ovsdbNode.getAutoattach();
-        if (!getOperationalState().getBridgeNode(iid).isPresent()) {
+        if (state.getBridgeNode(iid).isPresent()) {
             return;
         }
-        OvsdbNodeAugmentation currentOvsdbNode = getOperationalState().getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation currentOvsdbNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
         List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
 
         if (autoAttachList != null) {

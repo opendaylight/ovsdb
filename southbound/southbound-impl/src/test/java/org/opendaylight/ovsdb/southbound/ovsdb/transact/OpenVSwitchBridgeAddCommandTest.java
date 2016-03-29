@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -83,11 +84,11 @@ public class OpenVSwitchBridgeAddCommandTest {
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(ovs.getBridgesColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashSet<UUID>());
+        when(column.getData()).thenReturn(new HashSet<>());
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        openVSwitchBridgeAddCommand.execute(transaction);
+        openVSwitchBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
         verify(transaction).add(any(Operation.class));
     }
 

@@ -106,7 +106,7 @@ public class OvsdbNodeUpdateCommandTest {
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashMap<String, String>());
+        when(column.getData()).thenReturn(new HashMap<>());
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
@@ -119,7 +119,7 @@ public class OvsdbNodeUpdateCommandTest {
         doNothing().when(ovs).setOtherConfig(any(ImmutableMap.class));
         when(ovs.getOtherConfigColumn()).thenReturn(column);
 
-        ovsdbNodeUpdateCommand.execute(transaction);
+        ovsdbNodeUpdateCommand.execute(transaction, mock(BridgeOperationalState.class), changes);
         verify(externalId).getExternalIdKey();
         verify(otherConfig).getOtherConfigKey();
         verify(ovs, times(2)).getExternalIdsColumn();

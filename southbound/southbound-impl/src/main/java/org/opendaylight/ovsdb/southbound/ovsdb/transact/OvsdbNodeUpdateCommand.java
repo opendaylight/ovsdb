@@ -34,18 +34,16 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 
 public class OvsdbNodeUpdateCommand implements TransactCommand {
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbNodeUpdateCommand.class);
 
-
-    public OvsdbNodeUpdateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        this.changes = changes;
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated =
-                TransactUtils.extractCreatedOrUpdated(changes, OvsdbNodeAugmentation.class);
+    private void execute(TransactionBuilder transaction,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
             updated.entrySet()) {
             OvsdbNodeAugmentation ovsdbNode = ovsdbNodeEntry.getValue();

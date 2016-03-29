@@ -7,10 +7,12 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public interface TransactCommand {
-
-    void execute(TransactionBuilder transaction);
-
+    void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                 AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events);
 }

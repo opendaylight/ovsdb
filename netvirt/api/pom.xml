@@ -39,4 +39,27 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <version>1.3.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.opendaylight.yang.gen.v1.*,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.*,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.common.rev151227,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.devices.rev151227,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.l2.networks.rev151227,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.ports.rev151227,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.ports.rev151227.port,
+            </Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

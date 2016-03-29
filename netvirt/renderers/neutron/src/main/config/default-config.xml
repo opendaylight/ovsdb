@@ -13,12 +13,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
   </required-capabilities>
   <configuration>
-
     <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
       <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <module>
           <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:neutron">prefix:netvirt-neutron</type>
-          <name>netvirt-neutron-default</name>
+          <name>netvirt-neutron</name>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>

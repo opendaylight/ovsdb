@@ -9,6 +9,7 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt
 
 import org.opendaylight.ovsdb.netvirt.renderers.neutron.NeutronProvider;
 
+
 public class NeutronModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.neutron.rev160308.AbstractNeutronModule {
     public NeutronModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);

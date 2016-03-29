@@ -79,7 +79,7 @@ module netvirt-ports {
         }
 
         leaf id {
-            description "Depends on binding type.  E.g., if the type is VLAN, this would be the VLAN ID";
+            description "Depends on binding cr  E.g., if the type is VLAN, this would be the VLAN ID";
             type string;
         }
 

@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -47,6 +48,7 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -99,9 +101,9 @@ public class OvsdbConnectionInstanceTest {
         transactInvokers.put(mock(DatabaseSchema.class), transactInvoker2);
         MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
 
-        ovsdbConnectionInstance.transact(command);
-        verify(transactInvoker1).invoke(any(TransactCommand.class));
-        verify(transactInvoker2).invoke(any(TransactCommand.class));
+        ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        verify(transactInvoker1).invoke(any(TransactCommand.class), any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class));
+        verify(transactInvoker2).invoke(any(TransactCommand.class), any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class));
     }
 
     @SuppressWarnings("unchecked")

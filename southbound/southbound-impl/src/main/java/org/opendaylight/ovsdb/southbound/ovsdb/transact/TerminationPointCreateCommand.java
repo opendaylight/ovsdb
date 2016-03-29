@@ -58,55 +58,56 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 
-public class TerminationPointCreateCommand extends AbstractTransactCommand {
+public class TerminationPointCreateCommand implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
 
-    public TerminationPointCreateCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreated(events, OvsdbTerminationPointAugmentation.class),
+                TransactUtils.extractCreatedOrUpdated(events, Node.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        for (Entry<InstanceIdentifier<?>, DataObject> entry: getChanges().getCreatedData().entrySet()) {
-            DataObject dataObject = entry.getValue();
-            if (dataObject instanceof OvsdbTerminationPointAugmentation) {
-                OvsdbTerminationPointAugmentation terminationPoint = (OvsdbTerminationPointAugmentation) dataObject;
-                LOG.debug("Received request to create termination point {}",
-                        terminationPoint.getName());
-                InstanceIdentifier terminationPointIid = entry.getKey();
-                Optional<TerminationPoint> terminationPointOptional =
-                        getOperationalState().getBridgeTerminationPoint(terminationPointIid);
-                if (!terminationPointOptional.isPresent()) {
-                    // Configure interface
-                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();
-                    Interface ovsInterface =
-                            TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
-                    createInterface(terminationPoint, ovsInterface);
-                    transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                                 OvsdbTerminationPointAugmentation>
+                                 createdTerminationPoints, Map<InstanceIdentifier<Node>, Node> nodes) {
+        for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> entry :
+                createdTerminationPoints.entrySet()) {
+            OvsdbTerminationPointAugmentation terminationPoint = entry.getValue();
+            LOG.debug("Received request to create termination point {}",
+                    terminationPoint.getName());
+            InstanceIdentifier terminationPointIid = entry.getKey();
+            Optional<TerminationPoint> terminationPointOptional =
+                    state.getBridgeTerminationPoint(terminationPointIid);
+            if (!terminationPointOptional.isPresent()) {
+                // Configure interface
+                String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();
+                Interface ovsInterface =
+                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+                createInterface(terminationPoint, ovsInterface);
+                transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
-                    stampInstanceIdentifier(transaction, (InstanceIdentifier<TerminationPoint>) entry.getKey(),
-                            ovsInterface.getName());
+                stampInstanceIdentifier(transaction, entry.getKey(), ovsInterface.getName());
 
-                    // Configure port with the above interface details
-                    String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
-                    Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                    createPort(terminationPoint, port, interfaceUuid);
-                    transaction.add(op.insert(port).withId(portUuid));
+                // Configure port with the above interface details
+                String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
+                Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+                createPort(terminationPoint, port, interfaceUuid);
+                transaction.add(op.insert(port).withId(portUuid));
 
-                    //Configure bridge with the above port details
-                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-                    if (getBridge(entry.getKey()) != null) {
-                        bridge.setName(getBridge(entry.getKey()).getBridgeName().getValue());
-                        bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
+                //Configure bridge with the above port details
+                Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                if (getBridge(entry.getKey(), nodes) != null) {
+                    bridge.setName(getBridge(entry.getKey(), nodes).getBridgeName().getValue());
+                    bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
 
-                        transaction.add(op.mutate(bridge)
-                                .addMutation(bridge.getPortsColumn().getSchema(),
-                                        Mutator.INSERT,bridge.getPortsColumn().getData())
-                                .where(bridge.getNameColumn().getSchema()
-                                        .opEqual(bridge.getNameColumn().getData())).build());
-                    }
+                    transaction.add(op.mutate(bridge)
+                            .addMutation(bridge.getPortsColumn().getSchema(),
+                                    Mutator.INSERT, bridge.getPortsColumn().getData())
+                            .where(bridge.getNameColumn().getSchema()
+                                    .opEqual(bridge.getNameColumn().getData())).build());
                 }
             }
         }
@@ -327,11 +328,9 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key) {
+    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key, Map<InstanceIdentifier<Node>, Node> nodes) {
         OvsdbBridgeAugmentation bridge = null;
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
-        Map<InstanceIdentifier<Node>, Node> nodes =
-                TransactUtils.extractCreatedOrUpdated(getChanges(),Node.class);
         if (nodes != null && nodes.get(nodeIid) != null) {
             Node node = nodes.get(nodeIid);
             bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
@@ -353,8 +352,8 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         return bridge;
     }
 
-    public static void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<TerminationPoint> iid,
-            String interfaceName) {
+    public static void stampInstanceIdentifier(TransactionBuilder transaction, InstanceIdentifier
+            <OvsdbTerminationPointAugmentation> iid, String interfaceName) {
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
         port.setName(interfaceName);
         port.setExternalIds(Collections.<String,String>emptyMap());

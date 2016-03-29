@@ -36,7 +36,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -44,37 +43,30 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-public class TerminationPointUpdateCommand extends AbstractTransactCommand {
+public class TerminationPointUpdateCommand implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointUpdateCommand.class);
 
-    public TerminationPointUpdateCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, TransactUtils.extractCreatedOrUpdated(events, OvsdbTerminationPointAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
+    private void execute(TransactionBuilder transaction,
+                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                                 OvsdbTerminationPointAugmentation> createdOrUpdated) {
         LOG.trace("TerminationPointUpdateCommand called");
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> created =
-            TransactUtils.extractCreated(getChanges(),OvsdbTerminationPointAugmentation.class);
         for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
-                 OvsdbTerminationPointAugmentation> terminationPointEntry : created.entrySet()) {
+                OvsdbTerminationPointAugmentation> terminationPointEntry : createdOrUpdated.entrySet()) {
             updateTerminationPoint(transaction, terminationPointEntry.getKey(), terminationPointEntry.getValue());
-        }
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated =
-                TransactUtils.extractUpdated(getChanges(), OvsdbTerminationPointAugmentation.class);
-        for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
-                 OvsdbTerminationPointAugmentation> terminationPointEntry : updated.entrySet()) {
-            updateTerminationPoint(transaction, terminationPointEntry.getKey(),
-                    terminationPointEntry.getValue());
         }
     }
 
     public void updateTerminationPoint(TransactionBuilder transaction,
-            InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
-            OvsdbTerminationPointAugmentation terminationPoint) {
-        if (terminationPoint instanceof OvsdbTerminationPointAugmentation) {
+                                       InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
+                                       OvsdbTerminationPointAugmentation terminationPoint) {
+        if (terminationPoint != null) {
             LOG.debug("Received request to update termination point {}",
                     terminationPoint.getName());
 
@@ -90,12 +82,12 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
                     .build());
 
             TerminationPointCreateCommand.stampInstanceIdentifier(transaction,
-                    iid.firstIdentifierOf(TerminationPoint.class), terminationPoint.getName());
+                    iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName());
 
             // Update port
             Port port = TyperUtils.getTypedRowWrapper(
                     transaction.getDatabaseSchema(), Port.class);
-            updatePort(terminationPoint,port);
+            updatePort(terminationPoint, port);
             Port extraPort = TyperUtils.getTypedRowWrapper(
                     transaction.getDatabaseSchema(), Port.class);
             extraPort.setName("");
@@ -286,7 +278,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
         if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
             Set<Long> portTrunks = new HashSet<>();
             List<Trunks> modelTrunks = terminationPoint.getTrunks();
-            for (Trunks trunk: modelTrunks) {
+            for (Trunks trunk : modelTrunks) {
                 if (trunk.getTrunk() != null) {
                     portTrunks.add(trunk.getTrunk().getValue().longValue());
                 }

@@ -30,35 +30,29 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ControllerUpdateCommand extends AbstractTransactCommand {
+public class ControllerUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerUpdateCommand.class);
 
-    public ControllerUpdateCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, ControllerEntry.class),
+                TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> controllers =
-                TransactUtils.extractCreatedOrUpdated(getChanges(), ControllerEntry.class);
-        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges =
-                TransactUtils.extractCreatedOrUpdated(getChanges(), OvsdbBridgeAugmentation.class);
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> controllers,
+                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
         LOG.info("execute: controllers: {} --- bridges: {}", controllers, bridges);
         for (Entry<InstanceIdentifier<ControllerEntry>, ControllerEntry> entry: controllers.entrySet()) {
             Optional<ControllerEntry> operationalControllerEntryOptional =
-                    getOperationalState().getControllerEntry(entry.getKey());
+                    state.getControllerEntry(entry.getKey());
             if (!operationalControllerEntryOptional.isPresent()) {
                 InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
                         entry.getKey().firstIdentifierOf(OvsdbBridgeAugmentation.class);
                 Optional<OvsdbBridgeAugmentation> bridgeOptional =
-                        getOperationalState().getOvsdbBridgeAugmentation(bridgeIid);
-                OvsdbBridgeAugmentation ovsdbBridge = null;
-                if (bridgeOptional.isPresent()) {
-                    ovsdbBridge = bridgeOptional.get();
-                } else {
-                    ovsdbBridge = bridges.get(bridgeIid);
-                }
+                        state.getOvsdbBridgeAugmentation(bridgeIid);
+                OvsdbBridgeAugmentation ovsdbBridge = bridgeOptional.or(bridges.get(bridgeIid));
                 if (ovsdbBridge != null
                         && ovsdbBridge.getBridgeName() != null
                         && entry.getValue() != null

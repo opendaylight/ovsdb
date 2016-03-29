@@ -9,8 +9,6 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -26,8 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -55,11 +51,9 @@ public class BridgeUpdateCommandTest {
         when(TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class)).thenReturn(created);
         when(TransactUtils.extractUpdated(changes, OvsdbBridgeAugmentation.class)).thenReturn(updated);
 
-        MemberModifier.suppress(MemberMatcher.method(BridgeUpdateCommand.class, "getChanges"));
-        when(briUpdatedCmd.getChanges()).thenReturn(returnChanges);
+        briUpdatedCmd.execute(transaction, mock(BridgeOperationalState.class), changes);
 
-        briUpdatedCmd.execute(transaction);
-        verify(briUpdatedCmd, times(2)).getChanges();
+        // TODO Actually verify something
     }
 
 }

@@ -41,16 +41,19 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-public class AutoAttachRemovedCommand extends AbstractTransactCommand {
+public class AutoAttachRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachRemovedCommand.class);
 
-    public AutoAttachRemovedCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
+                TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
 
         // FIXME: Remove if loop after ovs community supports external_ids column in AutoAttach Table
         if (true) {
@@ -63,17 +66,10 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
             return;
         }
 
-        @SuppressWarnings("unused")
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original =
-        TransactUtils.extractOriginal(getChanges(), OvsdbNodeAugmentation.class);
-
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> deleted =
-                TransactUtils.extractUpdated(getChanges(), OvsdbNodeAugmentation.class);
-
         for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : original.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
             OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
-            OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = deleted.get(ovsdbNodeIid);
+            OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
 
             if (ovsdbNodeAugmentation != null && deletedOvsdbNodeAugmentation != null) {
                 List<Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
@@ -82,7 +78,7 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
                         (deletedAutoattachList == null || deletedAutoattachList.isEmpty())) {
 
                     OvsdbNodeAugmentation currentOvsdbNode =
-                            getOperationalState().getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                            state.getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
                     List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
                     for (Autoattach origAutoattach : origAutoattachList) {
                         Uri autoAttachId = origAutoattach.getAutoattachId();

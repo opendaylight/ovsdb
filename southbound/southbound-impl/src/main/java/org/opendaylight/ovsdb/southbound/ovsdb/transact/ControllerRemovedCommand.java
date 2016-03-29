@@ -26,26 +26,24 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-public class ControllerRemovedCommand extends AbstractTransactCommand {
-
-    public ControllerRemovedCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
-    }
+public class ControllerRemovedCommand implements TransactCommand {
 
     @Override
-    public void execute(TransactionBuilder transaction) {
-        Set<InstanceIdentifier<ControllerEntry>> removed =
-                TransactUtils.extractRemoved(getChanges(),ControllerEntry.class);
-        Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> operationalControllerEntries
-            = TransactUtils.extractOriginal(getChanges(),ControllerEntry.class);
-        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges
-            = TransactUtils.extractCreatedOrUpdatedOrRemoved(getChanges(),OvsdbBridgeAugmentation.class);
-        for (InstanceIdentifier<ControllerEntry> controllerIid : removed) {
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractRemoved(events, ControllerEntry.class),
+                TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
+    }
+
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Set<InstanceIdentifier<ControllerEntry>> removedControllers,
+                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation>
+                                 modifiedBridges) {
+        for (InstanceIdentifier<ControllerEntry> controllerIid : removedControllers) {
             InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
                     controllerIid.firstIdentifierOf(OvsdbBridgeAugmentation.class);
-            OvsdbBridgeAugmentation ovsdbBridge = updatedBridges.get(bridgeIid);
-            Optional<ControllerEntry> controllerEntryOptional = getOperationalState().getControllerEntry(controllerIid);
+            OvsdbBridgeAugmentation ovsdbBridge = modifiedBridges.get(bridgeIid);
+            Optional<ControllerEntry> controllerEntryOptional = state.getControllerEntry(controllerIid);
             if (ovsdbBridge != null && controllerEntryOptional.isPresent()) {
                 ControllerEntry controllerEntry = controllerEntryOptional.get();
                 Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);

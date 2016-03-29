@@ -49,8 +49,6 @@ public class TerminationPointDeleteCommandTest {
     @Before
     public void setUp() throws Exception {
         terminationPointDeleteCommand = mock(TerminationPointDeleteCommand.class, Mockito.CALLS_REAL_METHODS);
-        MemberModifier.field(TerminationPointDeleteCommand.class, "operationalState").set(terminationPointDeleteCommand, state);
-        MemberModifier.field(TerminationPointDeleteCommand.class, "changes").set(terminationPointDeleteCommand, changes);
     }
 
     @Test
@@ -60,7 +58,8 @@ public class TerminationPointDeleteCommandTest {
         when(TransactUtils.extractOriginal(changes, OvsdbTerminationPointAugmentation.class)).thenReturn(originals);
         when(TransactUtils.extractOriginal(changes, Node.class)).thenReturn(originalNodes);
         when(TransactUtils.extractRemoved(changes, OvsdbTerminationPointAugmentation.class)).thenReturn(removedTps);
-        terminationPointDeleteCommand.execute(transaction);
-        verify(terminationPointDeleteCommand, times(3)).getChanges();
+        terminationPointDeleteCommand.execute(transaction, state, changes);
+
+        // TODO Actually verify something
     }
 }

@@ -30,26 +30,24 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-public class ProtocolRemovedCommand extends AbstractTransactCommand {
+public class ProtocolRemovedCommand implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolRemovedCommand.class);
-    private Set<InstanceIdentifier<ProtocolEntry>> removed;
-    private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges;
-
-    public ProtocolRemovedCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
-        removed = TransactUtils.extractRemoved(getChanges(),ProtocolEntry.class);
-        updatedBridges = TransactUtils.extractCreatedOrUpdatedOrRemoved(getChanges(),OvsdbBridgeAugmentation.class);
-    }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractRemoved(events, ProtocolEntry.class),
+                TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
+    }
+
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state, Set<InstanceIdentifier<ProtocolEntry>> removed,
+                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges) {
         for (InstanceIdentifier<ProtocolEntry> protocolIid : removed) {
             InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
                     protocolIid.firstIdentifierOf(OvsdbBridgeAugmentation.class);
             OvsdbBridgeAugmentation ovsdbBridge = updatedBridges.get(bridgeIid);
-            Optional<ProtocolEntry> protocolEntryOptional = getOperationalState().getProtocolEntry(protocolIid);
+            Optional<ProtocolEntry> protocolEntryOptional = state.getProtocolEntry(protocolIid);
             if (ovsdbBridge != null
                     && protocolEntryOptional.isPresent()) {
                 ProtocolEntry protocolEntry = protocolEntryOptional.get();

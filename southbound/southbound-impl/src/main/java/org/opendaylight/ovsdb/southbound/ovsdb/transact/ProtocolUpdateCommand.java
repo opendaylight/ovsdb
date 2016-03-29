@@ -30,29 +30,28 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-public class ProtocolUpdateCommand extends AbstractTransactCommand {
+public class ProtocolUpdateCommand implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolUpdateCommand.class);
-    private Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols;
-    private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges;
-
-    public ProtocolUpdateCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
-        protocols = TransactUtils.extractCreatedOrUpdated(getChanges(), ProtocolEntry.class);
-        bridges = TransactUtils.extractCreatedOrUpdated(getChanges(), OvsdbBridgeAugmentation.class);
-    }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, ProtocolEntry.class),
+                TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
+    }
+
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols,
+                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
         for (Entry<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> entry: protocols.entrySet()) {
             Optional<ProtocolEntry> operationalProtocolEntryOptional =
-                    getOperationalState().getProtocolEntry(entry.getKey());
+                    state.getProtocolEntry(entry.getKey());
             if (!operationalProtocolEntryOptional.isPresent()) {
                 InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
                         entry.getKey().firstIdentifierOf(OvsdbBridgeAugmentation.class);
                 Optional<OvsdbBridgeAugmentation> bridgeOptional =
-                        getOperationalState().getOvsdbBridgeAugmentation(bridgeIid);
+                        state.getOvsdbBridgeAugmentation(bridgeIid);
                 OvsdbBridgeAugmentation ovsdbBridge;
                 if (bridgeOptional.isPresent()) {
                     ovsdbBridge = bridgeOptional.get();

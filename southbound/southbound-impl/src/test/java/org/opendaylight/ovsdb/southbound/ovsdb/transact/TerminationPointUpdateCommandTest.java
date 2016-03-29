@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -42,14 +41,12 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TerminationPointUpdateCommand.class, TransactUtils.class, TyperUtils.class, VlanMode.class, TerminationPointCreateCommand.class, InstanceIdentifier.class})
@@ -65,22 +62,10 @@ public class TerminationPointUpdateCommandTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testTerminationPointUpdateCommand() {
-        BridgeOperationalState state = mock(BridgeOperationalState.class);
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
-        TerminationPointUpdateCommand terminationPointUpdateCommand1 = new TerminationPointUpdateCommand(state, changes);
-        assertEquals(state, Whitebox.getInternalState(terminationPointUpdateCommand1, "operationalState"));
-        assertEquals(changes, Whitebox.getInternalState(terminationPointUpdateCommand1, "changes"));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
     public void testExecute() {
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> created = new HashMap<>();
         created.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
         PowerMockito.mockStatic(TransactUtils.class);
-        MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "getChanges"));
-        when(terminationPointUpdateCommand.getChanges()).thenReturn(mock(AsyncDataChangeEvent.class));
         PowerMockito.when(TransactUtils.extractCreated(any(AsyncDataChangeEvent.class), eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
                 TransactionBuilder.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class));
@@ -92,9 +77,8 @@ public class TerminationPointUpdateCommandTest {
         PowerMockito.when(TransactUtils.extractUpdated(any(AsyncDataChangeEvent.class), eq(OvsdbTerminationPointAugmentation.class))).thenReturn(updated);
 
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
-        terminationPointUpdateCommand.execute(transactionBuilder);
-        verify(terminationPointUpdateCommand, times(2)).
-                updateTerminationPoint(any(TransactionBuilder.class), any(InstanceIdentifier.class), any(OvsdbTerminationPointAugmentation.class));
+        terminationPointUpdateCommand.execute(transactionBuilder, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        // TODO Verify something useful
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

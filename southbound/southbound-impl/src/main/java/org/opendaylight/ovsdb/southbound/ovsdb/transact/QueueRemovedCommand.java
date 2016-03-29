@@ -10,18 +10,14 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -31,32 +27,23 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
-public class QueueRemovedCommand extends AbstractTransactCommand {
+public class QueueRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueRemovedCommand.class);
 
-    public QueueRemovedCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
+                TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        Set<InstanceIdentifier<Queues>> removed =
-                TransactUtils.extractRemoved(getChanges(),Queues.class);
-
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals
-            = TransactUtils.extractOriginal(getChanges(),OvsdbNodeAugmentation.class);
-
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated
-        = TransactUtils.extractUpdated(getChanges(), OvsdbNodeAugmentation.class);
-
-        Iterator<InstanceIdentifier<OvsdbNodeAugmentation>> itr = originals.keySet().iterator();
-        while (itr.hasNext()) {
-            InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = itr.next();
-            OvsdbNodeAugmentation original = originals.get(ovsdbNodeIid);
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+        for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : originals
+                .entrySet()) {
+            InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
+            OvsdbNodeAugmentation original = originalEntry.getValue();
             OvsdbNodeAugmentation update = updated.get(ovsdbNodeIid);
 
             if (original != null && update != null) {
@@ -64,7 +51,9 @@ public class QueueRemovedCommand extends AbstractTransactCommand {
                 List<Queues> updatedQueues = update.getQueues();
                 if (origQueues != null && !origQueues.isEmpty()) {
                     for (Queues origQueue : origQueues) {
-                        OvsdbNodeAugmentation operNode = getOperationalState().getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                        OvsdbNodeAugmentation operNode =
+                                state.getBridgeNode(ovsdbNodeIid).get().getAugmentation(
+                                        OvsdbNodeAugmentation.class);
                         List<Queues> operQueues = operNode.getQueues();
 
                         boolean found = false;
@@ -77,16 +66,22 @@ public class QueueRemovedCommand extends AbstractTransactCommand {
                             }
                         }
                         if (!found) {
-                            LOG.debug("Received request to delete Queue entry {}",origQueue.getQueueId());
+                            LOG.debug("Received request to delete Queue entry {}", origQueue.getQueueId());
                             Uuid queueUuid = getQueueUuid(operQueues, origQueue.getQueueId());
                             if (queueUuid != null) {
-                                Queue queue = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Queue.class, null);
-                                  transaction.add(op.delete(queue.getSchema())
-                                          .where(queue.getUuidColumn().getSchema().opEqual(new UUID(queueUuid.getValue())))
-                                          .build());
+                                Queue queue =
+                                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Queue.class,
+                                                null);
+                                transaction.add(op.delete(queue.getSchema())
+                                        .where(queue.getUuidColumn().getSchema().opEqual(
+                                                new UUID(queueUuid.getValue())))
+                                        .build());
                             } else {
-                                LOG.warn("Unable to delete Queue{} for node {} because it was not found in the operational store, "
-                                        + "and thus we cannot retrieve its UUID", ovsdbNodeIid, origQueue.getQueueId());
+                                LOG.warn(
+                                        "Unable to delete Queue{} for node {} because it was not found in the " +
+                                                "operational store, "
+                                                + "and thus we cannot retrieve its UUID", ovsdbNodeIid,
+                                        origQueue.getQueueId());
                             }
                         }
                     }

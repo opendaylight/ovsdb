@@ -9,6 +9,11 @@
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -113,18 +118,18 @@ public class OvsdbDataChangeListenerTest {
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbDataChangeListener.class, "connectionInstancesFromChanges", AsyncDataChangeEvent.class));
         when(ovsdbDataChangeListener.connectionInstancesFromChanges(any(AsyncDataChangeEvent.class))).thenReturn(map);
-        TransactCommandAggregator transactCommandAggregator = mock(TransactCommandAggregator.class);
         BridgeOperationalState bridgeOperationalState = mock(BridgeOperationalState.class);
         DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent = mock(DataChangesManagedByOvsdbNodeEvent.class);
         PowerMockito.whenNew(DataChangesManagedByOvsdbNodeEvent.class).withArguments(any(InstanceIdentifier.class), any(AsyncDataChangeEvent.class)).thenReturn(dataChangesManagedByOvsdbNodeEvent);
         PowerMockito.whenNew(BridgeOperationalState.class).withArguments(any(DataBroker.class), any(AsyncDataChangeEvent.class)).thenReturn(bridgeOperationalState);
-        PowerMockito.whenNew(TransactCommandAggregator.class).withArguments(any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class)).thenReturn(transactCommandAggregator);
 
         when(connectionInstance.getInstanceIdentifier()).thenReturn(iid);
-        doNothing().when(connectionInstance).transact(transactCommandAggregator);
+        doNothing().when(connectionInstance).transact(any(TransactCommandAggregator.class), eq(bridgeOperationalState),
+                eq(dataChangesManagedByOvsdbNodeEvent));
 
         Whitebox.invokeMethod(ovsdbDataChangeListener, "updateData", changes);
-        verify(connectionInstance).transact(transactCommandAggregator);
+        verify(connectionInstance).transact(any(TransactCommandAggregator.class), eq(bridgeOperationalState),
+                eq(dataChangesManagedByOvsdbNodeEvent));
         verify(ovsdbDataChangeListener).connectionInstancesFromChanges(changes);
     }
 

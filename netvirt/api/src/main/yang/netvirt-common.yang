@@ -64,7 +64,7 @@ module netvirt-common {
         list other-config {
             description "This is used to store information needed by the renderer(s).  In general,
                          it might be used as a cookie to relate external objects or configuration with
-                         the given NetVirt objed.  For example, we may store neutron logical port
+                         the given NetVirt object.  For example, we may store neutron logical port
                          information here so that the OVS southbound renderer can match up the port
                          reported by OVSDB with the Neutron port configured by Neutron.";
             key config-key;

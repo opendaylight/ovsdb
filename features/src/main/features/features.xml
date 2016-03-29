@@ -94,16 +94,18 @@
   </feature>
 
   <feature name='odl-netvirt-hwgw' version='${project.version}' description='OpenDaylight :: netvirt :: Hardware Gateway'>
-    <feature version="${project.version}">odl-netvirt-api</feature>
+    <feature version="${project.version}">odl-netvirt-ui</feature>
     <feature version='${project.version}'>odl-ovsdb-hwvtepsouthbound</feature>
     <bundle>mvn:org.opendaylight.ovsdb/hwgw/{{VERSION}}</bundle>
     <configfile finalname="etc/opendaylight/karaf/hwgw-default-config.xml">mvn:org.opendaylight.ovsdb/hwgw/{{VERSION}}/xml/config</configfile>
   </feature>
 
     <feature name='odl-netvirt-neutron' version='${project.version}' description='OpenDaylight :: netvirt :: Neutron Renderer'>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${neutron.version}">odl-neutron-service</feature>
     <feature version="${project.version}">odl-netvirt-ui</feature>
     <bundle>mvn:org.opendaylight.ovsdb/neutron/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <configfile finalname="etc/opendaylight/karaf/netvirt-neutron-default-config.xml">mvn:org.opendaylight.ovsdb/neutron/{{VERSION}}/xml/config</configfile>
   </feature>
 

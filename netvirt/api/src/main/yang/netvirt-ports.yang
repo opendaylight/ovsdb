@@ -7,8 +7,8 @@ module netvirt-ports {
         description "Initial revision of netvirt ports definition";
     }
 
-    import ietf-inet-types { prefix inet; }
-    import ietf-yang-types { prefix yang; }
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
     import netvirt-common { prefix "common"; }
 
 
@@ -79,7 +79,7 @@ module netvirt-ports {
         }
 
         leaf id {
-            description "Depends on binding type.  E.g., if the type is VLAN, this would be the VLAN ID";
+            description "Depends on binding cr  E.g., if the type is VLAN, this would be the VLAN ID";
             type string;
         }
 

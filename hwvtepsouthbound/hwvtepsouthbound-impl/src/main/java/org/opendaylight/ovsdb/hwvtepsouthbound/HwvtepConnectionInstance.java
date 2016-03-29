@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -65,6 +65,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
     private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private HwvtepGlobalAugmentation initialCreatedData = null;
+    private HwvtepDeviceState deviceState;
 
 
     HwvtepConnectionInstance (ConnectionInfo key,OvsdbClient client,
@@ -73,6 +74,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         this.client = client;
         this.instanceIdentifier = iid;
         this.txInvoker = txInvoker;
+        this.deviceState = new HwvtepDeviceState();
     }
 
     public void transact(TransactCommand command) {
@@ -293,4 +295,9 @@ public class HwvtepConnectionInstance implements OvsdbClient{
     public void setHwvtepGlobalAugmentation(HwvtepGlobalAugmentation hwvtepGlobalData) {
         this.initialCreatedData = hwvtepGlobalData;
     }
+
+    public HwvtepDeviceState getDeviceState() {
+        return this.deviceState;
+    }
+
 }

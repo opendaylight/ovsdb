@@ -45,13 +45,11 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
     private Map<UUID, UcastMacsLocal> updatedUMacsLocalRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
-    private Map<UUID, LogicalSwitch> updatedLSRows;
 
     public UcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedUMacsLocalRows = TyperUtils.extractRowsUpdated(UcastMacsLocal.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -95,7 +93,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
         }
         if (ucml.getLogicalSwitchColumn() != null && ucml.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = ucml.getLogicalSwitchColumn().getData();
-            LogicalSwitch logicalSwitch = updatedLSRows.get(lsUUID);
+            LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceState().getLogicalSwitch(lsUUID);
             if (logicalSwitch != null) {
                 InstanceIdentifier<LogicalSwitches> lSwitchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);

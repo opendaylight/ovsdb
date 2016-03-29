@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -56,14 +56,12 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, PhysicalPort> updatedPPRows;
     private Map<UUID, PhysicalPort> oldPPRows;
     private Map<UUID, PhysicalSwitch> switchUpdatedRows;
-    private Map<UUID, LogicalSwitch> lSwitchUpdatedRows;
 
     public PhysicalPortUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPPRows = TyperUtils.extractRowsUpdated(PhysicalPort.class, getUpdates(), getDbSchema());
         oldPPRows = TyperUtils.extractRowsOld(PhysicalPort.class, getUpdates(), getDbSchema());
         switchUpdatedRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
-        lSwitchUpdatedRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -181,12 +179,15 @@ public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
-        LogicalSwitch logicalSwitch = lSwitchUpdatedRows.get(switchUUID);
+        LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(switchUUID);
         if (logicalSwitch != null) {
             InstanceIdentifier<LogicalSwitches> lSwitchIid =
                     HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
             return new HwvtepLogicalSwitchRef(lSwitchIid);
         }
+        LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
+        LOG.trace("Available LogicalSwitches: {}",
+                        getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitches().values());
         return null;
     }
 

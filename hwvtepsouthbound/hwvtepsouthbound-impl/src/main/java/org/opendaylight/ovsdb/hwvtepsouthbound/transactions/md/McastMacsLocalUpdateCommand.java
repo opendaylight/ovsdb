@@ -13,8 +13,6 @@ import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -51,14 +49,12 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, McastMacsLocal> updatedMMacsLocalRows;
     private Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
-    private Map<UUID, LogicalSwitch> updatedLSRows;
 
     public McastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedMMacsLocalRows = TyperUtils.extractRowsUpdated(McastMacsLocal.class, getUpdates(), getDbSchema());
         updatedPLocSetRows = TyperUtils.extractRowsUpdated(PhysicalLocatorSet.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -104,7 +100,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactionCommand {
     private void setLogicalSwitch(LocalMcastMacsBuilder mMacLocalBuilder, McastMacsLocal mMacLocal) {
         if (mMacLocal.getLogicalSwitchColumn() != null && mMacLocal.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = mMacLocal.getLogicalSwitchColumn().getData();
-            LogicalSwitch lSwitch = updatedLSRows.get(lsUUID);
+            LogicalSwitch lSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
             if (lSwitch != null) {
                 InstanceIdentifier<LogicalSwitches> lSwitchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), lSwitch);

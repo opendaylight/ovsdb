@@ -9,8 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
-import java.util.Map;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -44,11 +42,9 @@ import org.slf4j.LoggerFactory;
 public class MacEntriesRemoveCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(MacEntriesRemoveCommand.class);
-    Map<UUID, LogicalSwitch> lSwitchUpdatedRows;
 
     public MacEntriesRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        lSwitchUpdatedRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
 
@@ -131,12 +127,15 @@ public class MacEntriesRemoveCommand extends AbstractTransactionCommand {
     }
 
     private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
-        LogicalSwitch logicalSwitch = lSwitchUpdatedRows.get(switchUUID);
+        LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(switchUUID);
         if (logicalSwitch != null) {
             InstanceIdentifier<LogicalSwitches> lSwitchIid =
                     HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
             return new HwvtepLogicalSwitchRef(lSwitchIid);
         }
+        LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
+        LOG.trace("Available LogicalSwitches: {}",
+                        getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitches().values());
         return null;
     }
 

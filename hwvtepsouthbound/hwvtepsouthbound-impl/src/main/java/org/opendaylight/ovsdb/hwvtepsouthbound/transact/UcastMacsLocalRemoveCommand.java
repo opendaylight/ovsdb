@@ -118,7 +118,7 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand {
                         for (LocalUcastMacs macBefore: macListBefore) {
                             int i = 0;
                             for(; i < macListUpdated.size(); i++) {
-                                if (macBefore.getMacEntryKey().equals(macListUpdated.get(i).getMacEntryKey())) {
+                                if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
                                     break;
                                 }
                             }

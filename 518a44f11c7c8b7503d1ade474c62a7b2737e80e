@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_e24a82ab",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-29T13:07:06Z",
+      "side": 1,
+      "message": "why uri instead of uuid?",
+      "range": {
+        "startLine": 519,
+        "startChar": 25,
+        "endLine": 519,
+        "endChar": 29
+      },
+      "revId": "518a44f11c7c8b7503d1ade474c62a7b2737e80e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

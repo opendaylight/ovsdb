@@ -7,8 +7,8 @@ module netvirt-ports {
         description "Initial revision of netvirt ports definition";
     }
 
-    import ietf-inet-types { prefix inet; }
-    import ietf-yang-types { prefix yang; }
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
     import netvirt-common { prefix "common"; }
 
 
@@ -24,6 +24,31 @@ module netvirt-ports {
     identity port-type-router {
         base port-type-base;
         description "port type router";
+    }
+
+    identity port-type-router-interface-distributed{
+        base port-type-base;
+        description "port type router interface distributed";
+    }
+
+    identity port-type-router-gateway {
+        base port-type-base;
+        description "port type router gateway";
+    }
+
+    identity port-type-dhcp{
+        base port-type-base;
+        description "port type dhcp";
+    }
+
+    identity port-type-floating-ip{
+        base port-type-base;
+        description "port type floatingip";
+    }
+
+    identity port-type-compute-nova{
+        base port-type-base;
+        description "port type compute nova";
     }
 
     typedef port-type {

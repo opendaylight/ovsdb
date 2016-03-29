@@ -5,6 +5,7 @@ module netvirt-neutron {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+    import opendaylight-entity-ownership-service {prefix eos; revision-date 2015-08-10;}
 
     description
         "Service definition for NetVirt Neutron renderer";
@@ -16,7 +17,7 @@ module netvirt-neutron {
 
     identity netvirt-neutron {
         base config:module-type;
-        config:java-name-prefix Neutron;
+        config:java-name-prefix neutron;
     }
 
     augment "/config:modules/config:module/config:configuration" {

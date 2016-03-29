@@ -7,47 +7,35 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TransactCommandAggregator implements TransactCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
 
-    private List<TransactCommand> commands = new ArrayList<>();
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private BridgeOperationalState operationalState;
-
-    public TransactCommandAggregator(BridgeOperationalState state,AsyncDataChangeEvent<InstanceIdentifier<?>,
-            DataObject> changes) {
-        this.operationalState = state;
-        this.changes = changes;
-        commands.add(new BridgeUpdateCommand(state,changes));
-        commands.add(new OpenVSwitchBridgeAddCommand());
-        commands.add(new ControllerUpdateCommand(state,changes));
-        commands.add(new ControllerRemovedCommand(state,changes));
-        commands.add(new ProtocolUpdateCommand(state,changes));
-        commands.add(new ProtocolRemovedCommand(state,changes));
-        commands.add(new BridgeRemovedCommand(state,changes));
-        commands.add(new TerminationPointCreateCommand(state,changes));
-        commands.add(new TerminationPointDeleteCommand(state, changes));
-        commands.add(new OvsdbNodeUpdateCommand(changes));
-        commands.add(new AutoAttachUpdateCommand(state, changes));
-        commands.add(new AutoAttachRemovedCommand(state, changes));
-        commands.add(new QosUpdateCommand(state, changes));
-        commands.add(new QosRemovedCommand(state, changes));
-        commands.add(new QueueUpdateCommand(state, changes));
-        commands.add(new QueueRemovedCommand(state, changes));
-        commands.add(new TerminationPointUpdateCommand(state, changes));
-    }
+    private static final Class<? extends TransactCommand>[] COMMAND_CLASSES =
+            new Class[] {BridgeUpdateCommand.class,
+                    OpenVSwitchBridgeAddCommand.class, ControllerUpdateCommand.class, ControllerRemovedCommand.class,
+                    ProtocolUpdateCommand.class, ProtocolRemovedCommand.class, BridgeRemovedCommand.class,
+                    TerminationPointCreateCommand.class,
+                    TerminationPointDeleteCommand.class, OvsdbNodeUpdateCommand.class, AutoAttachUpdateCommand.class,
+                    AutoAttachRemovedCommand.class, QosUpdateCommand.class, QosRemovedCommand.class,
+                    QueueUpdateCommand.class,
+                    QueueRemovedCommand.class, TerminationPointUpdateCommand.class};
 
     @Override
-    public void execute(TransactionBuilder transaction) {
-        for (TransactCommand command:commands) {
-            command.execute(transaction);
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        for (Class<? extends TransactCommand> commandClass : COMMAND_CLASSES) {
+            try {
+                commandClass.newInstance().execute(transaction, state, events);
+            } catch (InstantiationException | IllegalAccessException e) {
+                LOG.error("Error instantiating {}", commandClass, e);
+            }
         }
     }
 }

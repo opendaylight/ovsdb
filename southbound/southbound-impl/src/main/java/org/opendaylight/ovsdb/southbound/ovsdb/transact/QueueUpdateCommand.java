@@ -41,40 +41,33 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
-public class QueueUpdateCommand extends AbstractTransactCommand {
+public class QueueUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueUpdateCommand.class);
 
-
-    public QueueUpdateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> created =
-                TransactUtils.extractCreated(getChanges(),OvsdbNodeAugmentation.class);
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            created.entrySet()) {
-            updateQueue(transaction,  ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
-        }
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated =
-                TransactUtils.extractUpdated(getChanges(),OvsdbNodeAugmentation.class);
-        for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            updated.entrySet()) {
-            updateQueue(transaction,  ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
+            createdOrUpdated.entrySet()) {
+            updateQueue(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
         }
     }
 
     private void updateQueue(
-            TransactionBuilder transaction,
+            TransactionBuilder transaction, BridgeOperationalState state,
             InstanceIdentifier<OvsdbNodeAugmentation> iid, OvsdbNodeAugmentation ovsdbNode) {
 
         List<Queues> queueList = ovsdbNode.getQueues();
 
-        if (!getOperationalState().getBridgeNode(iid).isPresent()) {
+        if (!state.getBridgeNode(iid).isPresent()) {
             return;
         }
-        OvsdbNodeAugmentation operNode = getOperationalState().getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation operNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
         List<Queues> operQueues = operNode.getQueues();
 
         if (queueList != null) {

@@ -119,7 +119,7 @@ public class OvsdbNodeUpdateCommandTest {
         doNothing().when(ovs).setOtherConfig(any(ImmutableMap.class));
         when(ovs.getOtherConfigColumn()).thenReturn(column);
 
-        ovsdbNodeUpdateCommand.execute(transaction);
+        ovsdbNodeUpdateCommand.execute(transaction, mock(BridgeOperationalState.class), changes);
         verify(externalId).getExternalIdKey();
         verify(otherConfig).getOtherConfigKey();
         verify(ovs, times(2)).getExternalIdsColumn();

@@ -34,22 +34,21 @@ import com.google.common.collect.Sets;
  * @author avishnoi@brocade.com (Anil Vishnoi)
  *
  */
-public class TerminationPointDeleteCommand extends AbstractTransactCommand {
+public class TerminationPointDeleteCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointDeleteCommand.class);
 
-    public TerminationPointDeleteCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbTerminationPointAugmentation.class),
+                TransactUtils.extractOriginal(events, Node.class),
+                TransactUtils.extractRemoved(events, OvsdbTerminationPointAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> originals
-            = TransactUtils.extractOriginal(getChanges(),OvsdbTerminationPointAugmentation.class);
-        Map<InstanceIdentifier<Node>, Node> originalNodes
-            = TransactUtils.extractOriginal(getChanges(),Node.class);
-        Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps
-            = TransactUtils.extractRemoved(getChanges(), OvsdbTerminationPointAugmentation.class);
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> originals,
+                         Map<InstanceIdentifier<Node>, Node> originalNodes,
+                         Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
             LOG.info("Received request to delete termination point {}",removedTpIid);
 
@@ -61,7 +60,7 @@ public class TerminationPointDeleteCommand extends AbstractTransactCommand {
                      ? originalOvsdbBridgeAugmentation.getBridgeName().getValue() : "Bridge name not found";
             Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class,null);
             Optional<OvsdbTerminationPointAugmentation> tpAugmentation =
-                    getOperationalState().getOvsdbTerminationPointAugmentation(removedTpIid);
+                    state.getOvsdbTerminationPointAugmentation(removedTpIid);
 
             if (tpAugmentation.isPresent()) {
                 OvsdbTerminationPointAugmentation tp = tpAugmentation.get();

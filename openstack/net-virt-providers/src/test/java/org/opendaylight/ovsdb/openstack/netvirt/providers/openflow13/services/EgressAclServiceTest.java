@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -1596,10 +1596,10 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
 
-        verify(writeTransaction, times(12)).put(any(LogicalDatastoreType.class),
+        verify(writeTransaction, times(14)).put(any(LogicalDatastoreType.class),
                                                any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(12)).submit();
-        verify(commitFuture, times(12)).checkedGet();
+        verify(writeTransaction, times(14)).submit();
+        verify(commitFuture, times(14)).checkedGet();
     }
 
     /**
@@ -1611,9 +1611,9 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
 
-        verify(writeTransaction, times(12)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(12)).submit();
-        verify(commitFuture, times(12)).get();
+        verify(writeTransaction, times(14)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(14)).submit();
+        verify(commitFuture, times(14)).get();
     }
 
 }

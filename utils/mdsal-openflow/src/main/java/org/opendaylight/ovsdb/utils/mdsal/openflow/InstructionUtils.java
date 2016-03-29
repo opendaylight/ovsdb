@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2013 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,6 +9,11 @@
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import static org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils.dropAction;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -69,14 +74,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.TunnelIpv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class InstructionUtils {
     private static final Logger LOG = LoggerFactory.getLogger(InstructionUtils.class);
@@ -1131,7 +1130,6 @@ public class InstructionUtils {
     /**
      * Get a list of Instructions containing Nicira extensions that can have
      * additional OF/OXM instructions added to the returned Instruction list
-     *
      * @param instructions org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instructions
      * @return instruction list that additional
      */
@@ -1147,5 +1145,24 @@ public class InstructionUtils {
                     .build());
         }
         return ins;
+    }
+
+    /**
+     * Create InstructionBuilder with apply action.
+     *
+     * @param aab the apply action Builder.
+     * @param order the position of the instruction in the instruction list.
+     * @param drop indicates whether it is a drop instruction.
+     * @return the instruction builder.
+     */
+    public static InstructionBuilder createInstructionBuilder(ApplyActionsBuilder aab, int order, boolean drop) {
+        InstructionBuilder ib = new InstructionBuilder();
+        ib.setOrder(order);
+        ib.setKey(new InstructionKey(order));
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+        if (drop) {
+            InstructionUtils.createDropInstructions(ib);
+        }
+        return ib;
     }
 }

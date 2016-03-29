@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2015 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,7 +9,9 @@
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import com.google.common.base.Optional;
+
 import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -105,6 +107,21 @@ public class FlowUtils {
                 .setPriority(0);
     }
 
+    /**
+     * Creates a flowBuilder.
+     * @param flowName the flow name
+     * @param priority the priority
+     * @param matchBuilder the match builder
+     * @param tableNo the table no to which flow needs to be inserted.
+     * @return the created flow builder.
+     */
+    public static FlowBuilder createFlowBuilder(String flowName,Integer priority,
+                                                MatchBuilder matchBuilder, short tableNo) {
+        FlowBuilder flowBuilder = new FlowBuilder();
+        flowBuilder.setMatch(matchBuilder.build());
+        initFlowBuilder(flowBuilder, flowName, tableNo).setPriority(priority);
+        return flowBuilder;
+    }
     /**
      * Sets up common defaults for the given flow builder: a flow identifier and key based on the given flow name,
      * strict, no barrier, the given table identifier, no hard timeout and no idle timeout.

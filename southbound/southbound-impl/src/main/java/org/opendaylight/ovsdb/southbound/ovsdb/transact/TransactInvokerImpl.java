@@ -9,10 +9,13 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.List;
 
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +32,14 @@ public class TransactInvokerImpl implements TransactInvoker {
     }
 
     @Override
-    public void invoke(TransactCommand command) {
+    public void invoke(TransactCommand command, BridgeOperationalState state,
+                       AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
-        command.execute(tb);
+        command.execute(tb, state, events);
+        invoke(command, tb);
+    }
+
+    private void invoke(TransactCommand command, TransactionBuilder tb) {
         ListenableFuture<List<OperationResult>> result = tb.execute();
         LOG.debug("invoke: command: {}, tb: {}", command, tb);
         if (tb.getOperations().size() > 0) {

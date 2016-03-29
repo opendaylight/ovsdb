@@ -43,43 +43,32 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-public class BridgeUpdateCommand extends AbstractTransactCommand {
+public class BridgeUpdateCommand implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(BridgeUpdateCommand.class);
 
-    public BridgeUpdateCommand(BridgeOperationalState state,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
-    }
-
-
-
     @Override
-    public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> created =
-                TransactUtils.extractCreated(getChanges(),OvsdbBridgeAugmentation.class);
-        for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry:
-            created.entrySet()) {
-            updateBridge(transaction,  ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue());
-        }
-        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updated =
-                TransactUtils.extractUpdated(getChanges(),OvsdbBridgeAugmentation.class);
-        for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry:
-            updated.entrySet()) {
-            updateBridge(transaction,  ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue());
-        }
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
     }
 
-
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> createdOrUpdated) {
+        for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry :
+                createdOrUpdated.entrySet()) {
+            updateBridge(transaction, state, ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue());
+        }
+    }
 
     private void updateBridge(
-            TransactionBuilder transaction,
+            TransactionBuilder transaction, BridgeOperationalState state,
             InstanceIdentifier<OvsdbBridgeAugmentation> iid, OvsdbBridgeAugmentation ovsdbManagedNode) {
         LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                     ovsdbManagedNode.getBridgeName(),
                     ovsdbManagedNode.getBridgeUuid());
         Optional<OvsdbBridgeAugmentation> operationalBridgeOptional =
-                getOperationalState().getOvsdbBridgeAugmentation(iid);
+                state.getOvsdbBridgeAugmentation(iid);
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);

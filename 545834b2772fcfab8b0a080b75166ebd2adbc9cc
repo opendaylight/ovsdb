@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_b978a82c",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-03-30T20:41:23Z",
+      "side": 0,
+      "message": "Sam has pushed this in another patch. I did not rebase before pushing my patch, so this will not go in.",
+      "revId": "545834b2772fcfab8b0a080b75166ebd2adbc9cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_f9723048",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-03-30T20:41:23Z",
+      "side": 0,
+      "message": "Sam has pushed this already, I did not rebase yet to pick up his change. This will not go in with my patch, which is WIP.",
+      "revId": "545834b2772fcfab8b0a080b75166ebd2adbc9cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

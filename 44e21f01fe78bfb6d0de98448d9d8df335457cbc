@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_59b6c4dd",
+        "filename": "netvirt/api/src/main/yang/netvirt-ports.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-03-30T20:47:13Z",
+      "side": 1,
+      "message": "Spent quite a bit of time chasing this one down. Sam helped me debug to find this fix. Thanks Sam!\n\n\n\nWhen trying to write netvirt port to mdsal, via mdsal.put(), this error log was generated:\n2016-03-28 17:51:27,002 | WARN  | on-dispatcher-39 | JavassistUtils                   | 87 - org.opendaylight.mdsal.binding-generator-impl - 0.9.0.SNAPSHOT | Failed to customize org.opendaylight.yang.gen.v1.urn.opendaylight.netvirt.ports.rev151227.port.EndPoints$StreamWriter from prototype org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerPrototype                                                                                                                                       \njavassist.CannotCompileException: [source error] no such class: org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress              \n\n\nAlso, reference gist:\nhttps://gist.github.com/vpickard/1de6108406d0179752df",
+      "revId": "44e21f01fe78bfb6d0de98448d9d8df335457cbc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

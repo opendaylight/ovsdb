@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_8b83d9cb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_9c47a51d",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_dc512dda",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 16
@@ -30,6 +48,30 @@
       "writtenOn": "2016-03-27T21:49:05Z",
       "side": 1,
       "message": "maybe log at DEBUG level would make more sense",
+      "range": {
+        "startLine": 570,
+        "startChar": 32,
+        "endLine": 570,
+        "endChar": 36
+      },
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_6b880de8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "nope these are basic ovsdb actions to the switch, so i think we need to log this info.",
+      "parentUuid": "3a4c51b2_dc512dda",
       "range": {
         "startLine": 570,
         "startChar": 32,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_cb6cc139",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_fc54e9cb",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_3c5e51ea",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 16
@@ -82,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_2b656545",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "it\u0027s private enum, so i think it\u0027s fine.",
+      "parentUuid": "3a4c51b2_3c5e51ea",
+      "range": {
+        "startLine": 609,
+        "startChar": 0,
+        "endLine": 617,
+        "endChar": 5
+      },
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_1c6395b2",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 16
@@ -93,6 +177,24 @@
       "writtenOn": "2016-03-27T21:49:05Z",
       "side": 1,
       "message": "space before curly bracket",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_8b359948",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_1c6395b2",
       "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -139,6 +241,48 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_4b1271b5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Yes, once community decide the strategy for upgrade, we can make these configurable based on blueprint or config subsystem.",
+      "parentUuid": "3a4c51b2_7c58d9fa",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 51
+      },
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_6b3acd37",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_dcb5ad32",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_3c82d152",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 16
@@ -150,6 +294,24 @@
       "writtenOn": "2016-03-27T12:36:21Z",
       "side": 1,
       "message": "spacing between params",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_2b1725a5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_3c82d152",
       "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -179,6 +341,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_8b0c7996",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Yes, we can make this configurable as well.",
+      "parentUuid": "3a4c51b2_5c5d1de9",
+      "range": {
+        "startLine": 81,
+        "startChar": 19,
+        "endLine": 81,
+        "endChar": 43
+      },
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_7c7c5973",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
         "patchSetId": 16
@@ -190,6 +376,24 @@
       "writtenOn": "2016-03-27T12:36:21Z",
       "side": 1,
       "message": "Please follow coding conventions:\n  - always use braces for if blocks\n  - code blocks should start on separate line",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_6b112dac",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_7c7c5973",
       "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -213,6 +417,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_cb25e10b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTaskManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_5c819d49",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_bc95418a",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTaskManager.java",
         "patchSetId": 16
@@ -224,6 +446,24 @@
       "writtenOn": "2016-03-27T12:36:21Z",
       "side": 1,
       "message": "This class is only use by the ReconciliationManager so it doesn\u0027t need to be public.",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_0b2069f6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTaskManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_bc95418a",
       "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -253,6 +493,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_ab2215ff",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTaskManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "no, this need to info.",
+      "parentUuid": "3a4c51b2_7c41f90a",
+      "range": {
+        "startLine": 45,
+        "startChar": 20,
+        "endLine": 45,
+        "endChar": 24
+      },
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_9c6e8595",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
         "patchSetId": 16
@@ -264,6 +528,24 @@
       "writtenOn": "2016-03-27T21:49:05Z",
       "side": 1,
       "message": "space before curly bracket",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_8b5ab981",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_9c6e8595",
       "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -310,6 +592,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_eb1c1dc4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_bc71c179",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 39
+      },
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_fc6b4983",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
         "patchSetId": 16
@@ -327,6 +633,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_4b79d1fb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "these needs to be info, so that user knows that retry attempt is being made.",
+      "parentUuid": "3a4c51b2_fc6b4983",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_dc680d8a",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
         "patchSetId": 16
@@ -338,6 +662,24 @@
       "writtenOn": "2016-03-27T21:49:05Z",
       "side": 1,
       "message": "likewise",
+      "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_2b7e05e5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "similar to above this is also southbound plugin action, so we need to log this when it\u0027s connected.",
+      "parentUuid": "3a4c51b2_dc680d8a",
       "revId": "e59ed1446e3de7f943a5900380e33bbd2b0b37eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

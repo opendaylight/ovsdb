@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_0c053f45",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "let me find the intellj option for that, because it\u0027s very hard to keep track of these spaces after command manually :).",
+      "parentUuid": "9a3d3df0_a984050b",
+      "revId": "4e040e83dab03afb591e156862b6a3ccef86bbb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_097ff115",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 8
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_8c982f1d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_09a6d1ad",
+      "revId": "4e040e83dab03afb591e156862b6a3ccef86bbb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_a99b6564",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
         "patchSetId": 8
@@ -64,6 +100,24 @@
       "writtenOn": "2016-03-14T12:16:54Z",
       "side": 1,
       "message": "How about naming this RETRY_INTERVAL_FACTOR?\n\nAlso not trying to nitpick but the recommended order of variables:\n  - static final\n  - final\n  - non-final",
+      "revId": "4e040e83dab03afb591e156862b6a3ccef86bbb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_6c9b2b18",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliation.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-03-30T03:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_a99b6564",
       "revId": "4e040e83dab03afb591e156862b6a3ccef86bbb4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

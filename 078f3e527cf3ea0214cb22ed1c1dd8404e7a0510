@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_0b81898f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTask.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-30T04:00:15Z",
+      "side": 1,
+      "message": "Return should be on separate line with braces.",
+      "revId": "078f3e527cf3ea0214cb22ed1c1dd8404e7a0510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

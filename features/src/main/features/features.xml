@@ -40,12 +40,18 @@
     <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/utils.it-utils/{{VERSION}}</bundle>
+
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.neutron/dummyprovider/{{VERSION}}</bundle>
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}/xml/config</configfile>
+  </feature>
+
+  <feature name="odl-ovsdb-openstack-it" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization IT"
+           version='${project.version}'>
+    <feature version="${project.version}">odl-ovsdb-openstack</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.it-utils/{{VERSION}}</bundle>
   </feature>
 
   <feature name="odl-ovsdb-openstack-clusteraware" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization - Cluster Aware"

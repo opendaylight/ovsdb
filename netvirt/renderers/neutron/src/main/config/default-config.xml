@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <module>
           <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:neutron">prefix:netvirt-neutron</type>
-          <name>netvirt-neutron</name>
+          <name>netvirt-neutron-default</name>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>

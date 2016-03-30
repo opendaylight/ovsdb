@@ -28,24 +28,15 @@ public class MdsalHelper {
     public static final String PORT_URI_PREFIX = "port";
     public static final String NETWORK_URI_PREFIX = "network";
 
-    /*
-    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
-        return nodeKey.getNodeId();
-    }
-    */
-
-    public static InstanceIdentifier<Port> createInstanceIdentifier() {
-
-        return InstanceIdentifier
-                .create(Ports.class)
-                .child(Port.class, new PortKey(new Uuid("12345678-1234-1224-1234-123456789012")));
+    public static InstanceIdentifier<Port> createInstanceIdentifier(String portUuid) {
+        return InstanceIdentifier.create(Ports.class)
+                .child(Port.class, new PortKey(new Uuid(portUuid)));
     }
 
-    /*
+   /*
     public static InstanceIdentifier<Port> createInstanceIdentifier(Port port) {
         return InstanceIdentifier
-                .create(NetvirtNeutron.class)
+                .create(Ports.class)
                 .child(Ports.class)
                 .child(Ports.class, port.getKey());
     }

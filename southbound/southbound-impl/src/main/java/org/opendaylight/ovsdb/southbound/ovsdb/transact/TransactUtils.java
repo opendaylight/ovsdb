@@ -10,13 +10,21 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -33,8 +41,13 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+
+import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +85,36 @@ public class TransactUtils {
         return extract(changes.getCreatedData(),klazz);
     }
 
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, change -> change.getDataBefore() == null);
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz,
+            Predicate<DataObjectModification<T>> filter) {
+        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
+        for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry : extractDataObjectModifications(changes,
+                clazz,
+                new Predicate<DataObjectModification<T>>() {
+                    @Override
+                    public boolean apply(@Nullable DataObjectModification<T> input) {
+                        return input != null && input.getDataAfter() != null && filter.apply(input);
+                    }
+                }).entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getDataAfter());
+        }
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getUpdatedData(),klazz);
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, change -> change.getDataBefore() != null);
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
@@ -82,6 +122,11 @@ public class TransactUtils {
         Map<InstanceIdentifier<T>,T> result = extractUpdated(changes,klazz);
         result.putAll(extractCreated(changes,klazz));
         return result;
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, change -> true);
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
@@ -92,9 +137,31 @@ public class TransactUtils {
         return result;
     }
 
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Map<InstanceIdentifier<T>, T> result = extractCreatedOrUpdated(changes, clazz);
+        result.putAll(extractRemovedObjects(changes, clazz));
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractOriginal(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
+        for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry :
+                extractDataObjectModifications(changes, clazz, new Predicate<DataObjectModification<T>>() {
+                    @Override
+                    public boolean apply(@Nullable DataObjectModification<T> input) {
+                        return input != null && input.getDataBefore() != null;
+                    }
+                }).entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getDataBefore());
+        }
+        return result;
     }
 
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
@@ -112,11 +179,97 @@ public class TransactUtils {
         return result;
     }
 
+    public static <T extends DataObject, U extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractDataObjectModifications(changes, clazz,
+                new Predicate<DataObjectModification<T>>() {
+                    @Override
+                    public boolean apply(@Nullable DataObjectModification<T> input) {
+                        return input.getModificationType() == DataObjectModification.ModificationType.DELETE;
+                    }
+                }
+        ).keySet();
+    }
+
+    private static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
+    extractDataObjectModifications(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz,
+            Predicate<DataObjectModification<T>> filter) {
+        List<DataObjectModification<? extends DataObject>> dataObjectModifications = new ArrayList<>();
+        List<InstanceIdentifier<? extends DataObject>> paths = new ArrayList<>();
+        if (changes != null) {
+            for (DataTreeModification<? extends DataObject> change : changes) {
+                dataObjectModifications.add(change.getRootNode());
+                paths.add(change.getRootPath().getRootIdentifier());
+            }
+        }
+        return extractDataObjectModifications(dataObjectModifications, paths, clazz, filter);
+    }
+
+    private static <T extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
+    extractDataObjectModifications(
+            Collection<DataObjectModification<? extends DataObject>> changes,
+            Collection<InstanceIdentifier<? extends DataObject>> paths, Class<T> clazz,
+            Predicate<DataObjectModification<T>> filter) {
+        Map<InstanceIdentifier<T>, DataObjectModification<T>> result = new HashMap<>();
+        Queue<DataObjectModification<? extends DataObject>> remainingChanges = new LinkedList<>(changes);
+        Queue<InstanceIdentifier<? extends DataObject>> remainingPaths = new LinkedList<>(paths);
+        while (!remainingChanges.isEmpty()) {
+            DataObjectModification<? extends DataObject> change = remainingChanges.remove();
+            InstanceIdentifier<? extends DataObject> path = remainingPaths.remove();
+            // Is the change relevant?
+            if (clazz.isAssignableFrom(change.getDataType()) && filter.apply((DataObjectModification<T>) change)) {
+                result.put((InstanceIdentifier<T>) path, (DataObjectModification<T>) change);
+            }
+            // Add any children to the queue
+            for (DataObjectModification<? extends DataObject> child : change.getModifiedChildren()) {
+                remainingChanges.add(child);
+                remainingPaths.add(extendPath(path, child));
+            }
+        }
+        return result;
+    }
+
+    private static <N extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<N>, T extends DataObject>
+    InstanceIdentifier<? extends DataObject> extendPath(
+            InstanceIdentifier path,
+            DataObjectModification child) {
+        Class<N> item = (Class<N>) child.getDataType();
+        if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
+            K key = (K) ((InstanceIdentifier.IdentifiableItem) child.getIdentifier()).getKey();
+            KeyedInstanceIdentifier<N, K> extendedPath = path.child(item, key);
+            LOG.debug("Building a new child iid for {} with {} and key {}, resulting in {}",
+                    path, item, extendedPath);
+            return extendedPath;
+        } else {
+            InstanceIdentifier<N> extendedPath = path.child(item);
+            LOG.debug("Building a new child iid for {} with {}, resulting in {}",
+                    path, item, extendedPath);
+            return extendedPath;
+        }
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Class<T> klazz) {
         Set<InstanceIdentifier<T>> iids = extractRemoved(changes, klazz);
         return Maps.filterKeys(extractOriginal(changes, klazz),Predicates.in(iids));
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
+        for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry :
+                extractDataObjectModifications(changes, clazz, new Predicate<DataObjectModification<T>>() {
+                    @Override
+                    public boolean apply(@Nullable DataObjectModification<T> input) {
+                        return input != null && input.getModificationType() == DataObjectModification
+                                .ModificationType.DELETE && input.getDataBefore() != null;
+                    }
+                }).entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getDataBefore());
+        }
+        return result;
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(

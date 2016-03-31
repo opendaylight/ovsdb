@@ -48,7 +48,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     private static DataBroker db;
     private OvsdbConnectionManager cm;
     private TransactionInvoker txInvoker;
-    private OvsdbDataChangeListener ovsdbDataChangeListener;
+    private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
     private EntityOwnershipService entityOwnershipService;
     private EntityOwnershipCandidateRegistration registration;
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
@@ -70,7 +70,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         db = session.getSALService(DataBroker.class);
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection);
-        ovsdbDataChangeListener = new OvsdbDataChangeListener(db,cm);
+        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -100,7 +100,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     public void close() {
         LOG.info("SouthboundProvider Closed");
         cm.close();
-        ovsdbDataChangeListener.close();
+        ovsdbDataTreeChangeListener.close();
         registration.close();
         providerOwnershipChangeListener.close();
     }

@@ -10,8 +10,10 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -21,6 +23,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
 import com.google.common.collect.Sets;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -29,6 +32,12 @@ public class OpenVSwitchBridgeAddCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction);
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Collection<DataTreeModification<Node>> modifications) {
         execute(transaction);
     }
 

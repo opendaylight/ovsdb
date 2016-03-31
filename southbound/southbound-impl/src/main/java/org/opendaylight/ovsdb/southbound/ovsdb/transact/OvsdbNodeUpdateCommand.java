@@ -9,12 +9,14 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
@@ -40,6 +42,12 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         execute(transaction, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Collection<DataTreeModification<Node>> modifications) {
+        execute(transaction, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
     private void execute(TransactionBuilder transaction,

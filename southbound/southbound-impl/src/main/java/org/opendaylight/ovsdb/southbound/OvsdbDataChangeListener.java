@@ -163,6 +163,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                               + "to same device, hence dropping the request {}", key, ovsdbNode);
                 } else {
                     try {
+                        LOG.info("Connecting on key {} to {}", created.getKey(), created.getValue());
                         OvsdbClient client = cm.connect((InstanceIdentifier<Node>) created.getKey(),
                                 (OvsdbNodeAugmentation) created.getValue());
                         if(client == null) {

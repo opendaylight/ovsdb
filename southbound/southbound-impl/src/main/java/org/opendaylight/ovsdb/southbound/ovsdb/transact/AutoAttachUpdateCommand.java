@@ -10,12 +10,14 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -56,6 +58,12 @@ public class AutoAttachUpdateCommand implements TransactCommand {
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Collection<DataTreeModification<Node>> modifications) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,

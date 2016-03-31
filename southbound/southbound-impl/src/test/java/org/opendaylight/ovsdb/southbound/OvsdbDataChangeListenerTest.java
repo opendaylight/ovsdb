@@ -121,7 +121,7 @@ public class OvsdbDataChangeListenerTest {
         BridgeOperationalState bridgeOperationalState = mock(BridgeOperationalState.class);
         DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent = mock(DataChangesManagedByOvsdbNodeEvent.class);
         PowerMockito.whenNew(DataChangesManagedByOvsdbNodeEvent.class).withArguments(any(InstanceIdentifier.class), any(AsyncDataChangeEvent.class)).thenReturn(dataChangesManagedByOvsdbNodeEvent);
-        PowerMockito.whenNew(BridgeOperationalState.class).withArguments(any(DataBroker.class), any(AsyncDataChangeEvent.class)).thenReturn(bridgeOperationalState);
+        PowerMockito.whenNew(BridgeOperationalState.class.getConstructor(DataBroker.class, AsyncDataChangeEvent.class)).withArguments(any(DataBroker.class), any(AsyncDataChangeEvent.class)).thenReturn(bridgeOperationalState);
 
         when(connectionInstance.getInstanceIdentifier()).thenReturn(iid);
         doNothing().when(connectionInstance).transact(any(TransactCommandAggregator.class), eq(bridgeOperationalState),

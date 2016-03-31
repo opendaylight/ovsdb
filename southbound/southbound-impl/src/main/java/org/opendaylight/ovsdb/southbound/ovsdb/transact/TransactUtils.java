@@ -10,13 +10,20 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
 
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -33,8 +40,12 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+
+import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +83,45 @@ public class TransactUtils {
         return extract(changes.getCreatedData(),klazz);
     }
 
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, change -> change.getDataBefore() == null);
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz,
+            Predicate<DataObjectModification<T>> filter) {
+        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
+        if (changes != null) {
+            for (DataTreeModification<U> change : changes) {
+                if (clazz.isAssignableFrom(
+                        change.getRootNode().getDataType()) && change.getRootNode().getDataAfter() != null
+                        && filter.test((DataObjectModification<T>) change.getRootNode())) {
+                    result.put((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier(),
+                            (T) change.getRootNode().getDataAfter());
+                }
+                for (DataObjectModification<? extends DataObject> childChange : change.getRootNode()
+                        .getModifiedChildren()) {
+                    if (clazz.isAssignableFrom(
+                            childChange.getDataType()) && childChange.getDataAfter() != null && filter.test(
+                            (DataObjectModification<T>) childChange)) {
+                        result.put((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier().builder().child(
+                                (Class<? extends ChildOf<U>>) clazz).build(), (T) childChange.getDataAfter());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getUpdatedData(),klazz);
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, change -> change.getDataBefore() != null);
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
@@ -82,6 +129,11 @@ public class TransactUtils {
         Map<InstanceIdentifier<T>,T> result = extractUpdated(changes,klazz);
         result.putAll(extractCreated(changes,klazz));
         return result;
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, change -> true);
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
@@ -92,9 +144,38 @@ public class TransactUtils {
         return result;
     }
 
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Map<InstanceIdentifier<T>, T> result = extractCreatedOrUpdated(changes, clazz);
+        result.putAll(extractRemovedObjects(changes, clazz));
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractOriginal(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
+        for (DataTreeModification<U> change : changes) {
+            if (change.getRootNode().getDataBefore() != null && clazz.isAssignableFrom(
+                    change.getRootNode().getDataBefore().getClass())) {
+                //noinspection unchecked
+                result.put((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier(),
+                        (T) change.getRootNode().getDataBefore());
+            }
+            for (DataObjectModification<? extends DataObject> childChange : change.getRootNode()
+                    .getModifiedChildren()) {
+                if (clazz.isAssignableFrom(
+                        childChange.getDataType()) && childChange.getDataBefore() != null) {
+                    result.put((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier().builder().child(
+                            (Class<? extends ChildOf<U>>) clazz).build(), (T) childChange.getDataBefore());
+                }
+            }
+        }
+        return result;
     }
 
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
@@ -112,11 +193,82 @@ public class TransactUtils {
         return result;
     }
 
+    public static <T extends DataObject, U extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Set<InstanceIdentifier<T>> result = new HashSet<>();
+        if (changes != null) {
+            for (DataTreeModification<U> change : changes) {
+                result.addAll(extractRemoved(Collections.singleton(change.getRootNode()),
+                        Collections.singleton(change.getRootPath().getRootIdentifier()), clazz));
+                /*
+                if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE) {
+                    if (change.getRootNode().getDataBefore() != null && clazz.isAssignableFrom(
+                            change.getRootNode().getDataBefore().getClass())) {
+                        result.add((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier());
+                    }
+                    for (DataObjectModification<? extends DataObject> childChange : change.getRootNode()
+                            .getModifiedChildren()) {
+                        if (clazz.isAssignableFrom(
+                                childChange.getDataType()) && childChange.getDataBefore() != null) {
+                            result.add((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier().builder().child(
+                                    (Class<? extends ChildOf<U>>) clazz).build());
+                        }
+                    }
+                    // TODO Children
+                }
+                */
+            }
+        }
+        return result;
+    }
+
+    private static <T extends DataObject> Collection<InstanceIdentifier<T>> extractRemoved(
+            Collection<DataObjectModification<? extends DataObject>> changes,
+            Collection<InstanceIdentifier<? extends DataObject>> paths,
+            Class<T> clazz) {
+        Set<InstanceIdentifier<T>> result = new HashSet<>();
+        Queue<DataObjectModification<? extends DataObject>> remainingChanges = new LinkedList<>(changes);
+        Queue<InstanceIdentifier<? extends DataObject>> remainingPaths = new LinkedList<>(paths);
+        while (!remainingChanges.isEmpty()) {
+            DataObjectModification<? extends DataObject> change = remainingChanges.remove();
+            InstanceIdentifier<? extends DataObject> path = remainingPaths.remove();
+            // Is the change relevant as a removal?
+            if (change.getModificationType() == DataObjectModification.ModificationType.DELETE && clazz
+                    .isAssignableFrom(
+                    change.getDataType())) {
+                result.add((InstanceIdentifier<T>) path);
+            }
+            // Add any children to the queue
+            for (DataObjectModification<? extends DataObject> child : change.getModifiedChildren()) {
+                remainingChanges.add(child);
+                remainingPaths.add(path.child((Class<? extends ChildOf>) child.getDataType()));
+            }
+        }
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
             Class<T> klazz) {
         Set<InstanceIdentifier<T>> iids = extractRemoved(changes, klazz);
         return Maps.filterKeys(extractOriginal(changes, klazz),Predicates.in(iids));
+    }
+
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
+        if (changes != null) {
+            for (DataTreeModification<U> change : changes) {
+                if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE &&
+                        clazz.isAssignableFrom(
+                                change.getRootNode().getDataType()) && change.getRootNode().getDataBefore() != null) {
+                    result.put((InstanceIdentifier<T>) change.getRootPath().getRootIdentifier(),
+                            (T) change.getRootNode().getDataBefore());
+                }
+            }
+            // TODO Children
+        }
+        return result;
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(

@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -51,6 +53,13 @@ public class BridgeUpdateCommand implements TransactCommand {
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Collection<DataTreeModification<Node>> modifications) {
+        execute(transaction, state,
+                TransactUtils.extractCreatedOrUpdated(modifications, OvsdbBridgeAugmentation.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,

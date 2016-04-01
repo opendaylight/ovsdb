@@ -9,13 +9,8 @@
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,8 +34,12 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregato
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -135,7 +134,10 @@ public class OvsdbDataChangeListenerTest {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
         Map<InstanceIdentifier<?>, DataObject> originalDataObject = new HashMap<>();
         Set<InstanceIdentifier<?>> iiD = new HashSet<>();
-        InstanceIdentifier instanceIdentifier = mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> instanceIdentifier = InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class,new NodeKey(new NodeId("ovsdb://127.0.0.1:16640")))
+                .build();
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         iiD.add(instanceIdentifier);
         originalDataObject.put(instanceIdentifier, ovsdbNode);
@@ -166,7 +168,10 @@ public class OvsdbDataChangeListenerTest {
     public void testUpdateConnections() throws Exception {
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes = mock(AsyncDataChangeEvent.class);
         Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
-        InstanceIdentifier instanceIdentifier = mock(InstanceIdentifier.class);
+        InstanceIdentifier<?> instanceIdentifier = InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class,new NodeKey(new NodeId("ovsdb://127.0.0.1:16640")))
+                .build();
         OvsdbNodeAugmentation value = mock(OvsdbNodeAugmentation.class);
         map.put(instanceIdentifier, value);
 

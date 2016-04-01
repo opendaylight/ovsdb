@@ -6,28 +6,29 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.utils.it;
+package org.opendaylight.ovsdb.utils.itutils;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.List;
-
 import org.junit.Assert;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -100,5 +101,35 @@ public class ItUtils {
         }
         LOG.info("isControllerConnected exit: false {}", controllerTarget);
         return false;
+    }
+
+    public static DataBroker getDatabroker(BindingAwareBroker.ProviderContext providerContext) {
+        DataBroker dataBroker = providerContext.getSALService(DataBroker.class);
+        assertNotNull("dataBroker should not be null", dataBroker);
+        return dataBroker;
+    }
+
+    public Boolean getNetvirtTopology() {
+        LOG.info("getNetvirtTopology: looking for {}...", ItConstants.NETVIRT_TOPOLOGY_ID);
+        Boolean found = false;
+        final TopologyId topologyId = new TopologyId(new Uri(ItConstants.NETVIRT_TOPOLOGY_ID));
+        InstanceIdentifier<Topology> path =
+                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        for (int i = 0; i < 60; i++) {
+            Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
+            if (topology != null) {
+                LOG.info("getNetvirtTopology: found {}...", ItConstants.NETVIRT_TOPOLOGY_ID);
+                found = true;
+                break;
+            } else {
+                LOG.info("getNetvirtTopology: still looking (try {})...", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOG.warn("Interrupted while waiting for {}", ItConstants.NETVIRT_TOPOLOGY_ID, e);
+                }
+            }
+        }
+        return found;
     }
 }

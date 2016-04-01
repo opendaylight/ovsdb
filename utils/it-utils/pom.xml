@@ -69,7 +69,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.opendaylight.ovsdb.utils.it
+              org.opendaylight.ovsdb.utils.itutils
             </Export-Package>
           </instructions>
         </configuration>

@@ -40,7 +40,6 @@
     <bundle>mvn:org.opendaylight.ovsdb/utils.neutron-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
-
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/{{VERSION}}</bundle>
     <bundle>mvn:commons-net/commons-net/{{VERSION}}</bundle>
@@ -103,4 +102,8 @@
     <configfile finalname="etc/opendaylight/karaf/netvirt-neutron-default-config.xml">mvn:org.opendaylight.ovsdb/neutron/{{VERSION}}/xml/config</configfile>
   </feature>
 
+  <feature name='odl-netvirt-it' version='${project.version}' description='OpenDaylight :: netvirt :: IT'>
+    <feature version="${project.version}">odl-netvirt-neutron</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.it-utils/{{VERSION}}</bundle>
+  </feature>
 </features>

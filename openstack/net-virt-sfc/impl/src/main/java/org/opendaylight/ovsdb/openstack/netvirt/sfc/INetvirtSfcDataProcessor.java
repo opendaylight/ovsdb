@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 Dell, Inc. and others. All rights reserved.
+ * Copyright (c) 2013, 2016 Dell, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.sfc;
 
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -16,7 +15,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * netvirt-sfc-dcl processor
  * org.opendaylight.ovsdb.openstack.netvirt.sfc
  */
-public interface INetvirtSfcDataProcessor<D extends DataObject> extends AutoCloseable, DataTreeChangeListener<D> {
+public interface INetvirtSfcDataProcessor<D extends DataObject> {
 
     /**
      * Method removes DataObject which is identified by InstanceIdentifier.

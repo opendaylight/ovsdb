@@ -93,6 +93,40 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_a8997070",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "This should be a Javadoc, not a comment in the method.",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_a8b4d0f2",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "I like imports :-)\n\n    PortBuilder portBuilder \u003d new PortBuilder();",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_4879cc92",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -104,6 +138,23 @@
       "writtenOn": "2016-04-01T01:58:05Z",
       "side": 1,
       "message": "probably expand this to portBuilder. Easier to read than b.",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_68a128a9",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "Import this too.",
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -195,6 +246,57 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_289f2061",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "In addition, I like to use as small a scope as possible for variables, so this should go inside the if block below.",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_089ce468",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "According to the Javadocs, this IpAddress() constructor is only intended for use in JMX calls; I guess you\u0027re supposed to create either an Ipv4Address or an Ipv6Address and build the IpAddress using that...",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_688f6824",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "This is a question of taste, but I like fluent-style construction for a couple of reasons: it avoids declaring a new variable for the builder (so there\u0027s no risk of re-use) and it allows us to clarify what we\u0027re really interested in (either the list of endpoints or a specific endpoint):\n\n   endpoints.add(new EndpointsBuilder()\n       .setMacaddr(new MacAddress(change.getMacAddress()))\n       .setIpaddrs(ipAddressList())\n       .build());\n\nor even, since there\u0027s only one:\n\n    portB.setEndPoints(Collections.singletonList(new EndpointsBuilder()\n       .setMacaddr(new MacAddress(change.getMacAddress()))\n       .setIpaddrs(ipAddressList())\n       .build()));\n\nbut you could reasonably argue that that\u0027s hard to read, so\n\n    Endpoints endpoint \u003d new EndpointsBuilder()\n       .setMacaddr(new MacAddress(change.getMacAddress()))\n       .setIpaddrs(ipAddressList())\n       .build();\n    portB.setEndPoints(Collections.singletonList(endpoint));",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_085fc40f",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -206,6 +308,40 @@
       "writtenOn": "2016-04-01T01:58:05Z",
       "side": 1,
       "message": "comment not needed",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_48942c37",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "Since result is only used here, just declare it here:\n\n    boolean result \u003d ...\n\nWould there be any point in returning it?",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_889e3455",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-01T07:47:18Z",
+      "side": 1,
+      "message": "The exception isn\u0027t necessary here, it\u0027s best to remove it.",
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

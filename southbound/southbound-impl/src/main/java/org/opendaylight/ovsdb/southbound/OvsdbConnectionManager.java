@@ -573,7 +573,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
                         } else {
                             LOG.debug("Connection {} was switch initiated, no reconciliation is required"
-                                    , ovsdbNode.getConnectionInfo());
+                                    , iid.firstKeyOf(Node.class).getNodeId());
                         }
                     }
 

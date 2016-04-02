@@ -25,16 +25,18 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for OVSDB integration tests.
  */
 public final class LibraryIntegrationTestUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(LibraryIntegrationTestUtils.class);
     public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     public static final String SERVER_PORT = "ovsdbserver.port";
     public static final String CONNECTION_TYPE = "ovsdbserver.connection";
-    public final static String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
+    public final static String OPEN_VSWITCH = "Open_vSwitch";
     public final static String HARDWARE_VTEP = "hardware_vtep";
     private static final String CONNECTION_TYPE_ACTIVE = "active";
     private static final String CONNECTION_TYPE_PASSIVE = "passive";
@@ -47,7 +49,8 @@ public final class LibraryIntegrationTestUtils {
         // Nothing to do
     }
 
-    public static OvsdbClient getTestConnection(BindingAwareProvider provider) throws IOException, InterruptedException, ExecutionException, TimeoutException {
+    public static OvsdbClient getTestConnection(BindingAwareProvider provider) throws IOException,
+            InterruptedException, ExecutionException, TimeoutException {
         Properties props = System.getProperties();
         String addressStr = props.getProperty(SERVER_IPADDRESS);
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
@@ -63,8 +66,7 @@ public final class LibraryIntegrationTestUtils {
             try {
                 address = InetAddress.getByName(addressStr);
             } catch (Exception e) {
-                System.out.println("Unable to resolve " + addressStr);
-                e.printStackTrace();
+                LOG.warn("Unable to resolve {}", addressStr, e);
                 return null;
             }
 
@@ -72,40 +74,27 @@ public final class LibraryIntegrationTestUtils {
             try {
                 port = Integer.parseInt(portStr);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid port number : " + portStr);
-                e.printStackTrace();
+                LOG.warn("Invalid port number: {}", portStr, e);
                 return null;
             }
 
-            OvsdbConnection connection = (OvsdbConnection) ServiceHelper.getGlobalInstance(OvsdbConnection.class, provider);
+            OvsdbConnection connection =
+                    (OvsdbConnection) ServiceHelper.getGlobalInstance(OvsdbConnection.class, provider);
             return connection.connect(address, port);
         } else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
             ExecutorService executor = Executors.newFixedThreadPool(1);
             Future<OvsdbClient> passiveConnection = executor.submit(new PassiveListener());
             return passiveConnection.get(60, TimeUnit.SECONDS);
         }
-        throw new IllegalArgumentException("Connection parameter (" + CONNECTION_TYPE + ") must be either active or passive");
-    }
-
-    public static String bundleStateToString(int state) {
-        switch (state) {
-            case Bundle.ACTIVE:
-                return "ACTIVE";
-            case Bundle.INSTALLED:
-                return "INSTALLED";
-            case Bundle.RESOLVED:
-                return "RESOLVED";
-            case Bundle.UNINSTALLED:
-                return "UNINSTALLED";
-            default:
-                return "Not CONVERTED";
-        }
+        throw new IllegalArgumentException("Connection parameter (" + CONNECTION_TYPE
+                + ") must be either active or passive");
     }
 
     private static String usage() {
-        return "Integration Test needs a valid connection configuration as follows :\n" +
-                "active connection : mvn -Pintegrationtest -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"+
-                "passive connection : mvn -Pintegrationtest -Dovsdbserver.connection=passive verify\n";
+        return "Integration Test needs a valid connection configuration as follows :\n"
+                + "active connection : mvn -Pintegrationtest -Dovsdbserver.ipaddress=x.x.x.x "
+                + " -Dovsdbserver.port=yyyy verify\n"
+                + "passive connection : mvn -Pintegrationtest -Dovsdbserver.connection=passive verify\n";
     }
 
     private static class PassiveListener implements Callable<OvsdbClient>, OvsdbConnectionListener {
@@ -133,5 +122,4 @@ public final class LibraryIntegrationTestUtils {
             this.client = null;
         }
     }
-
 }

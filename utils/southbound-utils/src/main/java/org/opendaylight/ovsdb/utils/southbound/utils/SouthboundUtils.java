@@ -9,28 +9,34 @@
 package org.opendaylight.ovsdb.utils.southbound.utils;
 
 import com.google.common.collect.ImmutableBiMap;
+import java.math.BigInteger;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
@@ -58,6 +64,10 @@ public class SouthboundUtils {
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     private final MdsalUtils mdsalUtils;
+    public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
+    public static short OPENFLOW_PORT = 6653;
+    public static final String OVSDB_URI_PREFIX = "ovsdb";
+    public static final String BRIDGE_URI_PREFIX = "bridge";
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
@@ -82,8 +92,18 @@ public class SouthboundUtils {
             .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
             .build();
 
+    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
+            = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
+            .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
+            .put(OvsdbBridgeProtocolOpenflow11.class,"OpenFlow11")
+            .put(OvsdbBridgeProtocolOpenflow12.class,"OpenFlow12")
+            .put(OvsdbBridgeProtocolOpenflow13.class,"OpenFlow13")
+            .put(OvsdbBridgeProtocolOpenflow14.class,"OpenFlow14")
+            .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
+            .build();
+
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
-        String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
+        String uriString = OVSDB_URI_PREFIX + "://"
                 + String.valueOf(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         return new NodeId(uri);
@@ -102,6 +122,22 @@ public class SouthboundUtils {
         return ovsdbNodeBuilder.build();
     }
 
+    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
+        return InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+                .child(Node.class,new NodeKey(nodeId));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeKey ovsdbNodeKey, String bridgeName) {
+        return createInstanceIdentifier(createManagedNodeId(ovsdbNodeKey.getNodeId(), bridgeName));
+    }
+
+    public static NodeId createManagedNodeId(NodeId ovsdbNodeId, String bridgeName) {
+        return new NodeId(ovsdbNodeId.getValue()
+                + "/" + BRIDGE_URI_PREFIX + "/" + bridgeName);
+    }
+
     public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
         return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
     }
@@ -109,14 +145,14 @@ public class SouthboundUtils {
     public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
                 .child(Node.class,createNodeKey(ip,port));
         LOG.debug("Created ovsdb path: {}",path);
         return path;
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
-        return SouthboundMapper.createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+        return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, String bridgeName) {
@@ -145,12 +181,44 @@ public class SouthboundUtils {
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
         return new NodeId(createNodeId(ip,port).getValue()
-                + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
+                + "/" + BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
         NodeKey nodeKey = iid.firstKeyOf(Node.class);
         return nodeKey.getNodeId();
+    }
+
+    public ConnectionInfo getConnectionInfo(Node ovsdbNode) {
+        ConnectionInfo connectionInfo = null;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = extractOvsdbNode(ovsdbNode);
+        if (ovsdbNodeAugmentation != null) {
+            connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+        }
+        return connectionInfo;
+    }
+
+    public OvsdbNodeAugmentation extractOvsdbNode(Node node) {
+        return node.getAugmentation(OvsdbNodeAugmentation.class);
+    }
+
+    public static IpAddress createIpAddress(InetAddress address) {
+        IpAddress ip = null;
+        if (address instanceof Inet4Address) {
+            ip = createIpAddress((Inet4Address)address);
+        } else if (address instanceof Inet6Address) {
+            ip = createIpAddress((Inet6Address)address);
+        }
+        return ip;
+    }
+
+    public static IpAddress createIpAddress(Inet4Address address) {
+        return IetfInetUtil.INSTANCE.ipAddressFor(address);
+    }
+
+    public static IpAddress createIpAddress(Inet6Address address) {
+        Ipv6Address ipv6 = new Ipv6Address(address.getHostAddress());
+        return new IpAddress(ipv6);
     }
 
     public static ConnectionInfo getConnectionInfo(final String addressStr, final String portStr) {
@@ -161,7 +229,7 @@ public class SouthboundUtils {
             LOG.warn("Could not allocate InetAddress", e);
         }
 
-        IpAddress address = SouthboundMapper.createIpAddress(inetAddress);
+        IpAddress address = createIpAddress(inetAddress);
         PortNumber port = new PortNumber(Integer.parseInt(portStr));
 
         LOG.info("connectionInfo: {}", new ConnectionInfoBuilder()
@@ -296,6 +364,57 @@ public class SouthboundUtils {
         return mdsalUtils.read(store, bridgeIid);
     }
 
+    public Node getBridgeNode(Node node, String bridgeName) {
+        OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
+        if (bridge != null && bridge.getBridgeName().getValue().equals(bridgeName)) {
+            return node;
+        } else {
+            return readBridgeNode(node, bridgeName);
+        }
+    }
+
+    public Node readBridgeNode(Node node, String name) {
+        Node ovsdbNode = node;
+        if (extractNodeAugmentation(ovsdbNode) == null) {
+            ovsdbNode = readOvsdbNode(node);
+            if (ovsdbNode == null) {
+                return null;
+            }
+        }
+        Node bridgeNode = null;
+        ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
+        if (connectionInfo != null) {
+            InstanceIdentifier<Node> bridgeIid =
+                    createInstanceIdentifier(node.getKey(), name);
+            bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        }
+        return bridgeNode;
+    }
+
+    public OvsdbNodeAugmentation extractNodeAugmentation(Node node) {
+        return node.getAugmentation(OvsdbNodeAugmentation.class);
+    }
+
+    public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
+        if (node == null) {
+            return null;
+        }
+        return node.getAugmentation(OvsdbBridgeAugmentation.class);
+    }
+
+    public Node readOvsdbNode(Node bridgeNode) {
+        Node ovsdbNode = null;
+        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
+        if (bridgeAugmentation != null) {
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+            ovsdbNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
+        }else{
+            LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}",bridgeNode);
+        }
+        return ovsdbNode;
+    }
+
     public boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName) {
         return deleteBridge(connectionInfo, bridgeName, OVSDB_UPDATE_TIMEOUT);
     }
@@ -316,7 +435,7 @@ public class SouthboundUtils {
     public List<ProtocolEntry> createMdsalProtocols() {
         List<ProtocolEntry> protocolList = new ArrayList<>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+                OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
         return protocolList;
     }
@@ -363,7 +482,7 @@ public class SouthboundUtils {
             bridgeIid = createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
         }
         if (bridgeNodeId == null) {
-            bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+            bridgeNodeId = createManagedNodeId(bridgeIid);
         }
         bridgeNodeBuilder.setNodeId(bridgeNodeId);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
@@ -461,5 +580,153 @@ public class SouthboundUtils {
 
     public Boolean addTerminationPoint(Node bridgeNode, String portName, String type) {
         return addTerminationPoint(bridgeNode, portName, type, null, null);
+    }
+
+    private String getControllerIPAddress() {
+        String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
+        if (addressString != null) {
+            try {
+                if (InetAddress.getByName(addressString) != null) {
+                    return addressString;
+                }
+            } catch (UnknownHostException e) {
+                LOG.error("Host {} is invalid", addressString, e);
+            }
+        }
+
+        addressString = ConfigProperties.getProperty(this.getClass(), "of.address");
+        if (addressString != null) {
+            try {
+                if (InetAddress.getByName(addressString) != null) {
+                    return addressString;
+                }
+            } catch (UnknownHostException e) {
+                LOG.error("Host {} is invalid", addressString, e);
+            }
+        }
+
+        return null;
+    }
+
+    private short getControllerOFPort() {
+        short openFlowPort = OPENFLOW_PORT;
+        String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
+        if (portString != null) {
+            try {
+                openFlowPort = Short.parseShort(portString);
+            } catch (NumberFormatException e) {
+                LOG.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort, e);
+            }
+        }
+        return openFlowPort;
+    }
+
+    public List<String> getControllersFromOvsdbNode(Node node) {
+        List<String> controllersStr = new ArrayList<>();
+
+        String controllerIpStr = getControllerIPAddress();
+        if (controllerIpStr != null) {
+            // If codepath makes it here, the ip address to be used was explicitly provided.
+            // Being so, also fetch openflowPort provided via ConfigProperties.
+            controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
+                    + ":" + controllerIpStr + ":" + getControllerOFPort());
+        } else {
+            // Check if ovsdb node has manager entries
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = extractOvsdbNode(node);
+            if (ovsdbNodeAugmentation != null) {
+                List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
+                if (managerEntries != null && !managerEntries.isEmpty()) {
+                    for (ManagerEntry managerEntry : managerEntries) {
+                        if (managerEntry == null || managerEntry.getTarget() == null) {
+                            continue;
+                        }
+                        String[] tokens = managerEntry.getTarget().getValue().split(":");
+                        if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
+                            controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
+                                    + ":" + tokens[1] + ":" + getControllerOFPort());
+                        } else if (tokens[0].equalsIgnoreCase("ptcp")) {
+                            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
+                                controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
+                                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
+                            } else {
+                                LOG.warn("Ovsdb Node does not contain connection info: {}", node);
+                            }
+                        } else {
+                            LOG.trace("Skipping manager entry {} for node {}",
+                                    managerEntry.getTarget(), node.getNodeId().getValue());
+                        }
+                    }
+                } else {
+                    LOG.warn("Ovsdb Node does not contain manager entries : {}", node);
+                }
+            }
+        }
+
+        if (controllersStr.isEmpty()) {
+            // Neither user provided ip nor ovsdb node has manager entries. Lets use local machine ip address.
+            LOG.debug("Use local machine ip address as a OpenFlow Controller ip address");
+            controllerIpStr = getLocalControllerHostIpAddress();
+            if (controllerIpStr != null) {
+                controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
+                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
+            }
+        }
+
+        if (controllersStr.isEmpty()) {
+            LOG.warn("Failed to determine OpenFlow controller ip address");
+        } else if (LOG.isDebugEnabled()) {
+            controllerIpStr = "";
+            for (String currControllerIpStr : controllersStr) {
+                controllerIpStr += " " + currControllerIpStr;
+            }
+            LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(), controllerIpStr);
+        }
+
+        return controllersStr;
+    }
+
+    private String getLocalControllerHostIpAddress() {
+        String ipaddress = null;
+        try{
+            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();){
+                NetworkInterface iface = ifaces.nextElement();
+
+                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                    InetAddress inetAddr = inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
+                        ipaddress = inetAddr.getHostAddress();
+                        break;
+                    }
+                }
+            }
+        }catch (Exception e){
+            LOG.warn("Exception while fetching local host ip address ", e);
+        }
+        return ipaddress;
+    }
+
+    public long getDataPathId(Node node) {
+        long dpid = 0L;
+        String datapathId = getDatapathId(node);
+        if (datapathId != null) {
+            dpid = new BigInteger(datapathId.replaceAll(":", ""), 16).longValue();
+        }
+        return dpid;
+    }
+
+    public String getDatapathId(Node node) {
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        return getDatapathId(ovsdbBridgeAugmentation);
+    }
+
+    public String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {
+        String datapathId = null;
+        if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
+            datapathId = ovsdbBridgeAugmentation.getDatapathId().getValue();
+        }
+        return datapathId;
     }
 }

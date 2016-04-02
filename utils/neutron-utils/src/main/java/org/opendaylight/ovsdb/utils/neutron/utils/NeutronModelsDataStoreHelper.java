@@ -12,6 +12,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.l3.rev150712.routers.attributes.Routers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.networks.rev150712.networks.attributes.Networks;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.networks.rev150712.networks.attributes.networks.Network;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.networks.rev150712.networks.attributes.networks.NetworkKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.Ports;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.ports.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.ports.PortKey;
@@ -59,22 +62,29 @@ public class NeutronModelsDataStoreHelper {
         return mdsalPort;
     }
 
-    private InstanceIdentifier<Routers> getNeutrounRoutersPath() {
+    public InstanceIdentifier<Routers> getNeutrounRoutersPath() {
         return InstanceIdentifier
                 .create(Neutron.class)
                 .child(Routers.class);
     }
 
-    private InstanceIdentifier<Ports> getNeutrounPortsPath() {
+    public InstanceIdentifier<Ports> getNeutrounPortsPath() {
         return InstanceIdentifier
                 .create(Neutron.class)
                 .child(Ports.class);
     }
 
-    private InstanceIdentifier<Port> getNeutronPortPath(Uuid portId) {
+    public InstanceIdentifier<Port> getNeutronPortPath(Uuid portId) {
         return InstanceIdentifier
                 .create(Neutron.class)
                 .child(Ports.class)
                 .child(Port.class,new PortKey(portId));
+    }
+
+    public InstanceIdentifier<Network> getNeutronNetworkPath(Uuid networkId) {
+        return InstanceIdentifier
+                .create(Neutron.class)
+                .child(Networks.class)
+                .child(Network.class,new NetworkKey(networkId));
     }
 }

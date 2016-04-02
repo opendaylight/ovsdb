@@ -6,19 +6,14 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.utils.it;
+package org.opendaylight.ovsdb.utils.it.utils;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.List;
-
-import org.junit.Assert;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -72,22 +67,22 @@ public class NodeInfo {
         bridgeWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, bridgeIid, waitList);
         bridgeWaiter.registerDataChangeListener(itUtils.dataBroker);
 
-        Assert.assertNotNull("connection failed", itUtils.southboundUtils.addOvsdbNode(connectionInfo, 0));
+        assertNotNull("connection failed", itUtils.southboundUtils.addOvsdbNode(connectionInfo, 0));
 
         ovsdbWaiter.waitForCreation();
         ovsdbNode = itUtils.southboundUtils.getOvsdbNode(connectionInfo);
-        Assert.assertNotNull("node is not connected", ovsdbNode);
+        assertNotNull("node is not connected", ovsdbNode);
 
         bridgeWaiter.waitForCreation();
-        Assert.assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
+        assertTrue("Controller " + SouthboundUtils.connectionInfoToString(connectionInfo)
                 + " is not connected", itUtils.isControllerConnected(connectionInfo));
 
-        bridgeNode = itUtils.southbound.getBridgeNode(ovsdbNode, INTEGRATION_BRIDGE_NAME);
-        Assert.assertNotNull("bridge " + INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
-        datapathId = itUtils.southbound.getDataPathId(bridgeNode);
-        String datapathIdString = itUtils.southbound.getDatapathId(bridgeNode);
+        bridgeNode = itUtils.southboundUtils.getBridgeNode(ovsdbNode, INTEGRATION_BRIDGE_NAME);
+        assertNotNull("bridge " + INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
+        datapathId = itUtils.southboundUtils.getDataPathId(bridgeNode);
+        String datapathIdString = itUtils.southboundUtils.getDatapathId(bridgeNode);
         LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
-        Assert.assertNotEquals("datapathId was not found", datapathId, 0);
+        assertNotEquals("datapathId was not found", datapathId, 0);
     }
 
     /**
@@ -95,16 +90,16 @@ public class NodeInfo {
      * @throws InterruptedException
      */
     public void disconnect() throws InterruptedException {
-        Assert.assertTrue(itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0));
+        assertTrue(itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0));
         itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0);
         bridgeWaiter.waitForDeletion();
         Node bridgeNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
-        Assert.assertNull("Bridge should not be found", bridgeNode);
-        Assert.assertTrue(itUtils.southboundUtils.disconnectOvsdbNode(connectionInfo, 0));
+        assertNull("Bridge should not be found", bridgeNode);
+        assertTrue(itUtils.southboundUtils.disconnectOvsdbNode(connectionInfo, 0));
         itUtils.southboundUtils.disconnectOvsdbNode(connectionInfo, 0);
         ovsdbWaiter.waitForDeletion();
         Node ovsdbNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
-        Assert.assertNull("Ovsdb node should not be found", ovsdbNode);
+        assertNull("Ovsdb node should not be found", ovsdbNode);
     }
 
 }

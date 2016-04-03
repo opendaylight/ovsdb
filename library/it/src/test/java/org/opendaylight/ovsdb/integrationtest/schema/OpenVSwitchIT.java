@@ -7,7 +7,7 @@
  *
  *  Authors : Sam Hague, Matt Oswalt
  */
-package org.opendaylight.ovsdb.integrationtest.schema.openvswitch;
+package org.opendaylight.ovsdb.integrationtest.schema;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,12 +59,12 @@ import org.opendaylight.ovsdb.schema.openvswitch.SFlow;
 import org.opendaylight.ovsdb.schema.openvswitch.SSL;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerSuite.class)
+@ExamReactorStrategy(PerClass.class)
 public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(OpenVSwitchIT.class);
     private static final String TEST_BRIDGE_NAME = "br_test";

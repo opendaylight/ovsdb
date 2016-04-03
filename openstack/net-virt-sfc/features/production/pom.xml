@@ -28,6 +28,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <dlux.version>0.4.0-SNAPSHOT</dlux.version>
     <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
     <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
+    <neutron.version>0.7.0-SNAPSHOT</neutron.version>
     <openflowplugin.version>0.3.0-SNAPSHOT</openflowplugin.version>
     <restconf.version>1.4.0-SNAPSHOT</restconf.version>
     <sfc.version>0.3.0-SNAPSHOT</sfc.version>
@@ -36,6 +37,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <dependencyManagement>
     <dependencies>
       <!-- project specific dependencies -->
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
@@ -69,18 +77,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-mdsal</artifactId>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>features-mdsal-model</artifactId>
       <version>${mdsal.model.version}</version>
       <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-mdsal</artifactId>
-      <classifier>features</classifier>
-      <version>${controller.mdsal.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>

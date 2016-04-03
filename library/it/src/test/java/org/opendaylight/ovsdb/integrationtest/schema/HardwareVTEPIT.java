@@ -7,7 +7,7 @@
  *
  *  Authors : Sam Hague, Matt Oswalt
  */
-package org.opendaylight.ovsdb.integrationtest.schema.hardwarevtep;
+package org.opendaylight.ovsdb.integrationtest.schema;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,12 +34,12 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Manager;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerSuite.class)
+@ExamReactorStrategy(PerClass.class)
 public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(HardwareVTEPIT.class);
     private UUID testManagerUuid = null;

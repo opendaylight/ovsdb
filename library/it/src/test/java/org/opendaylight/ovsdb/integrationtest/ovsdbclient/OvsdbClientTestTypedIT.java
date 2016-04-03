@@ -10,6 +10,10 @@
 
 package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableMap;
@@ -20,9 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,15 +42,17 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerSuite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
 public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
-
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientTestTypedIT.class);
     OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
-    static String testBridgeName = "br_test";
-    static UUID testBridgeUuid = null;
+    private static final String TEST_BRIDGE_NAME = "br_test";
+    private static UUID testBridgeUuid = null;
 
     /**
      * Test creation of statically typed bridge table as defined in
@@ -59,7 +63,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
     @Test
     public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         TestBridge rBridge = ovs.createTypedRowWrapper(TestBridge.class);
-        rBridge.setName(testBridgeName);
+        rBridge.setName(TEST_BRIDGE_NAME);
         rBridge.setStatus(ImmutableMap.of("key","value"));
         rBridge.setFloodVlans(Sets.newHashSet(34));
 
@@ -77,36 +81,41 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults = results.get();
-        Assert.assertFalse(operationResults.isEmpty());
+        assertFalse(operationResults.isEmpty());
         // Check if Results matches the number of operations in transaction
-        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
-        System.out.println("Insert & Update operation results = " + operationResults);
+        assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        LOG.info("Insert & Update operation results = {}", operationResults);
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {
         ListenableFuture<List<String>> databases = ovs.getDatabases();
         List<String> dbNames = databases.get();
-        Assert.assertNotNull(dbNames);
+        assertNotNull(dbNames);
         boolean hasOpenVswitchSchema = false;
         for(String dbName : dbNames) {
-           if (dbName.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA)) {
+           if (dbName.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH)) {
                 hasOpenVswitchSchema = true;
                 break;
            }
         }
-        Assert.assertTrue(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA
+        assertTrue(LibraryIntegrationTestUtils.OPEN_VSWITCH
                 + " schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
     @Before
-    public  void setUp() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void setup() throws Exception {
+        schema = LibraryIntegrationTestUtils.OPEN_VSWITCH;
+        super.setup2();
+
         if (ovs != null) {
             return;
         }
         ovs = LibraryIntegrationTestUtils.getTestConnection(this);
+        assertNotNull("Failed to get connection to ovsdb node", ovs);
+        LOG.info("Connection Info: {}", ovs.getConnectionInfo().toString());
         testGetDBs();
-        dbSchema = ovs.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH_SCHEMA).get();
+        dbSchema = ovs.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
     }
 
     @After
@@ -118,7 +127,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)
                 .add(op.delete(bridge)
-                        .where(name.opEqual(testBridgeName))
+                        .where(name.opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.mutate(ovsTable)
                         .addMutation(bridges, Mutator.DELETE, Sets.newHashSet(testBridgeUuid)))
@@ -126,7 +135,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
                 .execute();
 
         List<OperationResult> operationResults = results.get();
-        System.out.println("Delete operation results = " + operationResults);
+        LOG.info("Delete operation results = {}", operationResults);
         ovs.disconnect();
     }
 }

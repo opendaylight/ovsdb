@@ -96,4 +96,90 @@ module neighbor-discovery {
             type yang:mac-address;
         }
     }
+
+    container router-solicitation-packet {
+        uses ethernet-header;
+        uses ipv6-header;
+        uses icmp6-header;
+        leaf reserved {
+            type uint32;
+        }
+        leaf option-type {
+            type uint8;
+        }
+        leaf source-addr-length {
+            type uint8;
+        }
+        leaf source-ll-address {
+            type yang:mac-address;
+        }
+    }
+
+    container router-advertisement-packet {
+        uses ethernet-header;
+        uses ipv6-header;
+        uses icmp6-header;
+        leaf cur-hop-limit {
+            type uint8;
+        }
+        leaf flags {
+            type uint8;
+        }
+        leaf router-lifetime {
+            type uint16;
+        }
+        leaf reachable-time {
+            type uint32;
+        }
+        leaf retrans-time {
+            type uint32;
+        }
+
+        leaf option-source-addr {
+            type uint8;
+        }
+        leaf source-addr-length {
+            type uint8;
+        }
+        leaf source-ll-address {
+            type yang:mac-address;
+        }
+
+        leaf option-mtu {
+            type uint8;
+        }
+        leaf option-mtu-length {
+            type uint8;
+        }
+        leaf mtu {
+            type yang:mac-address;
+        }
+        list prefix-list {
+            key "prefix";
+            leaf option-type {
+                type uint8;
+            }
+            leaf option-length {
+                type uint8;
+            }
+            leaf prefix-length {
+                type uint8;
+            }
+            leaf flags {
+                type uint8;
+            }
+            leaf valid-lifetime {
+                type uint32;
+            }
+            leaf preferred-lifetime {
+                type uint32;
+            }
+            leaf reserved {
+                type uint32;
+            }
+            leaf prefix {
+                type inet:ipv6-prefix;
+            }
+        }
+    }
 }

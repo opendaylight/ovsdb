@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3a4c51b2_235f3a10",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-04-04T22:09:31Z",
+      "side": 1,
+      "message": "FYI, I tried this again using \"netvirt-neutron-default-config.xml\", and it seems to work.  It seems like it\u0027s just a matter of what convention we want to use.",
+      "range": {
+        "startLine": 104,
+        "startChar": 50,
+        "endLine": 104,
+        "endChar": 76
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_48526c14",
         "filename": "netvirt/api/src/main/yang/netvirt-ports.yang",
         "patchSetId": 2
@@ -224,6 +247,29 @@
       "writtenOn": "2016-04-01T01:58:05Z",
       "side": 1,
       "message": "can there be a case?",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_03967e94",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 3972
+      },
+      "writtenOn": "2016-04-04T22:09:31Z",
+      "side": 1,
+      "message": "This should explicitly check for the DeviceOwner, and if we hit one that isn\u0027t handled yet, there should at least be a WARN log.",
+      "range": {
+        "startLine": 131,
+        "startChar": 10,
+        "endLine": 131,
+        "endChar": 14
+      },
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

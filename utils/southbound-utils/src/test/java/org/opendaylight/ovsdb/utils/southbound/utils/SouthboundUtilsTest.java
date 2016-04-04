@@ -6,8 +6,9 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-import static org.junit.Assert.assertTrue;
+package org.opendaylight.ovsdb.utils.southbound.utils;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class SouthboundUtilsTest {

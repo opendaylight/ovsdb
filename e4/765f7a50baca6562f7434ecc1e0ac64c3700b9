@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Eric Multanen <eric.w.multanen@intel.com>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Submitted-by: Sam Hague <shague@redhat.com>
+Submitted-at: Mon, 04 Apr 2016 23:22:44 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/37060
+Project: ovsdb
+Branch: refs/heads/master

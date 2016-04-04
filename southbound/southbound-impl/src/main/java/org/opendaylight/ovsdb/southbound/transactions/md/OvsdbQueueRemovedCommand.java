@@ -53,23 +53,21 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            for (@SuppressWarnings("unused") OpenVSwitch openVSwitch : updatedOpenVSwitchRows.values()) {
-                List<InstanceIdentifier<Queues>> result = new ArrayList<>();
-                InstanceIdentifier<Node> ovsdbNodeIid =
-                        SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
-                if (removedQueueRows != null && !removedQueueRows.isEmpty()) {
-                    for (UUID queueUuid : removedQueueRows.keySet()) {
-                        QueuesKey queueKey = getQueueKey(ovsdbNode.get(), queueUuid);
-                        if (queueKey != null) {
-                            InstanceIdentifier<Queues> iid = ovsdbNodeIid
-                                .augmentation(OvsdbNodeAugmentation.class)
-                                .child(Queues.class, queueKey);
-                            result.add(iid);
-                        }
+            List<InstanceIdentifier<Queues>> result = new ArrayList<>();
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
+            if (removedQueueRows != null && !removedQueueRows.isEmpty()) {
+                for (UUID queueUuid : removedQueueRows.keySet()) {
+                    QueuesKey queueKey = getQueueKey(ovsdbNode.get(), queueUuid);
+                    if (queueKey != null) {
+                        InstanceIdentifier<Queues> iid = ovsdbNodeIid
+                            .augmentation(OvsdbNodeAugmentation.class)
+                            .child(Queues.class, queueKey);
+                        result.add(iid);
                     }
                 }
-                deleteQueue(transaction, result);
             }
+            deleteQueue(transaction, result);
         }
     }
 

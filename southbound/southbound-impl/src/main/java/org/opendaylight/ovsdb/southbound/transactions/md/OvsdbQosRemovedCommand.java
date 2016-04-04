@@ -53,23 +53,21 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            for (@SuppressWarnings("unused") OpenVSwitch openVSwitch : updatedOpenVSwitchRows.values()) {
-                List<InstanceIdentifier<QosEntries>> result = new ArrayList<>();
-                InstanceIdentifier<Node> ovsdbNodeIid =
-                        SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
-                if (removedQosRows != null && !removedQosRows.isEmpty()) {
-                    for (UUID qosUuid : removedQosRows.keySet()) {
-                        QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.get(), qosUuid);
-                        if (qosKey != null) {
-                            InstanceIdentifier<QosEntries> iid = ovsdbNodeIid
-                                .augmentation(OvsdbNodeAugmentation.class)
-                                .child(QosEntries.class, qosKey);
-                            result.add(iid);
-                        }
+            List<InstanceIdentifier<QosEntries>> result = new ArrayList<>();
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
+            if (removedQosRows != null && !removedQosRows.isEmpty()) {
+                for (UUID qosUuid : removedQosRows.keySet()) {
+                    QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.get(), qosUuid);
+                    if (qosKey != null) {
+                        InstanceIdentifier<QosEntries> iid = ovsdbNodeIid
+                            .augmentation(OvsdbNodeAugmentation.class)
+                            .child(QosEntries.class, qosKey);
+                        result.add(iid);
                     }
                 }
-                deleteQos(transaction, result);
             }
+            deleteQos(transaction, result);
         }
     }
 

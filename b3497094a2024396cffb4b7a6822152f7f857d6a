@@ -25,6 +25,76 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_f5f34508",
+        "filename": "features/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Agree with Andre. netvirt-neutron is better fit than neutron, which may conflict with NeutronNorthbound if they wre to use a similar name tomorrow.",
+      "parentUuid": "3a4c51b2_235f3a10",
+      "range": {
+        "startLine": 104,
+        "startChar": 50,
+        "endLine": 104,
+        "endChar": 76
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_d5f8c9e7",
+        "filename": "netvirt/api/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "nitpick: shouldn\u0027t this be updated?",
+      "range": {
+        "startLine": 3,
+        "startChar": 14,
+        "endLine": 3,
+        "endChar": 18
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_35ddad71",
+        "filename": "netvirt/api/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Isn\u0027t this by itself enough?",
+      "range": {
+        "startLine": 51,
+        "startChar": 14,
+        "endLine": 51,
+        "endChar": 44
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_48526c14",
         "filename": "netvirt/api/src/main/yang/netvirt-ports.yang",
         "patchSetId": 2
@@ -65,6 +135,29 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_15da3178",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/ConfigActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "new files should be just 2016",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 26
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_0848645a",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/Constants.java",
         "patchSetId": 2
@@ -99,6 +192,75 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_75e73541",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/MdsalHelper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_550039aa",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/MdsalHelper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "This should be use Port.class or some identifier. Networks etc. all will use String uuid.",
+      "range": {
+        "startLine": 31,
+        "startChar": 43,
+        "endLine": 31,
+        "endChar": 84
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_f526a567",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Didn\u0027t you mean Redhat?",
+      "range": {
+        "startLine": 2,
+        "startChar": 22,
+        "endLine": 2,
+        "endChar": 29
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_6874889c",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -110,6 +272,24 @@
       "writtenOn": "2016-04-01T01:58:05Z",
       "side": 1,
       "message": "Much of this looks liek it would fit in the Constants.",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_953121a5",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Agree with Sam.",
+      "parentUuid": "3a4c51b2_6874889c",
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -167,6 +347,29 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_1548712c",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Should we consider re-using NeutronPort uuid? Else we may need to track which NeutronPort maps to which NetvirtPort to handle updates/deletes.",
+      "range": {
+        "startLine": 106,
+        "startChar": 8,
+        "endLine": 106,
+        "endChar": 65
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_68a128a9",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -202,6 +405,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_953c8195",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Should we consider renaming \"port\" to \"netvirt-port\"? Will make code easier to read. May also avoid a similar conflict as in https://bugs.opendaylight.org/show_bug.cgi?id\u003d5645",
+      "parentUuid": "3a4c51b2_2ebba90f",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_a86e90c7",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -213,6 +434,29 @@
       "writtenOn": "2016-04-01T01:58:05Z",
       "side": 1,
       "message": "is it possible any of these fields could be null?",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_755575c5",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "this can be null.",
+      "range": {
+        "startLine": 113,
+        "startChar": 22,
+        "endLine": 113,
+        "endChar": 37
+      },
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -253,6 +497,29 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_b55edde7",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "I prefer using ImmutableBiMap for such use cases and throw a warn if not found in Map.",
+      "range": {
+        "startLine": 128,
+        "startChar": 8,
+        "endLine": 128,
+        "endChar": 10
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_03967e94",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -269,6 +536,29 @@
         "startChar": 10,
         "endLine": 131,
         "endChar": 14
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_f55865fc",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "This will only be applicable when we get Vlan-aware-VMs. Could you add a TODO wherever you have an open question to make sure we don\u0027t miss them?",
+      "range": {
+        "startLine": 136,
+        "startChar": 10,
+        "endLine": 136,
+        "endChar": 45
       },
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
@@ -327,6 +617,29 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_15f6b1d7",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Not sure if this was designed with allowed-address-pairs in mind. Allowed address pairs would likely result in multiple netvirt ports as child ports of this one. Refer parent-port-binding in yang file.",
+      "range": {
+        "startLine": 145,
+        "startChar": 11,
+        "endLine": 145,
+        "endChar": 78
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_089ce468",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -338,6 +651,29 @@
       "writtenOn": "2016-04-01T07:47:18Z",
       "side": 1,
       "message": "According to the Javadocs, this IpAddress() constructor is only intended for use in JMX calls; I guess you\u0027re supposed to create either an Ipv4Address or an Ipv6Address and build the IpAddress using that...",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_7503b5b8",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "While we figure what to do with allowed-address-pairs, this should come from FixedIps, not allowed address pairs.",
+      "range": {
+        "startLine": 155,
+        "startChar": 40,
+        "endLine": 155,
+        "endChar": 53
+      },
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -395,6 +731,29 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_b52c1d4c",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "would prefer this to be debug, rather only a WARN if it fails.",
+      "range": {
+        "startLine": 162,
+        "startChar": 12,
+        "endLine": 162,
+        "endChar": 16
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_889e3455",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2
@@ -406,6 +765,29 @@
       "writtenOn": "2016-04-01T07:47:18Z",
       "side": 1,
       "message": "The exception isn\u0027t necessary here, it\u0027s best to remove it.",
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_151d1110",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:10:27Z",
+      "side": 1,
+      "message": "Might be better to return EntityOwnershipState as we may want to retry when election is still in progress. Else all the nodes will get false and no one will act on DCN.",
+      "range": {
+        "startLine": 40,
+        "startChar": 18,
+        "endLine": 40,
+        "endChar": 25
+      },
       "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

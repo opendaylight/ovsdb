@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_eb57e800",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-05T14:04:03Z",
+      "side": 1,
+      "message": "Indeed, and I\u0027m usually the one asking for it...",
+      "parentUuid": "3a4c51b2_185b8855",
+      "revId": "180f35d079e27883556e9e628f145863194f3d76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_5855101c",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommandAggregator.java",
         "patchSetId": 2
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_cb5cac28",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-05T14:04:03Z",
+      "side": 1,
+      "message": "You\u0027re right, hopefully the updated layout is easier to read.",
+      "parentUuid": "3a4c51b2_5855101c",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 84
+      },
+      "revId": "180f35d079e27883556e9e628f145863194f3d76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_f83b3ce9",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
         "patchSetId": 2
@@ -53,6 +95,24 @@
       "writtenOn": "2016-04-05T13:41:48Z",
       "side": 1,
       "message": "some documentation could be useful as well here",
+      "revId": "180f35d079e27883556e9e628f145863194f3d76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_2b41d039",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-05T14:04:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_f83b3ce9",
       "revId": "180f35d079e27883556e9e628f145863194f3d76",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -83,6 +83,11 @@ public class NeutronPort implements Serializable, INeutronObject {
     @XmlElement (name = "extra_dhcp_opts")
     List<NeutronPort_ExtraDHCPOption> extraDHCPOptions;
 
+    //Port security is enabled by default for backward compatibility.
+    @XmlElement (defaultValue = "true", name = "port_security_enabled")
+    Boolean portSecurityEnabled;
+
+
     NeutronPort originalPort;
 
     public NeutronPort() {
@@ -233,6 +238,18 @@ public class NeutronPort implements Serializable, INeutronObject {
         this.bindingvifType = bindingvifType;
     }
 
+    public Boolean getPortSecurityEnabled() {
+        if (portSecurityEnabled == null) {
+            return true;
+        }
+        return portSecurityEnabled;
+    }
+
+    public void setPortSecurityEnabled(Boolean newValue) {
+        portSecurityEnabled = newValue;
+    }
+
+
     public NeutronPort getOriginalPort() {
         return originalPort;
     }
@@ -288,12 +305,16 @@ public class NeutronPort implements Serializable, INeutronObject {
             if ("security_groups".equals(field)) {
                 ans.setSecurityGroups(new ArrayList<>(this.getSecurityGroups()));
             }
+            if ("port_security_enabled".equals(field)) {
+                ans.setPortSecurityEnabled(this.getPortSecurityEnabled());
+            }
         }
         return ans;
     }
 
     public void initDefaults() {
         adminStateUp = true;
+        portSecurityEnabled = true;
         if (status == null) {
             status = "ACTIVE";
         }
@@ -309,6 +330,6 @@ public class NeutronPort implements Serializable, INeutronObject {
                 + ", fixedIPs=" + fixedIPs + ", deviceID=" + deviceID + ", deviceOwner=" + deviceOwner + ", tenantID="
                 + tenantID + ", securityGroups=" + securityGroups
                 + ", bindinghostID=" + bindinghostID + ", bindingvnicType=" + bindingvnicType
-                + ", bindingvnicType=" + bindingvnicType + "]";
+                + ", bindingvnicType=" + bindingvnicType + ", portSecurityEnabled=" + portSecurityEnabled +"]";
     }
 }

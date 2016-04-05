@@ -70,7 +70,7 @@ public interface SecurityServicesManager {
     /**
      * Is this the last port in the subnet to which interface belongs to.
      * @param node The node to which the intf is connected.
-     * @param intf the intf
+     * @param intf the interface
      * @return whether last port in the subnet
      */
     boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation intf);
@@ -116,4 +116,11 @@ public interface SecurityServicesManager {
      * @return whether connection tracking enabled.
      */
     boolean isConntrackEnabled();
+    /**
+     * Is the port a PortSecurity Enabled.
+     *
+     * @param intf the port
+     * @return  whether it is a compute port or not
+     */
+    boolean isPortSecurityEnabled(OvsdbTerminationPointAugmentation intf);
 }

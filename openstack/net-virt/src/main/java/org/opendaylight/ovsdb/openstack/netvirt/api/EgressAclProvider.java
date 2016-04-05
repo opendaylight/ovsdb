@@ -55,11 +55,8 @@ public interface EgressAclProvider {
      * @param attachedMac the attached mac
      * @param localPort the local port
      * @param srcAddressList the list of source ip address assigned to vm
-     * @param isLastPortinBridge is this the last port in the bridge
-     * @param isComputePort indicates whether this port is a compute port or not
      * @param write is this flow writing or deleting
      */
     void programFixedSecurityGroup(Long dpid, String segmentationId,String attachedMac, long localPort,
-                                  List<Neutron_IPs> srcAddressList, boolean isLastPortinBridge,
-                                  boolean isComputePort, boolean write);
+                                  List<Neutron_IPs> srcAddressList, boolean write);
 }

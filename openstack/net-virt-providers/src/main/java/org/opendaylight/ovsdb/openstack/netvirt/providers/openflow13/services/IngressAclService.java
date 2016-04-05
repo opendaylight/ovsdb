@@ -215,21 +215,17 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
     @Override
     public void programFixedSecurityGroup(Long dpid, String segmentationId, String dhcpMacAddress,
-                                        long localPort, boolean isLastPortinSubnet,
-                                        boolean isComputePort, String attachMac, boolean write) {
-        //If this port is the only port in the compute node add the DHCP server rule.
-        if (isLastPortinSubnet && isComputePort ) {
-            ingressAclDhcpAllowServerTraffic(dpid, segmentationId,dhcpMacAddress,
-                                             write,Constants.PROTO_DHCP_SERVER_MATCH_PRIORITY);
-            ingressAclDhcpv6AllowServerTraffic(dpid, segmentationId,dhcpMacAddress,
-                                               write,Constants.PROTO_DHCP_SERVER_MATCH_PRIORITY);
+                                        long localPort, String attachMac, boolean write) {
+
+        ingressAclDhcpAllowServerTraffic(dpid, segmentationId,dhcpMacAddress, attachMac,
+                                         write,Constants.PROTO_DHCP_SERVER_MATCH_PRIORITY);
+        ingressAclDhcpv6AllowServerTraffic(dpid, segmentationId,dhcpMacAddress, attachMac,
+                                           write,Constants.PROTO_DHCP_SERVER_MATCH_PRIORITY);
+
+        if (securityServicesManager.isConntrackEnabled()) {
+            programIngressAclFixedConntrackRule(dpid, segmentationId, attachMac, localPort, write);
         }
-        if (isComputePort) {
-            if (securityServicesManager.isConntrackEnabled()) {
-                programIngressAclFixedConntrackRule(dpid, segmentationId, attachMac, localPort, write);
-            }
-            programArpRule(dpid, segmentationId, localPort, attachMac, write);
-        }
+        programArpRule(dpid, segmentationId, localPort, attachMac, write);
     }
 
     private void programArpRule(Long dpid, String segmentationId, long localPort, String attachMac, boolean write) {
@@ -654,18 +650,21 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
      * @param dpidLong the dpid
      * @param segmentationId the segmentation id
      * @param dhcpMacAddress the DHCP server mac address
+     * @param attachMac the mac address of  the port
      * @param write is write or delete
      * @param protoPortMatchPriority the priority
      */
     private void ingressAclDhcpAllowServerTraffic(Long dpidLong, String segmentationId, String dhcpMacAddress,
-                                                  boolean write, Integer protoPortMatchPriority) {
+                                                  String attachMac, boolean write, Integer protoPortMatchPriority) {
 
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         MatchBuilder matchBuilder = new MatchBuilder();
-        MatchUtils.createDhcpServerMatch(matchBuilder, dhcpMacAddress, 67, 68).build();
+        matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,dhcpMacAddress,attachMac,
+                                                             MatchUtils.ETHERTYPE_IPV4);
+        MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 67, 68);
         String flowId = "Ingress_DHCP_Server" + segmentationId + "_" + dhcpMacAddress + "_Permit_";
         FlowBuilder flowBuilder = FlowUtils.createFlowBuilder(flowId, protoPortMatchPriority, matchBuilder, getTable());
         addPipelineInstruction(flowBuilder, null, false);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         syncFlow(flowBuilder ,nodeBuilder, write);
     }
 
@@ -675,18 +674,21 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
      * @param dpidLong the dpid
      * @param segmentationId the segmentation id
      * @param dhcpMacAddress the DHCP server mac address
+     * @param attachMac the mac address of  the port
      * @param write is write or delete
      * @param protoPortMatchPriority the priority
      */
     private void ingressAclDhcpv6AllowServerTraffic(Long dpidLong, String segmentationId, String dhcpMacAddress,
-                                                    boolean write, Integer protoPortMatchPriority) {
+                                                    String attachMac, boolean write, Integer protoPortMatchPriority) {
 
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         MatchBuilder matchBuilder = new MatchBuilder();
-        MatchUtils.createDhcpv6ServerMatch(matchBuilder, dhcpMacAddress, 547, 546).build();
+        matchBuilder = MatchUtils.createV4EtherMatchWithType(matchBuilder,dhcpMacAddress,attachMac,
+                                                             MatchUtils.ETHERTYPE_IPV6);
+        MatchUtils.addLayer4Match(matchBuilder, MatchUtils.UDP_SHORT, 547, 546);
         String flowId = "Ingress_DHCPv6_Server" + segmentationId + "_" + dhcpMacAddress + "_Permit_";
         FlowBuilder flowBuilder = FlowUtils.createFlowBuilder(flowId, protoPortMatchPriority, matchBuilder, getTable());
         addPipelineInstruction(flowBuilder, null, false);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         syncFlow(flowBuilder ,nodeBuilder, write);
     }
 

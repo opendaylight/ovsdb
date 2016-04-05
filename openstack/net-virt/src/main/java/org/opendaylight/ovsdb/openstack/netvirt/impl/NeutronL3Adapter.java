@@ -426,7 +426,9 @@ public class NeutronL3Adapter extends AbstractHandler implements GatewayMacResol
         if (action == Action.UPDATE) {
             // FIXME: Bug 4971 Move cleanup cache to SG Impl
             this.updatePortInCleanupCache(neutronPort, neutronPort.getOriginalPort());
-            this.processSecurityGroupUpdate(neutronPort);
+            if (neutronPort.getPortSecurityEnabled()) {
+                this.processSecurityGroupUpdate(neutronPort);
+            }
         }
 
         if (!this.enabled) {

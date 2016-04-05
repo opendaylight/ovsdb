@@ -580,6 +580,21 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
+    public boolean isPortSecurityEnabled(OvsdbTerminationPointAugmentation intf) {
+        NeutronPort neutronPort = getNeutronPortFromCache(intf);
+        if (null == neutronPort) {
+            LOG.error("Neutron Port is null: " + intf);
+            return false;
+        }
+        if (neutronPort.getPortSecurityEnabled()) {
+            LOG.info("Port Security is enabled for Port: " + neutronPort);
+            return true;
+        }
+        LOG.info("Port Security is  not enabled for Port: " + neutronPort);
+        return false;
+    }
+
+    @Override
     public void setDependencies(ServiceReference serviceReference) {
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);

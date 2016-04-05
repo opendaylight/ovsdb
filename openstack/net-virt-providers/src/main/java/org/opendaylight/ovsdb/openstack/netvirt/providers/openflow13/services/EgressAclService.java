@@ -230,41 +230,39 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
 
     @Override
     public void programFixedSecurityGroup(Long dpid, String segmentationId, String attachedMac,
-                                        long localPort, List<Neutron_IPs> srcAddressList,
-                                        boolean isLastPortinBridge, boolean isComputePort ,boolean write) {
-        // If it is the only port in the bridge add the rule to allow any DHCP client traffic
-        //if (isLastPortinBridge) {
-        egressAclDhcpAllowClientTrafficFromVm(dpid, write, Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
-        egressAclDhcpv6AllowClientTrafficFromVm(dpid, write, Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
-        // }
-        if (isComputePort) {
-            programArpRule(dpid, segmentationId, localPort, attachedMac, write);
-            if (securityServicesManager.isConntrackEnabled()) {
-                programEgressAclFixedConntrackRule(dpid, segmentationId, localPort, attachedMac, write);
-            }
-            // add rule to drop the DHCP server traffic originating from the vm.
-            egressAclDhcpDropServerTrafficfromVm(dpid, localPort, write,
-                                                 Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
-            egressAclDhcpv6DropServerTrafficfromVm(dpid, localPort, write,
-                                                   Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
-            //Adds rule to check legitimate ip/mac pair for each packet from the vm
-            for (Neutron_IPs srcAddress : srcAddressList) {
-                try {
-                    InetAddress address = InetAddress.getByName(srcAddress.getIpAddress());
-                    if (address instanceof Inet4Address) {
-                        String addressWithPrefix = srcAddress.getIpAddress() + HOST_MASK;
-                        egressAclAllowTrafficFromVmIpMacPair(dpid, localPort, attachedMac, addressWithPrefix,
-                                                             Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
-                    } else if (address instanceof Inet6Address) {
-                        String addressWithPrefix = srcAddress.getIpAddress() + V6_HOST_MASK;
-                        egressAclAllowTrafficFromVmIpV6MacPair(dpid, localPort, attachedMac, addressWithPrefix,
-                                                               Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
-                    }
-                } catch (UnknownHostException e) {
-                    LOG.warn("Invalid IP address {}", srcAddress.getIpAddress(), e);
+                                          long localPort, List<Neutron_IPs> srcAddressList, boolean write) {
+
+        egressAclDhcpAllowClientTrafficFromVm(dpid, write, localPort,
+                                              Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
+        egressAclDhcpv6AllowClientTrafficFromVm(dpid, write, localPort,
+                                                Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
+        programArpRule(dpid, segmentationId, localPort, attachedMac, write);
+        if (securityServicesManager.isConntrackEnabled()) {
+            programEgressAclFixedConntrackRule(dpid, segmentationId, localPort, attachedMac, write);
+        }
+        // add rule to drop the DHCP server traffic originating from the vm.
+        egressAclDhcpDropServerTrafficfromVm(dpid, localPort, write,
+                                             Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
+        egressAclDhcpv6DropServerTrafficfromVm(dpid, localPort, write,
+                                               Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
+        //Adds rule to check legitimate ip/mac pair for each packet from the vm
+        for (Neutron_IPs srcAddress : srcAddressList) {
+            try {
+                InetAddress address = InetAddress.getByName(srcAddress.getIpAddress());
+                if (address instanceof Inet4Address) {
+                    String addressWithPrefix = srcAddress.getIpAddress() + HOST_MASK;
+                    egressAclAllowTrafficFromVmIpMacPair(dpid, localPort, attachedMac, addressWithPrefix,
+                                                         Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
+                } else if (address instanceof Inet6Address) {
+                    String addressWithPrefix = srcAddress.getIpAddress() + V6_HOST_MASK;
+                    egressAclAllowTrafficFromVmIpV6MacPair(dpid, localPort, attachedMac, addressWithPrefix,
+                                                           Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
                 }
+            } catch (UnknownHostException e) {
+                LOG.warn("Invalid IP address {}", srcAddress.getIpAddress(), e);
             }
         }
+
     }
 
     private void programArpRule(Long dpid, String segmentationId, long localPort, String attachedMac, boolean write) {
@@ -683,16 +681,18 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      *
      * @param dpidLong the dpid
      * @param write whether to write or delete the flow
+     * @param localPort the local port.
      * @param priority the priority
      */
     private void egressAclDhcpAllowClientTrafficFromVm(Long dpidLong,
-                                                       boolean write, Integer priority) {
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+                                                       boolean write, long localPort, Integer priority) {
         String flowName = "Egress_DHCP_Client"  + "_Permit_";
         MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         MatchUtils.createDhcpMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT);
         FlowBuilder flowBuilder = FlowUtils.createFlowBuilder(flowName, priority, matchBuilder, getTable());
         addPipelineInstruction(flowBuilder, null, false);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         syncFlow(flowBuilder ,nodeBuilder, write);
     }
 
@@ -701,16 +701,18 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
      *
      * @param dpidLong the dpid
      * @param write whether to write or delete the flow
+     * @param localPort the local port
      * @param priority the priority
      */
     private void egressAclDhcpv6AllowClientTrafficFromVm(Long dpidLong,
-                                                         boolean write, Integer priority) {
-        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
+                                                         boolean write, long localPort, Integer priority) {
         String flowName = "Egress_DHCPv6_Client"  + "_Permit_";
         MatchBuilder matchBuilder = new MatchBuilder();
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         MatchUtils.createDhcpv6Match(matchBuilder, DHCPV6_DESTINATION_PORT, DHCPV6_SOURCE_PORT);
         FlowBuilder flowBuilder = FlowUtils.createFlowBuilder(flowName, priority, matchBuilder, getTable());
         addPipelineInstruction(flowBuilder, null, false);
+        NodeBuilder nodeBuilder = FlowUtils.createNodeBuilder(dpidLong);
         syncFlow(flowBuilder ,nodeBuilder, write);
     }
 

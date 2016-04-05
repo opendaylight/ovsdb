@@ -49,6 +49,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv6Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -1505,40 +1506,13 @@ public class EgressAclServiceTest {
     }
 
     /**
-     *  Test With isConntrackEnabled false isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLAdd1() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(false);
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, true);
-
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).checkedGet();
-    }
-    /**
-     *  Test With isConntrackEnabled false isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLRemove1() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(false);
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, false);
-
-        verify(writeTransaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    /**
-     *  Test With isConntrackEnabled false isComputeNode true
+     *  Test With isConntrackEnabled false
      */
     @Test
     public void testProgramFixedSecurityACLAdd2() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(false);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true);
 
         verify(writeTransaction, times(9)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
         verify(writeTransaction, times(9)).submit();
@@ -1546,13 +1520,13 @@ public class EgressAclServiceTest {
     }
 
     /**
-     *  Test With isConntrackEnabled false isComputeNode true
+     *  Test With isConntrackEnabled false
      */
     @Test
     public void testProgramFixedSecurityACLRemove2() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(false);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false);
 
         verify(writeTransaction, times(9)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(9)).submit();
@@ -1560,41 +1534,13 @@ public class EgressAclServiceTest {
     }
 
     /**
-     *  Test With isConntrackEnabled true isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLAdd3() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(true);
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, true);
-
-        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).checkedGet();
-    }
-
-    /**
-     *  Test With isConntrackEnabled true isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLRemove3() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(true);
-
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, false, false);
-
-        verify(writeTransaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(2)).submit();
-        verify(commitFuture, times(2)).get();
-    }
-
-    /**
-     *  Test With isConntrackEnabled true isComputeNode true
+     *  Test With isConntrackEnabled true
      */
     @Test
     public void testProgramFixedSecurityACLAdd4() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, true);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, true);
 
         verify(writeTransaction, times(14)).put(any(LogicalDatastoreType.class),
                                                any(InstanceIdentifier.class), any(Node.class), eq(true));
@@ -1603,13 +1549,13 @@ public class EgressAclServiceTest {
     }
 
     /**
-     *  Test With isConntrackEnabled true isComputeNode true
+     *  Test With isConntrackEnabled true
      */
     @Test
     public void testProgramFixedSecurityACLRemove4() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false, true, false);
+        egressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", MAC_ADDRESS, 1, neutronDestIpList, false);
 
         verify(writeTransaction, times(14)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(14)).submit();

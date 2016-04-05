@@ -1536,108 +1536,56 @@ public class IngressAclServiceTest {
     }
 
     /**
-     *  Test With isConntrackEnabled false isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLAdd1() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(false);
-
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, false, MAC_ADDRESS, true);
-
-        verify(writeTransaction, times(0)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
-    }
-    /**
-     *  Test With isConntrackEnabled false isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLRemove1() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(false);
-
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, false, MAC_ADDRESS, false);
-
-        verify(writeTransaction, times(0)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
-    }
-    /**
-     *  Test With isConntrackEnabled false isComputeNode false
+     *  Test With isConntrackEnabled false
      */
     @Test
     public void testProgramFixedSecurityACLAdd2() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(false);
 
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, true, MAC_ADDRESS, true);
+        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, MAC_ADDRESS, true);
 
-        verify(writeTransaction, times(1)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).checkedGet();
+        verify(writeTransaction, times(3)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(3)).submit();
+        verify(commitFuture, times(3)).checkedGet();
     }
     /**
-     *  Test With isConntrackEnabled false isComputeNode false
+     *  Test With isConntrackEnabled false
      */
     @Test
     public void testProgramFixedSecurityACLRemove2() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(false);
 
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, true, MAC_ADDRESS, false);
+        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, MAC_ADDRESS, false);
 
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(1)).submit();
-        verify(commitFuture, times(1)).get();
+        verify(writeTransaction, times(3)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(3)).submit();
+        verify(commitFuture, times(3)).get();
     }
     /**
-     *  Test With isConntrackEnabled true isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLAdd3() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(true);
-
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, false, MAC_ADDRESS, true);
-
-        verify(writeTransaction, times(0)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
-    }
-    /**
-     *  Test With isConntrackEnabled true isComputeNode false
-     */
-    @Test
-    public void testProgramFixedSecurityACLRemove3() throws Exception {
-        when(securityServices.isConntrackEnabled()).thenReturn(true);
-
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, false, MAC_ADDRESS, false);
-
-        verify(writeTransaction, times(0)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(0)).submit();
-        verify(commitFuture, times(0)).get();
-    }
-    /**
-     *  Test With isConntrackEnabled true isComputeNode true
+     *  Test With isConntrackEnabled true
      */
     @Test
     public void testProgramFixedSecurityACLAdd4() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, true, MAC_ADDRESS, true);
+        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, MAC_ADDRESS, true);
 
-        verify(writeTransaction, times(6)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
-        verify(writeTransaction, times(6)).submit();
-        verify(commitFuture, times(6)).checkedGet();
+        verify(writeTransaction, times(8)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), eq(true));
+        verify(writeTransaction, times(8)).submit();
+        verify(commitFuture, times(8)).checkedGet();
     }
     /**
-     *  Test With isConntrackEnabled true isComputeNode true
+     *  Test With isConntrackEnabled true
      */
     @Test
     public void testProgramFixedSecurityACLRemove4() throws Exception {
         when(securityServices.isConntrackEnabled()).thenReturn(true);
 
-        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, false, true, MAC_ADDRESS, false);
+        ingressAclServiceSpy.programFixedSecurityGroup(Long.valueOf(1554), "2", DHCP_MAC_ADDRESS, 1, MAC_ADDRESS, false);
 
-        verify(writeTransaction, times(6)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(6)).submit();
-        verify(commitFuture, times(6)).get();
+        verify(writeTransaction, times(8)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(8)).submit();
+        verify(commitFuture, times(8)).get();
     }
 
 }

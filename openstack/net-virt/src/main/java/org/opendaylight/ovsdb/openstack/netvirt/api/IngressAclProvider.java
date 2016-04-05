@@ -52,11 +52,9 @@ public interface IngressAclProvider {
      * @param segmentationId the segmentation id
      * @param attachedMac the dhcp mac
      * @param localPort the local port
-     * @param isLastPortinSubnet is this the last port in the subnet
-     * @param isComputePort indicates whether this port is a compute port or not
      * @param attachedMac2 the src mac
      * @param write is this flow writing or deleting
      */
     void programFixedSecurityGroup(Long dpid, String segmentationId, String attachedMac, long localPort,
-                                  boolean isLastPortinSubnet, boolean isComputePort, String attachedMac2, boolean write);
+                                  String attachedMac2, boolean write);
 }

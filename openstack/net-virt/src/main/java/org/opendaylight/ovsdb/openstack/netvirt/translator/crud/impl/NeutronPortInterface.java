@@ -38,6 +38,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.por
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.Ports;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.ports.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.ports.rev150712.ports.attributes.ports.PortBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.portsecurity.rev150712.PortSecurityExtension;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.portsecurity.rev150712.PortSecurityExtensionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.neutron.rev150712.Neutron;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
@@ -151,6 +153,13 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         result.setBindingvnicType(binding.getVnicType());
     }
 
+    private void portSecurityExtension(Port port, NeutronPort result) {
+        PortSecurityExtension portSecurity = port.getAugmentation(PortSecurityExtension.class);
+        if(portSecurity != null && portSecurity.isPortSecurityEnabled() != null) {
+            result.setPortSecurityEnabled(portSecurity.isPortSecurityEnabled());
+        }
+    }
+
     protected NeutronPort fromMd(Port port) {
         NeutronPort result = new NeutronPort();
         result.setAdminStateUp(port.isAdminStateUp());
@@ -209,6 +218,7 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
         }
         result.setPortUUID(String.valueOf(port.getUuid().getValue()));
         addExtensions(port, result);
+        portSecurityExtension(port, result);
         return result;
     }
 
@@ -239,9 +249,14 @@ public class NeutronPortInterface extends AbstractNeutronInterface<Port, Neutron
             bindingBuilder.setVnicType(neutronPort.getBindingvnicType());
         }
 
+        PortSecurityExtensionBuilder portSecurityBuilder = new PortSecurityExtensionBuilder();
+        if (neutronPort.getPortSecurityEnabled() != null) {
+            portSecurityBuilder.setPortSecurityEnabled(neutronPort.getPortSecurityEnabled());
+        }
         PortBuilder portBuilder = new PortBuilder();
         portBuilder.addAugmentation(PortBindingExtension.class,
                                     bindingBuilder.build());
+        portBuilder.addAugmentation(PortSecurityExtension.class, portSecurityBuilder.build());
         portBuilder.setAdminStateUp(neutronPort.isAdminStateUp());
         if(neutronPort.getAllowedAddressPairs() != null) {
             List<AllowedAddressPairs> listAllowedAddressPairs = new ArrayList<>();

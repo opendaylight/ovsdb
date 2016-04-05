@@ -147,7 +147,6 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
         result.setNetworkUUID(subnet.getNetworkId().getValue());
         result.setIpVersion(IPV_MAP.get(subnet.getIpVersion()));
         result.setCidr(subnet.getCidr());
-        result.setGatewayIP(String.valueOf(subnet.getGatewayIp().getValue()));
         result.setIpV6RaMode(DHCPV6_MAP.get(subnet.getIpv6RaMode()));
         result.setIpV6AddressMode(DHCPV6_MAP.get(subnet.getIpv6AddressMode()));
         result.setEnableDHCP(subnet.isEnableDhcp());
@@ -177,6 +176,9 @@ public class NeutronSubnetInterface extends AbstractNeutronInterface<Subnet, Neu
             .fetchINeutronPortCRUD(this);
         INeutronPortCRUD portIf = interfaces.getPortInterface();
         for (NeutronPort port : portIf.getAllPorts()) {
+            if (port.getDeviceOwner().equalsIgnoreCase("network:router_interface")) {
+                result.setGatewayIP(String.valueOf(subnet.getGatewayIp().getValue()));
+            }
             if (port.getFixedIPs() != null) {
                 for (Neutron_IPs ip : port.getFixedIPs()) {
                     if (ip.getSubnetUUID().equals(result.getID())) {

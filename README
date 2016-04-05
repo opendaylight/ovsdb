@@ -108,12 +108,15 @@ To run the integration tests:
     # OSX
     mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=$(boot2docker ip 2>/dev/null) -Dovsdbserver.port=6640
     # Linux
-    mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=127.0.0.1 -Dovsdbserver.port=6640
+    mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=127.0.0.1 -Dovsdbserver.port=6640 -Dovsdb.controller.address=<addr of docker interface> -Dovsdb.userspace.enabled=yes
     fig stop
 
 On Linux you'll generally need to run fig as root (sudo fig ...).
 
 If you're using Docker Compose, replace "fig" above with "docker-compose" and ignore the warnings.
+
+Running the docker image manually:
+    sudo docker run -itd --cap-add NET_ADMIN -p 6640:6640 jhershbe/centos7-ovs:latest    
 
 Skipping unit tests and karaf tests
 ====================

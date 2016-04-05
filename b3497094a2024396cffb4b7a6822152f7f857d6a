@@ -731,6 +731,29 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_55ee79ed",
+        "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-05T09:16:29Z",
+      "side": 1,
+      "message": "This should only be done if isMasterProvderInstance \u003d\u003d true else. Since we\u0027re not doing anything on getting DCN but transforming it to NetvirtPort, we could add the check on onDataTreeChanged itself for now.",
+      "range": {
+        "startLine": 161,
+        "startChar": 17,
+        "endLine": 161,
+        "endChar": 31
+      },
+      "revId": "b3497094a2024396cffb4b7a6822152f7f857d6a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_b52c1d4c",
         "filename": "netvirt/renderers/neutron/src/main/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronPortChangeListener.java",
         "patchSetId": 2

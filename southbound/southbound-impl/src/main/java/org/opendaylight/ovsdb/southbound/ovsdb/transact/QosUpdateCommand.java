@@ -42,40 +42,33 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
-public class QosUpdateCommand extends AbstractTransactCommand {
+public class QosUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QosUpdateCommand.class);
 
-
-    public QosUpdateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        super(state, changes);
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    @Override
-    public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> created =
-                TransactUtils.extractCreated(getChanges(),OvsdbNodeAugmentation.class);
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            created.entrySet()) {
-            updateQos(transaction,  ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
-        }
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated =
-                TransactUtils.extractUpdated(getChanges(),OvsdbNodeAugmentation.class);
-        for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            updated.entrySet()) {
-            updateQos(transaction,  ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
+            createdOrUpdated.entrySet()) {
+            updateQos(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
         }
     }
 
     private void updateQos(
-            TransactionBuilder transaction,
+            TransactionBuilder transaction, BridgeOperationalState state,
             InstanceIdentifier<OvsdbNodeAugmentation> iid, OvsdbNodeAugmentation ovsdbNode) {
 
         List<QosEntries> qosEntries = ovsdbNode.getQosEntries();
 
-        if (!getOperationalState().getBridgeNode(iid).isPresent()) {
+        if (!state.getBridgeNode(iid).isPresent()) {
             return;
         }
-        OvsdbNodeAugmentation operNode = getOperationalState().getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation operNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
         List<QosEntries> operQosEntries = operNode.getQosEntries();
 
         if (qosEntries != null) {

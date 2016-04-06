@@ -47,6 +47,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.southbound.reconciliation.configuration.ConfigurationReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
@@ -57,6 +58,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -113,6 +115,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
             // Register Cluster Ownership for ConnectionInfo
             registerEntityForOwnership(client);
+
+            reconcileConfigurations(client);
         }
     }
 
@@ -170,6 +174,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //Controller initiated connection can be terminated from switch side.
             //So cleanup the instance identifier cache.
             removeInstanceIdentifier(key);
+            stopConfigurationReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
             retryConnection(ovsdbConnectionInstance.getInstanceIdentifier(),
                     ovsdbConnectionInstance.getOvsdbNodeAugmentation(),
                     ConnectionReconciliationTriggers.ON_DISCONNECT);
@@ -351,6 +356,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 ovsdbNode);
         reconciliationManager.dequeue(task);
     }
+
+    public void stopConfigurationReconciliationIfActive(InstanceIdentifier<?> iid) {
+        final ReconciliationTask task = new ConfigurationReconciliationTask(
+                reconciliationManager,
+                this,
+                iid,
+                null, null);
+        reconciliationManager.dequeue(task);
+    }
+
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
         LOG.debug("handleOwnershipChanged: {} event received for device {}",
@@ -587,6 +602,34 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             default:
                 break;
         }
+    }
+
+    private void reconcileConfigurations(final OvsdbConnectionInstance client) {
+        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
+        ReadOnlyTransaction tx = db.newReadOnlyTransaction();
+        CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture =
+                tx.read(LogicalDatastoreType.CONFIGURATION, topologyInstanceIdentifier);
+
+        Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
+            @Override
+            public void onSuccess(@Nullable Optional<Topology> optionalTopology) {
+                if (optionalTopology.isPresent()) {
+                    Topology topology = optionalTopology.get();
+                    if (topology.getNode() != null) {
+                        final ReconciliationTask task = new ConfigurationReconciliationTask(
+                                reconciliationManager, OvsdbConnectionManager.this,
+                                nodeIid, topology, client);
+                        reconciliationManager.enqueue(task);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, t);
+            }
+        });
     }
 
     private class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {

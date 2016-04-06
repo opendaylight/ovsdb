@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_3a73d44e",
+        "filename": "utils/it-utils/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-04-06T20:05:04Z",
+      "side": 1,
+      "message": "Is there a need to have this dependency? I see the pipelineOrchestrator is being set, but not used. The rework I did to get ItUtils working was to remove the net-virt dependency (to remove the Southbound dependency).\n\nThis is why the verify job is failing because the net-virt-provider dependencies are not fully satisfied. The log is complaining about of13provider and utils.mdsal-openflow so there is a missing underlying dependency. For the net-virt case I couldn\u0027t find the issue. Also I didn\u0027t want to make ItUtils dependent on Netvirt.",
+      "revId": "9ad75d625752ef57752cfe3e6ac8528a0a0e541f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

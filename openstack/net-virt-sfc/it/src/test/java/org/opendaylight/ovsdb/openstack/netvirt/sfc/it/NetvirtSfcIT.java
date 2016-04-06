@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright © 2015 - 2016 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -636,7 +636,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         nodeInfo.connect();
 
         String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
-        verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
 
         nodeInfo.disconnect();
     }
@@ -668,7 +668,7 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         nodeInfo.connect();
 
         String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(Service.SFC_CLASSIFIER);
-        verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
 
         Map<String, String> externalIds = Maps.newHashMap();
         externalIds.put("attached-mac", "f6:00:00:0f:00:01");
@@ -720,20 +720,20 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         assertNotNull("RSP was not found", rsp);
 
         flowId = FlowNames.getSfcIngressClass(RULENAME, rsp.getPathId(), rsp.getStartingIndex());
-        verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
         RenderedServicePathHop lastHop = sfcUtils.getLastHop(rsp);
         short lastServiceindex = (short)((lastHop.getServiceIndex()).intValue() - 1);
         flowId = FlowNames.getSfcEgressClass(vxGpeOfPort, rsp.getPathId(), lastServiceindex);
-        verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
         flowId = FlowNames.getSfcEgressClassBypass(rsp.getPathId(), lastServiceindex, 1);
-        verifyFlow(nodeInfo.datapathId, flowId, Service.CLASSIFIER);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.CLASSIFIER);
         flowId = FlowNames.getArpResponder(SF1IP);
-        verifyFlow(nodeInfo.datapathId, flowId, Service.ARP_RESPONDER);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.ARP_RESPONDER);
         // Only verify these flows if NetVirt adds them and not SFC
         //flowId = FlowNames.getSfEgress(GPEUDPPORT);
-        //verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
+        //itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.SFC_CLASSIFIER);
         //flowId = FlowNames.getSfIngress(GPEUDPPORT, SF1IP);
-        //verifyFlow(nodeInfo.datapathId, flowId, Service.CLASSIFIER.getTable());
+        //itUtils.verifyFlow(nodeInfo.datapathId, flowId, Service.CLASSIFIER.getTable());
 
         LOG.info("check for flows!!!!!!!!!!!!!");
         Thread.sleep(30000);
@@ -856,41 +856,6 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
         FlowBuilder flowBuilder =
                 FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, table);
         return FlowUtils.createFlowPath(flowBuilder, nodeBuilder);
-    }
-
-    private Flow getFlow (
-            FlowBuilder flowBuilder,
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder,
-            LogicalDatastoreType store) throws InterruptedException {
-
-        Flow flow = null;
-        for (int i = 0; i < 10; i++) {
-            LOG.info("getFlow try {} from {}: looking for flow: {}, node: {}",
-                    i, store, flowBuilder.build(), nodeBuilder.build());
-            flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
-            if (flow != null) {
-                LOG.info("getFlow try {} from {}: found flow: {}", i, store, flow);
-                break;
-            }
-            Thread.sleep(1000);
-        }
-        return flow;
-    }
-
-    private void verifyFlow(long datapathId, String flowId, short table) throws InterruptedException {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
-                FlowUtils.createNodeBuilder(datapathId);
-        FlowBuilder flowBuilder =
-                FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, table);
-        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("Could not find flow in config: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
-        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational: " + flowBuilder.build() + "--" + nodeBuilder.build(),
-                flow);
-    }
-
-    private void verifyFlow(long datapathId, String flowId, Service service) throws InterruptedException {
-        verifyFlow(datapathId, flowId, pipelineOrchestrator.getTable(service));
     }
 
     private void readwait() {

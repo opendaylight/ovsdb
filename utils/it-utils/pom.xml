@@ -59,6 +59,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <artifactId>ietf-topology</artifactId>
       </dependency>
       <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>openstack.net-virt-providers</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
           <scope>compile</scope>

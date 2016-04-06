@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_faca0c6d",
+        "filename": "netvirt/renderers/neutron/src/test/java/org/opendaylight/ovsdb/netvirt/renderers/neutron/NeutronProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-04-06T19:22:05Z",
+      "side": 1,
+      "message": "This test failed, so for now, commented out.\n\nI will fix this, and add new test code, in my next patch.",
+      "revId": "c1f4615a2e4cab56a7ce9517c0015b45a777c471",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

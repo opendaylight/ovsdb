@@ -391,13 +391,13 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 staticPipelineFound.add(service);
             }
             String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(service);
-            verifyFlow(datapathId, flowId, service);
+            itUtils.verifyFlow(datapathId, flowId, pipelineOrchestrator.getTable(service));
         }
         assertEquals("did not find all expected flows in static pipeline",
                 staticPipeline.size(), staticPipelineFound.size());
 
         String flowId = "TableOffset_" + pipelineOrchestrator.getTable(Service.CLASSIFIER);
-        verifyFlow(datapathId, flowId, Service.CLASSIFIER.getTable());
+        itUtils.verifyFlow(datapathId, flowId, Service.CLASSIFIER.getTable());
 
         Assert.assertTrue(southboundUtils.deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
         Thread.sleep(1000);
@@ -454,7 +454,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                 staticPipelineFound.add(service);
             }
             String flowId = "DEFAULT_PIPELINE_FLOW_" + pipelineOrchestrator.getTable(service);
-            verifyFlow(nodeInfo.datapathId, flowId, service);
+            itUtils.verifyFlow(nodeInfo.datapathId, flowId, pipelineOrchestrator.getTable(service));
         }
         assertEquals("did not find all expected flows in static pipeline",
                 staticPipeline.size(), staticPipelineFound.size());
@@ -520,7 +520,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Thread.sleep(1000);
 
         String flowId = "Egress_DHCP_Client"  + "_Permit_";
-        verifyFlow(nodeInfo.datapathId, flowId, Service.EGRESS_ACL);
+        itUtils.verifyFlow(nodeInfo.datapathId, flowId, pipelineOrchestrator.getTable(Service.EGRESS_ACL));
 
         testDefaultSG(nport, nodeInfo.datapathId, nn, tenantId, portId);
         Thread.sleep(1000);
@@ -583,44 +583,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         LOG.info("Neutron ports have been added");
         Thread.sleep(10000);
         String flowId = "Egress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
-        verifyFlow(datapathId, flowId, Service.EGRESS_ACL);
+        itUtils.verifyFlow(datapathId, flowId, pipelineOrchestrator.getTable(Service.EGRESS_ACL));
 
         flowId = "Ingress_IP" + nn.getProviderSegmentationID() + "_" + nport.getMacAddress() + "_Permit_";
-        verifyFlow(datapathId, flowId, Service.INGRESS_ACL);
-    }
-
-    private Flow getFlow (
-            FlowBuilder flowBuilder,
-            org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder,
-            LogicalDatastoreType store) throws InterruptedException {
-
-        Flow flow = null;
-        for (int i = 0; i < 10; i++) {
-            LOG.info("getFlow try {} from {}: looking for flow: {}, node: {}",
-                    i, store, flowBuilder.build(), nodeBuilder.build());
-            flow = FlowUtils.getFlow(flowBuilder, nodeBuilder, dataBroker.newReadOnlyTransaction(), store);
-            if (flow != null) {
-                LOG.info("getFlow try {} from {}: found flow: {}", i, store, flow);
-                break;
-            }
-            Thread.sleep(1000);
-        }
-        return flow;
-    }
-
-    private void verifyFlow(long datapathId, String flowId, short table) throws InterruptedException {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder nodeBuilder =
-                FlowUtils.createNodeBuilder(datapathId);
-        FlowBuilder flowBuilder =
-                FlowUtils.initFlowBuilder(new FlowBuilder(), flowId, table);
-        Flow flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.CONFIGURATION);
-        assertNotNull("Could not find flow in config: " + flowBuilder.build() + "--" + nodeBuilder.build(), flow);
-        flow = getFlow(flowBuilder, nodeBuilder, LogicalDatastoreType.OPERATIONAL);
-        assertNotNull("Could not find flow in operational: " + flowBuilder.build() + "--" + nodeBuilder.build(),
-                flow);
-    }
-
-    private void verifyFlow(long datapathId, String flowId, Service service) throws InterruptedException {
-        verifyFlow(datapathId, flowId, pipelineOrchestrator.getTable(service));
+        itUtils.verifyFlow(datapathId, flowId, pipelineOrchestrator.getTable(Service.INGRESS_ACL));
     }
 }

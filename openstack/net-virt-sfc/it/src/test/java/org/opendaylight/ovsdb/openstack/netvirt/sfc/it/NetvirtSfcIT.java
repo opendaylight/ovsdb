@@ -215,12 +215,12 @@ public class NetvirtSfcIT extends AbstractMdsalTestBase {
 
     @Override
     public String getModuleName() {
-        return "netvirt-sfc";
+        return "netvirt-sfc-impl";
     }
 
     @Override
     public String getInstanceName() {
-        return "netvirt-sfc-default";
+        return "netvirt-sfc-impl";
     }
 
     @Override

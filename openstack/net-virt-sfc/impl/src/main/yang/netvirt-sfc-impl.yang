@@ -1,7 +1,7 @@
-module netvirt-sfc {
+module netvirt-sfc-impl {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:sfc";
-    prefix "netvirt-sfc";
+    namespace "urn:opendaylight:params:xml:ns:yang:netvirt:sfc:impl";
+    prefix "netvirt-sfc-impl";
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28;}
@@ -14,14 +14,14 @@ module netvirt-sfc {
             "Initial revision";
     }
 
-    identity netvirt-sfc {
+    identity netvirt-sfc-impl {
         base config:module-type;
-        config:java-name-prefix NetvirtSfc;
+        config:java-name-prefix NetvirtSfcImpl;
     }
 
     augment "/config:modules/config:module/config:configuration" {
-        case netvirt-sfc {
-            when "/config:modules/config:module/config:type = 'netvirt-sfc'";
+        case netvirt-sfc-impl {
+            when "/config:modules/config:module/config:type = 'netvirt-sfc-impl'";
             container broker {
                 uses config:service-ref {
                     refine type {

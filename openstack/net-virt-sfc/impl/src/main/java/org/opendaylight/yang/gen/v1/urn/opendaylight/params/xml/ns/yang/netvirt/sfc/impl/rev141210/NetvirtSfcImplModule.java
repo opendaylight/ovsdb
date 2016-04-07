@@ -1,30 +1,27 @@
 /*
- * Copyright © 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev141210;
+package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.impl.rev141210;
 
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.ovsdb.openstack.netvirt.sfc.NetvirtSfcProvider;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetvirtSfcModule extends AbstractNetvirtSfcModule {
-    private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcModule.class);
+public class NetvirtSfcImplModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.impl.rev141210.AbstractNetvirtSfcImplModule {
+    private static final Logger LOG = LoggerFactory.getLogger(NetvirtSfcImplModule.class);
     private BundleContext bundleContext;
 
-    public NetvirtSfcModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
+    public NetvirtSfcImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public NetvirtSfcModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver,
-                            NetvirtSfcModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public NetvirtSfcImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.impl.rev141210.NetvirtSfcImplModule oldModule, java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

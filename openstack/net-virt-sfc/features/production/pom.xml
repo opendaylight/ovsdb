@@ -25,62 +25,27 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </prerequisites>
   <properties>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
+    <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
     <dlux.version>0.4.0-SNAPSHOT</dlux.version>
     <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
-    <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
-    <neutron.version>0.7.0-SNAPSHOT</neutron.version>
     <openflowplugin.version>0.3.0-SNAPSHOT</openflowplugin.version>
     <restconf.version>1.4.0-SNAPSHOT</restconf.version>
     <sfc.version>0.3.0-SNAPSHOT</sfc.version>
-    <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
   </properties>
-  <dependencyManagement>
-    <dependencies>
-      <!-- project specific dependencies -->
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yangtools-artifacts</artifactId>
-        <version>${yangtools.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>${controller.mdsal.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.netconf</groupId>
-        <artifactId>restconf-artifacts</artifactId>
-        <version>${restconf.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>ovsdb-artifacts</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>features-yangtools</artifactId>
+      <groupId>org.opendaylight.dlux</groupId>
+      <artifactId>features-dlux</artifactId>
       <classifier>features</classifier>
-      <version>${yangtools.version}</version>
+      <version>${dlux.version}</version>
       <type>xml</type>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>
-      <type>xml</type>
       <classifier>features</classifier>
+      <version>${controller.mdsal.version}</version>
+      <type>xml</type>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
@@ -88,7 +53,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <version>${mdsal.model.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.netconf</groupId>
@@ -96,23 +60,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <classifier>features</classifier>
       <version>${restconf.version}</version>
       <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.dlux</groupId>
-      <artifactId>features-dlux</artifactId>
-      <classifier>features</classifier>
-      <version>${dlux.version}</version>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>features-ovsdb</artifactId>
-      <classifier>features</classifier>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
@@ -120,6 +67,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <version>${openflowplugin.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>features-ovsdb</artifactId>
+      <classifier>features</classifier>
+      <version>${project.version}</version>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>southbound-features</artifactId>
+      <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
@@ -134,31 +95,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <version>${sfc.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>openstack.net-virt-sfc-impl</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>openstack.net-virt-sfc-impl</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>openstack.net-virt-sfc-api</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>southbound-features</artifactId>
-      <version>${project.version}</version>
-      <type>xml</type>
-      <classifier>features</classifier>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -169,6 +115,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>utils.servicehelper</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>openstack.net-virt-sfc-impl</artifactId>
+      <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
     </dependency>
   </dependencies>
 </project>

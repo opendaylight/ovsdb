@@ -87,13 +87,10 @@ Running The Integration Tests
 To run the integration tests locally the following components are required:
 
  - Docker
- - Fig or Docker Compose
+ - Docker Compose
 
 To install docker, follow the installation guide for your platform:
    http://docs.docker.com/installation/
-
-To install fig:
-   http://www.fig.sh/install.html
 
 To install Docker Compose:
    http://docs.docker.com/compose/install/
@@ -102,18 +99,16 @@ To run the integration tests:
 
     mvn clean install
     # The first time you need to set everything up
-    fig up -d
+    docker-compose up -d
     # Later runs only need the containers to be started
-    fig start
+    docker-compose start
     # OSX
     mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=$(boot2docker ip 2>/dev/null) -Dovsdbserver.port=6640
     # Linux
     mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=127.0.0.1 -Dovsdbserver.port=6640 -Dovsdb.controller.address=<addr of docker interface> -Dovsdb.userspace.enabled=yes
-    fig stop
+    docker-compose stop
 
 On Linux you'll generally need to run fig as root (sudo fig ...).
-
-If you're using Docker Compose, replace "fig" above with "docker-compose" and ignore the warnings.
 
 Running the docker image manually:
     sudo docker run -itd --cap-add NET_ADMIN -p 6640:6640 jhershbe/centos7-ovs:latest

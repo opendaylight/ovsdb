@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.rev141210;
+package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.netvirt.sfc.impl.rev141210;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -36,10 +36,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-public class NetvirtSfcModuleTest {
+public class NetvirtSfcImplModuleTest {
     @Test
     public void testCustomValidation() {
-        NetvirtSfcModule module = new NetvirtSfcModule(mock(ModuleIdentifier.class), mock(DependencyResolver.class));
+        NetvirtSfcImplModule module = new NetvirtSfcImplModule(mock(ModuleIdentifier.class), mock(DependencyResolver.class));
         // ensure no exceptions on validation
         // currently this method is empty
         module.customValidation();
@@ -58,7 +58,7 @@ public class NetvirtSfcModuleTest {
         when(session.getSALService(eq(DataBroker.class))).thenReturn(dataBroker);
 
         // create instance of module with injected mocks
-        NetvirtSfcModule module = new NetvirtSfcModule(mock(ModuleIdentifier.class), dependencyResolver);
+        NetvirtSfcImplModule module = new NetvirtSfcImplModule(mock(ModuleIdentifier.class), dependencyResolver);
         // getInstance calls resolveInstance to get the broker dependency and then calls createInstance
         BundleContext bundleContext = mock(BundleContext.class);
         PipelineOrchestrator pipelineOrchestrator = mock(PipelineOrchestrator.class);
@@ -77,6 +77,7 @@ public class NetvirtSfcModuleTest {
         AutoCloseable closeable = module.getInstance();
         ((NetvirtSfcProvider)closeable).setBundleContext(bundleContext);
         ((NetvirtSfcProvider)closeable).setOf13Provider("standalone");
+        ((NetvirtSfcProvider)closeable).setAddSfFlows(false);
         ((NetvirtSfcProvider)closeable).onSessionInitiated(session);
         // verify that the module registered the returned provider with the broker
         verify(broker).registerProvider((NetvirtSfcProvider)closeable);

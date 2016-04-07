@@ -8,7 +8,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <snapshot>
   <required-capabilities>
-    <capability>urn:opendaylight:params:xml:ns:yang:netvirt:sfc?module=netvirt-sfc&amp;revision=2014-12-10</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:netvirt:sfc:impl?module=netvirt-sfc-impl&amp;revision=2014-12-10</capability>
     <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
     <capability>urn:opendaylight:params:xml:ns:yang:southbound:impl?module=southbound-impl&amp;revision=2014-12-10</capability>
     <capability>urn:opendaylight:params:xml:ns:yang:netvirt:impl?module=netvirt-impl&amp;revision=2015-05-13</capability>
@@ -19,8 +19,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
       <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <module>
-          <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:sfc">prefix:netvirt-sfc</type>
-          <name>netvirt-sfc-default</name>
+          <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:netvirt:sfc:impl">prefix:netvirt-sfc-impl</type>
+          <name>netvirt-sfc-impl</name>
           <of13provider>workaround</of13provider>
           <addsfflows>false</addsfflows>
           <broker>

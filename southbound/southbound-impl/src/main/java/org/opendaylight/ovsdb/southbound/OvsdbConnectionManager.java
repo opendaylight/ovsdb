@@ -47,6 +47,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.southbound.reconciliation.configuration.BridgeConfigReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
@@ -138,6 +139,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             ovsdbConnectionInstance.disconnect();
 
             removeConnectionInstance(key);
+
+            stopBridgeConfigReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
         }
 
         ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
@@ -170,6 +173,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //Controller initiated connection can be terminated from switch side.
             //So cleanup the instance identifier cache.
             removeInstanceIdentifier(key);
+            stopBridgeConfigReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
             retryConnection(ovsdbConnectionInstance.getInstanceIdentifier(),
                     ovsdbConnectionInstance.getOvsdbNodeAugmentation(),
                     ConnectionReconciliationTriggers.ON_DISCONNECT);
@@ -215,6 +219,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             client.disconnect();
 
             removeInstanceIdentifier(ovsdbNode.getConnectionInfo());
+
+            stopBridgeConfigReconciliationIfActive(client.getInstanceIdentifier());
         } else {
             LOG.debug("disconnect : connection instance not found for {}",ovsdbNode.getConnectionInfo());
         }
@@ -351,6 +357,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 ovsdbNode);
         reconciliationManager.dequeue(task);
     }
+
+    public void stopBridgeConfigReconciliationIfActive(InstanceIdentifier<?> iid) {
+        final ReconciliationTask task = new BridgeConfigReconciliationTask(
+                reconciliationManager,
+                this,
+                iid,
+                null);
+        reconciliationManager.dequeue(task);
+    }
+
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
         LOG.debug("handleOwnershipChanged: {} event received for device {}",
@@ -399,6 +415,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //so register for monitor callbacks
             ovsdbConnectionInstance.registerCallbacks();
 
+            reconcileBridgeConfigurations(ovsdbConnectionInstance);
         } else {
             //You were owner of the device, but now you are not. With the current ownership
             //grant mechanism, this scenario should not occur. Because this scenario will occur
@@ -587,6 +604,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             default:
                 break;
         }
+    }
+
+    private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
+        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
+        final ReconciliationTask task = new BridgeConfigReconciliationTask(
+                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client);
+
+        reconciliationManager.enqueue(task);
     }
 
     private class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {

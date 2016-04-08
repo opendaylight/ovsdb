@@ -114,6 +114,13 @@ public class OvsdbConnectionManagerTest {
 
         //TODO: Write unit tests for entity ownership service related code.
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership", OvsdbConnectionInstance.class));
+
+        ReadOnlyTransaction tx = mock(ReadOnlyTransaction.class);
+        when(db.newReadOnlyTransaction()).thenReturn(tx);
+        when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
+                .thenReturn(mock(CheckedFuture.class));
+        when(client.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
+
         ovsdbConnectionManager.connected(externalClient);
     }
 
@@ -185,7 +192,8 @@ public class OvsdbConnectionManagerTest {
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", ConnectionInfo.class));
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbConnectionManager.getConnectionInstance(any(ConnectionInfo.class))).thenReturn(ovsdbConnectionInstance);
-
+        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
+        
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "removeInstanceIdentifier", ConnectionInfo.class));
 
         //TODO: Write unit tests for entity ownership service related code.

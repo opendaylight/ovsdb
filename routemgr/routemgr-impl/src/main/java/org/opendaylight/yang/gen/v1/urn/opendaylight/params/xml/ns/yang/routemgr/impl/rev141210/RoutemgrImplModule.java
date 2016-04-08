@@ -5,7 +5,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.ovsdb.routemgr.net.OvsdbDataListener;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.group.service.rev130918.SalGroupService;
@@ -48,9 +47,8 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
         NotificationProviderService notificationService = getNotificationServiceDependency();
         DataBroker dataService = getDataBrokerDependency();
         RpcProviderRegistry rpcRegistryDependency = getRpcRegistryDependency();
-        SalFlowService salFlowService = rpcRegistryDependency.getRpcService(SalFlowService.class);
 
-        IPv6RtrFlow.setSalFlow (salFlowService);
+        IPv6RtrFlow.setDataBroker (dataService);
 
         Preconditions.checkNotNull(dataService);
         Preconditions.checkNotNull(rpcRegistryDependency);
@@ -61,22 +59,18 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
         ovsdbDataListener = new OvsdbDataListener(dataService);
         ovsdbDataListener.registerDataChangeListener();
 
-        ipPktHandler = new PktHandler();
-        ipPktHandler.setDataBrokerService(dataService);
-        packetListener = notificationService.registerNotificationListener(ipPktHandler);
-        LOG.debug ("started the packethandler to receive lacp pdus");
-
         PacketProcessingService packetProcessingService =
                 rpcRegistryDependency.getRpcService(PacketProcessingService.class);
-
-	/* TODO:: Spawn the Default threads - PDU Decoder and Tx Threads */
-
-
+        ipPktHandler = new PktHandler();
+        ipPktHandler.setDataBrokerService(dataService);
+        ipPktHandler.setPacketProcessingService(packetProcessingService);
+        packetListener = notificationService.registerNotificationListener(ipPktHandler);
+        LOG.debug ("started the packethandler to receive pdus");
 
         LOG.debug("starting to read from data store");
         netDataListener.readDataStore();
 
-        final class CloseLacpResources implements AutoCloseable {
+        final class CloseRtrMgrResources implements AutoCloseable {
             @Override
             public void close() throws Exception {
                 if (packetListener != null)
@@ -97,7 +91,7 @@ public class RoutemgrImplModule extends org.opendaylight.yang.gen.v1.urn.openday
             }
         }
 
-        AutoCloseable ret = new CloseLacpResources();
+        AutoCloseable ret = new CloseRtrMgrResources();
         LOG.info("Routemgr (instance {}) initialized.", ret);
         return ret;
     }

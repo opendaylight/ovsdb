@@ -56,6 +56,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.SouthboundImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.HostConfigService;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronFloatingIPCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerCRUD;
 import org.opendaylight.ovsdb.openstack.netvirt.translator.crud.INeutronLoadBalancerPoolCRUD;
@@ -217,6 +218,10 @@ public class ConfigActivator implements BundleActivator {
         Southbound southbound = new SouthboundImpl(providerContext.getSALService(DataBroker.class));
         registerService(context,
                 new String[]{Southbound.class.getName()}, null, southbound);
+
+        HostConfigService hostConfigService = new HostConfigService(providerContext.getSALService(DataBroker.class));
+        registerService(context,
+                new String[]{HostConfigService.class.getName()}, null, hostConfigService);
 
         NodeCacheManagerImpl nodeCacheManager = new NodeCacheManagerImpl();
         registerAbstractHandlerService(context, new Class[] {NodeCacheManager.class},

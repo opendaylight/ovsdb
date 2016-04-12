@@ -19,7 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
-  <artifactId>utils.it-utils</artifactId>
+  <artifactId>utils.ovsdb-it-utils</artifactId>
   <version>1.2.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
@@ -36,17 +36,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <artifactId>sal-binding-api</artifactId>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.ovsdb</groupId>
+          <groupId>${project.groupId}</groupId>
           <artifactId>southbound-api</artifactId>
           <version>${project.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.ovsdb</groupId>
+          <groupId>${project.groupId}</groupId>
           <artifactId>utils.mdsal-utils</artifactId>
           <version>${project.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.ovsdb</groupId>
+          <groupId>${project.groupId}</groupId>
           <artifactId>utils.southbound-utils</artifactId>
           <version>${project.version}</version>
       </dependency>

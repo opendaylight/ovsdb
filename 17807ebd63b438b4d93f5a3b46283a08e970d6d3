@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_aac68f47",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-12T01:52:39Z",
+      "side": 1,
+      "message": "please add some detail about the class, it would be good to add the scenario where this class is required.",
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_6ab5a7cc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-12T01:52:39Z",
+      "side": 1,
+      "message": "Vishal, this object is not really holding any device state right? It\u0027s just a device metadata. So i would suggest to rename it to HwvtepDeviceMetadata / HwvtepDeviceInfo /HwvtepDeviceContext",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 30
+      },
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_cac95b5c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-12T01:52:39Z",
+      "side": 1,
+      "message": "Given that one physical switch can have multiple logical switch and there can be multiple update from switch which will be processed in parallel by the switch, so there is a possibility of concurrent modification exception. So i would suggest to use ConcurrentHashMap.",
+      "range": {
+        "startLine": 21,
+        "startChar": 35,
+        "endLine": 21,
+        "endChar": 42
+      },
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

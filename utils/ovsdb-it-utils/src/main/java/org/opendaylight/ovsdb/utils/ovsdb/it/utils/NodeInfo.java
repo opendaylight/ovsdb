@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.utils.it.utils;
+package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -40,15 +41,15 @@ public class NodeInfo {
     NotifyingDataChangeListener ovsdbWaiter;
     NotifyingDataChangeListener bridgeWaiter;
     List<NotifyingDataChangeListener> waitList;
-    ItUtils itUtils;
+    OvsdbItUtils itUtils;
 
     /**
-     * Create a new NodeInfo object
+     * Create a new NodeInfo object.
      * @param connectionInfo of the OVSDB node
-     * @param itUtils ItUtils instance
+     * @param itUtils OvsdbItUtils instance
      * @param waitList for tracking outstanding md-sal events
      */
-    NodeInfo(ConnectionInfo connectionInfo, ItUtils itUtils, List<NotifyingDataChangeListener> waitList) {
+    NodeInfo(ConnectionInfo connectionInfo, OvsdbItUtils itUtils, List<NotifyingDataChangeListener> waitList) {
         this.connectionInfo = connectionInfo;
         this.itUtils = itUtils;
         this.waitList = waitList;
@@ -59,7 +60,7 @@ public class NodeInfo {
     /**
      * Connect to the OVSDB node, wait for the connection to be established and for the integration bridge
      * to be successfully created. Contains assertions for unexpected states
-     * @throws InterruptedException
+     * @throws InterruptedException if interrupted while waiting for connection
      */
     public void connect() throws InterruptedException {
         ovsdbWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, ovsdbIid, waitList);
@@ -87,7 +88,7 @@ public class NodeInfo {
 
     /**
      * Remove integration bridge and teardown connection. Contains assertions for unexpected states.
-     * @throws InterruptedException
+     * @throws InterruptedException if interrupted while waiting for disconnect to complete
      */
     public void disconnect() throws InterruptedException {
         assertTrue(itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0));

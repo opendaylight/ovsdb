@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.ovsdb.utils.it.utils;
+package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,15 +40,15 @@ public class NodeInfo {
     NotifyingDataChangeListener ovsdbWaiter;
     NotifyingDataChangeListener bridgeWaiter;
     List<NotifyingDataChangeListener> waitList;
-    ItUtils itUtils;
+    OvsdbItUtils itUtils;
 
     /**
      * Create a new NodeInfo object
      * @param connectionInfo of the OVSDB node
-     * @param itUtils ItUtils instance
+     * @param itUtils OvsdbItUtils instance
      * @param waitList for tracking outstanding md-sal events
      */
-    NodeInfo(ConnectionInfo connectionInfo, ItUtils itUtils, List<NotifyingDataChangeListener> waitList) {
+    NodeInfo(ConnectionInfo connectionInfo, OvsdbItUtils itUtils, List<NotifyingDataChangeListener> waitList) {
         this.connectionInfo = connectionInfo;
         this.itUtils = itUtils;
         this.waitList = waitList;

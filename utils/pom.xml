@@ -51,13 +51,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modules>
     <module>config</module>
     <module>hwvtepsouthbound-utils</module>
-    <module>it-utils</module>
     <module>mdsal-node</module>
     <module>mdsal-openflow</module>
     <module>mdsal-utils</module>
     <module>servicehelper</module>
     <module>southbound-utils</module>
     <module>yang-utils</module>
+    <module>ovsdb-it-utils</module>
   </modules>
 
 <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->

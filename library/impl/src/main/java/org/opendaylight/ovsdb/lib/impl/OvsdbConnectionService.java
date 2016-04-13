@@ -318,13 +318,27 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     switch (status) {
                         case FINISHED:
                         case NOT_HANDSHAKING:
-                            //Handshake done. Notify listener.
-                            OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                                                 Executors.newFixedThreadPool(NUM_THREADS));
-
-                            LOG.debug("Notify listener");
-                            for (OvsdbConnectionListener listener : connectionListeners) {
-                                listener.connected(client);
+                            if (sslHandler.engine().getSession().getCipherSuite()
+                                    .equals("SSL_NULL_WITH_NULL_NULL")) {
+                                // Not begin handshake yet. Retry later.
+                                LOG.debug("handshake not begin yet {}", status);
+                                executorService.schedule(this, retryPeriod, TimeUnit.MILLISECONDS);
+                            } else {
+                              //Check if peer is trusted before notifying listeners
+                                try {
+                                    sslHandler.engine().getSession().getPeerCertificates();
+                                    //Handshake done. Notify listener.
+                                    OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
+                                                         Executors.newFixedThreadPool(NUM_THREADS));
+                                    LOG.debug("Notify listener");
+                                    for (OvsdbConnectionListener listener : connectionListeners) {
+                                        listener.connected(client);
+                                    }
+                                } catch (SSLPeerUnverifiedException e) {
+                                    //Trust manager is still checking peer certificate. Retry later
+                                    LOG.debug("Peer certifiacte is not verified yet {}", status);
+                                    executorService.schedule(this, retryPeriod, TimeUnit.MILLISECONDS);
+                                }
                             }
                             break;
 

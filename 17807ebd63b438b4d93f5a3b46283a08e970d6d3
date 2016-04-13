@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_331dd367",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-13T20:35:15Z",
+      "side": 1,
+      "message": "yeah but i think from plugin perspective, it\u0027s just holding some device related data, so \"State\" can be confusing.",
+      "parentUuid": "1a494da4_98b044f6",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 30
+      },
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_cac95b5c",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
         "patchSetId": 1
@@ -119,6 +143,30 @@
       "side": 1,
       "message": "This will only be updated by transactions/md/*.java from within TransactionInvoker, nowhere else. I believe that already eliminates concurrent modifications, right?",
       "parentUuid": "1a494da4_cac95b5c",
+      "range": {
+        "startLine": 21,
+        "startChar": 35,
+        "endLine": 21,
+        "endChar": 42
+      },
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_f339abd9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-13T20:35:15Z",
+      "side": 1,
+      "message": "Yeah, i was under impression that we are using thread pool, but looks like we are using only SingleThread executor, so this won\u0027t create any issue. But if we move toward using thread pool for these md-sal transaction, this cache can create problems. But i think as of now we are fine.",
+      "parentUuid": "1a494da4_189c3469",
       "range": {
         "startLine": 21,
         "startChar": 35,

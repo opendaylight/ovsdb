@@ -322,9 +322,17 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
                                                  Executors.newFixedThreadPool(NUM_THREADS));
 
-                            LOG.debug("Notify listener");
-                            for (OvsdbConnectionListener listener : connectionListeners) {
-                                listener.connected(client);
+                            if (sslHandler.engine().getSession().getCipherSuite()
+                                    .equals("SSL_NULL_WITH_NULL_NULL")
+                                    && status.equals(HandshakeStatus.NOT_HANDSHAKING)) {
+                                // Not begin handshake yet. Retry later.
+                                LOG.debug("handshake not begin yet {}", status);
+                                executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
+                            } else {
+                                LOG.debug("Notify listener");
+                                for (OvsdbConnectionListener listener : connectionListeners) {
+                                    listener.connected(client);
+                                }
                             }
                             break;
 

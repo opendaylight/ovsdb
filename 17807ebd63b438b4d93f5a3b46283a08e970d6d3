@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_f894e845",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-13T17:28:18Z",
+      "side": 1,
+      "message": "wil do.",
+      "parentUuid": "1a494da4_aac68f47",
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_6ab5a7cc",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
         "patchSetId": 1
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_98b044f6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-13T17:28:18Z",
+      "side": 1,
+      "message": "It is actually storing entries from some of the tables that get stored in operational datastore. I used state based off HwvtepOperationalState/OvsdbOperationalState.",
+      "parentUuid": "1a494da4_6ab5a7cc",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 30
+      },
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_cac95b5c",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
         "patchSetId": 1
@@ -53,6 +95,30 @@
       "writtenOn": "2016-04-12T01:52:39Z",
       "side": 1,
       "message": "Given that one physical switch can have multiple logical switch and there can be multiple update from switch which will be processed in parallel by the switch, so there is a possibility of concurrent modification exception. So i would suggest to use ConcurrentHashMap.",
+      "range": {
+        "startLine": 21,
+        "startChar": 35,
+        "endLine": 21,
+        "endChar": 42
+      },
+      "revId": "17807ebd63b438b4d93f5a3b46283a08e970d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_189c3469",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-04-13T17:28:18Z",
+      "side": 1,
+      "message": "This will only be updated by transactions/md/*.java from within TransactionInvoker, nowhere else. I believe that already eliminates concurrent modifications, right?",
+      "parentUuid": "1a494da4_cac95b5c",
       "range": {
         "startLine": 21,
         "startChar": 35,

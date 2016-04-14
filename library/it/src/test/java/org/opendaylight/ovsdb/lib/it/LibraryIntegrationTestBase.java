@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2015, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -222,7 +222,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
      * As per RFC 7047, section 4.1.5, if a Monitor request is sent without any columns, the update response will not include
      * the _uuid column.
      * ----------------------------------------------------------------------------------------------------------------------------------
-     * Each <monitor-request> specifies one or more columns and the manner in which the columns (or the entire table) are to be monitored.
+     * Each &lt;monitor-request&gt; specifies one or more columns and the manner in which the columns (or the entire table) are to be monitored.
      * The "columns" member specifies the columns whose values are monitored. It MUST NOT contain duplicates.
      * If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
      * ----------------------------------------------------------------------------------------------------------------------------------

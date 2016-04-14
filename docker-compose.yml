@@ -1,5 +1,5 @@
 ovs:
- image: jhershbe/centos7-ovs:2.5.1
+ image: davetucker/docker-ovs:2.1.2
  ports:
    - "6640:6640"
  command: "/usr/bin/supervisord -n"

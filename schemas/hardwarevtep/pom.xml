@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (C) 2014 Red Hat, Inc. and others. All rights reserved.
+Copyright © 2014, 2016 Red Hat, Inc. and others. All rights reserved.
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,13 +17,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <version>1.6.3-SNAPSHOT</version>
     <relativePath/>
   </parent>
-  
+
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>schema.hardwarevtep</artifactId>
   <version>1.2.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
-  <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   <licenses>
     <license>
       <name>Eclipse Public License v1.0</name>
@@ -72,4 +71,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </plugin>
     </plugins>
   </build>
+
+  <!--
+      Maven Site Configuration
+
+      The following configuration is necessary for maven-site-plugin to
+      correctly identify the correct deployment path for OpenDaylight Maven
+      sites.
+  -->
+  <url>${odl.site.url}/${project.groupId}/${stream}/${project.artifactId}/</url>
+
+  <distributionManagement>
+    <site>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/${project.artifactId}/</url>
+    </site>
+  </distributionManagement>
 </project>

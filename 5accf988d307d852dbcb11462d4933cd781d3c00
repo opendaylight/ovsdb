@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_53ccdf35",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-14T06:44:26Z",
+      "side": 1,
+      "message": "Hi Vinh, did you test this code in 3-node clustering?. Ideally we should trigger reconciliation only when this instance of southbound plugins is owner of the device. Now in single node cluster, it\u0027s obvious that we have only one instances and if device is connecting to this instance, it will be the owner of the device. But we need to write the reconciliation code in a cluster agnostic way. For that we need to make sure that we trigger the reconciliation only when this instance gets the ownership. In 3-node cluster when you register for the ownership, ownership decision might not be taken immediately by EntityOwnershipService. So you need to rely on the OwnershipChange notification and if you are owner you can trigger the reconciliation. So you need to write the logic in a way that you submit the reconciliation task to the queue, but reconciliation task need to  wait till device entity has owner AND *this* instance of southbound plugin is the owner of the device. If device entity has owner, but *this* instance of southbound plugin is not the entity owner, then ignore the reconciliation. Let me know if you need more detail, clarity about it, we can discuss over mail.",
+      "range": {
+        "startLine": 119,
+        "startChar": 12,
+        "endLine": 119,
+        "endChar": 35
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_33e5d3a8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-14T06:44:26Z",
+      "side": 1,
+      "message": "is there any specific reason we are reading the whole topology tree? We need to reconcile configuration related to very specific node (that just connected to controller), so it should only read configuration of that node from the data store.",
+      "range": {
+        "startLine": 612,
+        "startChar": 16,
+        "endLine": 612,
+        "endChar": 88
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_d3d74fbe",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/ConfigurationReconciliationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-14T06:44:26Z",
+      "side": 1,
+      "message": "please rename the class to BridgeConfigReconciliationTask, because we need to write task for individual resource, like bridge, termination point , queue etc.",
+      "range": {
+        "startLine": 46,
+        "startChar": 13,
+        "endLine": 46,
+        "endChar": 44
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_93d667c4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/ConfigurationReconciliationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-14T06:44:26Z",
+      "side": 1,
+      "message": "You don\u0027t have to reconcile for all the nodes present in the config data store, you just have to reconcile the configuration of the device that just connected to the southbound plugin.",
+      "range": {
+        "startLine": 65,
+        "startChar": 12,
+        "endLine": 65,
+        "endChar": 48
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

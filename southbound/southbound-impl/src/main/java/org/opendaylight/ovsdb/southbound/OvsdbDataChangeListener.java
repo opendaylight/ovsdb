@@ -96,7 +96,7 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getValue();
             connectionInstance.transact(new TransactCommandAggregator(),
                     new BridgeOperationalState(db, changes),
-                    new DataChangesManagedByOvsdbNodeEvent(
+                    new DataChangesManagedByOvsdbNodeEvent(db,
                             connectionInstance.getInstanceIdentifier(),
                             changes));
         }
@@ -218,12 +218,9 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
                     if (ovsNode != null && ovsNode.getConnectionInfo() != null) {
                         client = cm.getConnectionInstance(ovsNode.getConnectionInfo());
                     } else {
-                        List<TerminationPoint> terminationPoint = ((Node)created.getValue()).getTerminationPoint();
-                        if (!terminationPoint.isEmpty()) {
-                            InstanceIdentifier<Node> nodeIid = SouthboundMapper.
-                                    createInstanceIdentifier(((Node)created.getValue()).getNodeId());
-                            client = cm.getConnectionInstance(nodeIid);
-                        }
+                        InstanceIdentifier<Node> nodeIid = SouthboundMapper.
+                                createInstanceIdentifier(((Node)created.getValue()).getNodeId());
+                        client = cm.getConnectionInstance(nodeIid);
                     }
                 }
                 if (client != null) {

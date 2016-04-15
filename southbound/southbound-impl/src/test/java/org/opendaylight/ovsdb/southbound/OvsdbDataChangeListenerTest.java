@@ -120,7 +120,11 @@ public class OvsdbDataChangeListenerTest {
         when(ovsdbDataChangeListener.connectionInstancesFromChanges(any(AsyncDataChangeEvent.class))).thenReturn(map);
         BridgeOperationalState bridgeOperationalState = mock(BridgeOperationalState.class);
         DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent = mock(DataChangesManagedByOvsdbNodeEvent.class);
-        PowerMockito.whenNew(DataChangesManagedByOvsdbNodeEvent.class).withArguments(any(InstanceIdentifier.class), any(AsyncDataChangeEvent.class)).thenReturn(dataChangesManagedByOvsdbNodeEvent);
+        PowerMockito.whenNew(DataChangesManagedByOvsdbNodeEvent.class).withArguments(
+                any(DataBroker.class),
+                any(InstanceIdentifier.class),
+                any(AsyncDataChangeEvent.class)).thenReturn(dataChangesManagedByOvsdbNodeEvent);
+
         PowerMockito.whenNew(BridgeOperationalState.class).withArguments(any(DataBroker.class), any(AsyncDataChangeEvent.class)).thenReturn(bridgeOperationalState);
 
         when(connectionInstance.getInstanceIdentifier()).thenReturn(iid);
@@ -255,7 +259,6 @@ public class OvsdbDataChangeListenerTest {
         when(SouthboundMapper.createInstanceIdentifier(any(NodeId.class))).thenReturn(nodeIid);
         when(cm.getConnectionInstance(any(InstanceIdentifier.class))).thenReturn(client);
         assertEquals("Error returning correct Map", testResultMap, ovsdbDataChangeListener.connectionInstancesFromMap(map));
-        verify(node).getTerminationPoint();
         verify(cm).getConnectionInstance(any(InstanceIdentifier.class));
     }
 }

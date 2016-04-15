@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_2173b84e",
+        "filename": "deploy-site.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-15T23:45:44Z",
+      "side": 1,
+      "message": "2016?",
+      "range": {
+        "startLine": 4,
+        "startChar": 15,
+        "endLine": 4,
+        "endChar": 19
+      },
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_818f2c23",
+        "filename": "deploy-site.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-15T23:45:44Z",
+      "side": 1,
+      "message": "not an expert here, but how about putting these version in \u003cproperties\u003e?",
+      "range": {
+        "startLine": 28,
+        "startChar": 9,
+        "endLine": 28,
+        "endChar": 31
+      },
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_6194a037",
+        "filename": "schemas/hardwarevtep/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-15T23:45:44Z",
+      "side": 1,
+      "message": "nit:space",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 2
+      },
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_01a31c9f",
+        "filename": "src/site/site.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-04-15T23:45:44Z",
+      "side": 1,
+      "message": "copyright?",
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_7630e456",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-04-15T17:10:08Z",
+      "side": 1,
+      "message": "does it work if I simply move the  call \"reconcileConfigurations\" method when EntityOwnershipChange notification arrives and indicates that this plugin instance is the owner of the device. That would be inside the method \"handleOwnershipChanged\" call after the lines:\n\nif (ownershipChange.isOwner()) {\n    LOG.info(\"handleOwnershipChanged: *this* southbound plugin instance is an OWNER of the device {}\",\n            ovsdbConnectionInstance.getConnectionInfo());",
+      "parentUuid": "1a494da4_53ccdf35",
+      "range": {
+        "startLine": 119,
+        "startChar": 12,
+        "endLine": 119,
+        "endChar": 35
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_33e5d3a8",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-14T06:44:26Z",
       "side": 1,
       "message": "is there any specific reason we are reading the whole topology tree? We need to reconcile configuration related to very specific node (that just connected to controller), so it should only read configuration of that node from the data store.",
+      "range": {
+        "startLine": 612,
+        "startChar": 16,
+        "endLine": 612,
+        "endChar": 88
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_6d7e57e6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-04-15T17:10:08Z",
+      "side": 1,
+      "message": "For the OVS initiated scenario there is no tree node for the OVS node in the config datastore. Therefore I have to search for bridge nodes are that managed by the OVS node that is just connected.\n\nI could not find a way to read a tree node for bridges in the config datastore with either:\n- wildcard on bridge name, ie: ovsdb://uuid/\u003cdevice uuid\u003e/bridge/*\n- managedBy device url\n\nI found a related email topic that you might involve on it:\nhttps://lists.opendaylight.org/pipermail/ovsdb-dev/2015-July/001655.html\n\nIs there any update on that?",
+      "parentUuid": "1a494da4_33e5d3a8",
       "range": {
         "startLine": 612,
         "startChar": 16,
@@ -82,6 +130,30 @@
       "writtenOn": "2016-04-14T06:44:26Z",
       "side": 1,
       "message": "You don\u0027t have to reconcile for all the nodes present in the config data store, you just have to reconcile the configuration of the device that just connected to the southbound plugin.",
+      "range": {
+        "startLine": 65,
+        "startChar": 12,
+        "endLine": 65,
+        "endChar": 48
+      },
+      "revId": "5accf988d307d852dbcb11462d4933cd781d3c00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_962bf0ea",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/ConfigurationReconciliationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-04-15T17:10:08Z",
+      "side": 1,
+      "message": "I check for the bridges that belong to the OVS device in line 69.\n\nLine 66 \u0026 67 will be removed since they are there by cut\u0026paste mistake",
+      "parentUuid": "1a494da4_93d667c4",
       "range": {
         "startLine": 65,
         "startChar": 12,

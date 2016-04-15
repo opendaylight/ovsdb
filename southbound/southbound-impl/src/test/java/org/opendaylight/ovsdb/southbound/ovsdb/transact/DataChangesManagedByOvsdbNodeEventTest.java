@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -35,6 +36,7 @@ import org.powermock.reflect.Whitebox;
 public class DataChangesManagedByOvsdbNodeEventTest {
 
     @Mock private InstanceIdentifier<?> iid;
+    @Mock private DataBroker db;
     @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
     private Set<InstanceIdentifier<?>> removedPaths;
     private DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent;
@@ -47,7 +49,8 @@ public class DataChangesManagedByOvsdbNodeEventTest {
 
     @Test
     public void testDataChangesManagedByOvsdbNodeEvent() {
-        DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent1 = new DataChangesManagedByOvsdbNodeEvent(iid, event);
+        DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent1 = new
+                DataChangesManagedByOvsdbNodeEvent(db, iid, event);
         assertEquals(iid, Whitebox.getInternalState(dataChangesManagedByOvsdbNodeEvent1, "iid"));
         assertEquals(event, Whitebox.getInternalState(dataChangesManagedByOvsdbNodeEvent1, "event"));
     }

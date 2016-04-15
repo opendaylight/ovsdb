@@ -14,7 +14,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Optional;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -26,14 +29,16 @@ public class DataChangesManagedByOvsdbNodeEvent implements
     AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> {
 
     private InstanceIdentifier<?> iid;
+    private DataBroker db;
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
     private Map<InstanceIdentifier<?>, DataObject> createdData = null;
     private Map<InstanceIdentifier<?>, DataObject> updatedData = null;
     private Map<InstanceIdentifier<?>, DataObject> originalData = null;
     private Set<InstanceIdentifier<?>> removedPaths;
 
-    public DataChangesManagedByOvsdbNodeEvent(InstanceIdentifier<?> iid,
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+    public DataChangesManagedByOvsdbNodeEvent(DataBroker dataBroker, InstanceIdentifier<?> iid,
+                                              AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+        this.db = dataBroker;
         this.iid = iid;
         this.event = event;
     }
@@ -105,8 +110,28 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         if (managedBy != null && managedBy.equals(iid)) {
             return true;
         }
+
+        managedBy = getManagedByIidFromOperDS(bridgeIid);
+        if (managedBy != null && managedBy.equals(iid)) {
+            return true;
+        }
         return false;
 
+    }
+
+    private InstanceIdentifier<?> getManagedByIidFromOperDS(InstanceIdentifier<?> bridgeIid) {
+        // Get the InstanceIdentifier of the containing node
+        InstanceIdentifier<Node> nodeEntryIid = bridgeIid.firstIdentifierOf(Node.class);
+
+        Optional<?> bridgeNode =  SouthboundUtil.readNode(db.newReadWriteTransaction(),nodeEntryIid);
+        if (bridgeNode.isPresent() && bridgeNode.get() instanceof Node) {
+            Node node = (Node)bridgeNode.get();
+            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            if (bridge != null && bridge.getManagedBy() != null) {
+                return bridge.getManagedBy().getValue();
+            }
+        }
+        return null;
     }
 
     private InstanceIdentifier<?> getManagedByIid(Map<InstanceIdentifier<?>, DataObject> map,

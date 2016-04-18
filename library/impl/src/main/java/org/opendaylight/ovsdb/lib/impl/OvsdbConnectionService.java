@@ -16,10 +16,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -100,9 +97,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
                                final SSLContext sslContext) {
         try {
+            NettyTransportContainer nettyTransportContainer = new NettyTransportContainer(BootstrapType.CLIENT);
             Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(new NioEventLoopGroup());
-            bootstrap.channel(NioSocketChannel.class);
+            bootstrap.group(nettyTransportContainer.getWorkerGroup());
+            bootstrap.channel(nettyTransportContainer.getSocketChannelClass());
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
             bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
 
@@ -235,12 +233,13 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * passive connection with Ssl and handle channel callbacks.
      */
     private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext) {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        NettyTransportContainer nettyTransportContainer = new NettyTransportContainer(BootstrapType.SERVER);
+        EventLoopGroup bossGroup = nettyTransportContainer.getBossGroup();
+        EventLoopGroup workerGroup = nettyTransportContainer.getWorkerGroup();
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
+                    .channel(nettyTransportContainer.getServerSocketChannelClass())
                     .option(ChannelOption.SO_BACKLOG, 100)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -410,4 +409,5 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
         return null;
     }
+
 }

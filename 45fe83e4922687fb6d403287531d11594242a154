@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_e3c44061",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T16:11:39Z",
+      "side": 1,
+      "message": "Actually this log has been pretty useful for me (and others) as is, it catches things which get mis-handled by the other methods – so at trace level I\u0027d rather keep the full dump.",
+      "parentUuid": "fa57193c_830f44e1",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 52
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_401242b5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 1
@@ -101,6 +125,24 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "If in the connect we log something when successfully connect, would it make sense to have the same kind of log here saying we successfully disconnect?",
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_43a1aca8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T16:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_601146ac",
       "revId": "45fe83e4922687fb6d403287531d11594242a154",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -260,6 +302,30 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "is this null safe?",
+      "range": {
+        "startLine": 204,
+        "startChar": 67,
+        "endLine": 204,
+        "endChar": 93
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_83abc488",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T16:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_c02492c8",
       "range": {
         "startLine": 204,
         "startChar": 67,
@@ -437,6 +503,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_43ba4ce2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T16:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_230ab8d2",
+      "range": {
+        "startLine": 60,
+        "startChar": 13,
+        "endLine": 60,
+        "endChar": 26
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_80129a60",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
         "patchSetId": 1
@@ -448,6 +538,30 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "wondering if this could be statically defined instead of passing it in the function. This is more how the code could look. Functionality would be the same.",
+      "range": {
+        "startLine": 99,
+        "startChar": 55,
+        "endLine": 104,
+        "endChar": 11
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_83b464f3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T16:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_80129a60",
       "range": {
         "startLine": 99,
         "startChar": 55,
@@ -542,6 +656,30 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "same as previous, maybe this could be statically defined.\n\nAlso here it is an update, so maybe the predicate should check for input.getDataAfter !\u003d null as well",
+      "range": {
+        "startLine": 151,
+        "startChar": 55,
+        "endLine": 156,
+        "endChar": 11
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_23bf58d2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T16:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_00068a20",
       "range": {
         "startLine": 151,
         "startChar": 55,

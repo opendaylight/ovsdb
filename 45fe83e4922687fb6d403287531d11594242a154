@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_830f44e1",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T15:49:37Z",
+      "side": 1,
+      "message": "Ok I understand better why it is like that then.",
+      "parentUuid": "fa57193c_03905494",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 52
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_401242b5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 1
@@ -130,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_6314b0f5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T15:49:37Z",
+      "side": 1,
+      "message": "Ok understood, although that doesn\u0027t mean this scenario can happen. Or it does... I don\u0027t know much in fact, let\u0027s blame my lack of knowledge.",
+      "parentUuid": "fa57193c_e38c4082",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 5
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_60402657",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 1
@@ -165,6 +213,30 @@
       "side": 1,
       "message": "Then entrySet() returns an empty collection and the loop is skipped.",
       "parentUuid": "fa57193c_60402657",
+      "range": {
+        "startLine": 178,
+        "startChar": 16,
+        "endLine": 178,
+        "endChar": 66
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c3f81cc7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T15:49:37Z",
+      "side": 1,
+      "message": "Thanks for the info, I wasn\u0027t aware of how entrySet() is working.",
+      "parentUuid": "fa57193c_83f3c409",
       "range": {
         "startLine": 178,
         "startChar": 16,
@@ -341,6 +413,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_230ab8d2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T15:49:37Z",
+      "side": 1,
+      "message": "Yeah inline lambdas are great :) \n\nThanks for extracting the predicates.",
+      "parentUuid": "fa57193c_e3ba8009",
+      "range": {
+        "startLine": 60,
+        "startChar": 13,
+        "endLine": 60,
+        "endChar": 26
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_80129a60",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
         "patchSetId": 1
@@ -399,6 +495,30 @@
       "side": 1,
       "message": "I\u0027m pretty sure getDataAfter() returns the new values for creations too... (If it didn\u0027t, southbound wouldn\u0027t connect, and it does.)",
       "parentUuid": "fa57193c_23047814",
+      "range": {
+        "startLine": 127,
+        "startChar": 48,
+        "endLine": 127,
+        "endChar": 76
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_43052cc1",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T15:49:37Z",
+      "side": 1,
+      "message": "My bad, I must have read getDataBefore :/",
+      "parentUuid": "fa57193c_4337ecb0",
       "range": {
         "startLine": 127,
         "startChar": 48,

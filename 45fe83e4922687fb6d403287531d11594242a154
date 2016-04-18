@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_03905494",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "It\u0027s logged like that in the existing listener, but you\u0027re right, we should use finer-grained logs in the other methods.",
+      "parentUuid": "fa57193c_a03b5e37",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 52
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_401242b5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 1
@@ -82,6 +106,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_e38c4082",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "I think this handles the case where you update the OVSDB node without explicitly deleting the current node and creating a new one. It was ported directly from the existing listener.",
+      "parentUuid": "fa57193c_c053f26a",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 5
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_60402657",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 1
@@ -93,6 +141,30 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "what if the map is empty?",
+      "range": {
+        "startLine": 178,
+        "startChar": 16,
+        "endLine": 178,
+        "endChar": 66
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_83f3c409",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "Then entrySet() returns an empty collection and the loop is skipped.",
+      "parentUuid": "fa57193c_60402657",
       "range": {
         "startLine": 178,
         "startChar": 16,
@@ -151,6 +223,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_43d08c53",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "Yes, the TransactUtils methods never return null.",
+      "parentUuid": "fa57193c_002faaa2",
+      "range": {
+        "startLine": 69,
+        "startChar": 16,
+        "endLine": 69,
+        "endChar": 83
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_40188284",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
         "patchSetId": 1
@@ -174,6 +270,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_23d59843",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "Yup, there\u0027s a todo item on the Trello somewhere...",
+      "parentUuid": "fa57193c_40188284",
+      "range": {
+        "startLine": 75,
+        "startChar": 57,
+        "endLine": 75,
+        "endChar": 75
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_630e7036",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
         "patchSetId": 1
@@ -185,6 +305,30 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "the added function are pretty hard to read, mainly because of the predicate. I really thing having all predicate statically define could help readability.\n\nWhat do you think?\n\nInstead of having filter.apply(input) we could have\n\nCHECK_CREATED.apply(input)\nCHECK_UDPATED.apply(input)\n\nand so on",
+      "range": {
+        "startLine": 60,
+        "startChar": 13,
+        "endLine": 60,
+        "endChar": 26
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_e3ba8009",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "I\u0027ll extract the predicates for the time being. For Boron I\u0027ll replace them all with inline lambdas, once we stop cherry-picking everything back to Beryllium...",
+      "parentUuid": "fa57193c_630e7036",
       "range": {
         "startLine": 60,
         "startChar": 13,
@@ -231,6 +375,30 @@
       "writtenOn": "2016-04-18T14:37:33Z",
       "side": 1,
       "message": "created value will be null here. So I believe this will only contain updated values",
+      "range": {
+        "startLine": 127,
+        "startChar": 48,
+        "endLine": 127,
+        "endChar": 76
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_4337ecb0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T15:40:34Z",
+      "side": 1,
+      "message": "I\u0027m pretty sure getDataAfter() returns the new values for creations too... (If it didn\u0027t, southbound wouldn\u0027t connect, and it does.)",
+      "parentUuid": "fa57193c_23047814",
       "range": {
         "startLine": 127,
         "startChar": 48,

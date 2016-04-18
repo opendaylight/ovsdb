@@ -162,6 +162,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>netty-transport</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport-native-epoll</artifactId>
+      <!-- Explicitly bring in the linux classifier -->
+      <classifier>linux-x86_64</classifier>
+    </dependency>
+    <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
     </dependency>

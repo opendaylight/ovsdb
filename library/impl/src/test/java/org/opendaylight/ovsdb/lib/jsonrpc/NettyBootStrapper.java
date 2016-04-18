@@ -15,9 +15,9 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.opendaylight.ovsdb.lib.impl.BootstrapType;
+import org.opendaylight.ovsdb.lib.impl.NettyTransportContainer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,11 +29,12 @@ public class NettyBootStrapper {
 
     public ChannelFuture startServer(int localPort, final ChannelHandler... handlers) throws Exception {
         // Configure the server.
-        bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup();
+        NettyTransportContainer nettyTransportContainer = new NettyTransportContainer(BootstrapType.SERVER);
+        bossGroup = nettyTransportContainer.getBossGroup();
+        workerGroup = nettyTransportContainer.getWorkerGroup();
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(nettyTransportContainer.getServerSocketChannelClass())
                 .option(ChannelOption.SO_BACKLOG, 100)
                 .localAddress(localPort)
                 .childOption(ChannelOption.TCP_NODELAY, true)

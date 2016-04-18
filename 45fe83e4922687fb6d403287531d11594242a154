@@ -1,0 +1,268 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_a03b5e37",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "this is going to fill up the logs in when TRACE is enable... I think changes shouldn\u0027t be logged as is, the subset of changes used in the function bellow is more accurate and will polluted less the log output.",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 52
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_401242b5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "Regarding the previous comment, maybe at this point you could log ovsdbNodeModification.getDataAfter() to TRACE level",
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_601146ac",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "If in the connect we log something when successfully connect, would it make sense to have the same kind of log here saying we successfully disconnect?",
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c053f26a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "I don\u0027t quite see the use case for this, would you mind making it more explicit?\n\nFrom what I understand:\nIf the node exist, but after modification has a null client, let\u0027s disconnect the node before modification and connect the node after modification.\nIt is unclear to me why we would disconnect and reconnect the same node, can\u0027t we update change.getRootPath().getRootIdentifier() with  ovsdbNodeModification.getDataAfter() without putting up and down the connection to it?\n\nOr maybe I\u0027m missing something.\nIn fact this update looks like delete/create, isn\u0027t it?",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 5
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_60402657",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "what if the map is empty?",
+      "range": {
+        "startLine": 178,
+        "startChar": 16,
+        "endLine": 178,
+        "endChar": 66
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c02492c8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "is this null safe?",
+      "range": {
+        "startLine": 204,
+        "startChar": 67,
+        "endLine": 204,
+        "endChar": 93
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_002faaa2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "is this null safe?",
+      "range": {
+        "startLine": 69,
+        "startChar": 16,
+        "endLine": 69,
+        "endChar": 83
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_40188284",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "I know this is a completely different topic, but maybe at some point we will want to make transaction async to enhance performance. Although it would require concurrency management.",
+      "range": {
+        "startLine": 75,
+        "startChar": 57,
+        "endLine": 75,
+        "endChar": 75
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_630e7036",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "the added function are pretty hard to read, mainly because of the predicate. I really thing having all predicate statically define could help readability.\n\nWhat do you think?\n\nInstead of having filter.apply(input) we could have\n\nCHECK_CREATED.apply(input)\nCHECK_UDPATED.apply(input)\n\nand so on",
+      "range": {
+        "startLine": 60,
+        "startChar": 13,
+        "endLine": 60,
+        "endChar": 26
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_80129a60",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "wondering if this could be statically defined instead of passing it in the function. This is more how the code could look. Functionality would be the same.",
+      "range": {
+        "startLine": 99,
+        "startChar": 55,
+        "endLine": 104,
+        "endChar": 11
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_23047814",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "created value will be null here. So I believe this will only contain updated values",
+      "range": {
+        "startLine": 127,
+        "startChar": 48,
+        "endLine": 127,
+        "endChar": 76
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_00068a20",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-18T14:37:33Z",
+      "side": 1,
+      "message": "same as previous, maybe this could be statically defined.\n\nAlso here it is an update, so maybe the predicate should check for input.getDataAfter !\u003d null as well",
+      "range": {
+        "startLine": 151,
+        "startChar": 55,
+        "endLine": 156,
+        "endChar": 11
+      },
+      "revId": "45fe83e4922687fb6d403287531d11594242a154",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

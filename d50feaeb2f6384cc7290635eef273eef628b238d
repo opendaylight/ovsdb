@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_daa64553",
+        "filename": "deploy-site.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T07:21:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a494da4_2173b84e",
+      "range": {
+        "startLine": 4,
+        "startChar": 15,
+        "endLine": 4,
+        "endChar": 19
+      },
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_818f2c23",
         "filename": "deploy-site.xml",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-15T23:45:44Z",
       "side": 1,
       "message": "not an expert here, but how about putting these version in \u003cproperties\u003e?",
+      "range": {
+        "startLine": 28,
+        "startChar": 9,
+        "endLine": 28,
+        "endChar": 31
+      },
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_3a63011c",
+        "filename": "deploy-site.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T07:21:06Z",
+      "side": 1,
+      "message": "I\u0027m not a fan of properties for version numbers, particularly because they don\u0027t work well with tools such as maven-versions-plugin. I find it better to use dependency management for centralisation where appropriate.",
+      "parentUuid": "1a494da4_818f2c23",
       "range": {
         "startLine": 28,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1a68bdf4",
+        "filename": "schemas/hardwarevtep/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T07:21:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a494da4_6194a037",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 2
+      },
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_01a31c9f",
         "filename": "src/site/site.xml",
         "patchSetId": 2
@@ -82,6 +154,24 @@
       "writtenOn": "2016-04-15T23:45:44Z",
       "side": 1,
       "message": "copyright?",
+      "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_7a6d7904",
+        "filename": "src/site/site.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-18T07:21:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a494da4_01a31c9f",
       "revId": "d50feaeb2f6384cc7290635eef273eef628b238d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

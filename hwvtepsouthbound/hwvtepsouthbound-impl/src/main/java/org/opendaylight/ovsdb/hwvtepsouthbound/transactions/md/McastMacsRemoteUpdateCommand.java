@@ -51,14 +51,12 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, McastMacsRemote> updatedMMacsRemoteRows;
     private Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
-    private Map<UUID, LogicalSwitch> updatedLSRows;
 
     public McastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedMMacsRemoteRows = TyperUtils.extractRowsUpdated(McastMacsRemote.class, getUpdates(), getDbSchema());
         updatedPLocSetRows = TyperUtils.extractRowsUpdated(PhysicalLocatorSet.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -104,7 +102,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     private void setLogicalSwitch(RemoteMcastMacsBuilder mMacRemoteBuilder, McastMacsRemote mMacRemote) {
         if (mMacRemote.getLogicalSwitchColumn() != null && mMacRemote.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = mMacRemote.getLogicalSwitchColumn().getData();
-            LogicalSwitch lSwitch = updatedLSRows.get(lsUUID);
+            LogicalSwitch lSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
             if (lSwitch != null) {
                 InstanceIdentifier<LogicalSwitches> lSwitchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), lSwitch);

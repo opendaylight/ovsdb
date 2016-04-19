@@ -57,6 +57,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(lSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            getOvsdbConnectionInstance().getDeviceInfo().putLogicalSwitch(lSwitch.getUuid(), lSwitch);
             // TODO: Delete entries that are no longer needed
         }
     }

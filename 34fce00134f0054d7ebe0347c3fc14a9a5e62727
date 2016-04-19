@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_e46723e9",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-19T17:55:13Z",
+      "side": 1,
+      "message": "Correct, I\u0027ll import it",
+      "parentUuid": "fa57193c_012cc9aa",
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_8149f98d",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
         "patchSetId": 1
@@ -76,6 +94,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_2462bbd8",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-19T17:55:13Z",
+      "side": 1,
+      "message": "Good question, I haven\u0027t thought about that to be honest. The ReadOnlyTransaction needs to be closed? If so this implementation will change. I need to look at it.",
+      "parentUuid": "fa57193c_c1081130",
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_a144fd74",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
         "patchSetId": 1
@@ -110,6 +146,24 @@
       "writtenOn": "2016-04-19T17:35:33Z",
       "side": 1,
       "message": "Shouldn\u0027t the callback also close the transaction? (Looking at existing code maybe not...)",
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c4649fe7",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-19T17:55:13Z",
+      "side": 1,
+      "message": "For the WriteTransaction I\u0027m pretty sure we don\u0027t need to close it, I\u0027ll check as well.",
+      "parentUuid": "fa57193c_21062d21",
       "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

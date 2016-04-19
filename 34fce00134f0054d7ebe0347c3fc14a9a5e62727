@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa57193c_012cc9aa",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-19T17:35:33Z",
+      "side": 1,
+      "message": "It would be easier to read if you imported DataObject ;-).",
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_8149f98d",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
         "patchSetId": 1
@@ -25,6 +42,40 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_61182585",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-19T17:35:33Z",
+      "side": 1,
+      "message": "withParent is missing from the Javadoc.",
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c1081130",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-19T17:35:33Z",
+      "side": 1,
+      "message": "How do we go about closing the transaction in this scenario?",
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_a144fd74",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
         "patchSetId": 1
@@ -42,6 +93,23 @@
         "endLine": 128,
         "endChar": 17
       },
+      "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_21062d21",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsync.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-19T17:35:33Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the callback also close the transaction? (Looking at existing code maybe not...)",
       "revId": "34fce00134f0054d7ebe0347c3fc14a9a5e62727",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

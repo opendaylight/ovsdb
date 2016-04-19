@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_c422df00",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-04-19T22:13:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_090355b9",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_e9ff01a9",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2016-04-19T08:08:48Z",
       "side": 1,
       "message": "These should be final too if at all possible...",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_447ecfe5",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-04-19T22:13:02Z",
+      "side": 1,
+      "message": "Since it initialized based on conditions the class members are not declared final.",
+      "parentUuid": "fa57193c_e9ff01a9",
       "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_a4836bcb",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-04-19T22:13:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_6fd651c7",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_a9f509cd",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
         "patchSetId": 1
@@ -81,6 +135,24 @@
       "writtenOn": "2016-04-19T08:08:48Z",
       "side": 1,
       "message": "This is called in all cases, so we always end up with NIO... Presumably there\u0027s a missing return statement at then end of the try block.",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_8488e7e8",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-04-19T22:13:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_a9f509cd",
       "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

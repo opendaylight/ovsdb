@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa57193c_4487ef61",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-04-19T18:55:53Z",
+      "side": 1,
+      "message": "does this mean it has to be 64-bit or does this cover 32 and 64?",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_090355b9",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
         "patchSetId": 1

@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_6fd651c7",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-04-19T13:51:34Z",
+      "side": 1,
+      "message": "please add ex in the log",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_a9f509cd",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
         "patchSetId": 1

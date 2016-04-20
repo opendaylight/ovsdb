@@ -39,11 +39,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MacEntriesRemoveCommand extends AbstractTransactionCommand {
+public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MacEntriesRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepMacEntriesRemoveCommand.class);
 
-    public MacEntriesRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepMacEntriesRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 

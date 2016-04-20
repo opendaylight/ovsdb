@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,9 +22,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class PhysicalLocatorRemoveCommand extends AbstractTransactionCommand {
+public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionCommand {
 
-    public PhysicalLocatorRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalLocatorRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -37,6 +37,7 @@ public class PhysicalLocatorRemoveCommand extends AbstractTransactionCommand {
             final InstanceIdentifier<TerminationPoint> nodePath = HwvtepSouthboundMapper
                     .createInstanceIdentifier(connectionIId, pLoc);
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
+            getOvsdbConnectionInstance().getDeviceInfo().removePhysicalLocator(pLoc.getUuid());
             //TODO: Check if any cleanup is required
         }
     }

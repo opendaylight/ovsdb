@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -33,12 +33,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 
-public class PhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
+public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
 
     private Map<UUID, PhysicalLocator> updatedPLocRows;
     private Map<UUID, PhysicalLocator> oldPLocRows;
 
-    public PhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
         oldPLocRows = TyperUtils.extractRowsOld(PhysicalLocator.class, getUpdates(), getDbSchema());
@@ -79,6 +79,7 @@ public class PhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
+                    getOvsdbConnectionInstance().getDeviceInfo().putPhysicalLocator(pLoc.getUuid(), pLoc);
                 }
             }
         }

@@ -50,14 +50,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class PhysicalPortUpdateCommand extends AbstractTransactionCommand {
+public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortUpdateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortUpdateCommand.class);
     private Map<UUID, PhysicalPort> updatedPPRows;
     private Map<UUID, PhysicalPort> oldPPRows;
     private Map<UUID, PhysicalSwitch> switchUpdatedRows;
 
-    public PhysicalPortUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalPortUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPPRows = TyperUtils.extractRowsUpdated(PhysicalPort.class, getUpdates(), getDbSchema());
         oldPPRows = TyperUtils.extractRowsOld(PhysicalPort.class, getUpdates(), getDbSchema());

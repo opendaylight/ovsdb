@@ -23,21 +23,23 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
     public HwvtepOperationalCommandAggregator(HwvtepConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {
         commands.add(new GlobalUpdateCommand(key, updates, dbSchema));
-        commands.add(new PhysicalSwitchUpdateCommand(key, updates, dbSchema));
-        commands.add(new PhysicalSwitchRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalSwitchUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalSwitchRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepManagerUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepManagerRemoveCommand(key, updates, dbSchema));
-        commands.add(new LogicalSwitchUpdateCommand(key, updates, dbSchema));
-        commands.add(new LogicalSwitchRemoveCommand(key, updates, dbSchema));
-        commands.add(new PhysicalPortUpdateCommand(key, updates, dbSchema));
-        commands.add(new PhysicalPortRemoveCommand(key, updates, dbSchema));
-        commands.add(new PhysicalLocatorUpdateCommand(key, updates, dbSchema));
-        commands.add(new PhysicalLocatorRemoveCommand(key, updates, dbSchema));
-        commands.add(new UcastMacsLocalUpdateCommand(key, updates, dbSchema));
-        commands.add(new UcastMacsRemoteUpdateCommand(key, updates, dbSchema));
-        commands.add(new McastMacsLocalUpdateCommand(key, updates, dbSchema));
-        commands.add(new McastMacsRemoteUpdateCommand(key, updates, dbSchema));
-        commands.add(new MacEntriesRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepLogicalSwitchUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepLogicalSwitchRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalPortUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalPortRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalLocatorUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepTunnelUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepTunnelRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalLocatorRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepUcastMacsLocalUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepUcastMacsRemoteUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepMcastMacsLocalUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepMcastMacsRemoteUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepMacEntriesRemoveCommand(key, updates, dbSchema));
     }
 
     @Override

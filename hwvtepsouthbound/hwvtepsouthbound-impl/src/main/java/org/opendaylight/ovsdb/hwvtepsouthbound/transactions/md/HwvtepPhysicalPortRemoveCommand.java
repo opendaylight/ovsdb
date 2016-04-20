@@ -28,11 +28,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhysicalPortRemoveCommand extends AbstractTransactionCommand {
+public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortRemoveCommand.class);
 
-    public PhysicalPortRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalPortRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 

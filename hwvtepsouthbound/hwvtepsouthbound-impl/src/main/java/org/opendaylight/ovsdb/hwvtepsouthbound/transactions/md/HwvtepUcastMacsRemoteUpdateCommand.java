@@ -41,12 +41,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 
-public class UcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
+public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
     private final Map<UUID, UcastMacsRemote> updatedUMacsRemoteRows;
     private final Map<UUID, PhysicalLocator> updatedPLocRows;
 
-    public UcastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepUcastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedUMacsRemoteRows = TyperUtils.extractRowsUpdated(UcastMacsRemote.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());

@@ -41,12 +41,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class UcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
+public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
     private Map<UUID, UcastMacsLocal> updatedUMacsLocalRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
 
-    public UcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepUcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedUMacsLocalRows = TyperUtils.extractRowsUpdated(UcastMacsLocal.class, getUpdates(), getDbSchema());
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());

@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1749abd0",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-20T07:08:52Z",
+      "side": 1,
+      "message": "It can be provided for other architectures, but we\u0027d need to build the corresponding JARs ourselves.",
+      "parentUuid": "fa57193c_a45a4b81",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_090355b9",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
         "patchSetId": 1

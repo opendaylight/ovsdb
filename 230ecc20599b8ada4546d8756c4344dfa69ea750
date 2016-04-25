@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_bdca559f",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-25T07:55:02Z",
+      "side": 1,
+      "message": "As it stands, we\u0027ll only get native epoll on 64-bit Linux. All other architectures will use the fallback (if there is one), or break... So we need to ensure there\u0027s a fallback. (The difficult aspect there is that the build/test infrastructure uses 64-bit Linux everywhere AFAIK, so there\u0027s no easy way to ensure that we do have a fallback with regression tests.)",
+      "parentUuid": "fa57193c_424eb4c2",
+      "revId": "230ecc20599b8ada4546d8756c4344dfa69ea750",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_090355b9",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/NettyTransportContainer.java",
         "patchSetId": 1

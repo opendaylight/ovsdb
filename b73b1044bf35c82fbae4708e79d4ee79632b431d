@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_85cc5337",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-26T07:17:47Z",
+      "side": 1,
+      "message": "You can extend AbstractDataBrokerTest here, to use a \"real\" MD-SAL data broker. That way, tests can perform real operations (read, put, merge, delete) on an MD-SAL that can be checked afterwards. E.g. do a bare-bones put on the MD-SAL, then use MdsalUtilsAsync.read() to check that the read() implementation works; and again without the put to check that it handles missing data. You can probably also provoke failures in this way to test the onFailure paths, e.g. with a put on an instance identifier with missing parents.",
+      "revId": "b73b1044bf35c82fbae4708e79d4ee79632b431d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -220,13 +220,10 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             @SuppressWarnings("unchecked")
             Node managedNode = readNode(transaction
                     ,(InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue()).get();
-            TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-            TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
-            tpBuilder.setKey(tpKey);
-            if (managedNode.getTerminationPoint().contains(tpBuilder.build())) {
-                OvsdbBridgeAugmentation ovsdbNodeAugment
-                    = managedNode.getAugmentation(OvsdbBridgeAugmentation.class);
-                return Optional.of((InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue());
+            for (TerminationPoint tpEntry : managedNode.getTerminationPoint()) {
+                if (tpEntry.getTpId().equals(new TpId(tpName))) {
+                    return Optional.of((InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue());
+                }
             }
         }
         return Optional.absent();

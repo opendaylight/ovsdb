@@ -344,9 +344,12 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(managedNode.getTerminationPoint()).thenReturn(terminationPointList);
 
         when(managedNode.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
+        TpId tpId = new TpId(TP_NAME);
+        when(terminationPoint.getTpId()).thenReturn(tpId);
 
         Optional<InstanceIdentifier<Node>> testResult = Optional.of(iidNode);
         Optional<InstanceIdentifier<Node>>  result = Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getTerminationPointBridge", transaction, node, TP_NAME);
+
         assertEquals(testResult, result);
     }
 

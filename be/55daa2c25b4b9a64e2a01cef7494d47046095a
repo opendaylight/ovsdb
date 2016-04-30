@@ -1,0 +1,7 @@
+Code-Review+2: Sam Hague <shague@redhat.com>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Sat, 30 Apr 2016 02:31:20 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/38212
+Project: ovsdb
+Branch: refs/heads/stable/beryllium

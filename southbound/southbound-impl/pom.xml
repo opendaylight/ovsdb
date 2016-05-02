@@ -105,6 +105,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.southbound-utils</artifactId>
+      <version>1.3.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

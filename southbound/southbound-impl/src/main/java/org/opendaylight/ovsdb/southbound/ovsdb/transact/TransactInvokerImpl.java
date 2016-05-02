@@ -7,13 +7,16 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -36,6 +39,14 @@ public class TransactInvokerImpl implements TransactInvoker {
                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
         command.execute(tb, state, events);
+        invoke(command, tb);
+    }
+
+    @Override
+    public void invoke(TransactCommand command, BridgeOperationalState state,
+                       Collection<DataTreeModification<Node>> modifications) {
+        TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
+        command.execute(tb, state, modifications);
         invoke(command, tb);
     }
 

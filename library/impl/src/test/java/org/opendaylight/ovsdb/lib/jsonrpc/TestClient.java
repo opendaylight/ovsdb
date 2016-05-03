@@ -21,13 +21,11 @@ import java.net.Socket;
 public class TestClient extends TestCase {
 
         String serverurl = "127.0.0.1";
-        int serverport = 12345;
-
         NettyBootStrapper bootstrapper = new NettyBootStrapper();
         JsonRpcDecoder jsonRpcDecoder = new JsonRpcDecoder(100000);
 
         public void setupServer() throws Exception {
-            bootstrapper.startServer(serverport,
+            bootstrapper.startServer(0,
                     jsonRpcDecoder,
                     new LoggingHandler(LogLevel.DEBUG));
         }
@@ -38,15 +36,14 @@ public class TestClient extends TestCase {
 
         /**
          * Testing appropriate ChannelHandler integration for
-         * JsonRpcDecoder, so that Json strings written using an
+         * JsonRpcDecoder, so that JSON strings written using an
          * OutputStream connected to a ServerSocket of a Netty
-         * ServerBootstrap can be decoder properly.
+         * ServerBootstrap can be decoded properly.
          */
-
         @Test
         public void testBasicFlow() throws Exception {
             setupServer();
-            Socket socket = new Socket(serverurl, serverport);
+            Socket socket = new Socket(serverurl, bootstrapper.getServerPort());
             OutputStream outputStream = socket.getOutputStream();
 
             int records = 20;

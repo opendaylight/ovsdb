@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_84a0c091",
+        "filename": "resources/puppet/scripts/bootstrap.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-04T15:19:09Z",
+      "side": 1,
+      "message": "There\u0027s a pattern for installing packages in this bootstrap, it might be worth keeping it ;-)\n\n    echo \"Installing puppet...\"\n    apt-get install -y puppet \u003e/dev/null",
+      "revId": "8c1aaa7eff4d05ca25528f0a8a2407a6ed516d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

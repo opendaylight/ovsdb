@@ -85,10 +85,10 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         InstanceIdentifier<Tunnels> tunnelIid = getInstanceIdentifier(psIid, tunnel);
         if (connection.isPresent() && pSwitch != null && tunnelIid != null) {
             TunnelsBuilder tBuilder = new TunnelsBuilder();
-            tBuilder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(
-                            getPhysicalLocatorRefFromUUID(psIid, (tunnel.getLocalColumn().getData()))));
-            tBuilder.setRemoteLocatorRef(new HwvtepPhysicalLocatorRef(
-                            getPhysicalLocatorRefFromUUID(psIid, (tunnel.getRemoteColumn().getData()))));
+            tBuilder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
+                    getOvsdbConnectionInstance().getInstanceIdentifier(), (tunnel.getLocalColumn().getData()))));
+            tBuilder.setRemoteLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
+                    getOvsdbConnectionInstance().getInstanceIdentifier(), (tunnel.getRemoteColumn().getData()))));
             tBuilder.setTunnelUuid(new Uuid(tunnel.getUuid().toString()));
             setBfdLocalConfigs(tBuilder, tunnel);
             setBfdRemoteConfigs(tBuilder, tunnel);

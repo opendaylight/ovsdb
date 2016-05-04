@@ -9,6 +9,10 @@
  */
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
@@ -18,8 +22,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-
-import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.NotImplementedException;
 
 public class NettyBootStrapper {
 
@@ -69,6 +72,16 @@ public class NettyBootStrapper {
             workerGroup.terminationFuture().sync();
         } catch (Exception e) {
             //ignore
+        }
+    }
+
+    public int getServerPort() {
+        SocketAddress socketAddress = f.channel().localAddress();
+        if (socketAddress instanceof InetSocketAddress) {
+            InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+            return inetSocketAddress.getPort();
+        } else {
+            throw new NotImplementedException("Please implement how to obtain port from a " + socketAddress.toString());
         }
     }
 

@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_440fc830",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-04T13:02:16Z",
+      "side": 1,
+      "message": "is there a constant defined in a standard library?",
+      "range": {
+        "startLine": 326,
+        "startChar": 45,
+        "endLine": 326,
+        "endChar": 68
+      },
+      "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_8410c04f",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-04T13:02:16Z",
+      "side": 1,
+      "message": "This is only looking at the NOT_HANDSHAKING state  - does that mean all other states are OK to report connected?",
+      "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

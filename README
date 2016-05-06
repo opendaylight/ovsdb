@@ -4,25 +4,11 @@ DIRECTORY ORGANIZATION
 - commons
   +-- parent : Contains Parent pom.xml for all the ovsdb modules.
 
-- features : This folder contains all the Karaf related files.
-
 - hwvtepsouthbound : Contains the hw_vtep southbound plugin.
-
-- karaf : Builds a working controller distribution based on the controller + ovsdb modules and other
-          dependant modules such as openflowplugin
 
 - library : Contains Schema-independent library that is a reference implementation for RFC 7047.
             This module doesn't depend on any of the Opendaylight components.
             This library module can also be used independently in a non-OSGi environment.
-
-- openstack
-  +-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
-                 for Network Virtualization.
-  +-- net-virt-providers : Mostly contains data-path programming functionality via OpenFlow or potentially
-                           other protocols.
-  +-- net-virt-sfc : SFC implementation using the OVSDB project.
-
-- ovsdb-ui : Contains the DLUX implementation for displaying network virtualization
 
 - resources : Contains some useful resources such as scripts, testing utilities and tools used for deployment
               or testing the binaries generated from the OVSDB project.
@@ -33,7 +19,7 @@ DIRECTORY ORGANIZATION
 
 - southbound : contains the plugin for converting from the OVSDB protocol to mdsal and vice-versa.
 
-- utils : MD-SAL OpenFlow and OVSDB common utilities.
+- utils : OVSDB common utilities.
 
 HOW TO BUILD & RUN
 ==================

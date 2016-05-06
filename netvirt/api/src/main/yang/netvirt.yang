@@ -1,9 +1,0 @@
-module netvirt {
-    yang-version 1;
-    namespace "urn:opendaylight:netvirt";
-    prefix "netvirt";
-
-    revision "2015-12-27" {
-        description "Initial revision of netvirt model";
-    }
-}

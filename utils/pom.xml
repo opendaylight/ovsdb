@@ -51,8 +51,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modules>
     <module>config</module>
     <module>hwvtepsouthbound-utils</module>
-    <module>mdsal-node</module>
-    <module>mdsal-openflow</module>
     <module>mdsal-utils</module>
     <module>ovsdb-it-utils</module>
     <module>servicehelper</module>

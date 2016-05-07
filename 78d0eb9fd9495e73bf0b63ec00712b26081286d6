@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_ce55aec7",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2016-05-07T00:26:41Z",
+      "side": 1,
+      "message": "Not sure if I understand the question correctly but SSL_NULL_WITH_NULL_NULL is defined in standard java SSL library. Does this answer your question?",
+      "parentUuid": "fa57193c_440fc830",
+      "range": {
+        "startLine": 326,
+        "startChar": 45,
+        "endLine": 326,
+        "endChar": 68
+      },
+      "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_8410c04f",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-05-04T13:02:16Z",
       "side": 1,
       "message": "This is only looking at the NOT_HANDSHAKING state  - does that mean all other states are OK to report connected?",
+      "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_ee6352af",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2016-05-07T00:26:41Z",
+      "side": 1,
+      "message": "Other states are handled in other cases of this switch-case statement. There are logics there to decide whether it should report connected or not.",
+      "parentUuid": "fa57193c_8410c04f",
       "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_652ab87f",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-10T21:18:07Z",
+      "side": 1,
+      "message": "Does it make sense to have operational tests also?",
+      "revId": "948a40cb3a5d4041243867a1e6b652cf5ab75c4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_85270cb6",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-10T21:18:07Z",
+      "side": 1,
+      "message": "should the Assert be removed and just use assertNull? Seems like this was the best practice.",
+      "revId": "948a40cb3a5d4041243867a1e6b652cf5ab75c4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

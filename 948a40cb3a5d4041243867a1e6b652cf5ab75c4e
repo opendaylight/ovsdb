@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_053bfcd1",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-05-10T21:24:21Z",
+      "side": 1,
+      "message": "Well, writing to Config or Operational is the same operation in the end, it is independent of the function under tests here.\n\nTo me it like saying, should we make test against a Node that has a list of 10 SupportingNode instead of 2.... this won\u0027t change the test result is what I mean. Seems unrelated to me.\n\nBut if you feel different I guess I can add them :)",
+      "parentUuid": "fa57193c_652ab87f",
+      "revId": "948a40cb3a5d4041243867a1e6b652cf5ab75c4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_85270cb6",
         "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2016-05-10T21:18:07Z",
       "side": 1,
       "message": "should the Assert be removed and just use assertNull? Seems like this was the best practice.",
+      "revId": "948a40cb3a5d4041243867a1e6b652cf5ab75c4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_a524d0af",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-05-10T21:24:21Z",
+      "side": 1,
+      "message": "You mean do static import for Assert.assertNull and so others?",
+      "parentUuid": "fa57193c_85270cb6",
       "revId": "948a40cb3a5d4041243867a1e6b652cf5ab75c4e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

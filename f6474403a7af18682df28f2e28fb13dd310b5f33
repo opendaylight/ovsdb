@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_bda220ac",
+        "filename": "utils/mdsal-utils/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-12T21:01:32Z",
+      "side": 1,
+      "message": "these shouldn\u0027t show up as part of this patch right?",
+      "revId": "f6474403a7af18682df28f2e28fb13dd310b5f33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_9da59cb7",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-12T21:01:32Z",
+      "side": 1,
+      "message": "yeah, we should have Assert in here and they should be static imports.",
+      "revId": "f6474403a7af18682df28f2e28fb13dd310b5f33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

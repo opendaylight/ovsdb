@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_2221cb4d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2016-05-12T16:07:41Z",
+      "side": 1,
+      "message": "How about this for commit message -\n\n\"Minor sonar bug fixes in HwvtepConnectionManager.java\"\n\nlines numbers are not as helpful as the name of the file.",
+      "revId": "08b455a8df07947e37abbba75f8f14838bab41b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_42167ff2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2016-05-12T16:07:41Z",
+      "side": 1,
+      "message": "looks like you have tab here.\nCoding guidelines require us to use spaces instead of tabs.",
+      "revId": "08b455a8df07947e37abbba75f8f14838bab41b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c2e1efff",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2016-05-12T16:07:41Z",
+      "side": 1,
+      "message": "remove trailing while space after \"}\".",
+      "revId": "08b455a8df07947e37abbba75f8f14838bab41b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

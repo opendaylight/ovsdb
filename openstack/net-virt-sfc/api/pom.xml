@@ -12,18 +12,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.8.2-Beryllium-SR2</version>
+    <version>0.8.3-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt-sfc-api</artifactId>
-  <version>1.2.3-Beryllium-SR2</version>
+  <version>1.2.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <properties>
-    <sfc.project.version>0.2.2-Beryllium-SR2</sfc.project.version>
+    <sfc.project.version>0.2.3-SNAPSHOT</sfc.project.version>
   </properties>
 
   <dependencies>

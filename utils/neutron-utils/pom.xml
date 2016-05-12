@@ -15,17 +15,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-parent</artifactId>
-      <version>0.4.2-Beryllium-SR2</version>
+      <version>0.4.3-SNAPSHOT</version>
       <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>utils.neutron-utils</artifactId>
-    <version>1.2.3-Beryllium-SR2</version>
+    <version>1.2.4-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <properties>
-        <neutron.version>0.6.2-Beryllium-SR2</neutron.version>
+        <neutron.version>0.6.3-SNAPSHOT</neutron.version>
     </properties>
 
     <dependencies>
@@ -44,7 +44,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.neutron</groupId>
             <artifactId>model</artifactId>
-            <version>0.6.2-Beryllium-SR2</version>
+            <version>0.6.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.neutron</groupId>

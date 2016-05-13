@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa57193c_f3016407",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-13T20:25:06Z",
+      "side": 1,
+      "message": "looks like this should be indented.",
+      "revId": "cb34656e122e91dad6a67afd0a22c1f345786442",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_7339d440",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
         "patchSetId": 1

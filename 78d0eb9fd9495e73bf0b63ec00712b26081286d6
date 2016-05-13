@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_78825695",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-13T06:36:52Z",
+      "side": 1,
+      "message": "You can always define enum with the name same as the string. But IMO, given it\u0027s standard string, we don\u0027t get much value in defining constant, so i don\u0027t have a strong opinion here. Sam, if it\u0027s okay with you, please merge this patch.",
+      "parentUuid": "fa57193c_d60a5c20",
+      "range": {
+        "startLine": 326,
+        "startChar": 45,
+        "endLine": 326,
+        "endChar": 68
+      },
+      "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_8410c04f",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 1
@@ -126,6 +150,24 @@
       "side": 1,
       "message": "Other states are handled in other cases of this switch-case statement. There are logics there to decide whether it should report connected or not.",
       "parentUuid": "fa57193c_8410c04f",
+      "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_587dd2b0",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-13T06:36:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_ee6352af",
       "revId": "78d0eb9fd9495e73bf0b63ec00712b26081286d6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

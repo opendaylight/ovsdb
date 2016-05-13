@@ -121,6 +121,24 @@
       "revId": "f6474403a7af18682df28f2e28fb13dd310b5f33",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_3362bcad",
+        "filename": "utils/mdsal-utils/src/test/java/org/opendaylight/ovsdb/utils/mdsal/utils/MdsalUtilsAsyncTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-05-13T16:09:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_9da59cb7",
+      "revId": "f6474403a7af18682df28f2e28fb13dd310b5f33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -23,9 +23,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class LogicalSwitchRemoveCommand extends AbstractTransactionCommand {
+public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand {
 
-    public LogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepLogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 

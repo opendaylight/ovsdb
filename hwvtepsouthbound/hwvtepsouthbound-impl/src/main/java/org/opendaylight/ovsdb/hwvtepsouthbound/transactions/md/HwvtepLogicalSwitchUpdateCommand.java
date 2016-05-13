@@ -35,11 +35,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 
-public class LogicalSwitchUpdateCommand extends AbstractTransactionCommand {
+public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private Map<UUID, LogicalSwitch> updatedLSRows;
 
-    public LogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepLogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }

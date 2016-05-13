@@ -216,12 +216,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             final ReadWriteTransaction transaction, Node node, String tpName) {
         OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
         List<ManagedNodeEntry> managedNodes = ovsdbNode.getManagedNodeEntry();
+        TpId tpId = new TpId(tpName);
         for ( ManagedNodeEntry managedNodeEntry : managedNodes ) {
             @SuppressWarnings("unchecked")
             Node managedNode = readNode(transaction
                     ,(InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue()).get();
             for (TerminationPoint tpEntry : managedNode.getTerminationPoint()) {
-                if (tpEntry.getTpId().equals(new TpId(tpName))) {
+                if (tpId.equals(tpEntry.getTpId())) {
                     return Optional.of((InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue());
                 }
             }

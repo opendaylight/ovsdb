@@ -82,7 +82,7 @@ public class NodeInfo {
         assertNotNull("bridge " + INTEGRATION_BRIDGE_NAME + " was not found", bridgeNode);
         datapathId = itUtils.southboundUtils.getDataPathId(bridgeNode);
         String datapathIdString = itUtils.southboundUtils.getDatapathId(bridgeNode);
-        LOG.info("testNetVirt: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
+        LOG.info("NodeInfo.connect: bridgeNode: {}, datapathId: {} - {}", bridgeNode, datapathIdString, datapathId);
         assertNotEquals("datapathId was not found", datapathId, 0);
     }
 

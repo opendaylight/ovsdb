@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_8ab70586",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-16T18:31:35Z",
+      "side": 1,
+      "message": "\"has not begun\"",
+      "range": {
+        "startLine": 325,
+        "startChar": 53,
+        "endLine": 325,
+        "endChar": 62
+      },
+      "revId": "6f2e8752a034b1436d3fb045f123885f2a9866ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_aa8489b1",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-16T18:31:35Z",
+      "side": 1,
+      "message": "Spacing is off here.",
+      "revId": "6f2e8752a034b1436d3fb045f123885f2a9866ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

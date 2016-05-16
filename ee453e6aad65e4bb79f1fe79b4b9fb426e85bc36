@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_4a4e8d70",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-16T16:35:28Z",
+      "side": 1,
+      "message": "I think this value still might be too low. I\u0027ve seen cases where pushing a single takes 500ms and even pushing the initial pipeline could take 6s. sfc flows also take considerably longer than 2s.",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_2ad4f945",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-16T16:35:28Z",
+      "side": 1,
+      "message": "could you update the commit-msg with what the artifact adds and what the beans are for?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_4ad16d56",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-16T16:35:28Z",
+      "side": 1,
+      "message": "is basedir needed or would this just work since this pom is at the basedir already?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_8acb85a4",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-16T16:35:28Z",
+      "side": 1,
+      "message": "nitpick, but the checkstyle might complain that these com.* ones are not before the java.* ones.",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_2a6239ad",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-16T16:35:28Z",
+      "side": 1,
+      "message": "does changing the name to be ovsdbPing add value?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

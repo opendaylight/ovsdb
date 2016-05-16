@@ -63,6 +63,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <artifactId>junit</artifactId>
           <scope>compile</scope>
       </dependency>
+      <dependency>
+          <groupId>com.esotericsoftware.yamlbeans</groupId>
+          <artifactId>yamlbeans</artifactId>
+          <version>1.09</version>
+      </dependency>
   </dependencies>
 
     <!--
@@ -80,4 +85,30 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <url>${nexus.site.url}/${project.artifactId}/</url>
         </site>
     </distributionManagement>
+  <build>
+      <resources>
+          <resource>
+              <directory>src/main/resources/docker-compose-files</directory>
+              <targetPath>META-INF/docker-compose-files</targetPath>
+              <includes>
+                  <include>*.yml</include>
+              </includes>
+          </resource>
+      </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Embed-Dependency>
+              yamlbeans;groupId=com.esotericsoftware.yamlbeans;type=!pom;inline=false
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

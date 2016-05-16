@@ -34,10 +34,12 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
     private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
     private InstanceIdentifier<?> iid;
-    private final int RETRY_WAIT = 100;
-    private final int MDSAL_TIMEOUT = 1000;
+    private final static int RETRY_WAIT = 100;
+    private final static int MDSAL_TIMEOUT_OPERATIONAL = 10000;
+    private final static int MDSAL_TIMEOUT_CONFIG = 1000;
     private ListenerRegistration<?> listenerRegistration;
     private List<NotifyingDataChangeListener> waitList = null;
+    private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
 
     /**
      * Create a new NotifyingDataChangeListener
@@ -52,6 +54,11 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         this.waitList = waitList;
         if(this.waitList != null) {
             this.waitList.add(this);
+        }
+
+        mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
+        if (type == LogicalDatastoreType.CONFIGURATION) {
+            mdsalTimeout = MDSAL_TIMEOUT_CONFIG;
         }
     }
 
@@ -106,7 +113,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     }
 
     public void waitForCreation() throws InterruptedException {
-        waitForCreation(MDSAL_TIMEOUT);
+        waitForCreation(mdsalTimeout);
     }
 
     public void waitForCreation(long timeout) throws InterruptedException {
@@ -121,7 +128,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     }
 
     public void waitForUpdate() throws InterruptedException {
-        waitForUpdate(MDSAL_TIMEOUT);
+        waitForUpdate(mdsalTimeout);
     }
 
     public void waitForUpdate(long timeout) throws InterruptedException {
@@ -136,7 +143,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     }
 
     public void waitForDeletion() throws InterruptedException {
-        waitForDeletion(MDSAL_TIMEOUT);
+        waitForDeletion(mdsalTimeout);
     }
 
     public void waitForDeletion(long timeout) throws InterruptedException {

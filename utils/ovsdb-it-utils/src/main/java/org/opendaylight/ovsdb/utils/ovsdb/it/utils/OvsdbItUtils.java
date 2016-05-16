@@ -57,7 +57,7 @@ public class OvsdbItUtils {
     /**
      * Checks whether the OVSDB controller is connected. This method will retry 10 times and will through an
      * AssertionError for any number of unexpected states.
-     * @param connectionInfo
+     * @param connectionInfo where to connect to
      * @return true if connected
      * @throws InterruptedException if interrupted while waiting for connection to appear
      */

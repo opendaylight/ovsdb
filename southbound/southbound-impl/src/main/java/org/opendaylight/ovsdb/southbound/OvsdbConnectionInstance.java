@@ -394,7 +394,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     @Override
-    public void echo() {
-        client.echo();
+    public ListenableFuture<List<String>> echo() {
+        return client.echo();
     }
 }

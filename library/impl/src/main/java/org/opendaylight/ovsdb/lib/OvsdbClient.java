@@ -112,7 +112,7 @@ public interface OvsdbClient {
     /**
      * ovsdb echo operation
      */
-    void echo();
+    ListenableFuture<List<String>> echo();
 
     /**
      * Starts the echo service. The {@code callbackFilters} can be used to get notified on the absence of echo

@@ -273,8 +273,8 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public void echo() {
-        rpc.echo();
+    public ListenableFuture<List<String>> echo() {
+        return rpc.echo();
     }
 
     @Override

@@ -34,8 +34,10 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -94,6 +96,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
 
+    private static final StalePassiveConnectionService stalePassiveConnectionService =
+            new StalePassiveConnectionService(executorService);
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
 
@@ -341,10 +345,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                     //Handshake done. Notify listener.
                                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
                                         SocketConnectionType.SSL);
-                                    LOG.debug("Notify listener");
-                                    for (OvsdbConnectionListener listener : connectionListeners) {
-                                        listener.connected(client);
-                                    }
+                                    handleNewPassiveConnection(client);
                                 } catch (SSLPeerUnverifiedException e) {
                                     //Trust manager is still checking peer certificate. Retry later
                                     LOG.debug("Peer certifiacte is not verified yet {}", status);
@@ -398,11 +399,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 public void run() {
                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
                         SocketConnectionType.NON_SSL);
-
-                    LOG.debug("Notify listener");
-                    for (OvsdbConnectionListener listener : connectionListeners) {
-                        listener.connected(client);
-                    }
+                    handleNewPassiveConnection(client);
                 }
             });
         }
@@ -413,6 +410,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         connections.remove(client);
         for (OvsdbConnectionListener listener : connectionListeners) {
             listener.disconnected(client);
+            stalePassiveConnectionService.clientDisconnected(client);
         }
     }
     @Override
@@ -434,5 +432,33 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             }
         }
         return null;
+    }
+
+    private static List<OvsdbClient> getPassiveClientsFromSameNode(OvsdbClient ovsdbClient) {
+        List<OvsdbClient> passiveClients = new ArrayList<>();
+        for (OvsdbClient client : connections.keySet()) {
+            if (!client.equals(ovsdbClient) &&
+                    client.getConnectionInfo().getRemoteAddress()
+                            .equals(ovsdbClient.getConnectionInfo().getRemoteAddress()) &&
+                    client.getConnectionInfo().getType() == ConnectionType.PASSIVE) {
+                passiveClients.add(client);
+            }
+        }
+        return passiveClients;
+    }
+
+    private static void handleNewPassiveConnection(OvsdbClient client) {
+        List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
+        if (clientsFromSameNode.size() == 0) {
+            notifyListenerForPassiveConnection(client);
+        } else {
+            stalePassiveConnectionService.handleNewPassiveConnection(client, clientsFromSameNode);
+        }
+    }
+
+    public static void notifyListenerForPassiveConnection(OvsdbClient client) {
+        for (OvsdbConnectionListener listener : connectionListeners) {
+            listener.connected(client);
+        }
     }
 }

@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_d72085b2",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:07:54Z",
+      "side": 1,
+      "message": "Well that doesn\u0027t make much sense, I was thinking of YANG parsers! Doh...",
+      "parentUuid": "fa57193c_1754bd1f",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_4ad16d56",
         "filename": "utils/ovsdb-it-utils/pom.xml",
         "patchSetId": 2

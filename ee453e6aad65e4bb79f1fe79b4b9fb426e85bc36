@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_da354cdc",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "I\u0027ve changed it so that it waits 10 secs for operational and 1 for config.",
+      "parentUuid": "fa57193c_4a4e8d70",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_2ad4f945",
         "filename": "utils/ovsdb-it-utils/pom.xml",
         "patchSetId": 2
@@ -72,6 +90,42 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_7a3880a0",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_2ad4f945",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_5a3bfc9b",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Why would ODL need a Yang parser? ;-)",
+      "parentUuid": "fa57193c_d72085b2",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_4ad16d56",
         "filename": "utils/ovsdb-it-utils/pom.xml",
         "patchSetId": 2
@@ -83,6 +137,24 @@
       "writtenOn": "2016-05-16T16:35:28Z",
       "side": 1,
       "message": "is basedir needed or would this just work since this pom is at the basedir already?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_dad8ac81",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_4ad16d56",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -124,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_454b1e87",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "The opposite, as far as I can tell. I get warnings if I move these to be before the java ones.",
+      "parentUuid": "fa57193c_8acb85a4",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_b7835103",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -135,6 +225,24 @@
       "writtenOn": "2016-05-17T09:03:11Z",
       "side": 1,
       "message": "... or Docker set up so it can run without being root. Are there scenarios where that doesn\u0027t work? (At least, I have Docker set up this way on my machine, and the integration tests work...)\n\nIt would also be useful to document exactly which commands this expects to run using sudo, so users can limit access as much as possible.",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_cd6d949b",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "I changed the code so that it detects whether or not sudo is required and adjusted this documentation.",
+      "parentUuid": "fa57193c_b7835103",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -158,6 +266,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_fa7c9022",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Done. Somewhere my wife is laughing at my spelling right now.",
+      "parentUuid": "fa57193c_97860d12",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_2a6239ad",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -169,6 +295,24 @@
       "writtenOn": "2016-05-16T16:35:28Z",
       "side": 1,
       "message": "does changing the name to be ovsdbPing add value?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_85453672",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_2a6239ad",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -192,6 +336,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_4d30649e",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "I just removed the formatting and the code now just prints the array.",
+      "parentUuid": "fa57193c_f73f8923",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_37dc6112",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -203,6 +365,24 @@
       "writtenOn": "2016-05-17T09:03:11Z",
       "side": 1,
       "message": "Yes, I think they should be closed (we won\u0027t ever need to re-use the underlying streams since we wait for the process to exit).",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_8d2a7c2a",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_37dc6112",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -226,6 +406,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_cdc9147b",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "No! Not intentional. Thanks.",
+      "parentUuid": "fa57193c_17d79dee",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_b7ffd166",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -237,6 +435,24 @@
       "writtenOn": "2016-05-17T09:03:11Z",
       "side": 1,
       "message": "It might be worth documenting the possible exit values (i.e. how to detect that the process timed out).",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_edd178fc",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_b7ffd166",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -260,6 +476,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_8d027c6d",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Generally i would agree but the Process class in java 7 sucks. There is no way to wait for a process with a timeout value so instead I have to check the exit val and get an IllegalThreadStateException when the proc is still running. As such, I think it would be confusing to just have \"return proc.exitValue since you would think that the code would always return. Somehow, the strange flow seems clearer to me this way though now that I\u0027m writing it out I\u0027m not quite sure why. Does that make any sense to you? More importantly, there was a nasty bug here...a break was missing in the else clause inside the catch!",
+      "parentUuid": "fa57193c_f7f8297e",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_17ee7db4",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -277,6 +511,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_ad366050",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "Good idea. Done.",
+      "parentUuid": "fa57193c_17ee7db4",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_d73a4533",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -288,6 +540,24 @@
       "writtenOn": "2016-05-17T09:03:11Z",
       "side": 1,
       "message": "As above, IOUtils can do this, but if we want to avoid adding external dependencies that should be documented.",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_edf8587e",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-17T16:42:09Z",
+      "side": 1,
+      "message": "It seems like such a trivial thing, does it really require a utility?",
+      "parentUuid": "fa57193c_d73a4533",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

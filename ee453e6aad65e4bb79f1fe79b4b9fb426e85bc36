@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1754bd1f",
+        "filename": "utils/ovsdb-it-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "Is there no appropriate YAML parser in ODL?",
+      "parentUuid": "fa57193c_2ad4f945",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_4ad16d56",
         "filename": "utils/ovsdb-it-utils/pom.xml",
         "patchSetId": 2
@@ -70,6 +88,58 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_578c7535",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "It shouldn\u0027t, the Checkstyle rules expect:\n* static imports\n* java.* and javax.* imports\n* all other imports\nin that order.",
+      "parentUuid": "fa57193c_8acb85a4",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_b7835103",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "... or Docker set up so it can run without being root. Are there scenarios where that doesn\u0027t work? (At least, I have Docker set up this way on my machine, and the integration tests work...)\n\nIt would also be useful to document exactly which commands this expects to run using sudo, so users can limit access as much as possible.",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_97860d12",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "s/it\u0027s/its/ ;-)",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_2a6239ad",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -81,6 +151,125 @@
       "writtenOn": "2016-05-16T16:35:28Z",
       "side": 1,
       "message": "does changing the name to be ovsdbPing add value?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_f73f8923",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "Joiner or StringUtils.join() could do this without the substring trick, but if we want to avoid adding external dependencies it\u0027s worth documenting that.",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_37dc6112",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "Yes, I think they should be closed (we won\u0027t ever need to re-use the underlying streams since we wait for the process to exit).",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_17d79dee",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "This loses the newlines, is that intentional?",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_b7ffd166",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "It might be worth documenting the possible exit values (i.e. how to detect that the process timed out).",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_f7f8297e",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "Why not just\n\n    return proc.exitValue();",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_17ee7db4",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "This try block could go inside the previous one, and use the external handler:\n\n        File tmpFile \u003d null;\n        try {\n            tmpFile \u003d File.createTempFile(\"ovsdb-it-tmp-\", null);\n            try (Reader in \u003d new InputStreamReader(url.openStream());\n                 FileWriter out \u003d new FileWriter(tmpFile)) {\n                char[] buf \u003d new char[1024];\n                int read;\n                while (-1 !\u003d (read \u003d in.read(buf))) {\n                    out.write(buf, 0, read);\n                }\n            }\n        } catch (IOException e) {\n            Assert.fail(e.toString());\n        }",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_d73a4533",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-17T09:03:11Z",
+      "side": 1,
+      "message": "As above, IOUtils can do this, but if we want to avoid adding external dependencies that should be documented.",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

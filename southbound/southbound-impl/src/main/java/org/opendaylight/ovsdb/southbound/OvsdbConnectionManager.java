@@ -37,6 +37,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -119,8 +120,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
-        ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
-        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(key);
+        ConnectionInfo key = getConnectionInfoForConnectOperation(externalClient);
+        OvsdbConnectionInstance ovsdbConnectionInstance = clients.get(key);
 
         // Check if existing ovsdbConnectionInstance for the OvsdbClient present.
         // In such cases, we will see if the ovsdbConnectionInstance has same externalClient.
@@ -137,7 +138,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
             ovsdbConnectionInstance.disconnect();
 
-            removeConnectionInstance(key);
+            clients.remove(key);
         }
 
         ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
@@ -534,6 +535,44 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
 
+    }
+
+    private ConnectionInfo getConnectionInfoForConnectOperation(OvsdbClient externalClient) {
+        ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
+        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
+
+        // if PASSIVE connection search for existing PASSIVE connection from the same OVS node
+        // This handles the scenerio when the OVS node is hard-reset, the 'disconnected' event might not properly
+        // received before the 'connected' event arrives. In other words, two 'connected' events are received
+        // consequently.
+        // In this case, we want to replace the new OvsdbConnectionInstance with the existing connection
+        // with the new OvsdbConnectionInstance
+        if (externalClient.getConnectionInfo().getType() == OvsdbConnectionInfo.ConnectionType.PASSIVE &&
+                ! clients.containsKey(connectionInfo)) {
+            ConnectionInfo existingPassiveConnection = getPassiveConnectionInfoFromSameRemoteIP(connectionInfo);
+            if (existingPassiveConnection != null) {
+                connectionInfo = existingPassiveConnection;
+            }
+        }
+        return connectionInfo;
+    }
+
+    private ConnectionInfo getPassiveConnectionInfoFromSameRemoteIP(ConnectionInfo connectionInfo) {
+        ConnectionInfo passiveConnection = null;
+        for (ConnectionInfo connInfo : clients.keySet()) {
+            // The cached ConnectionInfo for existing PASSIVE connection for OVS node will be returned
+            // The remote port information is ignored since they are different for each PASSIVE connection event.
+            if (connectionInfo.getRemoteIp().equals(connInfo.getRemoteIp())) {
+                OvsdbConnectionInstance connectionInstance = clients.get(connInfo);
+                if (connectionInstance != null &&
+                        connectionInstance.getConnectionInfo().getType() ==
+                                OvsdbConnectionInfo.ConnectionType.PASSIVE) {
+                    passiveConnection = connInfo;
+                    break;
+                }
+            }
+        }
+        return passiveConnection;
     }
 
     private void unregisterEntityForOwnership(OvsdbConnectionInstance ovsdbConnectionInstance) {

@@ -36,6 +36,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
@@ -119,17 +120,21 @@ public class OvsdbConnectionManagerTest {
     @Test
     public void testConnectedButCallBacksNotRegistered() throws Exception {
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
+        OvsdbConnectionInfo connectionInfo = mock(OvsdbConnectionInfo.class);
         ConnectionInfo key = mock(ConnectionInfo.class);
+        when(client.getConnectionInfo()).thenReturn(connectionInfo);
+        when(connectionInfo.getType()).thenReturn(OvsdbConnectionInfo.ConnectionType.PASSIVE);
+
+        clients = new ConcurrentHashMap<>();
+        MemberModifier.field(OvsdbConnectionManager.class, "clients").set(ovsdbConnectionManager, clients);
 
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
+        when(SouthboundMapper.suppressLocalIpPort(any(ConnectionInfo.class))).thenReturn(key);
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getInstanceIdentifier", ConnectionInfo.class));
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
         when(ovsdbConnectionManager.getInstanceIdentifier(key)).thenReturn(iid);
-
-        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", ConnectionInfo.class));
-        when(ovsdbConnectionManager.getConnectionInstance(key)).thenReturn(null);
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "putConnectionInstance", ConnectionInfo.class, OvsdbConnectionInstance.class));
         doNothing().when(client).createTransactInvokers();

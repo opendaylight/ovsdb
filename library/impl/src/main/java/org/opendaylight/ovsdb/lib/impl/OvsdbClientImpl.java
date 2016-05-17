@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
@@ -59,6 +61,7 @@ import com.google.common.util.concurrent.SettableFuture;
 public class OvsdbClientImpl implements OvsdbClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
+    private static final int ECHO_TIMEOUT = 2000;
     private ExecutorService executorService;
     private OvsdbRPC rpc;
     private Map<String, DatabaseSchema> schema = Maps.newHashMap();
@@ -349,6 +352,19 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     public void setRpc(OvsdbRPC rpc) {
         this.rpc = rpc;
+    }
+
+    public boolean echoSync() {
+        boolean sendEchoResult = true;
+        ListenableFuture<List<String>> echoFuture = rpc.echo();
+        try {
+            echoFuture.get(ECHO_TIMEOUT, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOG.error("while waiting for sending echo result in TIMEOUTING state: "
+                    + e.getMessage());
+            sendEchoResult = false;
+        }
+        return sendEchoResult;
     }
 
     static class CallbackContext {

@@ -25,7 +25,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import javax.net.ssl.SSLContext;
@@ -94,7 +93,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static OvsdbConnection connectionService;
     private static volatile boolean singletonCreated = false;
     private static final int IDLE_READER_TIMEOUT = 30;
-    private static final int READ_TIMEOUT = 180;
 
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
@@ -135,7 +133,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             new JsonRpcDecoder(100000),
                             new StringEncoder(CharsetUtil.UTF_8),
                             new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
-                            new ReadTimeoutHandler(READ_TIMEOUT),
                             new ExceptionHandler());
                 }
             });
@@ -291,7 +288,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                  new JsonRpcDecoder(100000),
                                  new StringEncoder(CharsetUtil.UTF_8),
                                  new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
-                                 new ReadTimeoutHandler(READ_TIMEOUT),
                                  new ExceptionHandler());
 
                             handleNewPassiveConnection(channel);

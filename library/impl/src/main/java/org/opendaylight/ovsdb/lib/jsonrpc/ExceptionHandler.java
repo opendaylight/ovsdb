@@ -17,6 +17,7 @@ import io.netty.handler.timeout.ReadTimeoutException;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
+import org.opendaylight.ovsdb.lib.impl.OvsdbClientImpl;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +38,6 @@ public class ExceptionHandler extends ChannelDuplexHandler {
         if (cause instanceof IOException) {
             ctx.channel().close();
         }
-        /* In cases where the peer is power off
-         * Catch the read time out exception and close the channel
-         */
-        if (cause instanceof ReadTimeoutException) {
-            LOG.debug("Read timeout exception: close connection {}", ctx.channel());
-            ctx.channel().close();
-        }
     }
 
     @Override
@@ -56,7 +50,13 @@ public class ExceptionHandler extends ChannelDuplexHandler {
                 //Send echo message to peer
                 OvsdbClient client =
                              OvsdbConnectionService.getService().getClient(ctx.channel());
-                client.echo();
+                if (client instanceof OvsdbClientImpl) {
+                    OvsdbClientImpl ovsdbClientImpl = (OvsdbClientImpl)client;
+                    if (!ovsdbClientImpl.echoSync()) {
+                        // close channel if fail to send echo messge
+                        ctx.channel().close();
+                    }
+                }
             }
         }
     }

@@ -92,12 +92,10 @@ public class NodeInfo {
      */
     public void disconnect() throws InterruptedException {
         assertTrue(itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0));
-        itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0);
         bridgeWaiter.waitForDeletion();
         Node bridgeNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
         assertNull("Bridge should not be found", bridgeNode);
         assertTrue(itUtils.southboundUtils.disconnectOvsdbNode(connectionInfo, 0));
-        itUtils.southboundUtils.disconnectOvsdbNode(connectionInfo, 0);
         ovsdbWaiter.waitForDeletion();
         Node ovsdbNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
         assertNull("Ovsdb node should not be found", ovsdbNode);

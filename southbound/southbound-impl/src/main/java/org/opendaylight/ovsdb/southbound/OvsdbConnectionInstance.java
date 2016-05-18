@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -88,10 +90,31 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.instanceIdentifier = iid;
     }
 
+    /**
+     * Apply the given command to the given events, based on the given bridge state.
+     *
+     * @param command The command to run.
+     * @param state The current bridge state.
+     * @param events The events to process.
+     */
     public void transact(TransactCommand command, BridgeOperationalState state,
                  AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         for (TransactInvoker transactInvoker : transactInvokers.values()) {
             transactInvoker.invoke(command, state, events);
+        }
+    }
+
+    /**
+     * Apply the given command to the given modifications, based on the given bridge state.
+     *
+     * @param command The command to run.
+     * @param state The current bridge state.
+     * @param modifications The modifications to process.
+     */
+    public void transact(TransactCommand command, BridgeOperationalState state,
+                 Collection<DataTreeModification<Node>> modifications) {
+        for (TransactInvoker transactInvoker : transactInvokers.values()) {
+            transactInvoker.invoke(command, state, modifications);
         }
     }
 

@@ -9,9 +9,11 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -43,6 +45,15 @@ public class TerminationPointDeleteCommand implements TransactCommand {
         execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractOriginal(events, Node.class),
                 TransactUtils.extractRemoved(events, OvsdbTerminationPointAugmentation.class));
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Collection<DataTreeModification<Node>> modifications) {
+        execute(transaction, state,
+                TransactUtils.extractOriginal(modifications, OvsdbTerminationPointAugmentation.class),
+                TransactUtils.extractOriginal(modifications, Node.class),
+                TransactUtils.extractRemoved(modifications, OvsdbTerminationPointAugmentation.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,

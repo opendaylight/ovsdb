@@ -8,12 +8,14 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -59,6 +61,23 @@ public class BridgeOperationalState {
             }
         }
         transaction.close();
+    }
+
+    public BridgeOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
+        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
+        Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdateOrRemove =
+                TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+        for (Entry<InstanceIdentifier<Node>, Node> entry : nodeCreateOrUpdateOrRemove.entrySet()) {
+            try {
+                Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey())
+                            .checkedGet();
+                if (nodeOptional.isPresent()) {
+                    operationalNodes.put(entry.getKey(), nodeOptional.get());
+                }
+            } catch (ReadFailedException e) {
+                LOG.warn("Error reading from datastore", e);
+            }
+        }
     }
 
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {

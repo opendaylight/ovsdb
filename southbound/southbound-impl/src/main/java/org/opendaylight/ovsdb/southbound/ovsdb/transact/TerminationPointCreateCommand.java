@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -67,6 +69,13 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
         execute(transaction, state, TransactUtils.extractCreated(events, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractCreatedOrUpdated(events, Node.class));
+    }
+
+    @Override
+    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                        Collection<DataTreeModification<Node>> modifications) {
+        execute(transaction, state, TransactUtils.extractCreated(modifications, OvsdbTerminationPointAugmentation.class),
+                TransactUtils.extractCreatedOrUpdated(modifications, Node.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,

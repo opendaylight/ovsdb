@@ -55,8 +55,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
         try {
             updatedAutoAttachRows = TyperUtils.extractRowsUpdated(AutoAttach.class, getUpdates(), getDbSchema());
             oldAutoAttachRows = TyperUtils.extractRowsOld(AutoAttach.class, getUpdates(), getDbSchema());
-        } catch (IllegalArgumentException e) {
-            LOG.debug("AutoAttach not supported on this OVS", e);
+        } catch (final IllegalArgumentException e) {
+            LOG.debug("AutoAttach not supported on this OVS", e.getMessage());
         }
     }
 
@@ -73,17 +73,17 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            for (Entry<UUID, AutoAttach> entry : updatedAutoAttachRows.entrySet()) {
-                AutoAttach autoAttach = entry.getValue();
-                AutoAttach oldAutoAttach = oldAutoAttachRows.get(entry.getKey());
-                Uri uri = new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + autoAttach.getUuid().toString());
+            for (final Entry<UUID, AutoAttach> entry : updatedAutoAttachRows.entrySet()) {
+                final AutoAttach autoAttach = entry.getValue();
+                final AutoAttach oldAutoAttach = oldAutoAttachRows.get(entry.getKey());
+                final Uri uri = new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + autoAttach.getUuid().toString());
 
                 // FIXME: To be uncommented when Open vSwitch supports external_ids column
 //                Uri uri = new Uri(getAutoAttachId(autoAttach));
 
                 Autoattach currentAutoattach = null;
                 try {
-                    InstanceIdentifier<Autoattach> currentIid = nodeIId
+                    final InstanceIdentifier<Autoattach> currentIid = nodeIId
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
                                     .getUuidColumn().getData().toString())));
@@ -93,16 +93,16 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 //                            .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
 //                                    .getExternalIdsColumn().getData()
 //                                    .get(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY))));
-                    Optional<Autoattach> optionalAutoattach =
+                    final Optional<Autoattach> optionalAutoattach =
                             transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid).checkedGet();
                     if (optionalAutoattach.isPresent()) {
                         currentAutoattach = optionalAutoattach.get();
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.warn("AutoAttach table entries not found in operational datastore, need to create it.", e);
                 }
 
-                AutoattachBuilder autoAttachBuilder = (currentAutoattach != null) ? new AutoattachBuilder(currentAutoattach)
+                final AutoattachBuilder autoAttachBuilder = (currentAutoattach != null) ? new AutoattachBuilder(currentAutoattach)
                         : new AutoattachBuilder()
                         .setAutoattachUuid(new Uuid(entry.getKey().toString()))
                         .setAutoattachId(uri)
@@ -126,10 +126,10 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                 // FIXME: To be uncommented when Open vSwitch supports external_ids column
 //                setExternalIds(autoAttachBuilder, autoAttach);
 
-                Autoattach autoAttachEntry = autoAttachBuilder.build();
+                final Autoattach autoAttachEntry = autoAttachBuilder.build();
                 LOG.trace("Update Ovsdb Node {} with AutoAttach table entries {}",
                         ovsdbNode.get().getNodeId(), autoAttachEntry);
-                InstanceIdentifier<Autoattach> iid = nodeIId
+                final InstanceIdentifier<Autoattach> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Autoattach.class, autoAttachEntry.getKey());
                 transaction.put(LogicalDatastoreType.OPERATIONAL,
@@ -140,11 +140,11 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 
     private void setMappings (AutoattachBuilder autoAttachBuilder,
             AutoAttach autoAttach) {
-        Map<Long, Long> mappings = autoAttach.getMappingsColumn().getData();
-        Set<Long> mappingsKeys = mappings.keySet();
-        List<Mappings> mappingsList = new ArrayList<>();
-        for (Long mappingsKey : mappingsKeys) {
-            Integer mappingsValue = new Integer(mappings.get(mappingsKey).toString());
+        final Map<Long, Long> mappings = autoAttach.getMappingsColumn().getData();
+        final Set<Long> mappingsKeys = mappings.keySet();
+        final List<Mappings> mappingsList = new ArrayList<>();
+        for (final Long mappingsKey : mappingsKeys) {
+            final Integer mappingsValue = new Integer(mappings.get(mappingsKey).toString());
             if (mappingsKey != null && mappingsValue != null) {
                 mappingsList.add(new MappingsBuilder()
                         .setKey(new MappingsKey(mappingsKey))

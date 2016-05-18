@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_c6d611c3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-18T08:57:18Z",
+      "side": 1,
+      "message": "do we need to extract OtherConfigs here? given that BridgeUpdateCommand already handle this? Also i tried to test a simple scenario mentioned in the following gist link and i see NPE thrown (it\u0027s because of missing null exception).\n\nhttps://gist.github.com/vishnoianil/57e6cf50b4d7b332ec95f51d93c58202",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 136,
+        "endChar": 89
+      },
+      "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

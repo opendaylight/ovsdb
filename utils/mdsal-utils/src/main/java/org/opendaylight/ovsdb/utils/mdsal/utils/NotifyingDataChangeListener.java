@@ -35,7 +35,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
     private InstanceIdentifier<?> iid;
     private final int RETRY_WAIT = 100;
-    private final int MDSAL_TIMEOUT = 1000;
+    private final int MDSAL_TIMEOUT = 10000;
     private ListenerRegistration<?> listenerRegistration;
     private List<NotifyingDataChangeListener> waitList = null;
 

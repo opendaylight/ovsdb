@@ -68,28 +68,28 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             try {
                 throw new UnsupportedOperationException("CRUD operations not supported from ODL for auto_attach column for"
                         + " this version of ovsdb schema due to missing external_ids column");
-            } catch (UnsupportedOperationException e) {
-                LOG.debug(e.getMessage());
+            } catch (final UnsupportedOperationException e) {
+                LOG.debug("CRUD autoattach is not supported", e);
             }
             return;
         }
 
-        for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : original.entrySet()) {
-            InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
-            OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
-            OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
+        for (final Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : original.entrySet()) {
+            final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
+            final OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
+            final OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
 
             if (ovsdbNodeAugmentation != null && deletedOvsdbNodeAugmentation != null) {
-                List<Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
-                List<Autoattach> deletedAutoattachList = deletedOvsdbNodeAugmentation.getAutoattach();
+                final List<Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
+                final List<Autoattach> deletedAutoattachList = deletedOvsdbNodeAugmentation.getAutoattach();
                 if(origAutoattachList != null && !origAutoattachList.isEmpty() &&
                         (deletedAutoattachList == null || deletedAutoattachList.isEmpty())) {
 
-                    OvsdbNodeAugmentation currentOvsdbNode =
+                    final OvsdbNodeAugmentation currentOvsdbNode =
                             state.getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
-                    List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
-                    for (Autoattach origAutoattach : origAutoattachList) {
-                        Uri autoAttachId = origAutoattach.getAutoattachId();
+                    final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
+                    for (final Autoattach origAutoattach : origAutoattachList) {
+                        final Uri autoAttachId = origAutoattach.getAutoattachId();
                         deleteAutoAttach(transaction, ovsdbNodeIid, getAutoAttachUuid(currentAutoAttach, autoAttachId));
                     }
                 }
@@ -102,17 +102,17 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             Uuid autoattachUuid) {
 
         LOG.debug("Received request to delete Autoattach entry {}", autoattachUuid);
-        OvsdbBridgeAugmentation bridgeAugmentation = getBridge(ovsdbNodeIid, autoattachUuid);
+        final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(ovsdbNodeIid, autoattachUuid);
         if (autoattachUuid != null && bridgeAugmentation != null) {
-            UUID uuid = new UUID(autoattachUuid.getValue());
-            AutoAttach autoattach = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class, null);
+            final UUID uuid = new UUID(autoattachUuid.getValue());
+            final AutoAttach autoattach = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class, null);
             transaction.add(op.delete(autoattach.getSchema())
                     .where(autoattach.getUuidColumn().getSchema().opEqual(uuid))
                     .build());
             transaction.add(op.comment("AutoAttach: Deleting {} " + uuid
                     + " attached to " + bridgeAugmentation.getBridgeName().getValue()));
 
-            Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+            final Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     Bridge.class,null);
 
             transaction.add(op.mutate(bridge.getSchema())
@@ -131,7 +131,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
 
     private Uuid getAutoAttachUuid(List<Autoattach> currentAutoAttach, Uri autoAttachId) {
         if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
-            for (Autoattach autoAttach : currentAutoAttach) {
+            for (final Autoattach autoAttach : currentAutoAttach) {
                 if (autoAttach.getAutoattachId().equals(autoAttachId)) {
                     return autoAttach.getAutoattachUuid();
                 }
@@ -145,16 +145,16 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             return null;
         }
         OvsdbBridgeAugmentation bridge = null;
-        InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
+        final InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
-            Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid).get();
+            final Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid).get();
             if (nodeOptional.isPresent()) {
-                List<ManagedNodeEntry> managedNodes = nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
-                for (ManagedNodeEntry managedNode : managedNodes) {
-                    OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
-                    InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
+                final List<ManagedNodeEntry> managedNodes = nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+                for (final ManagedNodeEntry managedNode : managedNodes) {
+                    final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
+                    final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
                             .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);
-                    Optional<OvsdbBridgeAugmentation> optionalBridge = transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
+                    final Optional<OvsdbBridgeAugmentation> optionalBridge = transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
                     bridge = optionalBridge.orNull();
                     if(bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {

@@ -69,18 +69,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
                          Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
 
-        // FIXME: Fix if loop after ovs community supports external_ids column in AutoAttach Table
-        if (true) {
-            try {
-                throw new UnsupportedOperationException("CRUD operations not supported from ODL for auto_attach column for"
-                        + " this version of ovsdb schema due to missing external_ids column");
-            } catch (UnsupportedOperationException e) {
-                LOG.debug(e.getMessage());
-            }
-            return;
-        }
-
-        for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry
+        for (final Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry
                 : createdOrUpdated.entrySet()) {
             updateAutoAttach(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
         }
@@ -90,16 +79,22 @@ public class AutoAttachUpdateCommand implements TransactCommand {
             InstanceIdentifier<OvsdbNodeAugmentation> iid,
             OvsdbNodeAugmentation ovsdbNode) {
 
-        List<Autoattach> autoAttachList = ovsdbNode.getAutoattach();
+        final List<Autoattach> autoAttachList = ovsdbNode.getAutoattach();
         if (state.getBridgeNode(iid).isPresent()) {
             return;
         }
-        OvsdbNodeAugmentation currentOvsdbNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
-        List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
+        final OvsdbNodeAugmentation currentOvsdbNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+        final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
 
         if (autoAttachList != null) {
-            for (Autoattach autoAttach : autoAttachList) {
-                AutoAttach autoAttachWrapper = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class);
+            if (true) {
+                // FIXME: Remove if loop after ovs community supports external_ids column in AutoAttach Table
+                LOG.info("UNSUPPORTED FUNCTIONALITY: CRUD operations not supported from ODL for auto_attach column for"
+                        + " this version of ovsdb schema due to missing external_ids column");
+                return;
+            }
+            for (final Autoattach autoAttach : autoAttachList) {
+                final AutoAttach autoAttachWrapper = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class);
                 if (autoAttach.getSystemName() != null) {
                     autoAttachWrapper.setSystemName(autoAttach.getSystemName());
                 }
@@ -107,20 +102,20 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     autoAttachWrapper.setSystemDescription(autoAttach.getSystemDescription());
                 }
 
-                List<Mappings> mappingsList = autoAttach.getMappings();
+                final List<Mappings> mappingsList = autoAttach.getMappings();
                 if (mappingsList != null && !mappingsList.isEmpty()) {
-                    Map<Long, Long> newMappings = new HashMap<>();
-                    for (Mappings mappings : mappingsList) {
-                        Long mappingsValue = new Long(mappings.getMappingsValue().toString());
+                    final Map<Long, Long> newMappings = new HashMap<>();
+                    for (final Mappings mappings : mappingsList) {
+                        final Long mappingsValue = new Long(mappings.getMappingsValue().toString());
                         newMappings.put(mappings.getMappingsKey(), mappingsValue);
                     }
                     autoAttachWrapper.setMappings(newMappings);
                 }
 
-                List<AutoattachExternalIds> externalIds = autoAttach.getAutoattachExternalIds();
-                Map<String, String> externalIdsMap = new HashMap<>();
+                final List<AutoattachExternalIds> externalIds = autoAttach.getAutoattachExternalIds();
+                final Map<String, String> externalIdsMap = new HashMap<>();
                 if (externalIds != null) {
-                    for (AutoattachExternalIds externalId : externalIds) {
+                    for (final AutoattachExternalIds externalId : externalIds) {
                         externalIdsMap.put(externalId.getAutoattachExternalIdKey(), externalId.getAutoattachExternalIdValue());
                     }
                 }
@@ -132,10 +127,10 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 //                    LOG.warn("Incomplete AutoAttach external IDs");
 //                }
 
-                Uuid aaUuid = getAutoAttachUuid(currentAutoAttach, autoAttach.getAutoattachId());
+                final Uuid aaUuid = getAutoAttachUuid(currentAutoAttach, autoAttach.getAutoattachId());
                 if (aaUuid != null) {
-                    UUID uuid = new UUID(aaUuid.getValue());
-                    AutoAttach newAutoAttach = TyperUtils.getTypedRowWrapper(
+                    final UUID uuid = new UUID(aaUuid.getValue());
+                    final AutoAttach newAutoAttach = TyperUtils.getTypedRowWrapper(
                             transaction.getDatabaseSchema(), AutoAttach.class, null);
                     newAutoAttach.getUuidColumn().setData(uuid);
                     LOG.trace("Updating autoattach table entries {}", uuid);
@@ -143,11 +138,11 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                             .where(newAutoAttach.getUuidColumn().getSchema().opEqual(uuid)).build());
                     transaction.add(op.comment("Updating AutoAttach table: " + uuid));
                 } else {
-                    Uri bridgeUri = autoAttach.getBridgeId();
-                    String namedUuid = SouthboundMapper.getRandomUUID();
-                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                    final Uri bridgeUri = autoAttach.getBridgeId();
+                    final String namedUuid = SouthboundMapper.getRandomUUID();
+                    final Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     transaction.add(op.insert(autoAttachWrapper).withId(namedUuid));
-                    OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(iid, bridgeUri);
+                    final OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(iid, bridgeUri);
                     if (ovsdbBridgeAugmentation != null) {
                         bridge.setName(ovsdbBridgeAugmentation.getBridgeName().getValue());
                         bridge.setAutoAttach(Sets.newHashSet(new UUID(namedUuid)));
@@ -168,7 +163,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 
     private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<OvsdbNodeAugmentation> key,
             Uri bridgeUri) {
-        InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid = InstanceIdentifier
+        final InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(new NodeId(bridgeUri)))
@@ -176,7 +171,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 
         OvsdbBridgeAugmentation bridge = null;
         try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
-            Optional<OvsdbBridgeAugmentation> bridgeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
+            final Optional<OvsdbBridgeAugmentation> bridgeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
             if (bridgeOptional.isPresent()) {
                 bridge = bridgeOptional.get();
             }
@@ -188,7 +183,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 
     private Uuid getAutoAttachUuid(List<Autoattach> currentAutoAttach, Uri autoattachId) {
         if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
-            for (Autoattach autoAttach : currentAutoAttach) {
+            for (final Autoattach autoAttach : currentAutoAttach) {
                 if (autoAttach.getAutoattachId().equals(autoattachId)) {
                     return autoAttach.getAutoattachUuid();
                 }

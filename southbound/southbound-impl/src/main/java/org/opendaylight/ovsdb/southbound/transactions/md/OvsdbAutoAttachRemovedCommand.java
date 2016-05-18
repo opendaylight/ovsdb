@@ -42,8 +42,8 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
         super(key, updates, dbSchema);
         try {
             removedAutoAttachRows = TyperUtils.extractRowsRemoved(AutoAttach.class, getUpdates(), getDbSchema());
-        } catch (IllegalArgumentException e) {
-            LOG.debug("AutoAttach not supported on this OVS", e);
+        } catch (final IllegalArgumentException e) {
+            LOG.debug("AutoAttach not supported on this OVS", e.getMessage());
         }
     }
 
@@ -52,13 +52,13 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent() && removedAutoAttachRows != null && !removedAutoAttachRows.isEmpty()) {
-            InstanceIdentifier<Node> ovsdbNodeIid =
+            final InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             // FIXME: Iterate on external_ids instead of uuid when Open vSwitch supports external_ids column
-            for (UUID autoAttachUuid : removedAutoAttachRows.keySet()) {
-                AutoattachKey autoAttachKey = getAutoAttachKeyToRemove(ovsdbNode.get(), autoAttachUuid);
+            for (final UUID autoAttachUuid : removedAutoAttachRows.keySet()) {
+                final AutoattachKey autoAttachKey = getAutoAttachKeyToRemove(ovsdbNode.get(), autoAttachUuid);
                 if (autoAttachKey != null) {
-                    InstanceIdentifier<Autoattach> iid = ovsdbNodeIid
+                    final InstanceIdentifier<Autoattach> iid = ovsdbNodeIid
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(Autoattach.class, autoAttachKey);
                     transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
@@ -73,11 +73,11 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
     }
 
     private AutoattachKey getAutoAttachKeyToRemove(Node node, UUID autoAttachUuid) {
-        List<Autoattach> autoAttachList = node.getAugmentation(OvsdbNodeAugmentation.class).getAutoattach();
+        final List<Autoattach> autoAttachList = node.getAugmentation(OvsdbNodeAugmentation.class).getAutoattach();
         if (autoAttachList == null || autoAttachList.isEmpty()) {
             return null;
         }
-        for (Autoattach autoAttach : autoAttachList) {
+        for (final Autoattach autoAttach : autoAttachList) {
             if (autoAttach.getAutoattachUuid()
                     .equals(new Uuid(autoAttachUuid.toString()))) {
                 return autoAttach.getKey();

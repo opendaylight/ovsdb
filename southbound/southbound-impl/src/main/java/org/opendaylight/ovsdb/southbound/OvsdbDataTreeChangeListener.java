@@ -194,6 +194,9 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
             Node node = change.getRootNode().getDataAfter();
             if (bridgeModification != null && bridgeModification.getDataAfter() != null) {
                 client = cm.getConnectionInstance(bridgeModification.getDataAfter());
+            } else if (bridgeModification != null && bridgeModification.getDataBefore() != null &&
+                    change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE) {
+                client = cm.getConnectionInstance(bridgeModification.getDataBefore());
             } else {
                 DataObjectModification<OvsdbNodeAugmentation> nodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);

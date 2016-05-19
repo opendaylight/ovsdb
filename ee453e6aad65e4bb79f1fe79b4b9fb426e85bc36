@@ -512,6 +512,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_07ee4022",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-19T08:20:52Z",
+      "side": 1,
+      "message": "You\u0027ve managed to make me more confused ;-). Anil is going to merge this (after checking with me), but it would deserve a follow-up patch with the above as a comment in the code!",
+      "parentUuid": "fa57193c_8d027c6d",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_17ee7db4",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2
@@ -576,6 +594,24 @@
       "side": 1,
       "message": "It seems like such a trivial thing, does it really require a utility?",
       "parentUuid": "fa57193c_d73a4533",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_67f57ced",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-19T08:20:52Z",
+      "side": 1,
+      "message": "No, just sayin\u0027 ;-).",
+      "parentUuid": "fa57193c_edf8587e",
       "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -22,6 +22,30 @@
       "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_0d094195",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-05-19T16:33:30Z",
+      "side": 1,
+      "message": "I tried to mimic the \u0027changes\u0027 structure for a normal bridge update/add event which contains bridge object and other three list objects: ProtocolEntry, ControllerEntry, and BridgeOtherConfigs.\n\nI\u0027ll push another patch for the NPE issue.",
+      "parentUuid": "fa57193c_c6d611c3",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 136,
+        "endChar": 89
+      },
+      "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

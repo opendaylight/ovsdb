@@ -38,9 +38,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -58,8 +59,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * OvsDBConnectionService provides OVSDB connection management functionality which includes
@@ -82,10 +85,18 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final int NUM_THREADS = 3;
 
     // Singleton Service object that can be used in Non-OSGi environment
+    private static ThreadFactory threadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("OVSDB-PassiveConnection-%d").build();
+    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10, threadFactory);
+
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
     private static Map<OvsdbClient, Channel> connections = Maps.newHashMap();
     private static OvsdbConnection connectionService;
     private static volatile boolean singletonCreated = false;
+
+
+    private static int retryPeriod = 100; // retry after 100 milliseconds
+
 
     public static OvsdbConnection getService() {
         if (connectionService == null) {
@@ -127,8 +138,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
+            ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("OVSDB-ActiveConnection-" + address
+                    .getHostAddress()+"-%d").build();
             return getChannelClient(channel, ConnectionType.ACTIVE,
-                    Executors.newFixedThreadPool(NUM_THREADS));
+                    Executors.newFixedThreadPool(NUM_THREADS, threadFactory));
         } catch (InterruptedException e) {
             LOG.warn("Thread was interrupted during connect", e);
         } catch (Exception e) {
@@ -297,8 +310,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
-    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
-    private static int retryPeriod = 100; // retry after 100 milliseconds
     private static void handleNewPassiveConnection(final Channel channel) {
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
         if (sslHandler != null) {
@@ -330,7 +341,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                     sslHandler.engine().getSession().getPeerCertificates();
                                     //Handshake done. Notify listener.
                                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                                                         Executors.newFixedThreadPool(NUM_THREADS));
+                                                         Executors.newFixedThreadPool(NUM_THREADS, threadFactory));
                                     LOG.debug("Notify listener");
                                     for (OvsdbConnectionListener listener : connectionListeners) {
                                         listener.connected(client);

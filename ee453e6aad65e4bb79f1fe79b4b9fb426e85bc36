@@ -530,6 +530,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_c768c889",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-19T08:48:58Z",
+      "side": 1,
+      "message": "Since the patch can\u0027t be merged, you might as well add a comment while rebasing...",
+      "parentUuid": "fa57193c_07ee4022",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_17ee7db4",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_47467824",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-19T08:37:33Z",
+      "side": 1,
+      "message": "eric, sam pushed this patch and it looks like it\u0027s fixing the same issue that this code fixes.\nhttps://git.opendaylight.org/gerrit/#/c/39069/\n\ncan you take a look at it and see if that will work in this scenario. Also you will probably have to rebase your patch.",
+      "range": {
+        "startLine": 204,
+        "startChar": 18,
+        "endLine": 209,
+        "endChar": 63
+      },
+      "revId": "01f75454b1083580d1652c2634b42c7862e4a126",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

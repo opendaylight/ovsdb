@@ -38,10 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -60,6 +57,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * OvsDBConnectionService provides OVSDB connection management functionality which includes
@@ -127,8 +125,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
+            ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("connectWithSsl-%d").build();
             return getChannelClient(channel, ConnectionType.ACTIVE,
-                    Executors.newFixedThreadPool(NUM_THREADS));
+                    Executors.newFixedThreadPool(NUM_THREADS, threadFactory));
         } catch (InterruptedException e) {
             LOG.warn("Thread was interrupted during connect", e);
         } catch (Exception e) {
@@ -297,7 +296,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
-    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
+    static ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("PassiveConnection-%d").build();
+    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10, threadFactory);
+
     private static int retryPeriod = 100; // retry after 100 milliseconds
     private static void handleNewPassiveConnection(final Channel channel) {
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
@@ -330,7 +331,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                     sslHandler.engine().getSession().getPeerCertificates();
                                     //Handshake done. Notify listener.
                                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                                                         Executors.newFixedThreadPool(NUM_THREADS));
+                                                         Executors.newFixedThreadPool(NUM_THREADS, threadFactory));
                                     LOG.debug("Notify listener");
                                     for (OvsdbConnectionListener listener : connectionListeners) {
                                         listener.connected(client);

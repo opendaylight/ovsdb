@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -105,16 +107,18 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getLocalPort());
         List<String> databases = new ArrayList<>();
         try {
-            databases = externalClient.getDatabases().get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Unable to fetch database list");
+            databases = externalClient.getDatabases().get(1000, TimeUnit.MILLISECONDS);
+            if(databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
+                OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
+                // Register Cluster Ownership for ConnectionInfo
+                registerEntityForOwnership(client);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOG.warn("Unable to fetch Database list from device {}. Disconnecting from the device.",
+                    externalClient.getConnectionInfo().getRemoteAddress(), e);
+            externalClient.disconnect();
         }
 
-        if(databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
-            OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
-            // Register Cluster Ownership for ConnectionInfo
-            registerEntityForOwnership(client);
-        }
     }
 
     public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {

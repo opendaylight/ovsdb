@@ -22,6 +22,30 @@
       "revId": "01f75454b1083580d1652c2634b42c7862e4a126",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_cdd749ec",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-19T16:16:43Z",
+      "side": 1,
+      "message": "Anil, it looks like Sam\u0027s patch handles an issue with bridge node deletes.  This patch set is handling ovsdb node issues.  However, it looks like a rebase will be in order, so I\u0027ll do that.",
+      "parentUuid": "fa57193c_47467824",
+      "range": {
+        "startLine": 204,
+        "startChar": 18,
+        "endLine": 209,
+        "endChar": 63
+      },
+      "revId": "01f75454b1083580d1652c2634b42c7862e4a126",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

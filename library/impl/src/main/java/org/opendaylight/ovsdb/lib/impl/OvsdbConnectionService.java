@@ -277,6 +277,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                  new ReadTimeoutHandler(600),
                                  new ExceptionHandler());
 
+                            LOG.info("JAMO: need to call handleNewPassiveConnection");
                             handleNewPassiveConnection(channel);
                         }
                     });
@@ -292,16 +293,22 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             LOG.error("Thread interrupted", e);
         } finally {
             // Shut down all event loops to terminate all threads.
+            LOG.info("this is where I think all threads should be going away");
             bossGroup.shutdownGracefully();
+            LOG.info("AFTER bossGroup: this is where I think all threads should be going away");
             workerGroup.shutdownGracefully();
+            LOG.info("AFTER workerGroup: this is where I think all threads should be going away");
         }
     }
 
-    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
+    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(65536);  // this fails quickly if it's 10
     private static int retryPeriod = 100; // retry after 100 milliseconds
     private static void handleNewPassiveConnection(final Channel channel) {
+        LOG.info("JAMO1: inside handleNewPassiveConnection");
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
+        LOG.info("JAMO2: inside handleNewPassiveConnection");
         if (sslHandler != null) {
+            LOG.info("JAMO: we think we are a sslHandler");
             class HandleNewPassiveSslRunner implements Runnable {
                 public SslHandler sslHandler;
                 public final Channel channel;
@@ -383,19 +390,28 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             executorService.schedule(new HandleNewPassiveSslRunner(channel, sslHandler),
                     retryPeriod, TimeUnit.MILLISECONDS);
         } else {
+            LOG.info("JAMO: we think we are not a sslHandler");
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                            Executors.newFixedThreadPool(NUM_THREADS));
+                    LOG.info("JAMO1: overriding run(), but not if we've hit the bug");
+                    try {
+                        LOG.info("JAMO2: overriding run(), but not if we've hit the bug");
+                        OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
+                                Executors.newFixedThreadPool(NUM_THREADS));
 
-                    LOG.debug("Notify listener");
-                    for (OvsdbConnectionListener listener : connectionListeners) {
-                        listener.connected(client);
+                        LOG.debug("Notify listener");
+                        for (OvsdbConnectionListener listener : connectionListeners) {
+                            listener.connected(client);
+                        }
+                    } catch (Exception e) {
+                        LOG.info("JAMO: trying to get this sh!t to print an error {}", e);
                     }
                 }
             });
         }
+        LOG.info("JAMO: at the end of handleNewPassiveConnection");
+
     }
 
     public static void channelClosed(final OvsdbClient client) {

@@ -46,6 +46,30 @@
       "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_b80df540",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-19T23:42:55Z",
+      "side": 1,
+      "message": "do you need to extract \"BridgeOtherConfigs\" and put in the changes, given that BridgeUpdateCommand will extract it anyways.\n\nhttps://git.opendaylight.org/gerrit/gitweb?p\u003dovsdb.git;a\u003dblob;f\u003dsouthbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java;h\u003d5f04ff018d610e16e46fd102d4210f2aeb6feab9;hb\u003d1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47#l76",
+      "parentUuid": "fa57193c_0d094195",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 136,
+        "endChar": 89
+      },
+      "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

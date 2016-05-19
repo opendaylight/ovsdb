@@ -566,6 +566,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_a7e834e3",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-19T08:56:55Z",
+      "side": 1,
+      "message": "But that\u0027s Java 8 only :-(.",
+      "parentUuid": "fa57193c_a721544f",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_17ee7db4",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2

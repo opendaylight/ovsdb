@@ -548,6 +548,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_a721544f",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-05-19T08:53:32Z",
+      "side": 1,
+      "message": "Actually looking at Process in a little more detail, you could code this as follows:\n\n    while (proc.isAlive()) {\n        if (System.currentTimeMillis() - startTime) \u003e\u003d waitFor) {\n            LOG.warn(...);\n            return -1;\n        }\n        Thread.sleep(200);\n    }\n    return proc.exitValue();",
+      "parentUuid": "fa57193c_c768c889",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_17ee7db4",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2

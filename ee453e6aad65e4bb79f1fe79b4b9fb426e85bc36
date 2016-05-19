@@ -584,6 +584,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_a7cf947e",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-05-19T09:02:26Z",
+      "side": 1,
+      "message": "Correct. Once we no longer need to support 7, I\u0027m happy to come back here and violently erase this offensive code.",
+      "parentUuid": "fa57193c_a7e834e3",
+      "revId": "ee453e6aad65e4bb79f1fe79b4b9fb426e85bc36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_17ee7db4",
         "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
         "patchSetId": 2

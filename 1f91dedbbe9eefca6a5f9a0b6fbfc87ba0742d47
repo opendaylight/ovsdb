@@ -70,6 +70,30 @@
       "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_f34cae72",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-05-20T01:14:36Z",
+      "side": 1,
+      "message": "Actually I don\u0027t need to to extract the BridgeOtherConfigs. The reconciliation scenarios stil work when the BridgeOtherConfigs is not included in the changeset.\nI\u0027ll push another patch with the changes",
+      "parentUuid": "fa57193c_b80df540",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 136,
+        "endChar": 89
+      },
+      "revId": "1f91dedbbe9eefca6a5f9a0b6fbfc87ba0742d47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

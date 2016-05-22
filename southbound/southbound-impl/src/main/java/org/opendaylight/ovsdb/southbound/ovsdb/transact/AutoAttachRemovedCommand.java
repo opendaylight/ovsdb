@@ -76,8 +76,8 @@ public class AutoAttachRemovedCommand implements TransactCommand {
 
                     if (true) {
                         // FIXME: Remove if loop after ovs community supports external_ids column in AutoAttach Table
-                        LOG.info("UNSUPPORTED FUNCTIONALITY: CRUD operations not supported from ODL for auto_attach column for"
-                                + " this version of ovsdb schema due to missing external_ids column");
+                        LOG.info("UNSUPPORTED FUNCTIONALITY: Auto Attach related CRUD operations are not supported for"
+                                + " this version of OVSDB schema due to missing external_ids column.");
                         return;
                     }
                     final OvsdbNodeAugmentation currentOvsdbNode =

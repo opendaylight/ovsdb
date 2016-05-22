@@ -79,20 +79,20 @@ public class AutoAttachUpdateCommand implements TransactCommand {
             InstanceIdentifier<OvsdbNodeAugmentation> iid,
             OvsdbNodeAugmentation ovsdbNode) {
 
-        final List<Autoattach> autoAttachList = ovsdbNode.getAutoattach();
-        if (state.getBridgeNode(iid).isPresent()) {
+        if (!state.getBridgeNode(iid).isPresent()) {
             return;
         }
-        final OvsdbNodeAugmentation currentOvsdbNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
-        final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
-
+        final List<Autoattach> autoAttachList = ovsdbNode.getAutoattach();
         if (autoAttachList != null) {
             if (true) {
                 // FIXME: Remove if loop after ovs community supports external_ids column in AutoAttach Table
-                LOG.info("UNSUPPORTED FUNCTIONALITY: CRUD operations not supported from ODL for auto_attach column for"
-                        + " this version of ovsdb schema due to missing external_ids column");
+                LOG.info("UNSUPPORTED FUNCTIONALITY: Auto Attach related CRUD operations are not supported for"
+                        + " this version of OVSDB schema due to missing external_ids column.");
                 return;
             }
+
+            final OvsdbNodeAugmentation currentOvsdbNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+            final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
             for (final Autoattach autoAttach : autoAttachList) {
                 final AutoAttach autoAttachWrapper = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class);
                 if (autoAttach.getSystemName() != null) {

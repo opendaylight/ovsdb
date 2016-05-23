@@ -391,7 +391,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     // Verify that the device is netdev
                     OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
                     Assert.assertNotNull(bridge);
-                    Assert.assertEquals(dpTypeStr, bridge.getDatapathType());
+                    Assert.assertEquals(dpType, bridge.getDatapathType());
 
                     // Add dpdk port
                     final String TEST_PORT_NAME = "testDPDKPort";

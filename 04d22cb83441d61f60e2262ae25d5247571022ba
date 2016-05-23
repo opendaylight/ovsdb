@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_329bb668",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QueueUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 4567
+      },
+      "writtenOn": "2016-05-23T18:46:51Z",
+      "side": 1,
+      "message": "why not assign queueUuid with queueEntry.getQueueID(). Will save us the check in line 114 ?",
+      "revId": "04d22cb83441d61f60e2262ae25d5247571022ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

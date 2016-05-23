@@ -16,6 +16,24 @@
       "revId": "04d22cb83441d61f60e2262ae25d5247571022ba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_92f8c24a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QueueUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-23T20:27:33Z",
+      "side": 1,
+      "message": "There are two cases being handled here - 1) existing queues 2) new queues.\n\nBut, looks like the logic could be streamlined, so I\u0027ll take a look at that.",
+      "parentUuid": "fa57193c_329bb668",
+      "revId": "04d22cb83441d61f60e2262ae25d5247571022ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

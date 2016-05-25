@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_6c5eea13",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2016-05-25T07:16:24Z",
+      "side": 1,
+      "message": "are these ok?  they were helping me debug in jconsole, but I can remove them if they are not good.",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 298,
+        "endChar": 114
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_6cb54a30",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2016-05-25T07:16:24Z",
+      "side": 1,
+      "message": "my logic here was to let getDatabases() timeout if no good/valid response was coming back.  I picked 1s (1000ms) out the air.  If any of the exceptions are thrown, calling\ndisconnected() seems to unblock whatever it was that was\nblocking new connections after we had 10 of these incorrect\nconnections.\n\nI also moved the callback and Entity stuff in to the \nhappy path of the try/catch.",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 118,
+        "endChar": 9
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

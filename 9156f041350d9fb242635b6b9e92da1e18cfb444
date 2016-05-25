@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa57193c_c706efcd",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T13:36:01Z",
+      "side": 1,
+      "message": "add a space here for checkstyle and format happiness",
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_6c5eea13",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 2
@@ -19,6 +36,47 @@
         "endLine": 298,
         "endChar": 114
       },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_478adfbf",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T13:36:01Z",
+      "side": 1,
+      "message": "this is good. We use the same idea in the southbound to track the threads. There is a default ThreadFactory behind the Executor already.\n\nMaybe we should name this threadFactory more descriptive. I realize it is different than the one in the sslConnect method.",
+      "parentUuid": "fa57193c_6c5eea13",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 298,
+        "endChar": 114
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_27852bad",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T13:36:01Z",
+      "side": 1,
+      "message": "Do you have an idea on what the differences in the number of threads used and the different uses are? Like we use 3 for each connection - is that a requirement of the netty bootstrap?\n\nWhy do we use fixedThreadPool and not cached? Does it matter?\n\nIs 10 enough for the ssl stuff? Why is 10 used?",
       "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -48,6 +106,29 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_47b13f8e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T13:36:01Z",
+      "side": 1,
+      "message": "We can fix the test, Maybe just because the timeout is added we just need to change the when().\n\nBut the timeout value might be an issue. I have no idea if 1s is appropriate. If I recall correctly, this ends up as a list_dbs and could be an rpc to the node itself. This could easily take more than 1s in some cases.\n\nDo you find that this call blocks? Maybe we need something deeper down in the JsonRpcEndpoint#processRequesst() that returns if there isn\u0027t a connection or knows more if the connection isn\u0027t good so that it doesn\u0027t block.",
+      "range": {
+        "startLine": 109,
+        "startChar": 58,
+        "endLine": 109,
+        "endChar": 62
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_8c21befd",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 2
@@ -59,6 +140,30 @@
       "writtenOn": "2016-05-25T09:03:38Z",
       "side": 1,
       "message": "you can probably call externalClient.disconnect() here.",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 41
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_27736be8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T13:36:01Z",
+      "side": 1,
+      "message": "Agreed, it seems like we need to disconnect() to clean up this connection. Calling disconnected() assumes the remote side or the lib disconnected - which means the lib should have called disconnected().\n\ncould we call the disconnect() method rather than externalClient.disconnect()",
+      "parentUuid": "fa57193c_8c21befd",
       "range": {
         "startLine": 117,
         "startChar": 12,

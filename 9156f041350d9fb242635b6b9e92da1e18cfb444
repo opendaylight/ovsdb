@@ -83,6 +83,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1d783a2a",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2016-05-25T17:41:22Z",
+      "side": 1,
+      "message": "I have no idea why 10 and 3 were used.  Probably need someone more expert in this area to give us a good reason to use different numbers.",
+      "parentUuid": "fa57193c_27852bad",
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_6c68aa87",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 2
@@ -117,6 +135,30 @@
       "writtenOn": "2016-05-25T13:36:01Z",
       "side": 1,
       "message": "We can fix the test, Maybe just because the timeout is added we just need to change the when().\n\nBut the timeout value might be an issue. I have no idea if 1s is appropriate. If I recall correctly, this ends up as a list_dbs and could be an rpc to the node itself. This could easily take more than 1s in some cases.\n\nDo you find that this call blocks? Maybe we need something deeper down in the JsonRpcEndpoint#processRequesst() that returns if there isn\u0027t a connection or knows more if the connection isn\u0027t good so that it doesn\u0027t block.",
+      "range": {
+        "startLine": 109,
+        "startChar": 58,
+        "endLine": 109,
+        "endChar": 62
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_7d77b63a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2016-05-25T17:41:22Z",
+      "side": 1,
+      "message": "I fixed the test.",
+      "parentUuid": "fa57193c_47b13f8e",
       "range": {
         "startLine": 109,
         "startChar": 58,
@@ -164,6 +206,30 @@
       "side": 1,
       "message": "Agreed, it seems like we need to disconnect() to clean up this connection. Calling disconnected() assumes the remote side or the lib disconnected - which means the lib should have called disconnected().\n\ncould we call the disconnect() method rather than externalClient.disconnect()",
       "parentUuid": "fa57193c_8c21befd",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 41
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_9d93aa4e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2016-05-25T17:41:22Z",
+      "side": 1,
+      "message": "externalClient.disconnect() did not work for me.  It would close the socket, but it seems the underlying issue that\u0027s\nblocking the threads was not resolved.\n\ndisconnect() takes an OvsdbNode, which I don\u0027t think we have here.  disconnected() takes an OvsdbClient which is what we do have.\n\nwhat do you think?",
+      "parentUuid": "fa57193c_27736be8",
       "range": {
         "startLine": 117,
         "startChar": 12,

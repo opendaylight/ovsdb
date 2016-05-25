@@ -19,8 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -31,6 +33,10 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
@@ -56,6 +62,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoCloseable{
     private Map<ConnectionInfo, HwvtepConnectionInstance> clients = new ConcurrentHashMap<>();
@@ -68,6 +77,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private EntityOwnershipService entityOwnershipService;
     private HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
+    private final ReconciliationManager reconciliationManager;
 
     public HwvtepConnectionManager(DataBroker db, TransactionInvoker txInvoker,
                     EntityOwnershipService entityOwnershipService) {
@@ -75,6 +85,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         this.hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this,entityOwnershipService);
+        this.reconciliationManager = new ReconciliationManager(db);
     }
 
     @Override
@@ -134,6 +145,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             //Controller initiated connection can be terminated from switch side.
             //So cleanup the instance identifier cache.
             removeInstanceIdentifier(key);
+            retryConnection(hwvtepConnectionInstance.getInstanceIdentifier(),
+                    hwvtepConnectionInstance.getHwvtepGlobalAugmentation(),
+                    ConnectionReconciliationTriggers.ON_DISCONNECT);
         } else {
             LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
         }
@@ -359,6 +373,68 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         hwvtepConnectionInstance.closeDeviceOwnershipCandidateRegistration();
         entityConnectionMap.remove(hwvtepConnectionInstance.getConnectedEntity());
     }
+    
+    public void reconcileConnection(InstanceIdentifier<Node> iid, HwvtepGlobalAugmentation hwvtepNode) {
+        this.retryConnection(iid, hwvtepNode,
+                ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
+        }
+
+    public void stopConnectionReconciliationIfActive(InstanceIdentifier<?> iid, HwvtepGlobalAugmentation hwvtepNode) {
+        final ReconciliationTask task = new ConnectionReconciliationTask(
+                reconciliationManager,
+                this,
+                iid,
+                hwvtepNode);
+        reconciliationManager.dequeue(task);
+    }
+
+    private void retryConnection(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepNode,
+                                 ConnectionReconciliationTriggers trigger) {
+        final ReconciliationTask task = new ConnectionReconciliationTask(
+                reconciliationManager,
+                this,
+                iid,
+                hwvtepNode);
+
+        if(reconciliationManager.isEnqueued(task)){
+            return;
+        }
+        switch(trigger){
+            case ON_CONTROLLER_INITIATED_CONNECTION_FAILURE:
+                reconciliationManager.enqueueForRetry(task);
+                break;
+            case ON_DISCONNECT:
+            {
+                ReadOnlyTransaction tx = db.newReadOnlyTransaction();
+                CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture =
+                        tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+
+                final HwvtepConnectionManager connectionManager = this;
+                Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
+                    @Override
+                    public void onSuccess(@Nullable Optional<Node> node) {
+                        if (node.isPresent()) {
+                            LOG.info("Disconnected/Failed connection {} was controller initiated, attempting " +
+                                    "reconnection", hwvtepNode.getConnectionInfo());
+                            reconciliationManager.enqueue(task);
+
+                        } else {
+                            LOG.debug("Connection {} was switch initiated, no reconciliation is required"
+                                    , iid.firstKeyOf(Node.class).getNodeId());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        LOG.warn("Read Config/DS for Node failed! {}", iid, t);
+                    }
+                });
+                break;
+            }
+            default:
+                break;
+        }
+    }
 
     public void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
@@ -457,5 +533,19 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             hcm.handleOwnershipChanged(ownershipChange);
         }
+    }
+
+    private enum ConnectionReconciliationTriggers {
+        /*
+        Reconciliation trigger for scenario where controller's attempt
+        to connect to switch fails on config data store notification
+        */
+        ON_CONTROLLER_INITIATED_CONNECTION_FAILURE,
+
+        /*
+        Reconciliation trigger for the scenario where controller
+        initiated connection disconnects.
+        */
+        ON_DISCONNECT
     }
 }

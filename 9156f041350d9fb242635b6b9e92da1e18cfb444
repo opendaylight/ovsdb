@@ -242,6 +242,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_18c0487b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T20:10:28Z",
+      "side": 1,
+      "message": "we can get the node if we have the client or connection info which we have:\n\ngetInstanceIdentifier() has some code. Also in disconnected() the call for getConnectionInstance() returns the ConnectionInstance() and you can call getOvsdbNodeAugmentation() to get the node. Or just read the node based on the connectioninstance with:\n\nConnectionInfo key \u003d SouthboundMapper.createConnectionInfo(externalClient);\n        OvsdbConnectionInstance ovsdbConnectionInstance \u003d getConnectionInstance(key);\n\nCheckedFuture\u003cOptional\u003cNode\u003e, ReadFailedException\u003e ovsdbNodeFuture \u003d transaction.read(\n                LogicalDatastoreType.OPERATIONAL, ovsdbConnectionInstance().getInstanceIdentifier());\n\nThen you would",
+      "parentUuid": "fa57193c_9d93aa4e",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 41
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_6cb54a30",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 2

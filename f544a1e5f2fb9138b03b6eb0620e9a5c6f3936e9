@@ -22,6 +22,30 @@
       "revId": "f544a1e5f2fb9138b03b6eb0620e9a5c6f3936e9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_d8a9b0e0",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-25T20:10:28Z",
+      "side": 1,
+      "message": "yeah, that is against checkstyle and coding guidelines. Imports should not be wildcarded.\n\nCheck you ide settings. in intellij the default to widlcard is 10. look under settings-\u003eEditor-\u003eCode Style-\u003eJava-\u003eimports. Then \"Class count to use import with \u0027*\u0027. Bump that and the following value to 99.",
+      "parentUuid": "fa57193c_dd86c212",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "f544a1e5f2fb9138b03b6eb0620e9a5c6f3936e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

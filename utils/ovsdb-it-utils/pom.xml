@@ -68,6 +68,46 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <artifactId>yamlbeans</artifactId>
           <version>1.09</version>
       </dependency>
+
+
+    <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-container-karaf</artifactId>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-junit4</artifactId>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam</artifactId>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.ops4j.pax.url</groupId>
+        <artifactId>pax-url-aether</artifactId>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.karaf.features</groupId>
+        <artifactId>org.apache.karaf.features.core</artifactId>
+        <version>${karaf.version}</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
     <!--

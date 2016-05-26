@@ -266,6 +266,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_aad57f1d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-26T06:37:45Z",
+      "side": 1,
+      "message": "connected() method will be called by library, whenever it get any new passive connection. So we don\u0027t really build any state for this connection in this method, so if we are not able to get the schema, it means we can\u0027t process the connection. so just disconnect the client, it will disconnect the connection. I justed tested with it, and after making more then 20 \"nc localhost 6640\" connection, i tried set-manager and it worked.",
+      "parentUuid": "fa57193c_18c0487b",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 41
+      },
+      "revId": "9156f041350d9fb242635b6b9e92da1e18cfb444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_6cb54a30",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 2

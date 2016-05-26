@@ -86,6 +86,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static Map<OvsdbClient, Channel> connections = Maps.newHashMap();
     private static OvsdbConnection connectionService;
     private static volatile boolean singletonCreated = false;
+    private static final int IDLE_READER_TIMEOUT = 30;
+    private static final int READ_TIMEOUT = 180;
 
     public static OvsdbConnection getService() {
         if (connectionService == null) {
@@ -121,6 +123,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             //new LoggingHandler(LogLevel.INFO),
                             new JsonRpcDecoder(100000),
                             new StringEncoder(CharsetUtil.UTF_8),
+                            new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
+                            new ReadTimeoutHandler(READ_TIMEOUT),
                             new ExceptionHandler());
                 }
             });
@@ -273,8 +277,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             channel.pipeline().addLast(
                                  new JsonRpcDecoder(100000),
                                  new StringEncoder(CharsetUtil.UTF_8),
-                                 new IdleStateHandler(30, 0, 0),
-                                 new ReadTimeoutHandler(180),
+                                 new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
+                                 new ReadTimeoutHandler(READ_TIMEOUT),
                                  new ExceptionHandler());
 
                             handleNewPassiveConnection(channel);

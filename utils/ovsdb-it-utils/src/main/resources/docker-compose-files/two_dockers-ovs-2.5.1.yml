@@ -1,0 +1,12 @@
+ovs1:
+ image: jhershbe/centos7-ovs:latest
+ ports:
+   - "6641:6640"
+ command: "/usr/bin/supervisord -n"
+ privileged: true
+ovs2:
+ image: jhershbe/centos7-ovs:latest
+ ports:
+   - "6642:6640"
+ command: "/usr/bin/supervisord -n"
+ privileged: true

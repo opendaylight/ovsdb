@@ -27,15 +27,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import org.junit.Assert;
+import org.ops4j.pax.exam.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 
 /**
  * Run OVS(s) using docker-compose for use in integration tests.
@@ -45,8 +49,8 @@ import org.slf4j.LoggerFactory;
  *      ConnectionInfo connectionInfo = SouthboundUtils.getConnectionInfo(
  *                               ovs.getOvsdbAddress(0), ovs.getOvsdbPort(0));
  *      ...
-        nodeInfo.disconnect();
-
+ *       nodeInfo.disconnect();
+ *
  * } catch (Exception e) {
  * ...
  * </pre>
@@ -59,13 +63,48 @@ import org.slf4j.LoggerFactory;
  * at the path META-INF/docker-compose-files/. Currently, a single yaml file is used,
  * "docker-ovs-2.5.1.yml." DockerOvs does support docker-compose files that
  * launch more than one docker image, more on this later. DockerOvs will wait for OVS
- * to accept OVSDB connections. In order for this to work, the docker-compose file *must*
- * have a port mapping.
- * Currently, DockerOvs does not support docker images with OVS instances that connect actively.
+ * to accept OVSDB connections.
+ * Any docker-compose file must have a port mapping.
+ *
+ * The following explains how system properties are used to configure DockerOvs
+ * <pre>
+ *  private static String ENV_USAGE =
+ *  "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n" +
+ *  "-Dovsdbserver.ipaddress - specify IP address of ovsdb server - implies -Ddocker.run=false\n" +
+ *  "-Dovsdbserver.port - specify the port of the ovsdb server - required with -Dovsdbserver.ipaddress\n" +
+ *  "-Ddocker.compose.file - docker compose file in META-INF/docker-compose-files/. If not specified, default file is used\n" +
+ *  "-Dovsdb.userspace.enabled - true when Ovs is running in user space (usually the case with docker)\n" +
+ *  "-Dovsdb.controller.address - IP address of the controller (usually the docker0 interface with docker)\n" +
+ *  "To auto-run Ovs and connect actively:\n" +
+ *  " -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n" +
+ *  "To auto-run Ovs and connect passively:\n" +
+ *  " -Dovsdbserver.connection=passive -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n" +
+ *  "To actively connect to a running Ovs:\n" +
+ *  " -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=6641 -Dovsdb.controller.address=y.y.y.y\n" +
+ *  "To passively connect to a running Ovs:\n" +
+ *  " -Dovsdbserver.connection=passive -Ddocker.run=false\n";
+ * </pre>
+ * When DockerOvs does not run docker-compose getOvsdbAddress and getOvsdbPort return the address and port specified in
+ * the system properties.
  */
 public class DockerOvs implements AutoCloseable {
+    private static String ENV_USAGE = "Usage:\n" +
+            "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n" +
+                    "-Dovsdbserver.ipaddress - specify IP address of ovsdb server - implies -Ddocker.run=false\n" +
+                    "-Dovsdbserver.port - specify the port of the ovsdb server - required with -Dovsdbserver.ipaddress\n" +
+                    "-Ddocker.compose.file - docker compose file in META-INF/docker-compose-files/. If not specified, default file is used\n" +
+                    "-Dovsdb.userspace.enabled - true when Ovs is running in user space (usually the case with docker)\n" +
+                    "-Dovsdb.controller.address - IP address of the controller (usually the docker0 interface with docker)\n" +
+                    "To auto-run Ovs and connect actively:\n" +
+                    " -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n" +
+                    "To auto-run Ovs and connect passively:\n" +
+                    " -Dovsdbserver.connection=passive -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n" +
+                    "To actively connect to a running Ovs:\n" +
+                    " -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=6641 -Dovsdb.controller.address=y.y.y.y\n" +
+                    "To passively connect to a running Ovs:\n" +
+                    " -Dovsdbserver.connection=passive -Ddocker.run=false\n";
+
     private static final Logger LOG = LoggerFactory.getLogger(DockerOvs.class);
-    public static final String DOCKER_SUDO = "docker.sudo";
     private static final String DEFAULT_DOCKER_FILE = "docker-ovs-2.5.1.yml";
     private static final String DOCKER_FILE_PATH = "META-INF/docker-compose-files/";
     //private static final String[] HELP_CMD = {"docker-compose", "--help"};
@@ -80,6 +119,27 @@ public class DockerOvs implements AutoCloseable {
     private File tmpDockerComposeFile;
     private List<String> ovsdbPorts;
     boolean isRunning;
+    private String envServerAddress;
+    private String envServerPort;
+    private String envDockerComposeFile;
+    private boolean runDocker;
+
+    /**
+     * Get the array of system properties as pax exam Option objects for use in pax exam
+     * unit tests with Configuration annotation.
+     * @return List of Option objects
+     */
+    public static Option[] getSysPropOptions() {
+        return new Option[] {
+                propagateSystemProperties(ItConstants.SERVER_IPADDRESS,
+                                            ItConstants.SERVER_PORT,
+                                            ItConstants.CONNECTION_TYPE,
+                                            ItConstants.CONTROLLER_IPADDRESS,
+                                            ItConstants.USERSPACE_ENABLED,
+                                            ItConstants.DOCKER_COMPOSE_FILE_NAME,
+                                            ItConstants.DOCKER_RUN)
+        };
+    }
 
     /**
      * Bring up all docker images in the default docker-compose file.
@@ -97,6 +157,13 @@ public class DockerOvs implements AutoCloseable {
      * @throws InterruptedException If this thread is interrupted
      */
     public DockerOvs(String yamlFileName) throws IOException, InterruptedException {
+        configureFromEnv();
+
+        if (!runDocker) {
+            LOG.info("DockerOvs.DockerOvs: Not running docker, -D{} specified", ItConstants.SERVER_IPADDRESS);
+            return;
+        }
+
         tmpDockerComposeFile = createTempDockerComposeFile(yamlFileName);
         buildDockerComposeCommands();
         ovsdbPorts = extractPortsFromYaml();
@@ -109,6 +176,42 @@ public class DockerOvs implements AutoCloseable {
         runProcess(60000, upCmd);
         isRunning = true;
         waitForOvsdbServers(10 * 1000);
+    }
+
+    /**
+     * Pull required configuration from System.getProperties() and validate we have what we need.
+     * Note: Note that there is some minor complexity in how this class is configured using System
+     * properties. This stems from the fact that we want to preserve the meaning of these properties
+     * prior to the introduction of this class. See the ENV_USAGE variable for details.
+     */
+    private void configureFromEnv() {
+        Properties env = System.getProperties();
+        envServerAddress = env.getProperty(ItConstants.SERVER_IPADDRESS);
+        envServerPort = env.getProperty(ItConstants.SERVER_PORT);
+        String envRunDocker = env.getProperty(ItConstants.DOCKER_RUN);
+        String connType = env.getProperty(ItConstants.CONNECTION_TYPE, ItConstants.CONNECTION_TYPE_ACTIVE);
+        String dockerFile = env.getProperty(ItConstants.DOCKER_COMPOSE_FILE_NAME);
+        envDockerComposeFile = DOCKER_FILE_PATH + (null == dockerFile ? DEFAULT_DOCKER_FILE : dockerFile);
+
+        //Are we running docker? If we specified docker.run, that's the answer. Otherwise, if there is a server
+        //address we assume docker is already running
+        runDocker = (envRunDocker != null) ? Boolean.parseBoolean(envRunDocker) : envServerAddress == null;
+
+        if(runDocker) {
+            return;
+        }
+
+        if (connType.equals(ItConstants.CONNECTION_TYPE_PASSIVE)) {
+            return;
+        }
+
+        //At this point we know we're not running docker and the conn type is active - make sure we have what we need
+        //If we have a server address than we require a port too as those
+        //are returned in getOvsdbPort() and getOvsdbAddress()
+        Assert.assertNotNull("Attempt to connect to previous running ovs but missing -Dovsdbserver.ipaddress\n"
+                                                                                    + ENV_USAGE, envServerAddress);
+        Assert.assertNotNull("Attempt to connect to previous running ovs but missing -Dovsdbserver.port\n"
+                + ENV_USAGE, envServerPort);
     }
 
     /**
@@ -141,6 +244,9 @@ public class DockerOvs implements AutoCloseable {
      * @return IP string
      */
     public String getOvsdbAddress(int ovsNumber) {
+        if (!runDocker) {
+            return envServerAddress;
+        }
         return DEFAULT_OVSDB_HOST;
     }
 
@@ -150,6 +256,9 @@ public class DockerOvs implements AutoCloseable {
      * @return Port as a string
      */
     public String getOvsdbPort(int ovsNumber) {
+        if (!runDocker) {
+            return envServerPort;
+        }
         return ovsdbPorts.get(ovsNumber);
     }
 
@@ -468,7 +577,7 @@ public class DockerOvs implements AutoCloseable {
     private File createTempDockerComposeFile(String yamlFileName) {
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
         Assert.assertNotNull("DockerOvs: bundle is null", bundle);
-        URL url = bundle.getResource(DOCKER_FILE_PATH + yamlFileName);
+        URL url = bundle.getResource(envDockerComposeFile);
         Assert.assertNotNull("DockerOvs: URL is null", url);
 
         File tmpFile = null;

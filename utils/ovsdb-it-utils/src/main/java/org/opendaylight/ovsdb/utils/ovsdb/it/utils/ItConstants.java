@@ -36,4 +36,6 @@ public final class ItConstants {
     public static final String INTEGRATION_BRIDGE_NAME = "br-int";
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
+    public static final String DOCKER_COMPOSE_FILE_NAME="docker.compose.file";
+    public static final String DOCKER_RUN="docker.run";
 }

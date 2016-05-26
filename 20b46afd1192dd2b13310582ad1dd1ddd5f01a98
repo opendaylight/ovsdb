@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_708eb87a",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-26T12:09:06Z",
+      "side": 1,
+      "message": "Not sure why, but on master the values are 30 and 180. I think there was a comment from Anil that maybe we needed shorter values.",
+      "revId": "20b46afd1192dd2b13310582ad1dd1ddd5f01a98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_508bb467",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-26T12:09:06Z",
+      "side": 1,
+      "message": "private?",
+      "revId": "20b46afd1192dd2b13310582ad1dd1ddd5f01a98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

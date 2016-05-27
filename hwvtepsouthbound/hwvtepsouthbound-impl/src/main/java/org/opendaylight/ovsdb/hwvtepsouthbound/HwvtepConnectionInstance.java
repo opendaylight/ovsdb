@@ -296,6 +296,9 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         this.initialCreatedData = hwvtepGlobalData;
     }
 
+    public HwvtepGlobalAugmentation getHwvtepGlobalAugmentation() {
+        return this.initialCreatedData;
+    }
     public HwvtepDeviceInfo getDeviceInfo() {
         return this.deviceInfo;
     }

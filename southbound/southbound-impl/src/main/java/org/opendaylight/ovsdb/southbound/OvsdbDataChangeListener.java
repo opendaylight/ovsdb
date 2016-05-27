@@ -125,23 +125,25 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             if (updated.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation value = (OvsdbNodeAugmentation) updated.getValue();
-                OvsdbClient client = cm.getClient(value.getConnectionInfo());
-                if (client == null) {
-                    for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
-                        if (original.getValue() instanceof OvsdbNodeAugmentation) {
-                            try {
-                                cm.disconnect((OvsdbNodeAugmentation) original.getValue());
-                                cm.stopConnectionReconciliationIfActive(
-                                        original.getKey().firstIdentifierOf(Node.class),
-                                        (OvsdbNodeAugmentation) original.getValue());
-
-                                OvsdbClient newClient = cm.connect((InstanceIdentifier<Node>) original.getKey(),value);
-                                if(newClient == null) {
-                                    cm.reconcileConnection(original.getKey().firstIdentifierOf(Node.class),value);
+                if (value.getConnectionInfo() != null) {
+                    OvsdbClient client = cm.getClient(value.getConnectionInfo());
+                    if (client == null) {
+                        for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
+                            if (original.getValue() instanceof OvsdbNodeAugmentation) {
+                                try {
+                                    cm.disconnect((OvsdbNodeAugmentation) original.getValue());
+                                    cm.stopConnectionReconciliationIfActive(
+                                            original.getKey().firstIdentifierOf(Node.class),
+                                            (OvsdbNodeAugmentation) original.getValue());
+    
+                                    OvsdbClient newClient = cm.connect((InstanceIdentifier<Node>) original.getKey(),value);
+                                    if(newClient == null) {
+                                        cm.reconcileConnection(original.getKey().firstIdentifierOf(Node.class),value);
+                                    }
+    
+                                } catch (UnknownHostException e) {
+                                    LOG.warn("Failed to disconnect to ovsdbNode", e);
                                 }
-
-                            } catch (UnknownHostException e) {
-                                LOG.warn("Failed to disconnect to ovsdbNode", e);
                             }
                         }
                     }
@@ -157,20 +159,22 @@ public class OvsdbDataChangeListener implements ClusteredDataChangeListener, Aut
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
                 ConnectionInfo key = ovsdbNode.getConnectionInfo();
-                InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
-                if ( iid != null) {
-                    LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
-                              + "to same device, hence dropping the request {}", key, ovsdbNode);
-                } else {
-                    try {
-                        OvsdbClient client = cm.connect((InstanceIdentifier<Node>) created.getKey(),
-                                (OvsdbNodeAugmentation) created.getValue());
-                        if(client == null) {
-                            cm.reconcileConnection(created.getKey().firstIdentifierOf(Node.class),
+                if (key != null) {
+                    InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                    if ( iid != null) {
+                        LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
+                                  + "to same device, hence dropping the request {}", key, ovsdbNode);
+                    } else {
+                        try {
+                            OvsdbClient client = cm.connect((InstanceIdentifier<Node>) created.getKey(),
                                     (OvsdbNodeAugmentation) created.getValue());
+                            if(client == null) {
+                                cm.reconcileConnection(created.getKey().firstIdentifierOf(Node.class),
+                                        (OvsdbNodeAugmentation) created.getValue());
+                            }
+                        } catch (UnknownHostException e) {
+                            LOG.warn("Failed to connect to ovsdbNode", e);
                         }
-                    } catch (UnknownHostException e) {
-                        LOG.warn("Failed to connect to ovsdbNode", e);
                     }
                 }
             }

@@ -107,7 +107,8 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeModification != null && ovsdbNodeModification.getDataBefore() == null
-                        && ovsdbNodeModification.getDataAfter() != null) {
+                        && ovsdbNodeModification.getDataAfter() != null
+                        && ovsdbNodeModification.getDataAfter().getConnectionInfo() != null) {
                     OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataAfter();
                     ConnectionInfo key = ovsdbNode.getConnectionInfo();
                     InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
@@ -156,7 +157,8 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeModification != null && ovsdbNodeModification.getDataBefore() != null
-                        && ovsdbNodeModification.getDataAfter() != null) {
+                        && ovsdbNodeModification.getDataAfter() != null
+                        && ovsdbNodeModification.getDataAfter().getConnectionInfo() != null) {
                     OvsdbClient client = cm.getClient(ovsdbNodeModification.getDataAfter().getConnectionInfo());
                     if (client == null) {
                         if (ovsdbNodeModification.getDataBefore() != null) {
@@ -203,6 +205,11 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 if (nodeModification != null && nodeModification.getDataAfter() != null && nodeModification
                         .getDataAfter().getConnectionInfo() != null) {
                     client = cm.getConnectionInstance(nodeModification.getDataAfter().getConnectionInfo());
+                } else if (nodeModification != null && nodeModification.getDataAfter() != null && nodeModification
+                            .getDataAfter().getConnectionInfo() == null) {
+                    InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
+                            node.getNodeId());
+                    client = cm.getConnectionInstance(nodeIid);
                 } else {
                     if (node != null) {
                         List<TerminationPoint> terminationPoints = node.getTerminationPoint();

@@ -55,9 +55,13 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
             updated.entrySet()) {
             OvsdbNodeAugmentation ovsdbNode = ovsdbNodeEntry.getValue();
-            LOG.debug("Received request to update ovsdb node ip: {} port: {}",
+            if (ovsdbNode.getConnectionInfo() != null) {
+                LOG.debug("Received request to update ovsdb node ip: {} port: {}",
                         ovsdbNode.getConnectionInfo().getRemoteIp(),
                         ovsdbNode.getConnectionInfo().getRemotePort());
+            } else {
+                LOG.debug("Received request to update ovsdb node: {}", ovsdbNode);
+            }
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);

@@ -133,9 +133,9 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                                         + "to same device, hence dropping the request {}", connection, hwvtepGlobal);
                     } else {
                         try {
-                            hcm.connect(HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId()), hwvtepGlobal);
+                            OvsdbClient client = hcm.connect(key, hwvtepGlobal);
                         } catch (UnknownHostException e) {
-                            LOG.warn("Failed to connect to OVSDB node", e);
+                            LOG.warn("Failed to connect to HWVTEP node", e);
                         }
                     }
                 }
@@ -159,9 +159,13 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                     if (client == null) {
                         try {
                             hcm.disconnect(hgOriginal);
-                            hcm.connect(HwvtepSouthboundMapper.createInstanceIdentifier(original.getNodeId()), hgUpdated);
+                            hcm.stopConnectionReconciliationIfActive(key, hgOriginal);
+                            OvsdbClient newClient = hcm.connect(key, hgUpdated);
+                            if (newClient == null) {
+                                hcm.reconcileConnection(key, hgUpdated);
+                            }
                         } catch (UnknownHostException e) {
-                            LOG.warn("Failed to update connection on OVSDB Node", e);
+                            LOG.warn("Failed to update connection on HWVTEP Node", e);
                         }
                     }
                 }
@@ -170,7 +174,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
     }
 
     private void updateData(Collection<DataTreeModification<Node>> changes) {
-        /* TODO: 
+        /* TODO:
          * Get connection instances for each change
          * Update data for each connection
          * Requires Command patterns. TBD.
@@ -193,8 +197,9 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                 if (hgDeleted != null) {
                     try {
                         hcm.disconnect(hgDeleted);
+                        hcm.stopConnectionReconciliationIfActive(key, hgDeleted);
                     } catch (UnknownHostException e) {
-                        LOG.warn("Failed to disconnect OVSDB Node", e);
+                        LOG.warn("Failed to disconnect HWVTEP Node", e);
                     }
                 }
             }

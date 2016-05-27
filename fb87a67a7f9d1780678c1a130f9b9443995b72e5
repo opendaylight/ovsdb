@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_de47d575",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_3e2891e1",
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_1e25cd08",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2016-05-27T07:35:36Z",
       "side": 1,
       "message": "please use the consistent name (HWVTEP or Hwvtep or HwVtep)",
+      "range": {
+        "startLine": 168,
+        "startChar": 69,
+        "endLine": 168,
+        "endChar": 75
+      },
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_3e609100",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_1e25cd08",
       "range": {
         "startLine": 168,
         "startChar": 69,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1e5dcd47",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_7e1e89bc",
+      "range": {
+        "startLine": 177,
+        "startChar": 16,
+        "endLine": 177,
+        "endChar": 17
+      },
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_5e1bc5c9",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 1
@@ -76,6 +142,30 @@
       "writtenOn": "2016-05-27T07:35:36Z",
       "side": 1,
       "message": "remove the trailing space, not really sonar friendly.",
+      "range": {
+        "startLine": 20,
+        "startChar": 2,
+        "endLine": 20,
+        "endChar": 3
+      },
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_7e56892b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_5e1bc5c9",
       "range": {
         "startLine": 20,
         "startChar": 2,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_5e53c538",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/ReconciliationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_be7b01f4",
+      "range": {
+        "startLine": 21,
+        "startChar": 2,
+        "endLine": 21,
+        "endChar": 3
+      },
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_fe81f9c3",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/ReconciliationTaskManager.java",
         "patchSetId": 1
@@ -134,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_9e38bdf0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/ReconciliationTaskManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_fe81f9c3",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 18,
+        "endChar": 3
+      },
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_3e6ff12c",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/connection/ConnectionReconciliationTask.java",
         "patchSetId": 1
@@ -145,6 +283,30 @@
       "writtenOn": "2016-05-27T07:35:36Z",
       "side": 1,
       "message": "remove trailing space.",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 3
+      },
+      "revId": "fb87a67a7f9d1780678c1a130f9b9443995b72e5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_de3eb5d9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-05-27T08:18:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa57193c_3e6ff12c",
       "range": {
         "startLine": 26,
         "startChar": 2,

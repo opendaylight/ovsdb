@@ -13,6 +13,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypePatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlan;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlanGpe;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeTap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGeneve;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGre;
@@ -86,6 +87,7 @@ public class SouthboundConstants {
         = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
             .put("internal", InterfaceTypeInternal.class)
             .put("vxlan", InterfaceTypeVxlan.class)
+            .put("vxlan-gpe", InterfaceTypeVxlanGpe.class)
             .put("patch", InterfaceTypePatch.class)
             .put("system", InterfaceTypeSystem.class)
             .put("tap", InterfaceTypeTap.class)

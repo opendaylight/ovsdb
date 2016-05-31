@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_735f6073",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "The queue-id (inet:uri) is the identifier assigned to the queue when it is created in the MD-SAL config (or auto-created if queue is created on OVS host).  In the MD-SAL config case, the eventual uuid is unknown - so queue-id is the value to identify the queue in the md-sal.\n\nin this part of the model, (queue list in the qos entry), the idea is to just use the queue-id and remove queue-uuid in the future.",
+      "parentUuid": "da5c1566_8d993171",
+      "range": {
+        "startLine": 519,
+        "startChar": 25,
+        "endLine": 519,
+        "endChar": 33
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_2dee2523",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "is there any specific reason of using list, given that we set max-element to 1? is it directly update the list?Boron supports PATCH restconf call and that can just work like the .merge() call we use in java call. but if we are planning to migrate this patch to Beryllium than i think it make sense to have it.",
+      "range": {
+        "startLine": 1267,
+        "startChar": 8,
+        "endLine": 1268,
+        "endChar": 25
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b3d738bf",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 1268,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "yes - this list element was for setting/deleting the qos entry for the port without having to update the port.  Looks like PATCH would help with some of the issues I saw, but it does not support delete.  With the list, it is easier to delete the qos element.",
+      "parentUuid": "da5c1566_2dee2523",
       "range": {
         "startLine": 1267,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_f34a50ab",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 1282,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_cd95e989",
+      "range": {
+        "startLine": 1282,
+        "startChar": 1,
+        "endLine": 1282,
+        "endChar": 12
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_8df3f109",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "looks like you need to rebase this patch?",
+      "range": {
+        "startLine": 208,
+        "startChar": 17,
+        "endLine": 212,
+        "endChar": 63
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_13e544a8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_8df3f109",
       "range": {
         "startLine": 208,
         "startChar": 17,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_33f32875",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "I found here: http://openvswitch.org/support/dist-docs/ovs-vswitchd.conf.db.5.txt\nand in the code.",
+      "parentUuid": "da5c1566_adc0757d",
+      "range": {
+        "startLine": 67,
+        "startChar": 4,
+        "endLine": 69,
+        "endChar": 69
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_0dbec1ff",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "please remove tab",
+      "range": {
+        "startLine": 61,
+        "startChar": 82,
+        "endLine": 61,
+        "endChar": 98
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_93e8347e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_0dbec1ff",
       "range": {
         "startLine": 61,
         "startChar": 82,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_73eda08b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_4d3719b1",
+      "range": {
+        "startLine": 92,
+        "startChar": 112,
+        "endLine": 92,
+        "endChar": 140
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_2d3c6593",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
         "patchSetId": 8
@@ -174,6 +342,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "please define constant.",
+      "range": {
+        "startLine": 140,
+        "startChar": 15,
+        "endLine": 140,
+        "endChar": 22
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b3fe1837",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/QosUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_2d3c6593",
       "range": {
         "startLine": 140,
         "startChar": 15,
@@ -203,6 +395,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_f37d30b3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_4d5ef9ea",
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_ed68ad89",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
         "patchSetId": 8
@@ -214,6 +424,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "this method is not doing generic conversion, so can you please provide the input bytes and what is expected outcome. Also it would be better if you rename the method based on the specific conversion it\u0027s doing.",
+      "range": {
+        "startLine": 504,
+        "startChar": 25,
+        "endLine": 504,
+        "endChar": 41
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_73400057",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done - updated comment.  Not sure I\u0027m addressing everything you\u0027re asking for here (e.g. not sure what a better name would be)",
+      "parentUuid": "da5c1566_ed68ad89",
       "range": {
         "startLine": 504,
         "startChar": 25,
@@ -249,6 +483,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_534a1c84",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_2d63c5b2",
+      "range": {
+        "startLine": 520,
+        "startChar": 13,
+        "endLine": 520,
+        "endChar": 14
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_8d0f71e1",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 8
@@ -260,6 +518,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "there is only two input parameters for the debug message, but log message is expecting three.",
+      "range": {
+        "startLine": 625,
+        "startChar": 90,
+        "endLine": 625,
+        "endChar": 98
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_d3246cc8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_8d0f71e1",
       "range": {
         "startLine": 625,
         "startChar": 90,
@@ -289,6 +571,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_b321f8b6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_2d0aa5d2",
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_6d149df5",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 8
@@ -312,6 +612,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_132f04a3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_6d149df5",
+      "range": {
+        "startLine": 639,
+        "startChar": 91,
+        "endLine": 639,
+        "endChar": 99
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_6d2bfd30",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbQosUpdateCommand.java",
         "patchSetId": 8
@@ -323,6 +647,30 @@
       "writtenOn": "2016-05-31T07:42:43Z",
       "side": 1,
       "message": "i think this needs a bit of rephrasing.",
+      "range": {
+        "startLine": 153,
+        "startChar": 23,
+        "endLine": 153,
+        "endChar": 78
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_73176052",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbQosUpdateCommand.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-05-31T17:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_6d2bfd30",
       "range": {
         "startLine": 153,
         "startChar": 23,

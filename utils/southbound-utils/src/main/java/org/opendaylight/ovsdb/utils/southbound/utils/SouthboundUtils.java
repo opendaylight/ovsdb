@@ -77,6 +77,7 @@ public class SouthboundUtils {
             = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
             .put("internal", InterfaceTypeInternal.class)
             .put("vxlan", InterfaceTypeVxlan.class)
+            .put("vxlan-gpe", InterfaceTypeVxlanGpe.class)
             .put("patch", InterfaceTypePatch.class)
             .put("system", InterfaceTypeSystem.class)
             .put("tap", InterfaceTypeTap.class)

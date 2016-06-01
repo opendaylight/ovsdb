@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_e571e178",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-01T08:47:08Z",
+      "side": 1,
+      "message": "@Anil, @Stephen: Is this okay to let this slide or do we want to cover it in this patch?",
+      "range": {
+        "startLine": 31,
+        "startChar": 78,
+        "endLine": 31,
+        "endChar": 89
+      },
+      "revId": "2af486471736b71658a58d9ad4c90d9b408832a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_655e71eb",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-01T08:47:08Z",
+      "side": 1,
+      "message": "No import statement needed for this because of .* in imports.",
+      "revId": "2af486471736b71658a58d9ad4c90d9b408832a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

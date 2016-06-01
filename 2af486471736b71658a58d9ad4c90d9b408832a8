@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_458d2d31",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-01T09:15:54Z",
+      "side": 1,
+      "message": "I like to keep patches focused; if we want to clean this kind of thing up it should be in another patch as far as I\u0027m concerned.",
+      "parentUuid": "da5c1566_e571e178",
+      "range": {
+        "startLine": 31,
+        "startChar": 78,
+        "endLine": 31,
+        "endChar": 89
+      },
+      "revId": "2af486471736b71658a58d9ad4c90d9b408832a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_655e71eb",
         "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
         "patchSetId": 2

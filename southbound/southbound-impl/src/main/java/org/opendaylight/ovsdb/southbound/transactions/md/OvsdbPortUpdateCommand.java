@@ -257,6 +257,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 new Uuid(interf.getUuid().toString()));
         ovsdbTerminationPointBuilder.setInterfaceType(
                 SouthboundMapper.createInterfaceType(type));
+        updateIfIndex(interf, ovsdbTerminationPointBuilder);
         updateOfPort(interf, ovsdbTerminationPointBuilder);
         updateOfPortRequest(interf, ovsdbTerminationPointBuilder);
         updateInterfaceExternalIds(interf, ovsdbTerminationPointBuilder);
@@ -330,6 +331,19 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Iterator<UUID> itr = qosUuidCol.iterator();
             UUID qosUuid = itr.next();
             ovsdbTerminationPointBuilder.setQos(new Uuid(qosUuid.toString()));
+        }
+    }
+
+    private void updateIfIndex(final Interface interf,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        LOG.info("IN UPDATE IFINDEX METHOD: {}", interf.getIfIndexColumn().getData());
+        try {
+            Long ifIndex = interf.getIfIndexColumn().getData();
+            if (ifIndex != null) {
+                ovsdbTerminationPointBuilder.setIfindex(ifIndex);
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("ifindex column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }
 

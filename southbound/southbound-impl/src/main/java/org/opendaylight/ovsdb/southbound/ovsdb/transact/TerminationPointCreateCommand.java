@@ -129,6 +129,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         ovsInterface.setName(terminationPoint.getName());
 
         createInterfaceType(terminationPoint, ovsInterface);
+        createIfindex(terminationPoint, ovsInterface);
         createOfPort(terminationPoint, ovsInterface);
         createOfPortRequest(terminationPoint, ovsInterface);
         createInterfaceOptions(terminationPoint, ovsInterface);
@@ -144,6 +145,18 @@ public class TerminationPointCreateCommand implements TransactCommand {
         Class<? extends InterfaceTypeBase> mdsaltype = terminationPoint.getInterfaceType();
         if (mdsaltype != null) {
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(mdsaltype));
+        }
+    }
+
+    private void createIfindex(final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+        try {
+            Long ifIndex = terminationPoint.getIfindex();
+            if (ifIndex != null) {
+                ovsInterface.setIfIndex(ifIndex);
+            }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("ifindex column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
         }
     }
 

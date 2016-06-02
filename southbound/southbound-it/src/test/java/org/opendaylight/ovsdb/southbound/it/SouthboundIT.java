@@ -168,6 +168,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final int OVSDB_ROUNDTRIP_TIMEOUT = 10000;
     private static final String FORMAT_STR = "%s_%s_%d";
     private static final Version AUTOATTACH_FROM_VERSION = Version.fromString("7.11.2");
+    private static final Version IF_INDEX_FROM_VERSION = Version.fromString("7.2.1");
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;
@@ -1274,6 +1275,45 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             return null;
         }
         return tpList.get(index).getAugmentation(OvsdbTerminationPointAugmentation.class);
+    }
+
+    @Test
+    public void testCRUDTerminationPointIfIndex() throws InterruptedException {
+        final boolean isOldSchema = schemaVersion.compareTo(IF_INDEX_FROM_VERSION) < 0;
+        Assume.assumeFalse(isOldSchema);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+
+        // Test create ifIndex
+        try (TestBridge testBridge = new TestBridge(connectionInfo, null, SouthboundITConstants.BRIDGE_NAME, null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                true, SouthboundMapper.createDatapathType("netdev"), null, null, null)) {
+            OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+            Assert.assertNotNull(bridge);
+            LOG.info("bridge: {}", bridge);
+            NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
+                    connectionInfo, bridge.getBridgeName()));
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+            String portName = "testIfIndex";
+            ovsdbTerminationBuilder.setName(portName);
+
+            Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+            Assert.assertNotNull(terminationPointNode);
+
+            // Test read ifIndex
+            List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+            for (TerminationPoint terminationPoint : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                    Long ifIndex = ovsdbTerminationPointAugmentation.getIfindex();
+                    Assert.assertNotNull(ifIndex);
+                    LOG.info("ifIndex: {} for the port:{}", ifIndex, portName);
+                }
+            }
+        }
     }
 
     @Test

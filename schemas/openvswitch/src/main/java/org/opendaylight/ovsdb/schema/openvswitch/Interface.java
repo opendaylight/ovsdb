@@ -62,9 +62,9 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     void setMac(Set<String> mac);
 
     @TypedColumn(name="ifindex", method=MethodType.GETCOLUMN, fromVersion="7.2.1")
-    Column<GenericTableSchema, Long> getIfIndexColumn();
+    Column<GenericTableSchema, Set<Long>> getIfIndexColumn();
     @TypedColumn(name="ifindex", method=MethodType.SETDATA, fromVersion="7.2.1")
-    void setIfIndex(Long ifIndex);
+    void setIfIndex(Set<Long> ifIndex);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();

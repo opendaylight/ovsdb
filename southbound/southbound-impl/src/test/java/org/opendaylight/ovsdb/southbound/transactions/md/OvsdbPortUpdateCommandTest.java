@@ -391,6 +391,7 @@ import com.google.common.util.concurrent.CheckedFuture;
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceLldp", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceBfd", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceBfdStatus", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateIfIndex", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interf, OVSDB_INTERFACE_TYPE, ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setInterfaceUuid(any(Uuid.class));

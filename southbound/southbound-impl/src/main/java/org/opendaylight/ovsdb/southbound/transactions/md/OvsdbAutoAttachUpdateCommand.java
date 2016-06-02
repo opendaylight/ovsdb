@@ -52,12 +52,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     public OvsdbAutoAttachUpdateCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        try {
-            updatedAutoAttachRows = TyperUtils.extractRowsUpdated(AutoAttach.class, getUpdates(), getDbSchema());
-            oldAutoAttachRows = TyperUtils.extractRowsOld(AutoAttach.class, getUpdates(), getDbSchema());
-        } catch (final IllegalArgumentException e) {
-            LOG.info("UNSUPPORTED FUNCTIONALITY: AutoAttach not supported on this OVS", e.getMessage());
-        }
+        updatedAutoAttachRows = TyperUtils.extractRowsUpdated(AutoAttach.class, getUpdates(), getDbSchema());
+        oldAutoAttachRows = TyperUtils.extractRowsOld(AutoAttach.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -99,7 +95,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                         currentAutoattach = optionalAutoattach.get();
                     }
                 } catch (final Exception e) {
-                    LOG.warn("AutoAttach table entries not found in operational datastore, need to create it.", e);
+                    LOG.debug("AutoAttach table entries not found in operational datastore, need to create it.", e);
                 }
 
                 final AutoattachBuilder autoAttachBuilder = (currentAutoattach != null) ? new AutoattachBuilder(currentAutoattach)

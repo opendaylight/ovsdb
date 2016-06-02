@@ -110,6 +110,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
     private void updateInterface(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
+        updateIfIndex(terminationPoint, ovsInterface);
         updateOfPort(terminationPoint, ovsInterface);
         updateOfPortRequest(terminationPoint, ovsInterface);
         updateInterfaceOptions(terminationPoint, ovsInterface);
@@ -143,6 +144,13 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         port.setQos(uuidSet);
     }
 
+    private void updateIfIndex(final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+        Long ifIndex = terminationPoint.getIfindex();
+        if (ifIndex != null) {
+            ovsInterface.setIfIndex(ifIndex);
+        }
+    }
 
     private void updateOfPort(
             final OvsdbTerminationPointAugmentation terminationPoint,

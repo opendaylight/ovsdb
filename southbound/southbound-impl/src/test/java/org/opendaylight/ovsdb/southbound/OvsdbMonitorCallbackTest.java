@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.southbound;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbOperationalCommandAggregator;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -32,7 +34,9 @@ public class OvsdbMonitorCallbackTest {
 
     @Test
     public void testUpdate() {
-        ovsdbMonitorCallback.update(mock(TableUpdates.class), mock(DatabaseSchema.class));
+        DatabaseSchema dbSchema = mock(DatabaseSchema.class);
+        when(dbSchema.getVersion()).thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
+        ovsdbMonitorCallback.update(mock(TableUpdates.class), dbSchema);
         verify(txInvoker).invoke(any(OvsdbOperationalCommandAggregator.class));
     }
 

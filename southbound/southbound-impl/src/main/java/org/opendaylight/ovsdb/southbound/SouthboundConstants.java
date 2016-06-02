@@ -54,6 +54,7 @@ public class SouthboundConstants {
     public static final String QOS_URI_PREFIX = "qos";
     public static final String QUEUE_URI_PREFIX = "queue";
     public static final String AUTOATTACH_URI_PREFIX = "autoattach";
+    public static final String AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION = "7.11.2";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
     public static final String DEFAULT_OPENFLOW_PORT = "6653";
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";

@@ -13,12 +13,16 @@ import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
-
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperationalCommandAggregator.class);
     private List<TransactionCommand> commands = new ArrayList<>();
 
     public OvsdbOperationalCommandAggregator(OvsdbConnectionInstance key,TableUpdates updates,
@@ -36,8 +40,13 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         commands.add(new OvsdbControllerRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbPortUpdateCommand(key, updates, dbSchema));
         commands.add(new OvsdbPortRemoveCommand(key, updates, dbSchema));
-        commands.add(new OvsdbAutoAttachUpdateCommand(key, updates, dbSchema));
-        commands.add(new OvsdbAutoAttachRemovedCommand(key, updates, dbSchema));
+
+        if(dbSchema.getVersion().compareTo(Version.fromString(SouthboundConstants.AUTOATTACH_FROM_VERSION)) >= 0) {
+            commands.add(new OvsdbAutoAttachUpdateCommand(key, updates, dbSchema));
+            commands.add(new OvsdbAutoAttachRemovedCommand(key, updates, dbSchema));
+        } else {
+            LOG.debug("UNSUPPORTED FUNCTIONALITY: AutoAttach not supported in OVS schema version {}", dbSchema.getVersion().toString());
+        }
     }
 
     @Override

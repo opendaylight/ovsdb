@@ -702,6 +702,11 @@ module ovsdb {
         base interface-type-base;
     }
 
+    identity interface-type-vxlan-gpe {
+        description "Interface type for vxlan gpe interfaces";
+        base interface-type-base;
+    }
+
     identity interface-type-patch {
         description "Interface type for patch interfaces";
         base interface-type-base;
@@ -1216,7 +1221,7 @@ module ovsdb {
                        last change in session state. The error messages are defined in
                        section 4.1 of [RFC 5880].
 
-                bfd_status : flap_count: optional string, 
+                bfd_status : flap_count: optional string,
                        containing an integer, minimum 0
                        Counts the number of bfd_status:forwarding flaps since start.
                        A flap is considered as a change of the bfd_status:forwarding value.";

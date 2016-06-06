@@ -26,6 +26,10 @@ public class OvsdbConnectionInfo {
         ACTIVE, PASSIVE
     }
 
+    public enum SocketConnectionType {
+        SSL, NON_SSL
+    }
+
     @XmlTransient
     private Channel channel;
     @XmlTransient

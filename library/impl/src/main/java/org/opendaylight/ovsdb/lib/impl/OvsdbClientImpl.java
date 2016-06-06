@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.impl;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
 
 import java.util.Iterator;
@@ -16,6 +17,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
@@ -25,6 +28,7 @@ import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.SocketConnectionType;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -66,13 +70,46 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
+    private static final ThreadFactory threadFactorySSL =
+        new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-SSL-%d").build();
+    private static final ThreadFactory threadFactoryNonSSL =
+        new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-Non-SSL-%d").build();
 
-    public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type, ExecutorService executorService) {
+    public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type,
+        SocketConnectionType socketConnType, String executorNameArgs) {
         this.rpc = rpc;
-        this.executorService = executorService;
+        ThreadFactory threadFactory = getThreadFactory(type, socketConnType, executorNameArgs);
+        this.executorService = Executors.newCachedThreadPool(threadFactory);
         this.channel = channel;
-
         this.connectionInfo = new OvsdbConnectionInfo(channel, type);
+    }
+
+    /**
+     * Genereate the threadFactory based on ACTIVE, PASSIVE (SSL/NON-SSL) connection type.
+     * @param type ACTIVE or PASSIVE {@link ConnectionType}
+     * @param socketConnType SSL or NON-SSL {@link SocketConnectionType}
+     * @param executorNameArgs Additional args to append to thread name format
+     * @return {@link ThreadFactory}
+     */
+    private ThreadFactory getThreadFactory(ConnectionType type,
+        SocketConnectionType socketConnType, String executorNameArgs) {
+        if (type == ConnectionType.PASSIVE) {
+            switch (socketConnType) {
+                case SSL:
+                    return threadFactorySSL;
+                case NON_SSL:
+                    return threadFactoryNonSSL;
+                default:
+                    return Executors.defaultThreadFactory();
+            }
+        } else if (type == ConnectionType.ACTIVE) {
+            ThreadFactory threadFactorySSL =
+                new ThreadFactoryBuilder().setNameFormat("OVSDB-ActiveConnection-" + executorNameArgs + "-%d")
+                    .build();
+            return threadFactorySSL;
+        }
+        // Default case
+        return Executors.defaultThreadFactory();
     }
 
     OvsdbClientImpl() {
@@ -436,5 +473,6 @@ public class OvsdbClientImpl implements OvsdbClient {
     @Override
     public void disconnect() {
         channel.disconnect();
+        executorService.shutdown();
     }
 }

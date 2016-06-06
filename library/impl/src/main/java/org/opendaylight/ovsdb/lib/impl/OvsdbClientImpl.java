@@ -436,5 +436,6 @@ public class OvsdbClientImpl implements OvsdbClient {
     @Override
     public void disconnect() {
         channel.disconnect();
+        executorService.shutdown();
     }
 }

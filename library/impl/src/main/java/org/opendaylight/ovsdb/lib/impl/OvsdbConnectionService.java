@@ -87,6 +87,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     // Singleton Service object that can be used in Non-OSGi environment
     private static ThreadFactory threadFactory = new ThreadFactoryBuilder()
             .setNameFormat("OVSDB-PassiveConnection-%d").build();
+    private static ThreadFactory OvsdbClientThreadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("OVSDBClient-PassiveConnection-%d").build();
     private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10, threadFactory);
 
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
@@ -402,7 +404,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 @Override
                 public void run() {
                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                            Executors.newFixedThreadPool(NUM_THREADS));
+                            Executors.newFixedThreadPool(NUM_THREADS, OvsdbClientThreadFactory));
 
                     LOG.debug("Notify listener");
                     for (OvsdbConnectionListener listener : connectionListeners) {

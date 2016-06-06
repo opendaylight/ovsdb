@@ -151,6 +151,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         } else {
             LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
         }
+        client.disconnect();
         LOG.trace("HwvtepConnectionManager exit disconnected client: {}", client);
     }
 

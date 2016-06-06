@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.SocketConnectionType;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.jsonrpc.ExceptionHandler;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
@@ -82,11 +82,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  */
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
-    private static final int NUM_THREADS = 3;
 
-    // Singleton Service object that can be used in Non-OSGi environment
     private static ThreadFactory threadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("OVSDB-PassiveConnection-%d").build();
+            .setNameFormat("OVSDB-PassiveConnectionService-%d").build();
     private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10, threadFactory);
 
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
@@ -142,10 +140,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
-            ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("OVSDB-ActiveConnection-" + address
-                    .getHostAddress()+"-%d").build();
-            return getChannelClient(channel, ConnectionType.ACTIVE,
-                    Executors.newFixedThreadPool(NUM_THREADS, threadFactory));
+            return getChannelClient(channel, ConnectionType.ACTIVE, SocketConnectionType.SSL);
         } catch (InterruptedException e) {
             LOG.warn("Thread was interrupted during connect", e);
         } catch (Exception e) {
@@ -178,7 +173,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     private static OvsdbClient getChannelClient(Channel channel, ConnectionType type,
-                                                ExecutorService executorService) {
+        SocketConnectionType socketConnType) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.setSerializationInclusion(Include.NON_NULL);
@@ -189,7 +184,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         channel.pipeline().addLast(binderHandler);
 
         OvsdbRPC rpc = factory.getClient(channel, OvsdbRPC.class);
-        OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, executorService);
+        OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, socketConnType);
         connections.put(client, channel);
         ChannelFuture closeFuture = channel.closeFuture();
         closeFuture.addListener(new ChannelConnectionHandler(client));
@@ -345,7 +340,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                     sslHandler.engine().getSession().getPeerCertificates();
                                     //Handshake done. Notify listener.
                                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                                                         Executors.newFixedThreadPool(NUM_THREADS, threadFactory));
+                                        SocketConnectionType.SSL);
                                     LOG.debug("Notify listener");
                                     for (OvsdbConnectionListener listener : connectionListeners) {
                                         listener.connected(client);
@@ -402,7 +397,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 @Override
                 public void run() {
                     OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                            Executors.newFixedThreadPool(NUM_THREADS));
+                        SocketConnectionType.NON_SSL);
 
                     LOG.debug("Notify listener");
                     for (OvsdbConnectionListener listener : connectionListeners) {

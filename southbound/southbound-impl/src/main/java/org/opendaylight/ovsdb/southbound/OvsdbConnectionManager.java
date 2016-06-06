@@ -185,7 +185,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("disconnected : Connection instance not found for OVSDB Node {} ", key);
         }
         LOG.trace("OvsdbConnectionManager: exit disconnected client: {}", client);
-
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,

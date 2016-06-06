@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.impl;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
 
 import java.util.Iterator;
@@ -16,6 +17,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
@@ -67,11 +70,11 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
 
-    public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type, ExecutorService executorService) {
+    public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type,
+        ThreadFactory threadFactory) {
         this.rpc = rpc;
-        this.executorService = executorService;
+        this.executorService = Executors.newCachedThreadPool(threadFactory);
         this.channel = channel;
-
         this.connectionInfo = new OvsdbConnectionInfo(channel, type);
     }
 
@@ -436,5 +439,6 @@ public class OvsdbClientImpl implements OvsdbClient {
     @Override
     public void disconnect() {
         channel.disconnect();
+        executorService.shutdown();
     }
 }

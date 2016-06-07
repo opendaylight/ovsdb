@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_a1317da4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-06-07T18:49:46Z",
+      "side": 1,
+      "message": "Done - My bad. At first when I put the breakpoint it seemed that the client disconnect() was never hit.",
+      "parentUuid": "da5c1566_298439d3",
+      "range": {
+        "startLine": 154,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 28
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_4951ad61",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbClientImpl.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-07T06:19:46Z",
       "side": 1,
       "message": "This is something i was suspecting as well. Although fix is correct but this doesn\u0027t look correct from best practice perspective, because we are closing the threadpool that is passed to this client. Looking at the code, i don\u0027t really see why we need caller to initialize the thread pool and pass it to OvsdbClientImpl(). I think we should initialize the threadpool in the OvsdbClientImpl itself rather than callers from OvsdbConnectionService pass it down. Also i think we should use newCachedThreadPool rather than newFixedThreadPool. Thoughts?",
+      "range": {
+        "startLine": 439,
+        "startChar": 8,
+        "endLine": 439,
+        "endChar": 34
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_e15d35eb",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbClientImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-06-07T18:49:46Z",
+      "side": 1,
+      "message": "+1. Now creating the cachedThreadpool inside OVSDBClientImpl. Only the threadFactory is passed from outside, due to some dynamic name for Active connection threads.",
+      "parentUuid": "da5c1566_4951ad61",
       "range": {
         "startLine": 439,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_4172217d",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-06-07T18:49:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_29d279d2",
+      "range": {
+        "startLine": 91,
+        "startChar": 24,
+        "endLine": 91,
+        "endChar": 56
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_09d7b5c2",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-06-07T06:19:46Z",
       "side": 1,
       "message": "please refer to my comment from HwvtepConnectionManager.java file.",
+      "range": {
+        "startLine": 187,
+        "startChar": 8,
+        "endLine": 187,
+        "endChar": 28
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_a10a1dd0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-06-07T18:49:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_09d7b5c2",
       "range": {
         "startLine": 187,
         "startChar": 8,

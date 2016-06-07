@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_298439d3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-07T06:19:46Z",
+      "side": 1,
+      "message": "why explicit call to disconnect is required? Disconnected() notification should be called by library, so library calls this when switch really disconnect from the controller. am i missing any corner case here?",
+      "range": {
+        "startLine": 154,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 28
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_4951ad61",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbClientImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-07T06:19:46Z",
+      "side": 1,
+      "message": "This is something i was suspecting as well. Although fix is correct but this doesn\u0027t look correct from best practice perspective, because we are closing the threadpool that is passed to this client. Looking at the code, i don\u0027t really see why we need caller to initialize the thread pool and pass it to OvsdbClientImpl(). I think we should initialize the threadpool in the OvsdbClientImpl itself rather than callers from OvsdbConnectionService pass it down. Also i think we should use newCachedThreadPool rather than newFixedThreadPool. Thoughts?",
+      "range": {
+        "startLine": 439,
+        "startChar": 8,
+        "endLine": 439,
+        "endChar": 34
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_29d279d2",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-07T06:19:46Z",
+      "side": 1,
+      "message": "i think we should name it like OVSDB-PassiveConnection-Non-SSL-%d. Because this threadpool will get initialize when it\u0027s non-ssl connection. Also we should rename the previous one to OVSDB-PassiveConnection-SSL-%d from OVSDB-PassiveConnection-%d",
+      "range": {
+        "startLine": 91,
+        "startChar": 24,
+        "endLine": 91,
+        "endChar": 56
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_09d7b5c2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-07T06:19:46Z",
+      "side": 1,
+      "message": "please refer to my comment from HwvtepConnectionManager.java file.",
+      "range": {
+        "startLine": 187,
+        "startChar": 8,
+        "endLine": 187,
+        "endChar": 28
+      },
+      "revId": "1762099e4fa5f0c8f0992593df88d1af00ffb6ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

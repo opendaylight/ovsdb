@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_14d869ee",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-08T06:59:03Z",
+      "side": 1,
+      "message": "Is there any specific reason for not using \u0027type instance-identifier\u0027 ? we use it to refer to any instance-indentifier in the yang mode.e.g ovsdb-node-ref.",
+      "parentUuid": "da5c1566_735f6073",
+      "range": {
+        "startLine": 519,
+        "startChar": 25,
+        "endLine": 519,
+        "endChar": 33
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_2dee2523",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 8
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "yes - this list element was for setting/deleting the qos entry for the port without having to update the port.  Looks like PATCH would help with some of the issues I saw, but it does not support delete.  With the list, it is easier to delete the qos element.",
       "parentUuid": "da5c1566_2dee2523",
+      "range": {
+        "startLine": 1267,
+        "startChar": 8,
+        "endLine": 1268,
+        "endChar": 25
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_74e565a7",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 1268,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-08T06:59:03Z",
+      "side": 1,
+      "message": "make sense.",
+      "parentUuid": "da5c1566_b3d738bf",
       "range": {
         "startLine": 1267,
         "startChar": 8,
@@ -225,6 +273,30 @@
       "side": 1,
       "message": "I found here: http://openvswitch.org/support/dist-docs/ovs-vswitchd.conf.db.5.txt\nand in the code.",
       "parentUuid": "da5c1566_adc0757d",
+      "range": {
+        "startLine": 67,
+        "startChar": 4,
+        "endLine": 69,
+        "endChar": 69
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_f4e8557e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-08T06:59:03Z",
+      "side": 1,
+      "message": "Cool. Looks like these are supported in 2.5+ version. Can you please add a comment above these final strings with the above reference link for other developers reference.",
+      "parentUuid": "da5c1566_33f32875",
       "range": {
         "startLine": 67,
         "startChar": 4,
@@ -448,6 +520,30 @@
       "side": 1,
       "message": "Done - updated comment.  Not sure I\u0027m addressing everything you\u0027re asking for here (e.g. not sure what a better name would be)",
       "parentUuid": "da5c1566_ed68ad89",
+      "range": {
+        "startLine": 504,
+        "startChar": 25,
+        "endLine": 504,
+        "endChar": 41
+      },
+      "revId": "458971a448aaa48b9218c4b273dabdd20c6d8c2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_d4a43159",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-08T06:59:03Z",
+      "side": 1,
+      "message": "sorry for not to be clear in my previous comment. Basically i was asking if we can specify what this input really is, e.g it\u0027s a MAC address, or UUID or something else. Method name actually says that it\u0027s doing to byte to hex conversion, but it actually is doing specific conversion like removing \u0027:\u0027. I was not really sure whether it\u0027s converting byte [] of mac address like \u0027aa:bb:cc:dd:ee:ff\u0027 to \u0027aabbccddeeff\u0027 or it\u0027s something else. So i thought it\u0027s good to have a bit of clarity here, in case developers want to reuse this method.",
+      "parentUuid": "da5c1566_73400057",
       "range": {
         "startLine": 504,
         "startChar": 25,

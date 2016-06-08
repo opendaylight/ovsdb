@@ -36,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,36 +191,32 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =
                 new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
-            DataObjectModification<OvsdbBridgeAugmentation> bridgeModification =
-                    change.getRootNode().getModifiedAugmentation(OvsdbBridgeAugmentation.class);
             OvsdbConnectionInstance client = null;
-            Node node = change.getRootNode().getDataAfter();
-            if (bridgeModification != null && bridgeModification.getDataAfter() != null) {
-                client = cm.getConnectionInstance(bridgeModification.getDataAfter());
-            } else if (bridgeModification != null && bridgeModification.getDataBefore() != null &&
-                    change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE) {
-                client = cm.getConnectionInstance(bridgeModification.getDataBefore());
-            } else {
-                DataObjectModification<OvsdbNodeAugmentation> nodeModification =
-                        change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
-                if (nodeModification != null && nodeModification.getDataAfter() != null && nodeModification
-                        .getDataAfter().getConnectionInfo() != null) {
-                    client = cm.getConnectionInstance(nodeModification.getDataAfter().getConnectionInfo());
-                } else if (nodeModification != null && nodeModification.getDataAfter() != null && nodeModification
-                            .getDataAfter().getConnectionInfo() == null) {
-                    InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
-                            node.getNodeId());
-                    client = cm.getConnectionInstance(nodeIid);
-                } else {
-                    if (node != null) {
-                        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
-                        if (terminationPoints != null && !terminationPoints.isEmpty()) {
-                            InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
-                                    node.getNodeId());
-                            client = cm.getConnectionInstance(nodeIid);
-                        }
+            Node node = change.getRootNode().getDataAfter() != null?
+                    change.getRootNode().getDataAfter() : change.getRootNode().getDataBefore();
+            if (node != null) {
+                InstanceIdentifier<Node> nodeIid;
+                Augmentation nodeAug = node.getAugmentation(OvsdbNodeAugmentation.class) !=null?
+                        node.getAugmentation(OvsdbNodeAugmentation.class):node.getAugmentation(OvsdbBridgeAugmentation.class);
+
+                if(nodeAug instanceof OvsdbNodeAugmentation) {
+                    OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation) nodeAug;
+                    if(ovsdbNode.getConnectionInfo() != null) {
+                        client = cm.getConnectionInstance(ovsdbNode.getConnectionInfo());
+                    }else {
+                                SouthboundMapper.createInstanceIdentifier(node.getNodeId()));
+                        client = cm.getConnectionInstance(SouthboundMapper.createInstanceIdentifier(node.getNodeId()));
                     }
                 }
+                if(nodeAug instanceof OvsdbBridgeAugmentation) {
+                    OvsdbBridgeAugmentation bridgeAugmentation = (OvsdbBridgeAugmentation)nodeAug;
+                    if(bridgeAugmentation.getManagedBy() != null) {
+                        nodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+                        client = cm.getConnectionInstance(nodeIid);
+                    }
+                }
+            } else {
+                LOG.warn("Following change don't have after/before data {}", change);
             }
             if (client != null) {
                 LOG.debug("Found client for {}", node);

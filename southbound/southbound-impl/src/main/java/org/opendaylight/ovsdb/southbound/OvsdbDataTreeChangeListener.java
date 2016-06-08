@@ -212,11 +212,19 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     client = cm.getConnectionInstance(nodeIid);
                 } else {
                     if (node != null) {
-                        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
-                        if (terminationPoints != null && !terminationPoints.isEmpty()) {
-                            InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
-                                    node.getNodeId());
-                            client = cm.getConnectionInstance(nodeIid);
+                        InstanceIdentifier<Node> nodeIid ;
+                        if( node instanceof OvsdbBridgeAugmentation) {
+                            OvsdbBridgeAugmentation bridgeAugmentation = (OvsdbBridgeAugmentation)node;
+                            if(bridgeAugmentation.getManagedBy() != null) {
+                                nodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+                                client = cm.getConnectionInstance(nodeIid);
+                            }
+                        } else {
+                            List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+                            if (terminationPoints != null && !terminationPoints.isEmpty()) {
+                                nodeIid = SouthboundMapper.createInstanceIdentifier(node.getNodeId());
+                                client = cm.getConnectionInstance(nodeIid);
+                            }
                         }
                     }
                 }

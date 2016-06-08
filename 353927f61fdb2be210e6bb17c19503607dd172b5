@@ -22,6 +22,30 @@
       "revId": "353927f61fdb2be210e6bb17c19503607dd172b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_2886eab9",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2016-06-08T17:40:53Z",
+      "side": 1,
+      "message": "How about the active connection threads? It is currently [\"OVSDB-ActiveConnection-\" + address.getHostAddress()+\"-%d\"]. Can this be renamed as \"OVSDB-ActiveConnection-SSL-%d\"",
+      "parentUuid": "da5c1566_34af6de5",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 69
+      },
+      "revId": "353927f61fdb2be210e6bb17c19503607dd172b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

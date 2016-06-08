@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_34af6de5",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-08T01:58:25Z",
+      "side": 1,
+      "message": "I think we should move ThreadFactory to the OvsdbClientImpl as well.We should define enum values e.g \nenum connectionType {  \nNON_SSL,\nSSL\n}\n\nand pass it to the getChannelClient(). Inside this method, we should choose the thread-factory based on the enum value. This will keep the API\u0027s clean.",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 69
+      },
+      "revId": "353927f61fdb2be210e6bb17c19503607dd172b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

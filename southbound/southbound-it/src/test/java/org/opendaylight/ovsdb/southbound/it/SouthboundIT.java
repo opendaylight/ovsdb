@@ -1626,6 +1626,87 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
+    public void testCRUDTerminationPoints() throws InterruptedException {
+        String port1 = "vx1";
+        String port2 = "vxlanport";
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
+
+        try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
+            OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
+            Assert.assertNotNull(bridge);
+            NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
+                    connectionInfo, bridge.getBridgeName()));
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder();
+
+            // add and delete a single port
+            String portName = port1;
+            ovsdbTerminationBuilder.setName(portName);
+            Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+            Assert.assertNotNull(terminationPointNode);
+
+            SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                    new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
+            portName = port1;
+            InstanceIdentifier<TerminationPoint> nodePath =
+                    SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME))
+                            .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+
+            Assert.assertTrue("failed to delete port " + portName,
+                    mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, nodePath));
+            LOG.info("shague: waiting for delete {}", portName);
+            Thread.sleep(1000);
+            TerminationPoint terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, nodePath);
+            Assert.assertNull(terminationPoint);
+
+            // add two ports, then delete them
+            portName = port1;
+            ovsdbTerminationBuilder.setName(portName);
+            Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+            terminationPointIid = getTpIid(connectionInfo, bridge);
+            terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+            Assert.assertNotNull(terminationPointNode);
+
+            portName = port2;
+            ovsdbTerminationBuilder.setName(portName);
+            Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+            terminationPointIid = getTpIid(connectionInfo, bridge);
+            terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+            Assert.assertNotNull(terminationPointNode);
+
+            SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                    new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
+            portName = port1;
+            nodePath =
+                    SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME))
+                            .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+
+            Assert.assertTrue("failed to delete port " + portName,
+                    mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, nodePath));
+            LOG.info("shague: waiting for delete {}", portName);
+            Thread.sleep(1000);
+            terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, nodePath);
+            Assert.assertNull(terminationPoint);
+
+            portName = port2;
+            nodePath = SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                    new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME))
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+
+            Assert.assertTrue("failed to delete port " + portName,
+                    mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, nodePath));
+            LOG.info("shague: waiting for delete {}", portName);
+            Thread.sleep(1000);
+            terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, nodePath);
+            Assert.assertNull(terminationPoint);
+        }
+    }
+
+    @Test
     public void testCRUDTerminationPointVlanModes() throws InterruptedException {
         final VlanMode UPDATED_VLAN_MODE = VlanMode.Access;
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);

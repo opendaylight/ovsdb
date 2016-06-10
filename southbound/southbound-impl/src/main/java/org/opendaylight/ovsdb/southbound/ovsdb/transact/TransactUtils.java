@@ -381,13 +381,13 @@ public class TransactUtils {
         if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
             Identifier key = ((InstanceIdentifier.IdentifiableItem) child.getIdentifier()).getKey();
             KeyedInstanceIdentifier extendedPath = path.child(item, key);
-            LOG.debug("Building a new child iid for {} with {} and key {}, resulting in {}",
-                    path, item, extendedPath);
+            //LOG.debug("Building a new child iid for {} with {} and key {}, resulting in {}",
+            //        path, item, extendedPath);
             return extendedPath;
         } else {
             InstanceIdentifier extendedPath = path.child(item);
-            LOG.debug("Building a new child iid for {} with {}, resulting in {}",
-                    path, item, extendedPath);
+            //LOG.debug("Building a new child iid for {} with {}, resulting in {}",
+            //        path, item, extendedPath);
             return extendedPath;
         }
     }

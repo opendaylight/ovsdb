@@ -8,7 +8,9 @@
 
 package org.opendaylight.ovsdb.southbound;
 
+import com.google.common.collect.Iterables;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -36,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,10 +85,59 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         registration.close();
     }
 
+    private class dtmToString {
+        private void toString(DataTreeModification<Node> change, StringBuilder sb ) {
+            sb.append("\nchange [");
+            sb.append("getRootPath = ").append(change.getRootPath());
+            sb.append(", getDatastoreType = ").append(change.getRootPath().getDatastoreType());
+            sb.append(", getRootIdentifier = ").append(change.getRootPath().getRootIdentifier());
+
+            sb.append(",\ngetRootNode = ").append(change.getRootNode());
+            sb.append(", getModificationType = ").append(change.getRootNode().getModificationType());
+            sb.append(", getDataType = ").append(change.getRootNode().getDataType());
+            sb.append(",\n    getDataBefore = ").append(change.getRootNode().getDataBefore());
+            sb.append(",\n    getDataAfter = ").append(change.getRootNode().getDataAfter());
+
+            DataObjectModification<OvsdbNodeAugmentation> nodeModification =
+                    change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
+            if (nodeModification != null) {
+                sb.append(",\n").append(nodeModification);
+                sb.append(",\n    getDataBefore = ").append(nodeModification.getDataBefore());
+                sb.append(",\n    getDataAfter = ").append(nodeModification.getDataAfter());
+            }
+            DataObjectModification<OvsdbBridgeAugmentation> bridgeModification =
+                    change.getRootNode().getModifiedAugmentation(OvsdbBridgeAugmentation.class);
+            if (bridgeModification != null) {
+                sb.append(",\n").append(bridgeModification);
+                sb.append(",\n    getDataBefore = ").append(bridgeModification.getDataBefore());
+                sb.append(",\n    getDataAfter = ").append(bridgeModification.getDataAfter());
+            }
+            if (nodeModification == null && bridgeModification == null) {
+                sb.append(",\n no getModifiedAugmentation");
+            }
+
+            sb.append(']').toString();
+        }
+
+        public String toString(Collection<DataTreeModification<Node>> changes) {
+            StringBuilder sb = new StringBuilder("\nchanges [");
+            boolean first = true;
+            for (DataTreeModification<Node> change : changes) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                toString(change, sb);
+            }
+            return sb.append(']').toString();
+        }
+    }
+
     @Override
     public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Node>> changes) {
-        LOG.trace("onDataTreeChanged: {}", changes);
-
+        //LOG.trace("onDataTreeChanged: {}", changes);
+        LOG.info("onDataTreeChanged: {}:{}", changes.size(), new dtmToString().toString(changes));
         // Connect first if necessary
         connect(changes);
 
@@ -194,29 +247,79 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     change.getRootNode().getModifiedAugmentation(OvsdbBridgeAugmentation.class);
             OvsdbConnectionInstance client = null;
             Node node = change.getRootNode().getDataAfter();
+
+            LOG.info("\nshague 1. modType: {} change: {}:::{},,,\n bridgeModification: {}:::{},,,\n node: {}:::{}",
+                    change.getRootNode().getModificationType(), change.getRootNode(), change.getRootPath(),
+                    bridgeModification != null ? bridgeModification.getDataBefore() : null,
+                    bridgeModification != null ? bridgeModification.getDataAfter() : null,
+                    change.getRootNode().getDataBefore(), change.getRootNode().getDataAfter());
             if (bridgeModification != null && bridgeModification.getDataAfter() != null) {
                 client = cm.getConnectionInstance(bridgeModification.getDataAfter());
+                LOG.info("\nshague 2. bridgeModification: {},,,\n bridge.getDataAfter: {}",
+                        bridgeModification, bridgeModification.getDataAfter());
             } else if (bridgeModification != null && bridgeModification.getDataBefore() != null &&
                     change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE) {
                 client = cm.getConnectionInstance(bridgeModification.getDataBefore());
+                LOG.info("\nshague 3. bridgeModification: {},,,\n bridge.getDataBefore: {}",
+                        bridgeModification, bridgeModification.getDataBefore());
             } else {
                 DataObjectModification<OvsdbNodeAugmentation> nodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
+                LOG.info("\nshague 4. nodeModification: {}", nodeModification);
                 if (nodeModification != null && nodeModification.getDataAfter() != null && nodeModification
                         .getDataAfter().getConnectionInfo() != null) {
                     client = cm.getConnectionInstance(nodeModification.getDataAfter().getConnectionInfo());
+                    LOG.info("\nshague 5. nodeModification: {},\n node.GetDataAfter: {}",
+                            nodeModification, nodeModification.getDataAfter());
                 } else if (nodeModification != null && nodeModification.getDataAfter() != null && nodeModification
                             .getDataAfter().getConnectionInfo() == null) {
                     InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
-                            node.getNodeId());
+                            node != null ? node.getNodeId() : null);
                     client = cm.getConnectionInstance(nodeIid);
+                    LOG.info("\nshague 5. nodeModification: {},\n node.GetDataAfter: {}",
+                            nodeModification, nodeModification.getDataAfter());
                 } else {
+                    LOG.info("\nshague 6.");
                     if (node != null) {
                         List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+                        LOG.info("\nshague 7. node: {},\n terminationPoints: {}", node, terminationPoints);
                         if (terminationPoints != null && !terminationPoints.isEmpty()) {
                             InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
                                     node.getNodeId());
                             client = cm.getConnectionInstance(nodeIid);
+                            LOG.info("\nshague 8.");
+                        }
+                    }
+                    if (client == null) {
+                        node = change.getRootNode().getDataBefore();
+                        if (node != null) {
+                            List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+                            LOG.info("\nshague 7-2. node: {},\n terminationPoints: {}", node, terminationPoints);
+                            if (terminationPoints != null && !terminationPoints.isEmpty()) {
+                                InstanceIdentifier<Node> nodeIid = SouthboundMapper.createInstanceIdentifier(
+                                        node.getNodeId());
+                                client = cm.getConnectionInstance(nodeIid);
+                                LOG.info("\nshague 8-2.");
+                            }
+                        }
+                    }
+                    if (client == null) {
+                        InstanceIdentifier<Node> nodeIid ;
+                        node = change.getRootNode().getDataBefore() != null ? change.getRootNode().getDataBefore() :
+                                change.getRootNode().getDataAfter();
+                        LOG.info("\nshague 7-3. node: {}", node);
+                        if (node instanceof OvsdbBridgeAugmentation) {
+                            OvsdbBridgeAugmentation bridgeAugmentation = (OvsdbBridgeAugmentation) node;
+                            if (bridgeAugmentation.getManagedBy() != null) {
+                                nodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+                                client = cm.getConnectionInstance(nodeIid);
+                                LOG.info("\nshague 7-3-1. node: {}", node);
+                            }
+                        } else if (node instanceof OvsdbNodeAugmentation) {
+                            OvsdbNodeAugmentation nodeAugmentation = (OvsdbNodeAugmentation) node;
+                            nodeIid = SouthboundMapper.createInstanceIdentifier(node.getNodeId());
+                            client = cm.getConnectionInstance(nodeIid);
+                            LOG.info("\nshague 7-3-2. node: {}", node);
                         }
                     }
                 }

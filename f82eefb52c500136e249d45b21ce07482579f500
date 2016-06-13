@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_07f2209a",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbClientImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-13T19:03:10Z",
+      "side": 1,
+      "message": "I think we don\u0027t need this argument here, you can get the ip address using channel.remoteAddress().",
+      "range": {
+        "startLine": 79,
+        "startChar": 45,
+        "endLine": 79,
+        "endChar": 68
+      },
+      "revId": "f82eefb52c500136e249d45b21ce07482579f500",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_e7ee0cb4",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-13T19:03:10Z",
+      "side": 1,
+      "message": "what does SVC stands for?",
+      "range": {
+        "startLine": 87,
+        "startChar": 45,
+        "endLine": 87,
+        "endChar": 48
+      },
+      "revId": "f82eefb52c500136e249d45b21ce07482579f500",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

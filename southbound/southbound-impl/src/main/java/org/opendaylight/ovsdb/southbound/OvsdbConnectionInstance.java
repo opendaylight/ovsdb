@@ -144,12 +144,9 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                List<String> databases = getDatabases().get();
-                for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
-                    }
+                DatabaseSchema dbSchema = getSchema(SouthboundConstants.OPEN_V_SWITCH).get();
+                if(dbSchema != null) {
+                    transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Exception attempting to createTransactionInvokers {}", connectionInfo, e);

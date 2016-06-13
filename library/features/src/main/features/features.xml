@@ -20,6 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <!-- Test only (move to another feature) -->
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/schema.hardwarevtep/{{VERSION}}</bundle>
     <!-- Test only ends -->
     <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>
     <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-core/{{VERSION}}</bundle>

@@ -141,29 +141,21 @@ public class OvsdbConnectionInstanceTest {
         transactInvokers = new HashMap();
         MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
         ovsdbConnectionInstance.createTransactInvokers();
-        verify(ovsdbConnectionInstance, times(0)).getDatabases();
+        verify(ovsdbConnectionInstance, times(0)).getSchema(anyString());
 
         //transactInvokers null case
         MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
-        ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
-        List<String> databases = new ArrayList<>();
-        databases.add("database1");
-        databases.add("database2");
-        doReturn(listenableFuture).when(ovsdbConnectionInstance).getDatabases();
-        when(listenableFuture.get()).thenReturn(databases);
 
         ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
         DatabaseSchema dbSchema= mock(DatabaseSchema.class);
-        DatabaseSchema dbSchema1= mock(DatabaseSchema.class);
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
-        when(listenableDbSchema.get()).thenReturn(dbSchema).thenReturn(dbSchema1);
+        when(listenableDbSchema.get()).thenReturn(dbSchema);
 
         ovsdbConnectionInstance.createTransactInvokers();
-        verify(ovsdbConnectionInstance).getDatabases();
-        verify(ovsdbConnectionInstance, times(2)).getSchema(anyString());
+        verify(ovsdbConnectionInstance).getSchema(anyString());
 
         Map<DatabaseSchema,TransactInvoker> testTransactInvokers = Whitebox.getInternalState(ovsdbConnectionInstance, "transactInvokers");
-        assertEquals("Error, size of the hashmap is incorrect", 2, testTransactInvokers.size());
+        assertEquals("Error, size of the hashmap is incorrect", 1, testTransactInvokers.size());
     }
 
     @SuppressWarnings("unchecked")

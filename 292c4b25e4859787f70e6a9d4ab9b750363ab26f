@@ -34,6 +34,24 @@
       "revId": "292c4b25e4859787f70e6a9d4ab9b750363ab26f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_cef5dccc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-06-14T17:44:06Z",
+      "side": 0,
+      "message": "I should have noted, the maven-failsafe-plugin is already included on line 148. This entry that I removed was a duplicate entry, only with additional config to exclude HwvtepSouthboundIT.\n\nSo, deleting this entry looks to be the clean way, otherwise, we still have duplicate maven-failsafe-plugin entries in the pom file.",
+      "parentUuid": "ba51214e_93a4ab58",
+      "revId": "292c4b25e4859787f70e6a9d4ab9b750363ab26f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -86,6 +86,21 @@ public class NodeInfo {
         assertNotEquals("datapathId was not found", datapathId, 0);
     }
 
+    public void refresh() throws InterruptedException {
+        long oldDpid = datapathId;
+        Thread.sleep(3000);
+
+        ovsdbNode = itUtils.southboundUtils.getOvsdbNode(connectionInfo);
+        bridgeNode = itUtils.southboundUtils.getBridgeNode(ovsdbNode, INTEGRATION_BRIDGE_NAME);
+        datapathId = itUtils.southboundUtils.getDataPathId(bridgeNode);
+
+        LOG.warn("JOSH - REFRESH old {}, new {}", oldDpid, datapathId);
+    }
+
+    public long getDatapathId() {
+        return itUtils.southboundUtils.getDataPathId(bridgeNode);
+    }
+
     /**
      * Remove integration bridge and teardown connection. Contains assertions for unexpected states.
      * @throws InterruptedException if interrupted while waiting for disconnect to complete

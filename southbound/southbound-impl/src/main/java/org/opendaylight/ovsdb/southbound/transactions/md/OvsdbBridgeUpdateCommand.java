@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -185,8 +187,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.warn("protocol not supported by this version of ovsdb: {}", e.getMessage());
+            schemaMismatchLog("protocols", "Bridge", e);
         }
         return result;
     }
@@ -248,7 +249,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("auto_attach column for Bridge Table unsupported for this version of ovsdb schema. {}", e);
+            schemaMismatchLog("auto_attach", "Bridge", e);
         }
     }
 

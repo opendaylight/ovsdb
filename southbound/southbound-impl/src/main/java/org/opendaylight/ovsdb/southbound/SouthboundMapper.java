@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
+
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -30,7 +32,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -243,8 +244,7 @@ public class SouthboundMapper {
         try {
             protocols = bridge.getProtocolsColumn().getData();
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.warn("protocols not supported by this version of ovsdb", e);
+            schemaMismatchLog("protocols", "Bridge", e);
         }
         List<ProtocolEntry> protocolList = new ArrayList<>();
         if (protocols != null && protocols.size() > 0) {

@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -36,7 +38,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -474,8 +475,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
             }
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+            schemaMismatchLog("lldp", "Interface", e);
         }
     }
 
@@ -518,8 +518,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder.setInterfaceBfdStatus(interfaceBfdStatusList);
             }
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("bfd-status column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+            schemaMismatchLog("bfd", "Interface", e);
         }
     }
 
@@ -543,8 +542,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder.setInterfaceBfd(interfaceBfdList);
             }
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("bfd column for Interface Table unsupported for this version of ovsdb schema. {}", e.getMessage());
+            schemaMismatchLog("bfd", "Interface", e);
+
         }
     }
 

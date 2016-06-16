@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
 
     /** Our registration. */
-    private final ListenerRegistration<OvsdbDataTreeChangeListener> registration;
+    private final ListenerRegistration<DataTreeChangeListener<Node>> registration;
 
     /** The connection manager. */
     private final OvsdbConnectionManager cm;
@@ -65,7 +65,6 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
      * @param cm The connection manager.
      */
     OvsdbDataTreeChangeListener(DataBroker db, OvsdbConnectionManager cm) {
-        LOG.info("Registering OvsdbNodeDataChangeListener");
         this.cm = cm;
         this.db = db;
         InstanceIdentifier<Node> path = InstanceIdentifier
@@ -75,17 +74,17 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         DataTreeIdentifier<Node> dataTreeIdentifier =
                 new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, path);
         registration = db.registerDataTreeChangeListener(dataTreeIdentifier, this);
+        LOG.debug("OVSDB topology listener has been registered.");
     }
 
     @Override
     public void close() {
         registration.close();
+        LOG.debug("OVSDB topology listener has been closed.");
     }
 
     @Override
     public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Node>> changes) {
-        LOG.trace("onDataTreeChanged: {}", changes);
-
         // Connect first if necessary
         connect(changes);
 
@@ -97,8 +96,6 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
 
         // Disconnect if necessary
         disconnect(changes);
-
-        LOG.trace("onDataTreeChanged: exit");
     }
 
     private void connect(@Nonnull Collection<DataTreeModification<Node>> changes) {
@@ -119,8 +116,8 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     } else {
                         try {
                             InstanceIdentifier<Node> instanceIdentifier = change.getRootPath().getRootIdentifier();
-                            LOG.info("Connecting on key {} to {}", instanceIdentifier, ovsdbNode);
                             cm.connect(instanceIdentifier, ovsdbNode);
+                            LOG.trace("OVSDB node has been connected: {}",ovsdbNode);
                         } catch (UnknownHostException e) {
                             LOG.warn("Failed to connect to ovsdbNode", e);
                         }
@@ -140,8 +137,8 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     ConnectionInfo key = ovsdbNode.getConnectionInfo();
                     InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
                     try {
-                        LOG.info("Disconnecting from {}", ovsdbNode);
                         cm.disconnect(ovsdbNode);
+                        LOG.trace("OVSDB node has been disconnected:{}", ovsdbNode);
                         cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
                     } catch (UnknownHostException e) {
                         LOG.warn("Failed to disconnect ovsdbNode", e);

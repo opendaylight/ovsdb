@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import java.util.Collection;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class ProtocolRemovedCommand implements TransactCommand {
                             transaction.add(op.mutate(bridge).addMutation(bridge.getProtocolsColumn().getSchema(),
                                     Mutator.DELETE,bridge.getProtocolsColumn().getData()));
                         } catch (SchemaVersionMismatchException e) {
-                            LOG.warn("protocol is not supported by this version of ovsdb", e);
+                            schemaMismatchLog("protocols", "Bridge", e);
                         }
                     }
                 }

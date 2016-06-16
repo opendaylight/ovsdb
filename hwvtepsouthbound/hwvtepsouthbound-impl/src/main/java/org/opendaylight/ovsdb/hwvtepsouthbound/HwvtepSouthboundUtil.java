@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
@@ -30,6 +31,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class HwvtepSouthboundUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundUtil.class);
+    private static final String SCHEMA_VERSION_MISMATCH =
+            "{} column for {} table is not supported by this version of the {} schema: {}";
 
     private static InstanceIdentifierCodec instanceIdentifierCodec;
 
@@ -126,5 +129,10 @@ public class HwvtepSouthboundUtil {
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
         return String.valueOf(
                 connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+    }
+
+
+    public static void schemaMismatchlog(String column, String table, SchemaVersionMismatchException ex) {
+        LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, "hw_vtep", ex.getMessage());
     }
 }

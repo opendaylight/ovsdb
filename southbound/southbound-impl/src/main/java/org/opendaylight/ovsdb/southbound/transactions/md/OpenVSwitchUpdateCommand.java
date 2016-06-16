@@ -209,8 +209,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             }
             ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("Iface types  not supported by this version of ovsdb: {}", e.getMessage());
+            SouthboundUtil.schemaMismatchlog("iface_types", SouthboundConstants.OPEN_V_SWITCH, e);
         }
     }
 
@@ -234,8 +233,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             }
             ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("Datapath types not supported by this version of ovsdb: {}", e.getMessage());
+            SouthboundUtil.schemaMismatchlog("datapath_types", SouthboundConstants.OPEN_V_SWITCH, e);
         }
     }
 

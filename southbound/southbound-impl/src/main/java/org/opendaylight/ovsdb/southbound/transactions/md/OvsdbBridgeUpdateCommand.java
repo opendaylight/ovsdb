@@ -185,8 +185,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.warn("protocol not supported by this version of ovsdb: {}", e.getMessage());
+            SouthboundUtil.schemaMismatchlog("protocols", "Bridge", e);
         }
         return result;
     }
@@ -248,7 +247,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("auto_attach column for Bridge Table unsupported for this version of ovsdb schema. {}", e);
+            SouthboundUtil.schemaMismatchlog("auto_attach", "Bridge", e);
         }
     }
 

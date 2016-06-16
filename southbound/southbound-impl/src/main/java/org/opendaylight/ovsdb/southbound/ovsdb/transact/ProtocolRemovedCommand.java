@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -70,7 +71,7 @@ public class ProtocolRemovedCommand implements TransactCommand {
                             transaction.add(op.mutate(bridge).addMutation(bridge.getProtocolsColumn().getSchema(),
                                     Mutator.DELETE,bridge.getProtocolsColumn().getData()));
                         } catch (SchemaVersionMismatchException e) {
-                            LOG.warn("protocol is not supported by this version of ovsdb", e);
+                            SouthboundUtil.schemaMismatchlog("protocols", "Bridge", e);
                         }
                     }
                 }

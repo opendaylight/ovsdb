@@ -20,6 +20,8 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -33,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public class SouthboundUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtil.class);
+    private static final String SCHEMA_VERSION_MISMATCH =
+            "{} column for {} table is not supported by this version of the {} schema: {}";
 
     private static InstanceIdentifierCodec instanceIdentifierCodec;
 
@@ -161,5 +165,9 @@ public class SouthboundUtil {
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
         return String.valueOf(
                 connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+    }
+
+    public static void schemaMismatchlog(String column, String table, SchemaVersionMismatchException ex) {
+        LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, SouthboundConstants.OPEN_V_SWITCH, ex.getMessage());
     }
 }

@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
@@ -256,7 +257,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema", e);
+            SouthboundUtil.schemaMismatchlog("lldp", "Interface", e);
         }
     }
 
@@ -279,7 +280,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         }
                     }
                 } catch (SchemaVersionMismatchException e) {
-                    LOG.debug("bfd column for Interface Table unsupported for this version of ovsdb schema", e);
+                    SouthboundUtil.schemaMismatchlog("bfd", "Interface", e);
                 }
             }
 

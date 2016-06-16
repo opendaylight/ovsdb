@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -209,8 +211,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             }
             ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("Iface types  not supported by this version of ovsdb: {}", e.getMessage());
+            schemaMismatchLog("iface_types", SouthboundConstants.OPEN_V_SWITCH, e);
         }
     }
 
@@ -234,8 +235,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             }
             ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
         } catch (SchemaVersionMismatchException e) {
-            // We don't care about the exception stack trace here
-            LOG.debug("Datapath types not supported by this version of ovsdb: {}", e.getMessage());
+            schemaMismatchLog("datapath_types", SouthboundConstants.OPEN_V_SWITCH, e);
         }
     }
 

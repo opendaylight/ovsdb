@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schemaMismatchLog;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
@@ -89,7 +90,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation,
                             operationalPhysicalSwitchOptional.isPresent());
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("tunnels table unsupported for this version of HWVTEP schema", e);
+            schemaMismatchLog("tunnels", "Physical_Switch", e);
         }
         if (!operationalPhysicalSwitchOptional.isPresent()) {
             //create a physical switch

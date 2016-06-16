@@ -8,6 +8,7 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -256,7 +257,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 }
             }
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("lldp column for Interface Table unsupported for this version of ovsdb schema", e);
+            schemaMismatchLog("lldp", "Interface", e);
         }
     }
 
@@ -279,7 +280,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         }
                     }
                 } catch (SchemaVersionMismatchException e) {
-                    LOG.debug("bfd column for Interface Table unsupported for this version of ovsdb schema", e);
+                    schemaMismatchLog("bfd", "Interface", e);
                 }
             }
 

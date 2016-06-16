@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_f1e7d5e2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-16T12:04:06Z",
+      "side": 1,
+      "message": "Could we move this out to it\u0027s own patch? This would make it easier to track since this could have impacts.",
+      "revId": "fb75cbfbc84cdc53ceea581ff4d5b23fbb9bacaf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_31d14dfc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-16T12:04:06Z",
+      "side": 1,
+      "message": "Is the instanceIdentifier included in the ovsdbNode - or easily inferred from the node? If it is easily inferred, then that is fine to remove it from the log, but we should make sure removing it doesn\u0027t reduce the usefulness of this log.",
+      "range": {
+        "startLine": 120,
+        "startChar": 59,
+        "endLine": 120,
+        "endChar": 68
+      },
+      "revId": "fb75cbfbc84cdc53ceea581ff4d5b23fbb9bacaf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_71dbc51b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-16T12:04:06Z",
+      "side": 1,
+      "message": "maybe keep this at higher level. I still like them at info.",
+      "revId": "fb75cbfbc84cdc53ceea581ff4d5b23fbb9bacaf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

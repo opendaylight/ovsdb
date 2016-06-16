@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_11cec95a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-16T12:04:06Z",
+      "side": 0,
+      "message": "These logs are useful when debugging threading and deadlock issues so maybe we should keep them a little longer.",
+      "revId": "9a022bca7a1fcbf399b0ed8eee3880ef37d5ce12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

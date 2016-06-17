@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -24,6 +25,7 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperationalCommandAggregator.class);
     private List<TransactionCommand> commands = new ArrayList<>();
+    private CountDownLatch commandCompletionLatch = null;
 
     public OvsdbOperationalCommandAggregator(OvsdbConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {
@@ -49,10 +51,21 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         }
     }
 
+    public OvsdbOperationalCommandAggregator(OvsdbConnectionInstance key,TableUpdates updates,
+                                             DatabaseSchema dbSchema, CountDownLatch commandCompletionLatch) {
+        this(key, updates, dbSchema);
+        this.commandCompletionLatch = commandCompletionLatch;
+    }
+
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (TransactionCommand command: commands) {
             command.execute(transaction);
+        }
+
+        // notify command completion
+        if (commandCompletionLatch != null) {
+            commandCompletionLatch.countDown();
         }
     }
 }

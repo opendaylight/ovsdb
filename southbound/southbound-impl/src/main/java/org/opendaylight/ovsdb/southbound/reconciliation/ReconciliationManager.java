@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.ovsdb.southbound.reconciliation.configuration.TerminationPointConfigReconciliationService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ public class ReconciliationManager implements AutoCloseable {
     private final ScheduledExecutorService taskTriager;
 
     private final ReconciliationTaskManager reconTaskManager = new ReconciliationTaskManager();
+    private TerminationPointConfigReconciliationService terminationPointConfigReconciliationService;
 
     public ReconciliationManager(final DataBroker db) {
         this.db = db;
@@ -103,5 +105,12 @@ public class ReconciliationManager implements AutoCloseable {
         if (this.taskTriager != null) {
             this.taskTriager.shutdownNow();
         }
+    }
+
+    public synchronized TerminationPointConfigReconciliationService getTerminationPointConfigReconciliationService() {
+        if (terminationPointConfigReconciliationService == null) {
+            terminationPointConfigReconciliationService = new TerminationPointConfigReconciliationService(this);
+        }
+        return terminationPointConfigReconciliationService;
     }
 }

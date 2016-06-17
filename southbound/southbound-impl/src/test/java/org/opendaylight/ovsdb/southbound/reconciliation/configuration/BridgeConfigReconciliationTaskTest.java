@@ -22,7 +22,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
-import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -31,16 +30,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
@@ -50,6 +51,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +64,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by Vinh Nguyen (vinh.nguyen@hcl.com) on 3/21/16
  */
-@PrepareForTest({BridgeConfigReconciliationTask.class, OvsdbConnectionManager.class, OvsdbConnectionInstance.class, InstanceIdentifier.class, Optional.class})
+@PrepareForTest({BridgeConfigReconciliationTask.class, OvsdbConnectionInstance.class, InstanceIdentifier.class, Optional.class})
 @RunWith(PowerMockRunner.class)
 public class BridgeConfigReconciliationTaskTest {
     private final static String NODE_ID = "ovsdb://uuid/6ff3d0cf-4102-429d-b41c-f8027a0fd7f4";
@@ -70,7 +72,6 @@ public class BridgeConfigReconciliationTaskTest {
     private final static String BR02 = "br02";
 //    @Mock
     private BridgeConfigReconciliationTask configurationReconciliationTask;
-    @Mock private OvsdbConnectionManager ovsdbConnectionManager;
     @Mock private OvsdbConnectionInstance ovsdbConnectionInstance;
     @Mock private DataBroker db;
     @Mock private ReconciliationManager reconciliationManager;
@@ -81,8 +82,8 @@ public class BridgeConfigReconciliationTaskTest {
     public void setUp() throws Exception {
         NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
         List<Node> bridgeNodes = new ArrayList<>();
-        bridgeNodes.add(createBridgeNode(BR01));
-        bridgeNodes.add(createBridgeNode(BR02));
+
+
         when(topology.getNode()).thenReturn(bridgeNodes);
 
         Optional<Topology> topologyOptional = mock(Optional.class);
@@ -98,16 +99,18 @@ public class BridgeConfigReconciliationTaskTest {
 
         when(topology.getNode()).thenReturn(bridgeNodes);
         when(ovsdbConnectionInstance.getNodeKey()).thenReturn(nodeKey);
+        bridgeNodes.add(createBridgeNode(BR01));
+        bridgeNodes.add(createBridgeNode(BR02));
 
         configurationReconciliationTask = new BridgeConfigReconciliationTask(
-                reconciliationManager, ovsdbConnectionManager, iid, ovsdbConnectionInstance);
+                reconciliationManager, iid, ovsdbConnectionInstance);
     }
 
     @Test
     public void testReconcileConfiguration() throws Exception {
         BridgeConfigReconciliationTask underTest = PowerMockito.spy(configurationReconciliationTask);
         PowerMockito.doNothing().when(underTest, "reconcileBridgeConfigurations", any(Map.class));
-        assertEquals(true, underTest.reconcileConfiguration(ovsdbConnectionManager));
+        assertEquals(true, underTest.reconcileConfiguration());
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         for (Node bridgeNode : topology.getNode()) {
             changes.putAll(createExpectedConfigurationChanges(bridgeNode));
@@ -117,9 +120,16 @@ public class BridgeConfigReconciliationTaskTest {
 
     private Node createBridgeNode(final String bridgeName) {
         Node bridgeNode = mock(Node.class);
+        String nodeString = ovsdbConnectionInstance.getNodeKey().getNodeId().getValue()
+                + "/bridge/" + bridgeName;
+        when(bridgeNode.getNodeId()).thenReturn(new NodeId(new Uri(nodeString)));
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = mock(OvsdbBridgeAugmentation.class);
+        OvsdbTerminationPointAugmentation ovsdbTpAugmentation = mock(OvsdbTerminationPointAugmentation.class);
         OvsdbNodeRef ovsdbNodeRef = mock(OvsdbNodeRef.class);
-
+        TerminationPoint tp = mock(TerminationPoint.class);
+        when(ovsdbTpAugmentation.getName()).thenReturn(bridgeName);
+        when(tp.getAugmentation(OvsdbTerminationPointAugmentation.class)).thenReturn(ovsdbTpAugmentation);
+        when(bridgeNode.getTerminationPoint()).thenReturn(Arrays.asList(tp));
         when((InstanceIdentifier<Node>)ovsdbNodeRef.getValue()).thenReturn(iid);
         OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(bridgeName);
         when(bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
@@ -150,7 +160,7 @@ public class BridgeConfigReconciliationTaskTest {
 
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(ovsdbConnectionInstance, ovsdbBridge.getBridgeName().getValue());
+                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
         final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
                 bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
@@ -164,6 +174,24 @@ public class BridgeConfigReconciliationTaskTest {
             KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
                     ovsdbBridgeIid.child(ControllerEntry.class, controller.getKey());
             changes.put(controllerIid, controller);
+        }
+
+        List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()) {
+            for (TerminationPoint tp : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null) {
+                    final InstanceIdentifier<OvsdbTerminationPointAugmentation> tpIid =
+                            bridgeNodeIid
+                                    .child(TerminationPoint.class,
+                                            new TerminationPointKey(new TpId(ovsdbTerminationPointAugmentation.getName())))
+                                    .builder()
+                                    .augmentation(OvsdbTerminationPointAugmentation.class)
+                                    .build();
+                    changes.put(tpIid, ovsdbTerminationPointAugmentation);
+                }
+            }
         }
         return changes;
     }

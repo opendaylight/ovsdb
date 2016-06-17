@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound.reconciliation;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -24,29 +23,24 @@ public abstract class ReconciliationTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(ReconciliationTask.class);
 
     protected final ReconciliationManager reconciliationManager;
-    protected final OvsdbConnectionManager connectionManager;
     protected final InstanceIdentifier<?> nodeIid;
     protected final DataObject configData;
 
-    protected ReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager connectionManager,
+    protected ReconciliationTask(ReconciliationManager reconciliationManager,
                                  InstanceIdentifier<?> nodeIid,
                                  DataObject configData) {
         Preconditions.checkNotNull(reconciliationManager, "Reconciliation manager must not be null");
-        Preconditions.checkNotNull(connectionManager, "Connection manager must not be null");
         Preconditions.checkNotNull(nodeIid, "Node Iid must not be null");
         this.reconciliationManager = reconciliationManager;
-        this.connectionManager = connectionManager;
         this.nodeIid = nodeIid;
         this.configData = configData;
     }
 
     /**
      * Method contains task reconciliation logic.
-     *
-     * @param connectionManager Connection manager to get connection instance of the device
-     * @return True if reconciliation was successful, else false
+     ** @return True if reconciliation was successful, else false
      */
-    public abstract boolean reconcileConfiguration(OvsdbConnectionManager connectionManager);
+    public abstract boolean reconcileConfiguration();
 
     /**
      * Extended task should implement the logic that decides whether retry for the task
@@ -86,7 +80,7 @@ public abstract class ReconciliationTask implements Runnable {
 
     @Override
     public void run() {
-        boolean status = this.reconcileConfiguration(connectionManager);
+        boolean status = this.reconcileConfiguration();
         doRetry(status);
     }
 

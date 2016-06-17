@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.connection;
 
+import com.google.common.base.Preconditions;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -26,17 +27,18 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
 
     private static final int RETRY_INTERVAL_FACTOR = 10000;
     private static final int MAX_ATTEMPT = 10;
-
     private AtomicInteger connectionAttempt = new AtomicInteger(0);
+    private final OvsdbConnectionManager connectionManager;
 
     public ConnectionReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager
             connectionManager, InstanceIdentifier<?> nodeIid, DataObject configData) {
-        super(reconciliationManager, connectionManager, nodeIid, configData);
-
+        super(reconciliationManager, nodeIid, configData);
+        Preconditions.checkNotNull(connectionManager, "Connection manager must not be null");
+        this.connectionManager = connectionManager;
     }
 
     @Override
-    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManager) {
+    public boolean reconcileConfiguration() {
         boolean result = false;
         connectionAttempt.incrementAndGet();
         InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;

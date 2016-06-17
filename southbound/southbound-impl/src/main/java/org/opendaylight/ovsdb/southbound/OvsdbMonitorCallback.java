@@ -15,11 +15,17 @@ import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CountDownLatch;
+
 public class OvsdbMonitorCallback implements MonitorCallBack {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbMonitorCallback.class);
     private TransactionInvoker txInvoker;
     private OvsdbConnectionInstance key;
+
+    // latch to notify other tasks such as BridgeConfigReconciliationTask when the first schema
+    // update is completed
+    private CountDownLatch firstUpdateCompletionLatch = new CountDownLatch(1);
 
     OvsdbMonitorCallback(OvsdbConnectionInstance key,TransactionInvoker txInvoker) {
         this.txInvoker = txInvoker;
@@ -29,7 +35,7 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
         LOG.debug("result: {} dbSchema: {}",result,dbSchema);
-        txInvoker.invoke(new OvsdbOperationalCommandAggregator(key, result, dbSchema));
+        txInvoker.invoke(new OvsdbOperationalCommandAggregator(key, result, dbSchema, firstUpdateCompletionLatch));
         LOG.trace("update exit");
     }
 
@@ -38,4 +44,11 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
         LOG.warn("exception {}", exception);
     }
 
+    public CountDownLatch getFirstUpdateCompletionLatch() {
+        return firstUpdateCompletionLatch;
+    }
+
+    public void setFirstUpdateCompletionLatch(CountDownLatch firstUpdateCompletionLatch) {
+        this.firstUpdateCompletionLatch = firstUpdateCompletionLatch;
+    }
 }

@@ -366,6 +366,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 iid,
                 null);
         reconciliationManager.dequeue(task);
+        reconciliationManager.cancelTerminationPointReconciliation();
     }
 
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {

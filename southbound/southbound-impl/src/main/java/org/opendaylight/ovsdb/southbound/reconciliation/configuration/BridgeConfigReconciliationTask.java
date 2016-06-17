@@ -44,6 +44,9 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Configuration Reconciliation task to reconcile existing bridge configurations in the config datastore and the
  * switch when the latter is up and connected to the controller.
@@ -62,7 +65,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     }
 
     @Override
-    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManagerOfDevice) {
+    public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
         InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
         ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
 
@@ -80,16 +83,27 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                     InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
                     Topology topology = optionalTopology.get();
                     if (topology.getNode() != null) {
-                        final Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+                        final Map<InstanceIdentifier<?>, DataObject> brChanges = new HashMap<>();
+                        final List<Node> tpChanges = new ArrayList<>();
                         for (Node node : topology.getNode()) {
+                            LOG.debug("Reconcile Configuration for node {}", node.getNodeId());
                             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
                             if (bridge != null && bridge.getManagedBy() != null
                                     && bridge.getManagedBy().getValue().equals(ndIid)) {
-                                changes.putAll(extractBridgeConfigurationChanges(node, bridge));
+                                brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
+                                tpChanges.add(node);
+                            } else if (node.getKey().getNodeId().getValue().startsWith(
+                                    nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
+                                    && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty() ) {
+                                tpChanges.add(node);
                             }
                         }
-                        if (!changes.isEmpty()) {
-                            reconcileBridgeConfigurations(changes);
+                        if (!brChanges.isEmpty()) {
+                            reconcileBridgeConfigurations(brChanges);
+                        }
+                        if (!tpChanges.isEmpty()) {
+                            reconciliationManager.reconcileTerminationPoints(
+                                    connectionManagerOfDevice, connectionInstance, tpChanges);
                         }
                     }
                 }
@@ -109,7 +123,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             final Node bridgeNode, final OvsdbBridgeAugmentation ovsdbBridge) {
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInstance, ovsdbBridge.getBridgeName().getValue());
+                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
         final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
                 bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);

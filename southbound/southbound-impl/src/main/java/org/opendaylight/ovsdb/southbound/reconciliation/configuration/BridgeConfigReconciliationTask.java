@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
+import org.opendaylight.ovsdb.southbound.OvsdbMonitorCallback;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
@@ -25,14 +26,16 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregato
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
@@ -41,8 +44,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.Nullable;
 
@@ -57,18 +62,32 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask{
 
     private static final Logger LOG = LoggerFactory.getLogger(BridgeConfigReconciliationTask.class);
     private final OvsdbConnectionInstance connectionInstance;
+    private OvsdbMonitorCallback monitorCallback;
 
     public BridgeConfigReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager
-            connectionManager, InstanceIdentifier<?> nodeIid, OvsdbConnectionInstance connectionInstance) {
+            connectionManager, InstanceIdentifier<?> nodeIid, OvsdbConnectionInstance connectionInstance,
+                                          OvsdbMonitorCallback monitorCallback) {
         super(reconciliationManager, connectionManager, nodeIid, null);
         this.connectionInstance = connectionInstance;
-
+        this.monitorCallback = monitorCallback;
     }
 
     @Override
     public boolean reconcileConfiguration(OvsdbConnectionManager connectionManager) {
         InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
         ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
+
+        // Bridge configuration reconciliation starts after first schema update to the Operational DS
+        // This is to make sure that new configurations such as Termination Endpoints in Config DS
+        // can be added to existing Bridge configurations in the Operational DS
+        if (monitorCallback != null && monitorCallback.getFirstUpdateCompletionLatch() != null){
+            try {
+                monitorCallback.getFirstUpdateCompletionLatch().await();
+                monitorCallback.setFirstUpdateCompletionLatch(null);
+            } catch (InterruptedException ex) {
+                LOG.error("Error when waiting for completion of first configuration update", ex);
+            }
+        }
 
         // find all bridges of the specific device in the config data store
         // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and look for
@@ -85,10 +104,12 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask{
                     if (topology.getNode() != null) {
                         final Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
                         for (Node node : topology.getNode()) {
+                            LOG.debug("Reconcile Configuration for node {}", node.getNodeId());
                             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
                             if (bridge != null && bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(nIid)) {
                                 changes.putAll(extractBridgeConfigurationChanges(node, bridge));
                             }
+                            changes.putAll(extractTerminationPointConfigurationChanges(node));
                         }
                         if (!changes.isEmpty()) {
                             reconcileBridgeConfigurations(changes);
@@ -111,7 +132,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask{
             final Node bridgeNode, final OvsdbBridgeAugmentation ovsdbBridge) {
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInstance, ovsdbBridge.getBridgeName().getValue());
+                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
         final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
                 bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
@@ -136,7 +157,33 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask{
                 changes.put(controllerIid, controller);
             }
         }
+        return changes;
+    }
 
+    private Map<InstanceIdentifier<?>, DataObject> extractTerminationPointConfigurationChanges(
+            final Node bridgeNode) {
+        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+        final InstanceIdentifier<Node> bridgeNodeIid =
+                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
+        changes.putIfAbsent(bridgeNodeIid, bridgeNode);
+
+        List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()){
+            for(TerminationPoint tp : terminationPoints){
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null) {
+                    final InstanceIdentifier<OvsdbTerminationPointAugmentation> tpIid =
+                            bridgeNodeIid
+                                    .child(TerminationPoint.class,
+                                            new TerminationPointKey(new TpId(ovsdbTerminationPointAugmentation.getName())))
+                                    .builder()
+                                    .augmentation(OvsdbTerminationPointAugmentation.class)
+                                    .build();
+                    changes.put(tpIid, ovsdbTerminationPointAugmentation);
+                }
+            }
+        }
         return changes;
     }
 

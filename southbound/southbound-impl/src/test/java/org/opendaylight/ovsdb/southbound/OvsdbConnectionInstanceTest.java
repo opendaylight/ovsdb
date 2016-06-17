@@ -74,7 +74,7 @@ public class OvsdbConnectionInstanceTest {
     @Mock private OvsdbClient client;
     @Mock private ConnectionInfo connectionInfo;
     @Mock private TransactionInvoker txInvoker;
-    @Mock private MonitorCallBack callback;
+    @Mock private OvsdbMonitorCallback callback;
     @Mock private ConnectionInfo key;
     @Mock private InstanceIdentifier<Node> instanceIdentifier;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;

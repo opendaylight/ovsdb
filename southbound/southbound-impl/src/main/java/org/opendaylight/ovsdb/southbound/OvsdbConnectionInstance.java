@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
@@ -118,7 +119,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         }
     }
 
-    public void registerCallbacks() {
+    public OvsdbMonitorCallback registerCallbacks() {
         if ( this.callback == null) {
             if (this.initialCreateData != null ) {
                 this.updateConnectionAttributes();
@@ -138,6 +139,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                 LOG.warn("Exception attempting to registerCallbacks {}: ", connectionInfo, e);
             }
         }
+        return (OvsdbMonitorCallback)callback;
     }
 
     public void createTransactInvokers() {
@@ -168,7 +170,9 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                 }
                 monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
             }
-            this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
+
+            OvsdbMonitorCallback callback = (OvsdbMonitorCallback) this.callback;
+            callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
         } else {
             LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }

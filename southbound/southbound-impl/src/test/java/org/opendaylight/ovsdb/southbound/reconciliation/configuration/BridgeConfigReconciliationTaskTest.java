@@ -56,14 +56,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/**
- * Created by Vinh Nguyen (vinh.nguyen@hcl.com) on 3/21/16.
- */
+@PrepareForTest({BridgeConfigReconciliationTask.class,
+        OvsdbConnectionInstance.class, InstanceIdentifier.class, Optional.class})
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ BridgeConfigReconciliationTask.class, OvsdbConnectionManager.class, OvsdbConnectionInstance.class,
-        InstanceIdentifier.class, Optional.class })
 public class BridgeConfigReconciliationTaskTest {
-
     private static final String NODE_ID = "ovsdb://uuid/6ff3d0cf-4102-429d-b41c-f8027a0fd7f4";
     private static final String BR01 = "br01";
     private static final String BR02 = "br02";
@@ -78,16 +74,17 @@ public class BridgeConfigReconciliationTaskTest {
 
     @Before
     public void setUp() throws Exception {
+        NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
         List<Node> bridgeNodes = new ArrayList<>();
-        bridgeNodes.add(createBridgeNode(BR01));
-        bridgeNodes.add(createBridgeNode(BR02));
+
+
         when(topology.getNode()).thenReturn(bridgeNodes);
 
         Optional<Topology> topologyOptional = mock(Optional.class);
         when(topologyOptional.isPresent()).thenReturn(true);
         when(topologyOptional.get()).thenReturn(topology);
-        CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture = Futures
-                .immediateCheckedFuture(topologyOptional);
+        CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture =
+                Futures.immediateCheckedFuture(topologyOptional);
 
         when(reconciliationManager.getDb()).thenReturn(db);
         ReadOnlyTransaction tx = mock(ReadOnlyTransaction.class);
@@ -96,8 +93,9 @@ public class BridgeConfigReconciliationTaskTest {
                 .thenReturn(readTopologyFuture);
 
         when(topology.getNode()).thenReturn(bridgeNodes);
-        NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
         when(ovsdbConnectionInstance.getNodeKey()).thenReturn(nodeKey);
+        bridgeNodes.add(createBridgeNode(BR01));
+        bridgeNodes.add(createBridgeNode(BR02));
 
         configurationReconciliationTask = new BridgeConfigReconciliationTask(
                 reconciliationManager, ovsdbConnectionManager, iid, ovsdbConnectionInstance);
@@ -117,6 +115,9 @@ public class BridgeConfigReconciliationTaskTest {
 
     private Node createBridgeNode(final String bridgeName) {
         Node bridgeNode = mock(Node.class);
+        String nodeString = ovsdbConnectionInstance.getNodeKey().getNodeId().getValue()
+                + "/bridge/" + bridgeName;
+        when(bridgeNode.getNodeId()).thenReturn(new NodeId(new Uri(nodeString)));
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = mock(OvsdbBridgeAugmentation.class);
         OvsdbNodeRef ovsdbNodeRef = mock(OvsdbNodeRef.class);
 
@@ -149,8 +150,8 @@ public class BridgeConfigReconciliationTaskTest {
         OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
 
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid = SouthboundMapper
-                .createInstanceIdentifier(ovsdbConnectionInstance, ovsdbBridge.getBridgeName().getValue());
+        final InstanceIdentifier<Node> bridgeNodeIid =
+                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
         final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
                 bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);

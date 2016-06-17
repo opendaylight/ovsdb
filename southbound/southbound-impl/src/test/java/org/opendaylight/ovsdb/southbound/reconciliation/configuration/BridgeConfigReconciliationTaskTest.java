@@ -31,16 +31,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
@@ -50,6 +52,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,8 +121,12 @@ public class BridgeConfigReconciliationTaskTest {
     private Node createBridgeNode(final String bridgeName) {
         Node bridgeNode = mock(Node.class);
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = mock(OvsdbBridgeAugmentation.class);
+        OvsdbTerminationPointAugmentation ovsdbTpAugmentation = mock(OvsdbTerminationPointAugmentation.class);
         OvsdbNodeRef ovsdbNodeRef = mock(OvsdbNodeRef.class);
-
+        TerminationPoint tp = mock(TerminationPoint.class);
+        when(ovsdbTpAugmentation.getName()).thenReturn(bridgeName);
+        when(tp.getAugmentation(OvsdbTerminationPointAugmentation.class)).thenReturn(ovsdbTpAugmentation);
+        when(bridgeNode.getTerminationPoint()).thenReturn(Arrays.asList(tp));
         when((InstanceIdentifier<Node>)ovsdbNodeRef.getValue()).thenReturn(iid);
         OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(bridgeName);
         when(bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
@@ -164,6 +171,24 @@ public class BridgeConfigReconciliationTaskTest {
             KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
                     ovsdbBridgeIid.child(ControllerEntry.class, controller.getKey());
             changes.put(controllerIid, controller);
+        }
+
+        List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()) {
+            for (TerminationPoint tp : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null) {
+                    final InstanceIdentifier<OvsdbTerminationPointAugmentation> tpIid =
+                            bridgeNodeIid
+                                    .child(TerminationPoint.class,
+                                            new TerminationPointKey(new TpId(ovsdbTerminationPointAugmentation.getName())))
+                                    .builder()
+                                    .augmentation(OvsdbTerminationPointAugmentation.class)
+                                    .build();
+                    changes.put(tpIid, ovsdbTerminationPointAugmentation);
+                }
+            }
         }
         return changes;
     }

@@ -366,6 +366,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 reconciliationManager,
                 this,
                 iid,
+                null,
                 null);
         reconciliationManager.dequeue(task);
     }
@@ -416,9 +417,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
-            ovsdbConnectionInstance.registerCallbacks();
+            OvsdbMonitorCallback monitorCallback = ovsdbConnectionInstance.registerCallbacks();
 
-            reconcileBridgeConfigurations(ovsdbConnectionInstance);
+            reconcileBridgeConfigurations(ovsdbConnectionInstance, monitorCallback);
         } else {
             //You were owner of the device, but now you are not. With the current ownership
             //grant mechanism, this scenario should not occur. Because this scenario will occur
@@ -609,10 +610,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
+    private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client,
+                                               final OvsdbMonitorCallback monitorCallback) {
         final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
         final ReconciliationTask task = new BridgeConfigReconciliationTask(
-                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client);
+                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client, monitorCallback);
 
         reconciliationManager.enqueue(task);
     }

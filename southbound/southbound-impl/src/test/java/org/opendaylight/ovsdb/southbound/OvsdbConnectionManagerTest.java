@@ -70,6 +70,7 @@ public class OvsdbConnectionManagerTest {
     @Mock private OvsdbConnection ovsdbConnection;
     @Mock private OvsdbClient externalClient;
     @Mock private ReconciliationManager reconciliationManager;
+    @Mock private OvsdbMonitorCallback monitorCallback;
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
@@ -103,7 +104,7 @@ public class OvsdbConnectionManagerTest {
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered", OvsdbClient.class));
         when(ovsdbConnectionManager.connectedButCallBacksNotRegistered(any(OvsdbClient.class))).thenReturn(client);
-        doNothing().when(client).registerCallbacks();
+        when(client.registerCallbacks()).thenReturn(monitorCallback);
 
         //TODO: Write unit tests for EntityOwnershipService
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);

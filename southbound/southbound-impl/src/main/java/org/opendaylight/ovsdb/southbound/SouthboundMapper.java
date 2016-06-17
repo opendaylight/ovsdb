@@ -101,11 +101,6 @@ public class SouthboundMapper {
                 .child(Node.class,new NodeKey(nodeId));
     }
 
-    public static InstanceIdentifier<OvsdbBridgeAugmentation> createBridgeInstanceIdentifier(OvsdbConnectionInstance client, String bridgeName) {
-        return createInstanceIdentifier(client, bridgeName)
-                .augmentation(OvsdbBridgeAugmentation.class);
-    }
-
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbConnectionInstance client,Bridge bridge) {
         InstanceIdentifier<Node> iid;
         if (bridge.getExternalIdsColumn() != null

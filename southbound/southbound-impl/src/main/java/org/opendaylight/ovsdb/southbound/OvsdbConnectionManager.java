@@ -361,10 +361,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public void stopBridgeConfigReconciliationIfActive(InstanceIdentifier<?> iid) {
         final ReconciliationTask task = new BridgeConfigReconciliationTask(
                 reconciliationManager,
-                this,
                 iid,
                 null);
         reconciliationManager.dequeue(task);
+        reconciliationManager.getTerminationPointConfigReconciliationService().cancelReconciliation();
     }
 
     private void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
@@ -610,7 +610,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
         final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
         final ReconciliationTask task = new BridgeConfigReconciliationTask(
-                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client);
+                reconciliationManager, nodeIid, client);
 
         reconciliationManager.enqueue(task);
     }

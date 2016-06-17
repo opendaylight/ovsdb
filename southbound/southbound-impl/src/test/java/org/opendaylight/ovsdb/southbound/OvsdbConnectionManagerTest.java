@@ -43,6 +43,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
+import org.opendaylight.ovsdb.southbound.reconciliation.configuration.TerminationPointConfigReconciliationService;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
@@ -71,6 +72,7 @@ public class OvsdbConnectionManagerTest {
     @Mock private OvsdbConnection ovsdbConnection;
     @Mock private OvsdbClient externalClient;
     @Mock private ReconciliationManager reconciliationManager;
+    @Mock private TerminationPointConfigReconciliationService tpConfigReconciliationService;
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
@@ -94,6 +96,8 @@ public class OvsdbConnectionManagerTest {
         when(externalClient.getConnectionInfo().getLocalPort()).thenReturn(8080);
         List<String> databases = Arrays.asList("Open_vSwitch");
         when(externalClient.getDatabases().get(1000, TimeUnit.MILLISECONDS)).thenReturn(databases);
+        when(reconciliationManager.getTerminationPointConfigReconciliationService()).thenReturn(tpConfigReconciliationService);
+        doNothing().when(tpConfigReconciliationService).cancelReconciliation();
 
         PowerMockito.mockStatic(SouthboundUtil.class);
         when(SouthboundUtil.connectionInfoToString(any(ConnectionInfo.class))).thenReturn("192.18.120.31:8080");

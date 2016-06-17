@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -107,22 +106,27 @@ public class DockerOvs implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(DockerOvs.class);
     private static final String DEFAULT_DOCKER_FILE = "docker-ovs-2.5.1.yml";
     private static final String DOCKER_FILE_PATH = "META-INF/docker-compose-files/";
-    //private static final String[] HELP_CMD = {"docker-compose", "--help"};
-    //private static final String[] EXEC_CMD_PFX = {"sudo", "docker-compose", "-f"};
     private static final int COMPOSE_FILE_IDX = 3;
     private static final String DEFAULT_OVSDB_HOST = "127.0.0.1";
     private static final String[] PS_CMD = {"sudo", "docker-compose", "ps"};
     private static final String[] PS_CMD_NO_SUDO = {"docker-compose", "ps"};
 
-    private String[] upCmd = {"sudo", "docker-compose", "-f", null, "up", "-d"};
+    private String[] upCmd = {"sudo", "docker-compose", "-f", null, "up", "-d", "--force-recreate"};
     private String[] downCmd = {"sudo", "docker-compose", "-f", null, "stop"};
+    private String[] execCmd = {"sudo", "docker-compose", "-f", null, "exec", null};
+
     private File tmpDockerComposeFile;
-    private List<String> ovsdbPorts;
     boolean isRunning;
     private String envServerAddress;
     private String envServerPort;
     private String envDockerComposeFile;
     private boolean runDocker;
+
+    class DockerComposeServiceInfo {
+        public String name;
+        public String port;
+    }
+    private List<DockerComposeServiceInfo> dockerComposeServices = new ArrayList<DockerComposeServiceInfo>();
 
     /**
      * Get the array of system properties as pax exam Option objects for use in pax exam
@@ -166,14 +170,14 @@ public class DockerOvs implements AutoCloseable {
 
         tmpDockerComposeFile = createTempDockerComposeFile(yamlFileName);
         buildDockerComposeCommands();
-        ovsdbPorts = extractPortsFromYaml();
+        parseDockerComposeYaml();
 
         isRunning = false;
         //We run this for A LONG TIME since on the first run docker must download the
         //image from docker hub. In experience it takes significantly less than this
         //even when downloading the image. Once the image is downloaded this command
         //runs like that <snaps fingers>
-        runProcess(60000, upCmd);
+        ProcUtils.runProcess(60000, upCmd);
         isRunning = true;
         waitForOvsdbServers(10 * 1000);
     }
@@ -224,20 +228,24 @@ public class DockerOvs implements AutoCloseable {
     private void buildDockerComposeCommands() throws IOException, InterruptedException {
         upCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
         downCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
+        execCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
 
-        if (0 == tryProcess(5000, PS_CMD_NO_SUDO)) {
+        if (0 == ProcUtils.tryProcess(5000, PS_CMD_NO_SUDO)) {
             LOG.info("DockerOvs.buildDockerComposeCommands docker-compose does not require sudo");
             String[] tmp;
             tmp = Arrays.copyOfRange(upCmd, 1, upCmd.length);
             upCmd = tmp;
             tmp = Arrays.copyOfRange(downCmd, 1, downCmd.length);
             downCmd = tmp;
-        } else if (0 == tryProcess(5000, PS_CMD)) {
+            tmp = Arrays.copyOfRange(execCmd, 1, execCmd.length);
+            execCmd = tmp;
+        } else if (0 == ProcUtils.tryProcess(5000, PS_CMD)) {
             LOG.info("DockerOvs.buildDockerComposeCommands docker-compose requires sudo");
         } else {
             Assert.fail("docker-compose does not seem to work with or without sudo");
         }
     }
+
     /**
      * Get the IP address of the n'th OVS.
      * @param ovsNumber which OVS?
@@ -259,7 +267,7 @@ public class DockerOvs implements AutoCloseable {
         if (!runDocker) {
             return envServerPort;
         }
-        return ovsdbPorts.get(ovsNumber);
+        return dockerComposeServices.get(ovsNumber).port;
     }
 
     /**
@@ -267,14 +275,37 @@ public class DockerOvs implements AutoCloseable {
      * @return number of running OVS nodes
      */
     public int getNumOvsNodes() {
-        return ovsdbPorts.size();
+        return dockerComposeServices.size();
+    }
+
+    public String[] getExecCmdPrefix(int numOvs) {
+        String[] res = new String[execCmd.length];
+        System.arraycopy(execCmd, 0, res, 0, execCmd.length);
+        res[res.length - 1] = dockerComposeServices.get(numOvs).name;
+        return res;
+    }
+
+    public void runInContainer(int waitFor, int numOvs, String ... cmdWords) throws IOException, InterruptedException {
+        String[] pfx = getExecCmdPrefix(numOvs);
+        String[] cmd = new String[pfx.length + cmdWords.length];
+        System.arraycopy(pfx, 0, cmd, 0, pfx.length);
+        System.arraycopy(cmdWords, 0, cmd, pfx.length, cmdWords.length);
+        ProcUtils.runProcess(waitFor, cmd);
+    }
+
+    public void tryInContainer(int waitFor, int numOvs, String ... cmdWords) throws IOException, InterruptedException {
+        String[] pfx = getExecCmdPrefix(numOvs);
+        String[] cmd = new String[pfx.length + cmdWords.length];
+        System.arraycopy(pfx, 0, cmd, 0, pfx.length);
+        System.arraycopy(cmdWords, 0, cmd, pfx.length, cmdWords.length);
+        ProcUtils.tryProcess(waitFor, cmd);
     }
 
     /**
      * Parse the docker-compose yaml file to extract the port mappings.
      * @return a list of the external ports
      */
-    private List<String> extractPortsFromYaml() {
+    private List<String> parseDockerComposeYaml() {
         List<String> ports = new ArrayList<String>();
 
         YamlReader yamlReader = null;
@@ -283,18 +314,24 @@ public class DockerOvs implements AutoCloseable {
             yamlReader = new YamlReader(new FileReader(tmpDockerComposeFile));
             root = (Map) yamlReader.read();
         } catch (FileNotFoundException e) {
-            LOG.warn("DockerOvs.extractPortsFromYaml error reading yaml file", e);
+            LOG.warn("DockerOvs.parseDockerComposeYaml error reading yaml file", e);
             return ports;
         } catch (YamlException e) {
-            LOG.warn("DockerOvs.extractPortsFromYaml error parsing yaml file", e);
+            LOG.warn("DockerOvs.parseDockerComposeYaml error parsing yaml file", e);
             return ports;
         }
 
         if (null == root) {
             return ports;
         }
-        for (Object map : root.values()) {
-            List portMappings = (List) ((Map)map).get("ports");
+        for (Object entry : root.entrySet()) {
+            String key = ((Map.Entry<String,Map>)entry).getKey();
+            Map map = ((Map.Entry<String,Map>)entry).getValue();
+
+            DockerComposeServiceInfo svc = new DockerComposeServiceInfo();
+            svc.name = key;
+
+            List portMappings = (List) map.get("ports");
             if (null == portMappings) {
                 continue;
             }
@@ -306,7 +343,10 @@ public class DockerOvs implements AutoCloseable {
                 }
                 String port = portMappingStr.substring(0, delim);
                 ports.add(port);
+                svc.port = port;
             }
+            //TODO: think this through. What if there is no port?
+            dockerComposeServices.add(svc);
         }
 
         return ports;
@@ -319,7 +359,7 @@ public class DockerOvs implements AutoCloseable {
     @Override
     public void close() throws Exception {
         if (isRunning) {
-            runProcess(5000, downCmd);
+            ProcUtils.runProcess(10000, downCmd);
             isRunning = false;
         }
 
@@ -409,7 +449,7 @@ public class DockerOvs implements AutoCloseable {
     private void waitForOvsdbServers(long waitFor) throws IOException, InterruptedException {
         AtomicInteger numRunningOvs = new AtomicInteger(0);
 
-        int numOvs = ovsdbPorts.size();
+        int numOvs = dockerComposeServices.size();
         if (0 == numOvs) {
             return;
         }
@@ -433,139 +473,6 @@ public class DockerOvs implements AutoCloseable {
         for (OvsdbPing pinger : pingers) {
             pinger.interrupt();
         }
-    }
-
-    /*
-    WIP - todo: need to extract teh service name from the yaml or receive it as a param
-    private void validateDockerComposeVersion() throws IOException, InterruptedException {
-        StringBuilder stringBuilder = new StringBuilder();
-        runProcess(2000, stringBuilder, HELP_CMD);
-        assertTrue("DockerOvs.validateDockerComposeVersion: docker-compose version does not support exec, try updating",
-                                                                    stringBuilder.toString().contains(" exec "));
-    }
-
-    public String exec(long waitFor, String... execCmdWords) throws IOException, InterruptedException {
-        List<String> execCmd = new ArrayList<String>(20);
-        execCmd.addAll(Arrays.asList(EXEC_CMD_PFX));
-        execCmd.add(tmpDockerComposeFile.toString());
-        execCmd.add("exec");
-        execCmd.add("ovs");
-        execCmd.addAll(Arrays.asList(execCmdWords));
-
-        StringBuilder stringBuilder = new StringBuilder();
-        runProcess(waitFor, stringBuilder, execCmd.toArray(new String[0]));
-        return stringBuilder.toString();
-    }
-    */
-
-    /**
-     * Run a process and assert the exit code is 0.
-     * @param waitFor How long to wait for the command to execute
-     * @param words The words of the command to run
-     * @throws IOException if something goes wrong on the IO end
-     * @throws InterruptedException If this thread is interrupted
-     */
-    private void runProcess(long waitFor, String... words) throws IOException, InterruptedException {
-        runProcess(waitFor, null, words);
-    }
-
-    /**
-     * Run a process, collect the stdout, and assert the exit code is 0.
-     * @param waitFor How long to wait for the command to execute
-     * @param capturedStdout Whatever the process wrote to standard out
-     * @param words The words of the command to run
-     * @throws IOException if something goes wrong on the IO end
-     * @throws InterruptedException If this thread is interrupted
-     */
-    private void runProcess(long waitFor,StringBuilder capturedStdout, String... words)
-                                                                        throws IOException, InterruptedException {
-        int exitValue = tryProcess(waitFor, capturedStdout, words);
-        Assert.assertEquals("DockerOvs.runProcess exit code is not 0", 0, exitValue);
-    }
-
-    /**
-     * Run a process.
-     * @param waitFor How long to wait for the command to execute
-     * @param words The words of the command to run
-     * @return The process's exit code
-     * @throws IOException if something goes wrong on the IO end
-     * @throws InterruptedException If this thread is interrupted
-     */
-    private int tryProcess(long waitFor, String... words) throws IOException, InterruptedException {
-        return tryProcess(waitFor, null, words);
-    }
-
-    /**
-     * Run a process, collect the stdout.
-     * @param waitFor How long to wait (milliseconds) for the command to execute
-     * @param capturedStdout Whatever the process wrote to standard out
-     * @param words The words of the command to run
-     * @return The process's exit code or -1 if the the command does not complete within waitFor milliseconds
-     * @throws IOException if something goes wrong on the IO end
-     * @throws InterruptedException If this thread is interrupted
-     */
-    private int tryProcess(long waitFor, StringBuilder capturedStdout, String... words)
-                                                                        throws IOException, InterruptedException {
-
-        LOG.info("DockerOvs.runProcess running \"{}\", waitFor {}", words, waitFor);
-
-        Process proc = new ProcessBuilder(words).start();
-        int exitValue = -1;
-
-        // Use a try block to guarantee stdout and stderr are closed
-        try (BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        BufferedReader stderr = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
-
-            exitValue = waitForExitValue(waitFor, proc);
-
-            while (stderr.ready()) {
-                LOG.warn("DockerOvs.runProcess [stderr]: {}", stderr.readLine());
-            }
-
-            StringBuilder stdoutStringBuilder = (capturedStdout != null) ? capturedStdout : new StringBuilder();
-            int read;
-            char[] buf = new char[1024];
-            while (-1 != (read = stdout.read(buf))) {
-                stdoutStringBuilder.append(buf, 0, read);
-            }
-
-            for (String line : stdoutStringBuilder.toString().split("\\n")) {
-                LOG.info("DockerOvs.runProcess [stdout]: {}", line);
-            }
-        }
-
-        return exitValue;
-    }
-
-    /**
-     * Wait for a process to end.
-     * @param waitFor how long to wait in milliseconds
-     * @param proc Process object
-     * @return the process's exit value or -1 if the process did not complete within waitFor milliseconds
-     * @throws InterruptedException if this thread is interrupted
-     */
-    private int waitForExitValue(long waitFor, Process proc) throws InterruptedException {
-        //Java 7 has no way to check whether a process is still running without blocking
-        //until the process exits. What this hack does is checks the exitValue() which
-        //throws an IllegalStateException if the process is still running still it does
-        //not have a exit value. We catch that exception and implement our own timeout.
-        //Once we no longer need to support Java 7, this has more elegant solutions.
-        int exitValue = -1;
-        long startTime = System.currentTimeMillis();
-        while (true) {
-            try {
-                exitValue = proc.exitValue();
-                break;
-            } catch (IllegalThreadStateException e) {
-                if ((System.currentTimeMillis() - startTime) < waitFor) {
-                    Thread.sleep(200);
-                } else {
-                    LOG.warn("DockerOvs.waitForExitValue: timed out while waiting for command to complete", e);
-                    break;
-                }
-            }
-        }
-        return exitValue;
     }
 
     /**
@@ -598,6 +505,19 @@ public class DockerOvs implements AutoCloseable {
         }
 
         return tmpFile;
+    }
+
+    /**
+     * Useful for debugging. Dump some interesting config
+     * @throws IOException If something goes wrong with reading the process output
+     * @throws InterruptedException because there's some sleeping in here
+     */
+    public void logState(int dockerInstance) throws IOException, InterruptedException {
+        tryInContainer(5000, dockerInstance, "ip", "addr");
+        tryInContainer(5000, dockerInstance, "ovs-vsctl", "show");
+        tryInContainer(5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "show", "br-int");
+        tryInContainer(5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "dump-flows", "br-int");
+        tryInContainer(5000, dockerInstance, "ip", "netns", "list");
     }
 
 }

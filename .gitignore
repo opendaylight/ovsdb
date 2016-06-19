@@ -27,6 +27,7 @@ target-ide/
 .vagrant
 .DS_Store
 .checkstyle
+.factorypath
 yang-gen-config
 yang-gen-sal
 maven-metadata-local.xml

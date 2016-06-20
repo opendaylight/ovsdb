@@ -46,8 +46,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
@@ -56,8 +54,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class TransactUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
-
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBefore() {
         return new Predicate<DataObjectModification<T>>() {
             @Override
@@ -381,13 +377,9 @@ public class TransactUtils {
         if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
             Identifier key = ((InstanceIdentifier.IdentifiableItem) child.getIdentifier()).getKey();
             KeyedInstanceIdentifier extendedPath = path.child(item, key);
-            LOG.debug("Building a new child iid for {} with {} and key {}, resulting in {}",
-                    path, item, extendedPath);
             return extendedPath;
         } else {
             InstanceIdentifier extendedPath = path.child(item);
-            LOG.debug("Building a new child iid for {} with {}, resulting in {}",
-                    path, item, extendedPath);
             return extendedPath;
         }
     }

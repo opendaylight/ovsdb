@@ -21,6 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -29,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 
-public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoCloseable {
+public class HwvtepSouthboundProvider implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-hwvtepsouthbound-provider";
@@ -46,27 +48,35 @@ public class HwvtepSouthboundProvider implements BindingAwareProvider, AutoClose
     }
 
     private static DataBroker db;
+    private final EntityOwnershipService entityOwnershipService;
+    private final OvsdbConnection ovsdbConnection;
+
     private HwvtepConnectionManager cm;
-    private OvsdbConnection ovsdbConnection;
     private TransactionInvoker txInvoker;
-    private EntityOwnershipService entityOwnershipService;
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
 
-    public HwvtepSouthboundProvider(
-            EntityOwnershipService entityOwnershipServiceDependency,
-            OvsdbConnection ovsdbConnection) {
+    public HwvtepSouthboundProvider(final DataBroker dataBroker,
+            final EntityOwnershipService entityOwnershipServiceDependency,
+            final OvsdbConnection ovsdbConnection,
+            final SchemaService schemaService,
+            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+        this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
+
+        HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
+                bindingNormalizedNodeSerializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
     }
 
-    @Override
-    public void onSessionInitiated(ProviderContext session) {
+    /**
+     * Used by blueprint when starting the container.
+     */
+    public void init() {
         LOG.info("HwvtepSouthboundProvider Session Initiated");
-        db = session.getSALService(DataBroker.class);
         txInvoker = new TransactionInvokerImpl(db);
         cm = new HwvtepConnectionManager(db, txInvoker, entityOwnershipService);
         hwvtepDTListener = new HwvtepDataChangeListener(db, cm);

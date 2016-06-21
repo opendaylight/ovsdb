@@ -19,8 +19,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
@@ -29,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 
-public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
+public class SouthboundProvider implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
@@ -54,20 +54,26 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private OvsdbConnection ovsdbConnection;
 
-
-    public SouthboundProvider(
-            EntityOwnershipService entityOwnershipServiceDependency,
-            OvsdbConnection ovsdbConnection) {
+    public SouthboundProvider(final DataBroker dataBroker,
+            final EntityOwnershipService entityOwnershipServiceDependency,
+            final OvsdbConnection ovsdbConnection,
+            final SchemaService schemaService,
+            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+        this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
+
+        SouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
+                bindingNormalizedNodeSerializer));
         LOG.info("SouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
     }
 
-    @Override
-    public void onSessionInitiated(ProviderContext session) {
+    /**
+     * Used by blueprint when starting the container.
+     */
+    public void init() {
         LOG.info("SouthboundProvider Session Initiated");
-        db = session.getSALService(DataBroker.class);
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm);

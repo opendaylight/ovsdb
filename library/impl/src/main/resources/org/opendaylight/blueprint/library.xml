@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+  odl:use-default-for-reference-types="true">
+
+  <bean id="ovsdbConnectionService" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
+  </bean>
+  <service ref="ovsdbConnectionService" interface="org.opendaylight.ovsdb.lib.OvsdbConnection"
+    odl:type="default" />
+
+</blueprint>

@@ -25,6 +25,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>
     <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-core/{{VERSION}}</bundle>
     <bundle start="true">mvn:com.fasterxml.jackson.core/jackson-databind/{{VERSION}}</bundle>
-    <configfile finalname="${configfile.directory}/library.xml">mvn:org.opendaylight.ovsdb/library/{{VERSION}}/xml/config</configfile>
   </feature>
 </features>

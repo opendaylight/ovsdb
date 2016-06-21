@@ -316,16 +316,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Override
-    public String getModuleName() {
-        return "southbound-impl";
-    }
-
-    @Override
-    public String getInstanceName() {
-        return "southbound-default";
-    }
-
-    @Override
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.ovsdb")

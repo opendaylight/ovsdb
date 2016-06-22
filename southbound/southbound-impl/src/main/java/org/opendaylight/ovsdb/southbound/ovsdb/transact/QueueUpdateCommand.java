@@ -24,14 +24,18 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -87,12 +91,6 @@ public class QueueUpdateCommand implements TransactCommand {
                     }
                 }
 
-                Uuid queueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
-                UUID uuid = null;
-                if (queueUuid != null) {
-                    uuid = new UUID(queueUuid.getValue());
-                }
-
                 Map<String, String> externalIdsMap = new HashMap<>();
                 try {
                     YangUtils.copyYangKeyValueListToMap(externalIdsMap, queueEntry.getQueuesExternalIds(),
@@ -100,7 +98,11 @@ public class QueueUpdateCommand implements TransactCommand {
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete Queue external IDs", e);
                 }
-                externalIdsMap.put(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY, queueEntry.getQueueId().getValue());
+                externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                        SouthboundUtil.serializeInstanceIdentifier(
+                        SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(Queues.class, new QueuesKey(queueEntry.getQueueId()))));
                 queue.setExternalIds(externalIdsMap);
 
                 try {
@@ -109,10 +111,15 @@ public class QueueUpdateCommand implements TransactCommand {
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete Queue other_config", e);
                 }
-                if (uuid == null) {
-                    transaction.add(op.insert(queue)).build();
+
+                Uuid operQueueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
+                if (operQueueUuid == null) {
+                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
+                            TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
+                    transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
                 } else {
-                    transaction.add(op.update(queue)).build();
+                    UUID uuid = new UUID(operQueueUuid.getValue());
+                    //transaction.add(op.update(queue)).build();
                     Queue extraQueue = TyperUtils.getTypedRowWrapper(
                             transaction.getDatabaseSchema(), Queue.class, null);
                     extraQueue.getUuidColumn().setData(uuid);

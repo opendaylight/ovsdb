@@ -17,20 +17,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbQosRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
@@ -45,7 +57,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class TerminationPointUpdateCommand implements TransactCommand {
 
@@ -54,27 +68,27 @@ public class TerminationPointUpdateCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
-        execute(transaction, TransactUtils.extractCreatedOrUpdated(events, OvsdbTerminationPointAugmentation.class));
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbTerminationPointAugmentation.class));
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         Collection<DataTreeModification<Node>> modifications) {
-        execute(transaction,
+        execute(transaction, state,
                 TransactUtils.extractCreatedOrUpdated(modifications, OvsdbTerminationPointAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction,
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
                          Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
                                  OvsdbTerminationPointAugmentation> createdOrUpdated) {
         LOG.trace("TerminationPointUpdateCommand called");
         for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
                 OvsdbTerminationPointAugmentation> terminationPointEntry : createdOrUpdated.entrySet()) {
-            updateTerminationPoint(transaction, terminationPointEntry.getKey(), terminationPointEntry.getValue());
+            updateTerminationPoint(transaction, state, terminationPointEntry.getKey(), terminationPointEntry.getValue());
         }
     }
 
-    public void updateTerminationPoint(TransactionBuilder transaction,
+    public void updateTerminationPoint(TransactionBuilder transaction, BridgeOperationalState state,
                                        InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
                                        OvsdbTerminationPointAugmentation terminationPoint) {
         if (terminationPoint != null) {
@@ -96,9 +110,10 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                     iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName());
 
             // Update port
+            OvsdbBridgeAugmentation operBridge = state.getBridgeNode(iid).get().getAugmentation(OvsdbBridgeAugmentation.class);
             Port port = TyperUtils.getTypedRowWrapper(
                     transaction.getDatabaseSchema(), Port.class);
-            updatePort(terminationPoint, port);
+            updatePort(terminationPoint, port, operBridge);
             Port extraPort = TyperUtils.getTypedRowWrapper(
                     transaction.getDatabaseSchema(), Port.class);
             extraPort.setName("");
@@ -118,32 +133,74 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         updateInterfaceExternalIds(terminationPoint, ovsInterface);
         updateInterfaceLldp(terminationPoint, ovsInterface);
         updateInterfaceBfd(terminationPoint, ovsInterface);
+        updateInterfacePolicing(terminationPoint, ovsInterface);
     }
 
     private void updatePort(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port) {
+            final Port port,
+            final OvsdbBridgeAugmentation operBridge) {
 
         updatePortOtherConfig(terminationPoint, port);
         updatePortVlanTag(terminationPoint, port);
         updatePortVlanTrunk(terminationPoint, port);
         updatePortVlanMode(terminationPoint, port);
         updatePortExternalIds(terminationPoint, port);
-        updatePortQos(terminationPoint, port);
+        updatePortQos(terminationPoint, port, operBridge);
     }
 
     private void updatePortQos(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port) {
+            final Port port,
+            final OvsdbBridgeAugmentation operBridge) {
 
         Set<UUID> uuidSet = Sets.newHashSet();
-        Uuid qosUuid = terminationPoint.getQos();
-        if (qosUuid != null) {
-            uuidSet.add(new UUID(qosUuid.getValue()));
+
+        // First check if QosEntry is present and use that
+        if (terminationPoint.getQosEntry() != null && !terminationPoint.getQosEntry().isEmpty()) {
+            OvsdbQosRef qosRef = terminationPoint.getQosEntry().iterator().next().getQosRef();
+            Uri qosId = qosRef.getValue().firstKeyOf(QosEntries.class).getQosId();
+            OvsdbNodeAugmentation operNode = getOperNode(operBridge);
+            if (operNode != null && operNode.getQosEntries() != null &&
+                    !operNode.getQosEntries().isEmpty()) {
+                for (QosEntries qosEntry : operNode.getQosEntries()) {
+                    if (qosEntry.getQosId().equals(qosId)) {
+                        uuidSet.add(new UUID(qosEntry.getQosUuid().getValue()));
+                    }
+                }
+            }
+            if (uuidSet.size() == 0) {
+                uuidSet.add(new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX +
+                            TransactUtils.bytesToHexString(qosId.getValue().getBytes())));
+            }
+        } else {
+            // Second check if Qos is present and use that (deprecated)
+            // Do not bother to check if QosEntry and Qos are consistent if both are present
+            Uuid qosUuid = terminationPoint.getQos();
+            if (qosUuid != null) {
+                uuidSet.add(new UUID(qosUuid.getValue()));
+            }
         }
         port.setQos(uuidSet);
     }
 
+    private OvsdbNodeAugmentation getOperNode(final OvsdbBridgeAugmentation operBridge) {
+        @SuppressWarnings("unchecked")
+        InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>)operBridge.getManagedBy().getValue();
+        OvsdbNodeAugmentation operNode = null;
+        ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
+        CheckedFuture<Optional<Node>, ReadFailedException> future =
+                transaction.read(LogicalDatastoreType.OPERATIONAL, iidNode);
+        try {
+            Optional<Node> nodeOptional = future.get();
+            if (nodeOptional.isPresent()) {
+                operNode = nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Error reading from datastore", e);
+        }
+        return operNode;
+    }
 
     private void updateOfPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
@@ -253,6 +310,20 @@ public class TerminationPointUpdateCommand implements TransactCommand {
             }
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("bfd", "Interface", e);
+        }
+    }
+
+    private void updateInterfacePolicing(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        Long ingressPolicingRate = terminationPoint.getIngressPolicingRate();
+        if (ingressPolicingRate != null) {
+            ovsInterface.setIngressPolicingRate(ingressPolicingRate);
+        }
+        Long ingressPolicingBurst = terminationPoint.getIngressPolicingBurst();
+        if (ingressPolicingBurst != null) {
+            ovsInterface.setIngressPolicingBurst(ingressPolicingBurst);
         }
     }
 

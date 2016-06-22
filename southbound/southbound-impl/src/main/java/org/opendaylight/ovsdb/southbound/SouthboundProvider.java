@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -32,9 +34,6 @@ import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSe
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class SouthboundProvider implements AutoCloseable {
 
@@ -152,8 +151,8 @@ public class SouthboundProvider implements AutoCloseable {
     public void handleOwnershipChange(EntityOwnershipChange ownershipChange) {
         if (ownershipChange.isOwner()) {
             LOG.info("*This* instance of OVSDB southbound provider is set as a MASTER instance");
-            LOG.info("Initialize OVSDB topology {} in operational and config data store if not already present"
-                    ,SouthboundConstants.OVSDB_TOPOLOGY_ID);
+            LOG.info("Initialize OVSDB topology {} in operational and config data store if not already present",
+                    SouthboundConstants.OVSDB_TOPOLOGY_ID);
             initializeOvsdbTopology(LogicalDatastoreType.OPERATIONAL);
             initializeOvsdbTopology(LogicalDatastoreType.CONFIGURATION);
         } else {
@@ -176,6 +175,7 @@ public class SouthboundProvider implements AutoCloseable {
         public void close() {
             this.listenerRegistration.close();
         }
+
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             sp.handleOwnershipChange(ownershipChange);

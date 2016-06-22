@@ -8,12 +8,19 @@
 package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 
 
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
@@ -25,8 +32,6 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregato
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
@@ -39,21 +44,12 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-
 /**
  * Configuration Reconciliation task to reconcile existing bridge configurations in the config datastore and the
  * switch when the latter is up and connected to the controller.
  * Created by Vinh Nguyen (vinh.nguyen@hcl.com) on 3/21/16.
  */
-public class BridgeConfigReconciliationTask extends ReconciliationTask{
+public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(BridgeConfigReconciliationTask.class);
     private final OvsdbConnectionInstance connectionInstance;
@@ -79,14 +75,16 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask{
         Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
             @Override
             public void onSuccess(@Nullable Optional<Topology> optionalTopology) {
-                if (optionalTopology.isPresent()) {
-                    InstanceIdentifier<Node> nIid = (InstanceIdentifier<Node>) nodeIid;
+                if (optionalTopology != null && optionalTopology.isPresent()) {
+                    @SuppressWarnings("unchecked")
+                    InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
                     Topology topology = optionalTopology.get();
                     if (topology.getNode() != null) {
                         final Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
                         for (Node node : topology.getNode()) {
                             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-                            if (bridge != null && bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(nIid)) {
+                            if (bridge != null && bridge.getManagedBy() != null
+                                    && bridge.getManagedBy().getValue().equals(ndIid)) {
                                 changes.putAll(extractBridgeConfigurationChanges(node, bridge));
                             }
                         }
@@ -98,8 +96,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask{
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, t);
+            public void onFailure(Throwable throwable) {
+                LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, throwable);
             }
 
         });

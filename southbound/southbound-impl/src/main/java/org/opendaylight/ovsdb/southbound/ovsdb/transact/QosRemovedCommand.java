@@ -86,11 +86,9 @@ public class QosRemovedCommand implements TransactCommand {
                                         .where(qos.getUuidColumn().getSchema().opEqual(new UUID(qosUuid.getValue())))
                                         .build());
                             } else {
-                                LOG.warn(
-                                        "Unable to delete QoS{} for node {} because it was not found in the " +
-                                                "operational store, "
-                                                + "and thus we cannot retrieve its UUID", origQosEntry.getQosId(),
-                                        ovsdbNodeIid);
+                                LOG.warn("Unable to delete QoS{} for node {} because it was not found in the "
+                                        + "operational store, and thus we cannot retrieve its UUID",
+                                        origQosEntry.getQosId(), ovsdbNodeIid);
                             }
                         }
                     }

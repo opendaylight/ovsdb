@@ -9,6 +9,12 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,10 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-
 import javax.annotation.Nullable;
-
-import com.google.common.base.Predicate;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -41,19 +44,12 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class TransactUtils {
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBefore() {
@@ -112,8 +108,8 @@ public class TransactUtils {
         };
     }
 
-    private static <T extends DataObject> Predicate<DataObjectModification<T>> modificationIsDeletionAndHasDataBefore
-            () {
+    private static <T extends DataObject> Predicate<DataObjectModification<T>>
+        modificationIsDeletionAndHasDataBefore() {
         return new Predicate<DataObjectModification<T>>() {
             @Override
             public boolean apply(@Nullable DataObjectModification<T> input) {
@@ -162,6 +158,25 @@ public class TransactUtils {
         return extractCreatedOrUpdated(changes, clazz, hasNoDataBefore());
     }
 
+    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
+            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
+        return extract(changes.getUpdatedData(),klazz);
+    }
+
+    /**
+     * Extract all the instances of {@code clazz} which were updated in the given set of modifications.
+     *
+     * @param changes The changes to process.
+     * @param clazz The class we're interested in.
+     * @param <T> The type of changes we're interested in.
+     * @param <U> The type of changes to process.
+     * @return The updated instances, mapped by instance identifier.
+     */
+    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractUpdated(
+            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+        return extractCreatedOrUpdated(changes, clazz, hasDataBeforeAndDataAfter());
+    }
+
     /**
      * Extract all the instance of {@code clazz} which were created or updated in the given set of modifications, and
      * which satisfy the given filter.
@@ -182,25 +197,6 @@ public class TransactUtils {
             result.put(entry.getKey(), entry.getValue().getDataAfter());
         }
         return result;
-    }
-
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
-        return extract(changes.getUpdatedData(),klazz);
-    }
-
-    /**
-     * Extract all the instances of {@code clazz} which were updated in the given set of modifications.
-     *
-     * @param changes The changes to process.
-     * @param clazz The class we're interested in.
-     * @param <T> The type of changes we're interested in.
-     * @param <U> The type of changes to process.
-     * @return The updated instances, mapped by instance identifier.
-     */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractUpdated(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
-        return extractCreatedOrUpdated(changes, clazz, hasDataBeforeAndDataAfter());
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
@@ -244,7 +240,7 @@ public class TransactUtils {
      * @return The created, updated or removed instances, mapped by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T>
-    extractCreatedOrUpdatedOrRemoved(
+        extractCreatedOrUpdatedOrRemoved(
             Collection<DataTreeModification<U>> changes, Class<T> clazz) {
         Map<InstanceIdentifier<T>, T> result = extractCreatedOrUpdated(changes, clazz);
         result.putAll(extractRemovedObjects(changes, clazz));
@@ -316,9 +312,8 @@ public class TransactUtils {
      * @return The modifications, mapped by instance identifier.
      */
     private static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
-    extractDataObjectModifications(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz,
-            Predicate<DataObjectModification<T>> filter) {
+        extractDataObjectModifications(Collection<DataTreeModification<U>> changes, Class<T> clazz,
+                                       Predicate<DataObjectModification<T>> filter) {
         List<DataObjectModification<? extends DataObject>> dataObjectModifications = new ArrayList<>();
         List<InstanceIdentifier<? extends DataObject>> paths = new ArrayList<>();
         if (changes != null) {
@@ -342,7 +337,7 @@ public class TransactUtils {
      * @return The modifications, mapped by instance identifier.
      */
     private static <T extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
-    extractDataObjectModifications(
+        extractDataObjectModifications(
             Collection<DataObjectModification<? extends DataObject>> changes,
             Collection<InstanceIdentifier<? extends DataObject>> paths, Class<T> clazz,
             Predicate<DataObjectModification<T>> filter) {
@@ -374,7 +369,7 @@ public class TransactUtils {
      * @return The extended path.
      */
     private static <N extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<N>, T extends DataObject>
-    InstanceIdentifier<? extends DataObject> extendPath(
+        InstanceIdentifier<? extends DataObject> extendPath(
             InstanceIdentifier path,
             DataObjectModification child) {
         Class<N> item = (Class<N>) child.getDataType();
@@ -455,7 +450,7 @@ public class TransactUtils {
      */
     public static UUID extractNamedUuid(Insert insert) {
         String uuidString = insert.getUuidName() != null
-                ? insert.getUuidName() : SouthboundMapper.getRandomUUID();
+                ? insert.getUuidName() : SouthboundMapper.getRandomUuid();
         insert.setUuidName(uuidString);
         return new UUID(uuidString);
     }
@@ -488,7 +483,7 @@ public class TransactUtils {
     /**
      * This method builds a string by concatenating the 2 character
      * hexadecimal representation of each byte from the input byte array.
-     *
+     * <p>
      * For example: an input byte array containing:
      *   bytes[0] = 'a'
      *   bytes[1] = 'b'
@@ -498,7 +493,7 @@ public class TransactUtils {
      *   bytes[5] = '2'
      *   bytes[6] = '3'
      * returns the string "6162632d313233"
-     *
+     * </p>
      * @param bytes
      *            The byte array to convert to string
      * @return The hexadecimal representation of the byte array. If bytes is

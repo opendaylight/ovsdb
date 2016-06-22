@@ -73,8 +73,8 @@ public class BridgeUpdateCommand implements TransactCommand {
             TransactionBuilder transaction, BridgeOperationalState state,
             InstanceIdentifier<OvsdbBridgeAugmentation> iid, OvsdbBridgeAugmentation ovsdbManagedNode) {
         LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
-                    ovsdbManagedNode.getBridgeName(),
-                    ovsdbManagedNode.getBridgeUuid());
+                ovsdbManagedNode.getBridgeName(),
+                ovsdbManagedNode.getBridgeUuid());
         Optional<OvsdbBridgeAugmentation> operationalBridgeOptional =
                 state.getOvsdbBridgeAugmentation(iid);
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
@@ -86,6 +86,9 @@ public class BridgeUpdateCommand implements TransactCommand {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
             transaction.add(op.insert(bridge));
+            LOG.info("Added ovsdb Bridge name: {} uuid: {}",
+                    ovsdbManagedNode.getBridgeName(),
+                    ovsdbManagedNode.getBridgeUuid());
         } else {
             String existingBridgeName = operationalBridgeOptional.get().getBridgeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
@@ -134,7 +137,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         try {
             bridge.setExternalIds(ImmutableMap.copyOf(externalIdMap));
         } catch (NullPointerException e) {
-            LOG.warn("Incomplete bridge external Id", e);
+            LOG.error("Incomplete bridge external Id", e);
         }
     }
 
@@ -150,7 +153,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             try {
                 bridge.setOtherConfig(ImmutableMap.copyOf(otherConfigMap));
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete bridge other config", e);
+                LOG.error("Incomplete bridge other config", e);
             }
         }
     }

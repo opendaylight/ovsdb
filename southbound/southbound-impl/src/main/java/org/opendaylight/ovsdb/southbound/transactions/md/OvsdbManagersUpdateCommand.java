@@ -85,7 +85,8 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
         for (Map.Entry<UUID, OpenVSwitch> ovsdbNodeEntry : updatedOpenVSwitchRows.entrySet()) {
             final List<ManagerEntry> managerEntries =
                     SouthboundMapper.createManagerEntries(ovsdbNodeEntry.getValue(), updatedManagerRows);
-            LOG.debug("Update Ovsdb Node {} with manager entries {}",ovsdbNodeEntry.getValue(), managerEntries);
+            LOG.debug("Update Ovsdb Node : {} with manager entries : {}",
+                    ovsdbNodeEntry.getValue(), managerEntries);
             for (ManagerEntry managerEntry : managerEntries) {
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
                         getManagerEntryIid(managerEntry),
@@ -118,7 +119,8 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
             final List<ManagerEntry> managerEntries =
                     SouthboundMapper.createManagerEntries(ovsdbNode.get(), updatedManagerRows);
 
-            LOG.debug("Update Ovsdb Node {} with manager entries {}",ovsdbNode.get(), managerEntries);
+            LOG.debug("Update Ovsdb Node : {} with manager entries : {}",
+                    ovsdbNode.get(), managerEntries);
             for (ManagerEntry managerEntry : managerEntries) {
                 InstanceIdentifier<ManagerEntry> iid = connectionIId
                         .augmentation(OvsdbNodeAugmentation.class)

@@ -86,6 +86,9 @@ public class BridgeUpdateCommand implements TransactCommand {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
             transaction.add(op.insert(bridge));
+            LOG.info("Added ovsdb Bridge name: {} uuid: {}",
+                      ovsdbManagedNode.getBridgeName(),
+                      ovsdbManagedNode.getBridgeUuid());
         } else {
             String existingBridgeName = operationalBridgeOptional.get().getBridgeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
@@ -94,7 +97,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             transaction.add(op.update(bridge)
                     .where(extraBridge.getNameColumn().getSchema().opEqual(existingBridgeName))
                     .build());
-            stampInstanceIdentifier(transaction, iid.firstIdentifierOf(Node.class),existingBridgeName);
+            stampInstanceIdentifier(transaction, iid.firstIdentifierOf(Node.class),existingBridgeName);               
         }
     }
 
@@ -134,7 +137,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         try {
             bridge.setExternalIds(ImmutableMap.copyOf(externalIdMap));
         } catch (NullPointerException e) {
-            LOG.warn("Incomplete bridge external Id", e);
+            LOG.error("Incomplete bridge external Id", e);
         }
     }
 
@@ -150,7 +153,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             try {
                 bridge.setOtherConfig(ImmutableMap.copyOf(otherConfigMap));
             } catch (NullPointerException e) {
-                LOG.warn("Incomplete bridge other config", e);
+                LOG.error("Incomplete bridge other config", e);
             }
         }
     }

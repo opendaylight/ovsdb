@@ -141,7 +141,7 @@ public class TerminationPointUpdateCommandTest {
 
         InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
         terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint);
-        verify(transaction, times(2)).add(any(Operation.class));
+        verify(transaction, times(1)).add(any(Operation.class));
     }
 
     private Object setField(String fieldName) throws Exception {

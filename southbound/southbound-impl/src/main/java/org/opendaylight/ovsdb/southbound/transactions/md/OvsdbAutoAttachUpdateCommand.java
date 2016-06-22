@@ -8,15 +8,14 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -31,8 +30,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.AutoattachExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.AutoattachExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.Mappings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsKey;
@@ -40,8 +37,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbAutoAttachUpdateCommand.class);
@@ -72,7 +67,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
             for (final Entry<UUID, AutoAttach> entry : updatedAutoAttachRows.entrySet()) {
                 final AutoAttach autoAttach = entry.getValue();
                 final AutoAttach oldAutoAttach = oldAutoAttachRows.get(entry.getKey());
-                final Uri uri = new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + autoAttach.getUuid().toString());
+                final Uri uri =
+                        new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + autoAttach.getUuid().toString());
 
                 // FIXME: To be uncommented when Open vSwitch supports external_ids column
 //                Uri uri = new Uri(getAutoAttachId(autoAttach));
@@ -83,7 +79,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
                                     .getUuidColumn().getData().toString())));
-                    // FIXME: To be uncommented and replaced to currentIid when Open vSwitch supports external_ids column
+                    // FIXME: To be uncommented and replaced to currentIid when
+                    // Open vSwitch supports external_ids column
 //                    InstanceIdentifier<Autoattach> currentIid = nodeIId
 //                            .augmentation(OvsdbNodeAugmentation.class)
 //                            .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
@@ -98,11 +95,12 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                     LOG.debug("AutoAttach table entries not found in operational datastore, need to create it.", e);
                 }
 
-                final AutoattachBuilder autoAttachBuilder = (currentAutoattach != null) ? new AutoattachBuilder(currentAutoattach)
-                        : new AutoattachBuilder()
-                        .setAutoattachUuid(new Uuid(entry.getKey().toString()))
-                        .setAutoattachId(uri)
-                        .setKey(new AutoattachKey(uri));
+                final AutoattachBuilder autoAttachBuilder =
+                        (currentAutoattach != null) ? new AutoattachBuilder(currentAutoattach)
+                                : new AutoattachBuilder()
+                                .setAutoattachUuid(new Uuid(entry.getKey().toString()))
+                                .setAutoattachId(uri)
+                                .setKey(new AutoattachKey(uri));
 
                 if (autoAttach.getSystemNameColumn() != null
                         && autoAttach.getSystemNameColumn().getData() != null
@@ -134,14 +132,14 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setMappings (AutoattachBuilder autoAttachBuilder,
+    private void setMappings(AutoattachBuilder autoAttachBuilder,
             AutoAttach autoAttach) {
         final Map<Long, Long> mappings = autoAttach.getMappingsColumn().getData();
         final Set<Long> mappingsKeys = mappings.keySet();
         final List<Mappings> mappingsList = new ArrayList<>();
         for (final Long mappingsKey : mappingsKeys) {
             final Integer mappingsValue = new Integer(mappings.get(mappingsKey).toString());
-            if (mappingsKey != null && mappingsValue != null) {
+            if (mappingsKey != null) {
                 mappingsList.add(new MappingsBuilder()
                         .setKey(new MappingsKey(mappingsKey))
                         .setMappingsKey(mappingsKey)
@@ -156,7 +154,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 //    private String getAutoAttachId(AutoAttach autoAttach) {
 //        if (autoAttach.getExternalIdsColumn() != null
 //                && autoAttach.getExternalIdsColumn().getData() != null
-//                && autoAttach.getExternalIdsColumn().getData().containsKey(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY)) {
+//                && autoAttach.getExternalIdsColumn().getData()
+//                        .containsKey(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY)) {
 //            return autoAttach.getExternalIdsColumn().getData().get(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY);
 //        } else {
 //            return SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + autoAttach.getUuid().toString();
@@ -181,7 +180,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 //                }
 //            }
 //        } else {
-//            externalIdsList.add(new AutoattachExternalIdsBuilder().setAutoattachExternalIdKey(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY)
+//            externalIdsList.add(new AutoattachExternalIdsBuilder()
+//                    .setAutoattachExternalIdKey(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY)
 //                    .setAutoattachExternalIdValue(autoAttach.getUuid().toString()).build());
 //        }
 //        autoAttachBuilder.setAutoattachExternalIds(externalIdsList);

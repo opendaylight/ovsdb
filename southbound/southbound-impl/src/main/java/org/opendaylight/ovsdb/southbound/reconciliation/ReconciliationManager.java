@@ -8,12 +8,15 @@
 package org.opendaylight.ovsdb.southbound.reconciliation;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.*;
 
 /**
  * This class provides the implementation of ovsdb southbound plugins
@@ -28,7 +31,7 @@ import java.util.concurrent.*;
  * if task is ready for execution.
  * Ideally, addition of any type of reconciliation task should not require
  * any change in this reconciliation manager execution engine.
- *
+ * <p>
  * 3-Node Cluster:
  * Reconciliation manager is agnostic of whether it's running in single
  * node cluster or 3-node cluster. It's a responsibility of the task
@@ -37,8 +40,7 @@ import java.util.concurrent.*;
  * Reconciliation of controller initiated connection should be done by all
  * the 3-nodes in the cluster, because connection to individual controller
  * can be interrupted for various reason.
- *
- * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
+ * </p>
  */
 public class ReconciliationManager implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ReconciliationManager.class);
@@ -54,7 +56,8 @@ public class ReconciliationManager implements AutoCloseable {
 
     public ReconciliationManager(final DataBroker db) {
         this.db = db;
-        reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE, "ovsdb-reconciler");
+        reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE,
+                "ovsdb-reconciler");
 
         ThreadFactory threadFact = new ThreadFactoryBuilder()
                 .setNameFormat("ovsdb-recon-task-triager-%d").build();

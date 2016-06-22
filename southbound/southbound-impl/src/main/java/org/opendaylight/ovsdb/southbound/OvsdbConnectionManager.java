@@ -9,6 +9,11 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -18,12 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -65,10 +66,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     private Map<ConnectionInfo, OvsdbConnectionInstance> clients =
             new ConcurrentHashMap<>();
@@ -108,7 +105,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         List<String> databases = new ArrayList<>();
         try {
             databases = externalClient.getDatabases().get(1000, TimeUnit.MILLISECONDS);
-            if(databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
+            if (databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
                 OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
                 // Register Cluster Ownership for ConnectionInfo
                 registerEntityForOwnership(client);
@@ -274,14 +271,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         instanceIdentifiers.remove(connectionInfo);
     }
 
-    public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo key) {
-        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
-        return clients.get(connectionInfo);
-    }
-
     public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         return instanceIdentifiers.get(connectionInfo);
+    }
+
+    public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo key) {
+        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
+        return clients.get(connectionInfo);
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {
@@ -346,7 +343,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return ovsdbConnectionInstance.getHasDeviceOwnership();
     }
 
-    public void reconcileConnection(InstanceIdentifier<Node> iid, OvsdbNodeAugmentation ovsdbNode){
+    public void reconcileConnection(InstanceIdentifier<Node> iid, OvsdbNodeAugmentation ovsdbNode) {
         this.retryConnection(iid, ovsdbNode,
                 ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
 
@@ -403,8 +400,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         if (ownershipChange.isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
             LOG.info("handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",
                     ovsdbConnectionInstance.getConnectionInfo(), ovsdbConnectionInstance.getHasDeviceOwnership()
-                            ? SouthboundConstants.OWNERSHIPSTATES.OWNER.getState()
-                            : SouthboundConstants.OWNERSHIPSTATES.NONOWNER.getState());
+                            ? SouthboundConstants.OwnershipStates.OWNER.getState()
+                            : SouthboundConstants.OwnershipStates.NONOWNER.getState());
             return;
         }
 
@@ -502,6 +499,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
         return openVSwitchRow;
     }
+
     private Entity getEntityFromConnectionInstance(@Nonnull OvsdbConnectionInstance ovsdbConnectionInstance) {
         InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();
         if ( iid == null ) {
@@ -569,10 +567,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 iid,
                 ovsdbNode);
 
-        if(reconciliationManager.isEnqueued(task)){
+        if (reconciliationManager.isEnqueued(task)) {
             return;
         }
-        switch(trigger){
+        switch (trigger) {
             case ON_CONTROLLER_INITIATED_CONNECTION_FAILURE:
                 reconciliationManager.enqueueForRetry(task);
                 break;
@@ -587,19 +585,19 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     @Override
                     public void onSuccess(@Nullable Optional<Node> node) {
                         if (node.isPresent()) {
-                            LOG.info("Disconnected/Failed connection {} was controller initiated, attempting " +
-                                    "reconnection", ovsdbNode.getConnectionInfo());
+                            LOG.info("Disconnected/Failed connection {} was controller initiated, attempting "
+                                    + "reconnection", ovsdbNode.getConnectionInfo());
                             reconciliationManager.enqueue(task);
 
                         } else {
-                            LOG.debug("Connection {} was switch initiated, no reconciliation is required"
-                                    , iid.firstKeyOf(Node.class).getNodeId());
+                            LOG.debug("Connection {} was switch initiated, no reconciliation is required",
+                                    iid.firstKeyOf(Node.class).getNodeId());
                         }
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        LOG.warn("Read Config/DS for Node failed! {}", iid, t);
+                    public void onFailure(Throwable throwable) {
+                        LOG.warn("Read Config/DS for Node failed! {}", iid, throwable);
                     }
                 });
                 break;
@@ -625,9 +623,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             this.cm = cm;
             listenerRegistration = entityOwnershipService.registerListener(ENTITY_TYPE, this);
         }
+
         public void close() {
             listenerRegistration.close();
         }
+
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             cm.handleOwnershipChanged(ownershipChange);

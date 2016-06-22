@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.southbound.reconciliation;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
-import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
  * Abstract implementation of a reconciliation task. Each new type of
  * resource configuration reconciliation task should extend this class
  * and implement the abstract methods.
- * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
  */
 public abstract class ReconciliationTask implements Runnable {
 
@@ -43,9 +41,8 @@ public abstract class ReconciliationTask implements Runnable {
     }
 
     /**
-     * Method contains task reconciliation logic. Please refer to
-     * {@link ConnectionReconciliationTask#reconcileConfiguration(OvsdbConnectionManager)}
-     * for example.
+     * Method contains task reconciliation logic.
+     *
      * @param connectionManager Connection manager to get connection instance of the device
      * @return True if reconciliation was successful, else false
      */
@@ -61,7 +58,6 @@ public abstract class ReconciliationTask implements Runnable {
      * it as an async operation and submit the task on the callback of the future.
      * <p>
      * Note:Please do not write blocking data store operations
-     * {@link ConnectionReconciliationTask#doRetry(boolean)}
      * </p>
      * @param wasPreviousAttemptSuccessful Status of the previous attempt
      */
@@ -77,7 +73,6 @@ public abstract class ReconciliationTask implements Runnable {
      * implement it as an async operation and submit the task on the callback of the future.
      * <p>
      * Note:Please do not write blocking data store operations
-     * {@link ConnectionReconciliationTask#doRetry(boolean)}
      * </p>
      */
     public abstract void checkReadinessAndProcess();
@@ -96,16 +91,17 @@ public abstract class ReconciliationTask implements Runnable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        ReconciliationTask that = (ReconciliationTask) o;
+        ReconciliationTask that = (ReconciliationTask) obj;
 
         return nodeIid.equals(that.nodeIid);
-
     }
 
     @Override
@@ -116,8 +112,6 @@ public abstract class ReconciliationTask implements Runnable {
 
     @Override
     public String toString() {
-        return "ReconciliationTask{ type=" + getClass().toString()+
-                ", nodeIid=" + nodeIid +
-                '}';
+        return "ReconciliationTask{ type=" + getClass().toString() + ", nodeIid=" + nodeIid + '}';
     }
 }

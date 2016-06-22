@@ -41,11 +41,13 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         commands.add(new OvsdbPortUpdateCommand(key, updates, dbSchema));
         commands.add(new OvsdbPortRemoveCommand(key, updates, dbSchema));
 
-        if(dbSchema.getVersion().compareTo(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION)) >= 0) {
+        if (dbSchema.getVersion().compareTo(
+                Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION)) >= 0) {
             commands.add(new OvsdbAutoAttachUpdateCommand(key, updates, dbSchema));
             commands.add(new OvsdbAutoAttachRemovedCommand(key, updates, dbSchema));
         } else {
-            LOG.debug("UNSUPPORTED FUNCTIONALITY: AutoAttach not supported in OVS schema version {}", dbSchema.getVersion().toString());
+            LOG.debug("UNSUPPORTED FUNCTIONALITY: AutoAttach not supported in OVS schema version {}",
+                    dbSchema.getVersion().toString());
         }
     }
 

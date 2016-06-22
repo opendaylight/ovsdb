@@ -135,6 +135,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <failsOnError>true</failsOnError>
+          <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
+          <configLocation>src/main/resources/odl_checks.xml</configLocation>
         </configuration>
       </plugin>
       <plugin>

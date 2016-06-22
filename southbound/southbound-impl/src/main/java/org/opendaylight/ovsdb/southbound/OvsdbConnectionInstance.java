@@ -9,6 +9,9 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,9 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -63,10 +64,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
 
 public class OvsdbConnectionInstance implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
@@ -118,6 +115,11 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         }
     }
 
+    public ListenableFuture<List<OperationResult>> transact(
+            DatabaseSchema dbSchema, List<Operation> operations) {
+        return client.transact(dbSchema, operations);
+    }
+
     public void registerCallbacks() {
         if ( this.callback == null) {
             if (this.initialCreateData != null ) {
@@ -145,7 +147,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
             try {
                 transactInvokers = new HashMap<>();
                 DatabaseSchema dbSchema = getSchema(SouthboundConstants.OPEN_V_SWITCH).get();
-                if(dbSchema != null) {
+                if (dbSchema != null) {
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -265,9 +267,11 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         return client.transactBuilder(dbSchema);
     }
 
-    public ListenableFuture<List<OperationResult>> transact(
-            DatabaseSchema dbSchema, List<Operation> operations) {
-        return client.transact(dbSchema, operations);
+    @Override
+    public <E extends TableSchema<E>> TableUpdates monitor(
+            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
+            MonitorHandle monitorHandle, MonitorCallBack callback) {
+        return null;
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(
@@ -355,13 +359,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.instanceIdentifier = iid;
     }
 
-    @Override
-    public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
-            MonitorHandle monitorHandle, MonitorCallBack callback) {
-        return null;
-    }
-
     public Entity getConnectedEntity() {
         return this.connectedEntity;
     }
@@ -398,6 +395,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     public OvsdbNodeAugmentation getOvsdbNodeAugmentation() {
         return this.initialCreateData;
     }
+
     public void setOvsdbNodeAugmentation(OvsdbNodeAugmentation ovsdbNodeCreateData) {
         this.initialCreateData = ovsdbNodeCreateData;
     }

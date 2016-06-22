@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,16 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -33,7 +29,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
@@ -44,8 +39,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 public class QueueUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueUpdateCommand.class);
@@ -89,7 +82,7 @@ public class QueueUpdateCommand implements TransactCommand {
                 if (queueEntry.getDscp() != null) {
                     try {
                         Set<Long> dscpSet = new HashSet<>();
-                            if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
+                        if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
                             queue.setDscp(dscpSet);
                         }
                     } catch (NumberFormatException e) {
@@ -127,7 +120,8 @@ public class QueueUpdateCommand implements TransactCommand {
                 if (otherConfigs != null) {
                     Map<String, String> otherConfigsMap = new HashMap<>();
                     for (QueuesOtherConfig otherConfig : otherConfigs) {
-                        otherConfigsMap.put(otherConfig.getQueueOtherConfigKey(), otherConfig.getQueueOtherConfigValue());
+                        otherConfigsMap.put(otherConfig.getQueueOtherConfigKey(),
+                                otherConfig.getQueueOtherConfigValue());
                     }
                     try {
                         queue.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
@@ -138,8 +132,8 @@ public class QueueUpdateCommand implements TransactCommand {
 
                 Uuid operQueueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
                 if (operQueueUuid == null) {
-                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
-                            TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
+                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
+                            + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
                     transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
                 } else {
                     uuid = new UUID(operQueueUuid.getValue());

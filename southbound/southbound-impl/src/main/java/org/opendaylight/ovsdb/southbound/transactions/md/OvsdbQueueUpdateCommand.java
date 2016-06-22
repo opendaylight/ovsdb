@@ -8,13 +8,13 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-
+import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -29,8 +29,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsKey;
@@ -42,8 +42,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
@@ -66,7 +64,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
     }
 
     /**
-     * Update the Queues values after finding the related {@OpenVSwitch} list.
+     * Update the Queues values after finding the related {@link OpenVSwitch} list.
      * <p>
      * Queue and OpenVSwitch are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Queue fields in the
@@ -76,8 +74,6 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
      * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
-     * @param updatedQueueRows updated {@link Queue} rows
-
      */
     private void updateQueue(ReadWriteTransaction transaction) {
 
@@ -86,7 +82,6 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         if (ovsdbNode.isPresent()) {
             for (Entry<UUID, Queue> entry : updatedQueueRows.entrySet()) {
                 Queue queue = entry.getValue();
-                Queue oldQueue = oldQueueRows.get(entry.getKey());
                 QueuesBuilder queuesBuilder = new QueuesBuilder();
                 queuesBuilder.setQueueId(new Uri(getQueueId(queue)));
                 queuesBuilder.setQueueUuid(new Uuid(entry.getKey().toString()));
@@ -94,6 +89,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 if (!dscp.isEmpty()) {
                     queuesBuilder.setDscp(dscp.iterator().next().shortValue());
                 }
+                Queue oldQueue = oldQueueRows.get(entry.getKey());
                 setOtherConfig(transaction, queuesBuilder, oldQueue, queue, nodeIId);
                 setExternalIds(transaction, queuesBuilder, oldQueue, queue, nodeIId);
 
@@ -108,19 +104,22 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private String getQueueId(Queue queue) {
         if (queue.getExternalIdsColumn() != null
                 && queue.getExternalIdsColumn().getData() != null) {
             if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-                InstanceIdentifier<Queues> queueIid = (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
-                        queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                InstanceIdentifier<Queues> queueIid =
+                        (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
+                                queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
                 if (queueIid != null) {
                     QueuesKey queuesKey = queueIid.firstKeyOf(Queues.class);
                     if (queuesKey != null) {
                         return queuesKey.getQueueId().getValue();
                     }
                 }
-            } else if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY)) {
+            } else if (queue.getExternalIdsColumn().getData()
+                    .containsKey(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY)) {
                 return queue.getExternalIdsColumn().getData().get(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY);
             }
         }

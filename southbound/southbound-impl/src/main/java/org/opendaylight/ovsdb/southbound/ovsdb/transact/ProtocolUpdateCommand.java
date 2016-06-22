@@ -11,10 +11,11 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -30,9 +31,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 public class ProtocolUpdateCommand implements TransactCommand {
 

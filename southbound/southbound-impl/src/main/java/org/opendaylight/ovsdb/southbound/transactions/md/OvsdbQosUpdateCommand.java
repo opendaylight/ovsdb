@@ -8,13 +8,13 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-
+import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -27,15 +27,15 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbQueueRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QosExternalIdsKey;
@@ -50,8 +50,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQosUpdateCommand.class);
@@ -97,12 +95,12 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         if (ovsdbNode.isPresent()) {
             for (Entry<UUID, Qos> entry : updatedQosRows.entrySet()) {
                 Qos qos = entry.getValue();
-                Qos oldQos = oldQosRows.get(entry.getKey());
                 QosEntriesBuilder qosEntryBuilder = new QosEntriesBuilder();
                 qosEntryBuilder.setQosId(new Uri(getQosId(qos)));
                 qosEntryBuilder.setQosUuid(new Uuid(entry.getKey().toString()));
                 qosEntryBuilder.setQosType(
                         SouthboundMapper.createQosType(qos.getTypeColumn().getData().toString()));
+                Qos oldQos = oldQosRows.get(entry.getKey());
                 setOtherConfig(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
                 setExternalIds(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
                 setQueueList(transaction, qosEntryBuilder, oldQos, qos, nodeIId, ovsdbNode.get());
@@ -118,12 +116,14 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private String getQosId(Qos qos) {
         if (qos.getExternalIdsColumn() != null
                 && qos.getExternalIdsColumn().getData() != null) {
             if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-                InstanceIdentifier<QosEntries> qosIid = (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
-                        qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                InstanceIdentifier<QosEntries> qosIid =
+                        (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
+                                qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
                 if (qosIid != null) {
                     QosEntriesKey qosEntriesKey = qosIid.firstKeyOf(QosEntries.class);
                     if (qosEntriesKey != null) {
@@ -146,6 +146,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private InstanceIdentifier<Queues> getQueueIid(UUID queueUuid, Node ovsdbNode) {
         Queue queue = getQueue(queueUuid);
         if (queue != null && queue.getExternalIdsColumn() != null
@@ -314,7 +315,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         for (Entry<Long, UUID> queueEntry : queueEntries) {
             InstanceIdentifier<Queues> queueIid = getQueueIid(queueEntry.getValue(), ovsdbNode);
             if (queueIid != null) {
-            newQueueList.add(
+                newQueueList.add(
                     new QueueListBuilder()
                     .setQueueNumber(queueEntry.getKey())
                     .setQueueRef(new OvsdbQueueRef(queueIid))

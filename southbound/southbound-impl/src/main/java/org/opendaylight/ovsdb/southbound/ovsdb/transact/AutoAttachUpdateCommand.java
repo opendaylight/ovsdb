@@ -10,13 +10,14 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -47,9 +48,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 public class AutoAttachUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachUpdateCommand.class);
@@ -91,10 +89,12 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                 return;
             }
 
-            final OvsdbNodeAugmentation currentOvsdbNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+            final OvsdbNodeAugmentation currentOvsdbNode =
+                    state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
             final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
             for (final Autoattach autoAttach : autoAttachList) {
-                final AutoAttach autoAttachWrapper = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class);
+                final AutoAttach autoAttachWrapper =
+                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class);
                 if (autoAttach.getSystemName() != null) {
                     autoAttachWrapper.setSystemName(autoAttach.getSystemName());
                 }
@@ -116,10 +116,12 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                 final Map<String, String> externalIdsMap = new HashMap<>();
                 if (externalIds != null) {
                     for (final AutoattachExternalIds externalId : externalIds) {
-                        externalIdsMap.put(externalId.getAutoattachExternalIdKey(), externalId.getAutoattachExternalIdValue());
+                        externalIdsMap.put(externalId.getAutoattachExternalIdKey(),
+                                externalId.getAutoattachExternalIdValue());
                     }
                 }
-                externalIdsMap.put(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY, autoAttach.getAutoattachId().getValue());
+                externalIdsMap.put(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY,
+                        autoAttach.getAutoattachId().getValue());
                 // FIXME: To be uncommented when Open vSwitch supports external_ids column
 //                try {
 //                    autoAttachWrapper.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
@@ -139,21 +141,22 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     transaction.add(op.comment("Updating AutoAttach table: " + uuid));
                 } else {
                     final Uri bridgeUri = autoAttach.getBridgeId();
-                    final String namedUuid = SouthboundMapper.getRandomUUID();
+                    final String namedUuid = SouthboundMapper.getRandomUuid();
                     final Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     transaction.add(op.insert(autoAttachWrapper).withId(namedUuid));
                     final OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(iid, bridgeUri);
                     if (ovsdbBridgeAugmentation != null) {
                         bridge.setName(ovsdbBridgeAugmentation.getBridgeName().getValue());
                         bridge.setAutoAttach(Sets.newHashSet(new UUID(namedUuid)));
-                        LOG.trace("Create Autoattach table {}, "
-                                + "and mutate the bridge {}", autoAttach.getAutoattachId(), getBridge(iid, bridgeUri).getBridgeName().getValue());
+                        LOG.trace("Create Autoattach table {}, and mutate the bridge {}",
+                                autoAttach.getAutoattachId(), getBridge(iid, bridgeUri).getBridgeName().getValue());
                         transaction.add(op.mutate(bridge)
                                 .addMutation(bridge.getAutoAttachColumn().getSchema(),
                                         Mutator.INSERT,bridge.getAutoAttachColumn().getData())
                                 .where(bridge.getNameColumn().getSchema()
                                         .opEqual(bridge.getNameColumn().getData())).build());
-                        transaction.add(op.comment("Bridge: Mutating " + ovsdbBridgeAugmentation.getBridgeName().getValue()
+                        transaction.add(
+                                op.comment("Bridge: Mutating " + ovsdbBridgeAugmentation.getBridgeName().getValue()
                                 + " to add autoattach column " + namedUuid));
                     }
                 }
@@ -171,7 +174,8 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 
         OvsdbBridgeAugmentation bridge = null;
         try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
-            final Optional<OvsdbBridgeAugmentation> bridgeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
+            final Optional<OvsdbBridgeAugmentation> bridgeOptional =
+                    transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
             if (bridgeOptional.isPresent()) {
                 bridge = bridgeOptional.get();
             }

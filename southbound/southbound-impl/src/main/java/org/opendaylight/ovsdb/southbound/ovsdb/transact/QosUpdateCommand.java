@@ -9,30 +9,20 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.notation.Condition;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -51,8 +41,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 public class QosUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QosUpdateCommand.class);
@@ -99,11 +87,12 @@ public class QosUpdateCommand implements TransactCommand {
                 }
 
                 List<QueueList> queueList = qosEntry.getQueueList();
-                Map<Long, UUID>newQueueList = new HashMap<>();
+                Map<Long, UUID> newQueueList = new HashMap<>();
                 if (queueList != null && !queueList.isEmpty()) {
                     for (QueueList queue : queueList) {
                         if (queue.getQueueRef() != null) {
-                            newQueueList.put(queue.getQueueNumber(), new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
+                            newQueueList.put(queue.getQueueNumber(),
+                                    new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
                         } else if (queue.getQueueUuid() != null) {
                             newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
                         }
@@ -146,8 +135,8 @@ public class QosUpdateCommand implements TransactCommand {
 
                 Uuid operQosUuid = getQosEntryUuid(operQosEntries, qosEntry.getQosId());
                 if (operQosUuid == null) {
-                    UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX +
-                            TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
+                    UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
+                            + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
                     transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
                 } else {
                     UUID uuid = new UUID(operQosUuid.getValue());
@@ -171,8 +160,8 @@ public class QosUpdateCommand implements TransactCommand {
                 }
             }
         }
-        return SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
-            TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes());
+        return SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
+                + TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes());
     }
 
     private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {

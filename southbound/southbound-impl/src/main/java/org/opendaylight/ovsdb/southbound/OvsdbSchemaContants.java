@@ -7,14 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-/**
- *
- * @author Anil Vishnoi (avishnoi@brocade.com)
- *
- */
 public class OvsdbSchemaContants {
     public static final String databaseName = "Open_vSwitch";
-    public enum OVSDBSCHEMATABLES {
+
+    public enum OvsdbSchemaTables {
         OPENVSWITCH("Open_vSwitch",null,null),
         BRIDGE("Bridge", "Open_vSwitch", "bridges"),
         PORT("Port", "Bridge", "ports"),
@@ -35,7 +31,7 @@ public class OvsdbSchemaContants {
         private final String parentTableName;
         private final String columnNameInParentTable;
 
-        OVSDBSCHEMATABLES(
+        OvsdbSchemaTables(
                 final String tableName, final String parentTableName,
                 final String columnNameInParentTable) {
             this.tableName = tableName;

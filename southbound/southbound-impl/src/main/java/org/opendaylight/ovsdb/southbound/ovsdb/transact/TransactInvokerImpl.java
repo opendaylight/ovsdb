@@ -7,9 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -21,8 +21,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);

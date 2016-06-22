@@ -8,19 +8,19 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -32,8 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
@@ -78,10 +76,10 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
             return null;
         }
         Iterator<QosEntries> itr = qosList.iterator();
-        Uuid qUuid = new Uuid(qosUuid.toString());
+        Uuid quUuid = new Uuid(qosUuid.toString());
         while (itr.hasNext()) {
             QosEntries qos = itr.next();
-            if (qos.getQosUuid().equals(qUuid)) {
+            if (qos.getQosUuid().equals(quUuid)) {
                 return qos.getKey();
             }
         }

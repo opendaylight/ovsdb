@@ -10,6 +10,10 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,9 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import java.util.Set;
-
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -56,11 +59,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.CheckedFuture;
-
 public class TerminationPointCreateCommand implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
@@ -75,7 +73,8 @@ public class TerminationPointCreateCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         Collection<DataTreeModification<Node>> modifications) {
-        execute(transaction, state, TransactUtils.extractCreated(modifications, OvsdbTerminationPointAugmentation.class),
+        execute(transaction, state,
+                TransactUtils.extractCreated(modifications, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractCreatedOrUpdated(modifications, Node.class));
     }
 
@@ -93,7 +92,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                     state.getBridgeTerminationPoint(terminationPointIid);
             if (!terminationPointOptional.isPresent()) {
                 // Configure interface
-                String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();
+                String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUuid();
                 Interface ovsInterface =
                         TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
                 createInterface(terminationPoint, ovsInterface);
@@ -102,7 +101,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 stampInstanceIdentifier(transaction, entry.getKey(), ovsInterface.getName());
 
                 // Configure port with the above interface details
-                String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
+                String portUuid = "Port_" + SouthboundMapper.getRandomUuid();
                 Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
                 createPort(terminationPoint, port, interfaceUuid);
                 transaction.add(op.insert(port).withId(portUuid));
@@ -264,25 +263,24 @@ public class TerminationPointCreateCommand implements TransactCommand {
     private void createInterfaceBfd(
                     final OvsdbTerminationPointAugmentation terminationPoint,
                     final Interface ovsInterface) {
-
+        try {
+            List<InterfaceBfd> interfaceBfdList =
+                    terminationPoint.getInterfaceBfd();
+            if (interfaceBfdList != null && !interfaceBfdList.isEmpty()) {
+                Map<String, String> interfaceBfdMap = new HashMap<>();
+                for (InterfaceBfd interfaceBfd : interfaceBfdList) {
+                    interfaceBfdMap.put(interfaceBfd.getBfdKey(), interfaceBfd.getBfdValue());
+                }
                 try {
-                    List<InterfaceBfd> interfaceBfdList =
-                            terminationPoint.getInterfaceBfd();
-                    if (interfaceBfdList != null && !interfaceBfdList.isEmpty()) {
-                        Map<String, String> interfaceBfdMap = new HashMap<>();
-                        for (InterfaceBfd interfaceBfd : interfaceBfdList) {
-                            interfaceBfdMap.put(interfaceBfd.getBfdKey(), interfaceBfd.getBfdValue());
-                        }
-                        try {
-                            ovsInterface.setBfd(ImmutableMap.copyOf(interfaceBfdMap));
-                        } catch (NullPointerException e) {
-                            LOG.warn("Incomplete OVSDB interface bfd", e);
-                        }
-                    }
-                } catch (SchemaVersionMismatchException e) {
-                    schemaMismatchLog("bfd", "Interface", e);
+                    ovsInterface.setBfd(ImmutableMap.copyOf(interfaceBfdMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB interface bfd", e);
                 }
             }
+        } catch (SchemaVersionMismatchException e) {
+            schemaMismatchLog("bfd", "Interface", e);
+        }
+    }
 
     private void createPortExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
@@ -335,7 +333,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         if (terminationPoint.getVlanMode() != null) {
             Set<String> portVlanMode = new HashSet<>();
             VlanMode modelVlanMode = terminationPoint.getVlanMode();
-            portVlanMode.add(SouthboundConstants.VLANMODES.values()[modelVlanMode.getIntValue() - 1].getMode());
+            portVlanMode.add(SouthboundConstants.VlanModes.values()[modelVlanMode.getIntValue() - 1].getMode());
             port.setVlanMode(portVlanMode);
         }
     }

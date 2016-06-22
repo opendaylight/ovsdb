@@ -108,8 +108,14 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                     iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName());
 
             // Update port
-            OvsdbBridgeAugmentation operBridge =
-                    state.getBridgeNode(iid).get().getAugmentation(OvsdbBridgeAugmentation.class);
+            // Bug#6136
+            OvsdbBridgeAugmentation operBridge = null;
+            Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = state.getOvsdbBridgeAugmentation(iid);
+            if (ovsdbBridgeOptional.isPresent()) {
+                operBridge = ovsdbBridgeOptional.get();
+            } else {
+                LOG.warn("OVSDB bridge node was not found: {}", iid);
+            }
             Port port = TyperUtils.getTypedRowWrapper(
                     transaction.getDatabaseSchema(), Port.class);
             updatePort(terminationPoint, port, operBridge);

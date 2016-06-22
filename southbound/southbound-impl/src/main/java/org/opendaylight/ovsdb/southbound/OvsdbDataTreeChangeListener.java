@@ -215,6 +215,10 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                         client = cm.getConnectionInstance(nodeIid);
                     }
                 }
+                if( client == null ) {
+                    //Try getting from change root identifier
+                    client = cm.getConnectionInstance(change.getRootPath().getRootIdentifier());
+                }
             } else {
                 LOG.warn("Following change don't have after/before data {}", change);
             }

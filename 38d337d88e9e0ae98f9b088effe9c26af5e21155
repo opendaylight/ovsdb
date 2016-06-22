@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_a9779fd3",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-06-22T18:40:15Z",
+      "side": 1,
+      "message": "The clientFuture in case of connection disconnection is set in the following steps:\n1) the netty channel is closed,  OvsdbConnnection::channelClosed() is triggered\n2) OvsdbConnnectionService::channelClosed() calls StalePassiveConnectionService.disconnectedClient for that client (OvsdbConnnectionService.java:413)\n3) StalePassiveConnectionService.disconnectedClient sets the clientFuture (StalePassiveConnectionService.java:99-110)",
+      "parentUuid": "ba51214e_cfbc9a6f",
+      "range": {
+        "startLine": 88,
+        "startChar": 12,
+        "endLine": 89,
+        "endChar": 117
+      },
+      "revId": "38d337d88e9e0ae98f9b088effe9c26af5e21155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_afc166e6",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-22T02:01:10Z",
       "side": 1,
       "message": "The moment echo() future returns success, it will call FutureCallback.success created in createStableConnectionFutureCallback, and given that echoTimeoutFuture will be triggered after the delay of 10 second, there is possibility that it gets cancelled before 10 seconds and it\u0027s runnable never gets executed, which actually is cancelling the clientFuture. am i missing anything here?",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 117
+      },
+      "revId": "38d337d88e9e0ae98f9b088effe9c26af5e21155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_4c26d1b8",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-06-22T18:40:15Z",
+      "side": 1,
+      "message": "The echo() results in two scenarios:\n1) When the connection is still alive, echo future returns success and is removed from the clientFutureMap.\n2) When OVS is disconnected but the netty channel has not torn down, the echo command cause IOException which results in closing the channel. When the channel is closed the FutureCallback::onSuccess for disconnection for client is called (please see the first reply comment)\n\nIn the above two scenarios, the echo command either results in either an echo reply back (scenario 1) or the channel is disconnected if the connection is stale (scenario 2). In Both cases the FutureCallback::onSuccess() is called and client future is removed from the clientFutureMap. \n\nThere is a third scenario: there is no echo response nor disconnection as result of the echo command in 10 seconds. In this case the echoTimeoutFuture is triggered and all the unresponded connection will be closed. This will result in a FutureCallback::onSuccess for the disconnection.\n\nEventually, we have received all responses (echo response or disconnected) from the OVS, we proceed with the client connection process (line 129)",
+      "parentUuid": "ba51214e_afc166e6",
       "range": {
         "startLine": 90,
         "startChar": 12,

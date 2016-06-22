@@ -52,7 +52,8 @@ public class BridgeRemovedCommand implements TransactCommand {
     private void execute(TransactionBuilder transaction, BridgeOperationalState state, Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
                          Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
         for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
-            LOG.info("Received request to delete ovsdb node {}",ovsdbManagedNodeIid);
+            LOG.debug("Received request to delete ovsdb node : {}",
+                    ovsdbManagedNodeIid);
             OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class,null);
             Optional<OvsdbBridgeAugmentation> ovsdbAugmentationOptional = state
@@ -68,6 +69,7 @@ public class BridgeRemovedCommand implements TransactCommand {
                         .addMutation(ovs.getBridgesColumn().getSchema(), Mutator.DELETE,
                                 Sets.newHashSet(bridgeUuid)));
                 transaction.add(op.comment("Open_vSwitch: Mutating " + original.getBridgeName() + " " + bridgeUuid));
+                LOG.info("Bridge Deleted: {}", ovsdbManagedNodeIid);
             } else {
                 LOG.warn("Unable to delete bridge {} because it was not found in the operational store, "
                         + "and thus we cannot retrieve its UUID", ovsdbManagedNodeIid);

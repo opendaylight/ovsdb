@@ -108,19 +108,26 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                     iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName());
 
             // Update port
-            OvsdbBridgeAugmentation operBridge =
-                    state.getBridgeNode(iid).get().getAugmentation(OvsdbBridgeAugmentation.class);
-            Port port = TyperUtils.getTypedRowWrapper(
-                    transaction.getDatabaseSchema(), Port.class);
-            updatePort(terminationPoint, port, operBridge);
-            Port extraPort = TyperUtils.getTypedRowWrapper(
-                    transaction.getDatabaseSchema(), Port.class);
-            extraPort.setName("");
-            transaction.add(op.update(port)
-                    .where(extraPort.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
-                    .build());
-            LOG.info("Updated Termination Point : {}  with Uuid : {}",
-                    terminationPoint.getName(), terminationPoint.getPortUuid());
+            // Bug#6136
+            Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = state.getOvsdbBridgeAugmentation(iid);
+            if (ovsdbBridgeOptional != null && ovsdbBridgeOptional.isPresent()) {
+                OvsdbBridgeAugmentation operBridge = ovsdbBridgeOptional.get();
+                if (operBridge != null) {
+                    Port port = TyperUtils.getTypedRowWrapper(
+                        transaction.getDatabaseSchema(), Port.class);
+                    updatePort(terminationPoint, port, operBridge);
+                    Port extraPort = TyperUtils.getTypedRowWrapper(
+                        transaction.getDatabaseSchema(), Port.class);
+                    extraPort.setName("");
+                    transaction.add(op.update(port)
+                        .where(extraPort.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
+                        .build());
+                    LOG.info("Updated Termination Point : {}  with Uuid : {}",
+                        terminationPoint.getName(), terminationPoint.getPortUuid());
+                }
+            } else {
+                LOG.warn("OVSDB bridge node was not found: {}", iid);
+            }
         }
     }
 

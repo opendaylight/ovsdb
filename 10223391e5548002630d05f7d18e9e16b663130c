@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_8590c196",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-22T08:54:54Z",
+      "side": 1,
+      "message": "This should be testInit() now ;-).",
+      "revId": "10223391e5548002630d05f7d18e9e16b663130c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_e5cffdae",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-22T08:54:54Z",
+      "side": 1,
+      "message": "Is there a reason to remove the try? Since SouthboundProvider is still Autocloseable, using a try() {} block ensures we close it at the end of the test (which also effectively checks that we close without blowing up).\n\nThe same question applies to the other tests.",
+      "revId": "10223391e5548002630d05f7d18e9e16b663130c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -71,8 +71,8 @@ public class BridgeUpdateCommand implements TransactCommand {
             TransactionBuilder transaction, BridgeOperationalState state,
             InstanceIdentifier<OvsdbBridgeAugmentation> iid, OvsdbBridgeAugmentation ovsdbManagedNode) {
         LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
-                    ovsdbManagedNode.getBridgeName(),
-                    ovsdbManagedNode.getBridgeUuid());
+                ovsdbManagedNode.getBridgeName(),
+                ovsdbManagedNode.getBridgeUuid());
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);
@@ -84,6 +84,9 @@ public class BridgeUpdateCommand implements TransactCommand {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
             transaction.add(op.insert(bridge));
+            LOG.info("Added ovsdb Bridge name: {} uuid: {}",
+                    ovsdbManagedNode.getBridgeName(),
+                    ovsdbManagedNode.getBridgeUuid());
         } else {
             String existingBridgeName = operationalBridgeOptional.get().getBridgeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
@@ -96,15 +99,11 @@ public class BridgeUpdateCommand implements TransactCommand {
         }
     }
 
-
-
     private void setDataPathType(Bridge bridge,OvsdbBridgeAugmentation ovsdbManagedNode) {
         if (ovsdbManagedNode.getDatapathType() != null) {
             bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
         }
     }
-
-
 
     private void setName(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode,
             Optional<OvsdbBridgeAugmentation> operationalBridgeOptional) {
@@ -114,8 +113,6 @@ public class BridgeUpdateCommand implements TransactCommand {
             bridge.setName(operationalBridgeOptional.get().getBridgeName().getValue());
         }
     }
-
-
 
     private void setOpenDaylightExternalIds(Bridge bridge, InstanceIdentifier<OvsdbBridgeAugmentation> iid,
             OvsdbBridgeAugmentation ovsdbManagedNode) {
@@ -132,8 +129,6 @@ public class BridgeUpdateCommand implements TransactCommand {
         bridge.setExternalIds(externalIdMap);
     }
 
-
-
     private void setOpenDaylightOtherConfig(@Nonnull Bridge bridge, @Nonnull OvsdbBridgeAugmentation ovsdbManagedNode) {
         try {
             bridge.setOtherConfig(YangUtils.convertYangKeyValueListToMap(ovsdbManagedNode.getBridgeOtherConfigs(),
@@ -142,8 +137,6 @@ public class BridgeUpdateCommand implements TransactCommand {
             LOG.warn("Incomplete bridge other config", e);
         }
     }
-
-
 
     private void setPort(TransactionBuilder transaction, Bridge bridge,
             OvsdbBridgeAugmentation ovsdbManagedNode) {
@@ -169,8 +162,6 @@ public class BridgeUpdateCommand implements TransactCommand {
         transaction.add(result);
         return result;
     }
-
-
 
     private void setFailMode(Bridge bridge,
             OvsdbBridgeAugmentation ovsdbManagedNode) {

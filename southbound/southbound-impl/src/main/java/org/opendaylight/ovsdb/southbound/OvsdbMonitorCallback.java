@@ -28,9 +28,8 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
-        LOG.debug("result: {} dbSchema: {}",result,dbSchema);
         txInvoker.invoke(new OvsdbOperationalCommandAggregator(key, result, dbSchema));
-        LOG.trace("update exit");
+        LOG.trace("Updated dbSchema: {} and result: {}", dbSchema, result);
     }
 
     @Override

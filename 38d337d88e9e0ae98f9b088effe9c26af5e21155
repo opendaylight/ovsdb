@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_cfbc9a6f",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-22T02:01:10Z",
+      "side": 1,
+      "message": "Vinh, who sets the result of this SettableFuture clientFuture? Looking at the code it looks like FutureCallback created in createStaleConnectionFutureCallback will never be invoked, because nobody is setting clientFuture result (except the case that we cancel the clientFuture, which might not happen because of the reason i mentioned in the below comment).",
+      "range": {
+        "startLine": 88,
+        "startChar": 12,
+        "endLine": 89,
+        "endChar": 117
+      },
+      "revId": "38d337d88e9e0ae98f9b088effe9c26af5e21155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_afc166e6",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-22T02:01:10Z",
+      "side": 1,
+      "message": "The moment echo() future returns success, it will call FutureCallback.success created in createStableConnectionFutureCallback, and given that echoTimeoutFuture will be triggered after the delay of 10 second, there is possibility that it gets cancelled before 10 seconds and it\u0027s runnable never gets executed, which actually is cancelling the clientFuture. am i missing anything here?",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 117
+      },
+      "revId": "38d337d88e9e0ae98f9b088effe9c26af5e21155",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

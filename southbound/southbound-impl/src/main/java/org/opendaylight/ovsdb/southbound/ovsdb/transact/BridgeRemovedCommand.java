@@ -10,10 +10,11 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -28,9 +29,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 public class BridgeRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeRemovedCommand.class);
@@ -49,7 +47,8 @@ public class BridgeRemovedCommand implements TransactCommand {
                 TransactUtils.extractOriginal(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state, Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
+    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
+                         Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
                          Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
         for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
             LOG.info("Received request to delete ovsdb node {}",ovsdbManagedNodeIid);

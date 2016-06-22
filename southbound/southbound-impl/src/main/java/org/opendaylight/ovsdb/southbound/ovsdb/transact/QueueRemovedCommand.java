@@ -87,11 +87,9 @@ public class QueueRemovedCommand implements TransactCommand {
                                                 new UUID(queueUuid.getValue())))
                                         .build());
                             } else {
-                                LOG.warn(
-                                        "Unable to delete Queue{} for node {} because it was not found in the " +
-                                                "operational store, "
-                                                + "and thus we cannot retrieve its UUID", ovsdbNodeIid,
-                                        origQueue.getQueueId());
+                                LOG.warn("Unable to delete Queue{} for node {} because it was not found in the "
+                                        + "operational store, and thus we cannot retrieve its UUID",
+                                        ovsdbNodeIid, origQueue.getQueueId());
                             }
                         }
                     }

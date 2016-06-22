@@ -10,6 +10,9 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -18,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -64,10 +66,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.net.InetAddresses;
 
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
@@ -378,6 +376,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             }
         }
     }
+
     private InstanceIdentifier<Node> getInstanceIdentifier(Bridge bridge) {
         return SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
                 bridge);

@@ -10,11 +10,12 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -39,9 +40,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
 public class AutoAttachRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachRemovedCommand.class);
 
@@ -63,7 +61,8 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                          Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
                          Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
 
-        for (final Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : original.entrySet()) {
+        for (final Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry :
+                original.entrySet()) {
             final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
             final OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
             final OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
@@ -71,8 +70,8 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             if (ovsdbNodeAugmentation != null && deletedOvsdbNodeAugmentation != null) {
                 final List<Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
                 final List<Autoattach> deletedAutoattachList = deletedOvsdbNodeAugmentation.getAutoattach();
-                if(origAutoattachList != null && !origAutoattachList.isEmpty() &&
-                        (deletedAutoattachList == null || deletedAutoattachList.isEmpty())) {
+                if (origAutoattachList != null && !origAutoattachList.isEmpty()
+                        && (deletedAutoattachList == null || deletedAutoattachList.isEmpty())) {
 
                     if (true) {
                         // FIXME: Remove if loop after ovs community supports external_ids column in AutoAttach Table
@@ -100,7 +99,8 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(ovsdbNodeIid, autoattachUuid);
         if (autoattachUuid != null && bridgeAugmentation != null) {
             final UUID uuid = new UUID(autoattachUuid.getValue());
-            final AutoAttach autoattach = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class, null);
+            final AutoAttach autoattach =
+                    TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class, null);
             transaction.add(op.delete(autoattach.getSchema())
                     .where(autoattach.getUuidColumn().getSchema().opEqual(uuid))
                     .build());
@@ -144,14 +144,16 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
             final Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid).get();
             if (nodeOptional.isPresent()) {
-                final List<ManagedNodeEntry> managedNodes = nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+                final List<ManagedNodeEntry> managedNodes =
+                        nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
                 for (final ManagedNodeEntry managedNode : managedNodes) {
                     final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
                     final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
                             .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);
-                    final Optional<OvsdbBridgeAugmentation> optionalBridge = transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
+                    final Optional<OvsdbBridgeAugmentation> optionalBridge =
+                            transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
                     bridge = optionalBridge.orNull();
-                    if(bridge != null && bridge.getAutoAttach() != null
+                    if (bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {
                         return bridge;
                     }

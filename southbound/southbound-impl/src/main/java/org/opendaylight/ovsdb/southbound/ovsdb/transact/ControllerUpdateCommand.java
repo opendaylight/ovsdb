@@ -9,10 +9,11 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -27,9 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +68,7 @@ public class ControllerUpdateCommand implements TransactCommand {
                     Controller controller =
                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Controller.class);
                     controller.setTarget(entry.getValue().getTarget().getValue());
-                    String controllerNamedUuidString = SouthboundMapper.getRandomUUID();
+                    String controllerNamedUuidString = SouthboundMapper.getRandomUuid();
                     UUID controllerNamedUuid = new UUID(controllerNamedUuidString);
                     transaction.add(op.insert(controller).withId(controllerNamedUuidString));
 

@@ -7,10 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -35,8 +35,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbManagersUpdateCommand.class);

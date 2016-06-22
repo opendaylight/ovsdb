@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.connection;
 
+import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
@@ -18,12 +20,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.UnknownHostException;
-import java.util.concurrent.atomic.AtomicInteger;
-
-/**
- * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
- */
 public class ConnectionReconciliationTask extends ReconciliationTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConnectionReconciliationTask.class);
@@ -43,13 +39,13 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     public boolean reconcileConfiguration(OvsdbConnectionManager connectionManager) {
         boolean result = false;
         connectionAttempt.incrementAndGet();
-        InstanceIdentifier<Node> nIid = (InstanceIdentifier<Node>) nodeIid;
+        InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
         OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)configData;
 
         LOG.info("Retry({}) connection to Ovsdb Node {} ", connectionAttempt.get(), ovsdbNode.getConnectionInfo());
         OvsdbClient client = null;
         try {
-            client = connectionManager.connect(nIid, ovsdbNode);
+            client = connectionManager.connect(ndIid, ovsdbNode);
             if (client != null) {
                 LOG.info("Successfully connected to Ovsdb Node {} ", ovsdbNode.getConnectionInfo());
                 result = true;
@@ -66,7 +62,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     @Override
     public void doRetry(boolean wasLastAttemptSuccessful) {
 
-        if( !wasLastAttemptSuccessful && connectionAttempt.get() <= MAX_ATTEMPT ) {
+        if (!wasLastAttemptSuccessful && connectionAttempt.get() <= MAX_ATTEMPT) {
             reconciliationManager.enqueueForRetry(ConnectionReconciliationTask.this);
         } else {
             reconciliationManager.dequeue(this);

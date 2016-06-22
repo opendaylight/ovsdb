@@ -69,6 +69,24 @@
       "revId": "10223391e5548002630d05f7d18e9e16b663130c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_e64b8457",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-22T13:45:41Z",
+      "side": 1,
+      "message": "Ah yes, the close() method is marked in the XML descriptor. Since the tests don\u0027t use Blueprint though I\u0027d say it makes sense to keep things this way, so that we also check the close() method ;-).",
+      "parentUuid": "ba51214e_40c4d791",
+      "revId": "10223391e5548002630d05f7d18e9e16b663130c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

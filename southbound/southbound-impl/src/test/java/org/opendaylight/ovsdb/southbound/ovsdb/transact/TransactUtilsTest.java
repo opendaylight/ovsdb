@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -199,7 +198,7 @@ public class TransactUtilsTest {
         Insert insert = mock(Insert.class);
         when(insert.getUuidName()).thenReturn(UUID_NAME);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.getRandomUUID()).thenReturn(UUID_NAME);
+        PowerMockito.when(SouthboundMapper.getRandomUuid()).thenReturn(UUID_NAME);
         doNothing().when(insert).setUuidName(anyString());
 
         UUID uuid = mock(UUID.class);

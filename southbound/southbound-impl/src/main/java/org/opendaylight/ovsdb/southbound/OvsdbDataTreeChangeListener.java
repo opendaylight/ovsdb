@@ -11,12 +11,9 @@ package org.opendaylight.ovsdb.southbound;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -34,7 +31,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -193,29 +189,30 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             OvsdbConnectionInstance client = null;
-            Node node = change.getRootNode().getDataAfter() != null?
-                    change.getRootNode().getDataAfter() : change.getRootNode().getDataBefore();
+            Node node = change.getRootNode().getDataAfter() != null
+                    ? change.getRootNode().getDataAfter() : change.getRootNode().getDataBefore();
             if (node != null) {
                 InstanceIdentifier<Node> nodeIid;
-                Augmentation nodeAug = node.getAugmentation(OvsdbNodeAugmentation.class) !=null?
-                        node.getAugmentation(OvsdbNodeAugmentation.class):node.getAugmentation(OvsdbBridgeAugmentation.class);
+                Augmentation nodeAug = node.getAugmentation(OvsdbNodeAugmentation.class) != null
+                        ? node.getAugmentation(OvsdbNodeAugmentation.class)
+                        : node.getAugmentation(OvsdbBridgeAugmentation.class);
 
-                if(nodeAug instanceof OvsdbNodeAugmentation) {
+                if (nodeAug instanceof OvsdbNodeAugmentation) {
                     OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation) nodeAug;
-                    if(ovsdbNode.getConnectionInfo() != null) {
+                    if (ovsdbNode.getConnectionInfo() != null) {
                         client = cm.getConnectionInstance(ovsdbNode.getConnectionInfo());
-                    }else {
+                    } else {
                         client = cm.getConnectionInstance(SouthboundMapper.createInstanceIdentifier(node.getNodeId()));
                     }
                 }
-                if(nodeAug instanceof OvsdbBridgeAugmentation) {
+                if (nodeAug instanceof OvsdbBridgeAugmentation) {
                     OvsdbBridgeAugmentation bridgeAugmentation = (OvsdbBridgeAugmentation)nodeAug;
-                    if(bridgeAugmentation.getManagedBy() != null) {
+                    if (bridgeAugmentation.getManagedBy() != null) {
                         nodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
                         client = cm.getConnectionInstance(nodeIid);
                     }
                 }
-                if( client == null ) {
+                if (client == null) {
                     //Try getting from change root identifier
                     client = cm.getConnectionInstance(change.getRootPath().getRootIdentifier());
                 }

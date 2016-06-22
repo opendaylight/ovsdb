@@ -9,10 +9,11 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -29,13 +30,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
-/**
- * @author avishnoi@brocade.com (Anil Vishnoi)
- *
- */
 public class TerminationPointDeleteCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointDeleteCommand.class);
 
@@ -57,7 +51,8 @@ public class TerminationPointDeleteCommand implements TransactCommand {
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> originals,
+                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                                 OvsdbTerminationPointAugmentation> originals,
                          Map<InstanceIdentifier<Node>, Node> originalNodes,
                          Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
@@ -68,11 +63,11 @@ public class TerminationPointDeleteCommand implements TransactCommand {
             OvsdbBridgeAugmentation originalOvsdbBridgeAugmentation =
                     originalNode.getAugmentation(OvsdbBridgeAugmentation.class);
             String bridgeName = null;
-            if(originalOvsdbBridgeAugmentation != null) {
+            if (originalOvsdbBridgeAugmentation != null) {
                 bridgeName = originalOvsdbBridgeAugmentation.getBridgeName().getValue();
             } else {
                 Optional<OvsdbBridgeAugmentation> bridgeAug = state.getOvsdbBridgeAugmentation(removedTpIid);
-                if(bridgeAug.isPresent()) {
+                if (bridgeAug.isPresent()) {
                     bridgeName = bridgeAug.get().getBridgeName().getValue();
                 } else {
                     LOG.error("Bridge does not exist for termination point {}", removedTpIid);

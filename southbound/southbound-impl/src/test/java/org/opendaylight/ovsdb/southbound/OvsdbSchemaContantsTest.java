@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.ovsdb.southbound.OvsdbSchemaContants.OVSDBSCHEMATABLES;
+import org.opendaylight.ovsdb.southbound.OvsdbSchemaContants.OvsdbSchemaTables;
 
 public class OvsdbSchemaContantsTest {
 
@@ -28,16 +28,16 @@ public class OvsdbSchemaContantsTest {
     }
     @Test
     public void testGetTableName() {
-        assertEquals("Error getTableName() did not return correct value", "Open_vSwitch", OVSDBSCHEMATABLES.OPENVSWITCH.getTableName());
+        assertEquals("Error getTableName() did not return correct value", "Open_vSwitch", OvsdbSchemaTables.OPENVSWITCH.getTableName());
     }
 
     @Test
     public void testGetParentTableName() {
-        assertEquals("Error getTableName() did not return correct value", null, OVSDBSCHEMATABLES.OPENVSWITCH.getParentTableName());
+        assertEquals("Error getTableName() did not return correct value", null, OvsdbSchemaTables.OPENVSWITCH.getParentTableName());
     }
 
     @Test
     public void testGetColumnNameInParentTable() {
-        assertEquals("Error getTableName() did not return correct value", null, OVSDBSCHEMATABLES.OPENVSWITCH.getColumnNameInParentTable());
+        assertEquals("Error getTableName() did not return correct value", null, OvsdbSchemaTables.OPENVSWITCH.getColumnNameInParentTable());
     }
 }

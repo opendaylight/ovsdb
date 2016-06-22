@@ -83,7 +83,7 @@ public class QueueUpdateCommand implements TransactCommand {
                 if (queueEntry.getDscp() != null) {
                     try {
                         Set<Long> dscpSet = new HashSet<>();
-                            if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
+                        if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
                             queue.setDscp(dscpSet);
                         }
                     } catch (NumberFormatException e) {
@@ -114,8 +114,8 @@ public class QueueUpdateCommand implements TransactCommand {
 
                 Uuid operQueueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
                 if (operQueueUuid == null) {
-                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
-                            TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
+                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
+                            + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
                     transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
                 } else {
                     UUID uuid = new UUID(operQueueUuid.getValue());

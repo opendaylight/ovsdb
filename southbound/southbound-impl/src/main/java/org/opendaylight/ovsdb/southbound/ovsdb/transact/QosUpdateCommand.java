@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -88,11 +87,12 @@ public class QosUpdateCommand implements TransactCommand {
                 }
 
                 List<QueueList> queueList = qosEntry.getQueueList();
-                Map<Long, UUID>newQueueList = new HashMap<>();
+                Map<Long, UUID> newQueueList = new HashMap<>();
                 if (queueList != null && !queueList.isEmpty()) {
                     for (QueueList queue : queueList) {
                         if (queue.getQueueRef() != null) {
-                            newQueueList.put(queue.getQueueNumber(), new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
+                            newQueueList.put(queue.getQueueNumber(),
+                                    new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
                         } else if (queue.getQueueUuid() != null) {
                             newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
                         }
@@ -123,8 +123,8 @@ public class QosUpdateCommand implements TransactCommand {
 
                 Uuid operQosUuid = getQosEntryUuid(operQosEntries, qosEntry.getQosId());
                 if (operQosUuid == null) {
-                    UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX +
-                            TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
+                    UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
+                            + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
                     transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
                 } else {
                     UUID uuid = new UUID(operQosUuid.getValue());
@@ -148,8 +148,8 @@ public class QosUpdateCommand implements TransactCommand {
                 }
             }
         }
-        return SouthboundConstants.QUEUE_NAMED_UUID_PREFIX +
-            TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes());
+        return SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
+                + TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes());
     }
 
     private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {

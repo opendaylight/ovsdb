@@ -8,13 +8,12 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;

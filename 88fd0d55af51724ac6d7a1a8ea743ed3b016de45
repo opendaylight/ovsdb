@@ -94,6 +94,30 @@
       "revId": "88fd0d55af51724ac6d7a1a8ea743ed3b016de45",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_3bee2d89",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-23T21:41:22Z",
+      "side": 1,
+      "message": "target isn\u0027t a problem because those are already excluded. The odlparent did not cover the yang files.\n\nStephen, your build works now because the blueprint stuff is in - and that removes the yang files. I will remove this line since the files are not there anymore.",
+      "parentUuid": "ba51214e_1b89a926",
+      "range": {
+        "startLine": 134,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 39
+      },
+      "revId": "88fd0d55af51724ac6d7a1a8ea743ed3b016de45",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

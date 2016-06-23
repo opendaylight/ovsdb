@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_7bff0535",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-23T21:41:22Z",
+      "side": 0,
+      "message": "ODL guidelines have moved away from adding these author lines and to use a single contributor file. But one of these author lines checkstyle complained about - missing period or a \u003cp\u003e or something, so since ODL doesn\u0027t use them I just removed them as I hit files with checkstyle errors.\n\nEasy enough to add them back if really wanted.",
+      "parentUuid": "ba51214e_1b908942",
+      "range": {
+        "startLine": 36,
+        "startChar": 3,
+        "endLine": 36,
+        "endChar": 46
+      },
+      "revId": "ebb862cc3997a95466c029cc3810446fbc37ff57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_5b9a0164",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationTaskManager.java",
         "patchSetId": 1

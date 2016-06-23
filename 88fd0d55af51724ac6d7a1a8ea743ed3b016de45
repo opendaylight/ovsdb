@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_b5e24c9d",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-23T13:10:16Z",
+      "side": 1,
+      "message": "curious why we need this?",
+      "range": {
+        "startLine": 134,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 39
+      },
+      "revId": "88fd0d55af51724ac6d7a1a8ea743ed3b016de45",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

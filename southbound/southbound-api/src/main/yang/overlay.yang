@@ -5,7 +5,7 @@ module overlay {
 
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
     import yang-ext { prefix "ext"; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
 
     revision "2015-01-05" {
         description "Initial revision of overlay model";

@@ -46,6 +46,30 @@
       "revId": "88fd0d55af51724ac6d7a1a8ea743ed3b016de45",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_4004d07a",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-23T15:26:20Z",
+      "side": 1,
+      "message": "There shouldn\u0027t be any re-generated files in src now, they get generated in target; AFAICS the exclusion is no longer necessary (at least, southbound-impl builds fine without it for me).",
+      "parentUuid": "ba51214e_b52c0cad",
+      "range": {
+        "startLine": 134,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 39
+      },
+      "revId": "88fd0d55af51724ac6d7a1a8ea743ed3b016de45",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Sam Hague <shague@redhat.com>
+Code-Review+1: Jamo Luhrsen <jluhrsen@redhat.com>
+Code-Review+2: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-by: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-at: Thu, 23 Jun 2016 22:57:56 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/39002
+Project: ovsdb
+Branch: refs/heads/stable/beryllium

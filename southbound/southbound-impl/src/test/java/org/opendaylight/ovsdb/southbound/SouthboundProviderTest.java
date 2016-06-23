@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -32,11 +32,12 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
@@ -55,22 +56,24 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
     }
 
     @Test
-    public void testOnSessionInitiated() throws CandidateAlreadyRegisteredException {
-        ProviderContext session = mock(ProviderContext.class);
-        when(session.getSALService(DataBroker.class)).thenReturn(getDataBroker());
-
+    public void testInit() throws CandidateAlreadyRegisteredException {
         // Indicate that this is the owner
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
                 Optional.of(new EntityOwnershipState(true, true)));
 
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(entityOwnershipService,
-                mock(OvsdbConnection.class))) {
+        try (SouthboundProvider southboundProvider = new SouthboundProvider(
+                getDataBroker(),
+                entityOwnershipService,
+                Mockito.mock(OvsdbConnection.class),
+                Mockito.mock(SchemaService.class),
+                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+
             // Initiate the session
-            southboundProvider.onSessionInitiated(session);
+            southboundProvider.init();
 
             // Verify that at least one listener was registered
-            verify(entityOwnershipService, atLeastOnce()).registerListener(anyString(),
-                    any(EntityOwnershipListener.class));
+            verify(entityOwnershipService, atLeastOnce()).registerListener(
+                    anyString(), any(EntityOwnershipListener.class));
 
             // Verify that a candidate was registered
             verify(entityOwnershipService).registerCandidate(any(Entity.class));
@@ -79,13 +82,17 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
 
     @Test
     public void testGetDb() {
-        ProviderContext session = mock(ProviderContext.class);
-        when(session.getSALService(DataBroker.class)).thenReturn(getDataBroker());
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
                 Optional.of(new EntityOwnershipState(true, true)));
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(entityOwnershipService,
-                mock(OvsdbConnection.class))) {
-            southboundProvider.onSessionInitiated(session);
+
+        try (SouthboundProvider southboundProvider = new SouthboundProvider(
+                getDataBroker(),
+                entityOwnershipService,
+                Mockito.mock(OvsdbConnection.class),
+                Mockito.mock(SchemaService.class),
+                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+
+            southboundProvider.init();
 
             assertEquals(getDataBroker(), SouthboundProvider.getDb());
         }
@@ -93,9 +100,6 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
 
     @Test
     public void testHandleOwnershipChange() throws ReadFailedException {
-        // Start as slave
-        ProviderContext session = mock(ProviderContext.class);
-        when(session.getSALService(DataBroker.class)).thenReturn(getDataBroker());
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
                 Optional.of(new EntityOwnershipState(false, true)));
         Entity entity = new Entity("ovsdb-southbound-provider", "ovsdb-southbound-provider");
@@ -103,9 +107,14 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
 
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(entityOwnershipService,
-                mock(OvsdbConnection.class))) {
-            southboundProvider.onSessionInitiated(session);
+        try (SouthboundProvider southboundProvider = new SouthboundProvider(
+                getDataBroker(),
+                entityOwnershipService,
+                Mockito.mock(OvsdbConnection.class),
+                Mockito.mock(SchemaService.class),
+                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+
+            southboundProvider.init();
 
             // At this point the OVSDB topology must not be present in either tree
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,

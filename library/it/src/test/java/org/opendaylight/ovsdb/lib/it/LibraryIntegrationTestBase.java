@@ -94,16 +94,6 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     }
 
     @Override
-    public String getModuleName() {
-        return "library";
-    }
-
-    @Override
-    public String getInstanceName() {
-        return "library-default";
-    }
-
-    @Override
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.ovsdb")

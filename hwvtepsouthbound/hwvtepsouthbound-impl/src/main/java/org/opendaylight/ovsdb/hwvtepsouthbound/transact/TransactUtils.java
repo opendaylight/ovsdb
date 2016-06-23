@@ -42,6 +42,9 @@ import com.google.common.base.Optional;
 public class TransactUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
 
+    private TransactUtils(){
+    }
+
     public static Node getCreated(DataObjectModification<Node> mod) {
         if((mod.getModificationType() == ModificationType.WRITE)
                         && (mod.getDataBefore() == null)){
@@ -116,32 +119,6 @@ public class TransactUtils {
         }
         return result;
     }
-
-    /*
-    public static <T extends Augmentation<Node>> Map<InstanceIdentifier<? extends DataObject>, T> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<T> class1) {
-        // TODO Auto-generated method stub
-        Map<InstanceIdentifier<?>, T> result =
-            new HashMap<InstanceIdentifier<?>, T>();
-        if(changes != null && !changes.isEmpty()) {
-            for(DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = getCreated(mod);
-                if(created != null) {
-                    T logicalSwitch = created.getAugmentation(class1);
-                    created.getKey().getNodeId().get
-                    logicalSwitch.
-                    InstanceIdentifier<?> iid = change.getRootPath().getRootIdentifier()..augmentation(class1);
-                    if(logicalSwitch != null) {
-                        result.put(iid, logicalSwitch);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    */
 
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNodeFromConfig(
             ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {

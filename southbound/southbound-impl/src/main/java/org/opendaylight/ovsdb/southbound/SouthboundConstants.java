@@ -127,6 +127,8 @@ public class SouthboundConstants {
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
+    public static final String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";
+    public static final String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
     public static final String AUTOATTACH_ID_EXTERNAL_ID_KEY = "opendaylight-autoattach-id";
 
     public enum VlanModes {

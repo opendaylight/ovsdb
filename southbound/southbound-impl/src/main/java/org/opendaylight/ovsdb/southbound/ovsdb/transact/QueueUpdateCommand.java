@@ -123,7 +123,7 @@ public class QueueUpdateCommand implements TransactCommand {
                     Queue extraQueue = TyperUtils.getTypedRowWrapper(
                             transaction.getDatabaseSchema(), Queue.class, null);
                     extraQueue.getUuidColumn().setData(uuid);
-                    transaction.add(op.update(queue.getSchema())
+                    transaction.add(op.update(queue)
                             .where(extraQueue.getUuidColumn().getSchema().opEqual(uuid)).build());
                 }
                 transaction.build();

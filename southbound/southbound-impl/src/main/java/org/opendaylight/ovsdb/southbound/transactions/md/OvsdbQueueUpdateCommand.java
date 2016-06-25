@@ -107,16 +107,20 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
     @SuppressWarnings("unchecked")
     private String getQueueId(Queue queue) {
         if (queue.getExternalIdsColumn() != null
-                && queue.getExternalIdsColumn().getData() != null
-                && queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-            InstanceIdentifier<Queues> queueIid =
-                    (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
-                            queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
-            if (queueIid != null) {
-                QueuesKey queuesKey = queueIid.firstKeyOf(Queues.class);
-                if (queuesKey != null) {
-                    return queuesKey.getQueueId().getValue();
+                && queue.getExternalIdsColumn().getData() != null) {
+            if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+                InstanceIdentifier<Queues> queueIid =
+                        (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
+                        queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                if (queueIid != null) {
+                    QueuesKey queuesKey = queueIid.firstKeyOf(Queues.class);
+                    if (queuesKey != null) {
+                        return queuesKey.getQueueId().getValue();
+                    }
                 }
+            } else if (queue.getExternalIdsColumn().getData()
+                    .containsKey(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY)) {
+                return queue.getExternalIdsColumn().getData().get(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY);
             }
         }
         return SouthboundConstants.QUEUE_URI_PREFIX + "://" + queue.getUuid().toString();

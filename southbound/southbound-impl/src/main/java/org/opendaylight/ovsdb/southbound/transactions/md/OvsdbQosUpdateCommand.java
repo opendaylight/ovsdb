@@ -119,16 +119,19 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
     @SuppressWarnings("unchecked")
     private String getQosId(Qos qos) {
         if (qos.getExternalIdsColumn() != null
-                && qos.getExternalIdsColumn().getData() != null
-                && qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-            InstanceIdentifier<QosEntries> qosIid =
-                    (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
-                            qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
-            if (qosIid != null) {
-                QosEntriesKey qosEntriesKey = qosIid.firstKeyOf(QosEntries.class);
-                if (qosEntriesKey != null) {
-                    return qosEntriesKey.getQosId().getValue();
+                && qos.getExternalIdsColumn().getData() != null) {
+            if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+                InstanceIdentifier<QosEntries> qosIid =
+                        (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
+                                qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                if (qosIid != null) {
+                    QosEntriesKey qosEntriesKey = qosIid.firstKeyOf(QosEntries.class);
+                    if (qosEntriesKey != null) {
+                        return qosEntriesKey.getQosId().getValue();
+                    }
                 }
+            } else if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.QOS_ID_EXTERNAL_ID_KEY)) {
+                return qos.getExternalIdsColumn().getData().get(SouthboundConstants.QOS_ID_EXTERNAL_ID_KEY);
             }
         }
         return SouthboundConstants.QOS_URI_PREFIX + "://" + qos.getUuid().toString();

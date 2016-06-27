@@ -78,7 +78,6 @@ public class TerminationPointUpdateCommand implements TransactCommand {
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
                          Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
                                  OvsdbTerminationPointAugmentation> createdOrUpdated) {
-        LOG.trace("TerminationPointUpdateCommand called");
         for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
                  OvsdbTerminationPointAugmentation> terminationPointEntry : createdOrUpdated.entrySet()) {
             updateTerminationPoint(transaction, state, terminationPointEntry.getKey(),
@@ -89,9 +88,10 @@ public class TerminationPointUpdateCommand implements TransactCommand {
     public void updateTerminationPoint(TransactionBuilder transaction, BridgeOperationalState state,
                                        InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
                                        OvsdbTerminationPointAugmentation terminationPoint) {
+
         if (terminationPoint != null) {
             LOG.debug("Received request to update termination point {}",
-                    terminationPoint.getName());
+                   terminationPoint.getName());
 
             // Update interface
             Interface ovsInterface =
@@ -119,6 +119,8 @@ public class TerminationPointUpdateCommand implements TransactCommand {
             transaction.add(op.update(port)
                     .where(extraPort.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
                     .build());
+            LOG.info("Updated Termination Point : {}  with Uuid : {}",
+                    terminationPoint.getName(), terminationPoint.getPortUuid());
         }
     }
 

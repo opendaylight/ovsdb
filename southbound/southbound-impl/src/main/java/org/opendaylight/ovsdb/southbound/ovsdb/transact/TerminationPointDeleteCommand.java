@@ -61,7 +61,7 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                          Map<InstanceIdentifier<Node>, Node> originalNodes,
                          Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
-            LOG.info("Received request to delete termination point {}",removedTpIid);
+            LOG.debug("Received request to delete termination point {}",removedTpIid);
 
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
             Node originalNode = originalNodes.get(removedTpIid.firstIdentifierOf(Node.class));
@@ -102,6 +102,8 @@ public class TerminationPointDeleteCommand implements TransactCommand {
 
                     transaction.add(op.comment("Bridge: Mutating " + bridgeName
                             + " to remove port " + portUuid));
+                    LOG.info("Deleted Termination Point : {} with uuid : {}",
+                            original.getName(), portUuid);
                 } else {
                     LOG.warn("Unable to delete port {} from bridge  {} because it was not found in the operational "
                             + "store, operational store,  and thus we cannot retrieve its UUID",

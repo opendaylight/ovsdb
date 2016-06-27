@@ -53,7 +53,8 @@ public class ControllerUpdateCommand implements TransactCommand {
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
                          Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> controllers,
                          Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
-        LOG.info("execute: controllers: {} --- bridges: {}", controllers, bridges);
+        LOG.info("Register ODL controllers : {}  bridges detail : {}",
+                controllers, bridges);
         for (Entry<InstanceIdentifier<ControllerEntry>, ControllerEntry> entry: controllers.entrySet()) {
             Optional<ControllerEntry> operationalControllerEntryOptional =
                     state.getControllerEntry(entry.getKey());
@@ -77,7 +78,8 @@ public class ControllerUpdateCommand implements TransactCommand {
                     Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     bridge.setName(ovsdbBridge.getBridgeName().getValue());
                     bridge.setController(Sets.newHashSet(controllerNamedUuid));
-                    LOG.info("execute: bridge: {}", bridge);
+                    LOG.trace("Added controller : {} for bridge : {}",
+                            controller.getTarget(), bridge.getName());
                     transaction.add(op.mutate(bridge)
                             .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
                                     bridge.getControllerColumn().getData())
@@ -86,7 +88,7 @@ public class ControllerUpdateCommand implements TransactCommand {
                 }
             }
         }
-        LOG.info("execute: transaction: {}", transaction.build());
+        LOG.trace("Executed transaction: {}", transaction.build());
 
     }
 

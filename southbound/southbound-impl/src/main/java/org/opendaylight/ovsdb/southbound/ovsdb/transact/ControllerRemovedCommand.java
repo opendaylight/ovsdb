@@ -28,8 +28,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ControllerRemovedCommand implements TransactCommand {
+private static final Logger LOG = LoggerFactory.getLogger(ControllerRemovedCommand.class);
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
@@ -42,7 +45,7 @@ public class ControllerRemovedCommand implements TransactCommand {
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         Collection<DataTreeModification<Node>> modifications) {
         execute(transaction, state, TransactUtils.extractRemoved(modifications, ControllerEntry.class),
-                TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
+        TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
@@ -50,6 +53,7 @@ public class ControllerRemovedCommand implements TransactCommand {
                          Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation>
                                  modifiedBridges) {
         for (InstanceIdentifier<ControllerEntry> controllerIid : removedControllers) {
+            LOG.debug("Removing Registered...ODL controller : {} ", controllerIid);
             InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
                     controllerIid.firstIdentifierOf(OvsdbBridgeAugmentation.class);
             OvsdbBridgeAugmentation ovsdbBridge = modifiedBridges.get(bridgeIid);

@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_3a049d7d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ControllerRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-27T08:32:42Z",
+      "side": 1,
+      "message": "please change it to \"Removing Registered..\" and add a debug message in the for loop whenever it remove each controller.",
+      "range": {
+        "startLine": 55,
+        "startChar": 18,
+        "endLine": 55,
+        "endChar": 25
+      },
+      "revId": "e5586731f965e5e5666c97848113f096d70bfc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_baf70d8c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ControllerUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-27T08:32:42Z",
+      "side": 1,
+      "message": "please change it to \"Register\".",
+      "range": {
+        "startLine": 56,
+        "startChar": 18,
+        "endLine": 56,
+        "endChar": 28
+      },
+      "revId": "e5586731f965e5e5666c97848113f096d70bfc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_faf18596",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ControllerUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-27T08:32:42Z",
+      "side": 1,
+      "message": "please change this it \"Added controller {} for bridge {}\", controller.getTarget(), bridge.getName().",
+      "range": {
+        "startLine": 81,
+        "startChar": 31,
+        "endLine": 81,
+        "endChar": 48
+      },
+      "revId": "e5586731f965e5e5666c97848113f096d70bfc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_5a3a3137",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-27T08:32:42Z",
+      "side": 1,
+      "message": "portUuid alone is not very helpful here. We better print this with name, something like (\"Deleted Termination Point {} with uuid {}\", original.getName(), portUuid)",
+      "range": {
+        "startLine": 105,
+        "startChar": 63,
+        "endLine": 105,
+        "endChar": 71
+      },
+      "revId": "e5586731f965e5e5666c97848113f096d70bfc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_fa4865ce",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-27T08:32:42Z",
+      "side": 1,
+      "message": "It won\u0027t print both the variable. Please change this to \"Updated Termination Point {} with Uuid ()\", terminationPoint.getName(), terminationPoint.getPortUuid()\"",
+      "range": {
+        "startLine": 123,
+        "startChar": 50,
+        "endLine": 123,
+        "endChar": 52
+      },
+      "revId": "e5586731f965e5e5666c97848113f096d70bfc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

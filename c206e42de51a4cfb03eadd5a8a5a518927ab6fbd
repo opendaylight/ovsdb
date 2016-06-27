@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_9dca036d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ControllerUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 4018
+      },
+      "writtenOn": "2016-06-27T10:31:01Z",
+      "side": 1,
+      "message": "Can you check the code controller.getTarget()?\n\ni think this methd is not exist?",
+      "revId": "c206e42de51a4cfb03eadd5a8a5a518927ab6fbd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_3da137aa",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4018
+      },
+      "writtenOn": "2016-06-27T10:31:01Z",
+      "side": 1,
+      "message": "Please give a space after comma operator.",
+      "revId": "c206e42de51a4cfb03eadd5a8a5a518927ab6fbd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

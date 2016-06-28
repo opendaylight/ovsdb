@@ -7,15 +7,13 @@
  */
 package org.opendaylight.ovsdb.lib.operations;
 
+import com.google.common.collect.Lists;
 import java.util.List;
-
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import com.google.common.collect.Lists;
 
 public class Mutate<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 

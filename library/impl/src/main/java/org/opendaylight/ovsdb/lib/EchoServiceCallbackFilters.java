@@ -8,8 +8,5 @@
 
 package org.opendaylight.ovsdb.lib;
 
-/**
- * @author Ashwin Raveendran (ashwin at gmail)
- */
 public interface EchoServiceCallbackFilters {
 }

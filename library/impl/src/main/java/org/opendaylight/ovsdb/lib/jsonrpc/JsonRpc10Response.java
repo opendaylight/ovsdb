@@ -8,9 +8,8 @@
 
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+import java.util.List;
 
 public class JsonRpc10Response {
 

@@ -19,14 +19,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.support.membermodification.MemberMatcher.field;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,12 +66,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-@PrepareForTest({OvsdbConnectionInstance.class, MonitorRequestBuilder.class})
 @RunWith(PowerMockRunner.class)
-
+@PrepareForTest({OvsdbConnectionInstance.class, MonitorRequestBuilder.class})
 public class OvsdbConnectionInstanceTest {
+
     @Mock private OvsdbConnectionInstance ovsdbConnectionInstance;
     @Mock private OvsdbClient client;
     @Mock private ConnectionInfo connectionInfo;
@@ -82,40 +82,41 @@ public class OvsdbConnectionInstanceTest {
     @Before
     public void setUp() throws Exception {
         ovsdbConnectionInstance = PowerMockito.mock(OvsdbConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
-        MemberModifier.field(OvsdbConnectionInstance.class, "txInvoker").set(ovsdbConnectionInstance, txInvoker);
-        MemberModifier.field(OvsdbConnectionInstance.class, "connectionInfo").set(ovsdbConnectionInstance, key);
-        MemberModifier.field(OvsdbConnectionInstance.class, "instanceIdentifier").set(ovsdbConnectionInstance, instanceIdentifier);
-        MemberModifier.field(OvsdbConnectionInstance.class, "hasDeviceOwnership").set(ovsdbConnectionInstance, false);
+        field(OvsdbConnectionInstance.class, "txInvoker").set(ovsdbConnectionInstance, txInvoker);
+        field(OvsdbConnectionInstance.class, "connectionInfo").set(ovsdbConnectionInstance, key);
+        field(OvsdbConnectionInstance.class, "instanceIdentifier").set(ovsdbConnectionInstance, instanceIdentifier);
+        field(OvsdbConnectionInstance.class, "hasDeviceOwnership").set(ovsdbConnectionInstance, false);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void testTransact() throws Exception {
-        TransactCommand command = mock(TransactCommand.class);
         transactInvokers = new HashMap();
 
-        //init instance variables
+        // init instance variables
         TransactInvoker transactInvoker1 = mock(TransactInvoker.class);
         TransactInvoker transactInvoker2 = mock(TransactInvoker.class);
         transactInvokers.put(mock(DatabaseSchema.class), transactInvoker1);
         transactInvokers.put(mock(DatabaseSchema.class), transactInvoker2);
-        MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
+        field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
 
+        TransactCommand command = mock(TransactCommand.class);
         ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
-        verify(transactInvoker1).invoke(any(TransactCommand.class), any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class));
-        verify(transactInvoker2).invoke(any(TransactCommand.class), any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class));
+        verify(transactInvoker1).invoke(any(TransactCommand.class), any(BridgeOperationalState.class),
+                any(AsyncDataChangeEvent.class));
+        verify(transactInvoker2).invoke(any(TransactCommand.class), any(BridgeOperationalState.class),
+                any(AsyncDataChangeEvent.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testRegisterCallbacks() throws Exception {
-
-        //callback not null case
+        // callback not null case
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , callback);
         ovsdbConnectionInstance.registerCallbacks();
         verify(ovsdbConnectionInstance, times(0)).getDatabases();
 
-        //callback null case
+        // callback null case
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , null);
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
         List<String> databases = new ArrayList<>();
@@ -125,41 +126,44 @@ public class OvsdbConnectionInstanceTest {
         when(listenableFuture.get()).thenReturn(databases);
 
         ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
-        DatabaseSchema dbSchema= mock(DatabaseSchema.class);
+        DatabaseSchema dbSchema = mock(DatabaseSchema.class);
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
         when(listenableDbSchema.get()).thenReturn(dbSchema);
 
-        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorAllTables", String.class,DatabaseSchema.class));
+        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorAllTables", String.class,
+                DatabaseSchema.class));
         ovsdbConnectionInstance.registerCallbacks();
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(), any(DatabaseSchema.class));
+        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(),
+                any(DatabaseSchema.class));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void testCreateTransactInvokers() throws Exception {
-        //transactInvokers not null case
+        // transactInvokers not null case
         transactInvokers = new HashMap();
-        MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
+        field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
         ovsdbConnectionInstance.createTransactInvokers();
         verify(ovsdbConnectionInstance, times(0)).getSchema(anyString());
 
-        //transactInvokers null case
+        // transactInvokers null case
         MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
 
         ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
-        DatabaseSchema dbSchema= mock(DatabaseSchema.class);
+        DatabaseSchema dbSchema = mock(DatabaseSchema.class);
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
         when(listenableDbSchema.get()).thenReturn(dbSchema);
 
         ovsdbConnectionInstance.createTransactInvokers();
         verify(ovsdbConnectionInstance).getSchema(anyString());
 
-        Map<DatabaseSchema,TransactInvoker> testTransactInvokers = Whitebox.getInternalState(ovsdbConnectionInstance, "transactInvokers");
+        Map<DatabaseSchema, TransactInvoker> testTransactInvokers = Whitebox.getInternalState(ovsdbConnectionInstance,
+                "transactInvokers");
         assertEquals("Error, size of the hashmap is incorrect", 1, testTransactInvokers.size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testMonitorAllTables() throws Exception {
         Set<String> tables = new HashSet<>();
         tables.add("tableName1");
@@ -182,14 +186,17 @@ public class OvsdbConnectionInstanceTest {
         when(monitorBuilder.with(any(MonitorSelect.class))).thenReturn(monitorBuilder);
         when(monitorBuilder.build()).thenReturn(monitorReq);
 
-        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class, MonitorCallBack.class));
+        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class,
+                MonitorCallBack.class));
         TableUpdates tableUpdates = mock(TableUpdates.class);
-        when(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class))).thenReturn(tableUpdates);
+        when(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)))
+                .thenReturn(tableUpdates);
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance, callback);
         doNothing().when(callback).update(any(TableUpdates.class), any(DatabaseSchema.class));
 
         Whitebox.invokeMethod(ovsdbConnectionInstance, "monitorAllTables", "database", dbSchema);
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(), any(DatabaseSchema.class));
+        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(),
+                any(DatabaseSchema.class));
 
         verify(monitorBuilder, times(4)).addColumn(anyString());
     }
@@ -198,105 +205,117 @@ public class OvsdbConnectionInstanceTest {
     @Test
     public void testOvsdbConnectionInstance() throws Exception {
         MemberModifier.field(OvsdbConnectionInstance.class, "client").set(ovsdbConnectionInstance, client);
-        DatabaseSchema databaseSchema = mock(DatabaseSchema.class);
 
-        //test getDatabases()
+        // test getDatabases()
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
         when(client.getDatabases()).thenReturn(listenableFuture);
-        assertEquals("Error, did not return correct ListenableFuture<List<String>> object", listenableFuture, ovsdbConnectionInstance.getDatabases());
+        assertEquals("Error, did not return correct ListenableFuture<List<String>> object", listenableFuture,
+                ovsdbConnectionInstance.getDatabases());
         verify(client).getDatabases();
 
-        //test getSchema()
+        // test getSchema()
         ListenableFuture<DatabaseSchema> futureDatabaseSchema = mock(ListenableFuture.class);
         when(client.getSchema(anyString())).thenReturn(futureDatabaseSchema);
-        assertEquals("Error, did not return correct ListenableFuture<DatabaseSchema> object", futureDatabaseSchema, ovsdbConnectionInstance.getSchema(anyString()));
+        assertEquals("Error, did not return correct ListenableFuture<DatabaseSchema> object", futureDatabaseSchema,
+                ovsdbConnectionInstance.getSchema(anyString()));
         verify(client).getSchema(anyString());
 
-        //test transactBuilder()
+        // test transactBuilder()
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
         when(client.transactBuilder(any(DatabaseSchema.class))).thenReturn(transactionBuilder);
-        assertEquals("Error, did not return correct TransactionBuilder object", transactionBuilder, ovsdbConnectionInstance.transactBuilder(any(DatabaseSchema.class)));
+        assertEquals("Error, did not return correct TransactionBuilder object", transactionBuilder,
+                ovsdbConnectionInstance.transactBuilder(any(DatabaseSchema.class)));
         verify(client).transactBuilder(any(DatabaseSchema.class));
 
-        //test transact()
+        // test transact()
         ListenableFuture<List<OperationResult>> futureOperationResult = mock(ListenableFuture.class);
         when(client.transact(any(DatabaseSchema.class), any(List.class))).thenReturn(futureOperationResult);
-        assertEquals("Error, did not return correct ListenableFuture<List<OperationResult>> object", futureOperationResult, ovsdbConnectionInstance.transact(any(DatabaseSchema.class), any(List.class)));
+        assertEquals("Error, did not return correct ListenableFuture<List<OperationResult>> object",
+                futureOperationResult, ovsdbConnectionInstance.transact(any(DatabaseSchema.class), any(List.class)));
         verify(client).transact(any(DatabaseSchema.class), any(List.class));
 
-        //test monitor()
+        // test monitor()
         TableUpdates tableUpdates = mock(TableUpdates.class);
-        when(client.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class))).thenReturn(tableUpdates);
-        assertEquals("Error, did not return correct TableUpdates object", tableUpdates, ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)));
+        when(client.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)))
+                .thenReturn(tableUpdates);
+        assertEquals("Error, did not return correct TableUpdates object", tableUpdates, ovsdbConnectionInstance
+                .monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)));
         verify(client).monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class));
 
-        //test cancelMonitor()
+        // test cancelMonitor()
         doNothing().when(client).cancelMonitor(any(MonitorHandle.class));
         MonitorHandle monitorHandle = mock(MonitorHandle.class);
         ovsdbConnectionInstance.cancelMonitor(monitorHandle);
         verify(client).cancelMonitor(any(MonitorHandle.class));
 
-        //test lock()
+        // test lock()
         doNothing().when(client).lock(anyString(), any(LockAquisitionCallback.class), any(LockStolenCallback.class));
         LockAquisitionCallback lockAquisitionCallback = mock(LockAquisitionCallback.class);
         LockStolenCallback lockStolenCallback = mock(LockStolenCallback.class);
         ovsdbConnectionInstance.lock("lockId", lockAquisitionCallback, lockStolenCallback);
         verify(client).lock(anyString(), any(LockAquisitionCallback.class), any(LockStolenCallback.class));
 
-        //test steal()
+        // test steal()
         ListenableFuture<Boolean> futureBoolean = mock(ListenableFuture.class);
         when(client.steal(anyString())).thenReturn(futureBoolean);
-        assertEquals("Error, did not return correct ListenableFuture<Boolean> object", futureBoolean, ovsdbConnectionInstance.steal(anyString()));
+        assertEquals("Error, did not return correct ListenableFuture<Boolean> object", futureBoolean,
+                ovsdbConnectionInstance.steal(anyString()));
         verify(client).steal(anyString());
 
-        //test unLock()
+        // test unLock()
         when(client.unLock(anyString())).thenReturn(futureBoolean);
-        assertEquals("Error, did not return correct ListenableFuture<Boolean> object", futureBoolean, ovsdbConnectionInstance.unLock(anyString()));
+        assertEquals("Error, did not return correct ListenableFuture<Boolean> object", futureBoolean,
+                ovsdbConnectionInstance.unLock(anyString()));
         verify(client).unLock(anyString());
 
-        //test startEchoService()
+        // test startEchoService()
         EchoServiceCallbackFilters echoServiceCallbackFilters = mock(EchoServiceCallbackFilters.class);
         doNothing().when(client).startEchoService(any(EchoServiceCallbackFilters.class));
         ovsdbConnectionInstance.startEchoService(echoServiceCallbackFilters);
         verify(client).startEchoService(any(EchoServiceCallbackFilters.class));
 
-        //test stopEchoService()
+        // test stopEchoService()
         doNothing().when(client).stopEchoService();
         ovsdbConnectionInstance.stopEchoService();
         verify(client).stopEchoService();
 
-        //test isActive()
+        // test isActive()
         when(client.isActive()).thenReturn(true);
         assertEquals("Error, does not match isActive()", true, ovsdbConnectionInstance.isActive());
         verify(client).isActive();
 
-        //test disconnect()
+        // test disconnect()
         doNothing().when(client).disconnect();
         ovsdbConnectionInstance.disconnect();
         verify(client).disconnect();
 
-        //test getDatabaseSchema()
+        // test getDatabaseSchema()
+        DatabaseSchema databaseSchema = mock(DatabaseSchema.class);
         when(client.getDatabaseSchema(anyString())).thenReturn(databaseSchema);
-        assertEquals("Error, did not return correct DatabaseSchema object", databaseSchema, ovsdbConnectionInstance.getDatabaseSchema(anyString()));
+        assertEquals("Error, did not return correct DatabaseSchema object", databaseSchema,
+                ovsdbConnectionInstance.getDatabaseSchema(anyString()));
         verify(client).getDatabaseSchema(anyString());
 
-        //test getConnectionInfo()
+        // test getConnectionInfo()
         OvsdbConnectionInfo ovsdbConnectionInfo = mock(OvsdbConnectionInfo.class);
         when(client.getConnectionInfo()).thenReturn(ovsdbConnectionInfo);
-        assertEquals("Error, did not return correct OvsdbConnectionInfo object", ovsdbConnectionInfo, ovsdbConnectionInstance.getConnectionInfo());
+        assertEquals("Error, did not return correct OvsdbConnectionInfo object", ovsdbConnectionInfo,
+                ovsdbConnectionInstance.getConnectionInfo());
         verify(client).getConnectionInfo();
 
-        //test getMDConnectionInfo()
+        // test getMDConnectionInfo()
         assertEquals("Error, incorrect connectionInfo", key, ovsdbConnectionInstance.getMDConnectionInfo());
 
-        //test setMDConnectionInfo()
+        // test setMDConnectionInfo()
         ovsdbConnectionInstance.setMDConnectionInfo(key);
-        assertEquals("Error, incorrect ConnectionInfo", key, Whitebox.getInternalState(ovsdbConnectionInstance, "connectionInfo"));
+        assertEquals("Error, incorrect ConnectionInfo", key,
+                Whitebox.getInternalState(ovsdbConnectionInstance, "connectionInfo"));
 
-        //test getInstanceIdentifier()
-        assertEquals("Error, incorrect instanceIdentifier", instanceIdentifier, ovsdbConnectionInstance.getInstanceIdentifier());
+        // test getInstanceIdentifier()
+        assertEquals("Error, incorrect instanceIdentifier", instanceIdentifier,
+                ovsdbConnectionInstance.getInstanceIdentifier());
 
-        //test getNodeId()
+        // test getNodeId()
         NodeKey nodeKey = mock(NodeKey.class);
         NodeId nodeId = mock(NodeId.class);
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "getNodeKey"));
@@ -304,13 +323,17 @@ public class OvsdbConnectionInstanceTest {
         when(nodeKey.getNodeId()).thenReturn(nodeId);
         assertEquals("Error, incorrect NodeId object", nodeId, ovsdbConnectionInstance.getNodeId());
 
-        //test setInstanceIdentifier()
+        // test setInstanceIdentifier()
         ovsdbConnectionInstance.setInstanceIdentifier(instanceIdentifier);
-        assertEquals("Error, incorrect instanceIdentifier", instanceIdentifier, Whitebox.getInternalState(ovsdbConnectionInstance, "instanceIdentifier"));
+        assertEquals("Error, incorrect instanceIdentifier", instanceIdentifier,
+                Whitebox.getInternalState(ovsdbConnectionInstance, "instanceIdentifier"));
 
-        //test monitor()
-        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class, MonitorHandle.class, MonitorCallBack.class));
-        when(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorHandle.class), any(MonitorCallBack.class))).thenReturn(null);
-        assertNull(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorHandle.class), any(MonitorCallBack.class)));
+        // test monitor()
+        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class,
+                MonitorHandle.class, MonitorCallBack.class));
+        when(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorHandle.class),
+                any(MonitorCallBack.class))).thenReturn(null);
+        assertNull(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorHandle.class),
+                any(MonitorCallBack.class)));
     }
 }

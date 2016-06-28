@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,8 +54,6 @@ public class OvsdbBridgeRemovedCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-
         //suppress calls to parent get methods
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeRemovedCommand.class, "getUpdates"));
         when(ovsdbBridgeRemovedCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
@@ -65,8 +62,10 @@ public class OvsdbBridgeRemovedCommandTest {
 
         PowerMockito.mockStatic(TyperUtils.class);
         Map<UUID, Bridge> map = new HashMap<>();
-        when(TyperUtils.extractRowsRemoved(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class))).thenReturn(map);
+        when(TyperUtils.extractRowsRemoved(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class)))
+                .thenReturn(map);
 
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbBridgeRemovedCommand.execute(transaction);
         verify(ovsdbBridgeRemovedCommand).getUpdates();
         verify(ovsdbBridgeRemovedCommand).getDbSchema();

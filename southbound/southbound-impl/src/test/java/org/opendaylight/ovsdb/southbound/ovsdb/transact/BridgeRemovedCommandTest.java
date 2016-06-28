@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,12 +46,11 @@ public class BridgeRemovedCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
-
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.extractRemoved(changes, OvsdbBridgeAugmentation.class)).thenReturn(removed);
         when(TransactUtils.extractOriginal(changes, OvsdbBridgeAugmentation.class)).thenReturn(originals);
 
+        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
         briRemovedCmd.execute(transaction, mock(BridgeOperationalState.class), changes);
 
         // TODO Actually verify something

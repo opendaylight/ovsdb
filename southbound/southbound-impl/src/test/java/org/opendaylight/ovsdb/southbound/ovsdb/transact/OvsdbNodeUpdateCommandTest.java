@@ -16,12 +16,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,8 +51,6 @@ import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.collect.ImmutableMap;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TransactUtils.class, TyperUtils.class, OvsdbNodeUpdateCommand.class, InstanceIdentifier.class})
 public class OvsdbNodeUpdateCommandTest {
@@ -73,13 +71,14 @@ public class OvsdbNodeUpdateCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() throws Exception {
-        TransactionBuilder transaction = mock(TransactionBuilder.class);
         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated = new HashMap<>();
         InstanceIdentifier<OvsdbNodeAugmentation> iid = mock(InstanceIdentifier.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         updated.put(iid, ovsdbNode);
         PowerMockito.mockStatic(TransactUtils.class);
-        PowerMockito.when(TransactUtils.extractCreatedOrUpdated(any(AsyncDataChangeEvent.class), eq(OvsdbNodeAugmentation.class))).thenReturn(updated);
+        PowerMockito.when(
+                TransactUtils.extractCreatedOrUpdated(any(AsyncDataChangeEvent.class), eq(OvsdbNodeAugmentation.class)))
+                .thenReturn(updated);
 
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
         when(ovsdbNode.getConnectionInfo()).thenReturn(connectionInfo);
@@ -87,9 +86,11 @@ public class OvsdbNodeUpdateCommandTest {
         when(connectionInfo.getRemotePort()).thenReturn(mock(PortNumber.class));
 
         OpenVSwitch ovs = mock(OpenVSwitch.class);
+        TransactionBuilder transaction = mock(TransactionBuilder.class);
         when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
         PowerMockito.mockStatic(TyperUtils.class);
-        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(OpenVSwitch.class))).thenReturn(ovs);
+        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(OpenVSwitch.class)))
+                .thenReturn(ovs);
 
         List<OpenvswitchExternalIds> externalIds = new ArrayList<>();
         OpenvswitchExternalIds externalId = mock(OpenvswitchExternalIds.class);
@@ -97,7 +98,8 @@ public class OvsdbNodeUpdateCommandTest {
         when(externalId.getExternalIdKey()).thenReturn(EXTERNAL_ID_KEY);
         when(externalId.getExternalIdValue()).thenReturn(EXTERNAL_ID_VALUE);
         when(ovsdbNode.getOpenvswitchExternalIds()).thenReturn(externalIds);
-        PowerMockito.suppress(MemberMatcher.method(OvsdbNodeUpdateCommand.class, "stampInstanceIdentifier", TransactionBuilder.class, InstanceIdentifier.class));
+        PowerMockito.suppress(MemberMatcher.method(OvsdbNodeUpdateCommand.class, "stampInstanceIdentifier",
+                TransactionBuilder.class, InstanceIdentifier.class));
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 

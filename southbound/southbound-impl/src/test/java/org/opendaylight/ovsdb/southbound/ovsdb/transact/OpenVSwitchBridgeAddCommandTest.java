@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,11 +46,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TyperUtils.class, TransactUtils.class})
 public class OpenVSwitchBridgeAddCommandTest {
-    private OpenVSwitchBridgeAddCommand openVSwitchBridgeAddCommand;
+    private OpenVSwitchBridgeAddCommand ovsBridgeAddCommand;
 
     @Before
     public void setUp() {
-        openVSwitchBridgeAddCommand = mock(OpenVSwitchBridgeAddCommand.class, Mockito.CALLS_REAL_METHODS);
+        ovsBridgeAddCommand = mock(OpenVSwitchBridgeAddCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -64,17 +63,20 @@ public class OpenVSwitchBridgeAddCommandTest {
         Bridge bridge = mock(Bridge.class);
         when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
         PowerMockito.mockStatic(TyperUtils.class);
-        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Bridge.class))).thenReturn(bridge);
+        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Bridge.class)))
+                .thenReturn(bridge);
 
         List<Insert> inserts = new ArrayList<>();
         Insert insert = mock(Insert.class);
         inserts.add(insert);
         PowerMockito.mockStatic(TransactUtils.class);
         when(bridge.getSchema()).thenReturn(mock(GenericTableSchema.class));
-        PowerMockito.when(TransactUtils.extractInsert(any(TransactionBuilder.class), any(GenericTableSchema.class))).thenReturn(inserts);
+        PowerMockito.when(TransactUtils.extractInsert(any(TransactionBuilder.class), any(GenericTableSchema.class)))
+                .thenReturn(inserts);
 
         OpenVSwitch ovs = mock(OpenVSwitch.class);
-        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(OpenVSwitch.class))).thenReturn(ovs);
+        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(OpenVSwitch.class)))
+                .thenReturn(ovs);
         PowerMockito.when(TransactUtils.extractNamedUuid(any(Insert.class))).thenReturn(mock(UUID.class));
         doNothing().when(ovs).setBridges(any(Set.class));
 
@@ -88,7 +90,7 @@ public class OpenVSwitchBridgeAddCommandTest {
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        openVSwitchBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        ovsBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
         verify(transaction).add(any(Operation.class));
     }
 

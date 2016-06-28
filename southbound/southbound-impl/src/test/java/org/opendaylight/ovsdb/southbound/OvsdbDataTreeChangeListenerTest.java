@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.southbound;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -25,16 +24,15 @@ import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes
-        .ConnectionInfoBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology
-        .Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * Unit tests for the data-tree change listener.
  */
 public class OvsdbDataTreeChangeListenerTest extends AbstractDataBrokerTest {
+
     private final OvsdbConnection ovsdbConnection = Mockito.mock(OvsdbConnection.class);
     private DataBroker dataBroker;
     private OvsdbDataTreeChangeListener listener;

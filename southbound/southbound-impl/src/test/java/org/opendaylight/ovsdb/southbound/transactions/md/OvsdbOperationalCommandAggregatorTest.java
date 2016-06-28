@@ -8,12 +8,15 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,13 +36,15 @@ import org.powermock.reflect.Whitebox;
 @PrepareForTest({})
 @RunWith(PowerMockRunner.class)
 public class OvsdbOperationalCommandAggregatorTest {
+
     private static final int NUMBER_OF_COMMANDS = 15;
     private List<TransactionCommand> commands = new ArrayList<>();
     private OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator;
 
     @Before
     public void setUp() throws Exception {
-        ovsdbOperationalCommandAggregator = PowerMockito.mock(OvsdbOperationalCommandAggregator.class, Mockito.CALLS_REAL_METHODS);
+        ovsdbOperationalCommandAggregator = PowerMockito.mock(OvsdbOperationalCommandAggregator.class,
+                Mockito.CALLS_REAL_METHODS);
 
         //mock commands field
         commands.add(mock(OpenVSwitchUpdateCommand.class));
@@ -57,7 +62,8 @@ public class OvsdbOperationalCommandAggregatorTest {
         commands.add(mock(OvsdbControllerRemovedCommand.class));
         commands.add(mock(OvsdbPortUpdateCommand.class));
         commands.add(mock(OvsdbPortRemoveCommand.class));
-        MemberModifier.field(OvsdbOperationalCommandAggregator.class, "commands").set(ovsdbOperationalCommandAggregator, commands);
+        MemberModifier.field(OvsdbOperationalCommandAggregator.class, "commands").set(ovsdbOperationalCommandAggregator,
+                commands);
     }
 
     @Test
@@ -65,9 +71,12 @@ public class OvsdbOperationalCommandAggregatorTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        when(dbSchema.getVersion()).thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
-        OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator1 = new OvsdbOperationalCommandAggregator(key, updates, dbSchema);
-        List<TransactionCommand> testCommands = Whitebox.getInternalState(ovsdbOperationalCommandAggregator1, "commands");
+        when(dbSchema.getVersion())
+                .thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
+        OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator1 = new OvsdbOperationalCommandAggregator(
+                key, updates, dbSchema);
+        List<TransactionCommand> testCommands = Whitebox.getInternalState(ovsdbOperationalCommandAggregator1,
+                "commands");
         assertEquals(NUMBER_OF_COMMANDS, testCommands.size());
     }
 

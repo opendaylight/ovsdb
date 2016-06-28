@@ -15,11 +15,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,10 +55,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.base.Optional;
-
-@PrepareForTest({OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class, InstanceIdentifier.class})
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({ OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class,
+        InstanceIdentifier.class })
 public class OvsdbControllerUpdateCommandTest {
     private Map<UUID, Controller> updatedControllerRows;
     private Map<UUID, Bridge> updatedBridgeRows;
@@ -69,7 +68,8 @@ public class OvsdbControllerUpdateCommandTest {
 
     @Before
     public void setUp() {
-        ovsdbControllerUpdateCommand = PowerMockito.mock(OvsdbControllerUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
+        ovsdbControllerUpdateCommand = PowerMockito.mock(OvsdbControllerUpdateCommand.class,
+                Mockito.CALLS_REAL_METHODS);
     }
 
     @Test
@@ -77,7 +77,8 @@ public class OvsdbControllerUpdateCommandTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbControllerUpdateCommand ovsdbControllerUpdateCommand1 = new OvsdbControllerUpdateCommand(key, updates, dbSchema);
+        OvsdbControllerUpdateCommand ovsdbControllerUpdateCommand1 = new OvsdbControllerUpdateCommand(key, updates,
+                dbSchema);
         assertEquals(key, Whitebox.getInternalState(ovsdbControllerUpdateCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbControllerUpdateCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbControllerUpdateCommand1, "dbSchema"));
@@ -85,28 +86,31 @@ public class OvsdbControllerUpdateCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         updatedControllerRows = new HashMap<>();
         updatedControllerRows.put(mock(UUID.class), mock(Controller.class));
-        MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedControllerRows").set(ovsdbControllerUpdateCommand, updatedControllerRows);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "updateController", ReadWriteTransaction.class, Map.class, Map.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "updateController", ReadWriteTransaction.class, Map.class));
+        MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedControllerRows")
+                .set(ovsdbControllerUpdateCommand, updatedControllerRows);
+        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "updateController",
+                ReadWriteTransaction.class, Map.class, Map.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "updateController",
+                ReadWriteTransaction.class, Map.class));
 
-        //updatedBridgeRows null case
+        // updatedBridgeRows null case
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbControllerUpdateCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbControllerUpdateCommand).invoke("updateController", any(ReadWriteTransaction.class), any(Map.class));
+        PowerMockito.verifyPrivate(ovsdbControllerUpdateCommand).invoke("updateController",
+                any(ReadWriteTransaction.class), any(Map.class));
 
-        //updatedBridgeRows not null case
+        // updatedBridgeRows not null case
         updatedBridgeRows = new HashMap<>();
         updatedBridgeRows.put(mock(UUID.class), mock(Bridge.class));
-        MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedBridgeRows").set(ovsdbControllerUpdateCommand, updatedBridgeRows);
+        MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedBridgeRows").set(ovsdbControllerUpdateCommand,
+                updatedBridgeRows);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testUpdateController1() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         Map<UUID, Bridge> updatedBridgeRows = new HashMap<>();
         Bridge bridge = mock(Bridge.class);
         updatedBridgeRows.put(mock(UUID.class), bridge);
@@ -119,11 +123,17 @@ public class OvsdbControllerUpdateCommandTest {
         when(bridge.getNameColumn()).thenReturn(column);
         when(column.getData()).thenReturn(BRIDGE_NAME);
 
-        //suppress call to getControllerEntryIid()
-        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "getControllerEntryIid", ControllerEntry.class, String.class));
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(ControllerEntry.class));
-        Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "updateController", transaction, updatedControllerRows, updatedBridgeRows);
-        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(ControllerEntry.class));
+        // suppress call to getControllerEntryIid()
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
+        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "getControllerEntryIid",
+                ControllerEntry.class, String.class));
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(ControllerEntry.class));
+        Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "updateController", transaction, updatedControllerRows,
+                updatedBridgeRows);
+        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(ControllerEntry.class));
         verify(bridge).getNameColumn();
     }
 
@@ -136,24 +146,24 @@ public class OvsdbControllerUpdateCommandTest {
         Node node = mock(Node.class);
         InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
         bridgeNodes.put(bridgeIid, node);
-        PowerMockito.doReturn(bridgeNodes).when(ovsdbControllerUpdateCommand, "getBridgeNodes", any(ReadWriteTransaction.class));
+        PowerMockito.doReturn(bridgeNodes).when(ovsdbControllerUpdateCommand, "getBridgeNodes",
+                any(ReadWriteTransaction.class));
 
         Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "updateController", transaction, updatedControllerRows);
-        PowerMockito.verifyPrivate(ovsdbControllerUpdateCommand).invoke("getBridgeNodes", any(ReadWriteTransaction.class));
+        PowerMockito.verifyPrivate(ovsdbControllerUpdateCommand).invoke("getBridgeNodes",
+                any(ReadWriteTransaction.class));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testGetBridgeNodes() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-
-        Map<InstanceIdentifier<Node>, Node> testBridgeNodes = new HashMap<>();
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbControllerUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
         PowerMockito.mockStatic(SouthboundUtil.class);
         Optional<Node> ovsdbNode = mock(Optional.class);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         when(SouthboundUtil.readNode(transaction, connectionIId)).thenReturn(ovsdbNode);
         when(ovsdbNode.isPresent()).thenReturn(true);
         Node node = mock(Node.class);
@@ -174,10 +184,12 @@ public class OvsdbControllerUpdateCommandTest {
         when(bridgeNode.isPresent()).thenReturn(true);
         when(bridgeNode.get()).thenReturn(node);
 
+        Map<InstanceIdentifier<Node>, Node> testBridgeNodes = new HashMap<>();
         testBridgeNodes.put(bridgeIid, node);
 
         //verify if getBridgeNodes() returns expected value
-        assertEquals(testBridgeNodes, Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "getBridgeNodes", transaction));
+        assertEquals(testBridgeNodes,
+                Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "getBridgeNodes", transaction));
     }
 
     @Test
@@ -196,6 +208,8 @@ public class OvsdbControllerUpdateCommandTest {
         PowerMockito.whenNew(TopologyKey.class).withAnyArguments().thenReturn(mock(TopologyKey.class));
         //PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
         when(controllerEntry.getKey()).thenReturn(mock(ControllerEntryKey.class));
-        assertEquals(KeyedInstanceIdentifier.class, (Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME).getClass()));
+        assertEquals(KeyedInstanceIdentifier.class, (Whitebox
+                .invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME)
+                .getClass()));
     }
 }

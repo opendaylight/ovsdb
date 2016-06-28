@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +41,7 @@ public class ControllerRemovedCommandTest {
     private Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> operationalControllerEntries = new HashMap<>();
     private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> created = new HashMap<>();
     private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updated = new HashMap<>();
+
     @Before
     public void setUp() throws Exception {
         contRemoveCmd = mock(ControllerRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
@@ -49,14 +49,13 @@ public class ControllerRemovedCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
-
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.extractRemoved(changes, ControllerEntry.class)).thenReturn(removed);
         when(TransactUtils.extractOriginal(changes, ControllerEntry.class)).thenReturn(operationalControllerEntries);
         when(TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class)).thenReturn(created);
         when(TransactUtils.extractUpdated(changes, OvsdbBridgeAugmentation.class)).thenReturn(updated);
 
+        TransactionBuilder transaction = mock(TransactionBuilder.class, Mockito.RETURNS_MOCKS);
         contRemoveCmd.execute(transaction, null, changes);
 
         // TODO Actually verify something

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
@@ -19,18 +18,22 @@ public class OvsdbSchemaContantsTest {
     public void testDatabaseName() {
         assertEquals("Error databaseName did not return correct value","Open_vSwitch", OvsdbSchemaContants.databaseName);
     }
+
     @Test
     public void testGetTableName() {
-        assertEquals("Error getTableName() did not return correct value", "Open_vSwitch", OvsdbSchemaTables.OPENVSWITCH.getTableName());
+        assertEquals("Error getTableName() did not return correct value", "Open_vSwitch",
+                OvsdbSchemaTables.OPENVSWITCH.getTableName());
     }
 
     @Test
     public void testGetParentTableName() {
-        assertEquals("Error getTableName() did not return correct value", null, OvsdbSchemaTables.OPENVSWITCH.getParentTableName());
+        assertEquals("Error getTableName() did not return correct value", null,
+                OvsdbSchemaTables.OPENVSWITCH.getParentTableName());
     }
 
     @Test
     public void testGetColumnNameInParentTable() {
-        assertEquals("Error getTableName() did not return correct value", null, OvsdbSchemaTables.OPENVSWITCH.getColumnNameInParentTable());
+        assertEquals("Error getTableName() did not return correct value", null,
+                OvsdbSchemaTables.OPENVSWITCH.getColumnNameInParentTable());
     }
 }

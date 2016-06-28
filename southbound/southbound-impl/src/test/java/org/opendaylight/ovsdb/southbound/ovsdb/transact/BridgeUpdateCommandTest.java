@@ -12,7 +12,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
 
 @PrepareForTest(BridgeUpdateCommand.class)
 @RunWith(PowerMockRunner.class)
@@ -45,12 +43,11 @@ public class BridgeUpdateCommandTest {
 
     @Test
     public void testExecute() {
-        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
-
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class)).thenReturn(created);
         when(TransactUtils.extractUpdated(changes, OvsdbBridgeAugmentation.class)).thenReturn(updated);
 
+        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
         briUpdatedCmd.execute(transaction, mock(BridgeOperationalState.class), changes);
 
         // TODO Actually verify something

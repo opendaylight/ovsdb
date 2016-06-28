@@ -11,12 +11,12 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.support.membermodification.MemberMatcher.field;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +26,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -44,7 +43,7 @@ public class DataChangesManagedByOvsdbNodeEventTest {
     @Before
     public void setUp() throws Exception {
         dataChangesManagedByOvsdbNodeEvent = mock(DataChangesManagedByOvsdbNodeEvent.class, Mockito.CALLS_REAL_METHODS);
-        MemberModifier.field(DataChangesManagedByOvsdbNodeEvent.class, "event").set(dataChangesManagedByOvsdbNodeEvent, event);
+        field(DataChangesManagedByOvsdbNodeEvent.class, "event").set(dataChangesManagedByOvsdbNodeEvent, event);
     }
 
     @Test
@@ -58,7 +57,6 @@ public class DataChangesManagedByOvsdbNodeEventTest {
     @Test
     public void testGetMethods() {
         Map<InstanceIdentifier<?>,DataObject> data = new HashMap<>();
-        DataObject dataObject = mock(DataObject.class);
 
         //Test getCreatedData()
         when(event.getCreatedData()).thenReturn(data);
@@ -71,6 +69,8 @@ public class DataChangesManagedByOvsdbNodeEventTest {
         //Test getOriginalData()
         when(event.getOriginalData()).thenReturn(data);
         assertEquals(data, dataChangesManagedByOvsdbNodeEvent.getOriginalData());
+
+        DataObject dataObject = mock(DataObject.class);
 
         //Test getOriginalSubtree()
         when(event.getOriginalSubtree()).thenReturn(dataObject);

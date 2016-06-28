@@ -14,11 +14,11 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.support.membermodification.MemberMatcher.field;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,29 +35,32 @@ import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest({AbstractModuleStringInstanceIdentifierCodec.class, DataSchemaContextTree.class})
 @RunWith(PowerMockRunner.class)
-
+@PrepareForTest({ AbstractModuleStringInstanceIdentifierCodec.class, DataSchemaContextTree.class })
 public class InstanceIdentifierCodecTest {
 
-    private InstanceIdentifierCodec instanceIdentifierCodec;
-    @Mock private DataSchemaContextTree dataSchemaContextTree;
-    @Mock private SchemaContext context;
-    @Mock private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
-    @Mock private SchemaService schemaService;
+    private InstanceIdentifierCodec instanceIdCodec;
+    @Mock
+    private DataSchemaContextTree dataSchemaContextTree;
+    @Mock
+    private SchemaContext context;
+    @Mock
+    private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
+    @Mock
+    private SchemaService schemaService;
 
     @Before
     public void setUp() throws IllegalArgumentException, IllegalAccessException {
-        instanceIdentifierCodec = mock(InstanceIdentifierCodec.class, Mockito.CALLS_REAL_METHODS);
-        MemberModifier.field(InstanceIdentifierCodec.class, "dataSchemaContextTree").set(instanceIdentifierCodec, dataSchemaContextTree);
-        MemberModifier.field(InstanceIdentifierCodec.class, "context").set(instanceIdentifierCodec, context);
-        MemberModifier.field(InstanceIdentifierCodec.class, "bindingNormalizedNodeSerializer").set(instanceIdentifierCodec, bindingNormalizedNodeSerializer);
-
+        instanceIdCodec = mock(InstanceIdentifierCodec.class, Mockito.CALLS_REAL_METHODS);
+        field(InstanceIdentifierCodec.class, "dataSchemaContextTree").set(instanceIdCodec, dataSchemaContextTree);
+        field(InstanceIdentifierCodec.class, "context").set(instanceIdCodec, context);
+        field(InstanceIdentifierCodec.class, "bindingNormalizedNodeSerializer").set(instanceIdCodec,
+                bindingNormalizedNodeSerializer);
     }
+
     @Test
     public void testInstanceIdentifierCodec() throws Exception {
         InstanceIdentifierCodec codec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
@@ -66,56 +69,63 @@ public class InstanceIdentifierCodecTest {
 
     @Test
     public void testGetDataContextTree() {
-        assertEquals("Error, did not return correct DataSchemaContextTree object", dataSchemaContextTree, instanceIdentifierCodec.getDataContextTree());
+        assertEquals("Error, did not return correct DataSchemaContextTree object", dataSchemaContextTree,
+                instanceIdCodec.getDataContextTree());
     }
 
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        when(context.findModuleByName(anyString(),any(Date.class))).thenReturn(module);
-        assertEquals("Error, did not return correct Module object", module, instanceIdentifierCodec.moduleForPrefix(""));
+        when(context.findModuleByName(anyString(), any(Date.class))).thenReturn(module);
+        assertEquals("Error, did not return correct Module object", module, instanceIdCodec.moduleForPrefix(""));
     }
 
     @Test
     public void testPrefixForNamespace() throws URISyntaxException {
         Module module = mock(Module.class);
         URI namespace = new URI("");
-        when(context.findModuleByNamespaceAndRevision(any(URI.class), any(Date.class))).thenReturn(null).thenReturn(module);
+        when(context.findModuleByNamespaceAndRevision(any(URI.class), any(Date.class))).thenReturn(null)
+                .thenReturn(module);
         when(module.getName()).thenReturn("");
-        assertEquals("Error, null should have been returned", null, instanceIdentifierCodec.prefixForNamespace(namespace));
-        assertEquals("Error, did not return the correct module name", anyString(), instanceIdentifierCodec.prefixForNamespace(namespace));
+        assertEquals("Error, null should have been returned", null, instanceIdCodec.prefixForNamespace(namespace));
+        assertEquals("Error, did not return the correct module name", anyString(),
+                instanceIdCodec.prefixForNamespace(namespace));
     }
 
     @Test
     public void testOnGlobalContextUpdated() {
         PowerMockito.mockStatic(DataSchemaContextTree.class);
         when(DataSchemaContextTree.from(any(SchemaContext.class))).thenReturn(dataSchemaContextTree);
-        instanceIdentifierCodec.onGlobalContextUpdated(context);
-        verify(instanceIdentifierCodec).onGlobalContextUpdated(context);
+        instanceIdCodec.onGlobalContextUpdated(context);
+        verify(instanceIdCodec).onGlobalContextUpdated(context);
     }
 
     @Test
     public void testSerialize() {
         InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
-        YangInstanceIdentifier yIid = mock(YangInstanceIdentifier.class);
-        when(bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid)).thenReturn(yIid);
+        YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
+        when(bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid)).thenReturn(yiid);
 
-        when((PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class)).serialize(yIid)).thenReturn("Serialized IID");
-        assertEquals("Error, did not return correct string", anyString(), instanceIdentifierCodec.serialize(iid));
+        when((PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class)).serialize(yiid))
+                .thenReturn("Serialized IID");
+        assertEquals("Error, did not return correct string", anyString(), instanceIdCodec.serialize(iid));
     }
 
     @Test
     public void testBindingDeserializer() throws Exception {
-        YangInstanceIdentifier yIid = mock(YangInstanceIdentifier.class);
-        when((PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class)).deserialize(anyString())).thenReturn(yIid);
+        YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
+        when((PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class)).deserialize(anyString()))
+                .thenReturn(yiid);
 
         mock(InstanceIdentifier.class);
-        when(bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yIid)).thenAnswer(new Answer<InstanceIdentifier<?>>() {
-            public InstanceIdentifier<?> answer(InvocationOnMock invocation) throws Throwable {
-                return (InstanceIdentifier<?>) invocation.getArguments() [0];
-            }
-        });
+        when(bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yiid))
+                .thenAnswer(new Answer<InstanceIdentifier<?>>() {
+                    public InstanceIdentifier<?> answer(InvocationOnMock invocation) throws Throwable {
+                        return (InstanceIdentifier<?>) invocation.getArguments()[0];
+                    }
+                });
 
-        assertEquals("Error, did not return correct InstanceIdentifier<?> object", any(InstanceIdentifier.class), instanceIdentifierCodec.bindingDeserializer(""));
+        assertEquals("Error, did not return correct InstanceIdentifier<?> object", any(InstanceIdentifier.class),
+                instanceIdCodec.bindingDeserializer(""));
     }
 }

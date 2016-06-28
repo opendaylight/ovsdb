@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +53,7 @@ import org.powermock.reflect.Whitebox;
 @PrepareForTest({SouthboundMapper.class, OvsdbManagersRemovedCommand.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbManagersRemovedCommandTest {
+
     private static final String TARGET_COLUMN_DATA = "Target Column Data";
     private OvsdbManagersRemovedCommand ovsdbManagersRemovedCommand;
     private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
@@ -70,7 +70,8 @@ public class OvsdbManagersRemovedCommandTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbManagersRemovedCommand ovsdbManagersRemovedCommand1 = new OvsdbManagersRemovedCommand(key, updates, dbSchema);
+        OvsdbManagersRemovedCommand ovsdbManagersRemovedCommand1 = new OvsdbManagersRemovedCommand(key, updates,
+                dbSchema);
         assertEquals(key, Whitebox.getInternalState(ovsdbManagersRemovedCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbManagersRemovedCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbManagersRemovedCommand1, "dbSchema"));
@@ -79,22 +80,27 @@ public class OvsdbManagersRemovedCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         updatedOpenVSwitchRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         updatedOpenVSwitchRows.put(uuid, openVSwitch);
-        MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedOpenVSwitchRows").set(ovsdbManagersRemovedCommand, updatedOpenVSwitchRows);
+        MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedOpenVSwitchRows")
+                .set(ovsdbManagersRemovedCommand, updatedOpenVSwitchRows);
         PowerMockito.mockStatic(SouthboundMapper.class);
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersRemovedCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getNodeId()).thenReturn(mock(NodeId.class));
         when(SouthboundMapper.createInstanceIdentifier(any(NodeId.class))).thenReturn(mock(InstanceIdentifier.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbManagersRemovedCommand.class, "deleteManagers", ReadWriteTransaction.class, List.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbManagersRemovedCommand.class, "managerEntriesToRemove", InstanceIdentifier.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbManagersRemovedCommand.class, "deleteManagers",
+                ReadWriteTransaction.class, List.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbManagersRemovedCommand.class, "managerEntriesToRemove",
+                InstanceIdentifier.class, OpenVSwitch.class));
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbManagersRemovedCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbManagersRemovedCommand).invoke("deleteManagers", any(ReadWriteTransaction.class), any(List.class));
-        PowerMockito.verifyPrivate(ovsdbManagersRemovedCommand).invoke("managerEntriesToRemove", any(InstanceIdentifier.class), any(OpenVSwitch.class));
+        PowerMockito.verifyPrivate(ovsdbManagersRemovedCommand).invoke("deleteManagers",
+                any(ReadWriteTransaction.class), any(List.class));
+        PowerMockito.verifyPrivate(ovsdbManagersRemovedCommand).invoke("managerEntriesToRemove",
+                any(InstanceIdentifier.class), any(OpenVSwitch.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -111,7 +117,6 @@ public class OvsdbManagersRemovedCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testManagerEntriesToRemove() throws Exception {
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
         UUID uuid = mock(UUID.class);
@@ -119,7 +124,8 @@ public class OvsdbManagersRemovedCommandTest {
         oldOpenVSwitchRows = new HashMap<>();
         oldOpenVSwitchRows.put(uuid, oldOvsdbNode);
         when(openVSwitch.getUuid()).thenReturn(uuid);
-        MemberModifier.field(OvsdbManagersRemovedCommand.class, "oldOpenVSwitchRows").set(ovsdbManagersRemovedCommand, oldOpenVSwitchRows);
+        MemberModifier.field(OvsdbManagersRemovedCommand.class, "oldOpenVSwitchRows").set(ovsdbManagersRemovedCommand,
+                oldOpenVSwitchRows);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
@@ -128,7 +134,9 @@ public class OvsdbManagersRemovedCommandTest {
         when(oldOvsdbNode.getManagerOptionsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(set);
         when(openVSwitch.getManagerOptionsColumn()).thenReturn(column);
-        List<InstanceIdentifier<BridgeOtherConfigs>> resultManagerEntries = Whitebox.invokeMethod(ovsdbManagersRemovedCommand, "managerEntriesToRemove", bridgeIid, openVSwitch);
+        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
+        List<InstanceIdentifier<BridgeOtherConfigs>> resultManagerEntries = Whitebox
+                .invokeMethod(ovsdbManagersRemovedCommand, "managerEntriesToRemove", bridgeIid, openVSwitch);
         assertEquals(ArrayList.class, resultManagerEntries.getClass());
         verify(oldOvsdbNode, times(2)).getManagerOptionsColumn();
     }
@@ -136,17 +144,19 @@ public class OvsdbManagersRemovedCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCheckIfManagerPresentInUpdatedManagersList() throws Exception {
-        Manager removedManager = mock(Manager.class);
         Manager updatedManager = mock(Manager.class);
         updatedManagerRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         updatedManagerRows.put(uuid, updatedManager);
-        MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedManagerRows").set(ovsdbManagersRemovedCommand, updatedManagerRows);
+        MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedManagerRows").set(ovsdbManagersRemovedCommand,
+                updatedManagerRows);
         Column<GenericTableSchema, String> column = mock(Column.class);
+        Manager removedManager = mock(Manager.class);
         when(removedManager.getTargetColumn()).thenReturn(column);
         when(updatedManager.getTargetColumn()).thenReturn(column);
         when(column.getData()).thenReturn(TARGET_COLUMN_DATA);
 
-        assertEquals(true, Whitebox.invokeMethod(ovsdbManagersRemovedCommand, "checkIfManagerPresentInUpdatedManagersList", removedManager));
+        assertEquals(true, Whitebox.invokeMethod(ovsdbManagersRemovedCommand,
+                "checkIfManagerPresentInUpdatedManagersList", removedManager));
     }
 }

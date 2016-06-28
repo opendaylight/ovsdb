@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,9 +70,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({TyperUtils.class, OpenVSwitchUpdateCommand.class, SouthboundUtil.class, SouthboundMapper.class, InstanceIdentifier.class})
+@PrepareForTest({ TyperUtils.class, OpenVSwitchUpdateCommand.class, SouthboundUtil.class, SouthboundMapper.class,
+        InstanceIdentifier.class })
 @RunWith(PowerMockRunner.class)
 public class OpenVSwitchUpdateCommandTest {
+
     @Mock private OpenVSwitchUpdateCommand openVSwitchUpdateCommand;
     @Mock private TableUpdates updates;
     @Mock private DatabaseSchema dbSchema;
@@ -91,18 +92,21 @@ public class OpenVSwitchUpdateCommandTest {
         UUID uuid = mock(UUID.class);
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         updatedOpenVSwitchRows.put(uuid, ovs);
-        when(TyperUtils.extractRowsUpdated(eq(OpenVSwitch.class), any(TableUpdates.class), any(DatabaseSchema.class))).thenReturn(updatedOpenVSwitchRows);
+        when(TyperUtils.extractRowsUpdated(eq(OpenVSwitch.class), any(TableUpdates.class), any(DatabaseSchema.class)))
+                .thenReturn(updatedOpenVSwitchRows);
         Map<UUID, OpenVSwitch> deletedOpenVSwitchRows = new HashMap<>();
         OpenVSwitch ovs1 = mock(OpenVSwitch.class);
 
         deletedOpenVSwitchRows.put(uuid, ovs1);
-        when(TyperUtils.extractRowsOld(eq(OpenVSwitch.class), any(TableUpdates.class), any(DatabaseSchema.class))).thenReturn(deletedOpenVSwitchRows);
+        when(TyperUtils.extractRowsOld(eq(OpenVSwitch.class), any(TableUpdates.class), any(DatabaseSchema.class)))
+                .thenReturn(deletedOpenVSwitchRows);
 
         //mock getUpdates() and getDbSchema()
         when(openVSwitchUpdateCommand.getUpdates()).thenReturn(updates);
         when(openVSwitchUpdateCommand.getDbSchema()).thenReturn(dbSchema);
 
-        //Test getInstanceIdentifier(): case 1: ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) == true
+        //Test getInstanceIdentifier(): case 1:
+        // ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) == true
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "iidString");
@@ -121,11 +125,16 @@ public class OpenVSwitchUpdateCommandTest {
         PowerMockito.whenNew(OvsdbNodeAugmentationBuilder.class).withNoArguments().thenReturn(ovsdbNodeBuilder);
 
         //suppress the setter methods of the class
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setVersion", OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setDataPathTypes", OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setInterfaceTypes", OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setExternalIds", ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class, OpenVSwitch.class));
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setOtherConfig", ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setVersion",
+                OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setDataPathTypes",
+                OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setInterfaceTypes",
+                OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setExternalIds",
+                ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setOtherConfig",
+                ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class, OpenVSwitch.class));
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getConnectionInfo"));
         when(openVSwitchUpdateCommand.getConnectionInfo()).thenReturn(mock(ConnectionInfo.class));
         when(ovsdbNodeBuilder.setConnectionInfo(any(ConnectionInfo.class))).thenReturn(ovsdbNodeBuilder);
@@ -137,10 +146,12 @@ public class OpenVSwitchUpdateCommandTest {
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", OpenVSwitch.class));
         when(nodeBuilder.setNodeId(any(NodeId.class))).thenReturn(nodeBuilder);
         when(ovsdbNodeBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class));
-        when(nodeBuilder.addAugmentation(eq(OvsdbNodeAugmentation.class), any(OvsdbNodeAugmentation.class))).thenReturn(nodeBuilder);
+        when(nodeBuilder.addAugmentation(eq(OvsdbNodeAugmentation.class), any(OvsdbNodeAugmentation.class)))
+                .thenReturn(nodeBuilder);
         when(nodeBuilder.build()).thenReturn(mock(Node.class));
-        ReadWriteTransaction transaction= mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(Node.class));
 
         openVSwitchUpdateCommand.execute(transaction);
         verify(openVSwitchUpdateCommand, times(2)).getUpdates();
@@ -154,11 +165,9 @@ public class OpenVSwitchUpdateCommandTest {
         verify(openVSwitchUpdateCommand, times(4)).getDbSchema();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testSetOtherConfig() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         OpenVSwitch oldEntry = mock(OpenVSwitch.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
@@ -167,13 +176,19 @@ public class OpenVSwitchUpdateCommandTest {
         Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
         when(oldEntry.getOtherConfigColumn()).thenReturn(column);
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeOldConfigs", ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setNewOtherConfigs", OvsdbNodeAugmentationBuilder.class, Map.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeOldConfigs",
+                ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setNewOtherConfigs",
+                OvsdbNodeAugmentationBuilder.class, Map.class));
 
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setOtherConfig", transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setOtherConfig", transaction, ovsdbNodeBuilder, oldEntry,
+                openVSwitch);
         verify(openVSwitch, times(2)).getOtherConfigColumn();
         verify(oldEntry, times(2)).getOtherConfigColumn();
-        PowerMockito.verifyPrivate(openVSwitchUpdateCommand).invoke("removeOldConfigs", any(ReadWriteTransaction.class), any(Map.class), any(OpenVSwitch.class));
+        PowerMockito.verifyPrivate(openVSwitchUpdateCommand).invoke("removeOldConfigs", any(ReadWriteTransaction.class),
+                any(Map.class), any(OpenVSwitch.class));
     }
 
     @Test
@@ -181,28 +196,30 @@ public class OpenVSwitchUpdateCommandTest {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<String, String> oldOtherConfigs = new HashMap<>();
         oldOtherConfigs.put("OpenvswitchOtherConfigsKey", "OpenvswitchOtherConfigsValue");
-        OpenVSwitch ovs = mock(OpenVSwitch.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
 
         //suppress getNodeId()
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", OpenVSwitch.class));
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(mock(NodeKey.class));
+        OpenVSwitch ovs = mock(OpenVSwitch.class);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeOldConfigs", transaction, oldOtherConfigs, ovs);
         verify(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testSetNewOtherConfigs() throws Exception {
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         Map<String, String> otherConfigs = new HashMap<>();
         otherConfigs.put("otherConfigKey", "otherConfigValue");
 
         OpenvswitchOtherConfigsBuilder openvswitchOtherConfigsBuilder = mock(OpenvswitchOtherConfigsBuilder.class);
-        PowerMockito.whenNew(OpenvswitchOtherConfigsBuilder.class).withNoArguments().thenReturn(openvswitchOtherConfigsBuilder);
+        PowerMockito.whenNew(OpenvswitchOtherConfigsBuilder.class).withNoArguments()
+                .thenReturn(openvswitchOtherConfigsBuilder);
         when(openvswitchOtherConfigsBuilder.setOtherConfigKey(anyString())).thenReturn(openvswitchOtherConfigsBuilder);
-        when(openvswitchOtherConfigsBuilder.setOtherConfigValue(anyString())).thenReturn(openvswitchOtherConfigsBuilder);
+        when(openvswitchOtherConfigsBuilder.setOtherConfigValue(anyString()))
+                .thenReturn(openvswitchOtherConfigsBuilder);
         when(openvswitchOtherConfigsBuilder.build()).thenReturn(mock(OpenvswitchOtherConfigs.class));
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         when(ovsdbNodeBuilder.setOpenvswitchOtherConfigs(any(List.class))).thenReturn(ovsdbNodeBuilder);
 
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setNewOtherConfigs", ovsdbNodeBuilder, otherConfigs);
@@ -211,11 +228,9 @@ public class OpenVSwitchUpdateCommandTest {
         verify(ovsdbNodeBuilder).setOpenvswitchOtherConfigs(any(List.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testSetExternalIds() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         OpenVSwitch oldEntry = mock(OpenVSwitch.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
@@ -224,13 +239,19 @@ public class OpenVSwitchUpdateCommandTest {
         Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
         when(oldEntry.getExternalIdsColumn()).thenReturn(column);
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeExternalIds", ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setNewExternalIds", OvsdbNodeAugmentationBuilder.class, Map.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeExternalIds",
+                ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setNewExternalIds",
+                OvsdbNodeAugmentationBuilder.class, Map.class));
 
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setExternalIds", transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setExternalIds", transaction, ovsdbNodeBuilder, oldEntry,
+                openVSwitch);
         verify(openVSwitch, times(2)).getExternalIdsColumn();
         verify(oldEntry, times(2)).getExternalIdsColumn();
-        PowerMockito.verifyPrivate(openVSwitchUpdateCommand).invoke("removeExternalIds", any(ReadWriteTransaction.class), any(Map.class), any(OpenVSwitch.class));
+        PowerMockito.verifyPrivate(openVSwitchUpdateCommand).invoke("removeExternalIds",
+                any(ReadWriteTransaction.class), any(Map.class), any(OpenVSwitch.class));
     }
 
     @Test
@@ -238,12 +259,12 @@ public class OpenVSwitchUpdateCommandTest {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<String, String> oldExternalIds = new HashMap<>();
         oldExternalIds.put("OpenvswitchExternalIdKey", "OpenvswitchExternalIdValue");
-        OpenVSwitch ovs = mock(OpenVSwitch.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
 
         //suppress getNodeId()
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", OpenVSwitch.class));
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(mock(NodeKey.class));
+        OpenVSwitch ovs = mock(OpenVSwitch.class);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeExternalIds", transaction, oldExternalIds, ovs);
         verify(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
     }
@@ -251,27 +272,26 @@ public class OpenVSwitchUpdateCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetNewExternalIds() throws Exception {
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         Map<String, String> externalIds = new HashMap<>();
         externalIds.put("externalIdsKey", "externalIdsValue");
 
-        OpenvswitchExternalIdsBuilder openvswitchExternalIdsBuilder = mock(OpenvswitchExternalIdsBuilder.class);
-        PowerMockito.whenNew(OpenvswitchExternalIdsBuilder.class).withNoArguments().thenReturn(openvswitchExternalIdsBuilder);
-        when(openvswitchExternalIdsBuilder.setExternalIdKey(anyString())).thenReturn(openvswitchExternalIdsBuilder);
-        when(openvswitchExternalIdsBuilder.setExternalIdValue(anyString())).thenReturn(openvswitchExternalIdsBuilder);
-        when(openvswitchExternalIdsBuilder.build()).thenReturn(mock(OpenvswitchExternalIds.class));
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
+        OpenvswitchExternalIdsBuilder ovsExternalIdsBuilder = mock(OpenvswitchExternalIdsBuilder.class);
+        PowerMockito.whenNew(OpenvswitchExternalIdsBuilder.class).withNoArguments().thenReturn(ovsExternalIdsBuilder);
+        when(ovsExternalIdsBuilder.setExternalIdKey(anyString())).thenReturn(ovsExternalIdsBuilder);
+        when(ovsExternalIdsBuilder.setExternalIdValue(anyString())).thenReturn(ovsExternalIdsBuilder);
+        when(ovsExternalIdsBuilder.build()).thenReturn(mock(OpenvswitchExternalIds.class));
         when(ovsdbNodeBuilder.setOpenvswitchExternalIds(any(List.class))).thenReturn(ovsdbNodeBuilder);
 
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setNewExternalIds", ovsdbNodeBuilder, externalIds);
-        verify(openvswitchExternalIdsBuilder).setExternalIdKey(anyString());
-        verify(openvswitchExternalIdsBuilder).setExternalIdValue(anyString());
+        verify(ovsExternalIdsBuilder).setExternalIdKey(anyString());
+        verify(ovsExternalIdsBuilder).setExternalIdValue(anyString());
         verify(ovsdbNodeBuilder).setOpenvswitchExternalIds(any(List.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testSetInterfaceTypes() throws Exception {
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
@@ -292,29 +312,29 @@ public class OpenVSwitchUpdateCommandTest {
         set.add("vxlan");
         when(column.getData()).thenReturn(set);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createInterfaceType(anyString())).thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-            public Class<? extends InterfaceTypeBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
-                return InterfaceTypeInternal.class;
-            }
-        });
+        when(SouthboundMapper.createInterfaceType(anyString()))
+                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
+                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                        return InterfaceTypeInternal.class;
+                    }
+                });
 
         InterfaceTypeEntry ifEntry = mock(InterfaceTypeEntry.class);
-        InterfaceTypeEntryBuilder interfaceTypeEntryBuilder = mock(InterfaceTypeEntryBuilder.class);
-        PowerMockito.whenNew(InterfaceTypeEntryBuilder.class).withNoArguments().thenReturn(interfaceTypeEntryBuilder);
-        when(interfaceTypeEntryBuilder.setInterfaceType(InterfaceTypeInternal.class)).thenReturn(interfaceTypeEntryBuilder);
-        when(interfaceTypeEntryBuilder.build()).thenReturn(ifEntry);
+        InterfaceTypeEntryBuilder interfaceTypeEntryBldr = mock(InterfaceTypeEntryBuilder.class);
+        PowerMockito.whenNew(InterfaceTypeEntryBuilder.class).withNoArguments().thenReturn(interfaceTypeEntryBldr);
+        when(interfaceTypeEntryBldr.setInterfaceType(InterfaceTypeInternal.class)).thenReturn(interfaceTypeEntryBldr);
+        when(interfaceTypeEntryBldr.build()).thenReturn(ifEntry);
 
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         when(ovsdbNodeBuilder.setInterfaceTypeEntry(any(List.class))).thenReturn(ovsdbNodeBuilder);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setInterfaceTypes", ovsdbNodeBuilder, openVSwitch);
         verify(openVSwitch).getIfaceTypesColumn();
-        verify(interfaceTypeEntryBuilder,times(13)).setInterfaceType(InterfaceTypeInternal.class);
+        verify(interfaceTypeEntryBldr,times(13)).setInterfaceType(InterfaceTypeInternal.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testSetDataPathTypes() throws Exception {
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getDatapathTypesColumn()).thenReturn(column );
@@ -323,34 +343,35 @@ public class OpenVSwitchUpdateCommandTest {
         set.add("system");
         when(column.getData()).thenReturn(set);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createDatapathType(anyString())).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-            public Class<? extends DatapathTypeBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
-                return DatapathTypeSystem.class;
-            }
-        });
+        when(SouthboundMapper.createDatapathType(anyString()))
+                .thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
+                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                        return DatapathTypeSystem.class;
+                    }
+                });
         DatapathTypeEntry dpEntry = mock(DatapathTypeEntry.class);
         DatapathTypeEntryBuilder datapathTypeEntryBuilder = mock(DatapathTypeEntryBuilder.class);
         PowerMockito.whenNew(DatapathTypeEntryBuilder.class).withNoArguments().thenReturn(datapathTypeEntryBuilder);
         when(datapathTypeEntryBuilder.setDatapathType(DatapathTypeSystem.class)).thenReturn(datapathTypeEntryBuilder);
         when(datapathTypeEntryBuilder.build()).thenReturn(dpEntry);
 
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         when(ovsdbNodeBuilder.setDatapathTypeEntry(any(List.class))).thenReturn(ovsdbNodeBuilder);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setDataPathTypes", ovsdbNodeBuilder, openVSwitch);
         verify(openVSwitch).getDatapathTypesColumn();
         verify(datapathTypeEntryBuilder,times(2)).setDatapathType(DatapathTypeSystem.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testSetVersion() throws Exception {
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getOvsVersionColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("v2.3.0");
         when(column.getData()).thenReturn(set);
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         when(ovsdbNodeBuilder.setOvsVersion(anyString())).thenReturn(ovsdbNodeBuilder);
 
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setVersion", ovsdbNodeBuilder, openVSwitch);

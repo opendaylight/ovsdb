@@ -8,15 +8,19 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +44,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -49,8 +52,6 @@ import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.google.common.base.Optional;
 
 @PrepareForTest({TyperUtils.class, TransactUtils.class, TerminationPointCreateCommand.class})
 @RunWith(PowerMockRunner.class)
@@ -69,23 +70,24 @@ public class TerminationPointCreateCommandTest {
     @Test
     @Ignore("This needs to be rewritten")
     public void testExecute() throws Exception {
-        TransactionBuilder transaction = mock(TransactionBuilder.class);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointCreateCommand.class, "getChanges"));
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asynEvent = mock(AsyncDataChangeEvent.class);
         Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
-        OvsdbTerminationPointAugmentation terminationPoint= mock(OvsdbTerminationPointAugmentation.class);
+        OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
         InstanceIdentifier terminationPointIid = mock(InstanceIdentifier.class);
         map.put(terminationPointIid, terminationPoint);
         when(asynEvent.getCreatedData()).thenReturn(map);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
 
-        Optional<TerminationPoint> terminationPointOptional= mock(Optional.class);
+        Optional<TerminationPoint> terminationPointOptional = mock(Optional.class);
         BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
-        when(bridgeOpState.getBridgeTerminationPoint(any(InstanceIdentifier.class))).thenReturn(terminationPointOptional);
+        when(bridgeOpState.getBridgeTerminationPoint(any(InstanceIdentifier.class)))
+                .thenReturn(terminationPointOptional);
 
         when(terminationPointOptional.isPresent()).thenReturn(true);
         Interface ovsInterface = mock(Interface.class);
         PowerMockito.mockStatic(TyperUtils.class);
+        TransactionBuilder transaction = mock(TransactionBuilder.class);
         when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
         when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Interface.class))).thenReturn(ovsInterface);
         //createInterface()
@@ -116,8 +118,6 @@ public class TerminationPointCreateCommandTest {
     @Test
     public void testStampInstanceIdentifier() {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
-        String interfaceName = INTERFACE_NAME;
 
         when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
         PowerMockito.mockStatic(TyperUtils.class);
@@ -132,8 +132,8 @@ public class TerminationPointCreateCommandTest {
 
         Mutate mutate = mock(Mutate.class);
         PowerMockito.mockStatic(TransactUtils.class);
-        when(TransactUtils.stampInstanceIdentifierMutation(
-                any(TransactionBuilder.class), any(InstanceIdentifier.class), any(GenericTableSchema.class), any(ColumnSchema.class))).thenReturn(mutate);
+        when(TransactUtils.stampInstanceIdentifierMutation(any(TransactionBuilder.class), any(InstanceIdentifier.class),
+                any(GenericTableSchema.class), any(ColumnSchema.class))).thenReturn(mutate);
 
         Column<GenericTableSchema, String> nameColumn = mock(Column.class);
         when(port.getNameColumn()).thenReturn(nameColumn);
@@ -145,6 +145,8 @@ public class TerminationPointCreateCommandTest {
         when(where.build()).thenReturn(mock(Operation.class));
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
+        String interfaceName = INTERFACE_NAME;
+        InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
         TerminationPointCreateCommand.stampInstanceIdentifier(transaction, iid, interfaceName);
         verify(port).setName(anyString());
         verify(port).getExternalIdsColumn();

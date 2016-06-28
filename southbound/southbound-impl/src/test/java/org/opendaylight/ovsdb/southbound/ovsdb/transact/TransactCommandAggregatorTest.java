@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -26,12 +25,12 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @PrepareForTest({})
 @RunWith(PowerMockRunner.class)
 public class TransactCommandAggregatorTest {
+
     private List<TransactCommand> commands = new ArrayList<>();
     private TransactCommandAggregator transactCommandAggregator;
     @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
@@ -66,11 +65,14 @@ public class TransactCommandAggregatorTest {
     public void testExecute() {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         for (TransactCommand command: commands) {
-            doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class));
+            doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
+                    any(AsyncDataChangeEvent.class));
         }
-        transactCommandAggregator.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        transactCommandAggregator.execute(transaction, mock(BridgeOperationalState.class),
+                mock(AsyncDataChangeEvent.class));
         for (TransactCommand command: commands) {
-            verify(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class), any(AsyncDataChangeEvent.class));
+            verify(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
+                    any(AsyncDataChangeEvent.class));
         }
     }
 }

@@ -8,13 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.notation.json;
 
-import java.io.IOException;
-
-import org.opendaylight.ovsdb.lib.notation.UUID;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import java.io.IOException;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 
 public class UUIDSerializer extends JsonSerializer<UUID> {
     @Override

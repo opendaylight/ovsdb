@@ -8,11 +8,12 @@
 
 package org.opendaylight.ovsdb.lib.schema.typed;
 
+import com.google.common.base.Preconditions;
+import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
@@ -28,9 +29,6 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import com.google.common.base.Preconditions;
-import com.google.common.reflect.Reflection;
 
 public class TyperUtils {
     private static final String GET_STARTS_WITH = "get";

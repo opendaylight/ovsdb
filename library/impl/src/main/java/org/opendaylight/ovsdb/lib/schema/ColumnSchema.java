@@ -8,16 +8,14 @@
 
 package org.opendaylight.ovsdb.lib.schema;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.error.BadSchemaException;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 
 public class ColumnSchema<E extends TableSchema<E>, D> {

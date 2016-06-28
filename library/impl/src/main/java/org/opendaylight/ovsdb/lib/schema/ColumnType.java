@@ -8,12 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.schema;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 
 public abstract class ColumnType {

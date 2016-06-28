@@ -8,15 +8,13 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
-import java.util.Map;
-
-import org.opendaylight.ovsdb.lib.notation.json.Converter;
-import org.opendaylight.ovsdb.lib.notation.json.OvsdbMapSerializer;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Maps;
+import java.util.Map;
+import org.opendaylight.ovsdb.lib.notation.json.Converter;
+import org.opendaylight.ovsdb.lib.notation.json.OvsdbMapSerializer;
 
 @JsonDeserialize(converter = Converter.MapConverter.class)
 @JsonSerialize(using = OvsdbMapSerializer.class)

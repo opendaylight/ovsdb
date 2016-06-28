@@ -8,15 +8,13 @@
 
 package org.opendaylight.ovsdb.lib.notation.json;
 
-import java.io.IOException;
-import java.util.Collection;
-
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import java.io.IOException;
+import java.util.Collection;
+import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Row;
 
 public class RowSerializer extends JsonSerializer<Row> {
     @Override

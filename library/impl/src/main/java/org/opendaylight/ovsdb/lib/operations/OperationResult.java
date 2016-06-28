@@ -8,15 +8,13 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import java.util.List;
-
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 // Section 5.2 of ovsdb draft covers the various response structures for
 // each of the Operations covered by Transaction (Insert, Update, Delete, Mutate, etc...)

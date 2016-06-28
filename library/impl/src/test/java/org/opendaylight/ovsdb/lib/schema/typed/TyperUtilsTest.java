@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;

@@ -8,13 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import java.util.List;
-
-import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 public class TransactionBuilder {
 

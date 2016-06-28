@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014 - 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -46,6 +46,13 @@ public interface PhysicalPort extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="vlan_bindings", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setVlanBindings(Map<Long, UUID> vlanBindings);
+
+
+    @TypedColumn(name="acl_bindings", method=MethodType.GETCOLUMN, fromVersion="1.4.0")
+    Column<GenericTableSchema, Map<Long, UUID>> getAclBindingsColumn();
+
+    @TypedColumn(name="acl_bindings", method=MethodType.SETDATA, fromVersion="1.4.0")
+    void setAclBindings(Map<Long, UUID> aclBindings);
 
 
     @TypedColumn(name="vlan_stats", method=MethodType.GETCOLUMN, fromVersion="1.0.0")

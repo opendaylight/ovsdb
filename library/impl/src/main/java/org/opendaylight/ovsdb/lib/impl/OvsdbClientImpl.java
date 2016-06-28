@@ -8,9 +8,17 @@
 
 package org.opendaylight.ovsdb.lib.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +27,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -48,16 +55,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 
 
 public class OvsdbClientImpl implements OvsdbClient {
@@ -422,7 +419,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     /**
      * User friendly convenient method that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy
-     * given the Typed Table Class
+     * given the Typed Table Class.
      *
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.

@@ -4,10 +4,7 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Dave Tucker
  */
-
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
@@ -23,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class JsonRpcDecoderTest {
+
     static int testJson_BYTES = 179;
     String testJson;
     String prettyTestJson;
@@ -47,7 +45,6 @@ public class JsonRpcDecoderTest {
     /**
      * Test decoding the Stringified Json text in test.json to
      * individual Json node objects.
-     * @throws Exception
      */
     @Test
     public void testDecode() throws Exception {
@@ -62,7 +59,6 @@ public class JsonRpcDecoderTest {
     /**
      * Test decoding the Stringified Json text in pretty-test.json to
      * individual Json node objects.
-     * @throws Exception
      */
     @Test
     public void testDecodePrettyJson() throws Exception {
@@ -75,7 +71,6 @@ public class JsonRpcDecoderTest {
     /**
      * Test decoding the Stringified Json text with large spaces to
      * individual Json node objects.
-     * @throws Exception
      */
     @Test
     public void testDecodeSkipSpaces() throws Exception {
@@ -89,7 +84,6 @@ public class JsonRpcDecoderTest {
      * Test whether phased decoding is allowed with JsonRpcDecoder by
      * writing Json string over two separate iterations, and checking if
      * the decoder collates the record appropriately.
-     * @throws Exception
      */
     @Test
     public void testDecodePartial() throws Exception {
@@ -106,14 +100,14 @@ public class JsonRpcDecoderTest {
      * Test whether decoder throws appropriate DecoderException when
      * passing a Json string using an unsupported (i.e., UTF-16)
      * character set.
-     * @throws Exception
      */
-    @Test(expected= DecoderException.class)
+    @Test(expected = DecoderException.class)
     public void testDecodeInvalidEncoding() throws Exception {
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_16));
         ch.finish();
     }
-    /* Disabling this test as the limit was changed 
+
+    /* Disabling this test as the limit was changed
      * from exception to a log warning...
     /**
      * Test whether decoder throws appropriate TooLongFrameException

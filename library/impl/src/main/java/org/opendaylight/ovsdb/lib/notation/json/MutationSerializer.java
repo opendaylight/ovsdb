@@ -8,13 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.notation.json;
 
-import java.io.IOException;
-
-import org.opendaylight.ovsdb.lib.notation.Mutation;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import java.io.IOException;
+import org.opendaylight.ovsdb.lib.notation.Mutation;
 
 public class MutationSerializer extends JsonSerializer<Mutation> {
     @Override

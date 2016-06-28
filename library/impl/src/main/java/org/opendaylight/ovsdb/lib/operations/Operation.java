@@ -8,10 +8,9 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 public abstract class Operation<E extends TableSchema<E>> {
 

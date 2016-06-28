@@ -10,11 +10,9 @@ package org.opendaylight.ovsdb.lib;
 
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslHandler;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
-
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -22,6 +20,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement(name = "Connection")
 public class OvsdbConnectionInfo {
+
     public enum ConnectionType {
         ACTIVE, PASSIVE
     }
@@ -32,6 +31,7 @@ public class OvsdbConnectionInfo {
 
     @XmlTransient
     private Channel channel;
+
     @XmlTransient
     private ConnectionType type;
 
@@ -44,22 +44,27 @@ public class OvsdbConnectionInfo {
     public InetAddress getRemoteAddress() {
         return ((InetSocketAddress)channel.remoteAddress()).getAddress();
     }
+
     @XmlElement(name = "remotePort")
     public int getRemotePort() {
         return ((InetSocketAddress)channel.remoteAddress()).getPort();
     }
+
     @XmlElement(name = "localAddress")
     public InetAddress getLocalAddress() {
         return ((InetSocketAddress)channel.localAddress()).getAddress();
     }
+
     @XmlElement(name = "localPort")
     public int getLocalPort() {
         return ((InetSocketAddress)channel.localAddress()).getPort();
     }
+
     @XmlElement(name = "connectionType")
     public ConnectionType getType() {
         return type;
     }
+
     @XmlElement(name = "clientCertificate")
     public Certificate getCertificate() throws SSLPeerUnverifiedException {
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");

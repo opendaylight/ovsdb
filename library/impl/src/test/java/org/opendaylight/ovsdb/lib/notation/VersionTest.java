@@ -4,10 +4,7 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Dave Tucker
  */
-
 package org.opendaylight.ovsdb.lib.notation;
 
 import org.junit.Test;
@@ -65,11 +62,4 @@ public class VersionTest {
 
     }
 
-    /* TODO: Incomplete compare test
-     */
-    @Test
-    public void testCompare() throws Exception {
-        Version a = Version.fromString("6.9.3");
-        Version b = Version.fromString("7.1.0");
-    }
 }

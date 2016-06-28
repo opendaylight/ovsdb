@@ -4,8 +4,6 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran
  */
 package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 
@@ -52,7 +50,6 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +71,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
     public void testTransact() throws IOException, InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
         TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
+        bridge.column("name", String.class);
 
         createBridgeTransaction();
         abortTransaction();
@@ -187,7 +184,6 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         assertNotNull(dbSchema);
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
 
-        List<MonitorRequest> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
         List<OperationResult> results = ovs.transactBuilder(dbSchema)

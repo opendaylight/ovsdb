@@ -16,6 +16,40 @@
       "revId": "cf000d46a0a4f772ad7ebc9fea14858fb944ae46",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_a36d2507",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/LogicalRouter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-28T12:42:21Z",
+      "side": 1,
+      "message": "This should be\n\n    Copyright © 2014, 2016 Red Hat, Inc. and others. All rights reserved.\n\n(I\u0027m actually surprised this passed the license check!)",
+      "revId": "cf000d46a0a4f772ad7ebc9fea14858fb944ae46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_8372a1e3",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/PhysicalPort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-28T12:42:21Z",
+      "side": 1,
+      "message": "\"2014, 2016\"",
+      "revId": "cf000d46a0a4f772ad7ebc9fea14858fb944ae46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

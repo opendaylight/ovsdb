@@ -8,17 +8,15 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Maps;
 
 
 public class Insert<E extends TableSchema<E>> extends Operation<E> {

@@ -11,8 +11,10 @@ package org.opendaylight.ovsdb.lib.notation;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class ReferencedRow {
+
     String refTable;
     JsonNode jsonNode;
+
     public ReferencedRow(String refTable, JsonNode jsonNode) {
         this.refTable = refTable;
         this.jsonNode = jsonNode;

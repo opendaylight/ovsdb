@@ -10,10 +10,6 @@ package org.opendaylight.ovsdb.lib.impl;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,17 +17,20 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * StalePassiveConnectionService provides functionalities to clean up stale passive connections
  * from the same node before new connection request arrives, especially for connection flapping scenarios.
  *
- * When new connection arrives all connections from the same node are pinged. The pings cause
+ * <p>When new connection arrives all connections from the same node are pinged. The pings cause
  * the stale netty connections to close due to IOException. Those have not been closed after a timeout
  * will be closed programmatically. New connection request handling is then proceeded after all
  * stale connections are cleaned up in the OvsdbConnectionService
  *
- * Created by Vinh Nguyen (vinh.nguyen@hcl.com) on 6/10/16.
+ * @author Vinh Nguyen (vinh.nguyen@hcl.com) on 6/10/16.
  */
 public class StalePassiveConnectionService implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(StalePassiveConnectionService.class);
@@ -48,7 +47,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
 
     /**
      * This method makes sure that all stale connections from the same node are properly cleaned up before processing
-     * new connection request
+     * new connection request.
      *
      * @param newOvsdbClient the connecting OvsdbClient
      * @param clientsFromSameNode list of existing OvsdbClients from the same node as the new OvsdbClient
@@ -66,7 +65,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
                     public void run() {
                         for (OvsdbClient client : clientFutureMap.keySet()) {
                             Future<?> clientFuture = clientFutureMap.get(client);
-                            if( !clientFuture.isDone() && !clientFuture.isCancelled()) {
+                            if ( !clientFuture.isDone() && !clientFuture.isCancelled()) {
                                 clientFuture.cancel(true);
                             }
                             if (client.isActive()) {
@@ -82,7 +81,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
         // 2. the netty connection is closed due to IO exception -
         // The future is removed from the 'clientFutureMap' when the onSuccess event for each future arrives
         // If the map is empty we proceed with new connection process
-        for(final OvsdbClient client : clientsFromSameNode) {
+        for (final OvsdbClient client : clientsFromSameNode) {
             SettableFuture clientFuture = SettableFuture.create();
             clientFutureMap.put(client, clientFuture);
             Futures.addCallback(clientFuture,
@@ -93,7 +92,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
     }
 
     /**
-     * Notify the service that the given client has disconnected
+     * Notify the service that the given client has disconnected.
      * @param disconnectedClient the client just disconnected
      */
     public void clientDisconnected(OvsdbClient disconnectedClient) {
@@ -130,9 +129,10 @@ public class StalePassiveConnectionService implements AutoCloseable {
                     pendingConnectionClients.remove(newClient);
                 }
             }
+
             @Override
-            public void onFailure(Throwable t) {
-                LOG.error("Error in checking stale connections)", t);
+            public void onFailure(Throwable throwable) {
+                LOG.error("Error in checking stale connections)", throwable);
             }
         };
     }

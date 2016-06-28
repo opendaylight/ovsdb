@@ -5,14 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib;
 
 import io.netty.channel.Channel;
-
 import java.net.InetAddress;
 import java.util.Collection;
-
 import javax.net.ssl.SSLContext;
 
 /**
@@ -23,15 +20,15 @@ import javax.net.ssl.SSLContext;
  * While Passive OVSDB connections are those that are initiated from the ovs towards
  * the controller.
  *
- * Applications that use OvsDBConnectionService can use the connect APIs to initiate Active
+ * <p>Applications that use OvsDBConnectionService can use the connect APIs to initiate Active
  * connections and can listen to the asynchronous Passive connections via registerConnectionListener
  * listener API.
  */
-
 public interface OvsdbConnection {
+
     /**
      * connect API can be used by the applications to initiate Active connection from
-     * the controller towards ovsdb-server
+     * the controller towards ovsdb-server.
      * @param address IP Address of the remote server that hosts the ovsdb server.
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
@@ -40,7 +37,7 @@ public interface OvsdbConnection {
 
     /**
      * connect API can be used by the applications to initiate Active ssl
-     * connection from the controller towards ovsdb-server
+     * connection from the controller towards ovsdb-server.
      * @param address IP Address of the remote server that hosts the ovsdb server.
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
      * @param sslContext Netty sslContext for channel configuration
@@ -56,12 +53,12 @@ public interface OvsdbConnection {
     void disconnect(OvsdbClient client);
 
     /**
-     * Method to start ovsdb server for passive connection
+     * Method to start ovsdb server for passive connection.
      */
     boolean startOvsdbManager(final int ovsdbListenPort);
 
     /**
-     * Method to start ovsdb server for passive connection with SSL
+     * Method to start ovsdb server for passive connection with SSL.
      */
     boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
                                      final SSLContext sslContext);
@@ -74,7 +71,6 @@ public interface OvsdbConnection {
 
     /**
      * Method to unregister a Passive Connection Listener with the ConnectionService.
-     * @param listener
      */
     void unregisterConnectionListener(OvsdbConnectionListener listener);
 

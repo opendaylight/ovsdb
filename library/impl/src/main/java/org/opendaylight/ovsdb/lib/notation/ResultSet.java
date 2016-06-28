@@ -11,7 +11,7 @@ package org.opendaylight.ovsdb.lib.notation;
 import java.util.List;
 
 /**
- * A collection of Rows as returned by select and other operations on OVSDB
+ * A collection of Rows as returned by select and other operations on OVSDB.
  */
 public class ResultSet {
 

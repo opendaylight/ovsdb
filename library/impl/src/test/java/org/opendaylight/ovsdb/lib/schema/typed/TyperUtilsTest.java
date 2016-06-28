@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -26,8 +25,8 @@ public class TyperUtilsTest {
 
     /**
      * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} detects an old version. (The aim here isn't
-     * to test
-     * {@link Version#compareTo(Version)}, that should be done in {@link org.opendaylight.ovsdb.lib.notation.VersionTest}).
+     * to test {@link Version#compareTo(Version)}, that should be done in
+     * {@link org.opendaylight.ovsdb.lib.notation.VersionTest}).
      */
     @Test(expected = SchemaVersionMismatchException.class)
     public void testCheckOldVersionFails() throws SchemaVersionMismatchException {

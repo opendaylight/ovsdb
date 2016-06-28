@@ -12,11 +12,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ForwardingSet;
 import com.google.common.collect.Sets;
-
+import java.util.Set;
 import org.opendaylight.ovsdb.lib.notation.json.Converter;
 import org.opendaylight.ovsdb.lib.notation.json.OvsdbSetSerializer;
-
-import java.util.Set;
 
 @JsonDeserialize(converter = Converter.SetConverter.class)
 @JsonSerialize(using = OvsdbSetSerializer.class)

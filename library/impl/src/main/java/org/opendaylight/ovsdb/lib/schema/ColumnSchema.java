@@ -8,16 +8,14 @@
 
 package org.opendaylight.ovsdb.lib.schema;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.error.BadSchemaException;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 
 public class ColumnSchema<E extends TableSchema<E>, D> {
@@ -121,8 +119,7 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     }
 
     /**
-     * Validates the passed in value against the constraints set for this ColumnSchema
-     * @param value
+     * Validates the passed in value against the constraints set for this ColumnSchema.
      */
     public D validate(Object value) {
         //todo(type check and validate based on constraints set)
@@ -131,7 +128,7 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     }
 
     /**
-     * Verifies if this Column if of the specified type
+     * Verifies if this Column if of the specified type.
      * @param type the type to check for
      */
     public void validateType(Class<?> type) {

@@ -8,15 +8,15 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import org.opendaylight.ovsdb.lib.notation.json.Converter.UpdateNotificationConverter;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.opendaylight.ovsdb.lib.notation.json.Converter.UpdateNotificationConverter;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 @JsonDeserialize(converter = UpdateNotificationConverter.class)
 public class UpdateNotification {
+
     Object context;
     DatabaseSchema databaseSchema;
     TableUpdates update;
@@ -25,12 +25,15 @@ public class UpdateNotification {
     public Object getContext() {
         return context;
     }
+
     public void setContext(Object context) {
         this.context = context;
     }
+
     public TableUpdates getUpdate() {
         return update;
     }
+
     public void setUpdate(TableUpdates update) {
         this.update = update;
     }
@@ -53,6 +56,7 @@ public class UpdateNotification {
     public DatabaseSchema getDatabaseSchema() {
         return databaseSchema;
     }
+
     public void setDatabaseSchema(DatabaseSchema databaseSchema) {
         this.databaseSchema = databaseSchema;
     }

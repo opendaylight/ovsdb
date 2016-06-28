@@ -8,9 +8,8 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
-import org.opendaylight.ovsdb.lib.notation.json.MutationSerializer;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.opendaylight.ovsdb.lib.notation.json.MutationSerializer;
 
 @JsonSerialize(using = MutationSerializer.class)
 public class Mutation {

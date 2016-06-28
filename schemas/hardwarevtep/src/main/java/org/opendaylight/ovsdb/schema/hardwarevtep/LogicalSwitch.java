@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -44,4 +45,18 @@ public interface LogicalSwitch extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="tunnel_key", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setTunnelKey(Set<Long> tunnelKey);
+
+
+    @TypedColumn(name="replication_mode", method=MethodType.GETCOLUMN, fromVersion="1.6.0")
+    Column<GenericTableSchema, Set<String>> getReplicationModeColumn();
+
+    @TypedColumn(name="replication_mode", method=MethodType.SETDATA, fromVersion="1.6.0")
+    void setReplicationMode(Set<String> replicationMode);
+
+
+    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.5.1")
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+
+    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.5.1")
+    void setOtherConfig(Map<String, String> otherConfig);
 }

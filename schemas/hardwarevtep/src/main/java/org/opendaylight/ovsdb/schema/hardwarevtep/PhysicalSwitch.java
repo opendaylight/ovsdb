@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -66,6 +67,14 @@ public interface PhysicalSwitch extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="tunnels", method=MethodType.SETDATA, fromVersion="1.3.0")
     void setTunnels(Set<UUID> tunnels);
+
+
+    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.5.1")
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+
+    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.5.1")
+    void setOtherConfig(Map<String, String> otherConfig);
+
 
     @TypedColumn(name="switch_fault_status", method=MethodType.GETCOLUMN, fromVersion="1.1.0")
     Column<GenericTableSchema, Set<String>> getSwitchFaultStatusColumn();

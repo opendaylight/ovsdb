@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014, 2016 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -52,4 +52,18 @@ public interface LogicalRouter extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="static_routes", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setStaticRoutes(Map<String, String> staticRoutes);
+
+
+    @TypedColumn(name="acl_binding", method=MethodType.GETCOLUMN, fromVersion="1.4.0")
+    Column<GenericTableSchema, Map<String, UUID>> getAclBindingColumn();
+
+    @TypedColumn(name="acl_binding", method=MethodType.SETDATA, fromVersion="1.4.0")
+    void setAclBinding(Map<String, UUID> aclBinding);
+
+
+    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.5.1")
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+
+    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.5.1")
+    void setOtherConfig(Map<String, String> otherConfig);
 }

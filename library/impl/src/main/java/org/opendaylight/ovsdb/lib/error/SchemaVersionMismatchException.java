@@ -12,7 +12,7 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 
 /**
  * This exception is used when the a table or row is accessed though a typed interface
- * and the version requirements are not met
+ * and the version requirements are not met.
  */
 public class SchemaVersionMismatchException extends RuntimeException {
 

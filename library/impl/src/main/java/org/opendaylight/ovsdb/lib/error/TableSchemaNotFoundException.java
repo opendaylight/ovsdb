@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.lib.error;
 
 /**
- * This exception is thrown when a TableSchema cannot be found
+ * This exception is thrown when a TableSchema cannot be found.
  */
 public class TableSchemaNotFoundException extends RuntimeException {
 

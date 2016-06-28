@@ -8,13 +8,12 @@
 
 package org.opendaylight.ovsdb.lib.notation.json;
 
-import java.io.IOException;
-import java.util.Map;
-import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import java.io.IOException;
+import java.util.Map;
+import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 
 public class OvsdbMapSerializer extends JsonSerializer<OvsdbMap<?,?>> {
     @Override

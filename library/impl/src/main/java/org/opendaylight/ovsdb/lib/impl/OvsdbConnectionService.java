@@ -8,6 +8,12 @@
 
 package org.opendaylight.ovsdb.lib.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
@@ -23,16 +29,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.CharsetUtil;
 import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult.HandshakeStatus;
-import javax.net.ssl.SSLPeerUnverifiedException;
-
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.util.CharsetUtil;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +44,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
@@ -58,14 +61,6 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 /**
  * OvsDBConnectionService provides OVSDB connection management functionality which includes
  * both Active and Passive connections.
@@ -74,11 +69,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  * While Passive OVSDB connections are those that are initiated from the ovs towards
  * the controller.
  *
- * Applications that use OvsDBConnectionService can use the OvsDBConnection class' connect APIs
+ * <p>Applications that use OvsDBConnectionService can use the OvsDBConnection class' connect APIs
  * to initiate Active connections and can listen to the asynchronous Passive connections via
  * registerConnectionListener listener API.
  *
- * The library is designed as Java modular component that can work in both OSGi and non-OSGi
+ * <p>The library is designed as Java modular component that can work in both OSGi and non-OSGi
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
  * and a Singleton object in a non-OSGi environment.
  */
@@ -108,10 +103,12 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
         return connectionService;
     }
+
     @Override
     public OvsdbClient connect(final InetAddress address, final int port) {
         return connectWithSsl(address, port, null /* SslContext */);
     }
+
     @Override
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
                                final SSLContext sslContext) {
@@ -313,6 +310,15 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
+    private static void handleNewPassiveConnection(OvsdbClient client) {
+        List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
+        if (clientsFromSameNode.size() == 0) {
+            notifyListenerForPassiveConnection(client);
+        } else {
+            stalePassiveConnectionService.handleNewPassiveConnection(client, clientsFromSameNode);
+        }
+    }
+
     private static void handleNewPassiveConnection(final Channel channel) {
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
         if (sslHandler != null) {
@@ -326,6 +332,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     this.sslHandler = sslHandler;
                     this.retryTimes = 3;
                 }
+
                 @Override
                 public void run() {
                     HandshakeStatus status = sslHandler.engine().getHandshakeStatus();
@@ -391,6 +398,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     }
                 }
             }
+
             executorService.schedule(new HandleNewPassiveSslRunner(channel, sslHandler),
                     retryPeriod, TimeUnit.MILLISECONDS);
         } else {
@@ -413,6 +421,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             stalePassiveConnectionService.clientDisconnected(client);
         }
     }
+
     @Override
     public Collection<OvsdbClient> getConnections() {
         return connections.keySet();
@@ -437,23 +446,14 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static List<OvsdbClient> getPassiveClientsFromSameNode(OvsdbClient ovsdbClient) {
         List<OvsdbClient> passiveClients = new ArrayList<>();
         for (OvsdbClient client : connections.keySet()) {
-            if (!client.equals(ovsdbClient) &&
-                    client.getConnectionInfo().getRemoteAddress()
-                            .equals(ovsdbClient.getConnectionInfo().getRemoteAddress()) &&
-                    client.getConnectionInfo().getType() == ConnectionType.PASSIVE) {
+            if (!client.equals(ovsdbClient)
+                    && client.getConnectionInfo().getRemoteAddress()
+                            .equals(ovsdbClient.getConnectionInfo().getRemoteAddress())
+                    && client.getConnectionInfo().getType() == ConnectionType.PASSIVE) {
                 passiveClients.add(client);
             }
         }
         return passiveClients;
-    }
-
-    private static void handleNewPassiveConnection(OvsdbClient client) {
-        List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
-        if (clientsFromSameNode.size() == 0) {
-            notifyListenerForPassiveConnection(client);
-        } else {
-            stalePassiveConnectionService.handleNewPassiveConnection(client, clientsFromSameNode);
-        }
     }
 
     public static void notifyListenerForPassiveConnection(OvsdbClient client) {

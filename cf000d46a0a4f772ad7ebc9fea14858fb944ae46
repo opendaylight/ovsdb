@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_a3e8857d",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-28T12:33:44Z",
+      "side": 1,
+      "message": "nitpick whitespace.\n\nOther than that, looks like there is an extra line between each pair. I guess to separate them. none of the other files are that way though.",
+      "revId": "cf000d46a0a4f772ad7ebc9fea14858fb944ae46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

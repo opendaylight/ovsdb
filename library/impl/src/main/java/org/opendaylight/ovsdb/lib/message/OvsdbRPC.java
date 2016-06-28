@@ -10,11 +10,11 @@ package org.opendaylight.ovsdb.lib.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 
-import java.util.List;
-
 public interface OvsdbRPC {
+
     String REGISTER_CALLBACK_METHOD = "registerCallback";
 
     //public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);
@@ -43,8 +43,11 @@ public interface OvsdbRPC {
 
     interface Callback {
         void update(Object context, UpdateNotification upadateNotification);
+
         void locked(Object context, List<String> ids);
+
         void stolen(Object context, List<String> ids);
+
         // ECHO is handled by JsonRPCEndpoint directly.
         // We can add Echo request here if there is a need for clients to handle it.
     }

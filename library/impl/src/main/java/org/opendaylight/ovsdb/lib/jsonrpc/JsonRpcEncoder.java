@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
-
 import java.util.List;
 
 /**

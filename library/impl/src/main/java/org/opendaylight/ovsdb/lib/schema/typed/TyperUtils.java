@@ -8,11 +8,12 @@
 
 package org.opendaylight.ovsdb.lib.schema.typed;
 
+import com.google.common.base.Preconditions;
+import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
@@ -29,10 +30,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import com.google.common.base.Preconditions;
-import com.google.common.reflect.Reflection;
-
 public class TyperUtils {
+
     private static final String GET_STARTS_WITH = "get";
     private static final String SET_STARTS_WITH = "set";
     private static final String GETCOLUMN_ENDS_WITH = "Column";
@@ -203,35 +202,36 @@ public class TyperUtils {
     }
 
     /**
-     * This method returns a Typed Proxy implementation for the klazz passed as a parameter.
+     * Returns a Typed Proxy implementation for the klazz passed as a parameter.
      * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual
      * Row which is untyped.
-     * Being just a wrapper, it is state-less and more of a convenience functionality to
+     *
+     * <p>Being just a wrapper, it is state-less and more of a convenience functionality to
      * provide a type-safe infrastructure for the applications to built on top of.
      * And this Typed infra is completely optional.
      *
-     * It is the applications responsibility to pass on the raw Row parameter and this method will
+     * <p>It is the applications responsibility to pass on the raw Row parameter and this method will
      * return the appropriate Proxy wrapper for the passed klazz Type.
      * The raw Row parameter may be null if the caller is interested in just the ColumnSchema.
      * But that is not a very common use-case.
      *
      * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
      * @param klazz Typed Class that represents a Table
-     * @return
      */
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
         return getTypedRowWrapper(dbSchema, klazz,new Row<GenericTableSchema>());
     }
 
     /**
-     * This method returns a Typed Proxy implementation for the klazz passed as a parameter.
+     * Returns a Typed Proxy implementation for the klazz passed as a parameter.
      * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual
      * Row which is untyped.
-     * Being just a wrapper, it is state-less and more of a convenience functionality
+     *
+     * <p>Being just a wrapper, it is state-less and more of a convenience functionality
      * to provide a type-safe infrastructure for the applications to built on top of.
      * And this Typed infra is completely optional.
      *
-     * It is the applications responsibility to pass on the raw Row parameter and this method
+     * <p>It is the applications responsibility to pass on the raw Row parameter and this method
      * will return the appropriate Proxy wrapper for the passed klazz Type.
      * The raw Row parameter may be null if the caller is interested in just the
      * ColumnSchema. But that is not a very common use-case.
@@ -240,7 +240,6 @@ public class TyperUtils {
      * @param klazz Typed Class that represents a Table
      * @param row The actual Row that the wrapper is operating on. It can be null if the caller
      *            is just interested in getting ColumnSchema.
-     * @return
      */
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz,
                                            final Row<GenericTableSchema> row) {
@@ -333,15 +332,18 @@ public class TyperUtils {
             private Boolean isHashCodeMethod(Method method, Object[] args) {
                 return (args == null || args.length == 0) && method.getName().equals("hashCode");
             }
+
             private Boolean isEqualsMethod(Method method, Object[] args) {
                 return (args != null
                         && args.length == 1
                         && method.getName().equals("equals")
                         && Object.class.equals(method.getParameterTypes()[0]));
             }
+
             private Boolean isToStringMethod(Method method, Object[] args) {
                 return (args == null || args.length == 0) && method.getName().equals("toString");
             }
+
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (isGetTableSchema(method)) {
@@ -434,7 +436,7 @@ public class TyperUtils {
 
     /**
      * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
-     * that correspond to old version of rows of type klazz that have been updated
+     * that correspond to old version of rows of type klazz that have been updated.
      * Example:
      * <code>
      * Map&lt;UUID,Bridge&gt; oldBridges = extractRowsOld(Bridge.class,updates,dbSchema)
@@ -445,7 +447,7 @@ public class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID,T> extractRowsOld(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static <T> Map<UUID, T> extractRowsOld(Class<T> klazz, TableUpdates updates, DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);

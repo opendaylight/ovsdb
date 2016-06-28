@@ -8,14 +8,12 @@
 
 package org.opendaylight.ovsdb.lib.schema;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.ReferencedRow;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
 
 public abstract class BaseType<E extends BaseType<E>> {
 

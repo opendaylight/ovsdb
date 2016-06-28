@@ -10,14 +10,16 @@ package org.opendaylight.ovsdb.lib.impl;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 
 public class ChannelConnectionHandler implements ChannelFutureListener {
+
     OvsdbClient client;
+
     public ChannelConnectionHandler(OvsdbClient client) {
         this.client = client;
     }
+
     @Override
     public void operationComplete(ChannelFuture arg0) throws Exception {
         OvsdbConnectionService.channelClosed(client);

@@ -8,11 +8,9 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import java.util.Map;
-
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
 import com.google.common.collect.Maps;
+import java.util.Map;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 
 public class TableUpdates extends Response {

@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
 
 public class JsonRpc10Request {

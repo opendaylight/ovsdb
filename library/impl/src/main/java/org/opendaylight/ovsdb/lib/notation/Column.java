@@ -9,10 +9,9 @@
 package org.opendaylight.ovsdb.lib.notation;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 public class Column<E extends TableSchema<E>, D> {

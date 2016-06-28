@@ -8,8 +8,8 @@
 
 package org.opendaylight.ovsdb.lib;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
-
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -21,8 +21,6 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 /**
  * The main interface to interact with a device speaking ovsdb protocol in an asynchronous fashion and hence most
  * operations return a Future object representing the eventual response data from the remote.
@@ -30,13 +28,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 public interface OvsdbClient {
 
     /**
-     * Gets the list of database names exposed by this ovsdb capable device
+     * Gets the list of database names exposed by this ovsdb capable device.
      * @return list of database names
      */
     ListenableFuture<List<String>> getDatabases();
 
     /**
-     * Asynchronously returns the schema object for a specific database
+     * Asynchronously returns the schema object for a specific database.
      * @param database name of the database schema
      * @return DatabaseSchema future
      */
@@ -52,11 +50,10 @@ public interface OvsdbClient {
      * Execute the list of operations in a single Transactions. Similar to the transactBuilder() method
      * @param operations List of operations that needs to be part of a transact call
      * @return Future object representing the result of the transaction. Calling
-     * cancel on the Future would cause OVSDB cancel operation to be fired against
-     * the device.
+     *     cancel on the Future would cause OVSDB cancel operation to be fired against
+     *     the device.
      */
     ListenableFuture<List<OperationResult>> transact(DatabaseSchema dbSchema, List<Operation> operations);
-
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
@@ -96,21 +93,19 @@ public interface OvsdbClient {
     void lock(String lockId, LockAquisitionCallback lockedCallBack, LockStolenCallback stolenCallback);
 
     /**
-     * ovsdb steal operation, see {@link #lock(String, LockAquisitionCallback, LockStolenCallback)}
-     * @param lockId
-     * @return
+     * ovsdb steal operation.
+     * See {@link #lock(String, LockAquisitionCallback, LockStolenCallback)}
      */
     ListenableFuture<Boolean> steal(String lockId);
 
     /**
-     * ovsdb unlock operaiton, see {@link #unLock(String)}
-     * @param lockId
-     * @return
+     * ovsdb unlock operation.
+     * See {@link #unLock(String)}
      */
     ListenableFuture<Boolean> unLock(String lockId);
 
     /**
-     * ovsdb echo operation
+     * ovsdb echo operation.
      */
     ListenableFuture<List<String>> echo();
 
@@ -136,12 +131,13 @@ public interface OvsdbClient {
 
     /**
      * User friendly convenient methods that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy
-     * given the Typed Table Class
+     * given the Typed Table Class.
      *
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
     <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz);
+
     /**
      * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given
      * DatabaseSchema and Typed Table Class.

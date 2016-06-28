@@ -8,21 +8,6 @@
 
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
-import io.netty.channel.Channel;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.opendaylight.ovsdb.lib.error.UnexpectedResultException;
-import org.opendaylight.ovsdb.lib.error.UnsupportedArgumentException;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,6 +19,18 @@ import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import io.netty.channel.Channel;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.opendaylight.ovsdb.lib.error.UnexpectedResultException;
+import org.opendaylight.ovsdb.lib.error.UnsupportedArgumentException;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonRpcEndpoint {
 

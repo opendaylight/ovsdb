@@ -8,12 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.schema;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 
 public abstract class ColumnType {
@@ -56,6 +55,8 @@ public abstract class ColumnType {
     }
 
     /**
+     * JSON.
+     * <pre>
             "type": {
                 "key": {
                      "maxInteger": 4294967295,
@@ -68,9 +69,7 @@ public abstract class ColumnType {
                     "refTable": "Queue"
                  },
                  "max": "unlimited"
-            }
-     * @param json
-     * @return
+            }</pre>
      */
     public static ColumnType fromJson(JsonNode json) {
         for (ColumnType colType : columns) {
@@ -86,11 +85,10 @@ public abstract class ColumnType {
 
 
     /**
-     * Creates a ColumnType from the JsonNode if the implementation  knows how to, returns null otherwise
+     * Creates a ColumnType from the JsonNode if the implementation  knows how to, returns null otherwise.
      *
      * @param json the JSONNode object that needs to converted
-     * @return a valid SubType or Null (if the JsonNode does not represent
-     * the subtype)
+     * @return a valid SubType or Null (if the JsonNode does not represent the subtype)
      */
     protected abstract ColumnType fromJsonNode(JsonNode json);
 

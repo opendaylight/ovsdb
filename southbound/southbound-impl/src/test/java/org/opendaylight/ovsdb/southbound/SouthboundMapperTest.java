@@ -14,6 +14,8 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -23,9 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -84,19 +83,19 @@ public class SouthboundMapperTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateInstanceIdentifier1() throws Exception {
-        OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         Bridge bridge = mock(Bridge.class);
 
         // When bridge is not empty, we expect a deserialized identifier
-        InstanceIdentifier deserializedIid = InstanceIdentifier.create(Node.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(bridge.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
         when(column.getData()).thenReturn(map);
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
+        InstanceIdentifier deserializedIid = InstanceIdentifier.create(Node.class);
         when(iidc.bindingDeserializer("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
         SouthboundUtil.setInstanceIdentifierCodec(iidc);
+        OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         assertEquals("Incorrect Instance Identifier received", deserializedIid,
                 SouthboundMapper.createInstanceIdentifier(client, bridge));
 
@@ -113,19 +112,19 @@ public class SouthboundMapperTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateInstanceIdentifier2() throws Exception {
-        OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         Controller controller = mock(Controller.class);
 
         // When controller is not empty, we expect a deserialized identifier
-        InstanceIdentifier deserializedIid = InstanceIdentifier.create(Node.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(controller.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
         when(column.getData()).thenReturn(map);
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
+        InstanceIdentifier deserializedIid = InstanceIdentifier.create(Node.class);
         when(iidc.bindingDeserializer("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
         SouthboundUtil.setInstanceIdentifierCodec(iidc);
+        OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         assertEquals("Incorrect Instance Identifier received", deserializedIid,
                 SouthboundMapper.createInstanceIdentifier(client, controller, "bridgeName"));
 
@@ -149,8 +148,8 @@ public class SouthboundMapperTest {
         // IPv6 address
         IpAddress ipV6Address = IpAddressBuilder.getDefaultInstance("0000:0000:0000:0000:0000:9999:FE1E:8329");
         assertEquals("Incorrect InetAddress received", InetAddress.getByAddress(
-                new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0x99, (byte) 0x99, (byte) 0xFE, 0x1E, (byte) 0x83,
-                        0x29}),
+                new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0x99, (byte) 0x99, (byte) 0xFE, 0x1E, (byte) 0x83,
+                    0x29 }),
                 SouthboundMapper.createInetAddress(ipV6Address));
     }
 
@@ -249,7 +248,6 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateControllerEntries() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         Column<GenericTableSchema, Set<UUID>> controllerColumn = mock(Column.class);
         when(bridge.getControllerColumn()).thenReturn(controllerColumn);
         Set<UUID> controllerUUIDs = new HashSet<>();
@@ -264,6 +262,7 @@ public class SouthboundMapperTest {
         Column<GenericTableSchema, Boolean> isConnectedColumn = mock(Column.class);
         when(isConnectedColumn.getData()).thenReturn(true);
         when(controller.getIsConnectedColumn()).thenReturn(isConnectedColumn);
+        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         updatedControllerRows.put(uuid, controller);
         when(controllerColumn.getData()).thenReturn(controllerUUIDs);
 
@@ -288,7 +287,6 @@ public class SouthboundMapperTest {
         try (InputStream resourceAsStream = SouthboundMapperTest.class.getResourceAsStream("openvswitch_schema.json")) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(resourceAsStream);
-            System.out.println("jsonNode = " + jsonNode.get("id"));
 
             DatabaseSchema dbSchema = DatabaseSchema.fromJson(OvsdbSchemaContants.DATABASE_NAME, jsonNode.get("result"));
 
@@ -345,10 +343,10 @@ public class SouthboundMapperTest {
         OpenVSwitch ovsdbNode = mock(OpenVSwitch.class);
         Map<UUID, Manager> updatedManagerRows = new HashMap<>();
         Set<UUID> managerUUIDs = new HashSet<>();
-        UUID managerUUID = new UUID("7da709ff-397f-4778-a0e8-994811272fdb");
+        UUID uuid = new UUID("7da709ff-397f-4778-a0e8-994811272fdb");
         Manager manager = mock(Manager.class);
-        managerUUIDs.add(managerUUID);
-        updatedManagerRows.put(managerUUID, manager);
+        managerUUIDs.add(uuid);
+        updatedManagerRows.put(uuid, manager);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(ovsdbNode.getManagerOptionsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(managerUUIDs);
@@ -448,7 +446,6 @@ public class SouthboundMapperTest {
     @Test
     public void testGetInstanceIdentifier() throws Exception {
         OpenVSwitch ovs = mock(OpenVSwitch.class);
-        InstanceIdentifier iid = InstanceIdentifier.create(Node.class);
         Column<GenericTableSchema, Map<String, String>> externalIdColumn = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(externalIdColumn);
         Map<String, String> externalIdMap = new HashMap<>();
@@ -456,6 +453,7 @@ public class SouthboundMapperTest {
         // if true
         externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "test");
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
+        InstanceIdentifier iid = InstanceIdentifier.create(Node.class);
         when(iidc.bindingDeserializer("test")).thenReturn(iid);
         SouthboundUtil.setInstanceIdentifierCodec(iidc);
         assertEquals("Incorrect Instance Identifier received", iid, SouthboundMapper.getInstanceIdentifier(ovs));

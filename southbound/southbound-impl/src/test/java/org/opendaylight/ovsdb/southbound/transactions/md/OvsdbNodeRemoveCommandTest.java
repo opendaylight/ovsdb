@@ -16,9 +16,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,12 +41,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 @PrepareForTest({OvsdbNodeRemoveCommand.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbNodeRemoveCommandTest {
+
     private static final long ONE_CONNECTED_MANAGER = 1;
     private static final long ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE = 1;
     private OvsdbNodeRemoveCommand ovsdbNodeRemoveCommand;
@@ -69,12 +68,13 @@ public class OvsdbNodeRemoveCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction= mock(ReadWriteTransaction.class);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         CheckedFuture<Optional<Node>, ReadFailedException> ovsdbNodeFuture = mock(CheckedFuture.class);
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbNodeRemoveCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
-        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(ovsdbNodeFuture);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+                .thenReturn(ovsdbNodeFuture);
 
         Optional<Node> ovsdbNodeOptional = mock(Optional.class);
         when(ovsdbNodeFuture.get()).thenReturn(ovsdbNodeOptional);
@@ -84,7 +84,8 @@ public class OvsdbNodeRemoveCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        PowerMockito.doReturn(true).when(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", any(OvsdbNodeAugmentation.class));
+        PowerMockito.doReturn(true).when(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager",
+                any(OvsdbNodeAugmentation.class));
 
         List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<>();
         ManagedNodeEntry managedNode = mock(ManagedNodeEntry.class);
@@ -104,7 +105,6 @@ public class OvsdbNodeRemoveCommandTest {
     @Test
     public void testCheckIfOnlyConnectedManager() throws Exception {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        ManagerEntry onlyConnectedManager= mock(ManagerEntry.class);
         ManagerEntry manager = mock(ManagerEntry.class);
         List<ManagerEntry> listManagerEntry = new ArrayList<>();
         listManagerEntry.add(manager);
@@ -115,18 +115,23 @@ public class OvsdbNodeRemoveCommandTest {
         when(ovsdbNodeAugmentation.getManagerEntry()).thenReturn(listManagerEntry);
         when(manager.isConnected()).thenReturn(true, false, true);
         when(manager1.isConnected()).thenReturn(true, false, true);
-        assertEquals(false, Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
+        assertEquals(false,
+                Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
-        //case 2: connectedManager == 0
-        assertEquals(true, Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
+        // case 2: connectedManager == 0
+        assertEquals(true,
+                Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
-        //case 3: onlyConnectedManager.getNumberOfConnections().longValue() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE
+        // case 3: onlyConnectedManager.getNumberOfConnections().longValue() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE
+        ManagerEntry onlyConnectedManager = mock(ManagerEntry.class);
         when(onlyConnectedManager.getNumberOfConnections()).thenReturn(ONE_CONNECTED_MANAGER + 1,
                 ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE);
-        assertEquals(false, Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
+        assertEquals(false,
+                Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
-        //case 4: when all the above don't apply
+        // case 4: when all the above don't apply
         listManagerEntry.remove(manager1);
-        assertEquals(true, Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
+        assertEquals(true,
+                Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
     }
 }

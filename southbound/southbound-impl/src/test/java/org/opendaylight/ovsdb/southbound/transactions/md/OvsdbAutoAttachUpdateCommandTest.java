@@ -15,9 +15,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,9 +48,6 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-
 @PrepareForTest({OvsdbAutoAttachUpdateCommand.class, SouthboundUtil.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbAutoAttachUpdateCommandTest {
@@ -58,8 +56,8 @@ public class OvsdbAutoAttachUpdateCommandTest {
     private static final Map<Long, Long> AUTOATTACH_MAPPINGS = ImmutableMap.of(100L, 200L);
     private static final UUID AUTOATTACH_UUID = new UUID("798f35d8-f40a-449a-94d3-c860f5547f9a");
     private static final String CONNECTED_NODE_ID = "10.0.0.2";
-    private static final Map<String, String> AUTOATTACH_EXTERNAL_IDS =
-            ImmutableMap.of("opendaylight-autoattach-id", "autoattach://798f35d8-f40a-449a-94d3-c860f5547f9a");
+//    private static final Map<String, String> AUTOATTACH_EXTERNAL_IDS =
+//            ImmutableMap.of("opendaylight-autoattach-id", "autoattach://798f35d8-f40a-449a-94d3-c860f5547f9a");
     private Map<UUID, AutoAttach> updatedAutoAttachRows = new HashMap<>();
     private Map<UUID, AutoAttach> oldAutoAttachRows = new HashMap<>();
     private OvsdbAutoAttachUpdateCommand ovsdbAutoAttachUpdateCommand;
@@ -93,14 +91,14 @@ public class OvsdbAutoAttachUpdateCommandTest {
         when(ovsdbAutoAttachUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         aaIid = InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID)))
-                .augmentation(OvsdbNodeAugmentation.class)
-                .child(Autoattach.class, new AutoattachKey
-                        (new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID.toString())));
+                .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID))).augmentation(OvsdbNodeAugmentation.class)
+                .child(Autoattach.class, new AutoattachKey(
+                        new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID.toString())));
         InstanceIdentifier<Node> connectionIid = aaIid.firstIdentifierOf(Node.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIid);
         transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Autoattach.class));
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(Autoattach.class));
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
 
         PowerMockito.mockStatic(SouthboundUtil.class);
@@ -112,8 +110,10 @@ public class OvsdbAutoAttachUpdateCommandTest {
         NodeId nodeId = mock(NodeId.class);
         when(node.getNodeId()).thenReturn(nodeId);
 
-        MemberModifier.field(OvsdbAutoAttachUpdateCommand.class, "updatedAutoAttachRows").set(ovsdbAutoAttachUpdateCommand, updatedAutoAttachRows);
-        MemberModifier.field(OvsdbAutoAttachUpdateCommand.class, "oldAutoAttachRows").set(ovsdbAutoAttachUpdateCommand, oldAutoAttachRows);
+        MemberModifier.field(OvsdbAutoAttachUpdateCommand.class, "updatedAutoAttachRows")
+                .set(ovsdbAutoAttachUpdateCommand, updatedAutoAttachRows);
+        MemberModifier.field(OvsdbAutoAttachUpdateCommand.class, "oldAutoAttachRows").set(ovsdbAutoAttachUpdateCommand,
+                oldAutoAttachRows);
     }
 
     @Test

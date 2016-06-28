@@ -4,10 +4,7 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Dave Tucker
  */
-
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
@@ -113,7 +110,7 @@ public class JsonRpcDecoderTest {
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_16));
         ch.finish();
     }
-    /* Disabling this test as the limit was changed 
+    /* Disabling this test as the limit was changed
      * from exception to a log warning...
     /**
      * Test whether decoder throws appropriate TooLongFrameException

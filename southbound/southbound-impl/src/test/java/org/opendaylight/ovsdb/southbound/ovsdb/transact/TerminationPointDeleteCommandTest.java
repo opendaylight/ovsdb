@@ -9,15 +9,12 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -42,22 +38,23 @@ public class TerminationPointDeleteCommandTest {
     private TerminationPointDeleteCommand terminationPointDeleteCommand;
     @Mock private BridgeOperationalState state;
     @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> originals = new HashMap<>();
+    private Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> originals;
     private Map<InstanceIdentifier<Node>, Node> originalNodes = new HashMap<>();
     private Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps = new HashSet<>();
 
     @Before
     public void setUp() throws Exception {
         terminationPointDeleteCommand = mock(TerminationPointDeleteCommand.class, Mockito.CALLS_REAL_METHODS);
+        originals = new HashMap<>();
     }
 
     @Test
     public void testExecute() {
-        TransactionBuilder transaction = mock(TransactionBuilder.class);
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.extractOriginal(changes, OvsdbTerminationPointAugmentation.class)).thenReturn(originals);
         when(TransactUtils.extractOriginal(changes, Node.class)).thenReturn(originalNodes);
         when(TransactUtils.extractRemoved(changes, OvsdbTerminationPointAugmentation.class)).thenReturn(removedTps);
+        TransactionBuilder transaction = mock(TransactionBuilder.class);
         terminationPointDeleteCommand.execute(transaction, state, changes);
 
         // TODO Actually verify something

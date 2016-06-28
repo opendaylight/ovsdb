@@ -15,9 +15,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,11 +34,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 @PrepareForTest({TransactInvokerImpl.class})
 @RunWith(PowerMockRunner.class)
 public class TransactInvokerImplTest {
+
     @Mock private OvsdbConnectionInstance connectionInstance;
     @Mock private DatabaseSchema dbSchema;
     private TransactInvokerImpl transactInvokerImpl;
@@ -46,7 +45,8 @@ public class TransactInvokerImplTest {
     @Before
     public void setUp() throws Exception {
         transactInvokerImpl = new TransactInvokerImpl(connectionInstance, dbSchema);
-        MemberModifier.field(TransactInvokerImpl.class, "connectionInstance").set(transactInvokerImpl, connectionInstance);
+        MemberModifier.field(TransactInvokerImpl.class, "connectionInstance").set(transactInvokerImpl,
+                connectionInstance);
         MemberModifier.field(TransactInvokerImpl.class, "dbSchema").set(transactInvokerImpl, dbSchema);
     }
 

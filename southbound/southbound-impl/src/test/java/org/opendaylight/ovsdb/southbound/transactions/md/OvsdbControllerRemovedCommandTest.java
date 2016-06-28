@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,15 +47,18 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({SouthboundMapper.class, OvsdbControllerRemovedCommand.class})
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({SouthboundMapper.class, OvsdbControllerRemovedCommand.class})
 public class OvsdbControllerRemovedCommandTest {
+
     private Map<UUID, Bridge> oldBridgeRows;
     private Map<UUID, Bridge> updatedBridgeRows;
     private OvsdbControllerRemovedCommand ovsdbControllerRemovedCommand;
+
     @Before
     public void setUp() throws Exception {
-        ovsdbControllerRemovedCommand = PowerMockito.mock(OvsdbControllerRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
+        ovsdbControllerRemovedCommand = PowerMockito.mock(OvsdbControllerRemovedCommand.class,
+                Mockito.CALLS_REAL_METHODS);
     }
 
     @Test
@@ -64,7 +66,8 @@ public class OvsdbControllerRemovedCommandTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbControllerRemovedCommand ovsdbControllerRemovedCommand1 = new OvsdbControllerRemovedCommand(key, updates, dbSchema);
+        OvsdbControllerRemovedCommand ovsdbControllerRemovedCommand1 = new OvsdbControllerRemovedCommand(key, updates,
+                dbSchema);
         assertEquals(key, Whitebox.getInternalState(ovsdbControllerRemovedCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbControllerRemovedCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbControllerRemovedCommand1, "dbSchema"));
@@ -73,19 +76,25 @@ public class OvsdbControllerRemovedCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         updatedBridgeRows = new HashMap<>();
         UUID uuid = mock(UUID.class);
         Bridge bridge = mock(Bridge.class);
         updatedBridgeRows.put(uuid, bridge);
-        MemberModifier.field(OvsdbControllerRemovedCommand.class, "updatedBridgeRows").set(ovsdbControllerRemovedCommand, updatedBridgeRows);
+        MemberModifier.field(OvsdbControllerRemovedCommand.class, "updatedBridgeRows")
+                .set(ovsdbControllerRemovedCommand, updatedBridgeRows);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class))).thenReturn(mock(InstanceIdentifier.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerRemovedCommand.class, "deleteControllers", ReadWriteTransaction.class, List.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerRemovedCommand.class, "controllerEntriesToRemove", InstanceIdentifier.class, Bridge.class));
+        when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class)))
+                .thenReturn(mock(InstanceIdentifier.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerRemovedCommand.class, "deleteControllers",
+                ReadWriteTransaction.class, List.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerRemovedCommand.class, "controllerEntriesToRemove",
+                InstanceIdentifier.class, Bridge.class));
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbControllerRemovedCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbControllerRemovedCommand).invoke("deleteControllers", any(ReadWriteTransaction.class), any(List.class));
-        PowerMockito.verifyPrivate(ovsdbControllerRemovedCommand).invoke("controllerEntriesToRemove", any(ReadWriteTransaction.class), any(Bridge.class));
+        PowerMockito.verifyPrivate(ovsdbControllerRemovedCommand).invoke("deleteControllers",
+                any(ReadWriteTransaction.class), any(List.class));
+        PowerMockito.verifyPrivate(ovsdbControllerRemovedCommand).invoke("controllerEntriesToRemove",
+                any(ReadWriteTransaction.class), any(Bridge.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -107,7 +116,6 @@ public class OvsdbControllerRemovedCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testControllerEntriesToRemove() throws Exception {
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
         Bridge bridge = mock(Bridge.class);
 
         UUID uuid = mock(UUID.class);
@@ -115,7 +123,8 @@ public class OvsdbControllerRemovedCommandTest {
         oldBridgeRows = new HashMap<>();
         oldBridgeRows.put(uuid, oldBridgeNode);
         when(bridge.getUuid()).thenReturn(uuid);
-        MemberModifier.field(OvsdbControllerRemovedCommand.class, "oldBridgeRows").set(ovsdbControllerRemovedCommand, oldBridgeRows);
+        MemberModifier.field(OvsdbControllerRemovedCommand.class, "oldBridgeRows").set(ovsdbControllerRemovedCommand,
+                oldBridgeRows);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
@@ -124,7 +133,9 @@ public class OvsdbControllerRemovedCommandTest {
         when(oldBridgeNode.getControllerColumn()).thenReturn(column);
         when(column.getData()).thenReturn(set);
         when(bridge.getControllerColumn()).thenReturn(column);
-        List<InstanceIdentifier<BridgeOtherConfigs>> resultControllerEntries = Whitebox.invokeMethod(ovsdbControllerRemovedCommand, "controllerEntriesToRemove", bridgeIid, bridge);
+        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
+        List<InstanceIdentifier<BridgeOtherConfigs>> resultControllerEntries = Whitebox
+                .invokeMethod(ovsdbControllerRemovedCommand, "controllerEntriesToRemove", bridgeIid, bridge);
         assertEquals(ArrayList.class, resultControllerEntries.getClass());
         verify(oldBridgeNode, times(2)).getControllerColumn();
     }

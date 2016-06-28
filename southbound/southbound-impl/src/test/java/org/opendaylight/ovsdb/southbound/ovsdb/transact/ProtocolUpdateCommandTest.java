@@ -8,27 +8,24 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -53,15 +50,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.google.common.base.Optional;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({InstanceIdentifier.class, ProtocolUpdateCommand.class, TyperUtils.class})
 public class ProtocolUpdateCommandTest {
+
     private static final String BRIDGE_NAME_COLUMN = null;
     private Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols = new HashMap<>();
     private ProtocolUpdateCommand protocolUpdateCommand = new ProtocolUpdateCommand();
@@ -76,8 +71,6 @@ public class ProtocolUpdateCommandTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testExecute() throws Exception {
-        TransactionBuilder transaction = mock(TransactionBuilder.class);
-
         PowerMockito.mockStatic(TransactUtils.class);
         AsyncDataChangeEvent changes = mock(AsyncDataChangeEvent.class);
         when(TransactUtils.extractCreatedOrUpdated(changes, ProtocolEntry.class)).thenReturn(protocols);
@@ -86,7 +79,8 @@ public class ProtocolUpdateCommandTest {
 
         BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
         Optional<ProtocolEntry> operationalProtocolEntryOptional = Optional.absent();
-        when(bridgeOpState.getProtocolEntry(any(InstanceIdentifier.class))).thenReturn(operationalProtocolEntryOptional);
+        when(bridgeOpState.getProtocolEntry(any(InstanceIdentifier.class)))
+                .thenReturn(operationalProtocolEntryOptional);
 
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
 
@@ -103,8 +97,9 @@ public class ProtocolUpdateCommandTest {
             }
         });
 
-        Bridge bridge= mock(Bridge.class);
+        Bridge bridge = mock(Bridge.class);
         PowerMockito.mockStatic(TyperUtils.class);
+        TransactionBuilder transaction = mock(TransactionBuilder.class);
         when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
         when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Bridge.class))).thenReturn(bridge);
         doNothing().when(bridge).setName(anyString());

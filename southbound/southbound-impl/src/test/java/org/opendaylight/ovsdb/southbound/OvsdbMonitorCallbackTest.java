@@ -28,14 +28,20 @@ import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 @RunWith(MockitoJUnitRunner.class)
 
 public class OvsdbMonitorCallbackTest {
-    @InjectMocks private OvsdbMonitorCallback ovsdbMonitorCallback = mock(OvsdbMonitorCallback.class, Mockito.CALLS_REAL_METHODS);
-    @Mock private TransactionInvoker txInvoker;
-    @Mock private OvsdbConnectionInstance key;
+
+    @InjectMocks
+    OvsdbMonitorCallback ovsdbMonitorCallback = mock(OvsdbMonitorCallback.class, Mockito.CALLS_REAL_METHODS);
+
+    @Mock
+    private TransactionInvoker txInvoker;
+    @Mock
+    private OvsdbConnectionInstance key;
 
     @Test
     public void testUpdate() {
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        when(dbSchema.getVersion()).thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
+        when(dbSchema.getVersion())
+                .thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
         ovsdbMonitorCallback.update(mock(TableUpdates.class), dbSchema);
         verify(txInvoker).invoke(any(OvsdbOperationalCommandAggregator.class));
     }

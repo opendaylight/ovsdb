@@ -12,11 +12,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +47,6 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.base.Optional;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({InstanceIdentifier.class, TransactUtils.class, TyperUtils.class })
 public class ProtocolRemovedCommandTest {
@@ -60,8 +58,6 @@ public class ProtocolRemovedCommandTest {
     @Test
     @Ignore("This needs to be rewritten")
     public void testExecute() throws Exception {
-        ProtocolRemovedCommand protocolRemovedCommand = mock(ProtocolRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
-
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
 
         ProtocolEntry protocol = mock(ProtocolEntry.class);
@@ -77,6 +73,7 @@ public class ProtocolRemovedCommandTest {
 
         InstanceIdentifier<ProtocolEntry> protocolIid = mock(InstanceIdentifier.class);
         removed.add(protocolIid);
+        ProtocolRemovedCommand protocolRemovedCommand = mock(ProtocolRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
         MemberModifier.field(ProtocolRemovedCommand.class,"removed").set(protocolRemovedCommand, removed);
 
         MemberModifier.field(ProtocolRemovedCommand.class,"updatedBridges").set(protocolRemovedCommand, updatedBridges);

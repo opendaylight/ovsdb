@@ -16,11 +16,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,10 +51,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.base.Optional;
-
-@PrepareForTest({OvsdbManagersUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class, InstanceIdentifier.class})
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({ OvsdbManagersUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class,
+        InstanceIdentifier.class })
 public class OvsdbManagersUpdateCommandTest {
 
     private static final String TARGET_COLUMN_DATA = "Manager Column";
@@ -81,30 +80,33 @@ public class OvsdbManagersUpdateCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction= mock(ReadWriteTransaction.class);
         updatedManagerRows = new HashMap<>();
         updatedManagerRows.put(mock(UUID.class), mock(Manager.class));
-        MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedManagerRows").set(ovsdbManagersUpdateCommand, updatedManagerRows);
+        MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedManagerRows").set(ovsdbManagersUpdateCommand,
+                updatedManagerRows);
         Map<Uri, Manager> updatedManagerRowsWithUri = new HashMap<>();
-        PowerMockito.doReturn(updatedManagerRowsWithUri).when(ovsdbManagersUpdateCommand, "getUriManagerMap", any(Map.class));
+        PowerMockito.doReturn(updatedManagerRowsWithUri).when(ovsdbManagersUpdateCommand, "getUriManagerMap",
+                any(Map.class));
 
         updatedOpenVSwitchRows = new HashMap<>();
         updatedOpenVSwitchRows.put(mock(UUID.class), mock(OpenVSwitch.class));
-        MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedOpenVSwitchRows").set(ovsdbManagersUpdateCommand, updatedOpenVSwitchRows);
+        MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedOpenVSwitchRows").set(ovsdbManagersUpdateCommand,
+                updatedOpenVSwitchRows);
 
-        //mock updateManagers()
-        PowerMockito.doNothing().when(ovsdbManagersUpdateCommand, "updateManagers", any(ReadWriteTransaction.class), any(Map.class), any(Map.class));
+        // mock updateManagers()
+        PowerMockito.doNothing().when(ovsdbManagersUpdateCommand, "updateManagers", any(ReadWriteTransaction.class),
+                any(Map.class), any(Map.class));
 
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbManagersUpdateCommand.execute(transaction);
         PowerMockito.verifyPrivate(ovsdbManagersUpdateCommand).invoke("getUriManagerMap", any(Map.class));
-        PowerMockito.verifyPrivate(ovsdbManagersUpdateCommand).invoke("updateManagers", any(ReadWriteTransaction.class), any(Map.class), any(Map.class));
+        PowerMockito.verifyPrivate(ovsdbManagersUpdateCommand).invoke("updateManagers", any(ReadWriteTransaction.class),
+                any(Map.class), any(Map.class));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testUpdateManagers() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Map<UUID, Manager> updatedManagerRows = new HashMap<>();
         Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = new HashMap<>();
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         updatedOpenVSwitchRows.put(mock(UUID.class), openVSwitch);
@@ -114,18 +116,22 @@ public class OvsdbManagersUpdateCommandTest {
         managerEntries.add(mock(ManagerEntry.class));
         when(SouthboundMapper.createManagerEntries(any(OpenVSwitch.class), any(Map.class))).thenReturn(managerEntries);
 
-        //mock getManagerEntryIid()
-        PowerMockito.doReturn(mock(InstanceIdentifier.class)).when(ovsdbManagersUpdateCommand, "getManagerEntryIid", any(ManagerEntry.class));
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(ManagerEntry.class));
-        Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "updateManagers", transaction, updatedManagerRows, updatedOpenVSwitchRows);
-        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(ManagerEntry.class));
+        // mock getManagerEntryIid()
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        Map<UUID, Manager> updatedManagerRows = new HashMap<>();
+        PowerMockito.doReturn(mock(InstanceIdentifier.class)).when(ovsdbManagersUpdateCommand, "getManagerEntryIid",
+                any(ManagerEntry.class));
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(ManagerEntry.class));
+        Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "updateManagers", transaction, updatedManagerRows,
+                updatedOpenVSwitchRows);
+        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(ManagerEntry.class));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testUpdateManagers1() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
@@ -133,9 +139,12 @@ public class OvsdbManagersUpdateCommandTest {
 
         Optional<Node> ovsdbNode = mock(Optional.class);
         PowerMockito.mockStatic(SouthboundUtil.class);
-        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class))).thenReturn(ovsdbNode);
+        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
+                .thenReturn(ovsdbNode);
         when(ovsdbNode.isPresent()).thenReturn(true);
         when(ovsdbNode.get()).thenReturn(mock(Node.class));
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "updateManagers", transaction, updatedManagerRows);
         verify(ovsdbNode, times(2)).get();
     }
@@ -153,7 +162,8 @@ public class OvsdbManagersUpdateCommandTest {
         NodeKey nodeKey = mock(NodeKey.class);
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(nodeKey);
         when(managerEntry.getKey()).thenReturn(mock(ManagerEntryKey.class));
-        assertEquals(KeyedInstanceIdentifier.class, Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "getManagerEntryIid", managerEntry).getClass());
+        assertEquals(KeyedInstanceIdentifier.class,
+                Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "getManagerEntryIid", managerEntry).getClass());
     }
 
     @SuppressWarnings("unchecked")
@@ -162,7 +172,6 @@ public class OvsdbManagersUpdateCommandTest {
         Map<UUID,Manager> uuidManagerMap = new HashMap<>();
         Manager manager = mock(Manager.class);
         uuidManagerMap.put(mock(UUID.class), manager);
-        Map<Uri, Manager> testUriManagerMap = new HashMap<>();
 
         Column<GenericTableSchema, String> column = mock(Column.class);
         when(manager.getTargetColumn()).thenReturn(column);
@@ -170,7 +179,9 @@ public class OvsdbManagersUpdateCommandTest {
 
         Uri uri = mock(Uri.class);
         PowerMockito.whenNew(Uri.class).withAnyArguments().thenReturn(uri);
+        Map<Uri, Manager> testUriManagerMap = new HashMap<>();
         testUriManagerMap.put(uri, manager);
-        assertEquals(testUriManagerMap, Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "getUriManagerMap", uuidManagerMap));
+        assertEquals(testUriManagerMap,
+                Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "getUriManagerMap", uuidManagerMap));
     }
 }

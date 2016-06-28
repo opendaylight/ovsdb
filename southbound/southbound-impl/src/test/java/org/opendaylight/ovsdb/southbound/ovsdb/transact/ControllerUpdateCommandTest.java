@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,12 +43,11 @@ public class ControllerUpdateCommandTest {
 
     @Test
     public void testExecute() {
-        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
-
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.extractCreated(changes, ControllerEntry.class)).thenReturn(controllers);
         when(TransactUtils.extractUpdated(changes, OvsdbBridgeAugmentation.class)).thenReturn(bridges);
 
+        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
         contUpdateCmd.execute(transaction, mock(BridgeOperationalState.class), changes);
 
         // TODO Actually verify something

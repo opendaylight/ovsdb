@@ -17,15 +17,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.support.membermodification.MemberMatcher.field;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,11 +89,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
+@RunWith(PowerMockRunner.class)
 @PrepareForTest({TyperUtils.class, OvsdbPortUpdateCommand.class, SouthboundUtil.class, SouthboundMapper.class})
-@RunWith(PowerMockRunner.class)public class OvsdbPortUpdateCommandTest {
+public class OvsdbPortUpdateCommandTest {
 
     private static final String OTHER_CONFIG_KEY = "key";
     private static final String OTHER_CONFIG_VALUE = "value";
@@ -104,7 +106,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 
     private Map<UUID, Port> portUpdatedRows;
     private Map<UUID, Port> portOldRows;
-    private Map<UUID, Interface> interfaceUpdatedRows;
+    private Map<UUID, Interface> ifUpdatedRows;
     private Map<UUID, Interface> interfaceOldRows;
     private Map<UUID, Bridge> bridgeUpdatedRows;
     private OvsdbPortUpdateCommand ovsdbPortUpdateCommand;
@@ -116,17 +118,17 @@ import com.google.common.util.concurrent.CheckedFuture;
 
     @Test
     public void testOvsdbPortUpdateCommand() throws Exception {
-        OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
 
         PowerMockito.mockStatic(TyperUtils.class);
         PowerMockito.when(TyperUtils.extractRowsUpdated(Port.class, updates, dbSchema)).thenReturn(portUpdatedRows);
         PowerMockito.when(TyperUtils.extractRowsOld(Port.class, updates, dbSchema)).thenReturn(portOldRows);
-        PowerMockito.when(TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema)).thenReturn(interfaceUpdatedRows);
+        PowerMockito.when(TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema)).thenReturn(ifUpdatedRows);
         PowerMockito.when(TyperUtils.extractRowsOld(Interface.class, updates, dbSchema)).thenReturn(interfaceOldRows);
         PowerMockito.when(TyperUtils.extractRowsUpdated(Bridge.class, updates, dbSchema)).thenReturn(bridgeUpdatedRows);
 
+        OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         OvsdbPortUpdateCommand ovsdbPortUpdateCommand1 = new OvsdbPortUpdateCommand(key, updates, dbSchema);
         assertEquals(portUpdatedRows, Whitebox.getInternalState(ovsdbPortUpdateCommand1, "portUpdatedRows"));
         assertEquals(portOldRows, Whitebox.getInternalState(ovsdbPortUpdateCommand1, "portOldRows"));
@@ -136,13 +138,12 @@ import com.google.common.util.concurrent.CheckedFuture;
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction= mock(ReadWriteTransaction.class);
         portUpdatedRows = new HashMap<>();
         interfaceOldRows = new HashMap<>();
         portUpdatedRows.put(mock(UUID.class), mock(Port.class));
         interfaceOldRows.put(mock(UUID.class), mock(Interface.class));
-        MemberModifier.field(OvsdbPortUpdateCommand.class, "portUpdatedRows").set(ovsdbPortUpdateCommand, portUpdatedRows);
-        MemberModifier.field(OvsdbPortUpdateCommand.class, "interfaceOldRows").set(ovsdbPortUpdateCommand, interfaceOldRows);
+        field(OvsdbPortUpdateCommand.class, "portUpdatedRows").set(ovsdbPortUpdateCommand, portUpdatedRows);
+        field(OvsdbPortUpdateCommand.class, "interfaceOldRows").set(ovsdbPortUpdateCommand, interfaceOldRows);
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbPortUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
@@ -151,26 +152,27 @@ import com.google.common.util.concurrent.CheckedFuture;
 
         //case 1: portUpdatedRows & interfaceOldRows not null, not empty
         Optional<Node> node = mock(Optional.class);
-        PowerMockito.doReturn(node).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class), any(InstanceIdentifier.class));
+        PowerMockito.doReturn(node).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
+                any(InstanceIdentifier.class));
         when(node.isPresent()).thenReturn(true);
         when(node.get()).thenReturn(mock(Node.class));
-        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateTerminationPoints", ReadWriteTransaction.class, Node.class));
+        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateTerminationPoints",
+                ReadWriteTransaction.class, Node.class));
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbPortUpdateCommand.execute(transaction);
         verify(ovsdbConnectionInstance).getInstanceIdentifier();
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateTerminationPoints", any(ReadWriteTransaction.class), any(Node.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateTerminationPoints",
+                any(ReadWriteTransaction.class), any(Node.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testUpdateTerminationPoints() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Node node = mock(Node.class);
-
         portUpdatedRows = new HashMap<>();
         Port port = mock(Port.class);
         UUID uuid = mock(UUID.class);
         portUpdatedRows.put(uuid, port);
-        MemberModifier.field(OvsdbPortUpdateCommand.class, "portUpdatedRows").set(ovsdbPortUpdateCommand, portUpdatedRows);
+        field(OvsdbPortUpdateCommand.class, "portUpdatedRows").set(ovsdbPortUpdateCommand, portUpdatedRows);
         Column<GenericTableSchema, String> bridgeColumn = mock(Column.class);
         when(port.getNameColumn()).thenReturn(bridgeColumn);
         when(bridgeColumn.getData()).thenReturn(TERMINATION_POINT_NAME);
@@ -194,97 +196,119 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(tpKey.getTpId()).thenReturn(mock(TpId.class));
         when(tpBuilder.setTpId(any(TpId.class))).thenReturn(tpBuilder);
         InstanceIdentifier<TerminationPoint> tpPath = mock(InstanceIdentifier.class);
-        PowerMockito.doReturn(tpPath).when(ovsdbPortUpdateCommand, "getInstanceIdentifier", any(InstanceIdentifier.class), any(Port.class));
+        PowerMockito.doReturn(tpPath).when(ovsdbPortUpdateCommand, "getInstanceIdentifier",
+                any(InstanceIdentifier.class), any(Port.class));
 
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
-        PowerMockito.whenNew(OvsdbTerminationPointAugmentationBuilder.class).withNoArguments().thenReturn(tpAugmentationBuilder);
-        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint", ReadWriteTransaction.class,
-                InstanceIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class, Node.class, Entry.class));
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        PowerMockito.whenNew(OvsdbTerminationPointAugmentationBuilder.class).withNoArguments()
+                .thenReturn(tpAugmentationBuilder);
+        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint",
+                ReadWriteTransaction.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class,
+                Node.class, Entry.class));
 
         Column<GenericTableSchema, Set<UUID>> interfacesColumn = mock(Column.class);
         when(port.getInterfacesColumn()).thenReturn(interfacesColumn);
-        Set<UUID> setUUID = new HashSet<>();
-        UUID interfaceUUID = mock(UUID.class);
-        setUUID.add(interfaceUUID);
-        when(interfacesColumn.getData()).thenReturn(setUUID);
+        Set<UUID> uuids = new HashSet<>();
+        UUID uuid2 = mock(UUID.class);
+        uuids.add(uuid2);
+        when(interfacesColumn.getData()).thenReturn(uuids);
 
-        interfaceUpdatedRows = new HashMap<>();
+        ifUpdatedRows = new HashMap<>();
         interfaceOldRows = new HashMap<>();
         Interface iface = mock(Interface.class);
-        interfaceUpdatedRows.put(interfaceUUID, iface);
+        ifUpdatedRows.put(uuid2, iface);
         Interface interfaceUpdate = mock(Interface.class);
-        interfaceUpdatedRows.put(uuid, interfaceUpdate);
-        interfaceOldRows.put(interfaceUUID, iface);
-        MemberModifier.field(OvsdbPortUpdateCommand.class, "interfaceUpdatedRows").set(ovsdbPortUpdateCommand, interfaceUpdatedRows);
-        MemberModifier.field(OvsdbPortUpdateCommand.class, "interfaceOldRows").set(ovsdbPortUpdateCommand, interfaceOldRows);
-        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint", OvsdbTerminationPointAugmentationBuilder.class, Interface.class));
+        ifUpdatedRows.put(uuid, interfaceUpdate);
+        interfaceOldRows.put(uuid2, iface);
+        field(OvsdbPortUpdateCommand.class, "interfaceUpdatedRows").set(ovsdbPortUpdateCommand, ifUpdatedRows);
+        field(OvsdbPortUpdateCommand.class, "interfaceOldRows").set(ovsdbPortUpdateCommand, interfaceOldRows);
+        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint",
+                OvsdbTerminationPointAugmentationBuilder.class, Interface.class));
 
         when(tpAugmentationBuilder.build()).thenReturn(mock(OvsdbTerminationPointAugmentation.class));
-        when(tpBuilder.addAugmentation(eq(OvsdbTerminationPointAugmentation.class), any(OvsdbTerminationPointAugmentation.class))).thenReturn(tpBuilder);
+        when(tpBuilder.addAugmentation(eq(OvsdbTerminationPointAugmentation.class),
+                any(OvsdbTerminationPointAugmentation.class))).thenReturn(tpBuilder);
         when(tpBuilder.build()).thenReturn(mock(TerminationPoint.class));
         portOldRows = new HashMap<>();
         portOldRows.put(uuid, port);
         MemberModifier.field(OvsdbPortUpdateCommand.class, "portOldRows").set(ovsdbPortUpdateCommand, portOldRows);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(TerminationPoint.class));
-        doNothing().when(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(TerminationPoint.class));
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(TerminationPoint.class));
+        doNothing().when(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(TerminationPoint.class));
 
         Column<GenericTableSchema, String> interfaceColumn = mock(Column.class);
         when(interfaceUpdate.getNameColumn()).thenReturn(interfaceColumn);
         when(interfaceColumn.getData()).thenReturn(INTERFACE_NAME);
 
-        PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge", any(ReadWriteTransaction.class), any(Node.class), anyString());
+        PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge",
+                any(ReadWriteTransaction.class), any(Node.class), anyString());
         PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
         PowerMockito.whenNew(TopologyKey.class).withAnyArguments().thenReturn(mock(TopologyKey.class));
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(mock(NodeKey.class));
 
+        Node node = mock(Node.class);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateTerminationPoints", transaction, node);
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("getInstanceIdentifier", any(OvsdbTerminationPointAugmentationBuilder.class), any(Port.class));
-        verify(transaction, times(2)).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(TerminationPoint.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("getInstanceIdentifier",
+                any(OvsdbTerminationPointAugmentationBuilder.class), any(Port.class));
+        verify(transaction, times(2)).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(TerminationPoint.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testBuildTerminationPoint() throws Exception {
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Port portUpdate = mock(Port.class);
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        InstanceIdentifier<TerminationPoint> tpPath = mock(InstanceIdentifier.class);
         Entry<UUID,Port> portEntry = mock(Entry.class);
-        Node node = mock(Node.class);
         when(portEntry.getValue()).thenReturn(mock(Port.class));
         when(portEntry.getValue().getName()).thenReturn(PORT_NAME);
         when(portEntry.getValue().getUuid()).thenReturn(mock(UUID.class));
         when(portUpdate.getName()).thenReturn(PORT_NAME);
         when(portUpdate.getUuid()).thenReturn(mock(UUID.class));
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
+
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+
         when(tpAugmentationBuilder.setName(anyString())).thenReturn(tpAugmentationBuilder);
         when(tpAugmentationBuilder.setPortUuid(any(Uuid.class))).thenReturn(tpAugmentationBuilder);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePort",
-                ReadWriteTransaction.class, Node.class, InstanceIdentifier.class, Entry.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+        MemberModifier.suppress(
+                MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePort", ReadWriteTransaction.class, Node.class,
+                        InstanceIdentifier.class, Entry.class, OvsdbTerminationPointAugmentationBuilder.class));
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", transaction, tpPath, tpAugmentationBuilder, node, portEntry);
+        Node node = mock(Node.class);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        InstanceIdentifier<TerminationPoint> tpPath = mock(InstanceIdentifier.class);
+
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", transaction, tpPath,
+                tpAugmentationBuilder, node, portEntry);
         verify(tpAugmentationBuilder).setName(anyString());
         verify(tpAugmentationBuilder).setPortUuid(any(Uuid.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePort", any(ReadWriteTransaction.class), any(Node.class),
-                any(InstanceIdentifier.class), any(Entry.class), any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePort", any(ReadWriteTransaction.class),
+                any(Node.class), any(InstanceIdentifier.class), any(Entry.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
     @Test
     public void testBuildTerminationPoint1() throws Exception {
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Interface interfaceUpdate = mock(Interface.class);
         when(interfaceUpdate.getName()).thenReturn(INTERFACE_NAME);
         when(interfaceUpdate.getUuid()).thenReturn(mock(UUID.class));
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
         when(tpAugmentationBuilder.setName(anyString())).thenReturn(tpAugmentationBuilder);
         when(tpAugmentationBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(tpAugmentationBuilder);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaces", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaces", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", tpAugmentationBuilder, interfaceUpdate);
         verify(tpAugmentationBuilder).setName(anyString());
         verify(tpAugmentationBuilder).setInterfaceUuid(any(Uuid.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaces", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaces", any(Interface.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -294,7 +318,8 @@ import com.google.common.util.concurrent.CheckedFuture;
         InstanceIdentifier<Node> nodePath = mock(InstanceIdentifier.class);
         Optional<Node> node = mock(Optional.class);
         CheckedFuture<Optional<Node>, ReadFailedException> checkedFuture = mock(CheckedFuture.class);
-        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(checkedFuture);
+        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+                .thenReturn(checkedFuture);
         when(checkedFuture.checkedGet()).thenReturn(node);
         assertEquals(node, Whitebox.invokeMethod(ovsdbPortUpdateCommand, "readNode", transaction, nodePath));
     }
@@ -302,32 +327,33 @@ import com.google.common.util.concurrent.CheckedFuture;
     @SuppressWarnings("unchecked")
     @Test
     public void testGetTerminationPointBridge() throws Exception {
-        UUID portUUID = mock(UUID.class);
         bridgeUpdatedRows = new HashMap<>();
-        UUID bridgeUUID = mock(UUID.class);
         Bridge bridge = mock(Bridge.class);
-        bridgeUpdatedRows.put(bridgeUUID, bridge);
-        MemberModifier.field(OvsdbPortUpdateCommand.class, "bridgeUpdatedRows").set(ovsdbPortUpdateCommand, bridgeUpdatedRows);
+        UUID bridgeUuid = mock(UUID.class);
+        bridgeUpdatedRows.put(bridgeUuid, bridge);
+        field(OvsdbPortUpdateCommand.class, "bridgeUpdatedRows").set(ovsdbPortUpdateCommand, bridgeUpdatedRows);
 
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(bridge.getPortsColumn()).thenReturn(column);
         Set<UUID> set = new HashSet<>();
-        set.add(portUUID);
+        UUID portUuid = mock(UUID.class);
+        set.add(portUuid);
         when(column.getData()).thenReturn(set);
 
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(ovsdbPortUpdateCommand.getOvsdbConnectionInstance()).thenReturn(mock(OvsdbConnectionInstance.class));
         InstanceIdentifier<Node> nodeIid = mock(InstanceIdentifier.class);
-        PowerMockito.when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class))).thenReturn(nodeIid);
+        PowerMockito
+                .when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class)))
+                .thenReturn(nodeIid);
 
         Optional<InstanceIdentifier<Node>> testResult = Optional.of(nodeIid);
-        assertEquals(testResult, Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getTerminationPointBridge", portUUID));
+        assertEquals(testResult, Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getTerminationPointBridge", portUuid));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testGetTerminationPointBridge1() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Node node = mock(Node.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
@@ -342,7 +368,8 @@ import com.google.common.util.concurrent.CheckedFuture;
         InstanceIdentifier<Node> iidNode = mock(InstanceIdentifier.class);
         when((InstanceIdentifier<Node>) ovsdbBridgeRef.getValue()).thenReturn(iidNode);
         Optional<Node> optionalNode = Optional.of(managedNode);
-        PowerMockito.doReturn(optionalNode).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class), any(InstanceIdentifier.class));
+        PowerMockito.doReturn(optionalNode).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
+                any(InstanceIdentifier.class));
 
         TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
         PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
@@ -356,12 +383,15 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(tpBuilder.build()).thenReturn(terminationPoint);
         when(managedNode.getTerminationPoint()).thenReturn(terminationPointList);
 
-        when(managedNode.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
+        when(managedNode.getAugmentation(OvsdbBridgeAugmentation.class))
+                .thenReturn(mock(OvsdbBridgeAugmentation.class));
         TpId tpId = new TpId(TP_NAME);
         when(terminationPoint.getTpId()).thenReturn(tpId);
 
         Optional<InstanceIdentifier<Node>> testResult = Optional.of(iidNode);
-        Optional<InstanceIdentifier<Node>>  result = Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getTerminationPointBridge", transaction, node, TP_NAME);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        Optional<InstanceIdentifier<Node>> result = Whitebox.invokeMethod(ovsdbPortUpdateCommand,
+                "getTerminationPointBridge", transaction, node, TP_NAME);
 
         assertEquals(testResult, result);
     }
@@ -370,87 +400,120 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateInterfaces() throws Exception {
         Interface interfaceUpdate = mock(Interface.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, String> typeColumn = mock(Column.class);
         when(interfaceUpdate.getTypeColumn()).thenReturn(typeColumn);
         when(typeColumn.getData()).thenReturn(OVSDB_INTERFACE_TYPE);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterface", Interface.class, String.class, OvsdbTerminationPointAugmentationBuilder.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterface", Interface.class,
+                String.class, OvsdbTerminationPointAugmentationBuilder.class));
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaces", interfaceUpdate, ovsdbTerminationPointBuilder);
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterface", any(Interface.class), anyString(), any(OvsdbTerminationPointAugmentationBuilder.class));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaces", interfaceUpdate,
+                ovsdbTerminationPointBuilder);
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterface", any(Interface.class), anyString(),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testUpdateInterface() throws Exception {
         Interface interf = mock(Interface.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
         when(interf.getUuid()).thenReturn(mock(UUID.class));
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
         when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString())).thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-            public Class<? extends InterfaceTypeBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
-                return InterfaceTypeInternal.class;
-            }
-        });
+        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
+                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
+                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                        return InterfaceTypeInternal.class;
+                    }
+                });
         when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateOfPortRequest", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceExternalIds", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateOptions", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceOtherConfig", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceLldp", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceBfd", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceBfdStatus", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateIfIndex", Interface.class, OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateOfPortRequest", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceExternalIds", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateOptions", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceOtherConfig", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceLldp", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceBfd", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceBfdStatus", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateIfIndex", Interface.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interf, OVSDB_INTERFACE_TYPE, ovsdbTerminationPointBuilder);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interf, OVSDB_INTERFACE_TYPE,
+                ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setInterfaceUuid(any(Uuid.class));
         verify(ovsdbTerminationPointBuilder).setInterfaceType(any(Class.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOfPort", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOfPortRequest", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceExternalIds", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOptions", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceOtherConfig", any(Interface.class), any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOfPort", any(Interface.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOfPortRequest", any(Interface.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceExternalIds", any(Interface.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOptions", any(Interface.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceOtherConfig", any(Interface.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testUpdatePort() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        suppress(method(OvsdbPortUpdateCommand.class, "updateVlan", Port.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateVlanTrunks", Port.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updateVlanMode", Port.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updatePortExternalIds", Port.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+        suppress(method(OvsdbPortUpdateCommand.class, "updatePortOtherConfig", Port.class,
+                OvsdbTerminationPointAugmentationBuilder.class));
+
         Node node = mock(Node.class);
-        InstanceIdentifier<TerminationPoint> tpPath = (InstanceIdentifier<TerminationPoint>) mock(InstanceIdentifier.class);
         Entry<UUID, Port> port = mock(Entry.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        InstanceIdentifier<TerminationPoint> tpPath = (InstanceIdentifier<TerminationPoint>) mock(
+                InstanceIdentifier.class);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePort", transaction, node, tpPath, port,
+                ovsdbTerminationPointBuilder);
 
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateVlan", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateVlanTrunks", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateVlanMode", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePortExternalIds", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updatePortOtherConfig", Port.class, OvsdbTerminationPointAugmentationBuilder.class));
-
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePort", transaction, node, tpPath, port, ovsdbTerminationPointBuilder);
-
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlan", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlanTrunks", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlanMode", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePortExternalIds", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePortOtherConfig", any(Port.class), any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlan", any(Port.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlanTrunks", any(Port.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateVlanMode", any(Port.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePortExternalIds", any(Port.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
+        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePortOtherConfig", any(Port.class),
+                any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testUpdateVlan() throws Exception {
         Port port = mock(Port.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(port.getTagColumn()).thenReturn(column);
         Set<Long> vlanId = new HashSet<>();
         vlanId.add((long) 808);
         when(column.getData()).thenReturn(vlanId);
         PowerMockito.whenNew(VlanId.class).withAnyArguments().thenReturn(mock(VlanId.class));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
         when(ovsdbTerminationPointBuilder.setVlanTag(any(VlanId.class))).thenReturn(ovsdbTerminationPointBuilder);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateVlan", port, ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setVlanTag(any(VlanId.class));
@@ -460,7 +523,6 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateVlanTrunks() throws Exception {
         Port port = mock(Port.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(port.getTrunksColumn()).thenReturn(column);
         Set<Long> portTrunks = new HashSet<>();
@@ -471,6 +533,8 @@ import com.google.common.util.concurrent.CheckedFuture;
         PowerMockito.whenNew(TrunksBuilder.class).withNoArguments().thenReturn(trunksBuilder);
         PowerMockito.whenNew(VlanId.class).withAnyArguments().thenReturn(mock(VlanId.class));
         when(trunksBuilder.setTrunk(any(VlanId.class))).thenReturn(trunksBuilder);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
         when(ovsdbTerminationPointBuilder.setTrunks(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateVlanTrunks", port, ovsdbTerminationPointBuilder);
         verify(trunksBuilder).setTrunk(any(VlanId.class));
@@ -481,13 +545,15 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateVlanMode() throws Exception {
         Port port = mock(Port.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(port.getVlanModeColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add(VLAN_MODE_ACCESS);
         when(column.getData()).thenReturn(set);
-        when(ovsdbTerminationPointBuilder.setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Access)).thenReturn(ovsdbTerminationPointBuilder);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        when(ovsdbTerminationPointBuilder.setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Access))
+                .thenReturn(ovsdbTerminationPointBuilder);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateVlanMode", port, ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setVlanMode(any(VlanMode.class));
     }
@@ -496,12 +562,13 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateOfPort() throws Exception {
         Interface interf = mock(Interface.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Set<Long> ofPorts = new HashSet<>();
         ofPorts.add((long) 10000);
         Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(interf.getOpenFlowPortColumn()).thenReturn(column);
         when(column.getData()).thenReturn(ofPorts);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
         when(ovsdbTerminationPointBuilder.setOfport(any(Long.class))).thenReturn(ovsdbTerminationPointBuilder);
         when(interf.getName()).thenReturn(INTERFACE_NAME);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateOfPort", interf, ovsdbTerminationPointBuilder);
@@ -512,13 +579,15 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateOfPortRequest() throws Exception {
         Interface interf = mock(Interface.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Set<Long> ofPortRequests = new HashSet<>();
         ofPortRequests.add((long) 10000);
         Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(interf.getOpenFlowPortRequestColumn()).thenReturn(column);
         when(column.getData()).thenReturn(ofPortRequests);
-        when(ovsdbTerminationPointBuilder.setOfportRequest(any(Integer.class))).thenReturn(ovsdbTerminationPointBuilder);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        when(ovsdbTerminationPointBuilder.setOfportRequest(any(Integer.class)))
+                .thenReturn(ovsdbTerminationPointBuilder);
         when(interf.getName()).thenReturn(INTERFACE_NAME);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateOfPortRequest", interf, ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setOfportRequest(any(Integer.class));
@@ -528,7 +597,6 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateInterfaceExternalIds() throws Exception {
         Interface interf = mock(Interface.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(interf.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
@@ -537,14 +605,17 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(column.getData()).thenReturn(map);
 
         InterfaceExternalIdsBuilder interfaceExternalIdsBuilder = mock(InterfaceExternalIdsBuilder.class);
-        PowerMockito.whenNew(InterfaceExternalIdsBuilder.class).withNoArguments().thenReturn(interfaceExternalIdsBuilder);
+        PowerMockito.whenNew(InterfaceExternalIdsBuilder.class).withNoArguments()
+                .thenReturn(interfaceExternalIdsBuilder);
 
         when(interfaceExternalIdsBuilder.setExternalIdKey(anyString())).thenReturn(interfaceExternalIdsBuilder);
         when(interfaceExternalIdsBuilder.setExternalIdValue(anyString())).thenReturn(interfaceExternalIdsBuilder);
         when(interfaceExternalIdsBuilder.build()).thenReturn(mock(InterfaceExternalIds.class));
-        when(ovsdbTerminationPointBuilder.setInterfaceExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBldr = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        when(ovsdbTerminationPointBldr.setInterfaceExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBldr);
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceExternalIds", interf, ovsdbTerminationPointBuilder);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceExternalIds", interf, ovsdbTerminationPointBldr);
         verify(interfaceExternalIdsBuilder).setExternalIdKey(anyString());
         verify(interfaceExternalIdsBuilder).setExternalIdValue(anyString());
 
@@ -554,7 +625,6 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdatePortExternalIds() throws Exception {
         Port port = mock(Port.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(port.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
@@ -568,6 +638,8 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(portExternalIdsBuilder.setExternalIdKey(anyString())).thenReturn(portExternalIdsBuilder);
         when(portExternalIdsBuilder.setExternalIdValue(anyString())).thenReturn(portExternalIdsBuilder);
         when(portExternalIdsBuilder.build()).thenReturn(mock(PortExternalIds.class));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
         when(ovsdbTerminationPointBuilder.setPortExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortExternalIds", port, ovsdbTerminationPointBuilder);
@@ -579,7 +651,6 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdatePortOtherConfig() throws Exception {
         Port port = mock(Port.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(port.getOtherConfigColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
@@ -592,7 +663,10 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(portOtherConfigsBuilder.setOtherConfigKey(anyString())).thenReturn(portOtherConfigsBuilder);
         when(portOtherConfigsBuilder.setOtherConfigValue(anyString())).thenReturn(portOtherConfigsBuilder);
         when(portOtherConfigsBuilder.build()).thenReturn(mock(PortOtherConfigs.class));
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
+                .thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortOtherConfig", port, ovsdbTerminationPointBuilder);
         verify(portOtherConfigsBuilder).setOtherConfigKey(anyString());
@@ -603,7 +677,6 @@ import com.google.common.util.concurrent.CheckedFuture;
     @Test
     public void testUpdateInterfaceOtherConfig() throws Exception {
         Interface interf = mock(Interface.class);
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(OvsdbTerminationPointAugmentationBuilder.class);
         Map<String, String> interfaceOtherConfigMap = new HashMap<>();
         interfaceOtherConfigMap.put(OTHER_CONFIG_KEY, OTHER_CONFIG_VALUE);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
@@ -611,14 +684,19 @@ import com.google.common.util.concurrent.CheckedFuture;
         when(column.getData()).thenReturn(interfaceOtherConfigMap);
 
         InterfaceOtherConfigsBuilder interfaceOtherConfigsBuilder = mock(InterfaceOtherConfigsBuilder.class);
-        PowerMockito.whenNew(InterfaceOtherConfigsBuilder.class).withNoArguments().thenReturn(interfaceOtherConfigsBuilder);
+        PowerMockito.whenNew(InterfaceOtherConfigsBuilder.class).withNoArguments()
+                .thenReturn(interfaceOtherConfigsBuilder);
 
         when(interfaceOtherConfigsBuilder.setOtherConfigKey(anyString())).thenReturn(interfaceOtherConfigsBuilder);
         when(interfaceOtherConfigsBuilder.setOtherConfigValue(anyString())).thenReturn(interfaceOtherConfigsBuilder);
         when(interfaceOtherConfigsBuilder.build()).thenReturn(mock(InterfaceOtherConfigs.class));
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
+                OvsdbTerminationPointAugmentationBuilder.class);
+        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
+                .thenReturn(ovsdbTerminationPointBuilder);
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceOtherConfig", interf, ovsdbTerminationPointBuilder);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceOtherConfig", interf,
+                ovsdbTerminationPointBuilder);
         verify(interfaceOtherConfigsBuilder).setOtherConfigKey(anyString());
         verify(interfaceOtherConfigsBuilder).setOtherConfigValue(anyString());
     }
@@ -626,7 +704,6 @@ import com.google.common.util.concurrent.CheckedFuture;
     @SuppressWarnings("unchecked")
     @Test
     public void testGetInstanceIdentifier() throws Exception {
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
         Port port = mock(Port.class);
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(port.getExternalIdsColumn()).thenReturn(column);
@@ -636,7 +713,11 @@ import com.google.common.util.concurrent.CheckedFuture;
 
         PowerMockito.mockStatic(SouthboundUtil.class);
         InstanceIdentifier<TerminationPoint> terminationPointIId = mock(InstanceIdentifier.class);
-        PowerMockito.when((InstanceIdentifier<TerminationPoint>) SouthboundUtil.deserializeInstanceIdentifier(anyString())).thenReturn(terminationPointIId);
-        assertEquals(terminationPointIId, Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getInstanceIdentifier", bridgeIid, port));
+        PowerMockito
+                .when((InstanceIdentifier<TerminationPoint>) SouthboundUtil.deserializeInstanceIdentifier(anyString()))
+                .thenReturn(terminationPointIId);
+        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
+        assertEquals(terminationPointIId,
+                Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getInstanceIdentifier", bridgeIid, port));
     }
 }

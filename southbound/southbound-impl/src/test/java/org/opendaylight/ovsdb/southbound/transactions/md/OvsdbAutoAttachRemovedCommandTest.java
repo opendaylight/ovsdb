@@ -15,11 +15,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,8 +49,6 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.google.common.base.Optional;
-
 @PrepareForTest({OvsdbAutoAttachRemovedCommand.class, SouthboundMapper.class, SouthboundUtil.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbAutoAttachRemovedCommandTest {
@@ -70,11 +68,13 @@ public class OvsdbAutoAttachRemovedCommandTest {
 
         AutoAttach autoAttach = mock(AutoAttach.class);
         removedAutoAttachRows.put(AUTOATTACH_UUID, autoAttach);
-        MemberModifier.field(OvsdbAutoAttachRemovedCommand.class, "removedAutoAttachRows").set(ovsdbAutoAttachRemovedCommand, removedAutoAttachRows);
+        MemberModifier.field(OvsdbAutoAttachRemovedCommand.class, "removedAutoAttachRows")
+                .set(ovsdbAutoAttachRemovedCommand, removedAutoAttachRows);
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbAutoAttachRemovedCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        AutoattachKey aaKey = new AutoattachKey(new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID.toString()));
+        AutoattachKey aaKey = new AutoattachKey(
+                new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID.toString()));
         aaIid = InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID)))

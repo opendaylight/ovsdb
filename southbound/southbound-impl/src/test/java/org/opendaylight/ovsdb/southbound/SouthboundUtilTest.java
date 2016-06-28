@@ -16,11 +16,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,11 +48,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
-@PrepareForTest({SouthboundUtil.class, NetworkInterface.class})
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({SouthboundUtil.class, NetworkInterface.class})
 public class SouthboundUtilTest {
 
     @Before
@@ -63,15 +61,18 @@ public class SouthboundUtilTest {
     public void testSetInstanceIdentifierCodec() throws Exception {
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
         SouthboundUtil.setInstanceIdentifierCodec(iidc);
-        assertEquals("InstanceIdentifierCodec object not correctly set", iidc, getField("instanceIdentifierCodec"));
+        assertEquals("InstanceIdentifierCodec object not correctly set", iidc,
+                SouthboundUtil.getInstanceIdentifierCodec());
     }
 
     @Test
     public void testSerializeInstanceIdentifier() throws Exception {
         InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
-        InstanceIdentifierCodec iidc = (InstanceIdentifierCodec) setField("instanceIdentifierCodec", mock(InstanceIdentifierCodec.class));
+        InstanceIdentifierCodec iidc = (InstanceIdentifierCodec) setField("instanceIdentifierCodec",
+                mock(InstanceIdentifierCodec.class));
         when(iidc.serialize(iid)).thenReturn("serializeInstanceIdentifier");
-        assertEquals("Incorrect String returned", "serializeInstanceIdentifier", SouthboundUtil.serializeInstanceIdentifier(iid));
+        assertEquals("Incorrect String returned", "serializeInstanceIdentifier",
+                SouthboundUtil.serializeInstanceIdentifier(iid));
         verify(iidc).serialize(any(InstanceIdentifier.class));
     }
 
@@ -79,7 +80,8 @@ public class SouthboundUtilTest {
     @Test
     public void testDeserializeInstanceIdentifier() throws Exception {
         InstanceIdentifier result = mock(InstanceIdentifier.class);
-        InstanceIdentifierCodec iidc = (InstanceIdentifierCodec) setField("instanceIdentifierCodec", mock(InstanceIdentifierCodec.class));
+        InstanceIdentifierCodec iidc = (InstanceIdentifierCodec) setField("instanceIdentifierCodec",
+                mock(InstanceIdentifierCodec.class));
         when(iidc.bindingDeserializer(anyString())).thenReturn(result);
         assertEquals(result, SouthboundUtil.deserializeInstanceIdentifier("iidString"));
         verify(iidc).bindingDeserializer(anyString());
@@ -111,19 +113,23 @@ public class SouthboundUtilTest {
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         when(optional.get()).thenReturn(node);
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
-        assertEquals("Failed to return correct Optional object", Optional.of(ovsdbNode), SouthboundUtil.getManagingNode(db, mn));
+        assertEquals("Failed to return correct Optional object", Optional.of(ovsdbNode),
+                SouthboundUtil.getManagingNode(db, mn));
 
         //node not null, ovsdbNode null
         when(optional.get()).thenReturn(null);
-        assertEquals("Failed to return correct Optional object", Optional.absent(), SouthboundUtil.getManagingNode(db, mn));
+        assertEquals("Failed to return correct Optional object", Optional.absent(),
+                SouthboundUtil.getManagingNode(db, mn));
 
         //optional null
         when(nf.get()).thenReturn(null);
-        assertEquals("Failed to return correct Optional object", Optional.absent(), SouthboundUtil.getManagingNode(db, mn));
+        assertEquals("Failed to return correct Optional object", Optional.absent(),
+                SouthboundUtil.getManagingNode(db, mn));
 
         //ref null
         when(mn.getManagedBy()).thenReturn(null);
-        assertEquals("Failed to return correct Optional object", Optional.absent(), SouthboundUtil.getManagingNode(db, mn));
+        assertEquals("Failed to return correct Optional object", Optional.absent(),
+                SouthboundUtil.getManagingNode(db, mn));
     }
 
     @SuppressWarnings("unchecked")

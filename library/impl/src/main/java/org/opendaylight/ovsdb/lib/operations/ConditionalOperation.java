@@ -11,7 +11,7 @@ package org.opendaylight.ovsdb.lib.operations;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 
 /**
- * Represents an Operation type that accepts a condition, for e.g Update, Select etc
+ * Represents an Operation type that accepts a condition, for e.g Update, Select etc.
  */
 public interface ConditionalOperation {
 

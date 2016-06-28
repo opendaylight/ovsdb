@@ -8,15 +8,13 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import java.util.List;
-
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 // Section 5.2 of ovsdb draft covers the various response structures for
 // each of the Operations covered by Transaction (Insert, Update, Delete, Mutate, etc...)
@@ -28,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationResult {
+
     //public abstract boolean isSuccess();
     private int count;
     @JsonIgnore
@@ -39,31 +38,40 @@ public class OperationResult {
     public int getCount() {
         return count;
     }
+
     public void setCount(int count) {
         this.count = count;
     }
+
     @JsonProperty("uuid")
     public UUID getUuid() {
         return uuid;
     }
+
     public void setUuid(List<String> uuidList) {
         this.uuid = new UUID(uuidList.get(1));
     }
+
     public List<Row<GenericTableSchema>> getRows() {
         return rows;
     }
+
     public void setRows(List<Row<GenericTableSchema>> rows) {
         this.rows = rows;
     }
+
     public String getError() {
         return error;
     }
+
     public void setError(String error) {
         this.error = error;
     }
+
     public String getDetails() {
         return details;
     }
+
     public void setDetails(String details) {
         this.details = details;
     }

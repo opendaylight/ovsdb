@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class JsonRpcDecoderTest {
+
     static int testJson_BYTES = 179;
     String testJson;
     String prettyTestJson;
@@ -44,7 +45,6 @@ public class JsonRpcDecoderTest {
     /**
      * Test decoding the Stringified Json text in test.json to
      * individual Json node objects.
-     * @throws Exception
      */
     @Test
     public void testDecode() throws Exception {
@@ -59,7 +59,6 @@ public class JsonRpcDecoderTest {
     /**
      * Test decoding the Stringified Json text in pretty-test.json to
      * individual Json node objects.
-     * @throws Exception
      */
     @Test
     public void testDecodePrettyJson() throws Exception {
@@ -72,7 +71,6 @@ public class JsonRpcDecoderTest {
     /**
      * Test decoding the Stringified Json text with large spaces to
      * individual Json node objects.
-     * @throws Exception
      */
     @Test
     public void testDecodeSkipSpaces() throws Exception {
@@ -86,7 +84,6 @@ public class JsonRpcDecoderTest {
      * Test whether phased decoding is allowed with JsonRpcDecoder by
      * writing Json string over two separate iterations, and checking if
      * the decoder collates the record appropriately.
-     * @throws Exception
      */
     @Test
     public void testDecodePartial() throws Exception {
@@ -103,9 +100,8 @@ public class JsonRpcDecoderTest {
      * Test whether decoder throws appropriate DecoderException when
      * passing a Json string using an unsupported (i.e., UTF-16)
      * character set.
-     * @throws Exception
      */
-    @Test(expected= DecoderException.class)
+    @Test(expected = DecoderException.class)
     public void testDecodeInvalidEncoding() throws Exception {
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_16));
         ch.finish();

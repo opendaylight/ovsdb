@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.lib.error;
 
 /**
- * This exception is thrown when a result does not meet any of the known formats in RFC7047
+ * This exception is thrown when a result does not meet any of the known formats in RFC7047.
  */
 public class UnexpectedResultException extends RuntimeException {
     public UnexpectedResultException(String message) {

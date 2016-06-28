@@ -8,13 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
+import com.google.common.collect.Maps;
 import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import com.google.common.collect.Maps;
 
 public class TableUpdate<E extends TableSchema<E>> {
     private Map<UUID, RowUpdate<E>> rows;

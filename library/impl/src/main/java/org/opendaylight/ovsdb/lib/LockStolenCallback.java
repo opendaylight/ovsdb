@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.lib;
  *  Callback that can be registered with {@link org.opendaylight.ovsdb.lib.OvsdbClient} to
  *  get notified of a lock stolen.
  *  @see <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.10">ovsdb spec</a>
- *  <p>
  *
  *  @see org.opendaylight.ovsdb.lib.OvsdbClient#lock(String, LockAquisitionCallback, LockStolenCallback)
  */

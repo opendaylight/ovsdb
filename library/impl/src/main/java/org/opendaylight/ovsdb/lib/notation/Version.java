@@ -12,8 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class represents a version according to RFC 7047
- * The default implementation assumes the left-most digit is most significant when performing comparisons
+ * This class represents a version according to RFC 7047.
+ * The default implementation assumes the left-most digit is most significant when performing comparisons.
  * @see <a href="http://tools.ietf.org/html/rfc7047#section-3.1">RFC7047 Section 3.1</a>
  */
 public class Version implements Comparable<Version> {

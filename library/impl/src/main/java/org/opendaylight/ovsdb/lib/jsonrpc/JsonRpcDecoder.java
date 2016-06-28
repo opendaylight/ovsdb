@@ -9,18 +9,6 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-
-import java.io.IOException;
-import java.util.List;
-
-import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,13 +17,22 @@ import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import java.io.IOException;
+import java.util.List;
+import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JSON RPC 1.0 compatible decoder capable of decoding JSON messages from a TCP stream.
  * The stream is framed first by inspecting the json for valid end marker (left curly)
  * and is passed to a Json parser (jackson) for converting into an object model.
  *
- * There are no JSON parsers that I am aware of that does non blocking parsing.
+ * <p>There are no JSON parsers that I am aware of that does non blocking parsing.
  * This approach avoids having to run json parser over and over again on the entire
  * stream waiting for input. Parser is invoked only when we know of a full JSON message
  * in the stream.

@@ -5,21 +5,20 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.notation;
-
-import org.opendaylight.ovsdb.lib.notation.json.UUIDSerializer;
-import org.opendaylight.ovsdb.lib.notation.json.UUIDStringConverter;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.opendaylight.ovsdb.lib.notation.json.UUIDSerializer;
+import org.opendaylight.ovsdb.lib.notation.json.UUIDStringConverter;
 
-@JsonDeserialize(contentConverter = UUIDStringConverter.class)
-@JsonSerialize(using = UUIDSerializer.class)
-/*
+/**
  * Handles both uuid and named-uuid.
  */
+@JsonDeserialize(contentConverter = UUIDStringConverter.class)
+@JsonSerialize(using = UUIDSerializer.class)
 public class UUID {
+
     String val;
 
     public UUID(String value) {

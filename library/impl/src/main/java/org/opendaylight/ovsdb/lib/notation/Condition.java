@@ -8,12 +8,12 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.opendaylight.ovsdb.lib.notation.json.ConditionSerializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(using = ConditionSerializer.class)
-
 public class Condition {
+
     String column;
     Function function;
     Object value;

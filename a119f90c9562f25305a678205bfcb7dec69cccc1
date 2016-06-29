@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_ec5a654f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-06-29T14:40:54Z",
+      "side": 1,
+      "message": "Direction is currently part of acl-service augmentation. There each acl rule can have it own direction. So an access list which contain muliple rules, can have  rules in both ingress and egress direction. I am not sure the case is same here . Is here it is like applying the ACL a whole in ingress or egress not at the rules level.",
+      "parentUuid": "9a561d44_8c3769b0",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_cca5e105",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
         "patchSetId": 3
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "yes, this will point directly to relevant entry in the ietf-acl model. ACL and ACL Entries in hwvtep schema are very similar to the ietf-acl model, for most part. So the fields that are common we get off there, rest are local to hwvtep schema. ACL service code will populate ietf-acl, then add reference to it in hwvtep to apply it on TOR device. HWVTEP Plugin code will pull in attributes from ietf model and push to the switch.",
       "parentUuid": "9a561d44_cca5e105",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_ac406d57",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-06-29T14:40:54Z",
+      "side": 1,
+      "message": "In that case should this entry be a part of hwvtep-acl-attributes ? Or was there a reason it was added here? Also you can consider using the key and name in the ietf model. The aclservice yang model is now modified to use the key in the ietf yang.",
+      "parentUuid": "9a561d44_0c72397c",
       "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

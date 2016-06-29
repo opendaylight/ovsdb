@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_ac250dad",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-06-29T12:44:05Z",
+      "side": 1,
+      "message": "Do we require to model whether binding is ingress or egress?",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_cca5e105",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2016-06-29T12:44:05Z",
+      "side": 1,
+      "message": "ietf acl has similar hierarchy of acl attributes and acl entry attributes, so is the plan  to map one acl entry attribute here to one Acl attribute in ietf model?",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

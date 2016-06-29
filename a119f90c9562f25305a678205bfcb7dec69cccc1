@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_8c3769b0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-29T12:59:38Z",
+      "side": 1,
+      "message": "That would be a property of ACL Entry as per hwvtep schema. Is direction part of ietf-acl or is that an augmentation you added? If it is latter then we will end up needing similar aug for hwvtep, or need to add that augmentation to a more generic place as security groups/acl-service and hwvtep ACLs can be used independent of each other.",
+      "parentUuid": "9a561d44_ac250dad",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_cca5e105",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-29T12:44:05Z",
       "side": 1,
       "message": "ietf acl has similar hierarchy of acl attributes and acl entry attributes, so is the plan  to map one acl entry attribute here to one Acl attribute in ietf model?",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0c72397c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-29T12:59:38Z",
+      "side": 1,
+      "message": "yes, this will point directly to relevant entry in the ietf-acl model. ACL and ACL Entries in hwvtep schema are very similar to the ietf-acl model, for most part. So the fields that are common we get off there, rest are local to hwvtep schema. ACL service code will populate ietf-acl, then add reference to it in hwvtep to apply it on TOR device. HWVTEP Plugin code will pull in attributes from ietf model and push to the switch.",
+      "parentUuid": "9a561d44_cca5e105",
       "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

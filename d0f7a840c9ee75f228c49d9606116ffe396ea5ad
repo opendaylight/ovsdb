@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_2a9f2261",
+        "filename": "library/impl/src/test/java/org/opendaylight/ovsdb/lib/notation/VersionTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:11:46Z",
+      "side": 1,
+      "message": "Given that the test is incomplete, I\u0027d rather it remained as is (or was fixed so it actually tests something!).",
+      "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0a9cde68",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:11:46Z",
+      "side": 1,
+      "message": "I\u0027m not sure this serves any purpose then...",
+      "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_6a88fa22",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:11:46Z",
+      "side": 1,
+      "message": "This should be deleted entirely.",
+      "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_851101af",
+        "filename": "library/impl/src/test/java/org/opendaylight/ovsdb/lib/notation/VersionTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-29T09:56:10Z",
+      "side": 1,
+      "message": "I\u0027ve completely removed it now.  There is actually a testCompareTo() just above it, I think this one was just historical garbage which no-one ever cleaned.",
+      "parentUuid": "9a561d44_2a9f2261",
+      "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_0a9cde68",
         "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_c53bf936",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-29T09:56:10Z",
+      "side": 1,
+      "message": "Looking briefly at this code, which I do not understand, this does seem to \"do\" something, so I\u0027m not bold enough to remove it. I\u0027m also not curious enough to dig further.. ;-) So N/A.",
+      "parentUuid": "9a561d44_0a9cde68",
+      "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_6a88fa22",
         "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2016-06-29T07:11:46Z",
       "side": 1,
       "message": "This should be deleted entirely.",
+      "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_853aa134",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-29T09:56:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_6a88fa22",
       "revId": "d0f7a840c9ee75f228c49d9606116ffe396ea5ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

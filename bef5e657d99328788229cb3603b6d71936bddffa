@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_b287240f",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbSchemaContantsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-29T18:36:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_0aaa1e70",
+      "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_6add9a14",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommandTest.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_f2787c2d",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-29T18:36:39Z",
+      "side": 1,
+      "message": "because the line was too long otherwise! ;-)",
+      "parentUuid": "9a561d44_6add9a14",
+      "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_2adba21c",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommandTest.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2016-06-29T07:24:04Z",
       "side": 1,
       "message": "If this isn\u0027t useful, please delete it.",
+      "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_d299f86f",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-29T18:36:39Z",
+      "side": 1,
+      "message": "Nah. It\u0027s referred to a few lines below (\"FIXME: To be uncommented when Open vSwitch supports external_ids column\"), so it sounds like someone wants to get back to this. I don\u0027t want to be the one wiping things away behind people\u0027s back - I wouldn\u0027t like someone to do this in code where I left a TODO for something to action later, e.g. when an external system offers something one was anticipating but couldn\u0027t fully implement yet.  Personally I don\u0027t think commented out code is always bad.",
+      "parentUuid": "9a561d44_2adba21c",
       "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

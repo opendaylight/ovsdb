@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_aa9fb202",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/LogicalRouter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:55:11Z",
+      "side": 1,
+      "message": "I find it non-intuitive too, but we follow the Eclipse rules which specify first and last years only (see https://www.eclipse.org/legal/copyrightandlicensenotice.php for details). I\u0027ve looked into the nomenclature part of copyright law a bit more since then, and the Eclipse approach does appear to make sense (as well as being legally sound). The first and last years of publication are the only ones that really matter from a copyright perspective (they define the copyright duration).",
+      "parentUuid": "9a561d44_0f74f0fb",
+      "revId": "cf000d46a0a4f772ad7ebc9fea14858fb944ae46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_8372a1e3",
         "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/PhysicalPort.java",
         "patchSetId": 1

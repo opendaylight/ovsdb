@@ -81,6 +81,8 @@ public class ProtocolUpdateCommand implements TransactCommand {
                                         Mutator.INSERT,bridge.getProtocolsColumn().getData())
                                 .where(bridge.getNameColumn().getSchema().opEqual(bridge.getNameColumn().getData()))
                                 .build());
+                            LOG.info("Updated ProtocolEntry : {} for OVSDB Bridge : {} ",
+                                    protocolString, bridge.getName());
                         } catch (SchemaVersionMismatchException e) {
                             schemaMismatchLog("protocols", "Bridge", e);
                         }

@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_0aaa1e70",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbSchemaContantsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:24:04Z",
+      "side": 1,
+      "message": "Please delete this instead of commenting it out.",
+      "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_6add9a14",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:24:04Z",
+      "side": 1,
+      "message": "I\u0027m curious — why initialise this field in setUp(), and not the others?",
+      "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_2adba21c",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-29T07:24:04Z",
+      "side": 1,
+      "message": "If this isn\u0027t useful, please delete it.",
+      "revId": "bef5e657d99328788229cb3603b6d71936bddffa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

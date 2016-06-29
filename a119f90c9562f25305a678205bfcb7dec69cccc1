@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_4f1d4366",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-29T14:52:16Z",
+      "side": 1,
+      "message": "ACL Entry on hwvtep corresponds to an ACL rule and it has direction. So, just like acl-service, ACL [access-list] can have both ingress and egress ACL Entries [rules]. Like I said, schema is very similar to ACL model.",
+      "parentUuid": "9a561d44_ec5a654f",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_cca5e105",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
         "patchSetId": 3
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "In that case should this entry be a part of hwvtep-acl-attributes ? Or was there a reason it was added here? Also you can consider using the key and name in the ietf model. The aclservice yang model is now modified to use the key in the ietf yang.",
       "parentUuid": "9a561d44_0c72397c",
+      "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_2f31efec",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-29T14:52:16Z",
+      "side": 1,
+      "message": "hwvtep-acl-attributes has a list acl-entries that uses hwvtep-acl-entry-attributes. So, hwvtep-acl is a list of ACLs [access-lists] and contains ACL Entries [rules]. hwvtep-acl contains ref to counterpart access-list in ietf model and uses name as key.",
+      "parentUuid": "9a561d44_ac406d57",
       "revId": "a119f90c9562f25305a678205bfcb7dec69cccc1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

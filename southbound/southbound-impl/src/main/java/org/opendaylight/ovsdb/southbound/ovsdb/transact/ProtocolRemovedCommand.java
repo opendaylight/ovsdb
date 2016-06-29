@@ -69,6 +69,8 @@ public class ProtocolRemovedCommand implements TransactCommand {
                         try {
                             transaction.add(op.mutate(bridge).addMutation(bridge.getProtocolsColumn().getSchema(),
                                     Mutator.DELETE,bridge.getProtocolsColumn().getData()));
+                            LOG.trace("Removed ProtocolEntry : {} for OVSDB Bridge : {} ",
+                                    bridge.getProtocolsColumn(), bridge.getName());
                         } catch (SchemaVersionMismatchException e) {
                             schemaMismatchLog("protocols", "Bridge", e);
                         }

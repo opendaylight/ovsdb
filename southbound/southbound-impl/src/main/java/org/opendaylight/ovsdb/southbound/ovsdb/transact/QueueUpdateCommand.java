@@ -46,106 +46,85 @@ public class QueueUpdateCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, Queues.class));
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         Collection<DataTreeModification<Node>> modifications) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, Queues.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
-        for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            createdOrUpdated.entrySet()) {
-            updateQueue(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
-        }
-    }
+                         Map<InstanceIdentifier<Queues>, Queues> createdOrUpdated) {
+        for (Entry<InstanceIdentifier<Queues>, Queues> queueMapEntry: createdOrUpdated.entrySet()) {
+            InstanceIdentifier<OvsdbNodeAugmentation> iid =
+                    queueMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
+            if (!state.getBridgeNode(iid).isPresent()) {
+                return;
+            }
 
-    private void updateQueue(
-            TransactionBuilder transaction, BridgeOperationalState state,
-            InstanceIdentifier<OvsdbNodeAugmentation> iid, OvsdbNodeAugmentation ovsdbNode) {
+            Queues queueEntry = queueMapEntry.getValue();
+            Queue queue = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Queue.class);
 
-        List<Queues> queueList = ovsdbNode.getQueues();
-
-        if (!state.getBridgeNode(iid).isPresent()) {
-            return;
-        }
-        OvsdbNodeAugmentation operNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
-        List<Queues> operQueues = operNode.getQueues();
-
-        if (queueList != null) {
-            for (Queues queueEntry : queueList) {
-                Queue queue = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Queue.class);
-
-                if (queueEntry.getDscp() != null) {
-                    try {
-                        Set<Long> dscpSet = new HashSet<>();
-                        if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
-                            queue.setDscp(dscpSet);
-                        }
-                    } catch (NumberFormatException e) {
-                        LOG.warn("Invalid DSCP {} setting for Queue {}", queueEntry.getDscp(), queueEntry, e);
-                    }
-                }
-
-                Uuid queueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
-                UUID uuid = null;
-                if (queueUuid != null) {
-                    uuid = new UUID(queueUuid.getValue());
-                }
-
-                List<QueuesExternalIds> externalIds = queueEntry.getQueuesExternalIds();
-                Map<String, String> externalIdsMap = new HashMap<>();
-                if (externalIds != null) {
-                    for (QueuesExternalIds externalId : externalIds) {
-                        externalIdsMap.put(externalId.getQueuesExternalIdKey(), externalId.getQueuesExternalIdValue());
-                    }
-                }
-                externalIdsMap.put(SouthboundConstants.QUEUE_ID_EXTERNAL_ID_KEY, queueEntry.getQueueId().getValue());
+            if (queueEntry.getDscp() != null) {
                 try {
-                    queue.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete Queue external IDs", e);
+                    Set<Long> dscpSet = new HashSet<>();
+                    if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
+                        queue.setDscp(dscpSet);
+                    }
+                } catch (NumberFormatException e) {
+                    LOG.warn("Invalid DSCP {} setting for Queue {}", queueEntry.getDscp(), queueEntry, e);
                 }
-                externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-                        SouthboundUtil.serializeInstanceIdentifier(
+            }
+
+            List<QueuesExternalIds> externalIds = queueEntry.getQueuesExternalIds();
+            Map<String, String> externalIdsMap = new HashMap<>();
+            if (externalIds != null) {
+                for (QueuesExternalIds externalId : externalIds) {
+                    externalIdsMap.put(externalId.getQueuesExternalIdKey(), externalId.getQueuesExternalIdValue());
+                }
+            }
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                    SouthboundUtil.serializeInstanceIdentifier(
                         SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Queues.class, new QueuesKey(queueEntry.getQueueId()))));
-                queue.setExternalIds(externalIdsMap);
-
-                List<QueuesOtherConfig> otherConfigs = queueEntry.getQueuesOtherConfig();
-                if (otherConfigs != null) {
-                    Map<String, String> otherConfigsMap = new HashMap<>();
-                    for (QueuesOtherConfig otherConfig : otherConfigs) {
-                        otherConfigsMap.put(otherConfig.getQueueOtherConfigKey(),
-                                otherConfig.getQueueOtherConfigValue());
-                    }
-                    try {
-                        queue.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
-                    } catch (NullPointerException e) {
-                        LOG.warn("Incomplete Queue other_config", e);
-                    }
-                }
-
-                Uuid operQueueUuid = getQueueEntryUuid(operQueues, queueEntry.getQueueId());
-                if (operQueueUuid == null) {
-                    UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
-                            + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
-                    transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
-                } else {
-                    uuid = new UUID(operQueueUuid.getValue());
-                    //transaction.add(op.update(queue)).build();
-                    Queue extraQueue = TyperUtils.getTypedRowWrapper(
-                            transaction.getDatabaseSchema(), Queue.class, null);
-                    extraQueue.getUuidColumn().setData(uuid);
-                    transaction.add(op.update(queue)
-                            .where(extraQueue.getUuidColumn().getSchema().opEqual(uuid)).build());
-                }
-                transaction.build();
+            try {
+                queue.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete Queue external IDs", e);
             }
+
+            List<QueuesOtherConfig> otherConfigs = queueEntry.getQueuesOtherConfig();
+            if (otherConfigs != null) {
+                Map<String, String> otherConfigsMap = new HashMap<>();
+                for (QueuesOtherConfig otherConfig : otherConfigs) {
+                    otherConfigsMap.put(otherConfig.getQueueOtherConfigKey(), otherConfig.getQueueOtherConfigValue());
+                }
+                try {
+                    queue.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete Queue other_config", e);
+                }
+            }
+
+            OvsdbNodeAugmentation operNode =
+                state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+            Uuid operQueueUuid = getQueueEntryUuid(operNode.getQueues(), queueEntry.getQueueId());
+            if (operQueueUuid == null) {
+                UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
+                        + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
+                transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
+            } else {
+                UUID uuid = new UUID(operQueueUuid.getValue());
+                Queue extraQueue = TyperUtils.getTypedRowWrapper(
+                        transaction.getDatabaseSchema(), Queue.class, null);
+                extraQueue.getUuidColumn().setData(uuid);
+                transaction.add(op.update(queue)
+                        .where(extraQueue.getUuidColumn().getSchema().opEqual(uuid)).build());
+            }
+            transaction.build();
         }
     }
 

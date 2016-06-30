@@ -837,6 +837,14 @@ module ovsdb {
             type string;
         }
 
+        leaf ifindex {
+            description "The ifindex is useful for seamless integration with protocols such as SNMP and sFlow.
+                It is a positive interface index as defined for SNMP MIB-II in RFCs 1213 and 2863 if the interface
+                has one, otherwise 0. It is a read-only column and an integer in the range 0 to 4,294,967,295";
+            type uint32;
+            config false;
+        }
+
         leaf interface-type {
             description "The type of the OVSDB interface";
             type identityref {

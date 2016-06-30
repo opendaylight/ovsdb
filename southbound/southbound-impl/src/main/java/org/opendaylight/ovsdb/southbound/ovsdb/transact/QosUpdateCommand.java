@@ -48,106 +48,92 @@ public class QosUpdateCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, QosEntries.class));
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
                         Collection<DataTreeModification<Node>> modifications) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, QosEntries.class));
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
-        for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            createdOrUpdated.entrySet()) {
-            updateQos(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
-        }
-    }
+                         Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated) {
+        for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {
+            InstanceIdentifier<OvsdbNodeAugmentation> iid =
+                    qosMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
+            if (!state.getBridgeNode(iid).isPresent()) {
+                return;
+            }
+            OvsdbNodeAugmentation operNode =
+                state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
 
-    private void updateQos(
-            TransactionBuilder transaction, BridgeOperationalState state,
-            InstanceIdentifier<OvsdbNodeAugmentation> iid, OvsdbNodeAugmentation ovsdbNode) {
+            QosEntries qosEntry = qosMapEntry.getValue();
+            Qos qos = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Qos.class);
 
-        List<QosEntries> qosEntries = ovsdbNode.getQosEntries();
+            if (qosEntry.getQosType() != null) {
+                qos.setType(SouthboundMapper.createQosType(qosEntry.getQosType()));
+            }
 
-        if (!state.getBridgeNode(iid).isPresent()) {
-            return;
-        }
-        OvsdbNodeAugmentation operNode = state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
-        List<QosEntries> operQosEntries = operNode.getQosEntries();
-        List<Queues> operQueues = operNode.getQueues();
-
-        if (qosEntries != null) {
-            for (QosEntries qosEntry : qosEntries) {
-                Qos qos = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Qos.class);
-
-                if (qosEntry.getQosType() != null) {
-                    qos.setType(SouthboundMapper.createQosType(qosEntry.getQosType()));
-                }
-
-                List<QueueList> queueList = qosEntry.getQueueList();
-                Map<Long, UUID> newQueueList = new HashMap<>();
-                if (queueList != null && !queueList.isEmpty()) {
-                    for (QueueList queue : queueList) {
-                        if (queue.getQueueRef() != null) {
-                            newQueueList.put(queue.getQueueNumber(),
-                                    new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
-                        } else if (queue.getQueueUuid() != null) {
-                            newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
-                        }
+            List<QueueList> queueList = qosEntry.getQueueList();
+            Map<Long, UUID> newQueueList = new HashMap<>();
+            if (queueList != null && !queueList.isEmpty()) {
+                for (QueueList queue : queueList) {
+                    if (queue.getQueueRef() != null) {
+                        newQueueList.put(queue.getQueueNumber(),
+                                new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
+                    } else if (queue.getQueueUuid() != null) {
+                        newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
                     }
                 }
-                qos.setQueues(newQueueList);
+            }
+            qos.setQueues(newQueueList);
 
-                List<QosExternalIds> externalIds = qosEntry.getQosExternalIds();
-                Map<String, String> externalIdsMap = new HashMap<>();
-                if (externalIds != null) {
-                    for (QosExternalIds externalId : externalIds) {
-                        externalIdsMap.put(externalId.getQosExternalIdKey(), externalId.getQosExternalIdValue());
-                    }
+            List<QosExternalIds> externalIds = qosEntry.getQosExternalIds();
+            Map<String, String> externalIdsMap = new HashMap<>();
+            if (externalIds != null) {
+                for (QosExternalIds externalId : externalIds) {
+                    externalIdsMap.put(externalId.getQosExternalIdKey(), externalId.getQosExternalIdValue());
                 }
-                externalIdsMap.put(SouthboundConstants.QOS_ID_EXTERNAL_ID_KEY, qosEntry.getQosId().getValue());
-                try {
-                    qos.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete Qos external IDs", e);
-                }
-                externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-                        SouthboundUtil.serializeInstanceIdentifier(
+            }
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                    SouthboundUtil.serializeInstanceIdentifier(
                         SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))));
-                qos.setExternalIds(externalIdsMap);
-
-                List<QosOtherConfig> otherConfigs = qosEntry.getQosOtherConfig();
-                if (otherConfigs != null) {
-                    Map<String, String> otherConfigsMap = new HashMap<>();
-                    for (QosOtherConfig otherConfig : otherConfigs) {
-                        otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
-                    }
-                    try {
-                        qos.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
-                    } catch (NullPointerException e) {
-                        LOG.warn("Incomplete Qos other_config", e);
-                    }
-                }
-
-                Uuid operQosUuid = getQosEntryUuid(operQosEntries, qosEntry.getQosId());
-                if (operQosUuid == null) {
-                    UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
-                            + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
-                    transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
-                } else {
-                    UUID uuid = new UUID(operQosUuid.getValue());
-                    Qos extraQos = TyperUtils.getTypedRowWrapper(
-                            transaction.getDatabaseSchema(), Qos.class, null);
-                    extraQos.getUuidColumn().setData(uuid);
-                    transaction.add(op.update(qos)
-                            .where(extraQos.getUuidColumn().getSchema().opEqual(uuid)).build());
-                }
-                transaction.build();
+            try {
+                qos.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete Qos external IDs", e);
             }
+
+            List<QosOtherConfig> otherConfigs = qosEntry.getQosOtherConfig();
+            if (otherConfigs != null) {
+                Map<String, String> otherConfigsMap = new HashMap<>();
+                for (QosOtherConfig otherConfig : otherConfigs) {
+                    otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
+                }
+                try {
+                    qos.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete Qos other_config", e);
+                }
+            }
+
+            Uuid operQosUuid = getQosEntryUuid(operNode.getQosEntries(), qosEntry.getQosId());
+            if (operQosUuid == null) {
+                UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
+                        + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
+                transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
+            } else {
+                UUID uuid = new UUID(operQosUuid.getValue());
+                Qos extraQos = TyperUtils.getTypedRowWrapper(
+                        transaction.getDatabaseSchema(), Qos.class, null);
+                extraQos.getUuidColumn().setData(uuid);
+                transaction.add(op.update(qos)
+                        .where(extraQos.getUuidColumn().getSchema().opEqual(uuid)).build());
+            }
+            transaction.build();
         }
     }
 

@@ -25,6 +25,53 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_868d7d34",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACL.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-30T20:42:37Z",
+      "side": 1,
+      "message": "name being a key will always be present and this works as a better way to get it than getNameColumn().getData() Most key fields in other schema classes [e.g. Bridge.java] have similar methods",
+      "parentUuid": "9a561d44_8b658647",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 24
+      },
+      "revId": "091b5cfd7b2cb1600d44625424100fef9db3d763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_a6dd2117",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-30T20:42:37Z",
+      "side": 1,
+      "message": "Question: All these fields in schema are defined as:\n\n        \"source_mac\": {\n          \"type\": {\n            \"key\": \"string\", \"min\": 0, \"max\": 1}},\n\nI\u0027ve noticed other classes use Set\u003cString\u003e instead of just String even though size is 1. Any specific reason why? I think just String should work fine too, as I am already using it for encapsulation-type in PhysicalLocator.java Why use set only to get/set one entry in it?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 40
+      },
+      "revId": "091b5cfd7b2cb1600d44625424100fef9db3d763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_4b740efd",
         "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
         "patchSetId": 2
@@ -48,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_e699d96f",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-30T20:42:37Z",
+      "side": 1,
+      "message": "good catch, yes. will fix this.",
+      "parentUuid": "9a561d44_4b740efd",
+      "range": {
+        "startLine": 42,
+        "startChar": 23,
+        "endLine": 42,
+        "endChar": 33
+      },
+      "revId": "091b5cfd7b2cb1600d44625424100fef9db3d763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_6b20f2f7",
         "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
         "patchSetId": 2
@@ -59,6 +130,30 @@
       "writtenOn": "2016-06-30T19:15:46Z",
       "side": 1,
       "message": "replace dash with underscore",
+      "range": {
+        "startLine": 115,
+        "startChar": 23,
+        "endLine": 115,
+        "endChar": 32
+      },
+      "revId": "091b5cfd7b2cb1600d44625424100fef9db3d763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_66766940",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-06-30T20:42:37Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "9a561d44_6b20f2f7",
       "range": {
         "startLine": 115,
         "startChar": 23,

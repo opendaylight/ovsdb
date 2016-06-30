@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_065b2d55",
+        "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-30T21:55:33Z",
+      "side": 1,
+      "message": "This is because it is a set. It is saying you can have 0 or 1 values.\nIf you look at the log capture you will see that the field is [] when\nempty. So the protocol itself expects a set.\n\nStephen fixed a patch [1] a while back that did the opposite and\nchanged from Set\u003cString\u003e to just String. The reason because the QoS\nfield is defined as a single value.",
+      "parentUuid": "9a561d44_a6dd2117",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 40
+      },
+      "revId": "091b5cfd7b2cb1600d44625424100fef9db3d763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_4b740efd",
         "filename": "schemas/hardwarevtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/ACLEntry.java",
         "patchSetId": 2

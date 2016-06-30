@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_5e096f94",
+        "filename": "library/impl/src/test/java/org/opendaylight/ovsdb/lib/notation/VersionTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-30T08:19:18Z",
+      "side": 1,
+      "message": "This re-appeared in your git rebase adventures...",
+      "revId": "20c5fb0533a959c931e60a2efc4c11c78c296244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_befecb69",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/ovsdbclient/OvsdbClientTestIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-30T08:19:18Z",
+      "side": 1,
+      "message": "... as did this!",
+      "revId": "20c5fb0533a959c931e60a2efc4c11c78c296244",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

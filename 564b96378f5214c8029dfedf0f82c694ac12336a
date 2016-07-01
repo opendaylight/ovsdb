@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_d3ff3000",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1575
+      },
+      "writtenOn": "2016-07-01T08:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_cba49e59",
+      "range": {
+        "startLine": 72,
+        "startChar": 32,
+        "endLine": 72,
+        "endChar": 37
+      },
+      "revId": "564b96378f5214c8029dfedf0f82c694ac12336a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_eb9fe201",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolUpdateCommand.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-30T19:24:59Z",
       "side": 1,
       "message": "i think we should keep it at info level.Also need to make sure the getProtocolsColumn() don\u0027t dump long string.",
+      "range": {
+        "startLine": 84,
+        "startChar": 32,
+        "endLine": 84,
+        "endChar": 37
+      },
+      "revId": "564b96378f5214c8029dfedf0f82c694ac12336a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_130a4821",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1575
+      },
+      "writtenOn": "2016-07-01T08:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_eb9fe201",
       "range": {
         "startLine": 84,
         "startChar": 32,

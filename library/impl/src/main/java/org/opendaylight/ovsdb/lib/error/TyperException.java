@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.lib.error;
 
 /**
- * This is a generic exception thrown by the Typed Schema utilities
+ * This is a generic exception thrown by the Typed Schema utilities.
  */
 public class TyperException extends RuntimeException {
 

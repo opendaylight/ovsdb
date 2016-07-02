@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -32,4 +33,11 @@ public interface Global extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="switches", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setSwitches(Set<UUID> switches);
+
+
+    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.7.0")
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+
+    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.7.0")
+    void setOtherConfig(Map<String, String> otherConfig);
 }

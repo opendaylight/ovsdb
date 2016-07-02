@@ -20,9 +20,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <artifactId>library</artifactId>
   <version>1.2.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
+
   <properties>
     <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -114,6 +116,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <!--<propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>-->
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.lib.message;
 
 import java.util.List;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 

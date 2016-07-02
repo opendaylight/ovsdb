@@ -126,6 +126,8 @@ public class QosUpdateCommand implements TransactCommand {
                     UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
                             + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
                     transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
+                    LOG.info("Added QoS Uuid: {} for node : {} ",
+                            namedUuid, ovsdbNode);
                 } else {
                     UUID uuid = new UUID(operQosUuid.getValue());
                     Qos extraQos = TyperUtils.getTypedRowWrapper(
@@ -133,6 +135,8 @@ public class QosUpdateCommand implements TransactCommand {
                     extraQos.getUuidColumn().setData(uuid);
                     transaction.add(op.update(qos)
                             .where(extraQos.getUuidColumn().getSchema().opEqual(uuid)).build());
+                    LOG.info("Updated  QoS Uuid : {} for node : {} ",
+                            operQosUuid, ovsdbNode);
                 }
                 transaction.build();
             }

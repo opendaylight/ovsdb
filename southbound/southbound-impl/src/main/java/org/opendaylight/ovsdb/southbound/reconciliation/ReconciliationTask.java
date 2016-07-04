@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.reconciliation;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
+import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -41,8 +42,9 @@ public abstract class ReconciliationTask implements Runnable {
     }
 
     /**
-     * Method contains task reconciliation logic.
-     *
+     * Method contains task reconciliation logic. Please refer to
+     * {@link ConnectionReconciliationTask#reconcileConfiguration(OvsdbConnectionManager)}
+     * for example.
      * @param connectionManager Connection manager to get connection instance of the device
      * @return True if reconciliation was successful, else false
      */
@@ -58,6 +60,7 @@ public abstract class ReconciliationTask implements Runnable {
      * it as an async operation and submit the task on the callback of the future.
      * <p>
      * Note:Please do not write blocking data store operations
+     * {@link ConnectionReconciliationTask#doRetry(boolean)}
      * </p>
      * @param wasPreviousAttemptSuccessful Status of the previous attempt
      */
@@ -73,6 +76,7 @@ public abstract class ReconciliationTask implements Runnable {
      * implement it as an async operation and submit the task on the callback of the future.
      * <p>
      * Note:Please do not write blocking data store operations
+     * {@link ConnectionReconciliationTask#doRetry(boolean)}
      * </p>
      */
     public abstract void checkReadinessAndProcess();

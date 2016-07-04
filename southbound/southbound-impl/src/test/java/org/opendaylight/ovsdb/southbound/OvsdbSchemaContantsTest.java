@@ -7,24 +7,17 @@
  */
 
 package org.opendaylight.ovsdb.southbound;
+
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.southbound.OvsdbSchemaContants.OvsdbSchemaTables;
 
 public class OvsdbSchemaContantsTest {
 
-    private OvsdbSchemaContants ovsdbSchemaContants;
-
-    @Before
-    public void setUp() {
-        ovsdbSchemaContants = new OvsdbSchemaContants();
-    }
-
     @Test
     public void testDatabaseName() {
-        assertEquals("Error databaseName did not return correct value","Open_vSwitch",OvsdbSchemaContants.databaseName);
+        assertEquals("Error databaseName did not return correct value","Open_vSwitch", OvsdbSchemaContants.databaseName);
     }
     @Test
     public void testGetTableName() {

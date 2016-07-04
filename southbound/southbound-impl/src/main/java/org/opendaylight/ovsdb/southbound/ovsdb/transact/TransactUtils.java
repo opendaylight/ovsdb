@@ -50,6 +50,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
 public class TransactUtils {
+
+    private TransactUtils() { }
+
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBefore() {
         return new Predicate<DataObjectModification<T>>() {
             @Override
@@ -502,8 +505,8 @@ public class TransactUtils {
         }
 
         StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            short u8byte = (short) (bytes[i] & 0xff);
+        for (byte b : bytes) {
+            short u8byte = (short) (b & 0xff);
             String tmp = Integer.toHexString(u8byte);
             if (tmp.length() == 1) {
                 buf.append("0");

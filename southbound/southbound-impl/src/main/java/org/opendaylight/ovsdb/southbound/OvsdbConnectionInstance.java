@@ -121,7 +121,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public void registerCallbacks() {
-        if ( this.callback == null) {
+        if (this.callback == null) {
             if (this.initialCreateData != null ) {
                 this.updateConnectionAttributes();
             }
@@ -170,7 +170,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                 }
                 monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
             }
-            this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
+            this.callback.update(monitor(dbSchema, monitorRequests, callback), dbSchema);
         } else {
             LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }
@@ -270,14 +270,14 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(
             DatabaseSchema schema, List<MonitorRequest> monitorRequests,
-            MonitorHandle monitorHandle, MonitorCallBack callback) {
+            MonitorHandle monitorHandle, MonitorCallBack callbackArgument) {
         return null;
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(
             DatabaseSchema schema, List<MonitorRequest> monitorRequests,
-            MonitorCallBack callback) {
-        return client.monitor(schema, monitorRequests, callback);
+            MonitorCallBack callbackArgument) {
+        return client.monitor(schema, monitorRequests, callbackArgument);
     }
 
     public void cancelMonitor(MonitorHandle handler) {

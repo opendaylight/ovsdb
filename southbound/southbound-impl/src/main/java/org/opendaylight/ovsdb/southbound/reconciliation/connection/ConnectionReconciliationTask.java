@@ -36,7 +36,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     }
 
     @Override
-    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManager) {
+    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManagerOfDevice) {
         boolean result = false;
         connectionAttempt.incrementAndGet();
         InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
@@ -45,7 +45,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
         LOG.info("Retry({}) connection to Ovsdb Node {} ", connectionAttempt.get(), ovsdbNode.getConnectionInfo());
         OvsdbClient client = null;
         try {
-            client = connectionManager.connect(ndIid, ovsdbNode);
+            client = connectionManagerOfDevice.connect(ndIid, ovsdbNode);
             if (client != null) {
                 LOG.info("Successfully connected to Ovsdb Node {} ", ovsdbNode.getConnectionInfo());
                 result = true;

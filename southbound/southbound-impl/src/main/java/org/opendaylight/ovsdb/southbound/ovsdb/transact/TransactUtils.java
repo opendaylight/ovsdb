@@ -127,7 +127,8 @@ public class TransactUtils {
                     Node value = (Node) created.getValue();
                     Class<?> type = created.getKey().getTargetType();
                     if (type.equals(Node.class)) {
-                        @SuppressWarnings("unchecked") // Actually checked above
+                        // Actually checked above
+                        @SuppressWarnings("unchecked")
                         InstanceIdentifier<Node> iid = (InstanceIdentifier<Node>) created.getKey();
                         result.put(iid, value);
                     }
@@ -275,7 +276,8 @@ public class TransactUtils {
         if (changes != null && changes.getRemovedPaths() != null) {
             for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
                 if (iid.getTargetType().equals(klazz)) {
-                    @SuppressWarnings("unchecked") // Actually checked above
+                    // Actually checked above
+                    @SuppressWarnings("unchecked")
                     InstanceIdentifier<T> iidn = (InstanceIdentifier<T>)iid;
                     result.add(iidn);
                 }
@@ -415,7 +417,8 @@ public class TransactUtils {
                     T value = (T) created.getValue();
                     Class<?> type = created.getKey().getTargetType();
                     if (type.equals(klazz)) {
-                        @SuppressWarnings("unchecked") // Actually checked above
+                        // Actually checked above
+                        @SuppressWarnings("unchecked")
                         InstanceIdentifier<T> iid = (InstanceIdentifier<T>) created.getKey();
                         result.put(iid, value);
                     }
@@ -502,8 +505,8 @@ public class TransactUtils {
         }
 
         StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            short u8byte = (short) (bytes[i] & 0xff);
+        for (byte b : bytes) {
+            short u8byte = (short) (b & 0xff);
             String tmp = Integer.toHexString(u8byte);
             if (tmp.length() == 1) {
                 buf.append("0");

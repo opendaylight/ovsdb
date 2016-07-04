@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbControllerUpdateCommand.class);
+
     private Map<UUID, Controller> updatedControllerRows;
     private Map<UUID, Bridge> updatedBridgeRows;
 
@@ -74,16 +75,16 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
-     * @param updatedControllerRows updated {@link Controller} rows
-     * @param updatedBridgeRows updated {@link Bridge} rows
+     * @param newUpdatedControllerRows updated {@link Controller} rows
+     * @param newUpdatedBridgeRows updated {@link Bridge} rows
      */
     private void updateController(ReadWriteTransaction transaction,
-                                  Map<UUID, Controller> updatedControllerRows,
-                                  Map<UUID, Bridge> updatedBridgeRows) {
+                                  Map<UUID, Controller> newUpdatedControllerRows,
+                                  Map<UUID, Bridge> newUpdatedBridgeRows) {
 
-        for (Map.Entry<UUID, Bridge> bridgeEntry : updatedBridgeRows.entrySet()) {
+        for (Map.Entry<UUID, Bridge> bridgeEntry : newUpdatedBridgeRows.entrySet()) {
             final List<ControllerEntry> controllerEntries =
-                    SouthboundMapper.createControllerEntries(bridgeEntry.getValue(), updatedControllerRows);
+                    SouthboundMapper.createControllerEntries(bridgeEntry.getValue(), newUpdatedControllerRows);
 
             for (ControllerEntry controllerEntry : controllerEntries) {
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
@@ -105,16 +106,16 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
-     * @param updatedControllerRows updated {@link Controller} rows
+     * @param newUpdatedControllerRows updated {@link Controller} rows
 
      */
     private void updateController(ReadWriteTransaction transaction,
-                                  Map<UUID, Controller> updatedControllerRows) {
+                                  Map<UUID, Controller> newUpdatedControllerRows) {
 
         Map<InstanceIdentifier<Node>, Node> bridgeNodes = getBridgeNodes(transaction);
         for (Map.Entry<InstanceIdentifier<Node>, Node> bridgeNodeEntry : bridgeNodes.entrySet()) {
             final List<ControllerEntry> controllerEntries =
-                    SouthboundMapper.createControllerEntries(bridgeNodeEntry.getValue(), updatedControllerRows);
+                    SouthboundMapper.createControllerEntries(bridgeNodeEntry.getValue(), newUpdatedControllerRows);
 
             for (ControllerEntry controllerEntry : controllerEntries) {
                 final InstanceIdentifier<Node> bridgeIid = bridgeNodeEntry.getKey();

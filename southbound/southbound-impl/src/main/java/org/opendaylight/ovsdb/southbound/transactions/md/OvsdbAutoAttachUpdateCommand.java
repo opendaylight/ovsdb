@@ -59,12 +59,12 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void updateAutoAttach(ReadWriteTransaction transaction,
-            Map<UUID, AutoAttach> updatedAutoAttachRows) {
+            Map<UUID, AutoAttach> newUpdatedAutoAttachRows) {
 
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            for (final Entry<UUID, AutoAttach> entry : updatedAutoAttachRows.entrySet()) {
+            for (final Entry<UUID, AutoAttach> entry : newUpdatedAutoAttachRows.entrySet()) {
                 final AutoAttach autoAttach = entry.getValue();
                 final AutoAttach oldAutoAttach = oldAutoAttachRows.get(entry.getKey());
                 final Uri uri =

@@ -8,26 +8,28 @@
 package org.opendaylight.ovsdb.southbound;
 
 public class OvsdbSchemaContants {
-    public static final String databaseName = "Open_vSwitch";
+
+    public static final String DATABASE_NAME = "Open_vSwitch";
+    private static final String BRIDGE_NAME = "Bridge";
 
     private OvsdbSchemaContants() { }
 
     public enum OvsdbSchemaTables {
-        OPENVSWITCH("Open_vSwitch",null,null),
-        BRIDGE("Bridge", "Open_vSwitch", "bridges"),
-        PORT("Port", "Bridge", "ports"),
+        OPENVSWITCH(DATABASE_NAME,null,null),
+        BRIDGE(BRIDGE_NAME, DATABASE_NAME, "bridges"),
+        PORT("Port", BRIDGE_NAME, "ports"),
         INTERFACE("Interface", "Port", "interfaces"),
-        SSL("SSL", "Open_vSwitch", "ssl"),
-        IPFIX("IPFIX", "Bridge", "ipfix"),
-        SFLOW("sFlow", "Bridge", "sflow"),
-        FLOWTABLE("Flow_Table", "Bridge", "flow_tables"),
+        SSL("SSL", DATABASE_NAME, "ssl"),
+        IPFIX("IPFIX", BRIDGE_NAME, "ipfix"),
+        SFLOW("sFlow", BRIDGE_NAME, "sflow"),
+        FLOWTABLE("Flow_Table", BRIDGE_NAME, "flow_tables"),
         QOS("QoS", "Port", "qos"),
-        NETFLOW("NetFlow", "Bridge", "netflow"),
-        MIRROR("Mirror", "Bridge", "mirrors"),
-        MANAGER("Manager", "Open_vSwitch", "manager_options"),
-        CONTROLLER("Controller", "Bridge", "controller"),
+        NETFLOW("NetFlow", BRIDGE_NAME, "netflow"),
+        MIRROR("Mirror", BRIDGE_NAME, "mirrors"),
+        MANAGER("Manager", DATABASE_NAME, "manager_options"),
+        CONTROLLER("Controller", BRIDGE_NAME, "controller"),
         FLOWSAMPLECOLLECTORSET("Flow_Sample_Collector_Set",null,null),
-        AUTOATTACH("AutoAttach", "Bridge", "auto_attach");
+        AUTOATTACH("AutoAttach", BRIDGE_NAME, "auto_attach");
 
         private final String tableName;
         private final String parentTableName;

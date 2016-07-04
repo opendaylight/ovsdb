@@ -62,7 +62,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     }
 
     @Override
-    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManager) {
+    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManagerOfDevice) {
         InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
         ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
 

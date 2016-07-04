@@ -41,8 +41,8 @@ public abstract class ReconciliationTask implements Runnable {
     }
 
     /**
-     * Method contains task reconciliation logic.
-     *
+     * Method contains task reconciliation logic. Please refer to
+     * for example.
      * @param connectionManager Connection manager to get connection instance of the device
      * @return True if reconciliation was successful, else false
      */

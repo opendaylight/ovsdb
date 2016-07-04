@@ -10,6 +10,8 @@ package org.opendaylight.ovsdb.southbound;
 public class OvsdbSchemaContants {
     public static final String databaseName = "Open_vSwitch";
 
+    private OvsdbSchemaContants() { }
+
     public enum OvsdbSchemaTables {
         OPENVSWITCH("Open_vSwitch",null,null),
         BRIDGE("Bridge", "Open_vSwitch", "bridges"),

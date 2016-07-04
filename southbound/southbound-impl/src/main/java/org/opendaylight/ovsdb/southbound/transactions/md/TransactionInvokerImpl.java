@@ -63,15 +63,14 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
+    public void onTransactionChainFailed(TransactionChain<?, ?> chainArg,
             AsyncTransaction<?, ?> transaction, Throwable cause) {
         failedTransactionQueue.offer(transaction);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(TransactionChain<?, ?> chainArg) {
         // NO OP
-
     }
 
     @Override

@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.reconciliation;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
+import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -41,12 +42,13 @@ public abstract class ReconciliationTask implements Runnable {
     }
 
     /**
-     * Method contains task reconciliation logic.
-     *
-     * @param connectionManager Connection manager to get connection instance of the device
+     * Method contains task reconciliation logic. Please refer to
+     * {@link ConnectionReconciliationTask#reconcileConfiguration(OvsdbConnectionManager)}
+     * for example.
+     * @param connectionManagerOfDevice Connection manager to get connection instance of the device
      * @return True if reconciliation was successful, else false
      */
-    public abstract boolean reconcileConfiguration(OvsdbConnectionManager connectionManager);
+    public abstract boolean reconcileConfiguration(OvsdbConnectionManager connectionManagerOfDevice);
 
     /**
      * Extended task should implement the logic that decides whether retry for the task

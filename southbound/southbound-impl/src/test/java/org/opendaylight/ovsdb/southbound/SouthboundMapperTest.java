@@ -290,7 +290,7 @@ public class SouthboundMapperTest {
             JsonNode jsonNode = mapper.readTree(resourceAsStream);
             System.out.println("jsonNode = " + jsonNode.get("id"));
 
-            DatabaseSchema dbSchema = DatabaseSchema.fromJson(OvsdbSchemaContants.databaseName, jsonNode.get("result"));
+            DatabaseSchema dbSchema = DatabaseSchema.fromJson(OvsdbSchemaContants.DATABASE_NAME, jsonNode.get("result"));
 
             String uuidString = "7da709ff-397f-4778-a0e8-994811272fdb";
             OvsdbBridgeAugmentation omn = new OvsdbBridgeAugmentationBuilder()

@@ -468,10 +468,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         DatabaseSchema dbSchema = null;
         OpenVSwitch openVSwitchRow = null;
         try {
-            dbSchema = connectionInstance.getSchema(OvsdbSchemaContants.databaseName).get();
+            dbSchema = connectionInstance.getSchema(OvsdbSchemaContants.DATABASE_NAME).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Not able to fetch schema for database {} from device {}",
-                    OvsdbSchemaContants.databaseName,connectionInstance.getConnectionInfo(),e);
+                    OvsdbSchemaContants.DATABASE_NAME,connectionInstance.getConnectionInfo(),e);
         }
         if (dbSchema != null) {
             GenericTableSchema openVSwitchSchema = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);

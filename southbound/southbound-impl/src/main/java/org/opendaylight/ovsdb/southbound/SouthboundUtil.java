@@ -70,7 +70,8 @@ public class SouthboundUtil {
             OvsdbNodeRef ref = mn.getManagedBy();
             if (ref != null && ref.getValue() != null) {
                 ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-                @SuppressWarnings("unchecked") // Note: erasure makes this safe in combination with the typecheck below
+                @SuppressWarnings("unchecked")
+                // Note: erasure makes this safe in combination with the typecheck below
                 InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
 
                 CheckedFuture<Optional<Node>, ReadFailedException> nf = transaction.read(

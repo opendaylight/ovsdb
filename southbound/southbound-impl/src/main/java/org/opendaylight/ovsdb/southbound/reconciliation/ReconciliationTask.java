@@ -45,10 +45,10 @@ public abstract class ReconciliationTask implements Runnable {
      * Method contains task reconciliation logic. Please refer to
      * {@link ConnectionReconciliationTask#reconcileConfiguration(OvsdbConnectionManager)}
      * for example.
-     * @param connectionManager Connection manager to get connection instance of the device
+     * @param connectionManagerOfDevice Connection manager to get connection instance of the device
      * @return True if reconciliation was successful, else false
      */
-    public abstract boolean reconcileConfiguration(OvsdbConnectionManager connectionManager);
+    public abstract boolean reconcileConfiguration(OvsdbConnectionManager connectionManagerOfDevice);
 
     /**
      * Extended task should implement the logic that decides whether retry for the task

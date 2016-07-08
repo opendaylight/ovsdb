@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_c44911d2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "I think we should use getId() rather than name, because name can be different the the id that is used in the URI.",
+      "range": {
+        "startLine": 526,
+        "startChar": 87,
+        "endLine": 526,
+        "endChar": 94
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_6423e505",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "why not initialize terminationPointConfigReconciliationService, rather than doing lazy initialization?",
+      "range": {
+        "startLine": 110,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 5
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e44ff590",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "Vinh, at the time of reconciliation there is no way to figure out whether the termination point present in config data store is actually created at the time of bridge creation of after the bridge creation. I think it does not matter at the time of reconciliation. I think we should trigger the termination point whenever we should see bridge in the operational data store, but we should read all the bridge and termination point configuration whenever switch connects to the controller. Do you see any issue with that approach? I think that approach will be cleaner. Thoughts?",
+      "range": {
+        "startLine": 48,
+        "startChar": 3,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c458f158",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "can\u0027t we use the Reconciliation Manager to put this code, rather then creating specific service for termination point only.?",
+      "range": {
+        "startLine": 63,
+        "startChar": 13,
+        "endLine": 63,
+        "endChar": 56
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_842559c4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "i think we should reduce this timeout, probably 30 second or so, because we are basically waiting for the update from single node only.",
+      "range": {
+        "startLine": 66,
+        "startChar": 57,
+        "endLine": 66,
+        "endChar": 59
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_04194988",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "i think each connection reconciliation task should not have reference to the OvsdbConnectionManager, it should pass only the connection instance to the task.",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 58
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e41d3575",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbOperationalCommandAggregator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-08T04:25:58Z",
+      "side": 1,
+      "message": "do we still need this ?",
+      "range": {
+        "startLine": 56,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 5
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -84,16 +84,16 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
      * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
-     * @param updatedQosRows updated {@link Qos} rows
+     * @param newUpdatedQosRows updated {@link Qos} rows
 
      */
     private void updateQos(ReadWriteTransaction transaction,
-                                  Map<UUID, Qos> updatedQosRows) {
+                                  Map<UUID, Qos> newUpdatedQosRows) {
 
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            for (Entry<UUID, Qos> entry : updatedQosRows.entrySet()) {
+            for (Entry<UUID, Qos> entry : newUpdatedQosRows.entrySet()) {
                 Qos qos = entry.getValue();
                 QosEntriesBuilder qosEntryBuilder = new QosEntriesBuilder();
                 qosEntryBuilder.setQosId(new Uri(getQosId(qos)));

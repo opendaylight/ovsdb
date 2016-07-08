@@ -73,16 +73,16 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
-     * @param updatedManagerRows updated {@link Manager} rows
-     * @param updatedOpenVSwitchRows updated {@link OpenVSwitch} rows
+     * @param newUpdatedManagerRows updated {@link Manager} rows
+     * @param newUpdatedOpenVSwitchRows updated {@link OpenVSwitch} rows
      */
     private void updateManagers(ReadWriteTransaction transaction,
-                                  Map<UUID, Manager> updatedManagerRows,
-                                  Map<UUID, OpenVSwitch> updatedOpenVSwitchRows) {
+                                  Map<UUID, Manager> newUpdatedManagerRows,
+                                  Map<UUID, OpenVSwitch> newUpdatedOpenVSwitchRows) {
 
-        for (Map.Entry<UUID, OpenVSwitch> ovsdbNodeEntry : updatedOpenVSwitchRows.entrySet()) {
+        for (Map.Entry<UUID, OpenVSwitch> ovsdbNodeEntry : newUpdatedOpenVSwitchRows.entrySet()) {
             final List<ManagerEntry> managerEntries =
-                    SouthboundMapper.createManagerEntries(ovsdbNodeEntry.getValue(), updatedManagerRows);
+                    SouthboundMapper.createManagerEntries(ovsdbNodeEntry.getValue(), newUpdatedManagerRows);
             LOG.debug("Update Ovsdb Node : {} with manager entries : {}",
                     ovsdbNodeEntry.getValue(), managerEntries);
             for (ManagerEntry managerEntry : managerEntries) {
@@ -105,17 +105,17 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
-     * @param updatedManagerRows updated {@link Manager} rows
+     * @param newUpdatedManagerRows updated {@link Manager} rows
 
      */
     private void updateManagers(ReadWriteTransaction transaction,
-                                  Map<Uri, Manager> updatedManagerRows) {
+                                  Map<Uri, Manager> newUpdatedManagerRows) {
 
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
             final List<ManagerEntry> managerEntries =
-                    SouthboundMapper.createManagerEntries(ovsdbNode.get(), updatedManagerRows);
+                    SouthboundMapper.createManagerEntries(ovsdbNode.get(), newUpdatedManagerRows);
 
             LOG.debug("Update Ovsdb Node : {} with manager entries : {}",
                     ovsdbNode.get(), managerEntries);

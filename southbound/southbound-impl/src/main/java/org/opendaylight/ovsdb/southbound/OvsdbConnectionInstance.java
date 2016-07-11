@@ -240,7 +240,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
             try {
                 List<OperationResult> got = result.get();
                 LOG.debug("OVSDB transaction result: {}", got);
-            } catch (Exception e) {
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Transact execution exception: ", e);
             }
             LOG.trace("invoke exit tb: {}", txBuilder);

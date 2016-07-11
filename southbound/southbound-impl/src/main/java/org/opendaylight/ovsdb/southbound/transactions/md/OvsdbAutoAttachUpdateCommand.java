@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -74,25 +75,27 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 //                Uri uri = new Uri(getAutoAttachId(autoAttach));
 
                 Autoattach currentAutoattach = null;
-                try {
-                    final InstanceIdentifier<Autoattach> currentIid = nodeIId
-                            .augmentation(OvsdbNodeAugmentation.class)
-                            .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
-                                    .getUuidColumn().getData().toString())));
-                    // FIXME: To be uncommented and replaced to currentIid when
-                    // Open vSwitch supports external_ids column
+                if (oldAutoAttach.getUuidColumn() != null) {
+                    try {
+                        final InstanceIdentifier<Autoattach> currentIid = nodeIId
+                                .augmentation(OvsdbNodeAugmentation.class)
+                                .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
+                                        .getUuidColumn().getData().toString())));
+                        // FIXME: To be uncommented and replaced to currentIid when
+                        // Open vSwitch supports external_ids column
 //                    InstanceIdentifier<Autoattach> currentIid = nodeIId
 //                            .augmentation(OvsdbNodeAugmentation.class)
 //                            .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
 //                                    .getExternalIdsColumn().getData()
 //                                    .get(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY))));
-                    final Optional<Autoattach> optionalAutoattach =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid).checkedGet();
-                    if (optionalAutoattach.isPresent()) {
-                        currentAutoattach = optionalAutoattach.get();
+                        final Optional<Autoattach> optionalAutoattach =
+                                transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid).checkedGet();
+                        if (optionalAutoattach.isPresent()) {
+                            currentAutoattach = optionalAutoattach.get();
+                        }
+                    } catch (final ReadFailedException e) {
+                        LOG.debug("AutoAttach table entries not found in operational datastore, need to create it.", e);
                     }
-                } catch (final Exception e) {
-                    LOG.debug("AutoAttach table entries not found in operational datastore, need to create it.", e);
                 }
 
                 final AutoattachBuilder autoAttachBuilder =

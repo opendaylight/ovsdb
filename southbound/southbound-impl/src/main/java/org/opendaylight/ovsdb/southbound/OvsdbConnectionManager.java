@@ -317,7 +317,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 LOG.warn("Found non-topological node {} on path {}",optional);
                 return null;
             }
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to get Ovsdb Node {}",nodePath, e);
             return null;
         }

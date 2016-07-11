@@ -12,7 +12,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -101,7 +104,7 @@ public class SouthboundUtil {
                 LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}", mn);
                 return Optional.absent();
             }
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}", mn, e);
             return Optional.absent();
         }
@@ -121,19 +124,23 @@ public class SouthboundUtil {
     private static String getLocalControllerHostIpAddress() {
         String ipaddress = null;
         try {
-            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
-                 ifaces.hasMoreElements();) {
-                NetworkInterface iface = ifaces.nextElement();
+            Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+            if (ifaces != null) {
+                while (ifaces.hasMoreElements()) {
+                    NetworkInterface iface = ifaces.nextElement();
 
-                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                    InetAddress inetAddr = inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
-                        ipaddress = inetAddr.getHostAddress();
-                        break;
+                    for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                        InetAddress inetAddr = inetAddrs.nextElement();
+                        if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
+                            ipaddress = inetAddr.getHostAddress();
+                            break;
+                        }
                     }
                 }
+            } else {
+                LOG.warn("Local Host don't have any associated IP address");
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             LOG.warn("Exception while fetching local host ip address ",e);
         }
         return ipaddress;

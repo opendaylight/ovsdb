@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -120,7 +121,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
             } else {
                 transaction.cancel();
             }
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Error initializing ovsdb topology", e);
         }
     }
@@ -137,7 +138,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
             } else {
                 transaction.cancel();
             }
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Error initializing ovsdb topology", e);
         }
     }

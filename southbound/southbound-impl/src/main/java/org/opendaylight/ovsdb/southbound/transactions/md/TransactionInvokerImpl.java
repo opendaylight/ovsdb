@@ -95,7 +95,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                         }
                     });
                 }
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
                 LOG.warn("Exception invoking Transaction: ", e);
             }
         }

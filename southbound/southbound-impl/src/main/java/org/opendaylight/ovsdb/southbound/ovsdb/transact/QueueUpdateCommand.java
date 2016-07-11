@@ -107,6 +107,8 @@ public class QueueUpdateCommand implements TransactCommand {
                 UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
                         + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
                 transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
+                LOG.info("Added queue Uuid : {} for Ovsdb Node : {}",
+                        namedUuid, operNode);
             } else {
                 UUID uuid = new UUID(operQueueUuid.getValue());
                 Queue extraQueue = TyperUtils.getTypedRowWrapper(
@@ -114,6 +116,8 @@ public class QueueUpdateCommand implements TransactCommand {
                 extraQueue.getUuidColumn().setData(uuid);
                 transaction.add(op.update(queue)
                         .where(extraQueue.getUuidColumn().getSchema().opEqual(uuid)).build());
+                LOG.info("Updated queue entries: {} for Ovsdb Node : {}",
+                        queue, operNode);
             }
             transaction.build();
         }

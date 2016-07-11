@@ -66,7 +66,7 @@ public class SouthboundProvider implements AutoCloseable {
 
         SouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
                 bindingNormalizedNodeSerializer));
-        LOG.info("SouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
+        LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
     }
 
     /**

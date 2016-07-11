@@ -86,6 +86,7 @@ public class QueueRemovedCommand implements TransactCommand {
                                         .where(queue.getUuidColumn().getSchema().opEqual(
                                                 new UUID(queueUuid.getValue())))
                                         .build());
+                                LOG.info("Deleted queue Uuid : {}  for the  Ovsdb Node  : {}", queueUuid, operNode);
                             } else {
                                 LOG.warn("Unable to delete Queue{} for node {} because it was not found in the "
                                         + "operational store, and thus we cannot retrieve its UUID",

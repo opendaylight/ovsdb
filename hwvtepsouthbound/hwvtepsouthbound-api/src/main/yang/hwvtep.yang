@@ -5,7 +5,7 @@ module hwvtep {
 
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
     import yang-ext { prefix "ext"; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
     import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
     import opendaylight-l2-types { prefix ethertype; revision-date "2013-08-27";}
 

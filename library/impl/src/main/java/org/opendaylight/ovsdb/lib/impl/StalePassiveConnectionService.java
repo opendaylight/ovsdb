@@ -66,7 +66,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
                         for (OvsdbClient client : clientFutureMap.keySet()) {
                             Future<?> clientFuture = clientFutureMap.get(client);
                             if ( !clientFuture.isDone() && !clientFuture.isCancelled()) {
-                                clientFuture.cancel(true);
+                                clientFuture.cancel(false);
                             }
                             if (client.isActive()) {
                                 client.disconnect();
@@ -123,7 +123,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
                 clientFutureMap.remove(cbForClient);
                 if (clientFutureMap.isEmpty()) {
                     if (!echoTimeoutFuture.isDone() && !echoTimeoutFuture.isCancelled()) {
-                        echoTimeoutFuture.cancel(true);
+                        echoTimeoutFuture.cancel(false);
                     }
                     OvsdbConnectionService.notifyListenerForPassiveConnection(newClient);
                     pendingConnectionClients.remove(newClient);
@@ -132,7 +132,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
 
             @Override
             public void onFailure(Throwable throwable) {
-                LOG.error("Error in checking stale connections)", throwable);
+                LOG.error("Error in checking stale connections", throwable);
             }
         };
     }

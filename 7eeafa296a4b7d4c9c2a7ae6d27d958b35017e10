@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_faf77357",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 5444
+      },
+      "writtenOn": "2016-07-13T23:40:51Z",
+      "side": 1,
+      "message": "Hi Anil,\n\njust to clarify, is your proposal to have a DTCL that is always listening to the Operational DS for bridge creation?\nThen anytime a bridge is added to Operational DS, we can trigger Termination EndPoint (TEP) reconciliation?\nThe current bridge reconciliation stays the same since it is essentially Bridge + TEP configuration.\n\nIf yes, I think this approach also works.",
+      "parentUuid": "9a561d44_e44ff590",
+      "range": {
+        "startLine": 48,
+        "startChar": 3,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c458f158",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
         "patchSetId": 5

@@ -61,7 +61,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
-        LOG.info("SouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
+        LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
     }
 
     @Override

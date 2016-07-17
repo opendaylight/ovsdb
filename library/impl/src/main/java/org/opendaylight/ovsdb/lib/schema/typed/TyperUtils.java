@@ -345,7 +345,7 @@ public class TyperUtils {
             }
 
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
                 if (isGetTableSchema(method)) {
                     return processGetTableSchema();
                 } else if (isGetRow(method)) {
@@ -390,10 +390,10 @@ public class TyperUtils {
 
             @Override public String toString() {
                 String tableName;
-                try {
-                    TableSchema<?> schema = (TableSchema<?>)processGetTableSchema();
+                TableSchema<?> schema = (TableSchema<?>)processGetTableSchema();
+                if (schema != null) {
                     tableName = schema.getName();
-                } catch (Exception e) {
+                } else {
                     tableName = "";
                 }
                 if (row == null) {

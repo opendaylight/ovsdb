@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -64,7 +65,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         try {
             Constructor<E> instance = clazz.getConstructor(TableSchema.class);
             return instance.newInstance(this);
-        } catch (Exception e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException("exception constructing instance of clazz " + clazz, e);
         }
     }

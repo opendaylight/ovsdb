@@ -74,7 +74,7 @@ public class JsonRpcEndpoint {
 
         return Reflection.newProxy(klazz, new InvocationHandler() {
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
                 if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
                     if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) {
                         return false;

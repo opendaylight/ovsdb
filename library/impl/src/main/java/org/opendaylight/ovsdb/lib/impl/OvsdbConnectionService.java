@@ -142,10 +142,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
             return getChannelClient(channel, ConnectionType.ACTIVE, SocketConnectionType.SSL);
-        } catch (InterruptedException e) {
+        } catch (IllegalStateException | InterruptedException | NullPointerException
+                | UnsupportedOperationException e) {
             LOG.warn("Thread was interrupted during connect", e);
-        } catch (Exception e) {
-            LOG.warn("bootstrap.connect failed", e);
         }
         return null;
     }
@@ -327,7 +326,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 public final Channel channel;
                 private int retryTimes;
 
-                public HandleNewPassiveSslRunner(Channel channel, SslHandler sslHandler) {
+                HandleNewPassiveSslRunner(Channel channel, SslHandler sslHandler) {
                     this.channel = channel;
                     this.sslHandler = sslHandler;
                     this.retryTimes = 3;

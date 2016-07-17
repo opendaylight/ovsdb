@@ -345,7 +345,7 @@ public class TyperUtils {
             }
 
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
                 if (isGetTableSchema(method)) {
                     return processGetTableSchema();
                 } else if (isGetRow(method)) {
@@ -393,7 +393,7 @@ public class TyperUtils {
                 try {
                     TableSchema<?> schema = (TableSchema<?>)processGetTableSchema();
                     tableName = schema.getName();
-                } catch (Exception e) {
+                } catch (IllegalArgumentException | NullPointerException e) {
                     tableName = "";
                 }
                 if (row == null) {

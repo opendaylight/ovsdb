@@ -247,6 +247,14 @@ public class DockerOvs implements AutoCloseable {
     }
 
     /**
+     * Are we using some other OVS, not a docker we spin up?
+     * @return true if we are *not* running a docker image to test against
+     */
+    public boolean usingExternalDocker() {
+        return !runDocker;
+    }
+
+    /**
      * Get the IP address of the n'th OVS.
      * @param ovsNumber which OVS?
      * @return IP string

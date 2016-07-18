@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2016 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,8 +14,11 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdk;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkr;
@@ -57,6 +61,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow14;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow15;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeSecure;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeStandalone;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -64,12 +70,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
@@ -104,6 +113,8 @@ public class SouthboundUtils {
     public static short OPENFLOW_PORT = 6653;
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
+    private static final String DISABLE_IN_BAND = "disable-in-band";
+    private static final String PATCH_PORT_TYPE = "patch";
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
@@ -137,6 +148,12 @@ public class SouthboundUtils {
             .put(OvsdbBridgeProtocolOpenflow13.class,"OpenFlow13")
             .put(OvsdbBridgeProtocolOpenflow14.class,"OpenFlow14")
             .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
+            .build();
+
+    private static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP
+            = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
+            .put(OvsdbFailModeStandalone.class,"standalone")
+            .put(OvsdbFailModeSecure.class,"secure")
             .build();
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
@@ -560,6 +577,53 @@ public class SouthboundUtils {
         return result;
     }
 
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
+                             final Class<? extends DatapathTypeBase> dpType, String mac) {
+        boolean result;
+
+        LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
+        if (connectionInfo != null) {
+            NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+            InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+            NodeId bridgeNodeId = createManagedNodeId(bridgeIid);
+            bridgeNodeBuilder.setNodeId(bridgeNodeId);
+            OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(controllersStr));
+            ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
+            ovsdbBridgeAugmentationBuilder.setFailMode( OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
+            BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
+            bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(DISABLE_IN_BAND);
+            bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
+            List<BridgeOtherConfigs> bridgeOtherConfigsList = new ArrayList<>();
+            bridgeOtherConfigsList.add(bridgeOtherConfigsBuilder.build());
+            if (mac != null) {
+                BridgeOtherConfigsBuilder macOtherConfigBuilder = new BridgeOtherConfigsBuilder();
+                macOtherConfigBuilder.setBridgeOtherConfigKey("hwaddr");
+                macOtherConfigBuilder.setBridgeOtherConfigValue(mac);
+                bridgeOtherConfigsList.add(macOtherConfigBuilder.build());
+            }
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(bridgeOtherConfigsList);
+            setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
+            if (dpType != null) {
+                ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
+            }
+            if (isOvsdbNodeDpdk(ovsdbNode)) {
+                ovsdbBridgeAugmentationBuilder.setDatapathType(DatapathTypeNetdev.class);
+            }
+            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+
+            Node node = bridgeNodeBuilder.build();
+            result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, bridgeIid, node);
+            LOG.info("addBridge: result: {}", result);
+        } else {
+            throw new InvalidParameterException("Could not find ConnectionInfo");
+        }
+        return result;
+    }
+
+
     private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);
@@ -616,7 +680,56 @@ public class SouthboundUtils {
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String portName, String type) {
-        return addTerminationPoint(bridgeNode, portName, type, null, null);
+        return addTerminationPoint(bridgeNode, portName, type, Collections.EMPTY_MAP, null);
+    }
+
+    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
+                                       String type, Map<String, String> options) {
+        InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(
+                bridgeNode, portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+
+        tpAugmentationBuilder.setName(portName);
+        if (type != null) {
+            tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
+        }
+
+        List<Options> optionsList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : options.entrySet()) {
+            OptionsBuilder optionsBuilder = new OptionsBuilder();
+            optionsBuilder.setKey(new OptionsKey(entry.getKey()));
+            optionsBuilder.setOption(entry.getKey());
+            optionsBuilder.setValue(entry.getValue());
+            optionsList.add(optionsBuilder.build());
+        }
+        tpAugmentationBuilder.setOptions(optionsList);
+
+        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+        /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
+        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+    }
+
+    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
+        InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+
+        tpAugmentationBuilder.setName(portName);
+        if (type != null) {
+            tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
+        }
+        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+    }
+
+    public Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
+        Map<String, String> option = new HashMap<>();
+        option.put("peer", peerPortName);
+        return addTerminationPoint(node, bridgeName, portName, PATCH_PORT_TYPE, option);
     }
 
     private String getControllerIPAddress() {
@@ -766,4 +879,104 @@ public class SouthboundUtils {
         }
         return datapathId;
     }
+
+    public String extractBridgeName(Node node) {
+        return node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
+    }
+
+    public boolean isBridgeOnOvsdbNode(Node ovsdbNode, String bridgeName) {
+        boolean found = false;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = extractNodeAugmentation(ovsdbNode);
+        if (ovsdbNodeAugmentation != null) {
+            List<ManagedNodeEntry> managedNodes = ovsdbNodeAugmentation.getManagedNodeEntry();
+            if (managedNodes != null) {
+                for (ManagedNodeEntry managedNode : managedNodes) {
+                    InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
+                    if (bridgeIid.toString().contains(bridgeName)) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
+    public OvsdbBridgeAugmentation getBridgeFromConfig(Node node, String bridge) {
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
+        InstanceIdentifier<Node> bridgeIid =
+                createInstanceIdentifier(node.getKey(), bridge);
+        Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, bridgeIid);
+        if (bridgeNode != null) {
+            ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        }
+        return ovsdbBridgeAugmentation;
+    }
+
+    private void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                                       NodeKey ovsdbNodeKey) {
+        InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(ovsdbNodeKey.getNodeId());
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+    }
+
+    public boolean isOvsdbNodeDpdk(Node ovsdbNode) {
+        boolean found = false;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = extractNodeAugmentation(ovsdbNode);
+        if (ovsdbNodeAugmentation != null) {
+            List<InterfaceTypeEntry> ifTypes = ovsdbNodeAugmentation.getInterfaceTypeEntry();
+            if (ifTypes != null) {
+                for (InterfaceTypeEntry ifType : ifTypes) {
+                    if (ifType.getInterfaceType().equals(InterfaceTypeDpdk.class)) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
+    private List<ControllerEntry> createControllerEntries(List<String> controllersStr) {
+        List<ControllerEntry> controllerEntries = new ArrayList<>();
+        if (controllersStr != null) {
+            for (String controllerStr : controllersStr) {
+                ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
+                controllerEntryBuilder.setTarget(new Uri(controllerStr));
+                controllerEntries.add(controllerEntryBuilder.build());
+            }
+        }
+        return controllerEntries;
+    }
+
+    public OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {
+        if (bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+            List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(bridgeNode);
+            for (OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation : tpAugmentations) {
+                if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                    return ovsdbTerminationPointAugmentation;
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<OvsdbTerminationPointAugmentation> extractTerminationPointAugmentations( Node node ) {
+        List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<>();
+        if (node == null) {
+            LOG.error("extractTerminationPointAugmentations: Node value is null");
+            return Collections.<OvsdbTerminationPointAugmentation>emptyList();
+        }
+        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()){
+            for(TerminationPoint tp : terminationPoints){
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null) {
+                    tpAugmentations.add(ovsdbTerminationPointAugmentation);
+                }
+            }
+        }
+        return tpAugmentations;
+    }
+
 }

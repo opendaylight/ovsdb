@@ -107,10 +107,11 @@ public class DockerOvs implements AutoCloseable {
     private static final String DEFAULT_DOCKER_FILE = "docker-ovs-2.5.1.yml";
     private static final String DOCKER_FILE_PATH = "META-INF/docker-compose-files/";
     private static final int COMPOSE_FILE_IDX = 3;
+    private static final int COMPOSE_FILE_IDX_NO_SUDO = 2;
     private static final String DEFAULT_OVSDB_HOST = "127.0.0.1";
-    private static final String[] PS_CMD = {"sudo", "docker-compose", "ps"};
-    private static final String[] PS_CMD_NO_SUDO = {"docker-compose", "ps"};
 
+    private String[] psCmd = {"sudo", "docker-compose", "-f", null, "ps"};
+    private String[] psCmdNoSudo = {"docker-compose", "-f", null, "ps"};
     private String[] upCmd = {"sudo", "docker-compose", "-f", null, "up", "-d", "--force-recreate"};
     private String[] downCmd = {"sudo", "docker-compose", "-f", null, "stop"};
     private String[] execCmd = {"sudo", "docker-compose", "-f", null, "exec", null};
@@ -226,11 +227,13 @@ public class DockerOvs implements AutoCloseable {
      * @throws InterruptedException If this thread is interrupted
      */
     private void buildDockerComposeCommands() throws IOException, InterruptedException {
+        psCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
+        psCmdNoSudo[COMPOSE_FILE_IDX_NO_SUDO] = tmpDockerComposeFile.toString();
         upCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
         downCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
         execCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
 
-        if (0 == ProcUtils.tryProcess(5000, PS_CMD_NO_SUDO)) {
+        if (0 == ProcUtils.tryProcess(5000, psCmdNoSudo)) {
             LOG.info("DockerOvs.buildDockerComposeCommands docker-compose does not require sudo");
             String[] tmp;
             tmp = Arrays.copyOfRange(upCmd, 1, upCmd.length);
@@ -239,7 +242,7 @@ public class DockerOvs implements AutoCloseable {
             downCmd = tmp;
             tmp = Arrays.copyOfRange(execCmd, 1, execCmd.length);
             execCmd = tmp;
-        } else if (0 == ProcUtils.tryProcess(5000, PS_CMD)) {
+        } else if (0 == ProcUtils.tryProcess(5000, psCmd)) {
             LOG.info("DockerOvs.buildDockerComposeCommands docker-compose requires sudo");
         } else {
             Assert.fail("docker-compose does not seem to work with or without sudo");

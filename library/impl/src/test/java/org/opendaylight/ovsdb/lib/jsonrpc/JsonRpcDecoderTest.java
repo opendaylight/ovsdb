@@ -10,12 +10,12 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 import static io.netty.buffer.Unpooled.copiedBuffer;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderException;
 import io.netty.util.CharsetUtil;
 import java.net.URL;
+import java.util.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,9 +37,9 @@ public class JsonRpcDecoderTest {
         ch = new EmbeddedChannel(decoder);
 
         URL testJsonUrl = Resources.getResource(JsonRpcDecoderTest.class, "test.json");
-        testJson = Resources.toString(testJsonUrl, Charsets.UTF_8);
+        testJson = Resources.toString(testJsonUrl, StandardCharsets.UTF_8);
         URL prettyTestJsoUrl = Resources.getResource(JsonRpcDecoderTest.class, "pretty-test.json");
-        prettyTestJson = Resources.toString(prettyTestJsoUrl, Charsets.UTF_8);
+        prettyTestJson = Resources.toString(prettyTestJsoUrl, StandardCharsets.UTF_8);
     }
 
     /**

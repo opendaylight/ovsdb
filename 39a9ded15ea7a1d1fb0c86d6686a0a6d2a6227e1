@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_44467824",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-07-18T09:21:36Z",
+      "side": 1,
+      "message": "I would generally almost never catch NullPointerException .. are you 100% sure that this is one of the rare cases where this is just justified? Why?  If one of the methods called in the block actually has a throws NullPointerException declaration, then I would consider that a bug in that method.",
+      "revId": "39a9ded15ea7a1d1fb0c86d6686a0a6d2a6227e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0463e0b1",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-07-18T09:21:36Z",
+      "side": 1,
+      "message": "Just for clarity for future log readers, I would actually keep two separate catch blocks in this case, one for the InterruptedException and one for the IllegalStateException and the UnsupportedOperationException together, if you must catch those.  The reason is that it could be misleading to read \"Thread was interrupted during connect\" in logs when actually there was no InterruptedException, but some other problem.",
+      "revId": "39a9ded15ea7a1d1fb0c86d6686a0a6d2a6227e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_846ed094",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-07-18T09:21:36Z",
+      "side": 1,
+      "message": "I\u0027m not sure I would catch IllegalArgumentException here.. as far as I can tell from a brief look through the code, this is probably because DatabaseSchema transforms a NoSuchMethodException into an IllegalArgumentException if \"Class %s does not have public constructor that accepts TableSchema object\" ? But isn\u0027t that a programming, that needs to be seen and fixed during development? This catch will make us silently ignore and never see \u0026 forget about that. From the little I understand, I don\u0027t think that is a Good Thing?\n\nI would generally almost never catch NullPointerException .. are you 100% sure that this is one of the rare cases where this is just justified? Why?   If this is just to catch the case where schema may be null, then I would consider an explicit if (schema !\u003d null) { tableName \u003d schema.getName(); } else { tableName \u003d \"\" } a much cleaner solution.",
+      "revId": "39a9ded15ea7a1d1fb0c86d6686a0a6d2a6227e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a561d44_a747914a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbMonitorCallback.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "submitted by mistake, will reverse to the original",
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c44911d2",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 5
@@ -25,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_0728fd84",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "will change to:\n  tp.getTpId()\n\ninstead of:\n  new TpId(ovsdbTerminationPointAugmentation.getName())",
+      "parentUuid": "9a561d44_c44911d2",
+      "range": {
+        "startLine": 526,
+        "startChar": 87,
+        "endLine": 526,
+        "endChar": 94
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_6423e505",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
         "patchSetId": 5
@@ -36,6 +77,30 @@
       "writtenOn": "2016-07-08T04:25:58Z",
       "side": 1,
       "message": "why not initialize terminationPointConfigReconciliationService, rather than doing lazy initialization?",
+      "range": {
+        "startLine": 110,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 5
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_87140d45",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "I try to avoid passing \u0027this\u0027 inside constructor code. But I think there is no harm initializing terminationPointConfigReconciliationService in the constructor since it is not exposed to other thread.\nI am OK either way, please comment.",
+      "parentUuid": "9a561d44_6423e505",
       "range": {
         "startLine": 110,
         "startChar": 4,
@@ -95,6 +160,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_04c91b26",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "Hi Anil, we do know at termination point reconciliation, only TEP config for existing bridges (scenario 2) is handled. \n\nThe scenario 1, where the Termination Point are created at bridge creation, is handled by BridgeConfigReconciliationTask (line 149 in submitted code).\n\nThe nodes with only termination point configurations and without bridge augmentation (scenario 2 - termination points for existing bridges) are added to the list of bridge nodes that will be monitored for appearance in Operational DS and triggering termination point reconciliation accordingly (BridgeConfigReconciliationTask.java:92-95)\n\nThis class is to handle the termination point reconciliation for the list of termination points that are created for existing bridges as described above.\n\nI handle scenario 1 in BridgeConfigReconciliationTask because we have all the information to reconcile whole bridge and TEP configuration in one transaction. There is no need to trigger TerminationPointReconciliationTask.\n\nFor scenario 2, we have no other choice but to triggered the TerminationPointReconciliationTask.\n\n\nI think your suggestion is to handle both scenario 1 and 2 in this class. The list of bridge nodes to monitor consists of all bridge and termination configurations found in the config DS. I have no problem with that approach. It is a small change from my current solution. \nIt does looks cleaner in that we handle all TEP reconciliation in one place. But I feel that we would trigger the TEP reconciliation process unnecessarily if we only have to deal with scenario #1.\n\nPlease comment.",
+      "parentUuid": "9a561d44_e44ff590",
+      "range": {
+        "startLine": 48,
+        "startChar": 3,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c458f158",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
         "patchSetId": 5
@@ -106,6 +195,30 @@
       "writtenOn": "2016-07-08T04:25:58Z",
       "side": 1,
       "message": "can\u0027t we use the Reconciliation Manager to put this code, rather then creating specific service for termination point only.?",
+      "range": {
+        "startLine": 63,
+        "startChar": 13,
+        "endLine": 63,
+        "endChar": 56
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_446f93fd",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "You mean adding the logic of this class in the ReconciliationManager? It can be done. But I would like to put logic for handling specific scenario in its own class rather than clustering ReconciliationManager class.",
+      "parentUuid": "9a561d44_c458f158",
       "range": {
         "startLine": 63,
         "startChar": 13,
@@ -141,6 +254,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_6473b7e7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "OK, will reduce to 30 seconds",
+      "parentUuid": "9a561d44_842559c4",
+      "range": {
+        "startLine": 66,
+        "startChar": 57,
+        "endLine": 66,
+        "endChar": 59
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_04194988",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
         "patchSetId": 5
@@ -164,6 +301,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_a73031e9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "The connection reconciliation task call OvsdbConnectionManager.connect() at line 50.\nThe reason I made the change to move the  OvsdbConnectionManager attribute from the super class ReconciliationTask to the ConnectionReconciliationTask because only the latter needs to reference the former.\nThe other subclasses of ReconciliationTask such as Bridge/TerminationPointConfigReconciliationTask don\u0027t use OvsdbConnectionManager.",
+      "parentUuid": "9a561d44_04194988",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 58
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_e41d3575",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbOperationalCommandAggregator.java",
         "patchSetId": 5
@@ -175,6 +336,30 @@
       "writtenOn": "2016-07-08T04:25:58Z",
       "side": 1,
       "message": "do we still need this ?",
+      "range": {
+        "startLine": 56,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 5
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c74c4573",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbOperationalCommandAggregator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T01:17:18Z",
+      "side": 1,
+      "message": "oops sorry, there should be no changes in this file. I\u0027ll reverse to the original.",
+      "parentUuid": "9a561d44_e41d3575",
       "range": {
         "startLine": 56,
         "startChar": 3,

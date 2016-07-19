@@ -37,7 +37,7 @@ public class TransactInvokerImpl implements TransactInvoker {
     @Override
     public void invoke(TransactCommand command, BridgeOperationalState state,
                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
-        TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
+        TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb, state, events);
         invoke(command, tb);
     }
@@ -45,7 +45,7 @@ public class TransactInvokerImpl implements TransactInvoker {
     @Override
     public void invoke(TransactCommand command, BridgeOperationalState state,
                        Collection<DataTreeModification<Node>> modifications) {
-        TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
+        TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb, state, modifications);
         invoke(command, tb);
     }

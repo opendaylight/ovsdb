@@ -268,17 +268,6 @@ public class OvsdbConnectionInstanceTest {
                 ovsdbConnectionInstance.unLock(anyString()));
         verify(client).unLock(anyString());
 
-        // test startEchoService()
-        EchoServiceCallbackFilters echoServiceCallbackFilters = mock(EchoServiceCallbackFilters.class);
-        doNothing().when(client).startEchoService(any(EchoServiceCallbackFilters.class));
-        ovsdbConnectionInstance.startEchoService(echoServiceCallbackFilters);
-        verify(client).startEchoService(any(EchoServiceCallbackFilters.class));
-
-        // test stopEchoService()
-        doNothing().when(client).stopEchoService();
-        ovsdbConnectionInstance.stopEchoService();
-        verify(client).stopEchoService();
-
         // test isActive()
         when(client.isActive()).thenReturn(true);
         assertEquals("Error, does not match isActive()", true, ovsdbConnectionInstance.isActive());

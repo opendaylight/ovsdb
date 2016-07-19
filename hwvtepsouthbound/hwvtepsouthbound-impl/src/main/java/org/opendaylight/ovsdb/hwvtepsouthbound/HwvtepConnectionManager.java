@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -70,6 +72,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private Map<ConnectionInfo, HwvtepConnectionInstance> clients = new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionManager.class);
     private static final String ENTITY_TYPE = "hwvtep";
+    private static final int DB_FETCH_TIMEOUT = 1000;
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
@@ -94,29 +97,30 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             hwvtepDeviceEntityOwnershipListener.close();
         }
 
-        for (OvsdbClient client: clients.values()) {
+        for (HwvtepConnectionInstance client: clients.values()) {
             client.disconnect();
         }
     }
 
     @Override
-    public void connected(@Nonnull final OvsdbClient client) {
+    public void connected(@Nonnull final OvsdbClient externalClient) {
         LOG.info("Library connected {} from {}:{} to {}:{}",
-                client.getConnectionInfo().getType(),
-                client.getConnectionInfo().getRemoteAddress(),
-                client.getConnectionInfo().getRemotePort(),
-                client.getConnectionInfo().getLocalAddress(),
-                client.getConnectionInfo().getLocalPort());
+                externalClient.getConnectionInfo().getType(),
+                externalClient.getConnectionInfo().getRemoteAddress(),
+                externalClient.getConnectionInfo().getRemotePort(),
+                externalClient.getConnectionInfo().getLocalAddress(),
+                externalClient.getConnectionInfo().getLocalPort());
         List<String> databases = new ArrayList<>();
         try {
-            databases = client.getDatabases().get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Unable to fetch database list");
-        }
-
-        if(databases.contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {
-            HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(client);
-            registerEntityForOwnership(hwClient);
+            databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
+            if(databases.contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {
+                HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(externalClient);
+                registerEntityForOwnership(hwClient);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOG.warn("Unable to fetch Database list from device {}. Disconnecting from the device.",
+                    externalClient.getConnectionInfo().getRemoteAddress(), e);
+            externalClient.disconnect();
         }
     }
 
@@ -275,7 +279,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public OvsdbClient getClient(ConnectionInfo connectionInfo) {
-        return getConnectionInstance(connectionInfo);
+        return getConnectionInstance(connectionInfo).getOvsdbClient();
     }
 
     private void registerEntityForOwnership(HwvtepConnectionInstance hwvtepConnectionInstance) {

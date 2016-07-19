@@ -8,7 +8,12 @@
 package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.collect.ImmutableBiMap;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
@@ -129,10 +134,30 @@ public class SouthboundConstants {
             .put(DatapathTypeSystem.class,"system")
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
+
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
     public static final String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";
     public static final String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
     public static final String AUTOATTACH_ID_EXTERNAL_ID_KEY = "opendaylight-autoattach-id";
+
+    public static final ImmutableMap<String,String> SKIP_OVSDB_TABLE
+            = new ImmutableMap.Builder<String,String>()
+            .put("Flow_Table","Update callback registration for Flow Table is skipped")
+            .put("Mirror","Update callback registration for Mirror Table is skipped")
+            .put("NetFlow","Update callback registration for NetFlow Table is skipped")
+            .put("sFlow","Update callback registration for sFlow Table is skipped")
+            .put("IPFIX","Update callback registration for IPFIX Table is skipped")
+            .put("Flow_Sample_Collector_Set","Update callback registration for "
+                    + "Flow_Sample_Collector_Set Table is skipped")
+            .build();
+
+    public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
+            = new ImmutableMap.Builder<String,List<String>>()
+            .put("Open_vSwitch", Arrays.asList(new String[]{"statistics"}))
+            .put("Port", Arrays.asList(new String[]{"statistics"}))
+            .put("Interface", Arrays.asList(new String[]{"statistics"}))
+            .put("Controller", Arrays.asList(new String[]{"status"}))
+            .build();
 
     public enum VlanModes {
         ACCESS("access"),

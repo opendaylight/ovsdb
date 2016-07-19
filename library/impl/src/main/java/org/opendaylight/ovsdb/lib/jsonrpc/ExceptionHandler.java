@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -27,22 +28,27 @@ public class ExceptionHandler extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if ((cause instanceof InvalidEncodingException)
-                || (cause instanceof TooLongFrameException)) {
-            ctx.channel().disconnect();
-        }
+        if (ctx.channel().isActive()) {
+            LOG.error("Exception occurred while processing connection pipeline", cause);
+            if ((cause instanceof InvalidEncodingException)
+                    || (cause instanceof TooLongFrameException || (cause instanceof DecoderException))) {
+                LOG.info("Disconnecting channel to ovsdb {}", ctx.channel());
+                ctx.channel().disconnect();
+                return;
+            }
+
         /* In cases where a connection is quickly established and the closed
-        Catch the IOException and close the channel
+        Catch the IOException and close the channel. Similarly if the peer is
+        powered off, Catch the read time out exception and close the channel
          */
-        if (cause instanceof IOException) {
-            ctx.channel().close();
-        }
-        /* In cases where the peer is power off
-         * Catch the read time out exception and close the channel
-         */
-        if (cause instanceof ReadTimeoutException) {
-            LOG.debug("Read timeout exception: close connection {}", ctx.channel());
-            ctx.channel().close();
+            if ((cause instanceof IOException ) || (cause instanceof ReadTimeoutException)) {
+                LOG.info("Closing channel to ovsdb {}", ctx.channel());
+                ctx.channel().close();
+                return;
+            }
+
+            LOG.error("Exception was not handled by the exception handler, re-throwing it for next handler");
+            ctx.fireExceptionCaught(cause);
         }
     }
 

@@ -159,4 +159,7 @@ public interface OvsdbClient {
     <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
                                                        final Row<GenericTableSchema> row);
 
+    boolean isConnectionPublished();
+
+    void setConnectionPublished(boolean status);
 }

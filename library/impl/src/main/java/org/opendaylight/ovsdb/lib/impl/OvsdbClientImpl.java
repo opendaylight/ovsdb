@@ -68,10 +68,12 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
+    private boolean isConnectionPublished;
+
     private static final ThreadFactory threadFactorySSL =
-        new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-SSL-%d").build();
+        new ThreadFactoryBuilder().setNameFormat("OVSDBPassiveConnSSL-%d").build();
     private static final ThreadFactory threadFactoryNonSSL =
-        new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-Non-SSL-%d").build();
+        new ThreadFactoryBuilder().setNameFormat("OVSDBPassiveConnNonSSL-%d").build();
 
     public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type,
         SocketConnectionType socketConnType) {
@@ -103,7 +105,7 @@ public class OvsdbClientImpl implements OvsdbClient {
             }
         } else if (type == ConnectionType.ACTIVE) {
             ThreadFactory threadFactorySSL =
-                new ThreadFactoryBuilder().setNameFormat("OVSDB-ActiveConnection-" + executorNameArgs + "-%d")
+                new ThreadFactoryBuilder().setNameFormat("OVSDB-ActiveConn-" + executorNameArgs + "-%d")
                     .build();
             return threadFactorySSL;
         }
@@ -473,5 +475,15 @@ public class OvsdbClientImpl implements OvsdbClient {
     public void disconnect() {
         channel.disconnect();
         executorService.shutdown();
+    }
+
+    @Override
+    public boolean isConnectionPublished() {
+        return isConnectionPublished;
+    }
+
+    @Override
+    public void setConnectionPublished(boolean connectionPublished) {
+        isConnectionPublished = connectionPublished;
     }
 }

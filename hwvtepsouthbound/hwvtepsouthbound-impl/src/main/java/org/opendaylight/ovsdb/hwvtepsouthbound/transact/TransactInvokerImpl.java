@@ -31,7 +31,7 @@ public class TransactInvokerImpl implements TransactInvoker {
 
     @Override
     public void invoke(TransactCommand command) {
-        TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
+        TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb);
         ListenableFuture<List<OperationResult>> result = tb.execute();
         LOG.debug("invoke: command: {}, tb: {}", command, tb);

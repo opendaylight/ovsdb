@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.reflect.Invokable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class DatabaseSchema {
         Invokable<E, E> invokable = Invokable.from(declaredConstructor);
         try {
             return invokable.invoke(null, table);
-        } catch (Exception e) {
+        } catch (InvocationTargetException | IllegalAccessException e) {
             String message = String.format("Not able to create instance of class %s using public constructor "
                     + "that accepts TableSchema object", clazz);
             throw new IllegalArgumentException(message, e);

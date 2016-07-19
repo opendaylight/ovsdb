@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.SocketConnectionType;
+import org.opendaylight.ovsdb.lib.error.ParsingException;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -373,7 +374,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                             } else if (schema.size() == 1) {
                                 sfuture.set(schema);
                             }
-                        } catch (Exception e) {
+                        } catch (ParsingException e) {
                             LOG.warn("Failed to populate schema {}:{}", dbNames, schema, e);
                             sfuture.setException(e);
                         }

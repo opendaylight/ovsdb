@@ -54,7 +54,11 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (TransactionCommand command: commands) {
-            command.execute(transaction);
+            try {
+                command.execute(transaction);
+            } catch (NullPointerException e) {
+                LOG.warn("Exception trying to execute {}", command, e);
+            }
         }
     }
 }

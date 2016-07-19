@@ -129,10 +129,10 @@ public class OvsdbConnectionInstanceTest {
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
         when(listenableDbSchema.get()).thenReturn(dbSchema);
 
-        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorAllTables", String.class,
+        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorTables", String.class,
                 DatabaseSchema.class));
         ovsdbConnectionInstance.registerCallbacks();
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(),
+        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
                 any(DatabaseSchema.class));
     }
 
@@ -165,8 +165,8 @@ public class OvsdbConnectionInstanceTest {
     @SuppressWarnings("unchecked")
     public void testMonitorAllTables() throws Exception {
         Set<String> tables = new HashSet<>();
-        tables.add("tableName1");
-        tables.add("tableName2");
+        tables.add("Open_vSwitch");
+        tables.add("Port");
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
         when(dbSchema.getName()).thenReturn(SouthboundConstants.OPEN_V_SWITCH);
         when(dbSchema.getTables()).thenReturn(tables);
@@ -176,6 +176,8 @@ public class OvsdbConnectionInstanceTest {
         Set<String> columns = new HashSet<>();
         columns.add("columnName1");
         columns.add("columnName2");
+        columns.add("_version");
+        columns.add("statistics");
         when(tableSchema.getColumns()).thenReturn(columns);
         MonitorRequestBuilder<GenericTableSchema> monitorBuilder = mock(MonitorRequestBuilder.class);
         PowerMockito.mockStatic(MonitorRequestBuilder.class);
@@ -193,11 +195,11 @@ public class OvsdbConnectionInstanceTest {
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance, callback);
         doNothing().when(callback).update(any(TableUpdates.class), any(DatabaseSchema.class));
 
-        Whitebox.invokeMethod(ovsdbConnectionInstance, "monitorAllTables", "database", dbSchema);
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorAllTables", anyString(),
+        Whitebox.invokeMethod(ovsdbConnectionInstance, "monitorTables", "database", dbSchema);
+        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
                 any(DatabaseSchema.class));
 
-        verify(monitorBuilder, times(4)).addColumn(anyString());
+        verify(monitorBuilder, times(6)).addColumn(anyString());
     }
 
     @SuppressWarnings({ "unchecked" })

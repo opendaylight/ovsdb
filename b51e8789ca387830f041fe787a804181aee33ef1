@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_3028d033",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-19T22:26:51Z",
+      "side": 1,
+      "message": "Does it make sense to update termination point without an existing bridge?\n\nThe bug is reproduced by adding bridge + termination point configuration to the config DS. In this case, the termination point is created along with the bridge configuration. Therefore, I would think the TerminationPointCreateCommand is used instead of TerminationPointUpdateCommand",
+      "revId": "b51e8789ca387830f041fe787a804181aee33ef1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
 import javax.annotation.Nonnull;
+
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -76,6 +79,8 @@ public class OvsdbConnectionInstance {
     private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
+    private static final HashMap<String, HashMap<String, String>> skipColumns =
+                    new HashMap<String, HashMap<String, String>>();
 
     OvsdbConnectionInstance(ConnectionInfo key, OvsdbClient client, TransactionInvoker txInvoker,
                             InstanceIdentifier<Node> iid) {
@@ -84,6 +89,15 @@ public class OvsdbConnectionInstance {
         this.txInvoker = txInvoker;
         // this.key = key;
         this.instanceIdentifier = iid;
+        setupSkippedColumns();
+    }
+
+    private static void setupSkippedColumns() {
+        HashMap<String, String> skipForAllTables = new HashMap<>();
+        skipForAllTables.put("statistics", "statistics");
+        skipForAllTables.put("_version", "_version");
+        skipForAllTables.put("status", "status");
+        skipColumns.put(null, skipForAllTables);
     }
 
     /**
@@ -165,7 +179,11 @@ public class OvsdbConnectionInstance {
                 Set<String> columns = tableSchema.getColumns();
                 MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
                 for (String column : columns) {
-                    monitorBuilder.addColumn(column);
+                    if (skipColumn(tableName, column.toLowerCase()) == true) {
+                        LOG.warn("Skipping column " + column + " in table " + tableName);
+                    } else {
+                        monitorBuilder.addColumn(column);
+                    }
                 }
                 monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
             }
@@ -173,6 +191,18 @@ public class OvsdbConnectionInstance {
         } else {
             LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }
+    }
+
+    private boolean skipColumn(String tableName, String column) {
+        if (skipColumns.isEmpty()) {
+            setupSkippedColumns();
+        }
+        if (skipColumns.get(null).containsKey(column)
+                        || (skipColumns.get(tableName) != null
+                            && skipColumns.get(tableName).containsKey(column.toLowerCase()))) {
+            return true;
+        }
+        return false;
     }
 
     private void updateConnectionAttributes() {

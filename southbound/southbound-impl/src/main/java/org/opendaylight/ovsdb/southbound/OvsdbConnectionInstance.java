@@ -11,6 +11,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
 import javax.annotation.Nonnull;
+
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -131,7 +134,7 @@ public class OvsdbConnectionInstance {
                 if (dbSchema != null) {
                     LOG.info("Monitoring database: {}", database);
                     callback = new OvsdbMonitorCallback(this, txInvoker);
-                    monitorAllTables(database, dbSchema);
+                    monitorTables(database, dbSchema);
                 } else {
                     LOG.info("No database {} found on {}", database, connectionInfo);
                 }
@@ -155,19 +158,27 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void monitorAllTables(String database, DatabaseSchema dbSchema) {
+    private void monitorTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
-                LOG.info("Southbound monitoring table {} in {}", tableName, dbSchema.getName());
-                GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-                Set<String> columns = tableSchema.getColumns();
-                MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
-                for (String column : columns) {
-                    monitorBuilder.addColumn(column);
+                if (!SouthboundConstants.SKIP_OVSDB_TABLE.containsKey(tableName)) {
+                    LOG.info("Southbound monitoring OVSDB schema table {}", tableName);
+                    GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+                    Set<String> columns = tableSchema.getColumns();
+                    MonitorRequestBuilder<GenericTableSchema> monitorBuilder
+                            = MonitorRequestBuilder.builder(tableSchema);
+                    List<String> skipColumns = SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get(tableName);
+                    for (String column : columns) {
+                        if ( skipColumns == null || !skipColumns.contains(column)) {
+                            monitorBuilder.addColumn(column);
+                        } else {
+                            LOG.info("Southbound NOT monitoring column {} in table {}", column, tableName);
+                        }
+                    }
+                    monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
                 }
-                monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
             }
             this.callback.update(monitor(dbSchema, monitorRequests, callback), dbSchema);
         } else {

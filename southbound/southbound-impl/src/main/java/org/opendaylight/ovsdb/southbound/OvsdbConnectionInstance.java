@@ -23,7 +23,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
@@ -65,7 +64,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbConnectionInstance implements OvsdbClient {
+public class OvsdbConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
     private OvsdbClient client;
     private ConnectionInfo connectionInfo;
@@ -78,8 +77,8 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
 
-    OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker,
-            InstanceIdentifier<Node> iid) {
+    OvsdbConnectionInstance(ConnectionInfo key, OvsdbClient client, TransactionInvoker txInvoker,
+                            InstanceIdentifier<Node> iid) {
         this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
@@ -182,7 +181,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                     this.initialCreateData.getConnectionInfo().getRemotePort());
         for ( Map.Entry<DatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
 
-            TransactionBuilder transaction = new TransactionBuilder(this, entry.getKey());
+            TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
@@ -260,7 +259,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         return client.transactBuilder(dbSchema);
     }
 
-    @Override
     public <E extends TableSchema<E>> TableUpdates monitor(
             DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorHandle monitorHandle, MonitorCallBack callbackArgument) {
@@ -288,14 +286,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     public ListenableFuture<Boolean> unLock(String lockId) {
         return client.unLock(lockId);
-    }
-
-    public void startEchoService(EchoServiceCallbackFilters callbackFilters) {
-        client.startEchoService(callbackFilters);
-    }
-
-    public void stopEchoService() {
-        client.stopEchoService();
     }
 
     public boolean isActive() {
@@ -393,8 +383,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.initialCreateData = ovsdbNodeCreateData;
     }
 
-    @Override
-    public ListenableFuture<List<String>> echo() {
-        return client.echo();
+    public OvsdbClient getOvsdbClient() {
+        return client;
     }
 }

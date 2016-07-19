@@ -71,6 +71,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
     private static final String ENTITY_TYPE = "ovsdb";
+    private static final int DB_FETCH_TIMEOUT = 1000;
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
@@ -104,7 +105,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getLocalPort());
         List<String> databases = new ArrayList<>();
         try {
-            databases = externalClient.getDatabases().get(1000, TimeUnit.MILLISECONDS);
+            databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
             if (databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
                 OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
                 // Register Cluster Ownership for ConnectionInfo
@@ -246,7 +247,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             ovsdbDeviceEntityOwnershipListener.close();
         }
 
-        for (OvsdbClient client: clients.values()) {
+        for (OvsdbConnectionInstance client: clients.values()) {
             client.disconnect();
         }
     }
@@ -324,15 +325,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbClient getClient(ConnectionInfo connectionInfo) {
-        return getConnectionInstance(connectionInfo);
+        return getConnectionInstance(connectionInfo).getOvsdbClient();
     }
 
     public OvsdbClient getClient(OvsdbBridgeAttributes mn) {
-        return getConnectionInstance(mn);
+        return getConnectionInstance(mn).getOvsdbClient();
     }
 
     public OvsdbClient getClient(Node node) {
-        return getConnectionInstance(node);
+        return getConnectionInstance(node).getOvsdbClient();
     }
 
     public Boolean getHasDeviceOwnership(ConnectionInfo connectionInfo) {

@@ -19,6 +19,7 @@ import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -26,6 +27,11 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
 import org.opendaylight.ovsdb.lib.error.UnexpectedResultException;
 import org.opendaylight.ovsdb.lib.error.UnsupportedArgumentException;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -35,6 +41,12 @@ import org.slf4j.LoggerFactory;
 public class JsonRpcEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcEndpoint.class);
+    private static final int REAPER_INTERVAL = 300;
+    private static final int REAPER_THREADS = 3;
+    private static final ThreadFactory futureReaperThreadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("OVSDB-Lib-Future-Reaper-%d").build();
+    private static final ScheduledExecutorService futureReaperService
+            = Executors.newScheduledThreadPool(REAPER_THREADS, futureReaperThreadFactory);
 
     public class CallContext {
         Method method;
@@ -108,6 +120,15 @@ public class JsonRpcEndpoint {
 
                 SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));
+                futureReaperService.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (sf.isDone() || sf.isCancelled()) {
+                            return;
+                        }
+                        methodContext.remove(request.getId()).getFuture().cancel(false);
+                    }
+                },REAPER_INTERVAL, TimeUnit.MILLISECONDS);
 
                 nettyChannel.writeAndFlush(requestString);
 
@@ -120,7 +141,7 @@ public class JsonRpcEndpoint {
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
         LOG.trace("Response : {}", response.toString());
-        CallContext returnCtxt = methodContext.get(response.get("id").asText());
+        CallContext returnCtxt = methodContext.remove(response.get("id").asText());
         if (returnCtxt == null) {
             return;
         }

@@ -68,6 +68,8 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
+    private boolean isConnectionPublished;
+
     private static final ThreadFactory threadFactorySSL =
         new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-SSL-%d").build();
     private static final ThreadFactory threadFactoryNonSSL =
@@ -473,5 +475,15 @@ public class OvsdbClientImpl implements OvsdbClient {
     public void disconnect() {
         channel.disconnect();
         executorService.shutdown();
+    }
+
+    @Override
+    public boolean isConnectionPublished() {
+        return isConnectionPublished;
+    }
+
+    @Override
+    public void setConnectionPublished(boolean connectionPublished) {
+        isConnectionPublished = connectionPublished;
     }
 }

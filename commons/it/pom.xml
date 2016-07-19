@@ -47,6 +47,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <maven>3.1.1</maven>
   </prerequisites>
 
+  <properties>
+    <skip.surefire.tests>false</skip.surefire.tests>
+  </properties>
+
   <profiles>
     <profile>
       <id>default</id>
@@ -64,6 +68,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </activation>
       <properties>
         <skipITs>false</skipITs>
+        <skip.surefire.tests>true</skip.surefire.tests>
+        <skip.karaf.featureTest>true</skip.karaf.featureTest>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <maven.source.skip>true</maven.source.skip>
+        <checkstyle.skip>true</checkstyle.skip>
+        <findbugs.skip>true</findbugs.skip>
+        <pmd.skip>true</pmd.skip>
+        <cpd.skip>true</cpd.skip>
+        <maven.site.skip>true</maven.site.skip>
+        <invoker.skip>true</invoker.skip>
+        <enforcer.skip>true</enforcer.skip>
       </properties>
     </profile>
   </profiles>
@@ -95,6 +110,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <value>org.sonar.java.jacoco.JUnitListener</value>
             </property>
           </properties>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>${skip.surefire.tests}</skipTests>
         </configuration>
       </plugin>
       <plugin>

@@ -177,6 +177,8 @@ public class OvsdbConnectionInstanceTest {
         Set<String> columns = new HashSet<>();
         columns.add("columnName1");
         columns.add("columnName2");
+        columns.add("_version");
+        columns.add("statistics");
         when(tableSchema.getColumns()).thenReturn(columns);
         MonitorRequestBuilder<GenericTableSchema> monitorBuilder = mock(MonitorRequestBuilder.class);
         PowerMockito.mockStatic(MonitorRequestBuilder.class);

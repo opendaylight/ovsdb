@@ -438,8 +438,9 @@ public class SouthboundMapper {
             long numberOfConnections = 0;
             final String targetString = manager.getTargetColumn().getData();
 
-            final Map<String, String> statusAttributeMap = manager.getStatusColumn().getData();
-            if (statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
+            final Map<String, String> statusAttributeMap =
+                            (manager.getStatusColumn() == null) ? null : manager.getStatusColumn().getData();
+            if ((statusAttributeMap != null) && statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
                 String numberOfConnectionValueStr = statusAttributeMap.get(N_CONNECTIONS_STR);
                 numberOfConnections = Integer.parseInt(numberOfConnectionValueStr);
             } else {

@@ -16,6 +16,24 @@
       "revId": "e8572601e18bf84b5349bd983d2cc8508b6e44a1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_3673a3e8",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-20T23:47:04Z",
+      "side": 1,
+      "message": "yeah make sense, will push it in next patch after fixing IT.",
+      "parentUuid": "9a561d44_e2bdea69",
+      "revId": "e8572601e18bf84b5349bd983d2cc8508b6e44a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

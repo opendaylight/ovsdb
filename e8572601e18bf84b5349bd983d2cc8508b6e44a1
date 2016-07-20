@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_e2bdea69",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-07-20T19:51:58Z",
+      "side": 1,
+      "message": "should make this shorter - we only have 33 chars I think. Probably should change the one on line 89 also since the %d if two digits would truncate.\n\nMaybe just OvsdbPassConn-nn and OvsdbConnNotSvc-nn?",
+      "revId": "e8572601e18bf84b5349bd983d2cc8508b6e44a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

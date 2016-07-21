@@ -91,7 +91,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
 
-    private static final StalePassiveConnectionService stalePassiveConnectionService =
+    private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
@@ -315,7 +315,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         if (clientsFromSameNode.size() == 0) {
             notifyListenerForPassiveConnection(client);
         } else {
-            stalePassiveConnectionService.handleNewPassiveConnection(client, clientsFromSameNode);
+            STALE_PASSIVE_CONNECTION_SERVICE.handleNewPassiveConnection(client, clientsFromSameNode);
         }
     }
 
@@ -418,7 +418,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         connections.remove(client);
         for (OvsdbConnectionListener listener : connectionListeners) {
             listener.disconnected(client);
-            stalePassiveConnectionService.clientDisconnected(client);
+            STALE_PASSIVE_CONNECTION_SERVICE.clientDisconnected(client);
         }
     }
 

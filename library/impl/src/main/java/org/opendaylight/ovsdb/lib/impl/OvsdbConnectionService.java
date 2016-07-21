@@ -102,7 +102,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
 
-    private static final StalePassiveConnectionService stalePassiveConnectionService =
+    private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
@@ -320,6 +320,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     private static void handleNewPassiveConnection(OvsdbClient client) {
+<<<<<<< HEAD
         ListenableFuture<List<String>> echoFuture = client.echo();
         LOG.debug("Send echo message to probe the OVSDB switch {}",client.getConnectionInfo());
         Futures.addCallback(echoFuture, new FutureCallback<List<String>>() {
@@ -340,6 +341,14 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 client.disconnect();
             }
         }, connectionNotifierService);
+=======
+        List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
+        if (clientsFromSameNode.size() == 0) {
+            notifyListenerForPassiveConnection(client);
+        } else {
+            STALE_PASSIVE_CONNECTION_SERVICE.handleNewPassiveConnection(client, clientsFromSameNode);
+        }
+>>>>>>> Fix more Sonar (soon Checkstyle) constant name
     }
 
     private static void handleNewPassiveConnection(final Channel channel) {
@@ -443,10 +452,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public static void channelClosed(final OvsdbClient client) {
         LOG.info("Connection closed {}", client.getConnectionInfo().toString());
         connections.remove(client);
+<<<<<<< HEAD
         if (client.isConnectionPublished()) {
             for (OvsdbConnectionListener listener : connectionListeners) {
                 listener.disconnected(client);
             }
+=======
+        for (OvsdbConnectionListener listener : connectionListeners) {
+            listener.disconnected(client);
+            STALE_PASSIVE_CONNECTION_SERVICE.clientDisconnected(client);
+>>>>>>> Fix more Sonar (soon Checkstyle) constant name
         }
         stalePassiveConnectionService.clientDisconnected(client);
     }

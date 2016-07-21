@@ -68,12 +68,19 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
+<<<<<<< HEAD
     private boolean isConnectionPublished;
 
     private static final ThreadFactory threadFactorySSL =
         new ThreadFactoryBuilder().setNameFormat("OVSDBPassiveConnSSL-%d").build();
     private static final ThreadFactory threadFactoryNonSSL =
         new ThreadFactoryBuilder().setNameFormat("OVSDBPassiveConnNonSSL-%d").build();
+=======
+    private static final ThreadFactory THREAD_FACTORY_SSL =
+        new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-SSL-%d").build();
+    private static final ThreadFactory THREAD_FACTORY_NON_SSL =
+        new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-Non-SSL-%d").build();
+>>>>>>> Fix more Sonar (soon Checkstyle) constant name
 
     public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type,
         SocketConnectionType socketConnType) {
@@ -97,9 +104,9 @@ public class OvsdbClientImpl implements OvsdbClient {
         if (type == ConnectionType.PASSIVE) {
             switch (socketConnType) {
                 case SSL:
-                    return threadFactorySSL;
+                    return THREAD_FACTORY_SSL;
                 case NON_SSL:
-                    return threadFactoryNonSSL;
+                    return THREAD_FACTORY_NON_SSL;
                 default:
                     return Executors.defaultThreadFactory();
             }

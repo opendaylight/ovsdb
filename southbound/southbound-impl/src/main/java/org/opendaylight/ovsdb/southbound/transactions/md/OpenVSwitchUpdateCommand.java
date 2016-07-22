@@ -76,7 +76,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
 
-            setVersion(ovsdbNodeBuilder, openVSwitch);
+            setDbVersion(ovsdbNodeBuilder, openVSwitch);
+            setOvsVersion(ovsdbNodeBuilder, openVSwitch);
             setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
             setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
             OpenVSwitch oldEntry = deletedOpenVSwitchRows.get(entry.getKey());
@@ -238,12 +239,19 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
-            OpenVSwitch openVSwitch) {
+    private void setOvsVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
         try {
             ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
         } catch (NoSuchElementException e) {
             LOG.debug("ovs_version is not set for this switch",e);
+        }
+    }
+
+    private void setDbVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
+        try {
+            ovsdbNodeBuilder.setDbVersion(openVSwitch.getDbVersionColumn().getData().iterator().next());
+        } catch (NoSuchElementException e) {
+            LOG.debug("db_version is not set for this switch",e);
         }
     }
 

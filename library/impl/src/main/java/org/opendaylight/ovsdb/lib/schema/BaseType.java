@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.ReferencedRow;
@@ -101,7 +102,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             if (typeMinNode != null) {
                 baseType.setMin(typeMinNode.asLong());
             }
-            populateEnum(type);
+            Optional<Set<Integer>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -114,13 +118,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(JsonNode node) {
+        private Optional<Set<Integer>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Long> nodesEnums = Sets.newHashSet();
+                Set<Integer> nodesEnums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
-                    nodesEnums.add(enm.asLong());
+                    nodesEnums.add(enm.asInt());
                 }
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.empty();
             }
         }
 
@@ -213,7 +220,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             if (typeMinNode != null) {
                 baseType.setMin(typeMinNode.asLong());
             }
-            populateEnum(type);
+            Optional<Set<Double>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -226,13 +236,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(JsonNode node) {
+        private Optional<Set<Double>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
                 Set<Double> nodesEnums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
                     nodesEnums.add(enm.asDouble());
                 }
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.empty();
             }
         }
 
@@ -356,7 +369,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             if (typeMinNode != null) {
                 baseType.setMinLength(typeMinNode.asInt());
             }
-            populateEnum(baseType, type);
+            Optional<Set<String>> typeEnumsOpt = populateEnum(baseType, type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -369,7 +385,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(StringBaseType baseType, JsonNode node) {
+        private Optional<Set<String>> populateEnum(StringBaseType baseType, JsonNode node) {
             if (node.has("enum")) {
                 Set<String> nodesEnums = Sets.newHashSet();
                 JsonNode enumVal = node.get("enum");
@@ -382,6 +398,9 @@ public abstract class BaseType<E extends BaseType<E>> {
                     nodesEnums.add(enumVal.asText());
                 }
                 baseType.setEnums(nodesEnums);
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.empty();
             }
         }
 

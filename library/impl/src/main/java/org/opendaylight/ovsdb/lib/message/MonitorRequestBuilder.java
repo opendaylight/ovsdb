@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
@@ -15,8 +16,9 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 public class MonitorRequestBuilder<E extends TableSchema<E>> {
 
-    E tableSchema;
-    MonitorRequest monitorRequest;
+    private E tableSchema;
+    private Set<String> columns;
+    private MonitorSelect select;
 
     MonitorRequestBuilder(E tableSchema) {
         this.tableSchema = tableSchema;
@@ -26,15 +28,11 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return new MonitorRequestBuilder<>(tableSchema);
     }
 
-    MonitorRequest getMonitorRequest() {
-        if (monitorRequest == null) {
-            monitorRequest = new MonitorRequest();
-        }
-        return monitorRequest;
-    }
-
     public MonitorRequestBuilder<E> addColumn(String column) {
-        getMonitorRequest().addColumn(column);
+        if (columns == null) {
+            columns = Sets.newHashSet();
+        }
+        columns.add(column);
         return this;
     }
 
@@ -43,28 +41,29 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return this;
     }
 
-    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> columns) {
-        for (ColumnSchema<E, ?> schema : columns) {
+    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> newColumns) {
+        for (ColumnSchema<E, ?> schema : newColumns) {
             this.addColumn(schema);
         }
         return this;
     }
 
     public Set<String> getColumns() {
-        return getMonitorRequest().getColumns();
+        return columns;
     }
 
-    public MonitorRequestBuilder<E> with(MonitorSelect select) {
-        getMonitorRequest().setSelect(select);
+    public MonitorRequestBuilder<E> with(MonitorSelect theSelect) {
+        this.select = theSelect;
         return this;
     }
 
     public MonitorRequest build() {
-        MonitorRequest newBuiltMonitorRequest = getMonitorRequest();
-        if (newBuiltMonitorRequest.getSelect() == null) {
-            newBuiltMonitorRequest.setSelect(new MonitorSelect());
+        MonitorSelect nonNullSelect;
+        if (select == null) {
+            nonNullSelect = new MonitorSelectBuilder().build();
+        } else {
+            nonNullSelect = select;
         }
-        newBuiltMonitorRequest.setTableName(tableSchema.getName());
-        return newBuiltMonitorRequest;
+        return new MonitorRequest(tableSchema.getName(), columns, nonNullSelect);
     }
 }

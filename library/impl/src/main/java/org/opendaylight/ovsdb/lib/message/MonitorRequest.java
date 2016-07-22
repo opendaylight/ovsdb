@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.lib.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 /**
@@ -20,50 +20,27 @@ import java.util.Set;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MonitorRequest {
-    @JsonIgnore String tableName;
-    Set<String> columns;
-    MonitorSelect select;
 
-    public MonitorRequest() {
-    }
+    private final @JsonIgnore String tableName;
+    private final Set<String> columns;
+    private final MonitorSelect select;
 
-    public MonitorRequest(String tableName, Set<String> columns) {
+    MonitorRequest(String tableName, Set<String> columns, MonitorSelect select) {
         this.tableName = tableName;
-        this.columns = columns;
-    }
-
-    public MonitorRequest(String tableName) {
-        this.tableName = tableName;
+        this.columns = ImmutableSet.copyOf(columns);
+        this.select = select;
     }
 
     public String getTableName() {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     public MonitorSelect getSelect() {
         return select;
-    }
-
-    public void setSelect(MonitorSelect select) {
-        this.select = select;
     }
 
     public Set<String> getColumns() {
         return columns;
     }
 
-    public void setColumns(Set<String> columns) {
-        this.columns = columns;
-    }
-
-    public void addColumn(String column) {
-        if (columns == null) {
-            columns = Sets.newHashSet();
-        }
-        columns.add(column);
-    }
 }

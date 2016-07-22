@@ -10,10 +10,10 @@ package org.opendaylight.ovsdb.lib.message;
 
 public class MonitorSelect {
 
-    boolean initial;
-    boolean insert;
-    boolean delete;
-    boolean modify;
+    private final boolean initial;
+    private final boolean insert;
+    private final boolean delete;
+    private final boolean modify;
 
     public MonitorSelect(boolean initial, boolean insert, boolean delete, boolean modify) {
         this.initial = initial;
@@ -22,38 +22,20 @@ public class MonitorSelect {
         this.modify = modify;
     }
 
-    public MonitorSelect() {
-    }
-
     public boolean isInitial() {
         return initial;
-    }
-
-    public void setInitial(boolean initial) {
-        this.initial = initial;
     }
 
     public boolean isInsert() {
         return insert;
     }
 
-    public void setInsert(boolean insert) {
-        this.insert = insert;
-    }
-
     public boolean isDelete() {
         return delete;
-    }
-
-    public void setDelete(boolean delete) {
-        this.delete = delete;
     }
 
     public boolean isModify() {
         return modify;
     }
 
-    public void setModify(boolean modify) {
-        this.modify = modify;
-    }
 }

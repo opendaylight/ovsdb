@@ -177,15 +177,16 @@ public abstract class ColumnType {
 
                 AtomicColumnType atomicColumnType = new AtomicColumnType(jsonBaseType);
 
-                JsonNode node;
-                if ((node = json.get("min")) != null) {
-                    atomicColumnType.setMin(node.asLong());
+                JsonNode minNode = json.get("min");
+                if (minNode != null) {
+                    atomicColumnType.setMin(minNode.asLong());
                 }
 
-                if ((node = json.get("max")) != null) {
-                    if (node.isNumber()) {
-                        atomicColumnType.setMax(node.asLong());
-                    } else if ("unlimited".equals(node.asText())) {
+                JsonNode maxNode = json.get("max");
+                if (maxNode != null) {
+                    if (maxNode.isNumber()) {
+                        atomicColumnType.setMax(maxNode.asLong());
+                    } else if ("unlimited".equals(maxNode.asText())) {
                         atomicColumnType.setMax(Long.MAX_VALUE);
                     }
                 }
@@ -249,15 +250,16 @@ public abstract class ColumnType {
             BaseType valueType = BaseType.fromJson(json, "value");
 
             KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(jsonKeyType, valueType);
-            JsonNode node;
-            if ((node = json.get("min")) != null) {
-                keyValueColumnType.setMin(node.asLong());
+            JsonNode minNode = json.get("min");
+            if (minNode != null) {
+                keyValueColumnType.setMin(minNode.asLong());
             }
 
-            if ((node = json.get("max")) != null) {
-                if (node.isLong()) {
-                    keyValueColumnType.setMax(node.asLong());
-                } else if (node.isTextual() && "unlimited".equals(node.asText())) {
+            JsonNode maxNode = json.get("max");
+            if (maxNode != null) {
+                if (maxNode.isLong()) {
+                    keyValueColumnType.setMax(maxNode.asLong());
+                } else if (maxNode.isTextual() && "unlimited".equals(maxNode.asText())) {
                     keyValueColumnType.setMax(Long.MAX_VALUE);
                 }
             }

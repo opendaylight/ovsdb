@@ -5,14 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.notation;
-
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
 
 public class Column<E extends TableSchema<E>, D> {
     @JsonIgnore
@@ -24,8 +21,8 @@ public class Column<E extends TableSchema<E>, D> {
         this.data = data;
     }
 
-    public <E extends TableSchema<E>, T> T getData(ColumnSchema<E, T> schema) {
-        return schema.validate(data);
+    public <E extends TableSchema<E>, T> T getData(ColumnSchema<E, T> anotherSchema) {
+        return anotherSchema.validate(data);
     }
 
     public D getData() {

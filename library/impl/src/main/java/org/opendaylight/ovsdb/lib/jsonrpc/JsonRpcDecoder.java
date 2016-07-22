@@ -109,7 +109,9 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
                 JsonParser jp = jacksonJsonFactory.createParser(new ByteBufInputStream(slice));
                 JsonNode root = jp.readValueAsTree();
                 out.add(root);
-                leftCurlies = rightCurlies = lastRecordBytes = 0;
+                leftCurlies = 0;
+                rightCurlies = 0;
+                lastRecordBytes = 0;
                 recordsRead++;
                 break;
             }

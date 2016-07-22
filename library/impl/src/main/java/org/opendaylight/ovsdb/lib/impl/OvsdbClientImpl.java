@@ -63,7 +63,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
-    private Map<String, DatabaseSchema> schema = Maps.newHashMap();
+    private Map<String, DatabaseSchema> schemas = Maps.newHashMap();
     private Map<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
@@ -86,7 +86,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     /**
-     * Genereate the threadFactory based on ACTIVE, PASSIVE (SSL/NON-SSL) connection type.
+     * Generate the threadFactory based on ACTIVE, PASSIVE (SSL/NON-SSL) connection type.
      * @param type ACTIVE or PASSIVE {@link ConnectionType}
      * @param socketConnType SSL or NON-SSL {@link SocketConnectionType}
      * @param executorNameArgs Additional args to append to thread name format
@@ -158,7 +158,7 @@ public class OvsdbClientImpl implements OvsdbClient {
             for (Iterator<Map.Entry<String,JsonNode>> itr = updatesJson.fields(); itr.hasNext();) {
                 Map.Entry<String, JsonNode> entry = itr.next();
 
-                DatabaseSchema databaseSchema = this.schema.get(dbSchema.getName());
+                DatabaseSchema databaseSchema = this.schemas.get(dbSchema.getName());
                 TableSchema table = databaseSchema.table(entry.getKey(), TableSchema.class);
                 tableUpdateMap.put(entry.getKey(), table.updatesFromJson(entry.getValue()));
 
@@ -310,7 +310,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     public boolean isReady(int timeout) throws InterruptedException {
         while (timeout > 0) {
-            if (!schema.isEmpty()) {
+            if (!schemas.isEmpty()) {
                 return true;
             }
             Thread.sleep(1000);
@@ -327,7 +327,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     @Override
     public ListenableFuture<DatabaseSchema> getSchema(final String database) {
 
-        DatabaseSchema databaseSchema = schema.get(database);
+        DatabaseSchema databaseSchema = schemas.get(database);
 
         if (databaseSchema == null) {
             return Futures.transform(
@@ -338,7 +338,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                             if (result.containsKey(database)) {
                                 DatabaseSchema dbSchema = result.get(database);
                                 dbSchema.populateInternallyGeneratedColumns();
-                                OvsdbClientImpl.this.schema.put(database, dbSchema);
+                                OvsdbClientImpl.this.schemas.put(database, dbSchema);
                                 return dbSchema;
                             } else {
                                 return null;
@@ -401,7 +401,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public DatabaseSchema getDatabaseSchema(String dbName) {
-        return schema.get(dbName);
+        return schemas.get(dbName);
     }
 
     /**

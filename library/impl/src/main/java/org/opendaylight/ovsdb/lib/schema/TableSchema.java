@@ -137,7 +137,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     }
 
     public Row<E> createRow(ObjectNode rowNode) {
-        List<Column<E, ?>> columns = new ArrayList<>();
+        List<Column<E, ?>> newColumns = new ArrayList<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
             Map.Entry<String, JsonNode> next = iter.next();
             ColumnSchema<E, Object> schema = column(next.getKey(), Object.class);
@@ -149,10 +149,10 @@ public abstract class TableSchema<E extends TableSchema<E>> {
              */
             if (schema != null) {
                 Object value = schema.valueFromJson(next.getValue());
-                columns.add(new Column<>(schema, value));
+                newColumns.add(new Column<>(schema, value));
             }
         }
-        return new Row<>(this, columns);
+        return new Row<>(this, newColumns);
     }
 
     public List<Row<E>> createRows(JsonNode rowsNode) {

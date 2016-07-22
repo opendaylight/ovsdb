@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.ReferencedRow;
@@ -104,7 +105,10 @@ public abstract class BaseType<E extends BaseType<E>> {
                 baseType.setMin(node.asLong());
             }
 
-            populateEnum(type);
+            Optional<Set<Integer>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -117,13 +121,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(JsonNode node) {
+        private Optional<Set<Integer>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Long> enums = Sets.newHashSet();
+                Set<Integer> nodesEnums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
-                    enums.add(enm.asLong());
+                    nodesEnums.add(enm.asInt());
                 }
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.empty();
             }
         }
 
@@ -219,7 +226,10 @@ public abstract class BaseType<E extends BaseType<E>> {
                 baseType.setMin(node.asLong());
             }
 
-            populateEnum(type);
+            Optional<Set<Double>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -232,13 +242,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(JsonNode node) {
+        private Optional<Set<Double>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Double> enums = Sets.newHashSet();
+                Set<Double> nodesEnums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
-                    enums.add(enm.asDouble());
+                    nodesEnums.add(enm.asDouble());
                 }
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.empty();
             }
         }
 
@@ -365,7 +378,10 @@ public abstract class BaseType<E extends BaseType<E>> {
                 baseType.setMinLength(node.asInt());
             }
 
-            populateEnum(baseType, type);
+            Optional<Set<String>> typeEnumsOpt = populateEnum(baseType, type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -378,19 +394,22 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(StringBaseType baseType, JsonNode node) {
+        private Optional<Set<String>> populateEnum(StringBaseType baseType, JsonNode node) {
             if (node.has("enum")) {
-                Set<String> enums = Sets.newHashSet();
+                Set<String> nodesEnums = Sets.newHashSet();
                 JsonNode enumVal = node.get("enum");
                 if (enumVal.isArray()) {
                     JsonNode anEnum = enumVal.get(1);
                     for (JsonNode enm : anEnum) {
-                        enums.add(enm.asText());
+                        nodesEnums.add(enm.asText());
                     }
                 } else if (enumVal.isTextual()) {
-                    enums.add(enumVal.asText());
+                    nodesEnums.add(enumVal.asText());
                 }
-                baseType.setEnums(enums);
+                baseType.setEnums(nodesEnums);
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.empty();
             }
         }
 

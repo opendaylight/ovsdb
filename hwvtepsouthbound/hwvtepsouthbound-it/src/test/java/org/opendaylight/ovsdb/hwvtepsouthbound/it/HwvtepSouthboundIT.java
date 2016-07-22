@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.it;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -58,6 +59,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -70,6 +72,7 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +107,8 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static int portNumber;
     private static String connectionType;
     private static Node hwvtepNode;
-
+    @Inject @Filter(timeout=60000)
+    private static DataBroker dataBroker = null;
     @Inject
     private BundleContext bundleContext;
 
@@ -181,13 +185,13 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Override
-    public String getModuleName() {
-        return "hwvtepsouthbound";
-    }
-
-    @Override
-    public String getInstanceName() {
-        return "hwvtepsouthbound-default";
+    public String getKarafDistro() {
+        return maven()
+                .groupId("org.opendaylight.ovsdb")
+                .artifactId("hwvtepsouthbound-karaf")
+                .versionAsInProject()
+                .type("zip")
+                .getURL();
     }
 
     @Override
@@ -205,6 +209,12 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         return "odl-ovsdb-hwvtepsouthbound-test";
     }
 
+    protected String usage() {
+        return "Integration Test needs a valid connection configuration as follows :\n"
+                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
+                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
+    }
+
     @Override
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
@@ -212,22 +222,6 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
                 LogLevel.INFO.name());
         option = composite(option, super.getLoggingOption());
         return option;
-    }
-
-    @Override
-    public String getKarafDistro() {
-        return maven()
-                .groupId("org.opendaylight.ovsdb")
-                .artifactId("hwvtepsouthbound-karaf")
-                .versionAsInProject()
-                .type("zip")
-                .getURL();
-    }
-
-    protected String usage() {
-        return "Integration Test needs a valid connection configuration as follows :\n"
-                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
-                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
     }
 
     private Option[] getPropertiesOptions() {
@@ -260,10 +254,6 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             LOG.warn("Failed to setup test", e);
             fail("Failed to setup test: " + e);
         }
-        //dataBroker = getSession().getSALService(DataBroker.class);
-        Thread.sleep(3000);
-        DataBroker dataBroker = HwvtepSouthboundProvider.getDb();
-        Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bundleContext.getProperty(SERVER_IPADDRESS);
         String portStr = bundleContext.getProperty(SERVER_PORT);
@@ -284,6 +274,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
 
         mdsalUtils = new MdsalUtils(dataBroker);
+        assertTrue("Did not find " + HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), getHwvtepTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
         final DataTreeIdentifier<Node> treeId =
@@ -312,6 +303,31 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         LOG.info("{} test methods to run", testMethodsRemaining);
 
         setup = true;
+    }
+
+    private Boolean getHwvtepTopology() {
+        LOG.info("getHwvtepTopology: looking for {}...", HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue());
+        Boolean found = false;
+        final TopologyId topologyId = HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID;
+        InstanceIdentifier<Topology> path =
+                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        for (int i = 0; i < 60; i++) {
+            Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
+            if (topology != null) {
+                LOG.info("getHwvtepTopology: found {}...", HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue());
+                found = true;
+                break;
+            } else {
+                LOG.info("getHwvtepTopology: still looking ({})...", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOG.warn("Interrupted while waiting for {}",
+                            HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), e);
+                }
+            }
+        }
+        return found;
     }
 
     private Node connectHwvtepNode(ConnectionInfo connectionInfo) throws InterruptedException {

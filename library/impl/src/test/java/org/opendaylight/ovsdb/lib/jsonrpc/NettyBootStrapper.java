@@ -18,7 +18,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.NotImplementedException;
 
 public class NettyBootStrapper {
@@ -66,7 +68,7 @@ public class NettyBootStrapper {
             // Wait until all threads are terminated.
             bossGroup.terminationFuture().sync();
             workerGroup.terminationFuture().sync();
-        } catch (Exception e) {
+        } catch (ExecutionException | TimeoutException e) {
             //ignore
         }
     }

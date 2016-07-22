@@ -148,7 +148,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <excludes>
-            <exclude>**/HwvtepSouthboundIT.java</exclude>
+            <!--<exclude>**/HwvtepSouthboundIT.java</exclude>-->
           </excludes>
         </configuration>
       </plugin>

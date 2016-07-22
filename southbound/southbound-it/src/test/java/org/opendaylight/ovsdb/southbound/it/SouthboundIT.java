@@ -145,6 +145,7 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,10 +177,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
-    private static DataBroker dataBroker;
     private static Version schemaVersion;
     private static OvsdbClient ovsdbClient;
     private static DatabaseSchema dbSchema;
+    @Inject @Filter(timeout=60000)
+    private static DataBroker dataBroker = null;
 
     @Inject
     private BundleContext bundleContext;
@@ -385,10 +387,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } catch (Exception e) {
             LOG.warn("Failed to setup test", e);
         }
-        //dataBroker = getSession().getSALService(DataBroker.class);
-        Thread.sleep(3000);
-        dataBroker = SouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
+
+        LOG.info("sleeping for 60s just for the heck of it");
+        Thread.sleep(60000);
 
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
         String portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);

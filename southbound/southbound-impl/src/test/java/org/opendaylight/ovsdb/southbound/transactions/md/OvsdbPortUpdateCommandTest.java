@@ -426,7 +426,7 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
                 .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
                         return InterfaceTypeInternal.class;
                     }
                 });

@@ -331,7 +331,7 @@ public class OvsdbBridgeUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createDatapathType(anyString()))
                 .thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Exception {
                         return DatapathTypeSystem.class;
                     }
                 });

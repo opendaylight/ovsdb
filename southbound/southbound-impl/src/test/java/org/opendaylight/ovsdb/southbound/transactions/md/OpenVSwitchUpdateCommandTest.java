@@ -314,7 +314,7 @@ public class OpenVSwitchUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createInterfaceType(anyString()))
                 .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
                         return InterfaceTypeInternal.class;
                     }
                 });
@@ -345,7 +345,7 @@ public class OpenVSwitchUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createDatapathType(anyString()))
                 .thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Throwable {
+                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Exception {
                         return DatapathTypeSystem.class;
                     }
                 });

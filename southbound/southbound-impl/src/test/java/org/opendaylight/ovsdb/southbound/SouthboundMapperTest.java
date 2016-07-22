@@ -177,7 +177,7 @@ public class SouthboundMapperTest {
         OvsdbBridgeAugmentation mdsalbridge = mock(OvsdbBridgeAugmentation.class);
         when(mdsalbridge.getDatapathType()).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
             public Class<? extends DatapathTypeBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
+                    InvocationOnMock invocation) throws Exception {
                 return DatapathTypeNetdev.class;
             }
         });
@@ -185,7 +185,7 @@ public class SouthboundMapperTest {
 
         when(mdsalbridge.getDatapathType()).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
             public Class<? extends DatapathTypeBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
+                    InvocationOnMock invocation) throws Exception {
                 return DatapathTypeSystem.class;
             }
         });
@@ -208,7 +208,7 @@ public class SouthboundMapperTest {
         when(ovsdbBridgeNode.getProtocolEntry()).thenReturn(protocolList);
         when(protocolEntry.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
             public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
+                    InvocationOnMock invocation) throws Exception {
                 return OvsdbBridgeProtocolOpenflow10.class;
             }
         });
@@ -288,7 +288,8 @@ public class SouthboundMapperTest {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(resourceAsStream);
 
-            DatabaseSchema dbSchema = DatabaseSchema.fromJson(OvsdbSchemaContants.DATABASE_NAME, jsonNode.get("result"));
+            DatabaseSchema dbSchema = DatabaseSchema.fromJson(OvsdbSchemaContants.DATABASE_NAME,
+                    jsonNode.get("result"));
 
             String uuidString = "7da709ff-397f-4778-a0e8-994811272fdb";
             OvsdbBridgeAugmentation omn = new OvsdbBridgeAugmentationBuilder()

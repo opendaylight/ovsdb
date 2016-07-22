@@ -16,6 +16,24 @@
       "revId": "b51e8789ca387830f041fe787a804181aee33ef1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_7bfa1744",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2016-07-22T16:37:05Z",
+      "side": 1,
+      "message": "Hi.  So, the bug report is about an error that occurs when a POST creates a bridge and termination points at the same time.\n\nThis patch is reported to fix the bug, so the question here appears to be: why does changing TerminationPointUpdateCommand fix the problem instead of changing TerminationPointCreateCommand?\n\nI don\u0027t know the answer to that (and if this behavior implies a different issue or not).\n\nThat said, the patch itself looks ok to me.",
+      "parentUuid": "9a561d44_3028d033",
+      "revId": "b51e8789ca387830f041fe787a804181aee33ef1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

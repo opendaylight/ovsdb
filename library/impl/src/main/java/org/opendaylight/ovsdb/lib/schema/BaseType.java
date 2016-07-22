@@ -93,17 +93,14 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         protected void getConstraints(IntegerBaseType baseType, JsonNode type) {
-
-            JsonNode node = null;
-
-            if ((node = type.get("maxInteger")) != null) {
-                baseType.setMax(node.asLong());
+            JsonNode maxNode = type.get("maxInteger");
+            if (maxNode != null) {
+                baseType.setMax(maxNode.asLong());
             }
-
-            if ((node = type.get("minInteger")) != null) {
-                baseType.setMin(node.asLong());
+            JsonNode minNode = type.get("minInteger");
+            if (minNode != null) {
+                baseType.setMin(minNode.asLong());
             }
-
             populateEnum(type);
         }
 
@@ -208,17 +205,14 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         protected void getConstraints(RealBaseType baseType, JsonNode type) {
-
-            JsonNode node;
-
-            if ((node = type.get("maxReal")) != null) {
-                baseType.setMax(node.asLong());
+            JsonNode maxNode = type.get("maxReal");
+            if (maxNode != null) {
+                baseType.setMax(maxNode.asLong());
             }
-
-            if ((node = type.get("minReal")) != null) {
-                baseType.setMin(node.asLong());
+            JsonNode minNode = type.get("minReal");
+            if (minNode != null) {
+                baseType.setMin(minNode.asLong());
             }
-
             populateEnum(type);
         }
 
@@ -354,17 +348,14 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         protected void getConstraints(StringBaseType baseType, JsonNode type) {
-
-            JsonNode node = null;
-
-            if ((node = type.get("maxLength")) != null) {
-                baseType.setMaxLength(node.asInt());
+            JsonNode maxNode = type.get("maxLength");
+            if (maxNode != null) {
+                baseType.setMaxLength(maxNode.asInt());
             }
-
-            if ((node = type.get("minLength")) != null) {
-                baseType.setMinLength(node.asInt());
+            JsonNode minNode = type.get("minLength");
+            if (minNode != null) {
+                baseType.setMinLength(minNode.asInt());
             }
-
             populateEnum(baseType, type);
         }
 
@@ -471,7 +462,6 @@ public abstract class BaseType<E extends BaseType<E>> {
         String refTable;
         RefType refType;
 
-
         @Override
         public UuidBaseType fromString(String typeString) {
             return "uuid".equals(typeString) ? new UuidBaseType() : null;
@@ -479,13 +469,11 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         protected void getConstraints(UuidBaseType baseType, JsonNode node) {
-
-            JsonNode refTable = node.get("refTable");
-            baseType.setRefTable(refTable != null ? refTable.asText() : null);
+            JsonNode refTableNode = node.get("refTable");
+            baseType.setRefTable(refTableNode != null ? refTableNode.asText() : null);
 
             JsonNode refTypeJson = node.get("refType");
             baseType.setRefType(refTypeJson != null ? RefType.valueOf(refTypeJson.asText()) : RefType.strong);
-
         }
 
         @Override

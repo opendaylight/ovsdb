@@ -60,11 +60,11 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
     }
 
     public MonitorRequest build() {
-        MonitorRequest monitorRequest = getMonitorRequest();
-        if (monitorRequest.getSelect() == null) {
-            monitorRequest.setSelect(new MonitorSelect());
+        MonitorRequest newBuiltMonitorRequest = getMonitorRequest();
+        if (newBuiltMonitorRequest.getSelect() == null) {
+            newBuiltMonitorRequest.setSelect(new MonitorSelect());
         }
-        monitorRequest.setTableName(tableSchema.getName());
-        return monitorRequest;
+        newBuiltMonitorRequest.setTableName(tableSchema.getName());
+        return newBuiltMonitorRequest;
     }
 }

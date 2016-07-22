@@ -22,6 +22,9 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 public class FutureTransformUtils {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    private FutureTransformUtils() {
+    }
+
     public static final ListenableFuture<List<OperationResult>> transformTransactResponse(
             ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

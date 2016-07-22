@@ -8,6 +8,7 @@
 package org.opendaylight.ovsdb.southbound.it;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -125,6 +126,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -145,6 +147,7 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,10 +179,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
-    private static DataBroker dataBroker;
     private static Version schemaVersion;
     private static OvsdbClient ovsdbClient;
     private static DatabaseSchema dbSchema;
+    @Inject @Filter(timeout=60000)
+    private static DataBroker dataBroker = null;
 
     @Inject
     private BundleContext bundleContext;
@@ -385,9 +389,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } catch (Exception e) {
             LOG.warn("Failed to setup test", e);
         }
-        //dataBroker = getSession().getSALService(DataBroker.class);
-        Thread.sleep(3000);
-        dataBroker = SouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
@@ -408,6 +409,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         mdsalUtils = new MdsalUtils(dataBroker);
+        assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
@@ -461,6 +463,30 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.warn("Interrupted while disconnecting", e);
             }
         }
+    }
+
+    private Boolean getOvsdbTopology() {
+        LOG.info("getOvsdbTopology: looking for {}...", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue());
+        Boolean found = false;
+        final TopologyId topologyId = SouthboundUtils.OVSDB_TOPOLOGY_ID;
+        InstanceIdentifier<Topology> path =
+                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        for (int i = 0; i < 60; i++) {
+            Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
+            if (topology != null) {
+                LOG.info("getOvsdbTopology: found {}...", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue());
+                found = true;
+                break;
+            } else {
+                LOG.info("getOvsdbTopology: still looking ({})...", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOG.warn("Interrupted while waiting for {}", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), e);
+                }
+            }
+        }
+        return found;
     }
 
     /**

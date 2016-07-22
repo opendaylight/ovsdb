@@ -34,6 +34,24 @@
       "revId": "b51e8789ca387830f041fe787a804181aee33ef1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_7ba85720",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 5433
+      },
+      "writtenOn": "2016-07-22T16:49:26Z",
+      "side": 1,
+      "message": "Thanks Eric, I just concern that for this scenario the QoS is not updated as intended if the exception is swallowed.\nThe fix looks fine to me.",
+      "parentUuid": "9a561d44_7bfa1744",
+      "revId": "b51e8789ca387830f041fe787a804181aee33ef1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

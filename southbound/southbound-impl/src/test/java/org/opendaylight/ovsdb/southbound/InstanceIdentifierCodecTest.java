@@ -120,7 +120,7 @@ public class InstanceIdentifierCodecTest {
         mock(InstanceIdentifier.class);
         when(bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yiid))
                 .thenAnswer(new Answer<InstanceIdentifier<?>>() {
-                    public InstanceIdentifier<?> answer(InvocationOnMock invocation) throws Throwable {
+                    public InstanceIdentifier<?> answer(InvocationOnMock invocation) throws Exception {
                         return (InstanceIdentifier<?>) invocation.getArguments()[0];
                     }
                 });

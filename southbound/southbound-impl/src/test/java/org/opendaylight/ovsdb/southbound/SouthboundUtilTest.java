@@ -97,7 +97,7 @@ public class SouthboundUtilTest {
         when(db.newReadOnlyTransaction()).thenReturn(transaction);
         when(mn.getManagedBy()).thenReturn(ref);
         when(ref.getValue()).thenAnswer(new Answer<InstanceIdentifier<Node>>() {
-            public InstanceIdentifier<Node> answer(InvocationOnMock invocation) throws Throwable {
+            public InstanceIdentifier<Node> answer(InvocationOnMock invocation) throws Exception {
                 return (InstanceIdentifier<Node>) mock(InstanceIdentifier.class);
             }
         });

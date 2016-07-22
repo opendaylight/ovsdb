@@ -16,7 +16,8 @@ public class OvsdbSchemaContantsTest {
 
     @Test
     public void testDatabaseName() {
-        assertEquals("Error databaseName did not return correct value", "Open_vSwitch", OvsdbSchemaContants.DATABASE_NAME);
+        assertEquals("Error databaseName did not return correct value", "Open_vSwitch",
+                OvsdbSchemaContants.DATABASE_NAME);
     }
 
     @Test

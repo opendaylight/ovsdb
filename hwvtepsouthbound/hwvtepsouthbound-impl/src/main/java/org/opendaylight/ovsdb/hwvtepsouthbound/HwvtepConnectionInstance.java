@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class HwvtepConnectionInstance implements OvsdbClient{
+public class HwvtepConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionInstance.class);
     private ConnectionInfo connectionInfo;
     private OvsdbClient client;
@@ -67,9 +67,8 @@ public class HwvtepConnectionInstance implements OvsdbClient{
     private HwvtepGlobalAugmentation initialCreatedData = null;
     private HwvtepDeviceInfo deviceInfo;
 
-
-    HwvtepConnectionInstance (ConnectionInfo key,OvsdbClient client,
-                    InstanceIdentifier<Node> iid, TransactionInvoker txInvoker) {
+    HwvtepConnectionInstance (ConnectionInfo key, OvsdbClient client,
+                              InstanceIdentifier<Node> iid, TransactionInvoker txInvoker) {
         this.connectionInfo = key;
         this.client = client;
         this.instanceIdentifier = iid;
@@ -171,7 +170,6 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         return client.monitor(schema, monitorRequests, callback);
     }
 
-    @Override
     public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
                     List<MonitorRequest> monitorRequests, MonitorHandle monitorHandle, MonitorCallBack callback) {
         return null;
@@ -191,19 +189,6 @@ public class HwvtepConnectionInstance implements OvsdbClient{
 
     public ListenableFuture<Boolean> unLock(String lockId) {
         return client.unLock(lockId);
-    }
-
-    public void startEchoService(EchoServiceCallbackFilters callbackFilters) {
-        client.startEchoService(callbackFilters);
-    }
-
-    public void stopEchoService() {
-        client.stopEchoService();
-    }
-
-    @Override
-    public ListenableFuture<List<String>> echo() {
-        return client.echo();
     }
 
     public OvsdbConnectionInfo getConnectionInfo() {
@@ -303,4 +288,7 @@ public class HwvtepConnectionInstance implements OvsdbClient{
         return this.deviceInfo;
     }
 
+    public OvsdbClient getOvsdbClient() {
+        return client;
+    }
 }

@@ -125,7 +125,9 @@ public class OpenVSwitchUpdateCommandTest {
         PowerMockito.whenNew(OvsdbNodeAugmentationBuilder.class).withNoArguments().thenReturn(ovsdbNodeBuilder);
 
         //suppress the setter methods of the class
-        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setVersion",
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setOvsVersion",
+                OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
+        MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setDbVersion",
                 OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setDataPathTypes",
                 OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
@@ -364,7 +366,7 @@ public class OpenVSwitchUpdateCommandTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testSetVersion() throws Exception {
+    public void testSetOvsVersion() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(openVSwitch.getOvsVersionColumn()).thenReturn(column);
@@ -374,10 +376,25 @@ public class OpenVSwitchUpdateCommandTest {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         when(ovsdbNodeBuilder.setOvsVersion(anyString())).thenReturn(ovsdbNodeBuilder);
 
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setVersion", ovsdbNodeBuilder, openVSwitch);
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setOvsVersion", ovsdbNodeBuilder, openVSwitch);
         verify(ovsdbNodeBuilder).setOvsVersion(anyString());
         verify(openVSwitch).getOvsVersionColumn();
+    }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testSetDbVersion() throws Exception {
+        OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
+        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        when(openVSwitch.getDbVersionColumn()).thenReturn(column);
+        Set<String> set = new HashSet<>();
+        set.add("7.6.1");
+        when(column.getData()).thenReturn(set);
+        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
+        when(ovsdbNodeBuilder.setOvsVersion(anyString())).thenReturn(ovsdbNodeBuilder);
 
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setDbVersion", ovsdbNodeBuilder, openVSwitch);
+        verify(ovsdbNodeBuilder).setDbVersion(anyString());
+        verify(openVSwitch).getDbVersionColumn();
     }
 }

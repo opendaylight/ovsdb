@@ -5,19 +5,19 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-
 public class JsonUtils {
 
-    static ObjectMapper mapper = new ObjectMapper();
+    private static ObjectMapper mapper = new ObjectMapper();
+    private static ObjectWriter prettyWriter = mapper.writerWithDefaultPrettyPrinter();
 
-    static ObjectWriter prettyWriter = mapper.writerWithDefaultPrettyPrinter();
+    private JsonUtils() {
+    }
 
     public static String prettyString(Object jsonNode) {
         try {

@@ -40,14 +40,15 @@ public class TableUpdate<E extends TableSchema<E>> {
             return oldRow;
         }
 
-        public void setOld(Row<E> oldRow) {
-            this.oldRow = oldRow;
+        public void setOld(Row<E> old) {
+            this.oldRow = old;
         }
 
         public Row<E> getNew() {
             return newRow;
         }
 
+        @SuppressWarnings("checkstyle:HiddenField")
         public void setNew(Row<E> newRow) {
             this.newRow = newRow;
         }

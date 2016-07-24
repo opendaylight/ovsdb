@@ -184,6 +184,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_d04fbd69",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-24T03:23:06Z",
+      "side": 1,
+      "message": "Hi Vinh,\n\nApart from the cleaner solution, it will avoid any message re-ordering issues and also will help us handling the issue that probably happen at bridge creation time. E.g If there is any issue with bridge creation, TerminationPointReconciliationTask will timeout saying that bridge for the termination point was not created successfully, rather then going silent without logging any error. Also reconciliation generally is a high load exercise, so it can create lot of weird issues, like the one i mentioned above. So in my opinion it\u0027s good if we do termination point reconciliation once we see bridge in the operational data store.",
+      "parentUuid": "9a561d44_04c91b26",
+      "range": {
+        "startLine": 48,
+        "startChar": 3,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c458f158",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
         "patchSetId": 5
@@ -219,6 +243,30 @@
       "side": 1,
       "message": "You mean adding the logic of this class in the ReconciliationManager? It can be done. But I would like to put logic for handling specific scenario in its own class rather than clustering ReconciliationManager class.",
       "parentUuid": "9a561d44_c458f158",
+      "range": {
+        "startLine": 63,
+        "startChar": 13,
+        "endLine": 63,
+        "endChar": 56
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b054c9ff",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-24T03:23:06Z",
+      "side": 1,
+      "message": "ReconciliationManager is the main class that should take care of reconciliation of any OVSDB resource. Resource specific stuff should go to the *Task classes. Reconciliation manager should have insight of dependency between the resources, so that it can take care of any possible ordering required for reconciliation. We should have specific resource based service if the reconciliation of that resource requires explicit handling of many corner cases, which i don\u0027t really see in this case.",
+      "parentUuid": "9a561d44_446f93fd",
       "range": {
         "startLine": 63,
         "startChar": 13,
@@ -313,6 +361,30 @@
       "side": 1,
       "message": "The connection reconciliation task call OvsdbConnectionManager.connect() at line 50.\nThe reason I made the change to move the  OvsdbConnectionManager attribute from the super class ReconciliationTask to the ConnectionReconciliationTask because only the latter needs to reference the former.\nThe other subclasses of ReconciliationTask such as Bridge/TerminationPointConfigReconciliationTask don\u0027t use OvsdbConnectionManager.",
       "parentUuid": "9a561d44_04194988",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 58
+      },
+      "revId": "7eeafa296a4b7d4c9c2a7ae6d27d958b35017e10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_5043ad41",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/connection/ConnectionReconciliationTask.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-24T03:23:06Z",
+      "side": 1,
+      "message": "I think lets do this refactoring once we are done with the all the reconciliation work. I kept the reference in super class, because there might be a requirement to fetch details directly from the switch if required by any reconciliation task rather than waiting for data store. So i think it\u0027s good if the connection manager reference is available to all the reconciliation tasks.",
+      "parentUuid": "9a561d44_a73031e9",
       "range": {
         "startLine": 31,
         "startChar": 4,

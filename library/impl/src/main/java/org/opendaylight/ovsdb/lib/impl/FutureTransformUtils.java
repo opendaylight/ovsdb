@@ -20,14 +20,14 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 
 public class FutureTransformUtils {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private FutureTransformUtils() {
     }
 
     public static final ListenableFuture<List<OperationResult>> transformTransactResponse(
             ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return Futures.transform(transactResponseFuture, new Function<List<JsonNode>, List<OperationResult>>() {
             @Override
             public List<OperationResult> apply(List<JsonNode> jsonNodes) {
@@ -58,12 +58,12 @@ public class FutureTransformUtils {
                                     break;
 
                                 default:
-                                    or = objectMapper.convertValue(jsonNode, OperationResult.class);
+                                    or = OBJECT_MAPPER.convertValue(jsonNode, OperationResult.class);
 
                                     break;
                             }
                         } else {
-                            or = objectMapper.convertValue(jsonNode, OperationResult.class);
+                            or = OBJECT_MAPPER.convertValue(jsonNode, OperationResult.class);
                         }
                     } else {
                         or = new OperationResult();

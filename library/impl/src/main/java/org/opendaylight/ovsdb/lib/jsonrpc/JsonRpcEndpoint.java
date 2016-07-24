@@ -43,10 +43,10 @@ public class JsonRpcEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcEndpoint.class);
     private static final int REAPER_INTERVAL = 300;
     private static final int REAPER_THREADS = 3;
-    private static final ThreadFactory futureReaperThreadFactory = new ThreadFactoryBuilder()
+    private static final ThreadFactory FUTURE_REAPER_THREAD_FACTORY = new ThreadFactoryBuilder()
             .setNameFormat("OVSDB-Lib-Future-Reaper-%d").build();
-    private static final ScheduledExecutorService futureReaperService
-            = Executors.newScheduledThreadPool(REAPER_THREADS, futureReaperThreadFactory);
+    private static final ScheduledExecutorService FUTURE_REAPER_SERVICE
+            = Executors.newScheduledThreadPool(REAPER_THREADS, FUTURE_REAPER_THREAD_FACTORY);
 
     public class CallContext {
         Method method;
@@ -120,7 +120,7 @@ public class JsonRpcEndpoint {
 
                 final SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));
-                futureReaperService.schedule(new Runnable() {
+                FUTURE_REAPER_SERVICE.schedule(new Runnable() {
                     @Override
                     public void run() {
                         if (sf.isDone() || sf.isCancelled()) {

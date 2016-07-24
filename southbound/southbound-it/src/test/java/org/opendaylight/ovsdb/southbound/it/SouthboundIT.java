@@ -8,6 +8,7 @@
 package org.opendaylight.ovsdb.southbound.it;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -16,6 +17,10 @@ import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -26,10 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -44,12 +47,9 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -125,6 +125,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -145,14 +146,10 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Integration tests for southbound-impl
@@ -176,10 +173,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
-    private static DataBroker dataBroker;
     private static Version schemaVersion;
-    private static OvsdbClient ovsdbClient;
-    private static DatabaseSchema dbSchema;
+    @Inject @Filter(timeout=60000)
+    private static DataBroker dataBroker = null;
 
     @Inject
     private BundleContext bundleContext;
@@ -395,10 +391,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } catch (Exception e) {
             LOG.warn("Failed to setup test", e);
         }
-        //dataBroker = getSession().getSALService(DataBroker.class);
-        Thread.sleep(3000);
-        dataBroker = SouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
+
+        LOG.info("sleeping for 10s to let the features finish installing");
+        Thread.sleep(10000);
 
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
         String portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);
@@ -418,6 +414,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         mdsalUtils = new MdsalUtils(dataBroker);
+        assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
@@ -426,17 +423,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 iid, OPERATIONAL_LISTENER, AsyncDataBroker.DataChangeScope.SUBTREE);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
-        try {
-            ovsdbClient = SouthboundIntegrationTestUtils.getTestConnection(this);
-            assertNotNull("Invalid Client. Check connection params", ovsdbClient);
-
-            dbSchema = ovsdbClient.getSchema(SouthboundIntegrationTestUtils.OPEN_VSWITCH_SCHEMA).get();
-            assertNotNull("Invalid dbSchema.", dbSchema);
-            schemaVersion = dbSchema.getVersion();
-            LOG.info("{} schema version = {}", SouthboundIntegrationTestUtils.OPEN_VSWITCH_SCHEMA, schemaVersion);
-        } catch (Exception e) {
-            fail("Error accessing schemaVersion in SouthboundIT setUp()." + usage());
-        }
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        assertNotNull("The OvsdbNodeAugmentation cannot be null", ovsdbNodeAugmentation);
+        schemaVersion = Version.fromString(ovsdbNodeAugmentation.getDbVersion());
+        LOG.info("schemaVersion = {}", schemaVersion);
 
         // Let's count the test methods (we need to use this instead of @AfterClass on teardown() since the latter is
         // useless with pax-exam)
@@ -471,6 +461,30 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.warn("Interrupted while disconnecting", e);
             }
         }
+    }
+
+    private Boolean getOvsdbTopology() {
+        LOG.info("getOvsdbTopology: looking for {}...", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue());
+        Boolean found = false;
+        final TopologyId topologyId = SouthboundUtils.OVSDB_TOPOLOGY_ID;
+        InstanceIdentifier<Topology> path =
+                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        for (int i = 0; i < 60; i++) {
+            Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
+            if (topology != null) {
+                LOG.info("getOvsdbTopology: found {}...", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue());
+                found = true;
+                break;
+            } else {
+                LOG.info("getOvsdbTopology: still looking ({})...", i);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOG.warn("Interrupted while waiting for {}", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), e);
+                }
+            }
+        }
+        return found;
     }
 
     /**
@@ -677,6 +691,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
+    }
+
+    @Test
+    public void testOvsdbNodeDbVersion() throws InterruptedException {
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        Assert.assertNotNull(ovsdbNodeAugmentation);
+        assertNotNull(ovsdbNodeAugmentation.getDbVersion());
     }
 
     @Test

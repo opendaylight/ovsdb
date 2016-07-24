@@ -297,20 +297,23 @@ public class OvsdbConnectionManagerTest {
         ConnectionInfo key = mock(ConnectionInfo.class);
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", ConnectionInfo.class));
         when(ovsdbConnManager.getConnectionInstance(key)).thenReturn((OvsdbConnectionInstance)ovsdbClient);
-        assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(), ovsdbConnManager.getClient(key));
+        assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(),
+                ovsdbConnManager.getClient(key));
 
         //Test getClient(OvsdbBridgeAttributes mn)
         OvsdbBridgeAttributes mn = mock(OvsdbBridgeAttributes.class);
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance",
                 OvsdbBridgeAttributes.class));
         when(ovsdbConnManager.getConnectionInstance(mn)).thenReturn((OvsdbConnectionInstance)ovsdbClient);
-        assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(), ovsdbConnManager.getClient(mn));
+        assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(),
+                ovsdbConnManager.getClient(mn));
 
         //Test getClient(Node node)
         Node node = mock(Node.class);
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", Node.class));
         when(ovsdbConnManager.getConnectionInstance(node)).thenReturn((OvsdbConnectionInstance)ovsdbClient);
-        assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(), ovsdbConnManager.getClient(node));
+        assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(),
+                ovsdbConnManager.getClient(node));
     }
 
     @SuppressWarnings("unchecked")

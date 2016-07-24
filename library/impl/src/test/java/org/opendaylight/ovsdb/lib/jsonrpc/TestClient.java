@@ -66,7 +66,6 @@ public class TestClient extends TestCase {
             String string = ",\"key1" + counter + "\":\"planet of apes" + counter + "\", \"key2" + counter
                     + "\":{\"k1\":\"ovs-db rocks the world\"}";
             outputStream.write(string.substring(i == 0 ? 1 : 0).getBytes("UTF-8"));
-            // System.out.println("data counter = " + counter);
         }
         outputStream.write("}".getBytes("UTF-8"));
     }
@@ -79,7 +78,6 @@ public class TestClient extends TestCase {
         counter++;
         String string = "                       {\"part" + counter + "\":";
         outputStream.write(string.getBytes("UTF-8"));
-        // System.out.println("partial first half counter = " + counter);
     }
 
     /**
@@ -88,7 +86,6 @@ public class TestClient extends TestCase {
     private void writePartialLast(OutputStream outputStream) throws IOException {
         String string = "\"val" + counter + "\"}";
         outputStream.write(string.getBytes("UTF-8"));
-        // System.out.println("partial second half counter = " + counter);
     }
 
 }

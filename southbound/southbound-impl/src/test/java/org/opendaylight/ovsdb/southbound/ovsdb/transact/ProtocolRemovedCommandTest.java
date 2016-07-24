@@ -63,7 +63,7 @@ public class ProtocolRemovedCommandTest {
         ProtocolEntry protocol = mock(ProtocolEntry.class);
         when(protocol.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
             public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
+                    InvocationOnMock invocation) throws Exception {
                 return OvsdbBridgeProtocolOpenflow10.class;
             }
         });

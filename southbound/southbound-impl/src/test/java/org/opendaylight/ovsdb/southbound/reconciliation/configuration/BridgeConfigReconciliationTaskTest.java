@@ -128,7 +128,7 @@ public class BridgeConfigReconciliationTaskTest {
         ProtocolEntryKey protocolEntryKey = mock(ProtocolEntryKey.class);
         Mockito.when(protocolEntry.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
             public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Throwable {
+                    InvocationOnMock invocation) throws Exception {
                 return OvsdbBridgeProtocolOpenflow10.class;
             }
         });

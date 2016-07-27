@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_62b3790a",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/message/MonitorRequest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-07-27T07:42:34Z",
+      "side": 1,
+      "message": "Has this patch been tested in a JSON context? Last time I worked with JSON/JAXB in earnest, JSON beans needed to be mutable, have a parameterless constructor and setters for all the exposed properties :-/.",
+      "revId": "b719dfd25b76f8e914c0a490218a91d90df66d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_62aa5986",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/message/MonitorRequestBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-07-27T07:42:34Z",
+      "side": 1,
+      "message": "I liked Sets before Java 7, but now I find\n\n    columns \u003d new HashSet\u003c\u003e();\n\njust as readable!\n\nI also prefer to initialise columns in the instance initialisers (trading a little memory for better thread safety).",
+      "revId": "b719dfd25b76f8e914c0a490218a91d90df66d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_8294cd43",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/message/MonitorRequestBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-07-27T07:42:34Z",
+      "side": 1,
+      "message": "Since we\u0027re turning this into a proper builder, it might make sense to remove the getters (I haven\u0027t checked whether they\u0027re actually used).",
+      "revId": "b719dfd25b76f8e914c0a490218a91d90df66d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

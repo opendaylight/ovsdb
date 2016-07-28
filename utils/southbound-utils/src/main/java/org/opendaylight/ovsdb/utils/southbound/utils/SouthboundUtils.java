@@ -80,6 +80,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
@@ -577,6 +578,28 @@ public class SouthboundUtils {
         return result;
     }
 
+    /**
+     * Set the controllers of an existing bridge node
+     * @param ovsdbNode where the bridge is
+     * @param bridgeNode The bridge node itself
+     * @param bridgeName Name of the bridge
+     * @param controllers controller strings
+     * @return success if the write to md-sal was successful
+     */
+    public boolean setBridgeController(Node ovsdbNode, Node bridgeNode, String bridgeName, List<String> controllers) {
+        LOG.debug("setBridgeController: ovsdbNode: {}, bridgeNode: {}, controller(s): {}",
+                ovsdbNode, bridgeNode, controllers);
+
+        OvsdbBridgeAugmentation bridgeAug = extractBridgeAugmentation(bridgeNode);
+        NodeBuilder nodeBuilder = new NodeBuilder(bridgeNode);
+        OvsdbBridgeAugmentationBuilder augBuilder = new OvsdbBridgeAugmentationBuilder(bridgeAug);
+        augBuilder.setControllerEntry(createControllerEntries(controllers));
+        nodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, augBuilder.build());
+        InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+
+        return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, nodeBuilder.build());
+    }
+
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
                              final Class<? extends DatapathTypeBase> dpType, String mac) {
         boolean result;
@@ -979,4 +1002,40 @@ public class SouthboundUtils {
         return tpAugmentations;
     }
 
+    /**
+     * Get all OVSDB nodes from topology.
+     * @return a list of nodes or null if the topology could not found
+     */
+    public List<Node> getOvsdbNodes() {
+        InstanceIdentifier<Topology> inst = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class,
+                new TopologyKey(OVSDB_TOPOLOGY_ID));
+        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, inst);
+        return topology != null ? topology.getNode() : null;
+    }
+
+    /**
+     * Get OpenvSwitch other-config by key.
+     * @param node OVSDB node
+     * @param key key to extract from other-config
+     * @return the value for key or null if key not found
+     */
+    public String getOpenvswitchOtherConfig(Node node, String key) {
+        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+        if (ovsdbNode == null) {
+            Node nodeFromReadOvsdbNode = readOvsdbNode(node);
+            if (nodeFromReadOvsdbNode != null) {
+                ovsdbNode = nodeFromReadOvsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+            }
+        }
+
+        if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
+            for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {
+                if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {
+                    return openvswitchOtherConfigs.getOtherConfigValue();
+                }
+            }
+        }
+
+        return null;
+    }
 }

@@ -577,6 +577,28 @@ public class SouthboundUtils {
         return result;
     }
 
+    /**
+     * Set the controllers of an existing bridge node
+     * @param ovsdbNode where the bridge is
+     * @param bridgeNode The bridge node itself
+     * @param bridgeName Name of the bridge
+     * @param controllers controller strings
+     * @return success if the write to md-sal was successful
+     */
+    public boolean setBridgeController(Node ovsdbNode, Node bridgeNode, String bridgeName, List<String> controllers) {
+        LOG.info("setBridgeController: ovsdbNode: {}, bridgeNode: {}, controller(s): {}",
+                                                                               ovsdbNode, bridgeNode, controllers);
+
+        OvsdbBridgeAugmentation bridgeAug = extractBridgeAugmentation(bridgeNode);
+        NodeBuilder nodeBuilder = new NodeBuilder(bridgeNode);
+        OvsdbBridgeAugmentationBuilder augBuilder = new OvsdbBridgeAugmentationBuilder(bridgeAug);
+        augBuilder.setControllerEntry(createControllerEntries(controllers));
+        nodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, augBuilder.build());
+        InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+
+        return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, nodeBuilder.build());
+    }
+
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
                              final Class<? extends DatapathTypeBase> dpType, String mac) {
         boolean result;

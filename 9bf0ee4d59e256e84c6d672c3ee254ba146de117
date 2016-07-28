@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_bdcf6355",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/schema/BaseType.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-28T23:23:16Z",
+      "side": 1,
+      "message": "setEnums() is already done in populateEnum, so i think we should either remove it from populateEnum or from GetConstraints()",
+      "range": {
+        "startLine": 372,
+        "startChar": 12,
+        "endLine": 375,
+        "endChar": 13
+      },
+      "revId": "9bf0ee4d59e256e84c6d672c3ee254ba146de117",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

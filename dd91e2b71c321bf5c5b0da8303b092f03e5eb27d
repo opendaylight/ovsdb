@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_7db78bf5",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-28T21:28:37Z",
+      "side": 1,
+      "message": "please use constant.",
+      "range": {
+        "startLine": 108,
+        "startChar": 58,
+        "endLine": 108,
+        "endChar": 74
+      },
+      "revId": "dd91e2b71c321bf5c5b0da8303b092f03e5eb27d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_fdc27b51",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-28T21:28:37Z",
+      "side": 1,
+      "message": "please use constant.",
+      "range": {
+        "startLine": 167,
+        "startChar": 94,
+        "endLine": 167,
+        "endChar": 110
+      },
+      "revId": "dd91e2b71c321bf5c5b0da8303b092f03e5eb27d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_5da3a7b1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-28T21:28:37Z",
+      "side": 1,
+      "message": "please use constants",
+      "range": {
+        "startLine": 109,
+        "startChar": 58,
+        "endLine": 109,
+        "endChar": 74
+      },
+      "revId": "dd91e2b71c321bf5c5b0da8303b092f03e5eb27d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

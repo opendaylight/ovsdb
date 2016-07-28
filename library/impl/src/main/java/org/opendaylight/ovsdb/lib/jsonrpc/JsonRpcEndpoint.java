@@ -123,10 +123,11 @@ public class JsonRpcEndpoint {
                 FUTURE_REAPER_SERVICE.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        if (sf.isDone() || sf.isCancelled()) {
+                        CallContext cc = methodContext.remove(request.getId());
+                        if ( cc != null && (cc.getFuture().isDone() || cc.getFuture().isCancelled())) {
                             return;
                         }
-                        methodContext.remove(request.getId()).getFuture().cancel(false);
+                        cc.getFuture().cancel(false);
                     }
                 },REAPER_INTERVAL, TimeUnit.MILLISECONDS);
 

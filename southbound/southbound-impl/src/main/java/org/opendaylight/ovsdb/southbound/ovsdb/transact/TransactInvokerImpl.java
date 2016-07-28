@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -55,13 +56,14 @@ public class TransactInvokerImpl implements TransactInvoker {
         LOG.debug("invoke: command: {}, tb: {}", command, tb);
         if (tb.getOperations().size() > 0) {
             try {
-                List<OperationResult> got = result.get();
-                LOG.debug("OVSDB transaction result: {}", got);
+                if(!result.isCancelled()) {
+                    List<OperationResult> got = result.get();
+                    LOG.debug("OVSDB transaction result: {}", got);
+                }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Transact execution exception: ", e);
             }
             LOG.trace("invoke exit command: {}, tb: {}", command, tb);
         }
     }
-
 }

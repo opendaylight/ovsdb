@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_c978a1c6",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 590,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-07-28T12:06:01Z",
+      "side": 1,
+      "message": "probably don\u0027t want info",
+      "revId": "e1d738ae1b1d4e10ef8b662ae3d3089911b6b0df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_299cbd0e",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-07-28T12:06:01Z",
+      "side": 1,
+      "message": "formatting looks off on this line",
+      "revId": "e1d738ae1b1d4e10ef8b662ae3d3089911b6b0df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_89422966",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-07-28T12:06:01Z",
+      "side": 1,
+      "message": "more useful to have a method that takes the datastore type",
+      "revId": "e1d738ae1b1d4e10ef8b662ae3d3089911b6b0df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_4c013f04",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-07-28T12:06:01Z",
+      "side": 1,
+      "message": "this could also return an empty list",
+      "revId": "e1d738ae1b1d4e10ef8b662ae3d3089911b6b0df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_29383dee",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-07-28T12:06:01Z",
+      "side": 1,
+      "message": "name it getOvsdbNodes since these are ovsdb nodes",
+      "revId": "e1d738ae1b1d4e10ef8b662ae3d3089911b6b0df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

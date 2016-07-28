@@ -105,8 +105,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 mcastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update remoteMcastMac: NO logical switch with iid {} found in operational datastore!",
-                        lswitchIid);
+                mcastMacsRemote.setLogicalSwitch(new UUID("LogicalSwitch_"+lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue()));
             }
         }
     }

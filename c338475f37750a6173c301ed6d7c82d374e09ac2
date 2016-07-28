@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_432d92fd",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcEndpoint.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-07-28T07:52:03Z",
+      "side": 1,
+      "message": "needs null check, we can be here if cc is null at line 127.",
+      "revId": "c338475f37750a6173c301ed6d7c82d374e09ac2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_83fcca73",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-07-28T07:52:03Z",
+      "side": 1,
+      "message": "would be good to have a debug/trace log for else condition, will help with troubleshooting.",
+      "revId": "c338475f37750a6173c301ed6d7c82d374e09ac2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

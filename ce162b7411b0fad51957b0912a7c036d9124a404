@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_cc40afa7",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-07-28T13:17:50Z",
+      "side": 1,
+      "message": "Can you use Collections.EMPTY_LIST here? And above?",
+      "revId": "ce162b7411b0fad51957b0912a7c036d9124a404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

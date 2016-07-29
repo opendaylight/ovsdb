@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_380c01ed",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-29T02:43:33Z",
+      "side": 1,
+      "message": "Please use one of the following format (1) (methodname : log message) or (2) \"Reconcile Termination Point Configuration for Bridges {}, on node {}\"",
+      "range": {
+        "startLine": 155,
+        "startChar": 19,
+        "endLine": 155,
+        "endChar": 44
+      },
+      "revId": "d22c145259844bea9ba15ef433f38b756d77867e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_7812f909",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-29T02:43:33Z",
+      "side": 1,
+      "message": "please replace \"error\" with \"Error\". Also if NoSuchElementException is not critical, then we should change the log level to warn or debug.",
+      "range": {
+        "startLine": 239,
+        "startChar": 39,
+        "endLine": 239,
+        "endChar": 40
+      },
+      "revId": "d22c145259844bea9ba15ef433f38b756d77867e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_980d4deb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-29T02:43:33Z",
+      "side": 1,
+      "message": "replace \"error\" with \"Error\"",
+      "range": {
+        "startLine": 243,
+        "startChar": 35,
+        "endLine": 243,
+        "endChar": 36
+      },
+      "revId": "d22c145259844bea9ba15ef433f38b756d77867e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b8f771d2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/ReconciliationManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-07-29T02:43:33Z",
+      "side": 1,
+      "message": "This probably be bit confusing name (with ovsdbConnectionInstance), can you please change it something like NodeConnectionMetadata or something similar.",
+      "range": {
+        "startLine": 264,
+        "startChar": 18,
+        "endLine": 264,
+        "endChar": 40
+      },
+      "revId": "d22c145259844bea9ba15ef433f38b756d77867e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

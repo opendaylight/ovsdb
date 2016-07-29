@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -158,7 +159,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         LOG.trace("HwvtepConnectionManager exit disconnected client: {}", client);
     }
 
-    public OvsdbClient connect(InstanceIdentifier<Node> iid, HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException {
+    public OvsdbClient connect(InstanceIdentifier<Node> iid,
+                               HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException, ConnectException {
         LOG.info("Connecting to {}", HwvtepSouthboundUtil.connectionInfoToString(hwvtepGlobal.getConnectionInfo()));
         InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
         OvsdbClient client = OvsdbConnectionService.getService()

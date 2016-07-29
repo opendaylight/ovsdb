@@ -195,6 +195,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
         OvsdbRPC rpc = factory.getClient(channel, OvsdbRPC.class);
         OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, socketConnType);
+        client.setConnectionPublished(true);
         connections.put(client, channel);
         ChannelFuture closeFuture = channel.closeFuture();
         closeFuture.addListener(new ChannelConnectionHandler(client));

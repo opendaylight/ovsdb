@@ -14,6 +14,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -186,7 +188,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,
-            OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+            OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException, ConnectException {
         LOG.info("Connecting to {}", SouthboundUtil.connectionInfoToString(ovsdbNode.getConnectionInfo()));
 
         // TODO handle case where we already have a connection

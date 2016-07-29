@@ -979,4 +979,48 @@ public class SouthboundUtils {
         return tpAugmentations;
     }
 
+    /**
+     * Extract the <code>OvsdbTerminationPointAugmentation</code> for the particular <code>node</code> identified by
+     * <code>portName</code>.
+     *
+     * @param node
+     * @param portName
+     * @return
+     */
+    public OvsdbTerminationPointAugmentation getTerminationPointOfBridge(Node node, String portName) {
+        OvsdbTerminationPointAugmentation tpAugmentation = extractTerminationPointAugmentation(node,portName);
+        if(tpAugmentation == null){
+            List<OvsdbTerminationPointAugmentation> tpAugmentations = readTerminationPointAugmentations(node);
+            if(tpAugmentations != null){
+                for(OvsdbTerminationPointAugmentation ovsdbTpAugmentation : tpAugmentations){
+                    if(ovsdbTpAugmentation.getName().equals(portName)){
+                        return ovsdbTpAugmentation;
+                    }
+                }
+            }
+        }
+        return tpAugmentation;
+    }
+
+    /**
+     * read the list of <code>OvsdbTerminationPointAugmentation</code> for the particular <code>node</code>.
+     *
+     * @param node
+     * @return
+     */
+    public List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentations(Node node) {
+        if (node == null) {
+            LOG.error("readTerminationPointAugmentations: Node value is null");
+            return Collections.<OvsdbTerminationPointAugmentation>emptyList();
+        }
+        Node operNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(node.getNodeId())));
+        if (operNode != null) {
+            return extractTerminationPointAugmentations(operNode);
+        }
+        return new ArrayList<>();
+    }
+
 }

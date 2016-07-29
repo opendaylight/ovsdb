@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound;
 
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                             InstanceIdentifier<Node> instanceIdentifier = change.getRootPath().getRootIdentifier();
                             cm.connect(instanceIdentifier, ovsdbNode);
                             LOG.info("OVSDB node has been connected: {}",ovsdbNode);
-                        } catch (UnknownHostException e) {
+                        } catch (UnknownHostException | ConnectException e) {
                             LOG.warn("Failed to connect to ovsdbNode", e);
                         }
                     }
@@ -163,7 +164,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                                 cm.disconnect(ovsdbNodeModification.getDataBefore());
                                 cm.connect(change.getRootPath().getRootIdentifier(), ovsdbNodeModification
                                         .getDataAfter());
-                            } catch (UnknownHostException e) {
+                            } catch (UnknownHostException | ConnectException e) {
                                 LOG.warn("Error disconnecting from or connecting to ovsdbNode", e);
                             }
                         }

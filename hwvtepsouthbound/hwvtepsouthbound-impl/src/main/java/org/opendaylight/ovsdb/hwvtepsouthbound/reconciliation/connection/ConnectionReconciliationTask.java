@@ -18,6 +18,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,7 +60,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
                 LOG.warn("Connection retry({}) failed for {}.",
                         connectionAttempt.get(), hwvtepNode.getConnectionInfo());
             }
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | ConnectException e) {
             LOG.warn("Connection retry({}) failed with exception. ",connectionAttempt.get(), e);
         }
         return result;

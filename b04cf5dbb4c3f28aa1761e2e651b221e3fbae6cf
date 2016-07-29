@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_d80d0540",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-07-29T06:50:20Z",
+      "side": 1,
+      "message": "This change doesn\u0027t look related to ConnectException. Is this fix for something else or accidental code left in?",
+      "range": {
+        "startLine": 198,
+        "startChar": 8,
+        "endLine": 198,
+        "endChar": 44
+      },
+      "revId": "b04cf5dbb4c3f28aa1761e2e651b221e3fbae6cf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -37,6 +37,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIpsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIpsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.SwitchFaultStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.SwitchFaultStatusBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.SwitchFaultStatusKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIpsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIpsKey;
@@ -44,21 +47,25 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalSwitchUpdateCommand.class);
     private Map<UUID, PhysicalSwitch> updatedPSRows;
     private Map<UUID, Tunnel> updatedTunnelRows;
+    private Map<UUID, PhysicalSwitch> oldPSRows;
 
     public HwvtepPhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
+        oldPSRows = TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(), getDbSchema());
         try {
             updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
         } catch (IllegalArgumentException e) {
@@ -91,6 +98,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             // TODO: Delete entries that are no longer needed
             // TODO: Deletion of tunnels
             // TODO: Deletion of Tunnel BFD config and params
+            //Deleting old switch fault status entries
+            deleteEntries(transaction, getSwitchFaultStatusToRemove(psIid,pSwitch));
         }
     }
 
@@ -105,6 +114,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         setManagementIps(psAugmentationBuilder, pSwitch);
         setTunnelIps(psAugmentationBuilder, pSwitch);
         setTunnels(psAugmentationBuilder, pSwitch);
+        setSwitchFaultStatus(psAugmentationBuilder, pSwitch);
 
         psNodeBuilder.addAugmentation(PhysicalSwitchAugmentation.class, psAugmentationBuilder.build());
 
@@ -187,6 +197,45 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
     private NodeId getNodeId(PhysicalSwitch pSwitch) {
         NodeKey nodeKey = getInstanceIdentifier(pSwitch).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
+    }
+
+    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+            List<InstanceIdentifier<T>> entryIids) {
+        for (InstanceIdentifier<T> entryIid : entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+        }
+    }
+
+    private List<InstanceIdentifier<SwitchFaultStatus>> getSwitchFaultStatusToRemove(InstanceIdentifier<Node> psIid,
+            PhysicalSwitch pSwitch) {
+        Preconditions.checkNotNull(psIid);
+        Preconditions.checkNotNull(pSwitch);
+        List<InstanceIdentifier<SwitchFaultStatus>> result = new ArrayList<>();
+        PhysicalSwitch oldSwitch = oldPSRows.get(pSwitch.getUuid());
+        if (oldSwitch != null && oldSwitch.getSwitchFaultStatusColumn() != null) {
+            for (String switchFltStat : oldSwitch.getSwitchFaultStatusColumn().getData()) {
+                if (pSwitch.getSwitchFaultStatusColumn() == null
+                        || !pSwitch.getSwitchFaultStatusColumn().getData().contains(switchFltStat)) {
+                    InstanceIdentifier<SwitchFaultStatus> iid = psIid.augmentation(PhysicalSwitchAugmentation.class)
+                            .child(SwitchFaultStatus.class, new SwitchFaultStatusKey(switchFltStat));
+                    result.add(iid);
+                }
+            }
+        }
+        return result;
+    }
+
+    private void setSwitchFaultStatus(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch pSwitch) {
+        if (pSwitch.getSwitchFaultStatusColumn() != null && pSwitch.getSwitchFaultStatusColumn().getData() != null
+                && !pSwitch.getSwitchFaultStatusColumn().getData().isEmpty()) {
+            List<SwitchFaultStatus> switchFaultStatusLst = new ArrayList<>();
+            for (String switchFaultStatus : pSwitch.getSwitchFaultStatusColumn().getData()) {
+                switchFaultStatusLst
+                        .add(new SwitchFaultStatusBuilder().setKey(new SwitchFaultStatusKey(switchFaultStatus))
+                                .setSwitchFaultStatusKey(switchFaultStatus).build());
+            }
+            psAugmentationBuilder.setSwitchFaultStatus(switchFaultStatusLst);
+        }
     }
 
 }

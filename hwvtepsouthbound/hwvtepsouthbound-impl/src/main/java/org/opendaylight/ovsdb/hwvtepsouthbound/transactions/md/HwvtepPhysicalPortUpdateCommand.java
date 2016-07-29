@@ -34,10 +34,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatusBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatusKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsKey;
-
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -49,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand {
 
@@ -95,6 +98,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalPortAugmentationBuilder();
                 buildTerminationPoint(tpAugmentationBuilder, pPortUpdate);
+                setPortFaultStatus(tpAugmentationBuilder, pPortUpdate);
                 tpBuilder.addAugmentation(HwvtepPhysicalPortAugmentation.class, tpAugmentationBuilder.build());
                 if (oldPPRows.containsKey(pPortUpdateEntry.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
@@ -117,6 +121,8 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                         deleteEntries(transaction, vBIiList);
                     }
                 }
+                // Update with Deleted portfaultstatus
+                deleteEntries(transaction,getPortFaultStatusToRemove( tpPath, pPortUpdate));
             }
         }
     }
@@ -223,6 +229,38 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     private InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> switchIid,
             PhysicalPort pPort) {
         return switchIid.child(TerminationPoint.class, new TerminationPointKey(new TpId(pPort.getName())));
+    }
+    
+    private void setPortFaultStatus(HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder,
+            PhysicalPort portUpdate) {
+        if (portUpdate.getPortFaultStatusColumn() != null && portUpdate.getPortFaultStatusColumn().getData() != null
+                && !portUpdate.getPortFaultStatusColumn().getData().isEmpty()) {
+            List<PortFaultStatus> portFaultStatusLst = new ArrayList<>();
+            for (String portFaultStatus : portUpdate.getPortFaultStatusColumn().getData()) {
+                portFaultStatusLst.add(new PortFaultStatusBuilder().setKey(new PortFaultStatusKey(portFaultStatus))
+                        .setPortFaultStatusKey(portFaultStatus).build());
+            }
+            tpAugmentationBuilder.setPortFaultStatus(portFaultStatusLst);
+        }
+    }
+
+    private List<InstanceIdentifier<PortFaultStatus>> getPortFaultStatusToRemove(
+            InstanceIdentifier<TerminationPoint> tpPath, PhysicalPort pPort) {
+        Preconditions.checkNotNull(tpPath);
+        Preconditions.checkNotNull(pPort);
+        List<InstanceIdentifier<PortFaultStatus>> result = new ArrayList<>();
+        PhysicalPort oldPort = oldPPRows.get(pPort.getUuid());
+        if (oldPort != null && oldPort.getPortFaultStatusColumn() != null) {
+            for (String portFltStat : oldPort.getPortFaultStatusColumn().getData()) {
+                if (pPort.getPortFaultStatusColumn() == null
+                        || !pPort.getPortFaultStatusColumn().getData().contains(portFltStat)) {
+                    InstanceIdentifier<PortFaultStatus> iid = tpPath.augmentation(HwvtepPhysicalPortAugmentation.class)
+                            .child(PortFaultStatus.class, new PortFaultStatusKey(portFltStat));
+                    result.add(iid);
+                }
+            }
+        }
+        return result;
     }
 
 }

@@ -7,14 +7,42 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation;
 
+import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nonnull;
+
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
+import org.opendaylight.ovsdb.southbound.reconciliation.configuration.TerminationPointConfigReconciliationTask;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +75,17 @@ public class ReconciliationManager implements AutoCloseable {
 
     private static final int NO_OF_RECONCILER = 10;
     private static final int RECON_TASK_QUEUE_SIZE = 5000;
+    private static final long BRIDGE_CACHE_TIMEOUT_IN_SECONDS = 30;
 
     private final DataBroker db;
     private final ExecutorService reconcilers;
     private final ScheduledExecutorService taskTriager;
+
+    // Timeout cache contains the list of bridges to be reconciled for termination points
+    private LoadingCache<NodeKey, NodeConnectionMetadata> bridgeNodeCache = null;
+
+    // Listens for new bridge creations in the operational DS
+    private ListenerRegistration<BridgeCreatedDataTreeChangeListener> bridgeCreatedDataTreeChangeRegistration = null;
 
     private final ReconciliationTaskManager reconTaskManager = new ReconciliationTaskManager();
 
@@ -62,6 +97,8 @@ public class ReconciliationManager implements AutoCloseable {
         ThreadFactory threadFact = new ThreadFactoryBuilder()
                 .setNameFormat("ovsdb-recon-task-triager-%d").build();
         taskTriager = Executors.newSingleThreadScheduledExecutor(threadFact);
+
+        bridgeNodeCache = buildBridgeNodeCache();
     }
 
     public boolean isEnqueued(final ReconciliationTask task) {
@@ -102,6 +139,162 @@ public class ReconciliationManager implements AutoCloseable {
 
         if (this.taskTriager != null) {
             this.taskTriager.shutdownNow();
+        }
+    }
+
+    /**
+     * This method reconciles Termination Point configurations for the given list of bridge nodes.
+     *
+     * @param connectionManager OvsdbConnectionManager object
+     * @param connectionInstance OvsdbConnectionInstance object
+     * @param bridgeNodes list of bridge nodes be reconciled for termination points
+     */
+    public void reconcileTerminationPoints(final OvsdbConnectionManager connectionManager,
+                                           final OvsdbConnectionInstance connectionInstance,
+                                           final List<Node> bridgeNodes) {
+        LOG.debug("Reconcile Termination Point Configuration for Bridges {}", bridgeNodes);
+        Preconditions.checkNotNull(bridgeNodes, "Bridge Node list must not be null");
+        if (!bridgeNodes.isEmpty()) {
+            for (Node node : bridgeNodes) {
+                bridgeNodeCache.put(node.getKey(),
+                        new NodeConnectionMetadata(node, connectionManager, connectionInstance));
+            }
+            registerBridgeCreatedDataTreeChangeListener();
+        }
+    }
+
+    public void cancelTerminationPointReconciliation() {
+        cleanupBridgeCreatedDataTreeChangeRegistration();
+        for (NodeConnectionMetadata nodeConnectionMetadata : bridgeNodeCache.asMap().values()) {
+            if (nodeConnectionMetadata.getNodeIid() != null) {
+                dequeue(new TerminationPointConfigReconciliationTask(
+                        this,
+                        nodeConnectionMetadata.getConnectionManager(),
+                        nodeConnectionMetadata.getNode(),
+                        nodeConnectionMetadata.getNodeIid(),
+                        nodeConnectionMetadata.getConnectionInstance()
+                ));
+            }
+        }
+        bridgeNodeCache.invalidateAll();
+    }
+
+    private synchronized void registerBridgeCreatedDataTreeChangeListener() {
+        if (bridgeCreatedDataTreeChangeRegistration == null) {
+            BridgeCreatedDataTreeChangeListener bridgeCreatedDataTreeChangeListener =
+                    new BridgeCreatedDataTreeChangeListener();
+            InstanceIdentifier<Node> path = SouthboundMapper.createTopologyInstanceIdentifier()
+                    .child(Node.class);
+            DataTreeIdentifier<Node> dataTreeIdentifier =
+                    new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, path);
+
+            bridgeCreatedDataTreeChangeRegistration = db.registerDataTreeChangeListener(dataTreeIdentifier,
+                    bridgeCreatedDataTreeChangeListener);
+        }
+    }
+
+    private LoadingCache<NodeKey, NodeConnectionMetadata> buildBridgeNodeCache() {
+        return CacheBuilder.newBuilder()
+                .expireAfterWrite(BRIDGE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                .build(new CacheLoader<NodeKey, NodeConnectionMetadata>() {
+                    @Override
+                    public NodeConnectionMetadata load(NodeKey nodeKey) throws Exception {
+                        // the termination points are explicitly added to the cache, retrieving bridges that are not in
+                        // the cache results in NoSuchElementException
+                        throw new NoSuchElementException();
+                    }
+                });
+    }
+
+    /**
+     * This class listens for bridge creations in the operational data store.
+     * If the newly created bridge is in the 'bridgeNodeCache', termination point reconciliation for the bridge
+     * is triggered and the bridge entry is removed from the cache.
+     * Once cache is empty, either being removed explicitly or expired, the the listener de-registered.
+     */
+    class BridgeCreatedDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node> {
+        @Override
+        public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Node>> changes) {
+            bridgeNodeCache.cleanUp();
+            if (!bridgeNodeCache.asMap().isEmpty()) {
+                Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =
+                        TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class);
+                for (Map.Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> entry :
+                        nodes.entrySet()) {
+                    InstanceIdentifier<?> bridgeIid = entry.getKey();
+                    NodeKey nodeKey = bridgeIid.firstKeyOf(Node.class);
+                    try {
+                        NodeConnectionMetadata bridgeNodeMetaData = bridgeNodeCache.get(nodeKey);
+                        bridgeNodeMetaData.setNodeIid(bridgeIid);
+                        TerminationPointConfigReconciliationTask tpReconciliationTask =
+                                new TerminationPointConfigReconciliationTask(ReconciliationManager.this,
+                                        bridgeNodeMetaData.getConnectionManager(),
+                                        bridgeNodeMetaData.getNode(),
+                                        bridgeIid,
+                                        bridgeNodeMetaData.getConnectionInstance());
+                        enqueue(tpReconciliationTask);
+                        bridgeNodeCache.invalidate(nodeKey);
+                    } catch (UncheckedExecutionException ex) {
+                        // Ignore NoSuchElementException which indicates bridge node is not in the list of
+                        // pending reconciliation
+                        if (!(ex.getCause() instanceof NoSuchElementException)) {
+                            LOG.error("Error getting Termination Point node from LoadingCache", ex);
+                        }
+
+                    } catch (ExecutionException ex) {
+                        LOG.error("Error getting Termination Point node from LoadingCache", ex);
+                    }
+                    if (bridgeNodeCache.asMap().isEmpty()) {
+                        LOG.debug("De-registering for bridge creation event");
+                        cleanupBridgeCreatedDataTreeChangeRegistration();
+                    }
+                }
+            } else {
+                LOG.debug("Cache expired - De-registering for bridge creation event");
+                cleanupBridgeCreatedDataTreeChangeRegistration();
+            }
+        }
+    }
+
+    private void cleanupBridgeCreatedDataTreeChangeRegistration() {
+        if (bridgeCreatedDataTreeChangeRegistration != null) {
+            bridgeCreatedDataTreeChangeRegistration.close();
+            bridgeCreatedDataTreeChangeRegistration = null;
+        }
+    }
+
+    private class NodeConnectionMetadata {
+        Node node;
+        InstanceIdentifier<?> nodeIid;
+        OvsdbConnectionManager connectionManager;
+        OvsdbConnectionInstance connectionInstance;
+
+        NodeConnectionMetadata(Node node,
+                               OvsdbConnectionManager connectionManager,
+                               OvsdbConnectionInstance connectionInstance) {
+            this.node = node;
+            this.connectionManager = connectionManager;
+            this.connectionInstance = connectionInstance;
+        }
+
+        public Node getNode() {
+            return node;
+        }
+
+        public OvsdbConnectionManager getConnectionManager() {
+            return connectionManager;
+        }
+
+        public OvsdbConnectionInstance getConnectionInstance() {
+            return connectionInstance;
+        }
+
+        public void setNodeIid(InstanceIdentifier<?> nodeIid) {
+            this.nodeIid = nodeIid;
+        }
+
+        public InstanceIdentifier<?> getNodeIid() {
+            return nodeIid;
         }
     }
 }

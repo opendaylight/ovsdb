@@ -39,6 +39,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconcilationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
@@ -442,6 +443,14 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
+    private void reconcileConfigurations(final HwvtepConnectionInstance client) {
+        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
+        final ReconciliationTask task = new HwvtepReconcilationTask(
+                reconciliationManager, HwvtepConnectionManager.this, nodeIid, client, db);
+
+        reconciliationManager.enqueue(task);
+    }
+
     public void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
         LOG.info("handleOwnershipChanged: {} event received for device {}",
@@ -493,6 +502,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
             hwvtepConnectionInstance.registerCallbacks();
+
+            reconcileConfigurations(hwvtepConnectionInstance);
 
         } else {
             //You were owner of the device, but now you are not. With the current ownership

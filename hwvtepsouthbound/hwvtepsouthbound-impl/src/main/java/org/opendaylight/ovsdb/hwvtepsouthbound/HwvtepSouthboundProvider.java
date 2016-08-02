@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.OperationalNodeListener;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -56,6 +57,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
+    private OperationalNodeListener operationalNodeListener;
 
     public HwvtepSouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
@@ -80,7 +82,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         txInvoker = new TransactionInvokerImpl(db);
         cm = new HwvtepConnectionManager(db, txInvoker, entityOwnershipService);
         hwvtepDTListener = new HwvtepDataChangeListener(db, cm);
-
+        operationalNodeListener = new OperationalNodeListener(db, cm);
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
                 new HwvtepsbPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);

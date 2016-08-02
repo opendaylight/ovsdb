@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_2020e3f6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:37:27Z",
+      "side": 1,
+      "message": "Please add a short description of the fix to the summary...",
+      "revId": "2702a9ba62acb573c9cb6fc68edbb3cce0616264",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

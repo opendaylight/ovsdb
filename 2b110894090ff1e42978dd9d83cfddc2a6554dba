@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_bdd700bf",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T12:56:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_b9aefbe5",
+      "revId": "2b110894090ff1e42978dd9d83cfddc2a6554dba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_3982eb52",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
         "patchSetId": 4
@@ -47,6 +65,24 @@
       "writtenOn": "2016-08-01T08:38:26Z",
       "side": 1,
       "message": "The \"\u003d\u003d true\" part is redundant:\n\n    if (skipColumn(tableName, column.toLowerCase())) {\n\nI\u0027d recommend coding this the other way round, since the interesting case is the one where we add the monitor:\n\n    if (!skipColumn(tableName, column.toLowerCase())) {\n        monitorBuilder.addColumn(column);\n    } else {\n        LOG.info(\"Skipping column {} in table {}\", column, tableName);\n    }\n\nIn fact I\u0027d make skipColumn() handle the lower-casing:\n\n    if (!skipColumn(tableName, column)) {\n        monitorBuilder.addColumn(column);\n    } else {\n        LOG.info(\"Skipping column {} in table {}\", column, tableName);\n    }",
+      "revId": "2b110894090ff1e42978dd9d83cfddc2a6554dba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1de554a8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T12:56:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_3982eb52",
       "revId": "2b110894090ff1e42978dd9d83cfddc2a6554dba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_fde1789b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T12:56:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_797c6373",
+      "revId": "2b110894090ff1e42978dd9d83cfddc2a6554dba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_b9955b8a",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
         "patchSetId": 4
@@ -98,6 +152,24 @@
       "writtenOn": "2016-08-01T08:38:26Z",
       "side": 1,
       "message": "To avoid the caller having to know about the lower-casing, and to keep things consistent with the table-specific check two lines down:\n\n    if (SKIP_COLUMNS.get(null).containsKey(column.toLowerCase())",
+      "revId": "2b110894090ff1e42978dd9d83cfddc2a6554dba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7ded688b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T12:56:12Z",
+      "side": 1,
+      "message": "I was 50-50 about what to do. Alternately, I even considered removing toLowerCase and use case appropriate keys but then decided not to.\n\nDone.",
+      "parentUuid": "7a6b29fe_b9955b8a",
       "revId": "2b110894090ff1e42978dd9d83cfddc2a6554dba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

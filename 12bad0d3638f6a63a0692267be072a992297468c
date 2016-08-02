@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a6b29fe_9db68489",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T13:10:36Z",
+      "side": 1,
+      "message": "this should be getPortFaultStatusToRemove()",
+      "revId": "12bad0d3638f6a63a0692267be072a992297468c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1daa7419",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T13:10:36Z",
+      "side": 1,
+      "message": "newline after this",
+      "revId": "12bad0d3638f6a63a0692267be072a992297468c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_bdac2037",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-02T13:10:36Z",
+      "side": 1,
+      "message": "getSwitchFaultStatusToRemove()",
+      "revId": "12bad0d3638f6a63a0692267be072a992297468c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_402d7bfd",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalSwitchUpdateCommand.java",
         "patchSetId": 1

@@ -66,6 +66,14 @@ public class HwvtepSouthboundMapper {
                 .child(Node.class,new NodeKey(nodeId));
     }
 
+    public static InstanceIdentifier<Topology> createTopologyInstanceIdentifier() {
+        return InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
+
+    }
+
+
     public static InstanceIdentifier<Node> createInstanceIdentifier (OvsdbClient client) {
         return createInstanceIdentifier(createIpAddress(client.getConnectionInfo().getRemoteAddress()),
                         new PortNumber(client.getConnectionInfo().getRemotePort()));

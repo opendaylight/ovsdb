@@ -588,15 +588,44 @@ public class SouthboundUtils {
      */
     public boolean setBridgeController(Node ovsdbNode, Node bridgeNode, String bridgeName, List<String> controllers) {
         LOG.debug("setBridgeController: ovsdbNode: {}, bridgeNode: {}, controller(s): {}",
-                ovsdbNode, bridgeNode, controllers);
+                ovsdbNode, bridgeName, controllers);
+
+        InstanceIdentifier<Node> bridgeNodeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+        Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
+        if (bridgeNode == null) {
+            LOG.info("setBridgeController could not find bridge in configuration {}", bridgeNodeIid);
+            return false;
+        }
 
         OvsdbBridgeAugmentation bridgeAug = extractBridgeAugmentation(bridgeNode);
+
+        //Only add controller entries that do not already exist on this bridge
+        List<ControllerEntry> existingControllerEntries = bridgeAug.getControllerEntry();
+        List<ControllerEntry> newControllerEntries = new ArrayList<>();
+        if(existingControllerEntries != null) {
+            NEW_ENTRY_LOOP:
+            for (ControllerEntry newEntry : createControllerEntries(controllers)) {
+                for (ControllerEntry existingEntry : existingControllerEntries) {
+                    if (newEntry.getTarget().equals(existingEntry.getTarget())) {
+                        continue NEW_ENTRY_LOOP;
+                    }
+                }
+                newControllerEntries.add(newEntry);
+            }
+        } else {
+            newControllerEntries = createControllerEntries(controllers);
+        }
+
+        if(newControllerEntries.isEmpty()) {
+            return true;
+        }
+
         NodeBuilder nodeBuilder = new NodeBuilder(bridgeNode);
         OvsdbBridgeAugmentationBuilder augBuilder = new OvsdbBridgeAugmentationBuilder(bridgeAug);
-        augBuilder.setControllerEntry(createControllerEntries(controllers));
+
+        augBuilder.setControllerEntry(newControllerEntries);
         nodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, augBuilder.build());
         InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
-
         return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, nodeBuilder.build());
     }
 

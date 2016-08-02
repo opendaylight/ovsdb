@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_00b6873d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T13:44:58Z",
+      "side": 1,
+      "message": "You need to add a blank line between the SKIP_COLUMNS declaration and the static initialiser block (this is what Checkstyle is complaining about).",
+      "revId": "bc2971e63de8b21004b37bd013703821f500c692",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

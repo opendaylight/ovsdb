@@ -39,6 +39,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconcilationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
@@ -250,7 +251,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
-    private HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes pNode) {
+    public HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes pNode) {
         Optional<HwvtepGlobalAugmentation> optional = HwvtepSouthboundUtil.getManagingNode(db, pNode);
         if(optional.isPresent()) {
             return getConnectionInstance(optional.get().getConnectionInfo());
@@ -394,6 +395,15 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         reconciliationManager.dequeue(task);
     }
 
+    public void stopHwvtepReconciliationIfActive(InstanceIdentifier<?> iid, HwvtepConnectionInstance connectionInstance) {
+        final ReconciliationTask task = new HwvtepReconcilationTask(
+                reconciliationManager,
+                this,
+                iid,
+                connectionInstance,db);
+        reconciliationManager.dequeue(task);
+    }
+
     private void retryConnection(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepNode,
                                  ConnectionReconciliationTriggers trigger) {
         final ReconciliationTask task = new ConnectionReconciliationTask(
@@ -440,6 +450,14 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             default:
                 break;
         }
+    }
+
+    public void reconcileConfigurations(final HwvtepConnectionInstance client) {
+        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
+        final ReconciliationTask task = new HwvtepReconcilationTask(
+                reconciliationManager, HwvtepConnectionManager.this, nodeIid, client, db);
+
+        reconciliationManager.enqueue(task);
     }
 
     public void handleOwnershipChanged(EntityOwnershipChange ownershipChange) {

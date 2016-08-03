@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_ad7343b0",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/DockerOvs.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-08-03T19:35:49Z",
+      "side": 1,
+      "message": "If you change the file names, new default would be ovs-2.5.0-hwvtep.yml.",
+      "revId": "36a00afb017168014d92c1dc85effb05ba4965dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ed3d3bbd",
+        "filename": "utils/ovsdb-it-utils/src/main/resources/docker-compose-files/ovs-2.4-hwvtep.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-08-03T19:35:49Z",
+      "side": 1,
+      "message": "Can you rename this file to match the OVS version? In this case, 2.4.0.\n\nThis will make it easier to pass the OVS version in the jenkins IT build script.",
+      "revId": "36a00afb017168014d92c1dc85effb05ba4965dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4d4b8f59",
+        "filename": "utils/ovsdb-it-utils/src/main/resources/docker-compose-files/ovs-2.5-hwvtep.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2016-08-03T19:35:49Z",
+      "side": 1,
+      "message": "Can you rename this file to match the OVS version? In this case, 2.5.0.",
+      "revId": "36a00afb017168014d92c1dc85effb05ba4965dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -164,7 +164,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                     bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), new UUID(logicalSwitchUuid.getValue()));
                 }else{
-                   bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), new UUID("LogicalSwitch_"+lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue()));
+                   bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), TransactUtils.getLogicalSwitchUUID(lswitchIid));
                 }
             }
             physicalPort.setVlanBindings(bindingMap);

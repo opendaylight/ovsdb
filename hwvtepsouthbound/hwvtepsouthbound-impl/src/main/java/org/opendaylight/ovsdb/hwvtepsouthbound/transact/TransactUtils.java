@@ -30,6 +30,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -189,5 +190,13 @@ public class TransactUtils {
         if (inputLocator.getDstIp() != null) {
             physicalLocator.setDstIp(inputLocator.getDstIp().getIpv4Address().getValue());
         }
+    }
+
+    public static String getLogicalSwitchId(LogicalSwitches lswitch){
+        return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX+lswitch.getHwvtepNodeName().getValue();
+    }
+
+    public static UUID getLogicalSwitchUUID(InstanceIdentifier<LogicalSwitches> lswitchIid){
+        return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX+lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue());
     }
 }

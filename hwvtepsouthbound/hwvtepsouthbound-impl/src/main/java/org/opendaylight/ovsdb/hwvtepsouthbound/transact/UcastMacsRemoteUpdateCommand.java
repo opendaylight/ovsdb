@@ -106,7 +106,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 ucastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                ucastMacsRemote.setLogicalSwitch(new UUID("LogicalSwitch_"+lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue()));
+                ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(lswitchIid));
             }
         }
     }

@@ -12,7 +12,7 @@
   <reference id="schemaService"
     interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
   <reference id="bindingNormalizedNodeSerializer"
-    interface="org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer" />
+    interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer" />
 
   <bean id="southboundProvider"
     class="org.opendaylight.ovsdb.southbound.SouthboundProvider"

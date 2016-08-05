@@ -104,7 +104,7 @@ public class DockerOvs implements AutoCloseable {
                     " -Dovsdbserver.connection=passive -Ddocker.run=false\n";
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerOvs.class);
-    private static final String DEFAULT_DOCKER_FILE = "docker-ovs-2.5.1.yml";
+    private static final String DEFAULT_DOCKER_FILE = "ovs-2.5.0-hwvtep.yml";
     private static final String DOCKER_FILE_PATH = "META-INF/docker-compose-files/";
     private static final int COMPOSE_FILE_IDX = 3;
     private static final int COMPOSE_FILE_IDX_NO_SUDO = 2;

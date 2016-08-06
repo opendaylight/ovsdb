@@ -36,6 +36,11 @@ module library {
                     }
                 }
             }
+            leaf ovsdb-rpc-task-timeout {
+                description "Timeout value (in millisecond) after which OVSDB rpc task will be cancelled";
+                type uint32;
+                default 1000;
+            }
         }
     }
 }

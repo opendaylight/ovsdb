@@ -41,12 +41,13 @@ import org.slf4j.LoggerFactory;
 public class JsonRpcEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcEndpoint.class);
-    private static final int REAPER_INTERVAL = 300;
     private static final int REAPER_THREADS = 3;
     private static final ThreadFactory FUTURE_REAPER_THREAD_FACTORY = new ThreadFactoryBuilder()
             .setNameFormat("OVSDB-Lib-Future-Reaper-%d").build();
     private static final ScheduledExecutorService FUTURE_REAPER_SERVICE
             = Executors.newScheduledThreadPool(REAPER_THREADS, FUTURE_REAPER_THREAD_FACTORY);
+
+    private static int reaperInterval = 1000;
 
     public class CallContext {
         Method method;
@@ -131,7 +132,7 @@ public class JsonRpcEndpoint {
                             cc.getFuture().cancel(false);
                         }
                     }
-                },REAPER_INTERVAL, TimeUnit.MILLISECONDS);
+                }, reaperInterval, TimeUnit.MILLISECONDS);
 
                 nettyChannel.writeAndFlush(requestString);
 
@@ -228,5 +229,10 @@ public class JsonRpcEndpoint {
 
     public Map<String, CallContext> getMethodContext() {
         return methodContext;
+    }
+
+    public static void setReaperInterval(int interval) {
+        reaperInterval = interval;
+        LOG.debug("Ovsdb Rpc Task interval is set to {} millisecond", reaperInterval);
     }
 }

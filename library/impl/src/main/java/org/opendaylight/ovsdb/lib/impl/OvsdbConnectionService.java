@@ -498,4 +498,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             });
         }
     }
+
+    public void setOvsdbRpcTaskTimeout(int interval) {
+        JsonRpcEndpoint.setReaperInterval(interval);
+    }
 }

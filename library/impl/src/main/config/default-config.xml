@@ -23,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>
           </broker>
+          <ovsdb-rpc-task-timeout>1000</ovsdb-rpc-task-timeout>
         </module>
       </modules>
       <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">

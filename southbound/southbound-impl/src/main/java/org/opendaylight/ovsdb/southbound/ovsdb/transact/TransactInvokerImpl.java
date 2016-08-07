@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -61,7 +62,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                 } else {
                     LOG.debug("Operation task cancelled for transaction : {}", tb);
                 }
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException | ExecutionException | CancellationException e) {
                 LOG.warn("Transact execution exception: ", e);
             }
             LOG.trace("invoke exit command: {}, tb: {}", command, tb);

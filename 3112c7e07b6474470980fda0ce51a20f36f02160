@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_94b6403c",
+        "filename": "library/features/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-08T07:56:34Z",
+      "side": 1,
+      "message": "don\u0027t we have a property for this path defined somewhere that we can use here?",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 30
+      },
+      "revId": "3112c7e07b6474470980fda0ce51a20f36f02160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_347dac6f",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcEndpoint.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-08T07:56:34Z",
+      "side": 1,
+      "message": "should be debug, I think stable/be patch has this debug too.",
+      "range": {
+        "startLine": 236,
+        "startChar": 12,
+        "endLine": 236,
+        "endChar": 16
+      },
+      "revId": "3112c7e07b6474470980fda0ce51a20f36f02160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1482304f",
+        "filename": "library/impl/src/main/resources/initial/library.cfg",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-08-08T07:56:34Z",
+      "side": 1,
+      "message": "typo: Changing",
+      "range": {
+        "startLine": 3,
+        "startChar": 1,
+        "endLine": 3,
+        "endChar": 8
+      },
+      "revId": "3112c7e07b6474470980fda0ce51a20f36f02160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

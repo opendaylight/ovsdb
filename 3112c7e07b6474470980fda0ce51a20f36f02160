@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_145eb0e6",
+        "filename": "library/features/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-08T08:02:09Z",
+      "side": 1,
+      "message": "I have see that most of the feature files are using the similar format, so i used the same.",
+      "parentUuid": "7a6b29fe_94b6403c",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 30
+      },
+      "revId": "3112c7e07b6474470980fda0ce51a20f36f02160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_347dac6f",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcEndpoint.java",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_546f8892",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcEndpoint.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-08T08:02:09Z",
+      "side": 1,
+      "message": "I kept it info here because here the config change will happen through the cfg file, so this log will help user to verify that the time interval is really changed.",
+      "parentUuid": "7a6b29fe_347dac6f",
+      "range": {
+        "startLine": 236,
+        "startChar": 12,
+        "endLine": 236,
+        "endChar": 16
+      },
+      "revId": "3112c7e07b6474470980fda0ce51a20f36f02160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_1482304f",
         "filename": "library/impl/src/main/resources/initial/library.cfg",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-08T07:56:34Z",
       "side": 1,
       "message": "typo: Changing",
+      "range": {
+        "startLine": 3,
+        "startChar": 1,
+        "endLine": 3,
+        "endChar": 8
+      },
+      "revId": "3112c7e07b6474470980fda0ce51a20f36f02160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9469208e",
+        "filename": "library/impl/src/main/resources/initial/library.cfg",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-08T08:02:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_1482304f",
       "range": {
         "startLine": 3,
         "startChar": 1,

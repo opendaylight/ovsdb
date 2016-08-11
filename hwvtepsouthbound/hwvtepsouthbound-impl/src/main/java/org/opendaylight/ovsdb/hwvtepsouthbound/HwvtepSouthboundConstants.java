@@ -19,8 +19,6 @@ import com.google.common.collect.ImmutableBiMap;
 public class HwvtepSouthboundConstants {
 
     public static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
-    public static final String HWVTEP_URI_PREFIX = "hwvtep";
-    public static final String PSWITCH_URI_PREFIX = "physicalswitch";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
     public static final String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
     public static final String UUID = "uuid";
@@ -30,4 +28,7 @@ public class HwvtepSouthboundConstants {
         .build();
     public static final MacAddress UNKNOWN_DST_MAC = new MacAddress("00:00:00:00:00:00");
     public static final String UNKNOWN_DST_STRING = "unknown-dst";
+    public static final String HWVTEP_URI_PREFIX = "hwvtep";
+    public static final String PSWITCH_URI_PREFIX = "physicalswitch";
+    public static final String LOGICALSWITCH_UUID_PREFIX = "LogicalSwitch_";
 }

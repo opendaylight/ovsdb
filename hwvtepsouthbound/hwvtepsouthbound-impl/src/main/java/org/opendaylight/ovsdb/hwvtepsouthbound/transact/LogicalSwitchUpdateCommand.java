@@ -72,7 +72,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
             if (!operationalSwitchOptional.isPresent()) {
                 setName(logicalSwitch, lswitch, operationalSwitchOptional);
                 LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);
-                transaction.add(op.insert(logicalSwitch));
+                transaction.add(op.insert(logicalSwitch).withId(TransactUtils.getLogicalSwitchId(lswitch)));
                 transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
             } else {
                 LogicalSwitches updatedLSwitch = operationalSwitchOptional.get();

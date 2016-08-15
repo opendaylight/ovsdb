@@ -115,6 +115,7 @@ public class DockerOvs implements AutoCloseable {
     private String[] upCmd = {"sudo", "docker-compose", "-f", null, "up", "-d", "--force-recreate"};
     private String[] downCmd = {"sudo", "docker-compose", "-f", null, "stop"};
     private String[] execCmd = {"sudo", "docker-compose", "-f", null, "exec", null};
+    private String[] venvCmd = {"source", "$WORKSPACE/venv/bin/activate"};
 
     private File tmpDockerComposeFile;
     boolean isRunning;
@@ -201,6 +202,10 @@ public class DockerOvs implements AutoCloseable {
         //Are we running docker? If we specified docker.run, that's the answer. Otherwise, if there is a server
         //address we assume docker is already running
         runDocker = (envRunDocker != null) ? Boolean.parseBoolean(envRunDocker) : envServerAddress == null;
+
+        //switch to virtual environment, so that we get access to docker-compose on jenkins.
+        //May need a property to determine when to run this...
+        ProcUtils.runProcess(60000, venvCmd);
 
         if(runDocker) {
             return;

@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -51,7 +53,8 @@ import com.google.common.base.Preconditions;
 public class HwvtepOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
     private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
-    ReadWriteTransaction transaction;
+    private ReadWriteTransaction transaction;
+    HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = Maps.newHashMap();
 
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
@@ -295,5 +298,14 @@ public class HwvtepOperationalState {
 
     public ReadWriteTransaction getReadWriteTransaction() {
         return transaction;
+    }
+
+    public void setPhysicalLocatorInFlight(InstanceIdentifier<TerminationPoint> iid,
+                                           UUID uuid) {
+        inflightLocators.put(iid, uuid);
+    }
+
+    public UUID getPhysicalLocatorInFlight(InstanceIdentifier<TerminationPoint> iid) {
+        return inflightLocators.get(iid);
     }
 }

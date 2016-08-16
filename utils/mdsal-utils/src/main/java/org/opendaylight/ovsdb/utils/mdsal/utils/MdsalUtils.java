@@ -19,114 +19,47 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MdsalUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
-    private DataBroker databroker = null;
-
-    /**
-     * Class constructor setting the data broker.
-     *
-     * @param dataBroker the {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
-     */
-    public MdsalUtils(DataBroker dataBroker) {
-        this.databroker = dataBroker;
-    }
+public interface MdsalUtils {
 
     /**
      * Executes delete as a blocking transaction.
      *
-     * @param store {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} to read from
+     * @param store {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} which should be modified
+     * @param path {@link org.opendaylight.yangtools.yang.binding.InstanceIdentifier} to read from
      * @param <D> the data object type
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", path, e);
-        }
-        return result;
-    }
+            final LogicalDatastoreType store, final InstanceIdentifier<D> path);
 
     /**
      * Executes merge as a blocking transaction.
      *
-     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} for path to read
+     * @param logicalDatastoreType {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} which should be modified
+     * @param path {@link org.opendaylight.yangtools.yang.binding.InstanceIdentifier} for path to read
      * @param <D> the data object type
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.merge(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to merge {} ", path, e);
-        }
-        return result;
-    }
-
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data);
     /**
      * Executes put as a blocking transaction.
      *
-     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} for path to read
+     * @param logicalDatastoreType {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} which should be modified
+     * @param path {@link org.opendaylight.yangtools.yang.binding.InstanceIdentifier} for path to read
      * @param <D> the data object type
      * @return the result of the request
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to put {} ", path, e);
-        }
-        return result;
-    }
-
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data);
     /**
      * Executes read as a blocking transaction.
      *
-     * @param store {@link LogicalDatastoreType} to read
-     * @param path {@link InstanceIdentifier} for path to read
+     * @param store {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} to read
+     * @param path {@link org.opendaylight.yangtools.yang.binding.InstanceIdentifier} for path to read
      * @param <D> the data object type
      * @return the result as the data object requested
      */
     public <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
-        D result = null;
-        final ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
-        Optional<D> optionalDataObject;
-        CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
-        try {
-            optionalDataObject = future.checkedGet();
-            if (optionalDataObject.isPresent()) {
-                result = optionalDataObject.get();
-            } else {
-                LOG.debug("{}: Failed to read {}",
-                        Thread.currentThread().getStackTrace()[1], path);
-            }
-        } catch (ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
-        }
-        transaction.close();
-        return result;
-    }
+            final LogicalDatastoreType store, final InstanceIdentifier<D> path);
 }

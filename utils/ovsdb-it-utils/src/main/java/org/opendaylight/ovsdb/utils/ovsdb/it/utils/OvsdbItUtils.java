@@ -16,6 +16,7 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtilsImpl;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -40,7 +41,7 @@ public class OvsdbItUtils {
      */
     public OvsdbItUtils(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
-        mdsalUtils = new MdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtilsImpl(dataBroker);
         southboundUtils = new SouthboundUtils(mdsalUtils);
     }
 

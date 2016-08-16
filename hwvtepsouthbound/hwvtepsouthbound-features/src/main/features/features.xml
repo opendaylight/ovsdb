@@ -23,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-ovsdb-hwvtepsouthbound' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound'>
     <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-hwvtepsouthbound-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/hwvtepsouthbound-impl/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>

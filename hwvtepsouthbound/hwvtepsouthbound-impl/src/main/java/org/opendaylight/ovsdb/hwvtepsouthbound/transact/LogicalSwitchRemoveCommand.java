@@ -112,16 +112,20 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
                             lswitchListBefore.removeAll(lswitchListUpdated);
                         }
                         //then exclude updated ones
-                        for (LogicalSwitches lswitchBefore: lswitchListBefore) {
-                            int i = 0;
-                            for(; i < lswitchListUpdated.size(); i++) {
-                                if (lswitchBefore.getHwvtepNodeName().equals(lswitchListUpdated.get(i).getHwvtepNodeName())) {
-                                    break;
+                        if (lswitchListUpdated != null) {
+                            for (LogicalSwitches lswitchBefore : lswitchListBefore) {
+                                int i = 0;
+                                for (; i < lswitchListUpdated.size(); i++) {
+                                    if (lswitchBefore.getHwvtepNodeName().equals(lswitchListUpdated.get(i).getHwvtepNodeName())) {
+                                        break;
+                                    }
+                                }
+                                if (i == lswitchListUpdated.size()) {
+                                    lswitchListRemoved.add(lswitchBefore);
                                 }
                             }
-                            if (i == lswitchListUpdated.size()) {
-                                lswitchListRemoved.add(lswitchBefore);
-                            }
+                        } else {
+                            lswitchListRemoved.addAll(lswitchListBefore);
                         }
                         if (!lswitchListRemoved.isEmpty()) {
                             result.put(key, lswitchListRemoved);

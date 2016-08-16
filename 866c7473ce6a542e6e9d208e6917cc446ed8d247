@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_408d1f31",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataObjectModificationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:31:15Z",
+      "side": 1,
+      "message": "This needs a license header.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a08233fe",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataTreeModificationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:31:15Z",
+      "side": 1,
+      "message": "This needs a license header.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_80b577cf",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:31:15Z",
+      "side": 1,
+      "message": "The \"throws\" clause should be more specific.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e0c9cb5b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:31:15Z",
+      "side": 1,
+      "message": "The \"throws\" clause should be more specific.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_60ddbb14",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:31:15Z",
+      "side": 1,
+      "message": "How about a do/while loop instead, to avoid repeating the tx.read() line?",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_602bfbeb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-02T14:31:15Z",
+      "side": 1,
+      "message": "Please make this return changes instead of taking a collection to modify.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

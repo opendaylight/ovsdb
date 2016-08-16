@@ -116,16 +116,20 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand {
                             macListBefore.removeAll(macListUpdated);
                         }
                         //then exclude updated localMcastMacs
-                        for (LocalMcastMacs macBefore: macListBefore) {
-                            int i = 0;
-                            for(; i < macListUpdated.size(); i++) {
-                                if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
-                                    break;
+                        if (macListUpdated != null) {
+                            for (LocalMcastMacs macBefore : macListBefore) {
+                                int i = 0;
+                                for (; i < macListUpdated.size(); i++) {
+                                    if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
+                                        break;
+                                    }
+                                }
+                                if (i == macListUpdated.size()) {
+                                    macListRemoved.add(macBefore);
                                 }
                             }
-                            if (i == macListUpdated.size()) {
-                                macListRemoved.add(macBefore);
-                            }
+                        } else {
+                            macListRemoved.addAll(macListBefore);
                         }
                         if (!macListRemoved.isEmpty()) {
                             result.put(key, macListRemoved);

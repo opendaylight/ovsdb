@@ -28,6 +28,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
+import java.util.concurrent.ExecutionException;
+
 public class HwvtepSouthboundUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundUtil.class);

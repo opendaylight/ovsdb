@@ -19,13 +19,13 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -56,6 +56,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
+    private HwvtepReconciliationManager hwvtepReconciliationManager;
 
     public HwvtepSouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
@@ -66,7 +67,6 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
-
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
                 bindingNormalizedNodeSerializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
@@ -80,7 +80,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         txInvoker = new TransactionInvokerImpl(db);
         cm = new HwvtepConnectionManager(db, txInvoker, entityOwnershipService);
         hwvtepDTListener = new HwvtepDataChangeListener(db, cm);
-
+        hwvtepReconciliationManager = new HwvtepReconciliationManager(db, cm);
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
                 new HwvtepsbPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);

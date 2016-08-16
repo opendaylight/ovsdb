@@ -227,4 +227,12 @@ public class HwvtepSouthboundMapper {
                         new VlanBindingsKey(vBindings.getKey()));
 
     }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier() {
+        InstanceIdentifier<Node> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .child(Node.class);
+        return path;
+    }
 }

@@ -77,6 +77,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     public void run() {
         while (runTask.get()) {
             forgetSuccessfulTransactions();
+            ReadWriteTransaction transactionInFlight = null;
             try {
                 List<TransactionCommand> commands = extractCommands();
                 for (TransactionCommand command: commands) {
@@ -95,7 +96,12 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                         }
                     });
                 }
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                //The reason we got here means some npe or someother application error (not mdsal error)
+                //this is going into infinite while loop as this transaction is bound to fail with the same npe
+                if (transactionInFlight != null) {
+                    failedTransactionQueue.offer(transactionInFlight);
+                }
                 LOG.warn("Exception invoking Transaction: ", e);
             }
         }

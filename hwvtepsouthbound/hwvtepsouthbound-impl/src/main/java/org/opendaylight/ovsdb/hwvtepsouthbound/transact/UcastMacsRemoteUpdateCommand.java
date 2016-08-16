@@ -127,15 +127,19 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             } else {
                 //TODO: need to optimize by eliminating reading Configuration datastore
                 //if no, get it from config DS and create id
-                Optional<TerminationPoint> configLocatorOptional =
-                        TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
-                if (configLocatorOptional.isPresent()) {
-                    HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
-                } else {
-                    LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
-                            + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
+                locatorUuid = getOperationalState().getPhysicalLocatorInFlight(iid);
+                if (locatorUuid == null) {
+                    Optional<TerminationPoint> configLocatorOptional =
+                            TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
+                    if (configLocatorOptional.isPresent()) {
+                        HwvtepPhysicalLocatorAugmentation locatorAugmentation =
+                                configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+                        getOperationalState().setPhysicalLocatorInFlight(iid, locatorUuid);
+                    } else {
+                        LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
+                                + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
+                    }
                 }
             }
             if (locatorUuid != null) {

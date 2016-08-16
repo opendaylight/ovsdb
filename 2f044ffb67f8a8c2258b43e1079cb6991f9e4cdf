@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_31be7700",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 506,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "i don\u0027t see connection reconciliation is being stopped anywhere in this calls. So what will happen if you submit the task and switch disconnects. This task will still run and it can end up creating thread in HwvtepReconcilationTask that will run forever. Please Look at my comment in HwvtepReconcilationTask.",
+      "range": {
+        "startLine": 506,
+        "startChar": 12,
+        "endLine": 506,
+        "endChar": 61
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_11525bdd",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataObjectModificationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "please specify the detail of the Todo",
+      "range": {
+        "startLine": 47,
+        "startChar": 59,
+        "endLine": 47,
+        "endChar": 65
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_51d5f341",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataTreeModificationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "please do not use wildcarded imports.",
+      "range": {
+        "startLine": 10,
+        "startChar": 54,
+        "endLine": 10,
+        "endChar": 55
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_b1ca879f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataTreeModificationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 12,
+        "startChar": 47,
+        "endLine": 12,
+        "endChar": 48
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f14a3f26",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "this code can cause OOM and high CPU. So it waits for the data in the operational data store and assume that the switch connects and then it disconnects before plugin fetch any data, so this thread will never get any data in the operational data store and it will keep running forever. Also if connection flip happens frequently, it will end up consuming all the threads from reconciler ExecutorService and then all the new task will keep filling in the cache, that\u0027s going to be memory leak. Please look at following patches that does the reconciliation in OVSDB \n\nhttps://git.opendaylight.org/gerrit/#/c/37358/\nhttps://git.opendaylight.org/gerrit/42807\n\nThese patches uses the asyn method and listen on data store to trigger any further reconciliation.",
+      "range": {
+        "startLine": 69,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 61
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3155d7c6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "please catch specific exceptions.",
+      "range": {
+        "startLine": 87,
+        "startChar": 17,
+        "endLine": 87,
+        "endChar": 26
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d147431c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-02T22:45:58Z",
+      "side": 1,
+      "message": "\"Failed\"",
+      "range": {
+        "startLine": 88,
+        "startChar": 23,
+        "endLine": 88,
+        "endChar": 30
+      },
+      "revId": "2f044ffb67f8a8c2258b43e1079cb6991f9e4cdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

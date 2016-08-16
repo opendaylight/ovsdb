@@ -39,6 +39,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
@@ -53,6 +54,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
@@ -250,13 +252,28 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
-    private HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes pNode) {
+    public HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes pNode) {
         Optional<HwvtepGlobalAugmentation> optional = HwvtepSouthboundUtil.getManagingNode(db, pNode);
         if(optional.isPresent()) {
             return getConnectionInstance(optional.get().getConnectionInfo());
         } else {
             return null;
         }
+    }
+
+    public void stopConfigurationReconciliation(final InstanceIdentifier<Node> nodeIid) {
+        final ReconciliationTask task = new HwvtepReconciliationTask(
+                reconciliationManager, HwvtepConnectionManager.this, nodeIid, null, null, db);
+
+        reconciliationManager.dequeue(task);
+    }
+
+    public void reconcileConfigurations(final HwvtepConnectionInstance client, Node psNode) {
+        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
+        final ReconciliationTask task = new HwvtepReconciliationTask(
+                reconciliationManager, HwvtepConnectionManager.this, nodeIid, psNode, client, db);
+
+        reconciliationManager.enqueue(task);
     }
 
     private void removeConnectionInstance(ConnectionInfo key) {
@@ -476,7 +493,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             return;
         }
         //Connection detail need to be cached, irrespective of ownership result.
-        putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(),hwvtepConnectionInstance);
+        putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
 
         if (ownershipChange.isOwner() == hwvtepConnectionInstance.getHasDeviceOwnership()) {
             LOG.debug("handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",

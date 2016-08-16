@@ -28,7 +28,6 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         commands.add(new HwvtepManagerUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepManagerRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepLogicalSwitchUpdateCommand(key, updates, dbSchema));
-        commands.add(new HwvtepLogicalSwitchRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalPortUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalPortRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalLocatorUpdateCommand(key, updates, dbSchema));
@@ -40,6 +39,7 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         commands.add(new HwvtepMcastMacsLocalUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepMcastMacsRemoteUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepMacEntriesRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepLogicalSwitchRemoveCommand(key, updates, dbSchema));
     }
 
     @Override

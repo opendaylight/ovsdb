@@ -94,9 +94,11 @@ public class ProcUtils {
                 stdoutStringBuilder.append(buf, 0, read);
             }
 
+            StringBuilder stdoutStringBuilder2 = new StringBuilder();
             for (String line : stdoutStringBuilder.toString().split("\\n")) {
-                LOG.info("ProcUtils.runProcess [stdout]: {}", line);
+                stdoutStringBuilder2.append(line).append("\n");
             }
+            LOG.info("ProcUtils.runProcess [stdout]:\n{}", stdoutStringBuilder2.toString());
         }
 
         return exitValue;

@@ -81,7 +81,6 @@ public class SouthboundProvider implements AutoCloseable {
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
                 new SouthboundPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);
-        entityOwnershipService.registerListener(ENTITY_TYPE,providerOwnershipChangeListener);
 
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);

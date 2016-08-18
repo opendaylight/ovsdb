@@ -199,7 +199,7 @@ public class OvsdbConnectionInstanceTest {
         PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
                 any(DatabaseSchema.class));
 
-        verify(monitorBuilder, times(6)).addColumn(anyString());
+        verify(monitorBuilder, times(4)).addColumn(anyString());
     }
 
     @SuppressWarnings({ "unchecked" })

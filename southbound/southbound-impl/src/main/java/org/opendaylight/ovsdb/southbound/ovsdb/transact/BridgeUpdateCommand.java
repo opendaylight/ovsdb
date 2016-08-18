@@ -76,6 +76,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);
+        setStpEnalbe(bridge, ovsdbManagedNode);
         setOpenDaylightExternalIds(bridge, iid, ovsdbManagedNode);
         setOpenDaylightOtherConfig(bridge, ovsdbManagedNode);
         Optional<OvsdbBridgeAugmentation> operationalBridgeOptional =
@@ -102,6 +103,12 @@ public class BridgeUpdateCommand implements TransactCommand {
     private void setDataPathType(Bridge bridge,OvsdbBridgeAugmentation ovsdbManagedNode) {
         if (ovsdbManagedNode.getDatapathType() != null) {
             bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
+        }
+    }
+
+    private void setStpEnalbe(Bridge bridge, OvsdbBridgeAugmentation ovsdbManageNode) {
+        if (ovsdbManageNode.isStpEnable() != null) {
+            bridge.setStpEnable(ovsdbManageNode.isStpEnable());
         }
     }
 

@@ -229,6 +229,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setOpenFlowNodeRef(ovsdbBridgeAugmentationBuilder, bridge);
         setManagedBy(ovsdbBridgeAugmentationBuilder);
         setAutoAttach(ovsdbBridgeAugmentationBuilder, bridge);
+        setStpEnalbe(ovsdbBridgeAugmentationBuilder,bridge);
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
         LOG.debug("Built with the intent to store bridge data {}",
@@ -330,6 +331,14 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);
+        }
+    }
+
+    private void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                              Bridge bridge) {
+        Boolean stpEnable = bridge.getStpEnableColumn().getData();
+        if (stpEnable != null) {
+            ovsdbBridgeAugmentationBuilder.setStpEnable(stpEnable);
         }
     }
 

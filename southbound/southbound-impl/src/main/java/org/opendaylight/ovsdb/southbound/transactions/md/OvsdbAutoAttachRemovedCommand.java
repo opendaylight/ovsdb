@@ -43,9 +43,13 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
+        if (removedAutoAttachRows == null || removedAutoAttachRows.isEmpty()) {
+            return;
+        }
+
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
-        if (ovsdbNode.isPresent() && removedAutoAttachRows != null && !removedAutoAttachRows.isEmpty()) {
+        if (ovsdbNode.isPresent()) {
             final InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             // FIXME: Iterate on external_ids instead of uuid when Open vSwitch supports external_ids column

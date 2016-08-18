@@ -199,6 +199,13 @@ module ovsdb {
             type ovsdb-node-ref;
         }
 
+        leaf stp_enable {
+            description
+                "Enable spanning tree on the bridge. By default, STP is
+                 disabled on bridges";
+            type boolean;
+        }
+
         list bridge-external-ids {
             description
                "Key-value pairs for use by external frameworks that integrate

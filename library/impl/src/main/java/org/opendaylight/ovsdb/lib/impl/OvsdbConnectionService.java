@@ -461,6 +461,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public void close() throws Exception {
         LOG.info("OvsdbConnectionService closed");
+        JsonRpcEndpoint.close();
     }
 
     @Override

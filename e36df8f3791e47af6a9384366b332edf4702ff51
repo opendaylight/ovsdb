@@ -50,6 +50,23 @@
       "revId": "e36df8f3791e47af6a9384366b332edf4702ff51",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6b59c535",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstanceTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-18T09:14:54Z",
+      "side": 1,
+      "message": "Please, no... Given that this has been merged I\u0027ll write a follow-up patch to clean the tests up.",
+      "revId": "e36df8f3791e47af6a9384366b332edf4702ff51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_8847071d",
+        "filename": "utils/ovsdb-it-utils/src/main/java/org/opendaylight/ovsdb/utils/ovsdb/it/utils/ProcUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-08-18T06:20:14Z",
+      "side": 1,
+      "message": "Rather confused here. The string is split on \u0027\\n\u0027 and then stuck back together in the exact same way. Why not just use the original stdoutStrngBuilder.toString directly in the log?",
+      "revId": "479dc017fd27d2b713b9d647132de967a445bef7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -151,12 +151,19 @@ public class SouthboundConstants {
                     + "Flow_Sample_Collector_Set Table is skipped")
             .build();
 
+    //Note: _version is an internal column of ovsdb schema, that gets updated
+    //with every change in the row of the table.
     public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
-            .put("Open_vSwitch", Arrays.asList(new String[]{"statistics"}))
-            .put("Port", Arrays.asList(new String[]{"statistics"}))
-            .put("Interface", Arrays.asList(new String[]{"statistics"}))
-            .put("Controller", Arrays.asList(new String[]{"status"}))
+            .put("Open_vSwitch", Arrays.asList(new String[]{"statistics","_version"}))
+            .put("Port", Arrays.asList(new String[]{"statistics","_version"}))
+            .put("Manager", Arrays.asList(new String[]{"_version"}))
+            .put("SSL", Arrays.asList(new String[]{"_version"}))
+            .put("QoS", Arrays.asList(new String[]{"_version"}))
+            .put("Queue", Arrays.asList(new String[]{"_version"}))
+            .put("Bridge", Arrays.asList(new String[]{"_version"}))
+            .put("Interface", Arrays.asList(new String[]{"statistics","_version"}))
+            .put("Controller", Arrays.asList(new String[]{"status","_version"}))
             .build();
 
     public enum VlanModes {

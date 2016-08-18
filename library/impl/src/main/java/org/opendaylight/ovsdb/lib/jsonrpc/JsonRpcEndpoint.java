@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,7 +44,8 @@ public class JsonRpcEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcEndpoint.class);
     private static final int REAPER_THREADS = 3;
     private static final ThreadFactory FUTURE_REAPER_THREAD_FACTORY = new ThreadFactoryBuilder()
-            .setNameFormat("OVSDB-Lib-Future-Reaper-%d").build();
+            .setNameFormat("OVSDB-Lib-Future-Reaper-%d")
+            .setDaemon(true).build();
     private static final ScheduledExecutorService FUTURE_REAPER_SERVICE
             = Executors.newScheduledThreadPool(REAPER_THREADS, FUTURE_REAPER_THREAD_FACTORY);
 
@@ -234,5 +236,10 @@ public class JsonRpcEndpoint {
     public static void setReaperInterval(int interval) {
         reaperInterval = interval;
         LOG.debug("Ovsdb Rpc Task interval is set to {} millisecond", reaperInterval);
+    }
+
+    public static void close() {
+        LOG.info("Shutting down reaper executor service");
+        FUTURE_REAPER_SERVICE.shutdownNow();
     }
 }

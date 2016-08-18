@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_4817af51",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-18T09:13:56Z",
+      "side": 1,
+      "message": "This should just be\n\n    .put(\"Open_vSwitch\", Arrays.asList(\"statistics\"))\n\n(likewise for the following lines).",
+      "revId": "e36df8f3791e47af6a9384366b332edf4702ff51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c8029f0a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-18T09:13:56Z",
+      "side": 1,
+      "message": "How about Collections.emptyMap() instead of the second null here? That way the null check on the line below isn\u0027t necessary. (And we avoid nulls...)",
+      "revId": "e36df8f3791e47af6a9384366b332edf4702ff51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2b018d05",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbOperationalCommandAggregator.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-18T09:13:56Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be logged as an error?",
+      "revId": "e36df8f3791e47af6a9384366b332edf4702ff51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

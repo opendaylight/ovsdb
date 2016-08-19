@@ -186,7 +186,7 @@ public class DockerOvs implements AutoCloseable {
     }
 
     private void setupEnvForDockerCompose(String venvWs) {
-        String dockerCompose = venvWs + "venv/bin/docker-compose";
+        String dockerCompose = venvWs + "/venv/bin/docker-compose";
         String[] psCmdVenv = {"sudo", dockerCompose, "-f", null, "ps"};
         String[] psCmdNoSudoVenv = {dockerCompose, "-f", null, "ps"};
         String[] upCmdVenv = {"sudo", dockerCompose, "-f", null, "up", "-d", "--force-recreate"};

@@ -79,6 +79,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void run() {
         while (true) {
+            ReadWriteTransaction transactionInFlight = null;
             forgetSuccessfulTransactions();
             try {
                 List<TransactionCommand> commands = extractCommands();
@@ -99,7 +100,10 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     });
                 }
             } catch (Exception e) {
-                LOG.warn("Exception invoking Transaction: ", e);
+                if (transactionInFlight != null) {
+                    failedTransactionQueue.offer(transactionInFlight);
+                }
+                LOG.warn("Exception invoking Transaction ignoring this failed transaction: ", e);
             }
         }
     }

@@ -37,6 +37,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconcilationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
@@ -225,6 +226,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public HwvtepConnectionInstance getConnectionInstance(ConnectionInfo key) {
+        if (key == null) {
+            return null;
+        }
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         return clients.get(connectionInfo);
     }
@@ -245,12 +249,20 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         else if(pSwitchNode != null){
             return getConnectionInstance(pSwitchNode);
         } else {
-            LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
+            LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node.getNodeId());
             return null;
         }
     }
 
-    private HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes pNode) {
+    public void reconcileConfigurations(final HwvtepConnectionInstance client, Node psNode) {
+        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
+        final ReconciliationTask task = new HwvtepReconcilationTask(
+                reconciliationManager, HwvtepConnectionManager.this, nodeIid, psNode, client, db);
+
+        reconciliationManager.enqueue(task);
+    }
+
+    public HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes pNode) {
         Optional<HwvtepGlobalAugmentation> optional = HwvtepSouthboundUtil.getManagingNode(db, pNode);
         if(optional.isPresent()) {
             return getConnectionInstance(optional.get().getConnectionInfo());
@@ -312,6 +324,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 }
             }
         } catch (CandidateAlreadyRegisteredException e) {
+            hwvtepConnectionInstance.registerCallbacks();
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
 
@@ -420,9 +433,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     @Override
                     public void onSuccess(@Nullable Optional<Node> node) {
                         if (node.isPresent()) {
-                            LOG.info("Disconnected/Failed connection {} was controller initiated, attempting " +
-                                    "reconnection", hwvtepNode.getConnectionInfo());
-                            reconciliationManager.enqueue(task);
+                            //LOG.info("Disconnected/Failed connection {} was controller initiated, attempting " +
+                            //        "reconnection", hwvtepNode.getConnectionInfo());
+                            //reconciliationManager.enqueue(task);
 
                         } else {
                             LOG.debug("Connection {} was switch initiated, no reconciliation is required"
@@ -522,6 +535,13 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {
         return entityConnectionMap.get(entity);
+    }
+
+    public void stopConfigurationReconciliation(final InstanceIdentifier<Node> nodeIid) {
+        final ReconciliationTask task = new HwvtepReconcilationTask(
+                reconciliationManager, HwvtepConnectionManager.this, nodeIid, null/*psNode*/, null/*client*/, db);
+
+        reconciliationManager.dequeue(task);
     }
 
     private class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {

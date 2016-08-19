@@ -76,7 +76,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
     @Override
     public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
-        LOG.trace("onDataTreeChanged: {}", changes);
+        LOG.trace("onDataTreeChanged: ");
 
         /* TODO:
          * Currently only handling changes to Global.
@@ -281,7 +281,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                 final ReadWriteTransaction transaction = db.newReadWriteTransaction();
                 InstanceIdentifier<Node> connectionIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
                 Optional<Node> optionalNode = HwvtepSouthboundUtil.readNode(transaction, connectionIid);
-                LOG.trace("Node in Operational DataStore for user node {} is {}", node, optionalNode);
+                //LOG.trace("Node in Operational DataStore for user node {} is {}", node, optionalNode);
                 if(optionalNode.isPresent()) {
                     connection = hcm.getConnectionInstance(optionalNode.get());
                 }
@@ -295,10 +295,10 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                     result.get(connection).add(change);
                 }
             } else {
-                LOG.warn("Failed to get the connection of changed node: {}", node);
+                LOG.warn("Failed to get the connection of changed node: {}", node.getNodeId().getValue());
             }
         }
-        LOG.trace("Connection Change Map: {}", result);
+        //LOG.trace("Connection Change Map: {}", result);
         return result;
     }
 }

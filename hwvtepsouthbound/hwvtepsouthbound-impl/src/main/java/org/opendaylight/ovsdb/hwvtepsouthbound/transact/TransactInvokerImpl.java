@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.List;
 
+import com.google.common.base.Strings;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -39,6 +40,14 @@ public class TransactInvokerImpl implements TransactInvoker {
             try {
                 List<OperationResult> got = result.get();
                 LOG.debug("OVSDB transaction result: {}", got);
+                if (got != null && got.size() > 0) {
+                    for (OperationResult opResult : got) {
+                        if (!Strings.isNullOrEmpty(opResult.getError())) {
+                            LOG.error("operation failed {} {}",
+                                    opResult.getError(), opResult.getDetails());
+                        }
+                    }
+                }
             } catch (Exception e) {
                 LOG.warn("Transact execution exception: ", e);
             }

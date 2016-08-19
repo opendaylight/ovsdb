@@ -29,9 +29,11 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -146,16 +148,20 @@ public class TransactUtils {
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
-                //if no, get it from config DS and create id
-                Optional<TerminationPoint> configLocatorOptional =
-                        readNodeFromConfig(hwvtepOperationalState.getReadWriteTransaction(), iid);
-                if (configLocatorOptional.isPresent()) {
-                    HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
-                } else {
-                    LOG.warn("Create or update localMcastMac: No physical locator found in operational datastore!"
-                            + "Its indentifier is {}", locator.getLocatorRef().getValue());
+                locatorUuid = hwvtepOperationalState.getPhysicalLocatorAugmentation2(iid);
+                if (locatorUuid == null) {
+                    //if no, get it from config DS and create id
+                    Optional<TerminationPoint> configLocatorOptional =
+                            readNodeFromConfig(hwvtepOperationalState.getReadWriteTransaction(), iid);
+                    if (configLocatorOptional.isPresent()) {
+                        HwvtepPhysicalLocatorAugmentation locatorAugmentation =
+                                configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+                        hwvtepOperationalState.setPhysicalLocatorAugmentation(iid, locatorUuid);
+                    } else {
+                        LOG.warn("Create or update localMcastMac: No physical locator found in operational datastore!"
+                                + "Its indentifier is {}", locator.getLocatorRef().getValue());
+                    }
                 }
             }
             if (locatorUuid != null) {
@@ -193,10 +199,10 @@ public class TransactUtils {
     }
 
     public static String getLogicalSwitchId(LogicalSwitches lswitch){
-        return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX+lswitch.getHwvtepNodeName().getValue();
+        return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX+lswitch.getHwvtepNodeName().getValue().replaceAll("-","_");
     }
 
     public static UUID getLogicalSwitchUUID(InstanceIdentifier<LogicalSwitches> lswitchIid){
-        return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX+lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue());
+        return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX+lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue().replaceAll("-","_"));
     }
 }

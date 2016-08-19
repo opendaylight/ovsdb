@@ -94,6 +94,7 @@ public abstract class ReconciliationTask implements Runnable {
 
     @Override
     public void run() {
+        LOG.error("running reconcile task");
         boolean status = this.reconcileConfiguration(connectionManager);
         doRetry(status);
     }

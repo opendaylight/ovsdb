@@ -21,25 +21,25 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
     private List<TransactionCommand> commands = new ArrayList<>();
 
     public HwvtepOperationalCommandAggregator(HwvtepConnectionInstance key,TableUpdates updates,
-            DatabaseSchema dbSchema) {
+                                              DatabaseSchema dbSchema) {
         commands.add(new GlobalUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalSwitchUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalSwitchRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepManagerUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepManagerRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepLogicalSwitchUpdateCommand(key, updates, dbSchema));
-        commands.add(new HwvtepLogicalSwitchRemoveCommand(key, updates, dbSchema));
-        commands.add(new HwvtepPhysicalPortUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalPortRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalPortUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepPhysicalLocatorRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalLocatorUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepTunnelUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepTunnelRemoveCommand(key, updates, dbSchema));
-        commands.add(new HwvtepPhysicalLocatorRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepUcastMacsLocalUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepUcastMacsRemoteUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepMcastMacsLocalUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepMcastMacsRemoteUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepMacEntriesRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepLogicalSwitchRemoveCommand(key, updates, dbSchema));
     }
 
     @Override

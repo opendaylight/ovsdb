@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Maps;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -52,6 +54,10 @@ public class HwvtepOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
     private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
     ReadWriteTransaction transaction;
+    HashMap<InstanceIdentifier<TerminationPoint>, HwvtepPhysicalLocatorAugmentation> physicalLocatorAugmentations =
+            Maps.newHashMap();
+    HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflight =
+            Maps.newHashMap();
 
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
@@ -276,11 +282,18 @@ public class HwvtepOperationalState {
     }
 
     public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
+        if (physicalLocatorAugmentations.containsKey(iid)) {
+            return Optional.of(physicalLocatorAugmentations.get(iid));
+        }
         Optional<TerminationPoint> tp = HwvtepSouthboundUtil.readNode(transaction, iid);
         if (tp.isPresent()) {
             return Optional.fromNullable(tp.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
         }
         return Optional.absent();
+    }
+
+    public UUID getPhysicalLocatorAugmentation2(InstanceIdentifier<TerminationPoint> iid) {
+        return inflight.get(iid);
     }
 
     public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<LogicalSwitches> iid) {
@@ -295,5 +308,10 @@ public class HwvtepOperationalState {
 
     public ReadWriteTransaction getReadWriteTransaction() {
         return transaction;
+    }
+
+    public void setPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid,
+                                               UUID uuid) {
+        inflight.put(iid, uuid);
     }
 }

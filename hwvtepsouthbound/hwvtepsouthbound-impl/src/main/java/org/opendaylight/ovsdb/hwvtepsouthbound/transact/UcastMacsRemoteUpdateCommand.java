@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -107,6 +108,8 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 ucastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
             } else {
                 ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(lswitchIid));
+                LOG.warn("Create or update remoteUcastMac: No logical switch with iid {} found in operational datastore!",
+                        lswitchIid);
             }
         }
     }
@@ -125,17 +128,21 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
-                //TODO: need to optimize by eliminating reading Configuration datastore
-                //if no, get it from config DS and create id
-                Optional<TerminationPoint> configLocatorOptional =
-                        TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
-                if (configLocatorOptional.isPresent()) {
-                    HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
-                } else {
-                    LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
-                            + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
+                locatorUuid = getOperationalState().getPhysicalLocatorAugmentation2(iid);
+                if (locatorUuid == null) {
+                    //TODO: need to optimize by eliminating reading Configuration datastore
+                    //if no, get it from config DS and create id
+                    Optional<TerminationPoint> configLocatorOptional =
+                            TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
+                    if (configLocatorOptional.isPresent()) {
+                        HwvtepPhysicalLocatorAugmentation locatorAugmentation =
+                                configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+                        getOperationalState().setPhysicalLocatorAugmentation(iid, locatorUuid);
+                    } else {
+                        LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
+                                + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
+                    }
                 }
             }
             if (locatorUuid != null) {

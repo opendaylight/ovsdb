@@ -56,10 +56,12 @@ public class ReconciliationManager implements AutoCloseable {
 
     public ReconciliationManager(final DataBroker db) {
         this.db = db;
-        reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE, "ovsdb-reconciler");
 
+        ThreadFactory threadFact2 = new ThreadFactoryBuilder()
+                .setNameFormat("ovsdb-reconcile-%d").build();
         ThreadFactory threadFact = new ThreadFactoryBuilder()
                 .setNameFormat("ovsdb-recon-task-triager-%d").build();
+        reconcilers = Executors.newSingleThreadScheduledExecutor(threadFact2);
         taskTriager = Executors.newSingleThreadScheduledExecutor(threadFact);
     }
 
@@ -68,8 +70,15 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     public void enqueue(final ReconciliationTask task) {
-        LOG.trace("Reconciliation task submitted for execution {}",task);
-        reconTaskManager.cacheTask(task, reconcilers.submit(task));
+        LOG.trace("Reconciliation task submitted for execution ver2 {}",task.nodeIid);
+        Future<?> future = reconcilers.submit(task);
+        reconcilers.submit(new Runnable() {
+            @Override
+            public void run() {
+                LOG.error("running the test task");
+            }
+        });
+        reconTaskManager.cacheTask(task, future);
     }
 
     public void enqueueForRetry(final ReconciliationTask task) {
@@ -86,6 +95,7 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     public void dequeue(final ReconciliationTask task) {
+        LOG.trace("Reconciliation task cancelled for execution {}",task.nodeIid);
         reconTaskManager.cancelTask(task);
     }
 
@@ -95,6 +105,7 @@ public class ReconciliationManager implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
+        LOG.error("Warn closing the reconcile manager");
         if (this.reconcilers != null) {
             this.reconcilers.shutdownNow();
         }

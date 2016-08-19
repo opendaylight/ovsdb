@@ -143,7 +143,8 @@ public class DockerOvs implements AutoCloseable {
                                             ItConstants.CONTROLLER_IPADDRESS,
                                             ItConstants.USERSPACE_ENABLED,
                                             ItConstants.DOCKER_COMPOSE_FILE_NAME,
-                                            ItConstants.DOCKER_RUN)
+                                            ItConstants.DOCKER_RUN,
+                                            ItConstants.DOCKER_VENV_WS)
         };
     }
 
@@ -184,6 +185,21 @@ public class DockerOvs implements AutoCloseable {
         waitForOvsdbServers(10 * 1000);
     }
 
+    private void setupEnvForDockerCompose(String venvWs) {
+        String dockerCompose = venvWs + "venv/bin/docker-compose";
+        String[] psCmdVenv = {"sudo", dockerCompose, "-f", null, "ps"};
+        String[] psCmdNoSudoVenv = {dockerCompose, "-f", null, "ps"};
+        String[] upCmdVenv = {"sudo", dockerCompose, "-f", null, "up", "-d", "--force-recreate"};
+        String[] downCmdVenv = {"sudo", dockerCompose, "-f", null, "stop"};
+        String[] execCmdVenv = {"sudo", dockerCompose, "-f", null, "exec", null};
+
+        psCmd = psCmdVenv;
+        psCmdNoSudo = psCmdNoSudoVenv;
+        upCmd = upCmdVenv;
+        downCmd = downCmdVenv;
+        execCmd = execCmdVenv;
+    }
+
     /**
      * Pull required configuration from System.getProperties() and validate we have what we need.
      * Note: Note that there is some minor complexity in how this class is configured using System
@@ -197,11 +213,18 @@ public class DockerOvs implements AutoCloseable {
         String envRunDocker = env.getProperty(ItConstants.DOCKER_RUN);
         String connType = env.getProperty(ItConstants.CONNECTION_TYPE, ItConstants.CONNECTION_TYPE_ACTIVE);
         String dockerFile = env.getProperty(ItConstants.DOCKER_COMPOSE_FILE_NAME);
+        String venvWs = env.getProperty(ItConstants.DOCKER_VENV_WS);
         envDockerComposeFile = DOCKER_FILE_PATH + (null == dockerFile ? DEFAULT_DOCKER_FILE : dockerFile);
 
         //Are we running docker? If we specified docker.run, that's the answer. Otherwise, if there is a server
         //address we assume docker is already running
         runDocker = (envRunDocker != null) ? Boolean.parseBoolean(envRunDocker) : envServerAddress == null;
+
+        //Should we run in a virtual environment? Needed for jenkins and docker-compose
+        if ((venvWs != null) && (!venvWs.isEmpty())) {
+            LOG.info("Setting up virtual environment for docker compose");
+            setupEnvForDockerCompose(venvWs);
+        }
 
         if(runDocker) {
             return;

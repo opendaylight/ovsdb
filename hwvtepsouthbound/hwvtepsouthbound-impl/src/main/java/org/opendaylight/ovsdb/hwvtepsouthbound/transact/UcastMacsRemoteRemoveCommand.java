@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -105,25 +106,29 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand {
                     if (hgUpdated != null) {
                         macListUpdated = hgUpdated.getRemoteUcastMacs();
                     }
+                    if (macListUpdated  == null) {
+                        macListUpdated = Lists.newArrayList();
+                    }
                     HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
                     if (hgBefore != null) {
                         macListBefore = hgBefore.getRemoteUcastMacs();
                     }
                     if (macListBefore != null) {
                         List<RemoteUcastMacs> macListRemoved = new ArrayList<RemoteUcastMacs>();
-                        if (macListUpdated != null) {
-                            macListBefore.removeAll(macListUpdated);
-                        }
+                        //macListBefore.removeAll(macListUpdated);
+
                         //then exclude updated remoteUcastMacs
                         for (RemoteUcastMacs macBefore: macListBefore) {
                             int i = 0;
-                            for(; i < macListUpdated.size(); i++) {
-                                if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
-                                    break;
+                            if (macListUpdated != null) {
+                                for (; i < macListUpdated.size(); i++) {
+                                    if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
+                                        break;
+                                    }
                                 }
-                            }
-                            if (i == macListUpdated.size()) {
-                                macListRemoved.add(macBefore);
+                                if (i == macListUpdated.size()) {
+                                    macListRemoved.add(macBefore);
+                                }
                             }
                         }
                         if (!macListRemoved.isEmpty()) {

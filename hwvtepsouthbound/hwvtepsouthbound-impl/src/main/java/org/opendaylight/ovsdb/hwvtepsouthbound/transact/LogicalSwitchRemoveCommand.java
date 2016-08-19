@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -106,22 +107,24 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
                     if (before.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
                         lswitchListBefore = before.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
                     }
+                    if (lswitchListUpdated == null) {
+                        lswitchListUpdated = Lists.newArrayList();
+                    }
                     if (lswitchListBefore != null) {
                         List<LogicalSwitches> lswitchListRemoved = new ArrayList<LogicalSwitches>();
-                        if (lswitchListUpdated != null) {
-                            lswitchListBefore.removeAll(lswitchListUpdated);
-                        }
+                        //lswitchListBefore.removeAll(lswitchListUpdated);
                         //then exclude updated ones
                         for (LogicalSwitches lswitchBefore: lswitchListBefore) {
                             int i = 0;
-                            for(; i < lswitchListUpdated.size(); i++) {
-                                if (lswitchBefore.getHwvtepNodeName().equals(lswitchListUpdated.get(i).getHwvtepNodeName())) {
-                                    break;
-                                }
+                            for (; i < lswitchListUpdated.size(); i++) {
+                                    if (lswitchBefore.getHwvtepNodeName().equals(lswitchListUpdated.get(i).getHwvtepNodeName())) {
+                                        break;
+                                    }
                             }
                             if (i == lswitchListUpdated.size()) {
                                 lswitchListRemoved.add(lswitchBefore);
                             }
+
                         }
                         if (!lswitchListRemoved.isEmpty()) {
                             result.put(key, lswitchListRemoved);

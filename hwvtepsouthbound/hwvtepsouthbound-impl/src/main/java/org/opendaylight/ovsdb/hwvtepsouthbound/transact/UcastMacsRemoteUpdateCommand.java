@@ -107,6 +107,8 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 ucastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
             } else {
                 ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(lswitchIid));
+                LOG.warn("Create or update remoteUcastMac: No logical switch with iid {} found in operational datastore!",
+                        lswitchIid);
             }
         }
     }
@@ -125,17 +127,21 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
-                //TODO: need to optimize by eliminating reading Configuration datastore
-                //if no, get it from config DS and create id
-                Optional<TerminationPoint> configLocatorOptional =
-                        TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
-                if (configLocatorOptional.isPresent()) {
-                    HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
-                } else {
-                    LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
-                            + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
+                locatorUuid = getOperationalState().getTxCreatedPhysicalLocatorUUID(iid);
+                if (locatorUuid == null) {
+                    //TODO: need to optimize by eliminating reading Configuration datastore
+                    //if no, get it from config DS and create id
+                    Optional<TerminationPoint> configLocatorOptional =
+                            TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
+                    if (configLocatorOptional.isPresent()) {
+                        HwvtepPhysicalLocatorAugmentation locatorAugmentation =
+                                configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+                        getOperationalState().setTxCreatedPhysicalLocatorUUID(iid, locatorUuid);
+                    } else {
+                        LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
+                                + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
+                    }
                 }
             }
             if (locatorUuid != null) {

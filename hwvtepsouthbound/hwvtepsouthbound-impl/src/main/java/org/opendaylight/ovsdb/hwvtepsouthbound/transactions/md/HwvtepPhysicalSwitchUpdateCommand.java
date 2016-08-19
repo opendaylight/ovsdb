@@ -65,6 +65,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
     public HwvtepPhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
+
         oldPSRows = TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(), getDbSchema());
         try {
             updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
@@ -237,5 +238,4 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             psAugmentationBuilder.setSwitchFaultStatus(switchFaultStatusLst);
         }
     }
-
 }

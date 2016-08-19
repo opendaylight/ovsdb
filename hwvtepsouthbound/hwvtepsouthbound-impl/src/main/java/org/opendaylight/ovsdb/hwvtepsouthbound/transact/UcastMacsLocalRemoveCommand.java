@@ -10,13 +10,10 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -105,25 +102,28 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand {
                     if (hgUpdated != null) {
                         macListUpdated = hgUpdated.getLocalUcastMacs();
                     }
+                    if (macListUpdated == null) {
+                        macListUpdated = Lists.newArrayList();
+                    }
                     HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
                     if (hgBefore != null) {
                         macListBefore = hgBefore.getLocalUcastMacs();
                     }
                     if (macListBefore != null) {
                         List<LocalUcastMacs> macListRemoved = new ArrayList<LocalUcastMacs>();
-                        if (macListUpdated != null) {
-                            macListBefore.removeAll(macListUpdated);
-                        }
+                        //macListBefore.removeAll(macListUpdated);
                         //then exclude updated remoteUcastMacs
                         for (LocalUcastMacs macBefore: macListBefore) {
                             int i = 0;
-                            for(; i < macListUpdated.size(); i++) {
-                                if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
-                                    break;
+                            if (macListUpdated != null) {
+                                for (; i < macListUpdated.size(); i++) {
+                                    if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
+                                        break;
+                                    }
                                 }
-                            }
-                            if (i == macListUpdated.size()) {
-                                macListRemoved.add(macBefore);
+                                if (i == macListUpdated.size()) {
+                                    macListRemoved.add(macBefore);
+                                }
                             }
                         }
                         if (!macListRemoved.isEmpty()) {

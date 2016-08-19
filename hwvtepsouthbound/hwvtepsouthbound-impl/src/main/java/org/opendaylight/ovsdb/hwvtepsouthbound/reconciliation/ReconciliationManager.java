@@ -68,7 +68,7 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     public void enqueue(final ReconciliationTask task) {
-        LOG.trace("Reconciliation task submitted for execution {}",task);
+        LOG.trace("Reconciliation task submitted for execution {}", task);
         reconTaskManager.cacheTask(task, reconcilers.submit(task));
     }
 
@@ -86,6 +86,7 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     public void dequeue(final ReconciliationTask task) {
+        LOG.trace("Reconciliation task cancelled for {}",task.nodeIid);
         reconTaskManager.cancelTask(task);
     }
 

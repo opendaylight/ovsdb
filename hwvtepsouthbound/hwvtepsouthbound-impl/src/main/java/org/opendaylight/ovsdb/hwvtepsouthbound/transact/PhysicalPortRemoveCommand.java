@@ -132,16 +132,20 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                             }
                         }
                     }
-                    portListBefore.removeAll(portListUpdated);
+                    //portListBefore.removeAll(portListUpdated);
                     //then exclude updated physical ports
                     for (HwvtepPhysicalPortAugmentation portBefore: portListBefore) {
                         int i = 0;
-                        for(; i < portListUpdated.size(); i++) {
-                            if (portBefore.getHwvtepNodeName().equals(portListUpdated.get(i).getHwvtepNodeName())) {
-                                break;
+                        if (portListUpdated != null) {
+                            for (; i < portListUpdated.size(); i++) {
+                                if (portBefore.getHwvtepNodeName().equals(portListUpdated.get(i).getHwvtepNodeName())) {
+                                    break;
+                                }
                             }
-                        }
-                        if (i == portListUpdated.size()) {
+                            if (i == portListUpdated.size()) {
+                                portListRemoved.add(portBefore);
+                            }
+                        } else {
                             portListRemoved.add(portBefore);
                         }
                     }

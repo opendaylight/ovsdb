@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -106,19 +107,21 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand {
                     if (hgUpdated != null) {
                         macListUpdated = hgUpdated.getLocalMcastMacs();
                     }
+                    if (macListUpdated == null) {
+                        macListUpdated = Lists.newArrayList();
+                    }
                     HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
                     if (hgBefore != null) {
                         macListBefore = hgBefore.getLocalMcastMacs();
                     }
                     if (macListBefore != null) {
                         List<LocalMcastMacs> macListRemoved = new ArrayList<LocalMcastMacs>();
-                        if (macListUpdated != null) {
-                            macListBefore.removeAll(macListUpdated);
-                        }
+                        //macListBefore.removeAll(macListUpdated);
                         //then exclude updated localMcastMacs
                         for (LocalMcastMacs macBefore: macListBefore) {
                             int i = 0;
-                            for(; i < macListUpdated.size(); i++) {
+
+                            for (; i < macListUpdated.size(); i++) {
                                 if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
                                     break;
                                 }
@@ -126,6 +129,7 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand {
                             if (i == macListUpdated.size()) {
                                 macListRemoved.add(macBefore);
                             }
+
                         }
                         if (!macListRemoved.isEmpty()) {
                             result.put(key, macListRemoved);

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -106,19 +107,20 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
                     if (hgUpdated != null) {
                         macListUpdated = hgUpdated.getRemoteMcastMacs();
                     }
+                    if (macListUpdated == null) {
+                        macListUpdated = Lists.newArrayList();
+                    }
                     HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
                     if (hgBefore != null) {
                         macListBefore = hgBefore.getRemoteMcastMacs();
                     }
                     if (macListBefore != null) {
                         List<RemoteMcastMacs> macListRemoved = new ArrayList<RemoteMcastMacs>();
-                        if (macListUpdated != null) {
-                            macListBefore.removeAll(macListUpdated);
-                        }
+                        //macListBefore.removeAll(macListUpdated);
                         //then exclude updated remoteMcastMacs
                         for (RemoteMcastMacs macBefore: macListBefore) {
                             int i = 0;
-                            for(; i < macListUpdated.size(); i++) {
+                            for (; i < macListUpdated.size(); i++) {
                                 if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
                                     break;
                                 }

@@ -257,7 +257,7 @@ public class DockerOvs implements AutoCloseable {
         downCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
         execCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
 
-        if (0 == ProcUtils.tryProcess(5000, psCmdNoSudo)) {
+        if (0 == ProcUtils.tryProcess(null, 5000, psCmdNoSudo)) {
             LOG.info("DockerOvs.buildDockerComposeCommands docker-compose does not require sudo");
             String[] tmp;
             tmp = Arrays.copyOfRange(upCmd, 1, upCmd.length);
@@ -266,7 +266,7 @@ public class DockerOvs implements AutoCloseable {
             downCmd = tmp;
             tmp = Arrays.copyOfRange(execCmd, 1, execCmd.length);
             execCmd = tmp;
-        } else if (0 == ProcUtils.tryProcess(5000, psCmd)) {
+        } else if (0 == ProcUtils.tryProcess(null, 5000, psCmd)) {
             LOG.info("DockerOvs.buildDockerComposeCommands docker-compose requires sudo");
         } else {
             Assert.fail("docker-compose does not seem to work with or without sudo");
@@ -328,12 +328,12 @@ public class DockerOvs implements AutoCloseable {
         ProcUtils.runProcess(waitFor, cmd);
     }
 
-    public void tryInContainer(int waitFor, int numOvs, String ... cmdWords) throws IOException, InterruptedException {
+    public void tryInContainer(String logText, int waitFor, int numOvs, String ... cmdWords) throws IOException, InterruptedException {
         String[] pfx = getExecCmdPrefix(numOvs);
         String[] cmd = new String[pfx.length + cmdWords.length];
         System.arraycopy(pfx, 0, cmd, 0, pfx.length);
         System.arraycopy(cmdWords, 0, cmd, pfx.length, cmdWords.length);
-        ProcUtils.tryProcess(waitFor, cmd);
+        ProcUtils.tryProcess(logText, waitFor, cmd);
     }
 
     /**
@@ -547,12 +547,12 @@ public class DockerOvs implements AutoCloseable {
      * @throws IOException If something goes wrong with reading the process output
      * @throws InterruptedException because there's some sleeping in here
      */
-    public void logState(int dockerInstance) throws IOException, InterruptedException {
-        tryInContainer(5000, dockerInstance, "ip", "addr");
-        tryInContainer(5000, dockerInstance, "ovs-vsctl", "show");
-        tryInContainer(5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "show", "br-int");
-        tryInContainer(5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "dump-flows", "br-int");
-        tryInContainer(5000, dockerInstance, "ip", "netns", "list");
+    public void logState(int dockerInstance, String logText) throws IOException, InterruptedException {
+        tryInContainer(logText, 5000, dockerInstance, "ip", "addr");
+        tryInContainer(logText, 5000, dockerInstance, "ovs-vsctl", "show");
+        tryInContainer(logText, 5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "show", "br-int");
+        tryInContainer(logText, 5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "dump-flows", "br-int");
+        tryInContainer(logText, 5000, dockerInstance, "ip", "netns", "list");
     }
 
 }

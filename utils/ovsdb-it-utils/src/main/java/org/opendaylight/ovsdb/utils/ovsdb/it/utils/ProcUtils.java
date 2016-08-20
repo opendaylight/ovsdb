@@ -42,9 +42,9 @@ public class ProcUtils {
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
-    public static void runProcess(long waitFor,StringBuilder capturedStdout, String... words)
+    public static void runProcess(long waitFor, StringBuilder capturedStdout, String... words)
             throws IOException, InterruptedException {
-        int exitValue = tryProcess(waitFor, capturedStdout, words);
+        int exitValue = tryProcess(null, waitFor, capturedStdout, words);
         Assert.assertEquals("ProcUtils.runProcess exit code is not 0", 0, exitValue);
     }
 
@@ -56,8 +56,9 @@ public class ProcUtils {
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
-    public static int tryProcess(long waitFor, String... words) throws IOException, InterruptedException {
-        return tryProcess(waitFor, null, words);
+    public static int tryProcess(String logText, long waitFor, String... words)
+            throws IOException, InterruptedException {
+        return tryProcess(logText, waitFor, null, words);
     }
 
     /**
@@ -69,10 +70,11 @@ public class ProcUtils {
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
-    public static int tryProcess(long waitFor, StringBuilder capturedStdout, String... words)
+    public static int tryProcess(String logText, long waitFor, StringBuilder capturedStdout, String... words)
             throws IOException, InterruptedException {
 
-        LOG.info("ProcUtils.runProcess running \"{}\", waitFor {}", words, waitFor);
+        LOG.info("ProcUtils.runProcess {} running \"{}\", waitFor {}",
+                logText != null ? logText : "", words, waitFor);
 
         Process proc = new ProcessBuilder(words).start();
         int exitValue = -1;
@@ -84,7 +86,8 @@ public class ProcUtils {
             exitValue = waitForExitValue(waitFor, proc);
 
             while (stderr.ready()) {
-                LOG.warn("ProcUtils.runProcess [stderr]: {}", stderr.readLine());
+                LOG.warn("ProcUtils.runProcess {} [stderr]: {}",
+                        logText != null ? logText : "", stderr.readLine());
             }
 
             StringBuilder stdoutStringBuilder = (capturedStdout != null) ? capturedStdout : new StringBuilder();
@@ -94,7 +97,8 @@ public class ProcUtils {
                 stdoutStringBuilder.append(buf, 0, read);
             }
 
-            LOG.info("ProcUtils.runProcess [stdout]:\n{}", stdoutStringBuilder.toString());
+            LOG.info("ProcUtils.runProcess {} [stdout]:\n{}",
+                    logText != null ? logText : "", stdoutStringBuilder.toString());
         }
 
         return exitValue;

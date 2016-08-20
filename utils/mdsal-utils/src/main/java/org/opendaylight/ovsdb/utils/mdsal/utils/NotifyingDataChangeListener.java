@@ -40,10 +40,22 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     private ListenerRegistration<?> listenerRegistration;
     private List<NotifyingDataChangeListener> waitList = null;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
+    private Boolean listen;
+    public static final int BIT_CREATE = 1;
+    public static final int BIT_UPDATE = 2;
+    public static final int BIT_DELETE = 4;
+    public static final int BIT_ALL = 7;
+    private int mask;
+
+    public NotifyingDataChangeListener(LogicalDatastoreType type, int mask,
+                                       InstanceIdentifier<?> iid, List<NotifyingDataChangeListener> waitList) {
+        this(type, iid, waitList);
+        this.mask = mask;
+    }
 
     /**
      * Create a new NotifyingDataChangeListener
-     * @param type
+     * @param type DataStore type
      * @param iid of the md-sal object we're waiting for
      * @param waitList for tracking outstanding changes
      */
@@ -52,7 +64,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         this.type = type;
         this.iid = iid;
         this.waitList = waitList;
-        if(this.waitList != null) {
+        if (this.waitList != null) {
             this.waitList.add(this);
         }
 
@@ -60,30 +72,50 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         if (type == LogicalDatastoreType.CONFIGURATION) {
             mdsalTimeout = MDSAL_TIMEOUT_CONFIG;
         }
+        listen = true;
+        mask = BIT_ALL;
     }
 
     /**
      * Completely reset the state of this NotifyingDataChangeListener.
-     * @param type
+     * @param type DataStore type
      * @param iid of the md-sal object we're waiting for
      * @throws Exception
      */
-    private void modify(LogicalDatastoreType type, InstanceIdentifier<?> iid) throws Exception {
+    public void modify(LogicalDatastoreType type, InstanceIdentifier<?> iid) throws Exception {
         this.close();
         this.clear();
         this.type = type;
         this.iid = iid;
     }
 
+    public void setlisten(Boolean listen) {
+        this.listen = listen;
+    }
+
+    public void setMask(int mask) {
+        this.mask = mask;
+    }
+
     @Override
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asyncDataChangeEvent) {
-        LOG.info("{} DataChanged: created {}", type, asyncDataChangeEvent.getCreatedData().keySet());
-        LOG.info("{} DataChanged: updated {}", type, asyncDataChangeEvent.getUpdatedData().keySet());
-        LOG.info("{} DataChanged: removed {}", type, asyncDataChangeEvent.getRemovedPaths());
-        createdIids.addAll(asyncDataChangeEvent.getCreatedData().keySet());
-        removedIids.addAll(asyncDataChangeEvent.getRemovedPaths());
-        updatedIids.addAll(asyncDataChangeEvent.getUpdatedData().keySet());
+        if (!listen) {
+            return;
+        }
+        if ((mask & BIT_CREATE) == BIT_CREATE) {
+            LOG.info("{} DataChanged: created {}", type, asyncDataChangeEvent.getCreatedData().keySet());
+            createdIids.addAll(asyncDataChangeEvent.getCreatedData().keySet());
+        }
+        if ((mask & BIT_UPDATE) == BIT_UPDATE) {
+            LOG.info("{} DataChanged: updated {}", type, asyncDataChangeEvent.getUpdatedData().keySet());
+            updatedIids.addAll(asyncDataChangeEvent.getUpdatedData().keySet());
+        }
+        if ((mask & BIT_DELETE) == BIT_DELETE) {
+            LOG.info("{} DataChanged: removed {}", type, asyncDataChangeEvent.getRemovedPaths());
+            removedIids.addAll(asyncDataChangeEvent.getRemovedPaths());
+        }
+
         synchronized (this) {
             notifyAll();
         }
@@ -103,8 +135,8 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
 
     public void clear() {
         createdIids.clear();
-        removedIids.clear();
         updatedIids.clear();
+        removedIids.clear();
     }
 
     public void registerDataChangeListener(DataBroker dataBroker) {

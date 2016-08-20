@@ -57,16 +57,27 @@ public class NodeInfo {
         bridgeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo, INTEGRATION_BRIDGE_NAME);
     }
 
+    private void addWaiters() {
+        ovsdbWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                NotifyingDataChangeListener.BIT_CREATE, ovsdbIid, waitList);
+        ovsdbWaiter.registerDataChangeListener(itUtils.dataBroker);
+        bridgeWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                NotifyingDataChangeListener.BIT_CREATE, bridgeIid, waitList);
+        bridgeWaiter.registerDataChangeListener(itUtils.dataBroker);
+    }
+
+    private void closeWaiters() throws Exception {
+        ovsdbWaiter.close();
+        bridgeWaiter.close();
+    }
+
     /**
      * Connect to the OVSDB node, wait for the connection to be established and for the integration bridge
      * to be successfully created. Contains assertions for unexpected states
      * @throws InterruptedException if interrupted while waiting for connection
      */
-    public void connect() throws InterruptedException {
-        ovsdbWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, ovsdbIid, waitList);
-        ovsdbWaiter.registerDataChangeListener(itUtils.dataBroker);
-        bridgeWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, bridgeIid, waitList);
-        bridgeWaiter.registerDataChangeListener(itUtils.dataBroker);
+    public void connect() throws Exception {
+        addWaiters();
 
         assertNotNull("connection failed", itUtils.southboundUtils.addOvsdbNode(connectionInfo, 0));
 
@@ -90,7 +101,9 @@ public class NodeInfo {
      * Remove integration bridge and teardown connection. Contains assertions for unexpected states.
      * @throws InterruptedException if interrupted while waiting for disconnect to complete
      */
-    public void disconnect() throws InterruptedException {
+    public void disconnect() throws Exception {
+        ovsdbWaiter.setMask(NotifyingDataChangeListener.BIT_DELETE);
+        bridgeWaiter.setMask(NotifyingDataChangeListener.BIT_DELETE);
         assertTrue(itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0));
         bridgeWaiter.waitForDeletion();
         Node bridgeNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
@@ -99,6 +112,7 @@ public class NodeInfo {
         ovsdbWaiter.waitForDeletion();
         Node ovsdbNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
         assertNull("Ovsdb node should not be found", ovsdbNode);
+        closeWaiters();
     }
 
 }

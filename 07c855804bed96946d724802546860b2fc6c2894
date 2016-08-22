@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_a4c93c7a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-22T22:57:47Z",
+      "side": 1,
+      "message": "TransactionInvokerImpl is the main class that actually process all the md-sal transactions for all the nodes. So size of 20 is something that is very less to show up the warning, given that the queue size is 10000 here. This warning will show up even if you connect 2 ovs switches. I think with this size, it will log this warning message very frequently to the log file. I think you will see this impact if you connect 3 ovsdb node with 3 bridge each. I think we should keep this number a bit high 100+ or 50% of the queue size or probably configurable parameter. In my personal opinion if we can dump the DEBUG logs about the queue size rather than warning message (which user can interpret in many ways), that would be better approach to hint user about the possible bottleneck issue.\n On a side node this is one of the bottleneck class in the whole switch message processing pipeline, because it uses single thread to process these messages.",
+      "range": {
+        "startLine": 38,
+        "startChar": 29,
+        "endLine": 38,
+        "endChar": 62
+      },
+      "revId": "07c855804bed96946d724802546860b2fc6c2894",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

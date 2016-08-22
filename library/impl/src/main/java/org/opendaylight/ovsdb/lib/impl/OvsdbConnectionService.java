@@ -501,12 +501,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
+    public void setOvsdbRpcTaskTimeout(int timeout) {
+        JsonRpcEndpoint.setReaperInterval(timeout);
+    }
+
     public void updateConfigParameter(Map<String, Object> configParameters) {
-        LOG.debug("Config parameters received : {}", configParameters.entrySet());
+        LOG.info("Config parameters received : {}", configParameters.entrySet());
         if (configParameters != null && !configParameters.isEmpty()) {
             for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {
                 if (paramEntry.getKey().equalsIgnoreCase(OVSDB_RPC_TASK_TIMEOUT_PARAM)) {
-                    JsonRpcEndpoint.setReaperInterval(Integer.parseInt((String)paramEntry.getValue()));
+                    setOvsdbRpcTaskTimeout(Integer.parseInt((String)paramEntry.getValue()));
 
                     //Please remove the break if you add more config nobs.
                     break;

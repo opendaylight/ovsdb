@@ -22,6 +22,30 @@
       "revId": "07c855804bed96946d724802546860b2fc6c2894",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_84a9a07d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2016-08-22T23:45:54Z",
+      "side": 1,
+      "message": "Yes, this should be configurable parameter in the future, probably in a different patch.\n\nI don\u0027t think 20 is \"very\" less to show up the warning. I\u0027ve checked many log files which have debug log messages which show the size of the queue. And, I think when it goes over 20, it means that we are facing a performance issue, and it means that we are probably hitting the bug 5376. To avoid such kind of performance issues and critical problems, the plugin should process update notifications as quickly as the plugin receives update notification. So I would say that the size should be less than 1.\n\nYes, now, we would observe that the size goes over 20 easily. That\u0027s because the plugin has performance issue (e.g. the bug 6475). The situation which the size goes over 20 should be avoided.\n\nAnd, I think we should output log messages at WARN level, because it would tell users that a performance issue happens which I think users need to know. That\u0027s really valuable information for users. Otherwise, users would just hit critical problem like bug 5376 without any hits about why the critical problem happened.\n\nYes, some users can see messages at DEBUG level. However, DEBUG level is for developers. So I don\u0027t think we should expect users see DEBUG messages. Messages which should be informed to users are not output at the DEBUG level.",
+      "parentUuid": "7a6b29fe_a4c93c7a",
+      "range": {
+        "startLine": 38,
+        "startChar": 29,
+        "endLine": 38,
+        "endChar": 62
+      },
+      "revId": "07c855804bed96946d724802546860b2fc6c2894",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

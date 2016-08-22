@@ -48,6 +48,13 @@ public class ProcUtils {
         Assert.assertEquals("ProcUtils.runProcess exit code is not 0", 0, exitValue);
     }
 
+    public static int runProcess(int reserved, long waitFor, StringBuilder capturedStdout, String... words)
+            throws IOException, InterruptedException {
+        int exitValue = tryProcess(null, waitFor, capturedStdout, words);
+        LOG.info("ProcUtils.runProcess exit code: ", exitValue);
+        return exitValue;
+    }
+
     /**
      * Run a process.
      * @param waitFor How long to wait for the command to execute

@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
+    private static final int WARNING_SIZE_OF_INPUT_QUEUE = 50;
+
     private BindingTransactionChain chain;
     private DataBroker db;
     private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
@@ -47,6 +49,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         = new HashMap<>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
     private final AtomicBoolean runTask = new AtomicBoolean( true );
+    private boolean isWarningOfTooManyUpdates = false;
 
     public TransactionInvokerImpl(DataBroker db) {
         this.db = db;
@@ -60,6 +63,17 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     public void invoke(final TransactionCommand command) {
         // TODO what do we do if queue is full?
         inputQueue.offer(command);
+
+        // If there are many commands in the inputQueue,
+        // warn users that the plugin is taking a long time to process Update Notification.
+        if (!isWarningOfTooManyUpdates && inputQueue.size() >= WARNING_SIZE_OF_INPUT_QUEUE) {
+            LOG.warn("Since too many update notifications came from OVS in a short time, "
+                + "it is taking a long time to process them and update topology-operational DS.");
+
+            // To avoid outputting the same WARN message many times, set true into the flag
+            // so that the method output the WARN message only once when it faces this problem.
+            isWarningOfTooManyUpdates = true;
+        }
     }
 
     @Override
@@ -94,6 +108,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                             // NOOP - handled by failure of transaction chain
                         }
                     });
+                }
+
+                // If there are no pending commands to process in the inputQueue anymore,
+                // set false into the flag, and let users know this situation.
+                if (isWarningOfTooManyUpdates && inputQueue.isEmpty()) {
+                    isWarningOfTooManyUpdates = false;
+                    LOG.info("All update notifications pending have been processed.");
                 }
             } catch (InterruptedException e) {
                 LOG.warn("Exception invoking Transaction: ", e);

@@ -328,6 +328,15 @@ public class DockerOvs implements AutoCloseable {
         ProcUtils.runProcess(waitFor, cmd);
     }
 
+    public int runInContainer(int reserved, int waitFor, int numOvs, String ... cmdWords)
+            throws IOException, InterruptedException {
+        String[] pfx = getExecCmdPrefix(numOvs);
+        String[] cmd = new String[pfx.length + cmdWords.length];
+        System.arraycopy(pfx, 0, cmd, 0, pfx.length);
+        System.arraycopy(cmdWords, 0, cmd, pfx.length, cmdWords.length);
+        return ProcUtils.runProcess(reserved, waitFor, null, cmd);
+    }
+
     public void tryInContainer(String logText, int waitFor, int numOvs, String ... cmdWords) throws IOException, InterruptedException {
         String[] pfx = getExecCmdPrefix(numOvs);
         String[] cmd = new String[pfx.length + cmdWords.length];

@@ -82,30 +82,34 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
+        if (updatedBridgeRows == null || updatedBridgeRows.isEmpty()) {
+            return;
+        }
+
+        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        Optional<Node> connection = SouthboundUtil.readNode(transaction, connectionIId);
+        if (!connection.isPresent()) {
+            return;
+        }
+
         for (Entry<UUID, Bridge> entry : updatedBridgeRows.entrySet()) {
-            updateBridge(transaction, entry.getValue());
+            updateBridge(transaction, entry.getValue(), connectionIId);
         }
     }
 
     private void updateBridge(ReadWriteTransaction transaction,
-            Bridge bridge) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Optional<Node> connection = SouthboundUtil.readNode(transaction, connectionIId);
-        if (connection.isPresent()) {
-            LOG.debug("Connection {} is present",connection);
+            Bridge bridge, InstanceIdentifier<Node> connectionIId) {
+        // Update the connection node to let it know it manages this bridge
+        Node connectionNode = buildConnectionNode(bridge);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
 
-            // Update the connection node to let it know it manages this bridge
-            Node connectionNode = buildConnectionNode(bridge);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-
-            // Update the bridge node with whatever data we are getting
-            InstanceIdentifier<Node> bridgeIid = getInstanceIdentifier(bridge);
-            Node bridgeNode = buildBridgeNode(bridge);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
-            deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
-            deleteEntries(transaction, externalIdsToRemove(bridgeIid,bridge));
-            deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
-        }
+        // Update the bridge node with whatever data we are getting
+        InstanceIdentifier<Node> bridgeIid = getInstanceIdentifier(bridge);
+        Node bridgeNode = buildBridgeNode(bridge);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
+        deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
+        deleteEntries(transaction, externalIdsToRemove(bridgeIid,bridge));
+        deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
     }
 
     private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,

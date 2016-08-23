@@ -19,7 +19,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -37,32 +36,32 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
 
     private Map<UUID, Queue> removedQueueRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
 
     public OvsdbQueueRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
         removedQueueRows = TyperUtils.extractRowsRemoved(Queue.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
+        if (removedQueueRows == null || removedQueueRows.isEmpty()) {
+            return;
+        }
+
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
             List<InstanceIdentifier<Queues>> result = new ArrayList<>();
             InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
-            if (removedQueueRows != null && !removedQueueRows.isEmpty()) {
-                for (UUID queueUuid : removedQueueRows.keySet()) {
-                    QueuesKey queueKey = getQueueKey(ovsdbNode.get(), queueUuid);
-                    if (queueKey != null) {
-                        InstanceIdentifier<Queues> iid = ovsdbNodeIid
-                            .augmentation(OvsdbNodeAugmentation.class)
-                            .child(Queues.class, queueKey);
-                        result.add(iid);
-                    }
+            for (UUID queueUuid : removedQueueRows.keySet()) {
+                QueuesKey queueKey = getQueueKey(ovsdbNode.get(), queueUuid);
+                if (queueKey != null) {
+                    InstanceIdentifier<Queues> iid = ovsdbNodeIid
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(Queues.class, queueKey);
+                    result.add(iid);
                 }
             }
             deleteQueue(transaction, result);

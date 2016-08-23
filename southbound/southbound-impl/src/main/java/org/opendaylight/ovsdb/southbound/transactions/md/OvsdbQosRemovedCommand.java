@@ -19,7 +19,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -37,32 +36,32 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
 
     private Map<UUID, Qos> removedQosRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
 
     public OvsdbQosRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
         removedQosRows = TyperUtils.extractRowsRemoved(Qos.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
+        if (removedQosRows == null || removedQosRows.isEmpty()) {
+            return;
+        }
+
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
             List<InstanceIdentifier<QosEntries>> result = new ArrayList<>();
             InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
-            if (removedQosRows != null && !removedQosRows.isEmpty()) {
-                for (UUID qosUuid : removedQosRows.keySet()) {
-                    QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.get(), qosUuid);
-                    if (qosKey != null) {
-                        InstanceIdentifier<QosEntries> iid = ovsdbNodeIid
-                            .augmentation(OvsdbNodeAugmentation.class)
-                            .child(QosEntries.class, qosKey);
-                        result.add(iid);
-                    }
+            for (UUID qosUuid : removedQosRows.keySet()) {
+                QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.get(), qosUuid);
+                if (qosKey != null) {
+                    InstanceIdentifier<QosEntries> iid = ovsdbNodeIid
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(QosEntries.class, qosKey);
+                    result.add(iid);
                 }
             }
             deleteQos(transaction, result);

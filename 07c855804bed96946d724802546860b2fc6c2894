@@ -46,6 +46,30 @@
       "revId": "07c855804bed96946d724802546860b2fc6c2894",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a507761b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2016-08-23T15:52:45Z",
+      "side": 1,
+      "message": "Based on your opinion and our latest observations, I\u0027ve updated the value from 20 to 50.\n\nI\u0027ve checked how many TransactionCommand pending would be in the inputQueue with the latest source code.\nThe max number was 11 during our test with the legacy NetVirt feature.\nIn the test, we created two networks and one VM instance  in OpenStack.\nAnd, there were over 500 update notification came from OVS during the test.\nIn the test, we used the source code at stable/beryllium branch. Though I think the number will be not much different even in stable/boron branch.\nThe test was done with three ODL nodes as a cluster.\nAt most, there was 11 TransactionCommand in the inputQueue in the node which was the owner for three OVS, but not the leader of the shard-topology-operational. (Different ODL node was the leader of the shard-topology-operational). That is the worst case in terms of the performance on processing update notifications. Therefore, I think *50* is a good number as a threshold at which we warn users that a performance issue is happening.",
+      "parentUuid": "7a6b29fe_84a9a07d",
+      "range": {
+        "startLine": 38,
+        "startChar": 29,
+        "endLine": 38,
+        "endChar": 62
+      },
+      "revId": "07c855804bed96946d724802546860b2fc6c2894",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

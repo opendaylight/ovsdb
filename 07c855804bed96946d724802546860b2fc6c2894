@@ -70,6 +70,30 @@
       "revId": "07c855804bed96946d724802546860b2fc6c2894",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_da27f0b4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-23T21:02:30Z",
+      "side": 1,
+      "message": "Performance is always dependent on where you are running the controller. If you are running the controller in 1 CPU/2gig ram, you probably will hit 50 very easily, but if you are running it in 8CPU/16gig machine, you might never hit this number. In some cases you can hit this number even with 8CPU/16gig machine if ovsdb is loaded with other project that does huge number of data store transaction. But that does not really mean that plugin is a culprit here, it\u0027s because md-sal itself is loaded. So these explicit warning message can give you the wrong clue about the real problem. So there is a possibility that the warning message is really a false positive. So in my opinion, it\u0027s a better approach to print the status (queue size and any other stats) in debug log rather than explicitly warning the user, which can be false positive. Thoughts?",
+      "parentUuid": "7a6b29fe_a507761b",
+      "range": {
+        "startLine": 38,
+        "startChar": 29,
+        "endLine": 38,
+        "endChar": 62
+      },
+      "revId": "07c855804bed96946d724802546860b2fc6c2894",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

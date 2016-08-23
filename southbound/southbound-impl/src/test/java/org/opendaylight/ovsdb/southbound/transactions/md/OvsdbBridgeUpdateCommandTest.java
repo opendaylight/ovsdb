@@ -113,18 +113,8 @@ public class OvsdbBridgeUpdateCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         updatedBridgeRows.put(mock(UUID.class), mock(Bridge.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "updateBridge",
-                ReadWriteTransaction.class, Bridge.class));
-        ovsdbBridgeUpdateCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbBridgeUpdateCommand).invoke("updateBridge", any(ReadWriteTransaction.class),
-                any(Bridge.class));
-    }
 
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testUpdateBridge() throws Exception {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
@@ -134,6 +124,17 @@ public class OvsdbBridgeUpdateCommandTest {
         when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
                 .thenReturn(connection);
         when(connection.isPresent()).thenReturn(true);
+        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "updateBridge",
+                ReadWriteTransaction.class, Bridge.class, InstanceIdentifier.class));
+        ovsdbBridgeUpdateCommand.execute(transaction);
+        PowerMockito.verifyPrivate(ovsdbBridgeUpdateCommand).invoke("updateBridge", any(ReadWriteTransaction.class),
+                any(Bridge.class), any(InstanceIdentifier.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testUpdateBridge() throws Exception {
         MemberModifier
                 .suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "buildConnectionNode", Bridge.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
@@ -154,10 +155,10 @@ public class OvsdbBridgeUpdateCommandTest {
                 InstanceIdentifier.class, Bridge.class));
 
         Bridge bridge = mock(Bridge.class);
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "updateBridge", transaction, bridge);
+        InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
+        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "updateBridge", transaction, bridge, connectionIId);
         PowerMockito.verifyPrivate(ovsdbBridgeUpdateCommand, times(3)).invoke("deleteEntries",
                 any(ReadWriteTransaction.class), any(Bridge.class));
-        verify(ovsdbConnectionInstance).getInstanceIdentifier();
     }
 
     @SuppressWarnings("unchecked")

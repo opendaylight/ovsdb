@@ -4,11 +4,27 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            odl:use-default-for-reference-types="true">
 
+  <!-- Read default values at startup and inject to OvsdbConnectionService-->
+  <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.library" update-strategy="none">
+    <!-- Setting default values, in case library.cfg file is not present
+    or config property is commented out. This will be overridden if user
+    specify the property in library.cfg file-->
+    <cm:default-properties>
+      <cm:property name="ovsdb-rpc-task-timeout" value="1000"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <bean id="library" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
+    <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
+  </bean>
+
+  <!-- Notify OvsdbConnectionService with any change in the config properties value-->
   <bean id="ovsdbConnectionService" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
     <cm:managed-properties persistent-id="org.opendaylight.ovsdb.library"
                            update-strategy="component-managed"
                            update-method="updateConfigParameter"/>
   </bean>
+
   <service ref="ovsdbConnectionService" interface="org.opendaylight.ovsdb.lib.OvsdbConnection"
     odl:type="default" />
 

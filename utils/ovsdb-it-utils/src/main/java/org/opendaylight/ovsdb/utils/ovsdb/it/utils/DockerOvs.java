@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -128,7 +129,7 @@ public class DockerOvs implements AutoCloseable {
         public String name;
         public String port;
     }
-    private List<DockerComposeServiceInfo> dockerComposeServices = new ArrayList<DockerComposeServiceInfo>();
+    private Map<String, DockerComposeServiceInfo> dockerComposeServices = new HashMap<>();
 
     /**
      * Get the array of system properties as pax exam Option objects for use in pax exam
@@ -302,7 +303,14 @@ public class DockerOvs implements AutoCloseable {
         if (!runDocker) {
             return envServerPort;
         }
-        return dockerComposeServices.get(ovsNumber).port;
+        return dockerComposeServices.get(getOvsNumString(ovsNumber)).port;
+    }
+
+    public String getOvsdbPort(String ovsName) {
+        if (!runDocker) {
+            return envServerPort;
+        }
+        return dockerComposeServices.get(ovsName).port;
     }
 
     /**
@@ -313,10 +321,17 @@ public class DockerOvs implements AutoCloseable {
         return dockerComposeServices.size();
     }
 
+    private String getOvsNumString(int numOvs) {
+        if (numOvs == 0) {
+            return "ovs";
+        } else {
+            return "ovs" + numOvs;
+        }
+    }
     public String[] getExecCmdPrefix(int numOvs) {
         String[] res = new String[execCmd.length];
         System.arraycopy(execCmd, 0, res, 0, execCmd.length);
-        res[res.length - 1] = dockerComposeServices.get(numOvs).name;
+        res[res.length - 1] = dockerComposeServices.get(getOvsNumString(numOvs)).name;
         return res;
     }
 
@@ -337,7 +352,17 @@ public class DockerOvs implements AutoCloseable {
         return ProcUtils.runProcess(reserved, waitFor, null, cmd);
     }
 
-    public void tryInContainer(String logText, int waitFor, int numOvs, String ... cmdWords) throws IOException, InterruptedException {
+    public int runInContainer(int reserved, int waitFor, StringBuilder capturedStdout, int numOvs, String ... cmdWords)
+            throws IOException, InterruptedException {
+        String[] pfx = getExecCmdPrefix(numOvs);
+        String[] cmd = new String[pfx.length + cmdWords.length];
+        System.arraycopy(pfx, 0, cmd, 0, pfx.length);
+        System.arraycopy(cmdWords, 0, cmd, pfx.length, cmdWords.length);
+        return ProcUtils.runProcess(reserved, waitFor, capturedStdout, cmd);
+    }
+
+    public void tryInContainer(String logText, int waitFor, int numOvs, String ... cmdWords)
+            throws IOException, InterruptedException {
         String[] pfx = getExecCmdPrefix(numOvs);
         String[] cmd = new String[pfx.length + cmdWords.length];
         System.arraycopy(pfx, 0, cmd, 0, pfx.length);
@@ -390,7 +415,7 @@ public class DockerOvs implements AutoCloseable {
                 svc.port = port;
             }
             //TODO: think this through. What if there is no port?
-            dockerComposeServices.add(svc);
+            dockerComposeServices.put(svc.name, svc);
         }
 
         return ports;
@@ -499,9 +524,14 @@ public class DockerOvs implements AutoCloseable {
         }
 
         OvsdbPing[] pingers = new OvsdbPing[numOvs];
-        for (int i = 0; i < numOvs; i++) {
-            pingers[i] = new OvsdbPing(i, numRunningOvs);
-            pingers[i].start();
+        if (numOvs == 1) {
+            pingers[0] = new OvsdbPing(0, numRunningOvs);
+            pingers[0].start();
+        } else {
+            for (int i = 0; i < numOvs; i++) {
+                pingers[i] = new OvsdbPing(i+1, numRunningOvs);
+                pingers[i].start();
+            }
         }
 
         long startTime = System.currentTimeMillis();
@@ -563,5 +593,4 @@ public class DockerOvs implements AutoCloseable {
         tryInContainer(logText, 5000, dockerInstance, "ovs-ofctl", "-OOpenFlow13", "dump-flows", "br-int");
         tryInContainer(logText, 5000, dockerInstance, "ip", "netns", "list");
     }
-
 }

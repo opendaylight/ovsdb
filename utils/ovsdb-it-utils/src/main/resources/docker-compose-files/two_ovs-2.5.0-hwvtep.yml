@@ -1,0 +1,12 @@
+ovs1:
+ image: vpickard/openvswitch:2.5.0
+ ports:
+   - "6641:6640"
+ command: "/usr/bin/supervisord -n"
+ privileged: true
+ovs2:
+ image: vpickard/openvswitch:2.5.0
+ ports:
+   - "6642:6640"
+ command: "/usr/bin/supervisord -n"
+ privileged: true

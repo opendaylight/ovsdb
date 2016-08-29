@@ -1,0 +1,52 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_3a36e4e7",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-23T21:44:07Z",
+      "side": 1,
+      "message": "This thread is newSingleThreadExecutor, so ideally if the thread terminates because of some reason, it should spawn new thread and keep processing the messages, you don\u0027t see that behavior? Any bug anywhere in the system is probably not good for overall health of the system. But if this is something that frequently happening then we should definitely fix that rather then hiding it in the generic exception.",
+      "parentUuid": "7a6b29fe_c586f264",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 16
+      },
+      "revId": "eafdf695d2dbd7d39aa9521f2930f3a0702c3ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1a432815",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-08-23T21:44:07Z",
+      "side": 1,
+      "message": "it\u0027s basically submitting the commands associated with the transaction and most probably this resubmission of command will end up with the same result, if it\u0027s a bug in the command itself.",
+      "parentUuid": "7a6b29fe_25a7e60d",
+      "range": {
+        "startLine": 107,
+        "startChar": 20,
+        "endLine": 107,
+        "endChar": 70
+      },
+      "revId": "eafdf695d2dbd7d39aa9521f2930f3a0702c3ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

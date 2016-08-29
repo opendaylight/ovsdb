@@ -26,6 +26,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_fa10eca9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 396
+      },
+      "writtenOn": "2016-08-23T23:54:17Z",
+      "side": 1,
+      "message": "Hi Anil, we\u0027ve faced a similar issue twice yesterday. But, we\u0027ve not observed the behavior that the ExecutorService spawns a new thread to process update notification after the issue. I think that\u0027s because this method submits only one single task into the ExecutorService in the constructor (the line 58). Since only one task is submitted to the ExecutorService, the ExecutorService doesn\u0027t do nothing after the thread is halted. (If the ExecutorService has pending tasks, it will spawn a new thread after the thread running goes die. Please note here a task means an object of Runnable class, but not about an object of TransactionCommand.)\n\n\nSo since it is a single thread worker model, we should not let the thread die in any conditions, I think.\n\nThat being said, I would say that we should not hiding known exceptions here. Instead of that, I think we should create several catch blocks.",
+      "parentUuid": "7a6b29fe_3a36e4e7",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 16
+      },
+      "revId": "eafdf695d2dbd7d39aa9521f2930f3a0702c3ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_8156a7d0",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionInvokerImpl.java",
         "patchSetId": 1

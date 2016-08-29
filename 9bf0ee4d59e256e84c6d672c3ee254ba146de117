@@ -22,6 +22,30 @@
       "revId": "9bf0ee4d59e256e84c6d672c3ee254ba146de117",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f0011d6b",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/schema/BaseType.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-08-29T12:33:11Z",
+      "side": 1,
+      "message": "Anil, you are right (well spotted!).  I had a closer look over this code just now, and realized: 1. It has that getConstratins/populateEnum pattern it does for every type;  2. It had a clear bug for Integer \u0026 Double, which this fixes;  3. It already worked for String, because it looks like someone at some point in the past already fixed the problem I bumped it (courtesy of FindBugs), BUT at the time only for String!  I initially hadn\u0027t understood or seen that, which lead to the inconsistency you\u0027ve picked up on.  I\u0027ve therefore now removed the setEnums from populateEnum for StringBaseType, to make it consistent (could equally well have changed them all back to doing it in EACH xN respective populateEnum as well; but I find this clearer).  Could you look it over again as well, and see if this makes sense now?",
+      "parentUuid": "9a561d44_bdcf6355",
+      "range": {
+        "startLine": 372,
+        "startChar": 12,
+        "endLine": 375,
+        "endChar": 13
+      },
+      "revId": "9bf0ee4d59e256e84c6d672c3ee254ba146de117",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -323,7 +323,7 @@ public class DockerOvs implements AutoCloseable {
 
     private String getOvsNumString(int numOvs) {
         if (numOvs == 0) {
-            return "ovs";
+            return "ovs1";
         } else {
             return "ovs" + numOvs;
         }

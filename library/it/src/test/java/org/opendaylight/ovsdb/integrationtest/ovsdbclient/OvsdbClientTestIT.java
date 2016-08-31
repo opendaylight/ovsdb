@@ -100,7 +100,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
-        MonitorRequestBuilder<GenericTableSchema> builder = MonitorRequestBuilder.builder(bridge);
+        MonitorRequestBuilder<GenericTableSchema> builder = new MonitorRequestBuilder<>(bridge);
         if (filter) {
             builder.addColumn(bridge.column("name"))
                    .addColumn(bridge.column("fail_mode", String.class))

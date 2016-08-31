@@ -41,9 +41,7 @@ import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
-import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
-import org.opendaylight.ovsdb.lib.message.MonitorSelect;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -179,13 +177,6 @@ public class OvsdbConnectionInstanceTest {
         columns.add("_version");
         columns.add("statistics");
         when(tableSchema.getColumns()).thenReturn(columns);
-        MonitorRequestBuilder<GenericTableSchema> monitorBuilder = mock(MonitorRequestBuilder.class);
-        PowerMockito.mockStatic(MonitorRequestBuilder.class);
-        when(MonitorRequestBuilder.builder(any(GenericTableSchema.class))).thenReturn(monitorBuilder);
-        when(monitorBuilder.addColumn(anyString())).thenReturn(monitorBuilder);
-        MonitorRequest monitorReq = mock(MonitorRequest.class);
-        when(monitorBuilder.with(any(MonitorSelect.class))).thenReturn(monitorBuilder);
-        when(monitorBuilder.build()).thenReturn(monitorReq);
 
         suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class,
                 MonitorCallBack.class));
@@ -198,8 +189,6 @@ public class OvsdbConnectionInstanceTest {
         Whitebox.invokeMethod(ovsdbConnectionInstance, "monitorTables", "database", dbSchema);
         PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
                 any(DatabaseSchema.class));
-
-        verify(monitorBuilder, times(4)).addColumn(anyString());
     }
 
     @SuppressWarnings({ "unchecked" })

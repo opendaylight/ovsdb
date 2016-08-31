@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.lib.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.Sets;
 import java.util.Set;
 
 /**
@@ -58,12 +57,5 @@ public class MonitorRequest {
 
     public void setColumns(Set<String> columns) {
         this.columns = columns;
-    }
-
-    public void addColumn(String column) {
-        if (columns == null) {
-            columns = Sets.newHashSet();
-        }
-        columns.add(column);
     }
 }

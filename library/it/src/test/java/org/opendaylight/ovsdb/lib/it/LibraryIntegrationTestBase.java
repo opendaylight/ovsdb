@@ -224,7 +224,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         TypedBaseTable<GenericTableSchema> table = getClient().createTypedRowWrapper(klazz);
         GenericTableSchema tableSchema = table.getSchema();
         Set<String> columns = tableSchema.getColumns();
-        MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = MonitorRequestBuilder.builder(table.getSchema());
+        MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = new MonitorRequestBuilder<>(table.getSchema());
         for (String column : columns) {
             bridgeBuilder.addColumn(column);
         }
@@ -233,7 +233,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
     public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
-        MonitorRequestBuilder<T> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
+        MonitorRequestBuilder<T> monitorBuilder = new MonitorRequestBuilder<>(tableSchema);
         for (String column : columns) {
             monitorBuilder.addColumn(column);
         }

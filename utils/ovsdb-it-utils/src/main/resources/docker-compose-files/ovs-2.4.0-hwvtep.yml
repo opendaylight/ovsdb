@@ -1,4 +1,4 @@
-ovs:
+ovs1:
  image: vpickard/openvswitch:2.4.0
  ports:
    - "6641:6640"

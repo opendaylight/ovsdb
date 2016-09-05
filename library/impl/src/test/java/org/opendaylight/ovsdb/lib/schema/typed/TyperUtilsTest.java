@@ -8,13 +8,20 @@
 
 package org.opendaylight.ovsdb.lib.schema.typed;
 
+import static org.junit.Assert.assertEquals;
+
+import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +31,15 @@ import org.slf4j.LoggerFactory;
 public class TyperUtilsTest {
     private static final Logger LOG = LoggerFactory.getLogger(TyperUtilsTest.class);
 
+    @TypedTable(name = "TestTypedTable", database = "Open_vSwitch")
+    private class TestTypedTable {
+
+    }
+
+    private class TestUntypedTable {
+
+    }
+
     /**
      * Test that {@link TyperUtils#getTableSchema(DatabaseSchema, Class)} returns the appropriate schema when given a
      * table containing the appropriate schema, for a typed table (annotated).
@@ -31,10 +47,14 @@ public class TyperUtilsTest {
     @Test
     public void testGetTableSchemaWithIncludedTypedTable() {
         // Given ...
+        GenericTableSchema testTableSchema = new GenericTableSchema("TestTypedTable");
+        DatabaseSchema dbSchema = new DatabaseSchema(ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
+        GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
 
         // Then ...
+        assertEquals(testTableSchema, tableSchema);
     }
 
     /**
@@ -44,10 +64,14 @@ public class TyperUtilsTest {
     @Test
     public void testGetTableSchemaWithIncludedUntypedTable() {
         // Given ...
+        GenericTableSchema testTableSchema = new GenericTableSchema("TestUntypedTable");
+        DatabaseSchema dbSchema = new DatabaseSchema(ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
+        GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
 
         // Then ...
+        assertEquals(testTableSchema, tableSchema);
     }
 
     /**

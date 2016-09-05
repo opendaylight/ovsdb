@@ -30,6 +30,9 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
+/**
+ * Utility methods for typed OVSDB schema data.
+ */
 public class TyperUtils {
 
     private static final String GET_STARTS_WITH = "get";
@@ -49,7 +52,15 @@ public class TyperUtils {
         return klazz.getSimpleName();
     }
 
-    public static <T> GenericTableSchema getTableSchema(DatabaseSchema dbSchema, Class<T> klazz) {
+    /**
+     * Retrieve the table schema for the given table in the given database schema.
+     *
+     * @param dbSchema The database schema.
+     * @param klazz The class whose table schema should be retrieved. Classes are matched in the database schema either
+     *     using their {@link TypedTable} annotation, if they have one, or by name.
+     * @return the table schema.
+     */
+    public static GenericTableSchema getTableSchema(DatabaseSchema dbSchema, Class<?> klazz) {
         String tableName = getTableName(klazz);
         return dbSchema.table(tableName, GenericTableSchema.class);
     }

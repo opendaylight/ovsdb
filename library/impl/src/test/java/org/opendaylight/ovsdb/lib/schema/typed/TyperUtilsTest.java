@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,32 @@ import org.slf4j.LoggerFactory;
  */
 public class TyperUtilsTest {
     private static final Logger LOG = LoggerFactory.getLogger(TyperUtilsTest.class);
+
+    /**
+     * Test that {@link TyperUtils#getTableSchema(DatabaseSchema, Class)} returns the appropriate schema when given a
+     * table containing the appropriate schema, for a typed table (annotated).
+     */
+    @Test
+    public void testGetTableSchemaWithIncludedTypedTable() {
+        // Given ...
+
+        // When ...
+
+        // Then ...
+    }
+
+    /**
+     * Test that {@link TyperUtils#getTableSchema(DatabaseSchema, Class)} returns the appropriate schema when given a
+     * table containing the appropriate schema, for an untyped table (non-annotated).
+     */
+    @Test
+    public void testGetTableSchemaWithIncludedUntypedTable() {
+        // Given ...
+
+        // When ...
+
+        // Then ...
+    }
 
     /**
      * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} detects an old version. (The aim here isn't

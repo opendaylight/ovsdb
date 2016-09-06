@@ -75,6 +75,32 @@ public class TyperUtilsTest {
     }
 
     /**
+     * Test that {@link TyperUtils#getTableSchema(DatabaseSchema, Class)} throws an {@link IllegalArgumentException}
+     * when the appropriate table schema isn't present in the database schema (for a typed table).
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetTableSchemaWithoutIncludedTypedTable() {
+        // Given ...
+        DatabaseSchema dbSchema = new DatabaseSchema(Collections.emptyMap());
+
+        // When ...
+        TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
+    }
+
+    /**
+     * Test that {@link TyperUtils#getTableSchema(DatabaseSchema, Class)} throws an {@link IllegalArgumentException}
+     * when the appropriate table schema isn't present in the database schema (for an untyped table).
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetTableSchemaWithoutIncludedUntypedTable() {
+        // Given ...
+        DatabaseSchema dbSchema = new DatabaseSchema(Collections.emptyMap());
+
+        // When ...
+        TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
+    }
+
+    /**
      * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} detects an old version. (The aim here isn't
      * to test {@link Version#compareTo(Version)}, that should be done in
      * {@link org.opendaylight.ovsdb.lib.notation.VersionTest}).

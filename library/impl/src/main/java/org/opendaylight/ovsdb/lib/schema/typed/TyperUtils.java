@@ -58,10 +58,9 @@ public class TyperUtils {
      * @param dbSchema The database schema.
      * @param klazz The class whose table schema should be retrieved. Classes are matched in the database schema either
      * using their {@link TypedTable} annotation, if they have one, or by name.
-     * @param <T>
      * @return the table schema.
      */
-    public static <T> GenericTableSchema getTableSchema(DatabaseSchema dbSchema, Class<T> klazz) {
+    public static GenericTableSchema getTableSchema(DatabaseSchema dbSchema, Class<?> klazz) {
         String tableName = getTableName(klazz);
         return dbSchema.table(tableName, GenericTableSchema.class);
     }

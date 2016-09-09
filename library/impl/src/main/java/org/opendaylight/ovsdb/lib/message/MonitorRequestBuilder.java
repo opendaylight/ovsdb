@@ -13,17 +13,17 @@ import java.util.Set;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class MonitorRequestBuilder<E extends TableSchema<E>> {
+public class MonitorRequestBuilder {
 
-    E tableSchema;
+    TableSchema tableSchema;
     MonitorRequest monitorRequest;
 
-    MonitorRequestBuilder(E tableSchema) {
+    MonitorRequestBuilder(TableSchema tableSchema) {
         this.tableSchema = tableSchema;
     }
 
-    public static <T extends TableSchema<T>> MonitorRequestBuilder<T> builder(T tableSchema) {
-        return new MonitorRequestBuilder<>(tableSchema);
+    public static MonitorRequestBuilder builder(TableSchema tableSchema) {
+        return new MonitorRequestBuilder(tableSchema);
     }
 
     MonitorRequest getMonitorRequest() {
@@ -33,18 +33,18 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return monitorRequest;
     }
 
-    public MonitorRequestBuilder<E> addColumn(String column) {
+    public MonitorRequestBuilder addColumn(String column) {
         getMonitorRequest().addColumn(column);
         return this;
     }
 
-    public MonitorRequestBuilder<E> addColumn(ColumnSchema<?, ?> column) {
+    public MonitorRequestBuilder addColumn(ColumnSchema<?> column) {
         this.addColumn(column.getName());
         return this;
     }
 
-    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> columns) {
-        for (ColumnSchema<E, ?> schema : columns) {
+    public MonitorRequestBuilder addColumns(List<ColumnSchema<?>> columns) {
+        for (ColumnSchema<?> schema : columns) {
             this.addColumn(schema);
         }
         return this;
@@ -54,7 +54,7 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return getMonitorRequest().getColumns();
     }
 
-    public MonitorRequestBuilder<E> with(MonitorSelect select) {
+    public MonitorRequestBuilder with(MonitorSelect select) {
         getMonitorRequest().setSelect(select);
         return this;
     }

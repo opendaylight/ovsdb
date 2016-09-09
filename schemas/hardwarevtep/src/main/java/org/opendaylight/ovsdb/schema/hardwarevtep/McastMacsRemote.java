@@ -10,16 +10,15 @@ package org.opendaylight.ovsdb.schema.hardwarevtep;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.MethodType;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Mcast_Macs_Remote", database="hardware_vtep", fromVersion="1.0.0")
-public interface McastMacsRemote extends TypedBaseTable<GenericTableSchema> {
+public interface McastMacsRemote extends TypedBaseTable {
     @TypedColumn(name="MAC", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, String> getMacColumn();
+    Column<String> getMacColumn();
 
     @TypedColumn(name="MAC", method=MethodType.GETDATA, fromVersion="1.0.0")
     String getMac();
@@ -29,20 +28,20 @@ public interface McastMacsRemote extends TypedBaseTable<GenericTableSchema> {
 
 
     @TypedColumn(name="logical_switch", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, UUID> getLogicalSwitchColumn();
+    Column<UUID> getLogicalSwitchColumn();
 
     @TypedColumn(name="logical_switch", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setLogicalSwitch(UUID logicalSwitch);
 
     @TypedColumn(name="locator_set", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, UUID> getLocatorSetColumn();
+    Column<UUID> getLocatorSetColumn();
 
     @TypedColumn(name="locator_set", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setLocatorSet(UUID locatorSet);
 
 
     @TypedColumn(name="ipaddr", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, String> getIpAddrColumn();
+    Column<String> getIpAddrColumn();
 
     @TypedColumn(name="ipaddr", method=MethodType.GETDATA, fromVersion="1.0.0")
     String getIpAddr();

@@ -14,10 +14,10 @@ import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class Select<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
+public class Select extends Operation implements ConditionalOperation {
 
-    public static final String SELECT = "select";
-    List<Condition> where = Lists.newArrayList();
+    private static final String SELECT = "select";
+    private List<Condition> where = Lists.newArrayList();
     private List<String> columns = Lists.newArrayList();
 
     public Select on(TableSchema schema) {
@@ -25,11 +25,11 @@ public class Select<E extends TableSchema<E>> extends Operation<E> implements Co
         return this;
     }
 
-    public Select(TableSchema<E> schema) {
+    public Select(TableSchema schema) {
         super(schema, SELECT);
     }
 
-    public <D, C extends TableSchema<C>> Select<E> column(ColumnSchema<C, D> columnSchema) {
+    public <D> Select column(ColumnSchema<D> columnSchema) {
         columns.add(columnSchema.getName());
         return this;
     }

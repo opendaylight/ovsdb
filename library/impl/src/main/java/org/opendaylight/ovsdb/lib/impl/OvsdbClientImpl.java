@@ -49,7 +49,6 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
@@ -159,7 +158,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                 Map.Entry<String, JsonNode> entry = itr.next();
 
                 DatabaseSchema databaseSchema = this.schemas.get(dbSchema.getName());
-                TableSchema table = databaseSchema.table(entry.getKey(), TableSchema.class);
+                TableSchema table = databaseSchema.table(entry.getKey());
                 tableUpdateMap.put(entry.getKey(), table.updatesFromJson(entry.getValue()));
 
             }
@@ -181,9 +180,9 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
-                                                            List<MonitorRequest> monitorRequest,
-                                                            final MonitorCallBack callback) {
+    public TableUpdates monitor(final DatabaseSchema dbSchema,
+                                List<MonitorRequest> monitorRequest,
+                                final MonitorCallBack callback) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
                 new Function<MonitorRequest, String>() {
@@ -213,10 +212,10 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
-                                                           List<MonitorRequest> monitorRequest,
-                                                           final MonitorHandle monitorHandle,
-                                                           final MonitorCallBack callback) {
+    public TableUpdates monitor(final DatabaseSchema dbSchema,
+                                List<MonitorRequest> monitorRequest,
+                                final MonitorHandle monitorHandle,
+                                final MonitorCallBack callback) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
                 new Function<MonitorRequest, String>() {
@@ -428,7 +427,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @return Proxy wrapper for the actual raw Row class.
      */
     @Override
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz) {
+    public <T extends TypedBaseTable> T createTypedRowWrapper(Class<T> klazz) {
         DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return this.createTypedRowWrapper(dbSchema, klazz);
     }
@@ -442,8 +441,8 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @return Proxy wrapper for the actual raw Row class.
      */
     @Override
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
-        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<GenericTableSchema>());
+    public <T extends TypedBaseTable> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
+        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row());
     }
 
     /**
@@ -456,7 +455,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      */
     @Override
 
-    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
+    public <T extends TypedBaseTable> T getTypedRowWrapper(final Class<T> klazz, final Row row) {
         DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return TyperUtils.getTypedRowWrapper(dbSchema, klazz, row);
     }

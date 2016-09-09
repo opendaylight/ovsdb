@@ -21,8 +21,8 @@ public class RowSerializer extends JsonSerializer<Row> {
     public void serialize(Row row, JsonGenerator generator,
         SerializerProvider provider) throws IOException {
         generator.writeStartObject();
-        Collection<Column> columns = row.getColumns();
-        for (Column<?,?> column : columns) {
+        Collection<Column<?>> columns = row.getColumns();
+        for (Column<?> column : columns) {
             generator.writeObjectField(column.getSchema().getName(), column.getData());
         }
         generator.writeEndObject();

@@ -20,46 +20,46 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
-public class Update<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
+public class Update extends Operation implements ConditionalOperation {
 
-    public static final String UPDATE = "update";
+    private static final String UPDATE = "update";
 
-    Map<String, Object> row = Maps.newHashMap();
-    String uuid;
+    private Map<String, Object> row = Maps.newHashMap();
+    private String uuid;
 
-    List<Condition> where = Lists.newArrayList();
+    private List<Condition> where = Lists.newArrayList();
 
     private String uuidName;
 
-    public Update(TableSchema<E> schema) {
+    public Update(TableSchema schema) {
         super(schema, UPDATE);
     }
 
-    public Update<E> on(TableSchema schema) {
+    public Update on(TableSchema schema) {
         return this;
     }
 
-    public Update(TableSchema<E> schema, Row<E> row) {
+    public Update(TableSchema schema, Row row) {
         super(schema, UPDATE);
-        Collection<Column<E,?>> columns = row.getColumns();
-        for (Column<E,?> column : columns) {
+        Collection<Column<?>> columns = row.getColumns();
+        for (Column<?> column : columns) {
             this.set(column);
         }
     }
 
-    public Update(TypedBaseTable<E> typedTable) {
+    public Update(TypedBaseTable typedTable) {
         this(typedTable.getSchema(), typedTable.getRow());
     }
 
-    public <T extends TableSchema<T>, D> Update<E> set(ColumnSchema<T, D> columnSchema, D value) {
+    public <D> Update set(ColumnSchema<D> columnSchema, D value) {
         columnSchema.validate(value);
         Object untypedValue = columnSchema.getNormalizeData(value);
         this.row.put(columnSchema.getName(), untypedValue);
         return this;
     }
 
-    public <T extends TableSchema<T>, D> Update<E> set(Column<T, D> column) {
-        ColumnSchema<T, D> columnSchema = column.getSchema();
+    public <D> Update set(Column<D> column) {
+        ColumnSchema<D> columnSchema = column.getSchema();
         D value = column.getData();
         return this.set(columnSchema, value);
     }

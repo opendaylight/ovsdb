@@ -12,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public abstract class Operation<E extends TableSchema<E>> {
+public abstract class Operation {
 
     @JsonIgnore
-    private TableSchema<E> tableSchema;
+    private TableSchema tableSchema;
 
     private String op;
 
@@ -28,11 +28,11 @@ public abstract class Operation<E extends TableSchema<E>> {
     protected Operation() {
     }
 
-    protected Operation(TableSchema<E> tableSchema) {
+    protected Operation(TableSchema tableSchema) {
         this.tableSchema = tableSchema;
     }
 
-    public Operation(TableSchema<E> schema, String operation) {
+    public Operation(TableSchema schema, String operation) {
         this.tableSchema = schema;
         this.op = operation;
     }
@@ -53,11 +53,11 @@ public abstract class Operation<E extends TableSchema<E>> {
         this.result = result;
     }
 
-    public TableSchema<E> getTableSchema() {
+    public TableSchema getTableSchema() {
         return tableSchema;
     }
 
-    public void setTableSchema(TableSchema<E> tableSchema) {
+    public void setTableSchema(TableSchema tableSchema) {
         this.tableSchema = tableSchema;
     }
 

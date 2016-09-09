@@ -27,7 +27,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -73,11 +72,11 @@ public class OvsdbAutoAttachUpdateCommandTest {
         updatedAutoAttachRows.put(AUTOATTACH_UUID, autoAttach);
         oldAutoAttachRows.put(AUTOATTACH_UUID, autoAttach);
 
-        Column<GenericTableSchema, String> aaColumn = mock(Column.class);
+        Column<String> aaColumn = mock(Column.class);
         when(autoAttach.getSystemNameColumn()).thenReturn(aaColumn);
         when(autoAttach.getSystemDescriptionColumn()).thenReturn(aaColumn);
         when(aaColumn.getData()).thenReturn(AUTOATTACH_SYSTEM_INFO);
-        Column<GenericTableSchema, Map<Long, Long>> aaMappingColumn = mock(Column.class);
+        Column<Map<Long, Long>> aaMappingColumn = mock(Column.class);
         when(autoAttach.getMappingsColumn()).thenReturn(aaMappingColumn);
         when(aaMappingColumn.getData()).thenReturn(AUTOATTACH_MAPPINGS);
 

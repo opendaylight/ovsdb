@@ -30,7 +30,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -119,7 +118,7 @@ public class OvsdbControllerUpdateCommandTest {
         List<ControllerEntry> controllerEntries = new ArrayList<>();
         controllerEntries.add(mock(ControllerEntry.class));
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class))).thenReturn(controllerEntries);
-        Column<GenericTableSchema, String> column = mock(Column.class);
+        Column<String> column = mock(Column.class);
         when(bridge.getNameColumn()).thenReturn(column);
         when(column.getData()).thenReturn(BRIDGE_NAME);
 

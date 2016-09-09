@@ -15,10 +15,10 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class Mutate<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
+public class Mutate extends Operation implements ConditionalOperation {
 
-    public static final String MUTATE = "mutate";
-    List<Condition> where = Lists.newArrayList();
+    private static final String MUTATE = "mutate";
+    private List<Condition> where = Lists.newArrayList();
     private List<Mutation> mutations = Lists.newArrayList();
 
     public Mutate on(TableSchema schema) {
@@ -26,12 +26,12 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
         return this;
     }
 
-    public Mutate(TableSchema<E> schema) {
+    public Mutate(TableSchema schema) {
         super(schema, MUTATE);
     }
 
-    public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema,
-                                                               Mutator mutator, D value) {
+    public <T extends TableSchema, D> Mutate addMutation(ColumnSchema<D> columnSchema,
+                                                         Mutator mutator, D value) {
         columnSchema.validate(value);
         Object untypedValue = columnSchema.getNormalizeData(value);
         mutations.add(new Mutation(columnSchema.getName(), mutator, untypedValue));

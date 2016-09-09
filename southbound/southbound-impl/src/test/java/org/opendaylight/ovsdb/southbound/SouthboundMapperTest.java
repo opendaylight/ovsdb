@@ -33,7 +33,6 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
@@ -86,7 +85,7 @@ public class SouthboundMapperTest {
         Bridge bridge = mock(Bridge.class);
 
         // When bridge is not empty, we expect a deserialized identifier
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         when(bridge.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
@@ -114,7 +113,7 @@ public class SouthboundMapperTest {
         Controller controller = mock(Controller.class);
 
         // When controller is not empty, we expect a deserialized identifier
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         when(controller.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
@@ -158,7 +157,7 @@ public class SouthboundMapperTest {
         when(bridge.getDatapathIdColumn()).thenReturn(null);
         assertNull(SouthboundMapper.createDatapathId(bridge));
 
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(bridge.getDatapathIdColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("00:11:22:33:44:55:66:77");
@@ -233,7 +232,7 @@ public class SouthboundMapperTest {
         Bridge bridge = mock(Bridge.class);
         Set<String> value = new HashSet<>();
         value.add("OpenFlow10");
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(bridge.getProtocolsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(value);
 
@@ -246,18 +245,18 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateControllerEntries() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, Set<UUID>> controllerColumn = mock(Column.class);
+        Column<Set<UUID>> controllerColumn = mock(Column.class);
         when(bridge.getControllerColumn()).thenReturn(controllerColumn);
         Set<UUID> controllerUUIDs = new HashSet<>();
         String uuidString = "7da709ff-397f-4778-a0e8-994811272fdb";
         UUID uuid = new UUID(uuidString);
         controllerUUIDs.add(uuid);
         Controller controller = mock(Controller.class);
-        Column<GenericTableSchema, String> targetColumn = mock(Column.class);
+        Column<String> targetColumn = mock(Column.class);
         when(targetColumn.getData()).thenReturn("targetData");
         when(controller.getTargetColumn()).thenReturn(targetColumn);
         when(controller.getUuid()).thenReturn(uuid);
-        Column<GenericTableSchema, Boolean> isConnectedColumn = mock(Column.class);
+        Column<Boolean> isConnectedColumn = mock(Column.class);
         when(isConnectedColumn.getData()).thenReturn(true);
         when(controller.getIsConnectedColumn()).thenReturn(isConnectedColumn);
         Map<UUID, Controller> updatedControllerRows = new HashMap<>();
@@ -346,16 +345,16 @@ public class SouthboundMapperTest {
         Manager manager = mock(Manager.class);
         managerUUIDs.add(uuid);
         updatedManagerRows.put(uuid, manager);
-        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
+        Column<Set<UUID>> column = mock(Column.class);
         when(ovsdbNode.getManagerOptionsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(managerUUIDs);
 
         //Test addManagerEntries(managerEntriesCreated, manager)
-        Column<GenericTableSchema, String> value = mock(Column.class);
+        Column<String> value = mock(Column.class);
         when(manager.getTargetColumn()).thenReturn(value);
         when(value.getData()).thenReturn("dummy");
 
-        Column<GenericTableSchema, Map<String, String>> statusColumn = mock(Column.class);
+        Column<Map<String, String>> statusColumn = mock(Column.class);
         when(manager.getStatusColumn()).thenReturn(statusColumn);
         Map<String, String> statusAttributeMap = new HashMap<>();
         when(statusColumn.getData()).thenReturn(statusAttributeMap);
@@ -364,7 +363,7 @@ public class SouthboundMapperTest {
         //statusAttributeMap contains N_CONNECTIONS_STR key
         statusAttributeMap.put("n_connections", numberOfConnectionValueStr);
 
-        Column<GenericTableSchema, Boolean> isConnectedColumn = mock(Column.class);
+        Column<Boolean> isConnectedColumn = mock(Column.class);
         when(manager.getIsConnectedColumn()).thenReturn(isConnectedColumn);
         when(isConnectedColumn.getData()).thenReturn(true);
 
@@ -409,11 +408,11 @@ public class SouthboundMapperTest {
         when(managerEntry.getTarget()).thenReturn(uri);
 
         //Test addManagerEntries(managerEntriesCreated, manager)
-        Column<GenericTableSchema, String> value = mock(Column.class);
+        Column<String> value = mock(Column.class);
         when(manager.getTargetColumn()).thenReturn(value);
         when(value.getData()).thenReturn("dummy");
 
-        Column<GenericTableSchema, Map<String, String>> statusColumn = mock(Column.class);
+        Column<Map<String, String>> statusColumn = mock(Column.class);
         when(manager.getStatusColumn()).thenReturn(statusColumn);
         Map<String, String> statusAttributeMap = new HashMap<>();
         when(statusColumn.getData()).thenReturn(statusAttributeMap);
@@ -422,7 +421,7 @@ public class SouthboundMapperTest {
         //statusAttributeMap contains N_CONNECTIONS_STR key
         statusAttributeMap.put("n_connections", numberOfConnectionValueStr);
 
-        Column<GenericTableSchema, Boolean> isConnectedColumn = mock(Column.class);
+        Column<Boolean> isConnectedColumn = mock(Column.class);
         when(manager.getIsConnectedColumn()).thenReturn(isConnectedColumn);
         when(isConnectedColumn.getData()).thenReturn(true);
 
@@ -445,7 +444,7 @@ public class SouthboundMapperTest {
     @Test
     public void testGetInstanceIdentifier() throws Exception {
         OpenVSwitch ovs = mock(OpenVSwitch.class);
-        Column<GenericTableSchema, Map<String, String>> externalIdColumn = mock(Column.class);
+        Column<Map<String, String>> externalIdColumn = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(externalIdColumn);
         Map<String, String> externalIdMap = new HashMap<>();
         when(externalIdColumn.getData()).thenReturn(externalIdMap);

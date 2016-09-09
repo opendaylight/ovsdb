@@ -35,7 +35,7 @@ import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -71,8 +71,8 @@ public class OpenVSwitchBridgeAddCommandTest {
         Insert insert = mock(Insert.class);
         inserts.add(insert);
         PowerMockito.mockStatic(TransactUtils.class);
-        when(bridge.getSchema()).thenReturn(mock(GenericTableSchema.class));
-        PowerMockito.when(TransactUtils.extractInsert(any(TransactionBuilder.class), any(GenericTableSchema.class)))
+        when(bridge.getSchema()).thenReturn(mock(TableSchema.class));
+        PowerMockito.when(TransactUtils.extractInsert(any(TransactionBuilder.class), any(TableSchema.class)))
                 .thenReturn(inserts);
 
         OpenVSwitch ovs = mock(OpenVSwitch.class);
@@ -81,10 +81,10 @@ public class OpenVSwitchBridgeAddCommandTest {
         PowerMockito.when(TransactUtils.extractNamedUuid(any(Insert.class))).thenReturn(mock(UUID.class));
         doNothing().when(ovs).setBridges(any(Set.class));
 
-        Mutate<GenericTableSchema> mutate = mock(Mutate.class);
+        Mutate mutate = mock(Mutate.class);
         Operations op = (Operations) setField("op");
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
-        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
+        Column<Set<UUID>> column = mock(Column.class);
         when(ovs.getBridgesColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
         when(column.getData()).thenReturn(new HashSet<UUID>());

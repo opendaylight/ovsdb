@@ -42,7 +42,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
@@ -184,7 +183,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(bridge.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbBridgeUpdateCommand.class, "oldBridgeRows").set(ovsdbBridgeUpdateCommand,
                 oldBridgeRows);
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         Map<String, String> map = new HashMap<>();
         map.put("key", "value");
         when(column.getData()).thenReturn(map);
@@ -208,7 +207,7 @@ public class OvsdbBridgeUpdateCommandTest {
         verify(oldBridge, times(2)).getExternalIdsColumn();
 
         //test protocolEntriesToRemove()
-        Column<GenericTableSchema, Set<String>> column1 = mock(Column.class);
+        Column<Set<String>> column1 = mock(Column.class);
         Set<String> set = new HashSet<>();
         set.add("element");
         when(column1.getData()).thenReturn(set);
@@ -328,7 +327,7 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testSetDataPathType() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, String> column = mock(Column.class);
+        Column<String> column = mock(Column.class);
         when(bridge.getDatapathTypeColumn()).thenReturn(column);
         when(column.getData()).thenReturn("system");
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -351,7 +350,7 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testSetFailMode() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(bridge.getFailModeColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("standalone");
@@ -368,7 +367,7 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testSetOtherConfig() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         when(bridge.getOtherConfigColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put("key", "value");
@@ -393,7 +392,7 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testSetExternalIds() throws Exception {
         Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         when(bridge.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put("key", "value");

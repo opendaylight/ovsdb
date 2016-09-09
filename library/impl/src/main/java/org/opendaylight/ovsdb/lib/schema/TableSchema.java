@@ -13,11 +13,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.opendaylight.ovsdb.lib.error.BadSchemaException;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -25,9 +27,12 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 import org.opendaylight.ovsdb.lib.schema.ColumnType.AtomicColumnType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
-public abstract class TableSchema<E extends TableSchema<E>> {
+public class TableSchema {
+    private static final Logger LOG = LoggerFactory.getLogger(TableSchema.class);
 
     private String name;
     private Map<String, ColumnSchema> columns;
@@ -35,7 +40,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public TableSchema() {
     }
 
-    protected TableSchema(String name) {
+    public TableSchema(String name) {
         this.name = name;
     }
 
@@ -61,7 +66,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return this.columns.get(column).getType();
     }
 
-    public <E extends TableSchema<E>> E as(Class<E> clazz) {
+    public <E extends TableSchema> E as(Class<E> clazz) {
         try {
             Constructor<E> instance = clazz.getConstructor(TableSchema.class);
             return instance.newInstance(this);
@@ -71,30 +76,30 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         }
     }
 
-    public Insert<E> insert() {
-        return new Insert<>(this);
+    public Insert insert() {
+        return new Insert(this);
     }
 
-    public <D> ColumnSchema<E, Set<D>> multiValuedColumn(String column, Class<D> type) {
+    public <D> ColumnSchema<Set<D>> multiValuedColumn(String column, Class<D> type) {
         //todo exception handling
 
-        ColumnSchema<E, Set<D>> columnSchema = columns.get(column);
+        ColumnSchema<Set<D>> columnSchema = columns.get(column);
         columnSchema.validateType(type);
         return columnSchema;
     }
 
-    public <K,V> ColumnSchema<E, Map<K,V>> multiValuedColumn(String column, Class<K> keyType, Class<V> valueType) {
+    public <K,V> ColumnSchema<Map<K,V>> multiValuedColumn(String column, Class<K> keyType, Class<V> valueType) {
         //todo exception handling
 
-        ColumnSchema<E, Map<K, V>> columnSchema = columns.get(column);
+        ColumnSchema<Map<K, V>> columnSchema = columns.get(column);
         columnSchema.validateType(valueType);
         return columnSchema;
     }
 
-    public <D> ColumnSchema<E, D> column(String column, Class<D> type) {
+    public <D> ColumnSchema<D> column(String column, Class<D> type) {
         //todo exception handling
 
-        ColumnSchema<E, D> columnSchema = columns.get(column);
+        ColumnSchema<D> columnSchema = columns.get(column);
         if (columnSchema != null) {
             columnSchema.validateType(type);
         }
@@ -118,8 +123,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         this.columns = columns;
     }
 
-    public TableUpdate<E> updatesFromJson(JsonNode value) {
-        TableUpdate<E> tableUpdate = new TableUpdate<>();
+    public TableUpdate updatesFromJson(JsonNode value) {
+        TableUpdate tableUpdate = new TableUpdate();
         Iterator<Entry<String, JsonNode>> fields = value.fields();
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> idOldNew = fields.next();
@@ -128,19 +133,19 @@ public abstract class TableSchema<E extends TableSchema<E>> {
             ObjectNode newObjectNode = (ObjectNode) idOldNew.getValue().get("new");
             ObjectNode oldObjectNode = (ObjectNode) idOldNew.getValue().get("old");
 
-            Row<E> newRow = newObjectNode != null ? createRow(newObjectNode) : null;
-            Row<E> oldRow = oldObjectNode != null ? createRow(oldObjectNode) : null;
+            Row newRow = newObjectNode != null ? createRow(newObjectNode) : null;
+            Row oldRow = oldObjectNode != null ? createRow(oldObjectNode) : null;
 
             tableUpdate.addRow(new UUID(uuid), oldRow, newRow);
         }
         return tableUpdate;
     }
 
-    public Row<E> createRow(ObjectNode rowNode) {
-        List<Column<E, ?>> newColumns = new ArrayList<>();
+    public Row createRow(ObjectNode rowNode) {
+        List<Column<?>> newColumns = new ArrayList<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
             Map.Entry<String, JsonNode> next = iter.next();
-            ColumnSchema<E, Object> schema = column(next.getKey(), Object.class);
+            ColumnSchema<Object> schema = column(next.getKey(), Object.class);
             /*
              * Ideally the ColumnSchema shouldn't be null at this stage. But there can be cases in which
              * the OVSDB manager Schema implementation might decide to include some "hidden" columns that
@@ -152,11 +157,11 @@ public abstract class TableSchema<E extends TableSchema<E>> {
                 newColumns.add(new Column<>(schema, value));
             }
         }
-        return new Row<>(this, newColumns);
+        return new Row(this, newColumns);
     }
 
-    public List<Row<E>> createRows(JsonNode rowsNode) {
-        List<Row<E>> rows = new ArrayList<>();
+    public List<Row> createRows(JsonNode rowsNode) {
+        List<Row> rows = new ArrayList<>();
         for (JsonNode rowNode : rowsNode.get("rows")) {
             rows.add(createRow((ObjectNode)rowNode));
         }
@@ -177,5 +182,21 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public void populateInternallyGeneratedColumns() {
         columns.put("_uuid", new ColumnSchema("_uuid", new AtomicColumnType(new UuidBaseType())));
         columns.put("_version", new ColumnSchema("_version", new AtomicColumnType(new UuidBaseType())));
+    }
+
+    public static TableSchema fromJson(String tableName, JsonNode json) {
+
+        if (!json.isObject() || !json.has("columns")) {
+            throw new BadSchemaException("bad tableschema root, expected \"columns\" as child");
+        }
+
+        Map<String, ColumnSchema> columns = new HashMap<>();
+        for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("columns").fields(); iter.hasNext(); ) {
+            Map.Entry<String, JsonNode> column = iter.next();
+            LOG.trace("{}:{}", tableName, column.getKey());
+            columns.put(column.getKey(), ColumnSchema.fromJson(column.getKey(), column.getValue()));
+        }
+
+        return new TableSchema(tableName, columns);
     }
 }

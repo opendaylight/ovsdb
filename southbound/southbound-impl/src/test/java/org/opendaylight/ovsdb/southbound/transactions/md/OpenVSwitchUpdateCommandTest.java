@@ -35,7 +35,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -107,7 +106,7 @@ public class OpenVSwitchUpdateCommandTest {
 
         //Test getInstanceIdentifier(): case 1:
         // ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) == true
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "iidString");
         when(ovs.getExternalIdsColumn()).thenReturn(column);
@@ -173,7 +172,7 @@ public class OpenVSwitchUpdateCommandTest {
         OpenVSwitch oldEntry = mock(OpenVSwitch.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         when(openVSwitch.getOtherConfigColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
@@ -236,7 +235,7 @@ public class OpenVSwitchUpdateCommandTest {
         OpenVSwitch oldEntry = mock(OpenVSwitch.class);
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        Column<Map<String, String>> column = mock(Column.class);
         when(openVSwitch.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
@@ -296,7 +295,7 @@ public class OpenVSwitchUpdateCommandTest {
     public void testSetInterfaceTypes() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(openVSwitch.getIfaceTypesColumn()).thenReturn(column );
         Set<String> set = new HashSet<>();
         set.add("dpdk");
@@ -338,7 +337,7 @@ public class OpenVSwitchUpdateCommandTest {
     @SuppressWarnings("unchecked")
     public void testSetDataPathTypes() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(openVSwitch.getDatapathTypesColumn()).thenReturn(column );
         Set<String> set = new HashSet<>();
         set.add("netdev");
@@ -368,7 +367,7 @@ public class OpenVSwitchUpdateCommandTest {
     @SuppressWarnings("unchecked")
     public void testSetOvsVersion() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(openVSwitch.getOvsVersionColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("v2.3.0");
@@ -385,7 +384,7 @@ public class OpenVSwitchUpdateCommandTest {
     @SuppressWarnings("unchecked")
     public void testSetDbVersion() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         when(openVSwitch.getDbVersionColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("7.6.1");

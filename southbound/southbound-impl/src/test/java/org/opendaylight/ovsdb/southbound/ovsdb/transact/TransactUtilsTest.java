@@ -41,7 +41,6 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -192,7 +191,7 @@ public class TransactUtilsTest {
     @Test
     public void testExtractInsert() {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        GenericTableSchema schema = mock(GenericTableSchema.class);
+        TableSchema schema = mock(TableSchema.class);
 
         List<Operation> operations = new ArrayList<>();
         Operation operation = mock(Insert.class);
@@ -223,8 +222,8 @@ public class TransactUtilsTest {
     public void testStampInstanceIdentifier() {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
-        TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
-        ColumnSchema<GenericTableSchema, Map<String,String>> columnSchema = mock(ColumnSchema.class);
+        TableSchema tableSchema = mock(TableSchema.class);
+        ColumnSchema<Map<String,String>> columnSchema = mock(ColumnSchema.class);
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
 
         PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "stampInstanceIdentifierMutation",
@@ -247,12 +246,12 @@ public class TransactUtilsTest {
         InstanceIdentifierCodec instanceIdentifierCodec = Mockito.mock(InstanceIdentifierCodec.class);
         when(instanceIdentifierCodec.serialize(any(InstanceIdentifier.class))).thenReturn(IID_STRING);
 
-        Mutate<GenericTableSchema> mutate = mock(Mutate.class);
+        Mutate mutate = mock(Mutate.class);
         Operations op = (Operations) setField("op");
-        Mockito.<Mutate<GenericTableSchema>>when(op.mutate(any(TableSchema.class))).thenReturn(mutate);
+        Mockito.when(op.mutate(any(TableSchema.class))).thenReturn(mutate);
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Map.class))).thenReturn(mutate);
 
-        ColumnSchema<GenericTableSchema, Map<String,String>> columnSchema = mock(ColumnSchema.class);
+        ColumnSchema<Map<String,String>> columnSchema = mock(ColumnSchema.class);
         when(columnSchema.getName()).thenReturn(COLUMN_SCHEMA_NAME);
         PowerMockito.mockStatic(OvsdbSet.class);
         PowerMockito.when(OvsdbSet.fromSet(any(Set.class))).thenReturn(mock(OvsdbSet.class));
@@ -265,7 +264,7 @@ public class TransactUtilsTest {
 
         InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
+        TableSchema tableSchema = mock(TableSchema.class);
         assertEquals(mutate, TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
                 instanceIdentifierCodec));
     }

@@ -37,7 +37,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -85,7 +85,7 @@ public class TerminationPointCreateCommandTest {
         when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Interface.class))).thenReturn(ovsInterface);
         //createInterface()
         Operations op = (Operations) setField("op");
-        Insert<GenericTableSchema> insert = mock(Insert.class);
+        Insert insert = mock(Insert.class);
         when(op.insert(any(Interface.class))).thenReturn(insert);
         when(insert.withId(anyString())).thenReturn(insert);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointCreateCommand.class,
@@ -121,20 +121,19 @@ public class TerminationPointCreateCommandTest {
         PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Port.class))).thenReturn(port);
         doNothing().when(port).setName(anyString());
         doNothing().when(port).setExternalIds(any(HashMap.class));
-        when(port.getSchema()).thenReturn(mock(GenericTableSchema.class));
-        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
+        when(port.getSchema()).thenReturn(mock(TableSchema.class));
+        Column<Map<String, String>> column = mock(Column.class);
         when(port.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
 
         Mutate mutate = mock(Mutate.class);
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.stampInstanceIdentifierMutation(any(TransactionBuilder.class), any(InstanceIdentifier.class),
-                any(GenericTableSchema.class), any(ColumnSchema.class), any(InstanceIdentifierCodec.class))).thenReturn(
-                mutate);
+                any(TableSchema.class), any(ColumnSchema.class))).thenReturn(mutate);
 
-        Column<GenericTableSchema, String> nameColumn = mock(Column.class);
+        Column<String> nameColumn = mock(Column.class);
         when(port.getNameColumn()).thenReturn(nameColumn);
-        ColumnSchema<GenericTableSchema, String> nameColumnSchema = mock(ColumnSchema.class);
+        ColumnSchema<String> nameColumnSchema = mock(ColumnSchema.class);
         when(nameColumn.getSchema()).thenReturn(nameColumnSchema);
         when(nameColumnSchema.opEqual(anyString())).thenReturn(mock(Condition.class));
         Where where = mock(Where.class);
@@ -142,9 +141,8 @@ public class TerminationPointCreateCommandTest {
         when(where.build()).thenReturn(mock(Operation.class));
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        String interfaceName = INTERFACE_NAME;
         InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
-        TerminationPointCreateCommand.stampInstanceIdentifier(transaction, iid, interfaceName,
+        TerminationPointCreateCommand.stampInstanceIdentifier(transaction, iid, INTERFACE_NAME,
                 mock(InstanceIdentifierCodec.class));
         verify(port).setName(anyString());
         verify(port).getExternalIdsColumn();

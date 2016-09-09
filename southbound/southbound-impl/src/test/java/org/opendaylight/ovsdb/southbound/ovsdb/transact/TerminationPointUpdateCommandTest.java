@@ -35,7 +35,6 @@ import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -118,9 +117,9 @@ public class TerminationPointUpdateCommandTest {
         Update update = mock(Update.class);
         when(op.update(any(Interface.class))).thenReturn(update);
 
-        Column<GenericTableSchema, String> column = mock(Column.class);
+        Column<String> column = mock(Column.class);
         when(extraInterface.getNameColumn()).thenReturn(column);
-        ColumnSchema<GenericTableSchema, String> columnSchema = mock(ColumnSchema.class);
+        ColumnSchema<String> columnSchema = mock(ColumnSchema.class);
         when(column.getSchema()).thenReturn(columnSchema);
         when(columnSchema.opEqual(anyString())).thenReturn(mock(Condition.class));
         Where where = mock(Where.class);

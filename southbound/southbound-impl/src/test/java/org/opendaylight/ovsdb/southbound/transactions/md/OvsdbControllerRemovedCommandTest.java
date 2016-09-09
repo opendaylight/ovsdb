@@ -32,7 +32,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -127,7 +126,7 @@ public class OvsdbControllerRemovedCommandTest {
         when(bridge.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbControllerRemovedCommand.class, "oldBridgeRows").set(ovsdbControllerRemovedCommand,
                 oldBridgeRows);
-        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
+        Column<Set<UUID>> column = mock(Column.class);
         Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
         set.add(controllerUuid);

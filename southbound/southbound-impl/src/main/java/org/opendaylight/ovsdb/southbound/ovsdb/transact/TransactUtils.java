@@ -38,7 +38,6 @@ import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -435,7 +434,7 @@ public class TransactUtils {
         return result;
     }
 
-    public static List<Insert> extractInsert(TransactionBuilder transaction, GenericTableSchema schema) {
+    public static List<Insert> extractInsert(TransactionBuilder transaction, TableSchema schema) {
         List<Operation> operations = transaction.getOperations();
         List<Insert> inserts = new ArrayList<>();
         for (Operation operation : operations) {
@@ -461,19 +460,19 @@ public class TransactUtils {
         return new UUID(uuidString);
     }
 
-    public static <T extends TableSchema<T>> void stampInstanceIdentifier(TransactionBuilder transaction,
-            InstanceIdentifier<?> iid, TableSchema<T> tableSchema, ColumnSchema<T, Map<String, String>> columnSchema,
+    public static void stampInstanceIdentifier(TransactionBuilder transaction, InstanceIdentifier<?> iid,
+            TableSchema tableSchema, ColumnSchema<Map<String, String>> columnSchema,
             InstanceIdentifierCodec instanceIdentifierCodec) {
         transaction.add(
                 stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec));
     }
 
-    public static <T extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(TransactionBuilder transaction,
-            InstanceIdentifier<?> iid, TableSchema<T> tableSchema, ColumnSchema<T, Map<String, String>> columnSchema,
+    public static Mutate stampInstanceIdentifierMutation(TransactionBuilder transaction, InstanceIdentifier<?> iid,
+            TableSchema tableSchema, ColumnSchema<Map<String, String>> columnSchema,
             InstanceIdentifierCodec instanceIdentifierCodec) {
-        Map<String,String> externalIdsMap = ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+        Map<String, String> externalIdsMap = ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                 instanceIdentifierCodec.serialize(iid));
-        Mutate<T> mutate = op.mutate(tableSchema)
+        Mutate mutate = op.mutate(tableSchema)
                 .addMutation(columnSchema,
                     Mutator.INSERT,
                     externalIdsMap);

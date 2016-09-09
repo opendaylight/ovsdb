@@ -50,7 +50,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -329,11 +329,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         if (dbSchema != null) {
-            GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, Global.class);
+            TableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, Global.class);
 
             List<String> hwvtepTableColumn = new ArrayList<>();
             hwvtepTableColumn.addAll(hwvtepSchema.getColumns());
-            Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
+            Select selectOperation = op.select(hwvtepSchema);
             selectOperation.setColumns(hwvtepTableColumn);
 
             ArrayList<Operation> operations = new ArrayList<>();

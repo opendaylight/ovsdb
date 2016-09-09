@@ -33,7 +33,6 @@ import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -81,9 +80,9 @@ public class ProtocolRemovedCommandTest {
         when(updatedBridges.get(any(InstanceIdentifier.class))).thenReturn(mock(OvsdbBridgeAugmentation.class));
 
         Operations op = (Operations) setField("op");
-        Mutate<GenericTableSchema> mutate = mock(Mutate.class);
+        Mutate mutate = mock(Mutate.class);
         when(op.mutate(any(Bridge.class))).thenReturn(mutate);
-        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
+        Column<Set<String>> column = mock(Column.class);
         Bridge bridge = mock(Bridge.class);
         when(bridge.getProtocolsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));

@@ -45,7 +45,6 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -57,8 +56,8 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerClass.class)
 public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientTestIT.class);
-    OvsdbClient ovs;
-    DatabaseSchema dbSchema = null;
+    private OvsdbClient ovs;
+    private DatabaseSchema dbSchema = null;
     private static final String TEST_BRIDGE_NAME = "br-test";
     private static UUID testBridgeUuid = null;
 
@@ -70,7 +69,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
     @Test
     public void testTransact() throws IOException, InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
-        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        TableSchema bridge = dbSchema.table("Bridge");
         bridge.column("name", String.class);
 
         createBridgeTransaction();
@@ -94,13 +93,14 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
 
     public void sendBridgeMonitorRequest(boolean filter) throws ExecutionException, InterruptedException, IOException {
         assertNotNull(dbSchema);
-        GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        TableSchema bridge = dbSchema.table("Bridge");
 
         List<MonitorRequest> monitorRequests = Lists.newArrayList();
-        ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
-        ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
-        MonitorRequestBuilder<GenericTableSchema> builder = new MonitorRequestBuilder<>(bridge);
+        ColumnSchema<Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
+        ColumnSchema<Map<String, String>> externalIds =
+                bridge.multiValuedColumn("external_ids", String.class, String.class);
+        ColumnSchema<String> name = bridge.column("name", String.class);
+        MonitorRequestBuilder builder = new MonitorRequestBuilder(bridge);
         if (filter) {
             builder.addColumn(bridge.column("name"))
                    .addColumn(bridge.column("fail_mode", String.class))
@@ -140,10 +140,10 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         Object result = results.get(0);
         assertTrue(result instanceof TableUpdates);
         updates = (TableUpdates) result;
-        TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
+        TableUpdate update = updates.getUpdate(bridge);
         assertTrue(update.getRows().size() > 0);
         for (UUID uuid : update.getRows().keySet()) {
-            Row<GenericTableSchema> aNew = update.getNew(uuid);
+            Row aNew = update.getNew(uuid);
             if (!aNew.getColumn(name).getData().equals(TEST_BRIDGE_NAME)) {
                 continue;
             }
@@ -153,7 +153,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
                 // As per RFC7047, Section 4.1.5 : If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
                 assertEquals(bridge.getColumns().size() - 1, aNew.getColumns().size());
             }
-            for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
+            for (Column<?> column: aNew.getColumns()) {
                 if (column.getSchema().equals(flood_vlans)) {
                     // Test for the 5 flood_vlans inserted in Bridge br-test in createBridgeTransaction
                     Set<Integer> data = column.getData(flood_vlans);
@@ -182,9 +182,9 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
      */
     private UUID selectOpenVSwitchTableUuid() throws ExecutionException, InterruptedException {
         assertNotNull(dbSchema);
-        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        TableSchema ovsTable = dbSchema.table("Open_vSwitch");
 
-        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
+        ColumnSchema<UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
         List<OperationResult> results = ovs.transactBuilder(dbSchema)
                .add(op.select(ovsTable)
@@ -194,22 +194,23 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
 
         assertTrue(!results.isEmpty());
         OperationResult result = results.get(0);
-        List<Row<GenericTableSchema>> rows = result.getRows();
-        Row<GenericTableSchema> ovsTableRow = rows.get(0);
+        List<Row> rows = result.getRows();
+        Row ovsTableRow = rows.get(0);
         return ovsTableRow.getColumn(_uuid).getData();
     }
 
     private void createBridgeTransaction() throws IOException, InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
-        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
-        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        TableSchema bridge = dbSchema.table("Bridge");
+        TableSchema ovsTable = dbSchema.table("Open_vSwitch");
 
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
-        ColumnSchema<GenericTableSchema, String> fail_mode = bridge.column("fail_mode", String.class);
-        ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
-        ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
-        ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
-        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
+        ColumnSchema<String> name = bridge.column("name", String.class);
+        ColumnSchema<String> fail_mode = bridge.column("fail_mode", String.class);
+        ColumnSchema<Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
+        ColumnSchema<Map<String, String>> externalIds =
+                bridge.multiValuedColumn("external_ids", String.class, String.class);
+        ColumnSchema<Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+        ColumnSchema<UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
         String namedUuid = "br_test";
         int insertOperationIndex = 0;
@@ -262,8 +263,8 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
 
     private void assertTransaction() throws InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
-        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
+        TableSchema bridge = dbSchema.table("Bridge");
+        ColumnSchema<String> name = bridge.column("name", String.class);
 
         /*
          * Adding a separate Assert operation in a transaction. Lets not mix this with other
@@ -285,8 +286,8 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
 
     private void abortTransaction() throws InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
-        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
+        TableSchema bridge = dbSchema.table("Bridge");
+        ColumnSchema<String> name = bridge.column("name", String.class);
 
         /*
          * Adding a separate Abort operation in a transaction. Lets not mix this with other
@@ -342,11 +343,11 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         if (dbSchema == null) {
             return;
         }
-        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
-        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
-        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
+        TableSchema bridge = dbSchema.table("Bridge");
+        ColumnSchema<String> name = bridge.column("name", String.class);
+        TableSchema ovsTable = dbSchema.table("Open_vSwitch");
+        ColumnSchema<Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+        ColumnSchema<UUID> _uuid = ovsTable.column("_uuid", UUID.class);
         UUID parentTable = selectOpenVSwitchTableUuid();
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)

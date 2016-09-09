@@ -13,22 +13,22 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public interface TypedBaseTable<E extends TableSchema<E>> {
+public interface TypedBaseTable {
     @TypedColumn(name = "", method = MethodType.GETTABLESCHEMA)
-    E getSchema();
+    TableSchema getSchema();
 
     @TypedColumn(name = "", method = MethodType.GETROW)
-    Row<E> getRow();
+    Row getRow();
 
     @TypedColumn(name = "_uuid", method = MethodType.GETDATA)
     UUID getUuid();
 
     @TypedColumn(name = "_uuid", method = MethodType.GETCOLUMN)
-    Column<E, UUID> getUuidColumn();
+    Column<UUID> getUuidColumn();
 
     @TypedColumn(name = "_version", method = MethodType.GETDATA)
     UUID getVersion();
 
     @TypedColumn(name = "_version", method = MethodType.GETCOLUMN)
-    Column<E, UUID> getVersionColumn();
+    Column<UUID> getVersionColumn();
 }

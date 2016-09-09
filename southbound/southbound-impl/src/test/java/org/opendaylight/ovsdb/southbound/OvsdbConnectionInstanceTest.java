@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -46,7 +45,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
@@ -168,8 +167,8 @@ public class OvsdbConnectionInstanceTest {
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
         when(dbSchema.getName()).thenReturn(SouthboundConstants.OPEN_V_SWITCH);
         when(dbSchema.getTables()).thenReturn(tables);
-        GenericTableSchema tableSchema = mock(GenericTableSchema.class);
-        when(dbSchema.table(anyString(), eq(GenericTableSchema.class))).thenReturn(tableSchema);
+        TableSchema tableSchema = mock(TableSchema.class);
+        when(dbSchema.table(anyString())).thenReturn(tableSchema);
 
         Set<String> columns = new HashSet<>();
         columns.add("columnName1");

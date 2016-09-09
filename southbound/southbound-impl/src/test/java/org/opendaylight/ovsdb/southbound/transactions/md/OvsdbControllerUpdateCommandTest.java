@@ -30,7 +30,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -119,7 +118,7 @@ public class OvsdbControllerUpdateCommandTest {
         List<ControllerEntry> controllerEntries = new ArrayList<>();
         controllerEntries.add(mock(ControllerEntry.class));
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class))).thenReturn(controllerEntries);
-        Column<GenericTableSchema, String> column = mock(Column.class);
+        Column<String> column = mock(Column.class);
         when(bridge.getNameColumn()).thenReturn(column);
         when(column.getData()).thenReturn(BRIDGE_NAME);
 
@@ -162,12 +161,10 @@ public class OvsdbControllerUpdateCommandTest {
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
         PowerMockito.mockStatic(SouthboundUtil.class);
-        Optional<Node> ovsdbNode = mock(Optional.class);
+        Node node = mock(Node.class);
+        Optional<Node> ovsdbNode = Optional.of(node);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         when(SouthboundUtil.readNode(transaction, connectionIId)).thenReturn(ovsdbNode);
-        when(ovsdbNode.isPresent()).thenReturn(true);
-        Node node = mock(Node.class);
-        when(ovsdbNode.get()).thenReturn(node);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
@@ -179,10 +176,8 @@ public class OvsdbControllerUpdateCommandTest {
         OvsdbBridgeRef ovsdbBridgeRef = mock(OvsdbBridgeRef.class);
         when(managedNodeEntry.getBridgeRef()).thenReturn(ovsdbBridgeRef);
         when((InstanceIdentifier<Node>) ovsdbBridgeRef.getValue()).thenReturn(bridgeIid);
-        Optional<Node> bridgeNode = mock(Optional.class);
+        Optional<Node> bridgeNode = Optional.of(node);
         when(SouthboundUtil.readNode(transaction, bridgeIid)).thenReturn(bridgeNode);
-        when(bridgeNode.isPresent()).thenReturn(true);
-        when(bridgeNode.get()).thenReturn(node);
 
         Map<InstanceIdentifier<Node>, Node> testBridgeNodes = new HashMap<>();
         testBridgeNodes.put(bridgeIid, node);

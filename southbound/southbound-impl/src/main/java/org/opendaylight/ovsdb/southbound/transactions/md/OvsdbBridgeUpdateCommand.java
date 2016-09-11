@@ -353,22 +353,23 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private void setStatus(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                            Bridge bridge) {
-        Map<String, String> status = bridge
-                .getStatusColumn().getData();
-        if (status != null && !status.isEmpty()) {
-            Set<String> statusKeys = status.keySet();
-            List<BridgeStatus> statusList = new ArrayList<>();
-            String statusValue;
-            for (String statusKey : statusKeys) {
-                statusValue = status.get(statusKey);
-                if (statusKey != null && statusValue != null) {
-                    statusList.add(new BridgeStatusBuilder()
-                            .setBridgeStatusKey(statusKey)
-                            .setBridgeStatusValue(statusValue)
-                            .build());
+        if (bridge.getStatusColumn() != null ) {
+            Map<String, String> status = bridge.getStatusColumn().getData();
+            if (status != null && !status.isEmpty()) {
+                Set<String> statusKeys = status.keySet();
+                List<BridgeStatus> statusList = new ArrayList<>();
+                String statusValue;
+                for (String statusKey : statusKeys) {
+                    statusValue = status.get(statusKey);
+                    if (statusKey != null && statusValue != null) {
+                        statusList.add(new BridgeStatusBuilder()
+                                .setBridgeStatusKey(statusKey)
+                                .setBridgeStatusValue(statusValue)
+                                .build());
+                    }
                 }
+                ovsdbBridgeAugmentationBuilder.setBridgeStatus(statusList);
             }
-            ovsdbBridgeAugmentationBuilder.setBridgeStatus(statusList);
         }
     }
 

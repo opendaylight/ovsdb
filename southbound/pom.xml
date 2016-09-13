@@ -46,6 +46,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modules>
     <module>southbound-api</module>
     <module>southbound-impl</module>
+    <module>southbound-cli</module>
     <module>southbound-karaf</module>
     <module>southbound-features</module>
     <module>southbound-artifacts</module>

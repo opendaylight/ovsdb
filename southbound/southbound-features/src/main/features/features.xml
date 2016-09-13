@@ -23,6 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-southbound-api</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/southbound-cli/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.yang-utils/{{VERSION}}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>

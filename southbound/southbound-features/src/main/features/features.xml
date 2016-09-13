@@ -39,6 +39,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:io.netty/netty-transport/{{VERSION}}</bundle>
     <feature version="${project.version}">odl-ovsdb-library</feature>
   </feature>
+  <feature name='odl-ovsdb-southound-cli' version='${project.version}' description='OpenDaylight :: southbound :: impl :: CLI '>
+    <feature version="${project.version}">odl-ovsdb-southbound-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/southbound-cli/{{VERSION}}</bundle>
+  </feature>
   <feature name='odl-ovsdb-southbound-impl-rest' version='${project.version}' description='OpenDaylight :: southbound :: impl :: REST '>
     <feature version="${project.version}">odl-ovsdb-southbound-impl</feature>
     <feature version="${restconf.version}">odl-restconf</feature>

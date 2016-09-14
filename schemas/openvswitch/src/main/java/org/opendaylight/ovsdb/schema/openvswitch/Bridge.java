@@ -51,6 +51,12 @@ public interface Bridge extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="stp_enable", method=MethodType.SETDATA, fromVersion="6.2.0")
     void setStpEnable(Boolean stp_enable);
 
+    @TypedColumn(name="rstp_enable", method=MethodType.GETCOLUMN, fromVersion="7.8.0")
+    Column<GenericTableSchema, Boolean> getRstpEnableColumn();
+
+    @TypedColumn(name="rstp_enable", method=MethodType.SETDATA, fromVersion="7.8.0")
+    void setRstpEnable(Boolean rstp_enable);
+
     @TypedColumn(name="ports", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     Column<GenericTableSchema, Set<UUID>> getPortsColumn();
 
@@ -104,6 +110,12 @@ public interface Bridge extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="status", method=MethodType.SETDATA, fromVersion="6.2.0")
     void setStatus(Map<String, String> status);
+
+    @TypedColumn(name="rstp_status", method=MethodType.GETCOLUMN, fromVersion="7.8.0")
+    Column<GenericTableSchema, Map<String, String>> getRstpStatusColumn();
+
+    @TypedColumn(name="rstp_status", method=MethodType.SETDATA, fromVersion="7.8.0")
+    void setRstpStatus(Map<String, String> rstpStatus);
 
     @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();

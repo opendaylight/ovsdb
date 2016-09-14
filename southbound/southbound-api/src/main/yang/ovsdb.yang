@@ -206,6 +206,53 @@ module ovsdb {
             type boolean;
         }
 
+        leaf rstp_enable {
+            description
+                "Enable Rapid Spanning Tree on the bridge. By default, RSTP is
+                 disabled on bridges";
+            type boolean;
+        }
+
+        list rstp-status {
+            description
+               "These key-value pairs report the status of 802.1D−2004. They are present only
+               if RSTP is enabled (via the rstp_enable column).
+
+                rstp_status : rstp_bridge_id: optional string
+                    The bridge ID used in rapid spanning tree advertisements, in the form
+                    x.yyy.zzzzzzzzzzzz where x is the RSTP priority, the ys are a locally
+                    assigned system ID extension, the zs are the STP system ID, and each
+                    x, y, or z is a hex digit.
+
+                rstp_status : rstp_root_id: optional string
+                    The root of this spanning tree, in the same form as
+                    rstp_status:rstp_bridge_id. If this bridge is the root, this will have
+                    the same value as rstp_status:rstp_bridge_id, otherwise it will differ.
+
+                rstp_status : rstp_root_path_cost: optional string, containing an integer,
+                    at least 0. The path cost of reaching the root. A lower number is better.
+                    The value is 0 if this bridge is the root, otherwise it is higher.
+
+                rstp_status : rstp_designated_id: optional string
+                    The RSTP designated ID, in the same form as rstp_status:rstp_bridge_id.
+
+                rstp_status : rstp_designated_port_id: optional string
+                    The RSTP designated port ID, as a 4-digit hex number.
+
+                rstp_status : rstp_bridge_port_id: optional string
+                    The RSTP bridge port ID, as a 4-digit hex number.";
+
+            key "bridge-rstp-status-key";
+            leaf bridge-rstp-status-key {
+                description "bridge-rstp-status name/key";
+                type string;
+            }
+            leaf bridge-rstp-status-value {
+                description "bridge-rstp-status value";
+                type string;
+            }
+        }
+
         list bridge-external-ids {
             description
                "Key-value pairs for use by external frameworks that integrate

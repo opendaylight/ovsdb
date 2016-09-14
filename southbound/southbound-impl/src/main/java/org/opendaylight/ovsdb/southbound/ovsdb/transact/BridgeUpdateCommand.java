@@ -36,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.RstpStatus;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -77,6 +78,8 @@ public class BridgeUpdateCommand implements TransactCommand {
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);
         setStpEnalbe(bridge, ovsdbManagedNode);
+        setRstpEnalbe(bridge, ovsdbManagedNode);
+        setRstpStatus(bridge, ovsdbManagedNode);
         setOpenDaylightExternalIds(bridge, iid, ovsdbManagedNode);
         setOpenDaylightOtherConfig(bridge, ovsdbManagedNode);
         Optional<OvsdbBridgeAugmentation> operationalBridgeOptional =
@@ -109,6 +112,21 @@ public class BridgeUpdateCommand implements TransactCommand {
     private void setStpEnalbe(Bridge bridge, OvsdbBridgeAugmentation ovsdbManageNode) {
         if (ovsdbManageNode.isStpEnable() != null) {
             bridge.setStpEnable(ovsdbManageNode.isStpEnable());
+        }
+    }
+
+    private void setRstpEnalbe(Bridge bridge, OvsdbBridgeAugmentation ovsdbManageNode) {
+        if (ovsdbManageNode.isRstpEnable() != null) {
+            bridge.setRstpEnable(ovsdbManageNode.isRstpEnable());
+        }
+    }
+
+    private void setRstpStatus(@Nonnull Bridge bridge, @Nonnull OvsdbBridgeAugmentation ovsdbManagedNode) {
+        try {
+            bridge.setRstpStatus(YangUtils.convertYangKeyValueListToMap(ovsdbManagedNode.getRstpStatus(),
+                    RstpStatus::getBridgeRstpStatusKey, RstpStatus::getBridgeRstpStatusValue));
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete bridge rstp status", e);
         }
     }
 

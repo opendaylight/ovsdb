@@ -38,6 +38,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -99,7 +100,7 @@ public class OvsdbNodeUpdateCommandTest {
         when(externalId.getExternalIdValue()).thenReturn(EXTERNAL_ID_VALUE);
         when(ovsdbNode.getOpenvswitchExternalIds()).thenReturn(externalIds);
         PowerMockito.suppress(MemberMatcher.method(OvsdbNodeUpdateCommand.class, "stampInstanceIdentifier",
-                TransactionBuilder.class, InstanceIdentifier.class));
+                TransactionBuilder.class, InstanceIdentifier.class, InstanceIdentifierCodec.class));
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 
@@ -121,7 +122,8 @@ public class OvsdbNodeUpdateCommandTest {
         doNothing().when(ovs).setOtherConfig(any(ImmutableMap.class));
         when(ovs.getOtherConfigColumn()).thenReturn(column);
 
-        ovsdbNodeUpdateCommand.execute(transaction, mock(BridgeOperationalState.class), changes);
+        ovsdbNodeUpdateCommand.execute(transaction, mock(BridgeOperationalState.class), changes,
+                mock(InstanceIdentifierCodec.class));
         verify(externalId).getExternalIdKey();
         verify(otherConfig).getOtherConfigKey();
         verify(ovs, times(2)).getExternalIdsColumn();

@@ -33,10 +33,10 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
@@ -89,6 +89,8 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortUpdateCommand.class);
+
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
     private Map<UUID, Port> portUpdatedRows;
     private Map<UUID, Port> portOldRows;
     private Map<UUID, Interface> interfaceUpdatedRows;
@@ -96,9 +98,10 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Bridge> bridgeUpdatedRows;
     private Map<UUID, Qos> qosUpdatedRows;
 
-    public OvsdbPortUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public OvsdbPortUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
+            TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         portUpdatedRows = TyperUtils.extractRowsUpdated(Port.class, updates, dbSchema);
         portOldRows = TyperUtils.extractRowsOld(Port.class, updates, dbSchema);
         interfaceUpdatedRows = TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema);
@@ -219,8 +222,9 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private Optional<InstanceIdentifier<Node>> getTerminationPointBridge(UUID portUuid) {
         for (UUID bridgeUuid : this.bridgeUpdatedRows.keySet()) {
             if (this.bridgeUpdatedRows.get(bridgeUuid).getPortsColumn().getData().contains(portUuid)) {
-                return Optional.of(SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                        this.bridgeUpdatedRows.get(bridgeUuid)));
+                return Optional.of(
+                        SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
+                                this.bridgeUpdatedRows.get(bridgeUuid)));
             }
         }
         return Optional.absent();
@@ -399,7 +403,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Qos qos = qosUpdate.getValue();
             if (qos.getUuid().equals(qosUuid)) {
                 if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-                    return (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
+                    return (InstanceIdentifier<QosEntries>) instanceIdentifierCodec.bindingDeserializerOrNull(
                             qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
                 } else {
                     return SouthboundMapper.createInstanceIdentifier(nodeId)
@@ -701,7 +705,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 && port.getExternalIdsColumn().getData() != null
                 && port.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = port.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            return (InstanceIdentifier<TerminationPoint>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+            return (InstanceIdentifier<TerminationPoint>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
         } else {
             return bridgeIid.child(TerminationPoint.class, new TerminationPointKey(new TpId(port.getName())));
         }

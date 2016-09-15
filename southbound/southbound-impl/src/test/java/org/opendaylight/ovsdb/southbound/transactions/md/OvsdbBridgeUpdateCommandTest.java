@@ -46,6 +46,7 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -105,7 +106,8 @@ public class OvsdbBridgeUpdateCommandTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand1 = new OvsdbBridgeUpdateCommand(key, updates, dbSchema);
+        OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand1 =
+                new OvsdbBridgeUpdateCommand(mock(InstanceIdentifierCodec.class), key, updates, dbSchema);
         assertEquals(key, Whitebox.getInternalState(ovsdbBridgeUpdateCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbBridgeUpdateCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbBridgeUpdateCommand1, "dbSchema"));
@@ -235,7 +237,8 @@ public class OvsdbBridgeUpdateCommandTest {
                 .thenReturn(ovsdbConnectionAugmentationBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
         InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
-        when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class)))
+        when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
+                any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(bridgeIid);
         ManagedNodeEntry managedBridge = mock(ManagedNodeEntry.class);
         ManagedNodeEntryBuilder managedNodeEntryBuilder = mock(ManagedNodeEntryBuilder.class);
@@ -509,7 +512,8 @@ public class OvsdbBridgeUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(mock(OvsdbConnectionInstance.class));
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class)))
+        when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
+                any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(iid);
 
         assertEquals(iid, Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "getInstanceIdentifier", mock(Bridge.class)));

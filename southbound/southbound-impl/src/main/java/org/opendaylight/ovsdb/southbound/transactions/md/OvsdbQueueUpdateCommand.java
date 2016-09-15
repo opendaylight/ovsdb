@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -46,12 +47,15 @@ import org.slf4j.LoggerFactory;
 public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
 
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
+
     private Map<UUID, Queue> updatedQueueRows;
     private Map<UUID, Queue> oldQueueRows;
 
-    public OvsdbQueueUpdateCommand(OvsdbConnectionInstance key,
+    public OvsdbQueueUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedQueueRows = TyperUtils.extractRowsUpdated(Queue.class,getUpdates(), getDbSchema());
         oldQueueRows = TyperUtils.extractRowsOld(Queue.class, getUpdates(), getDbSchema());
     }
@@ -110,8 +114,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 && queue.getExternalIdsColumn().getData() != null) {
             if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
                 InstanceIdentifier<Queues> queueIid =
-                        (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
-                        queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                        (InstanceIdentifier<Queues>) instanceIdentifierCodec.bindingDeserializerOrNull(
+                                queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
                 if (queueIid != null) {
                     QueuesKey queuesKey = queueIid.firstKeyOf(Queues.class);
                     if (queuesKey != null) {

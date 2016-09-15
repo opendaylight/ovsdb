@@ -34,6 +34,7 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -61,7 +62,8 @@ public class OvsdbPortRemoveCommandTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbPortRemoveCommand ovsdbPortRemoveCommand1 = new OvsdbPortRemoveCommand(key, updates, dbSchema);
+        OvsdbPortRemoveCommand ovsdbPortRemoveCommand1 =
+                new OvsdbPortRemoveCommand(mock(InstanceIdentifierCodec.class), key, updates, dbSchema);
         assertEquals(key, Whitebox.getInternalState(ovsdbPortRemoveCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbPortRemoveCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbPortRemoveCommand1, "dbSchema"));
@@ -104,7 +106,8 @@ public class OvsdbPortRemoveCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         InstanceIdentifier<Node> nodeIID = mock(InstanceIdentifier.class);
         when(ovsdbPortRemoveCommand.getOvsdbConnectionInstance()).thenReturn(mock(OvsdbConnectionInstance.class));
-        when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class)))
+        when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
+                any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(nodeIID);
         MemberModifier.suppress(MemberModifier.methodsDeclaredIn(InstanceIdentifier.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);

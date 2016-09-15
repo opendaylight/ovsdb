@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
@@ -27,9 +28,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
 
-    public OvsdbBridgeRemovedCommand(OvsdbConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
+
+    public OvsdbBridgeRemovedCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
+            TableUpdates updates, DatabaseSchema dbSchema) {
         super(key,updates,dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
@@ -37,8 +41,9 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
         Collection<Bridge> removedRows = TyperUtils.extractRowsRemoved(Bridge.class,
                 getUpdates(), getDbSchema()).values();
         for (Bridge bridge : removedRows) {
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                    bridge);
+            InstanceIdentifier<Node> bridgeIid =
+                    SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
+                            bridge);
             InstanceIdentifier<ManagedNodeEntry> mnIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));

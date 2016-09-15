@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.powermock.api.mockito.PowerMockito;
@@ -74,7 +75,7 @@ public class OvsdbOperationalCommandAggregatorTest {
         when(dbSchema.getVersion())
                 .thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
         OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator1 = new OvsdbOperationalCommandAggregator(
-                key, updates, dbSchema);
+                mock(InstanceIdentifierCodec.class), key, updates, dbSchema);
         List<TransactionCommand> testCommands = Whitebox.getInternalState(ovsdbOperationalCommandAggregator1,
                 "commands");
         assertEquals(NUMBER_OF_COMMANDS, testCommands.size());

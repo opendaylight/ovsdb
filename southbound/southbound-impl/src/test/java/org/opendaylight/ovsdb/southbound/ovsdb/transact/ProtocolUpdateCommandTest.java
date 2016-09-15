@@ -42,6 +42,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
@@ -125,7 +126,7 @@ public class ProtocolUpdateCommandTest {
         when(where.build()).thenReturn(mock(Operation.class));
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        protocolUpdateCommand.execute(transaction, bridgeOpState, changes);
+        protocolUpdateCommand.execute(transaction, bridgeOpState, changes, mock(InstanceIdentifierCodec.class));
 
         // TODO What are we trying to verify here?
         // verify(transaction).add(any(Operation.class));

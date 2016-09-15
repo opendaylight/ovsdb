@@ -31,6 +31,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -79,9 +80,7 @@ public class BridgeConfigReconciliationTaskTest {
 
         when(topology.getNode()).thenReturn(bridgeNodes);
 
-        Optional<Topology> topologyOptional = mock(Optional.class);
-        when(topologyOptional.isPresent()).thenReturn(true);
-        when(topologyOptional.get()).thenReturn(topology);
+        Optional<Topology> topologyOptional = Optional.of(topology);
         CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture =
                 Futures.immediateCheckedFuture(topologyOptional);
 
@@ -96,8 +95,9 @@ public class BridgeConfigReconciliationTaskTest {
         bridgeNodes.add(createBridgeNode(BR01));
         bridgeNodes.add(createBridgeNode(BR02));
 
-        configurationReconciliationTask = new BridgeConfigReconciliationTask(
-                reconciliationManager, ovsdbConnectionManager, iid, ovsdbConnectionInstance);
+        configurationReconciliationTask =
+                new BridgeConfigReconciliationTask(reconciliationManager, ovsdbConnectionManager, iid,
+                        ovsdbConnectionInstance, mock(InstanceIdentifierCodec.class));
     }
 
     @Test

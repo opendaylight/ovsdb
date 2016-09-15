@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -54,13 +55,16 @@ import org.slf4j.LoggerFactory;
 public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQosUpdateCommand.class);
 
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
+
     private Map<UUID, Qos> updatedQosRows;
     private Map<UUID, Qos> oldQosRows;
     private Map<UUID, Queue> updatedQueueRows;
 
-    public OvsdbQosUpdateCommand(OvsdbConnectionInstance key,
+    public OvsdbQosUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedQosRows = TyperUtils.extractRowsUpdated(Qos.class,getUpdates(), getDbSchema());
         oldQosRows = TyperUtils.extractRowsOld(Qos.class, getUpdates(), getDbSchema());
         updatedQueueRows = TyperUtils.extractRowsUpdated(Queue.class, getUpdates(), getDbSchema());
@@ -74,7 +78,8 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
     }
 
     /**
-     * Update the QosEntries values after finding the related {@link OpenVSwitch} list.
+     * Update the QosEntries values after finding the related
+     * {@link org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch} list.
      * <p>
      * Qos and OpenVSwitch are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Qos fields in the
@@ -122,7 +127,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 && qos.getExternalIdsColumn().getData() != null) {
             if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
                 InstanceIdentifier<QosEntries> qosIid =
-                        (InstanceIdentifier<QosEntries>) SouthboundUtil.deserializeInstanceIdentifier(
+                        (InstanceIdentifier<QosEntries>) instanceIdentifierCodec.bindingDeserializerOrNull(
                                 qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
                 if (qosIid != null) {
                     QosEntriesKey qosEntriesKey = qosIid.firstKeyOf(QosEntries.class);
@@ -152,7 +157,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         if (queue != null && queue.getExternalIdsColumn() != null
                 && queue.getExternalIdsColumn().getData() != null
                 && queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-            return (InstanceIdentifier<Queues>) SouthboundUtil.deserializeInstanceIdentifier(
+            return (InstanceIdentifier<Queues>) instanceIdentifierCodec.bindingDeserializerOrNull(
                     queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
         } else {
             OvsdbNodeAugmentation node = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);

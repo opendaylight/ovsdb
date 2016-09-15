@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -30,15 +31,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
 
-
-
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
     private Map<UUID, Bridge> oldBridgeRows;
     private Map<UUID, Controller> removedControllerRows;
     private Map<UUID, Bridge> updatedBridgeRows;
 
-    public OvsdbControllerRemovedCommand(OvsdbConnectionInstance key,
+    public OvsdbControllerRemovedCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
         removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class,
@@ -49,7 +50,8 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     public void execute(ReadWriteTransaction transaction) {
         for (Bridge bridge : updatedBridgeRows.values()) {
             InstanceIdentifier<Node> bridgeIid =
-                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), bridge);
+                    SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
+                            bridge);
             deleteControllers(transaction, controllerEntriesToRemove(bridgeIid,bridge));
         }
     }

@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
@@ -63,31 +64,35 @@ public class TerminationPointUpdateCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
-                TransactUtils.extractCreatedOrUpdated(events, OvsdbTerminationPointAugmentation.class));
+                TransactUtils.extractCreatedOrUpdated(events, OvsdbTerminationPointAugmentation.class),
+                instanceIdentifierCodec);
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        Collection<DataTreeModification<Node>> modifications) {
+            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
-                TransactUtils.extractCreatedOrUpdated(modifications, OvsdbTerminationPointAugmentation.class));
+                TransactUtils.extractCreatedOrUpdated(modifications, OvsdbTerminationPointAugmentation.class),
+                instanceIdentifierCodec);
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
-                                 OvsdbTerminationPointAugmentation> createdOrUpdated) {
+            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+                    createdOrUpdated,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
                  OvsdbTerminationPointAugmentation> terminationPointEntry : createdOrUpdated.entrySet()) {
             updateTerminationPoint(transaction, state, terminationPointEntry.getKey(),
-                    terminationPointEntry.getValue());
+                    terminationPointEntry.getValue(), instanceIdentifierCodec);
         }
     }
 
     public void updateTerminationPoint(TransactionBuilder transaction, BridgeOperationalState state,
-                                       InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
-                                       OvsdbTerminationPointAugmentation terminationPoint) {
+            InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
+            OvsdbTerminationPointAugmentation terminationPoint, InstanceIdentifierCodec instanceIdentifierCodec) {
 
         if (terminationPoint != null) {
             LOG.debug("Received request to update termination point {}",
@@ -105,7 +110,8 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                     .build());
 
             TerminationPointCreateCommand.stampInstanceIdentifier(transaction,
-                    iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName());
+                    iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName(),
+                    instanceIdentifierCodec);
 
             // Update port
             // Bug#6136

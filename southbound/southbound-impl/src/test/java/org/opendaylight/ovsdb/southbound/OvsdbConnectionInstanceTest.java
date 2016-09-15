@@ -98,19 +98,22 @@ public class OvsdbConnectionInstanceTest {
         field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
 
         TransactCommand command = mock(TransactCommand.class);
-        ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class),
+                mock(InstanceIdentifierCodec.class));
         verify(transactInvoker1).invoke(any(TransactCommand.class), any(BridgeOperationalState.class),
-                any(AsyncDataChangeEvent.class));
+                any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
         verify(transactInvoker2).invoke(any(TransactCommand.class), any(BridgeOperationalState.class),
-                any(AsyncDataChangeEvent.class));
+                any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testRegisterCallbacks() throws Exception {
+        InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
+
         // callback not null case
         MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , callback);
-        ovsdbConnectionInstance.registerCallbacks();
+        ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
         verify(ovsdbConnectionInstance, times(0)).getDatabases();
 
         // callback null case
@@ -129,7 +132,7 @@ public class OvsdbConnectionInstanceTest {
 
         suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorTables", String.class,
                 DatabaseSchema.class));
-        ovsdbConnectionInstance.registerCallbacks();
+        ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
         PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
                 any(DatabaseSchema.class));
     }

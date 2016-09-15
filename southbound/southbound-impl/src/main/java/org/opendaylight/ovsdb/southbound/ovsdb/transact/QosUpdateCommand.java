@@ -20,9 +20,9 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -46,18 +46,22 @@ public class QosUpdateCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, QosEntries.class));
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, QosEntries.class),
+                instanceIdentifierCodec);
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        Collection<DataTreeModification<Node>> modifications) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, QosEntries.class));
+            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, QosEntries.class),
+                instanceIdentifierCodec);
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated) {
+            Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> iid =
                     qosMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
@@ -96,7 +100,8 @@ public class QosUpdateCommand implements TransactCommand {
                 LOG.warn("Incomplete Qos external IDs", e);
             }
             externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-                    SouthboundUtil.serializeInstanceIdentifier(
+
+                    instanceIdentifierCodec.serialize(
                     SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))));

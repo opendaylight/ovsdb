@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -55,7 +56,7 @@ public class TerminationPointDeleteCommandTest {
         when(TransactUtils.extractOriginal(changes, Node.class)).thenReturn(originalNodes);
         when(TransactUtils.extractRemoved(changes, OvsdbTerminationPointAugmentation.class)).thenReturn(removedTps);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        terminationPointDeleteCommand.execute(transaction, state, changes);
+        terminationPointDeleteCommand.execute(transaction, state, changes, mock(InstanceIdentifierCodec.class));
 
         // TODO Actually verify something
     }

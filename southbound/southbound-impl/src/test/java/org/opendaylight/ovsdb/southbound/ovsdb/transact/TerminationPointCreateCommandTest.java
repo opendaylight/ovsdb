@@ -43,6 +43,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -109,7 +110,8 @@ public class TerminationPointCreateCommandTest {
         PowerMockito.whenNew(UUID.class).withAnyArguments().thenReturn(mock(UUID.class));
         doNothing().when(bridge).setPorts(any(HashSet.class));
 
-        terminationPointCreateCommand.execute(transaction, bridgeOpState, asynEvent);
+        terminationPointCreateCommand.execute(transaction, bridgeOpState, asynEvent,
+                mock(InstanceIdentifierCodec.class));
 
         // TODO Actually verify something
     }
@@ -133,7 +135,8 @@ public class TerminationPointCreateCommandTest {
         Mutate mutate = mock(Mutate.class);
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.stampInstanceIdentifierMutation(any(TransactionBuilder.class), any(InstanceIdentifier.class),
-                any(GenericTableSchema.class), any(ColumnSchema.class))).thenReturn(mutate);
+                any(GenericTableSchema.class), any(ColumnSchema.class), any(InstanceIdentifierCodec.class))).thenReturn(
+                mutate);
 
         Column<GenericTableSchema, String> nameColumn = mock(Column.class);
         when(port.getNameColumn()).thenReturn(nameColumn);
@@ -147,7 +150,8 @@ public class TerminationPointCreateCommandTest {
 
         String interfaceName = INTERFACE_NAME;
         InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
-        TerminationPointCreateCommand.stampInstanceIdentifier(transaction, iid, interfaceName);
+        TerminationPointCreateCommand.stampInstanceIdentifier(transaction, iid, interfaceName,
+                mock(InstanceIdentifierCodec.class));
         verify(port).setName(anyString());
         verify(port).getExternalIdsColumn();
         verify(transaction).add(any(Operation.class));

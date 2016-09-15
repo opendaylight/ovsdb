@@ -39,6 +39,7 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -90,7 +91,8 @@ public class OpenVSwitchBridgeAddCommandTest {
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        ovsBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        ovsBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class),
+                mock(InstanceIdentifierCodec.class));
         verify(transaction).add(any(Operation.class));
     }
 

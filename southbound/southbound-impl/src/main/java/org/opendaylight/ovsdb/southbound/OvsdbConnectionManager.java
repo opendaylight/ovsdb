@@ -85,16 +85,19 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
     private OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,
                                   EntityOwnershipService entityOwnershipService,
-                                  OvsdbConnection ovsdbConnection) {
+                                  OvsdbConnection ovsdbConnection,
+                                  InstanceIdentifierCodec instanceIdentifierCodec) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         this.ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
         this.ovsdbConnection = ovsdbConnection;
-        this.reconciliationManager = new ReconciliationManager(db);
+        this.reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
@@ -362,11 +365,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void stopBridgeConfigReconciliationIfActive(InstanceIdentifier<?> iid) {
-        final ReconciliationTask task = new BridgeConfigReconciliationTask(
-                reconciliationManager,
-                this,
-                iid,
-                null);
+        final ReconciliationTask task =
+                new BridgeConfigReconciliationTask(reconciliationManager, this, iid, null, instanceIdentifierCodec);
         reconciliationManager.dequeue(task);
         reconciliationManager.cancelTerminationPointReconciliation();
     }
@@ -417,7 +417,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
-            ovsdbConnectionInstance.registerCallbacks();
+            ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
 
             reconcileBridgeConfigurations(ovsdbConnectionInstance);
         } else {
@@ -441,8 +441,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // not clear manager entry, which OvsdbNodeRemoveCommand look for before cleanup.
 
         @SuppressWarnings("unchecked") final InstanceIdentifier<Node> nodeIid =
-                (InstanceIdentifier<Node>) SouthboundUtil
-                        .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
+                (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializer(entity.getId());
 
         txInvoker.invoke(new TransactionCommand() {
             @Override
@@ -512,12 +511,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
              * is granted. So we are explicitly fetch the row here to get the iid.
              */
             OpenVSwitch openvswitchRow = getOpenVswitchTableEntry(ovsdbConnectionInstance);
-            iid = SouthboundMapper.getInstanceIdentifier(openvswitchRow);
+            iid = SouthboundMapper.getInstanceIdentifier(instanceIdentifierCodec, openvswitchRow);
             LOG.info("InstanceIdentifier {} generated for device "
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
             ovsdbConnectionInstance.setInstanceIdentifier(iid);
         }
-        YangInstanceIdentifier entityId = SouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
+        YangInstanceIdentifier entityId = instanceIdentifierCodec.getYangInstanceIdentifier(iid);
         Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
         LOG.debug("Entity {} created for device connection {}",
                 deviceEntity, ovsdbConnectionInstance.getConnectionInfo());
@@ -614,7 +613,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
         final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
         final ReconciliationTask task = new BridgeConfigReconciliationTask(
-                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client);
+                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client, instanceIdentifierCodec);
 
         reconciliationManager.enqueue(task);
     }

@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -37,17 +38,18 @@ public class TransactInvokerImpl implements TransactInvoker {
 
     @Override
     public void invoke(TransactCommand command, BridgeOperationalState state,
-                       AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
-        command.execute(tb, state, events);
+        command.execute(tb, state, events, instanceIdentifierCodec);
         invoke(command, tb);
     }
 
     @Override
     public void invoke(TransactCommand command, BridgeOperationalState state,
-                       Collection<DataTreeModification<Node>> modifications) {
+            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
-        command.execute(tb, state, modifications);
+        command.execute(tb, state, modifications, instanceIdentifierCodec);
         invoke(command, tb);
     }
 

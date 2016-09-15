@@ -28,7 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,34 +37,9 @@ public class SouthboundUtil {
     private static final String SCHEMA_VERSION_MISMATCH =
             "{} column for {} table is not supported by this version of the {} schema: {}";
 
-    private static InstanceIdentifierCodec instanceIdentifierCodec;
-
     private SouthboundUtil() {
         // Prevent instantiating a utility class
     }
-
-    public static void setInstanceIdentifierCodec(InstanceIdentifierCodec iidc) {
-        instanceIdentifierCodec = iidc;
-    }
-
-    public static InstanceIdentifierCodec getInstanceIdentifierCodec() {
-        return instanceIdentifierCodec;
-    }
-
-    public static String serializeInstanceIdentifier(InstanceIdentifier<?> iid) {
-        return instanceIdentifierCodec.serialize(iid);
-    }
-
-    public static InstanceIdentifier<?> deserializeInstanceIdentifier(String iidString) {
-        InstanceIdentifier<?> result = null;
-        try {
-            result = instanceIdentifierCodec.bindingDeserializer(iidString);
-        } catch (DeserializationException e) {
-            LOG.warn("Unable to deserialize iidString", e);
-        }
-        return result;
-    }
-
 
     public static Optional<OvsdbNodeAugmentation> getManagingNode(DataBroker db, OvsdbBridgeAttributes mn) {
         Preconditions.checkNotNull(mn);

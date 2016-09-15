@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -57,12 +58,14 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(BridgeConfigReconciliationTask.class);
     private final OvsdbConnectionInstance connectionInstance;
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public BridgeConfigReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager
-            connectionManager, InstanceIdentifier<?> nodeIid, OvsdbConnectionInstance connectionInstance) {
+            connectionManager, InstanceIdentifier<?> nodeIid, OvsdbConnectionInstance connectionInstance,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, nodeIid, null);
         this.connectionInstance = connectionInstance;
-
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
@@ -191,7 +194,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 new DataChangesManagedByOvsdbNodeEvent(
                         reconciliationManager.getDb(),
                         connectionInstance.getInstanceIdentifier(),
-                        changeEvents));
+                        changeEvents), instanceIdentifierCodec);
     }
 
     @Override

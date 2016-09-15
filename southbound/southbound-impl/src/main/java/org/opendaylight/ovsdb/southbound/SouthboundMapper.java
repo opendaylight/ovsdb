@@ -107,13 +107,14 @@ public class SouthboundMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbConnectionInstance client,Bridge bridge) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
+            OvsdbConnectionInstance client, Bridge bridge) {
         InstanceIdentifier<Node> iid;
         if (bridge.getExternalIdsColumn() != null
                 && bridge.getExternalIdsColumn().getData() != null
                 && bridge.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = bridge.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+            iid = (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
         } else {
             iid = createInstanceIdentifier(client, bridge.getName());
         }
@@ -121,14 +122,14 @@ public class SouthboundMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public static InstanceIdentifier<Node> createInstanceIdentifier(
+    public static InstanceIdentifier<Node> createInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
             OvsdbConnectionInstance client, Controller controller, String bridgeName) {
         InstanceIdentifier<Node> iid;
         if (controller.getExternalIdsColumn() != null
                 && controller.getExternalIdsColumn().getData() != null
                 && controller.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = controller.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+            iid = (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
         } else {
             iid = createInstanceIdentifier(client, bridgeName);
         }
@@ -493,12 +494,13 @@ public class SouthboundMapper {
     }
 
 
-    public static InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
+    public static InstanceIdentifier<Node> getInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
+            OpenVSwitch ovs) {
         if (ovs.getExternalIdsColumn() != null
                 && ovs.getExternalIdsColumn().getData() != null
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            return (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+            return (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
         } else {
             String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
                     + ovs.getUuid().toString();

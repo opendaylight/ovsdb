@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -66,13 +67,13 @@ public class TransactCommandAggregatorTest {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         for (TransactCommand command: commands) {
             doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
-                    any(AsyncDataChangeEvent.class));
+                    any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
         }
         transactCommandAggregator.execute(transaction, mock(BridgeOperationalState.class),
-                mock(AsyncDataChangeEvent.class));
+                mock(AsyncDataChangeEvent.class), mock(InstanceIdentifierCodec.class));
         for (TransactCommand command: commands) {
             verify(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
-                    any(AsyncDataChangeEvent.class));
+                    any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
         }
     }
 }

@@ -18,17 +18,20 @@ import org.slf4j.LoggerFactory;
 public class OvsdbMonitorCallback implements MonitorCallBack {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbMonitorCallback.class);
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
     private TransactionInvoker txInvoker;
     private OvsdbConnectionInstance key;
 
-    OvsdbMonitorCallback(OvsdbConnectionInstance key,TransactionInvoker txInvoker) {
+    OvsdbMonitorCallback(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
+            TransactionInvoker txInvoker) {
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         this.txInvoker = txInvoker;
         this.key = key;
     }
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
-        txInvoker.invoke(new OvsdbOperationalCommandAggregator(key, result, dbSchema));
+        txInvoker.invoke(new OvsdbOperationalCommandAggregator(instanceIdentifierCodec, key, result, dbSchema));
         LOG.trace("Updated dbSchema: {} and result: {}", dbSchema, result);
     }
 

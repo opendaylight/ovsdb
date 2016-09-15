@@ -34,6 +34,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
@@ -66,8 +67,8 @@ public class OvsdbControllerRemovedCommandTest {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbControllerRemovedCommand ovsdbControllerRemovedCommand1 = new OvsdbControllerRemovedCommand(key, updates,
-                dbSchema);
+        OvsdbControllerRemovedCommand ovsdbControllerRemovedCommand1 =
+                new OvsdbControllerRemovedCommand(mock(InstanceIdentifierCodec.class), key, updates, dbSchema);
         assertEquals(key, Whitebox.getInternalState(ovsdbControllerRemovedCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbControllerRemovedCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbControllerRemovedCommand1, "dbSchema"));
@@ -83,7 +84,8 @@ public class OvsdbControllerRemovedCommandTest {
         MemberModifier.field(OvsdbControllerRemovedCommand.class, "updatedBridgeRows")
                 .set(ovsdbControllerRemovedCommand, updatedBridgeRows);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createInstanceIdentifier(any(OvsdbConnectionInstance.class), any(Bridge.class)))
+        when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
+                any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(mock(InstanceIdentifier.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbControllerRemovedCommand.class, "deleteControllers",
                 ReadWriteTransaction.class, List.class));

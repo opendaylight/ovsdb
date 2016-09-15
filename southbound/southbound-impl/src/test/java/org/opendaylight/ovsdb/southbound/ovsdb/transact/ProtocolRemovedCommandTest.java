@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
@@ -93,7 +94,8 @@ public class ProtocolRemovedCommandTest {
         when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), any(Class.class))).thenReturn(bridge);
 
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        protocolRemovedCommand.execute(transaction, bridgeOpState, mock(AsyncDataChangeEvent.class));
+        protocolRemovedCommand.execute(transaction, bridgeOpState, mock(AsyncDataChangeEvent.class),
+                mock(InstanceIdentifierCodec.class));
         Mockito.verify(transaction).add(any(Operation.class));
     }
 

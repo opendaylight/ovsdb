@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -51,7 +52,8 @@ public class BridgeRemovedCommandTest {
         when(TransactUtils.extractOriginal(changes, OvsdbBridgeAugmentation.class)).thenReturn(originals);
 
         TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
-        briRemovedCmd.execute(transaction, mock(BridgeOperationalState.class), changes);
+        briRemovedCmd.execute(transaction, mock(BridgeOperationalState.class), changes,
+                mock(InstanceIdentifierCodec.class));
 
         // TODO Actually verify something
     }

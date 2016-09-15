@@ -105,7 +105,7 @@ public class OvsdbConnectionManagerTest {
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered",
                 OvsdbClient.class));
         when(ovsdbConnManager.connectedButCallBacksNotRegistered(any(OvsdbClient.class))).thenReturn(client);
-        doNothing().when(client).registerCallbacks();
+        doNothing().when(client).registerCallbacks(any());
 
         //TODO: Write unit tests for EntityOwnershipService
         InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
@@ -219,7 +219,7 @@ public class OvsdbConnectionManagerTest {
 
         // client not null
         // ovsdbConnectionManager.init(key);
-        verify(ovsdbConnectionInstance).registerCallbacks();
+        verify(ovsdbConnectionInstance).registerCallbacks(any());
     }
 
     @Test

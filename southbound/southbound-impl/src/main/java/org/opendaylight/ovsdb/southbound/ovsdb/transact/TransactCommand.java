@@ -12,6 +12,7 @@ import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -27,9 +28,11 @@ public interface TransactCommand {
      * @param transaction The transaction builder.
      * @param state The bridge state.
      * @param events The events to be represented.
+     * @param instanceIdentifierCodec The instance identifier codec to use.
      */
     void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                 AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events);
+                 AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+                 InstanceIdentifierCodec instanceIdentifierCodec);
 
     /**
      * Queue the command defined by the class implementing this interface in the given transaction builder, with the
@@ -38,7 +41,9 @@ public interface TransactCommand {
      * @param transaction The transaction builder.
      * @param state The bridge state.
      * @param modifications The modifications to be represented.
+     * @param instanceIdentifierCodec The instance identifier codec to use.
      */
     void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                 Collection<DataTreeModification<Node>> modifications);
+                 Collection<DataTreeModification<Node>> modifications,
+                 InstanceIdentifierCodec instanceIdentifierCodec);
 }

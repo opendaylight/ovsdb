@@ -52,6 +52,9 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
     /** The data broker. */
     private final DataBroker db;
 
+    /** The instance identifier codec. */
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
+
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataTreeChangeListener.class);
 
@@ -61,9 +64,11 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
      * @param db The data broker.
      * @param cm The connection manager.
      */
-    OvsdbDataTreeChangeListener(DataBroker db, OvsdbConnectionManager cm) {
+    OvsdbDataTreeChangeListener(DataBroker db, OvsdbConnectionManager cm,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         this.cm = cm;
         this.db = db;
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -180,7 +185,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 connectionInstancesFromChanges(changes).entrySet()) {
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getValue();
             connectionInstance.transact(new TransactCommandAggregator(),
-                    new BridgeOperationalState(db, changes), changes);
+                    new BridgeOperationalState(db, changes), changes, instanceIdentifierCodec);
         }
     }
 

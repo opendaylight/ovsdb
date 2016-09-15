@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.southbound;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -18,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
@@ -55,36 +53,6 @@ public class SouthboundUtilTest {
     @Before
     public void setUp() {
         PowerMockito.mockStatic(SouthboundUtil.class, Mockito.CALLS_REAL_METHODS);
-    }
-
-    @Test
-    public void testSetInstanceIdentifierCodec() throws Exception {
-        InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
-        SouthboundUtil.setInstanceIdentifierCodec(iidc);
-        assertEquals("InstanceIdentifierCodec object not correctly set", iidc,
-                SouthboundUtil.getInstanceIdentifierCodec());
-    }
-
-    @Test
-    public void testSerializeInstanceIdentifier() throws Exception {
-        InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
-        InstanceIdentifierCodec iidc = (InstanceIdentifierCodec) setField("instanceIdentifierCodec",
-                mock(InstanceIdentifierCodec.class));
-        when(iidc.serialize(iid)).thenReturn("serializeInstanceIdentifier");
-        assertEquals("Incorrect String returned", "serializeInstanceIdentifier",
-                SouthboundUtil.serializeInstanceIdentifier(iid));
-        verify(iidc).serialize(any(InstanceIdentifier.class));
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void testDeserializeInstanceIdentifier() throws Exception {
-        InstanceIdentifier result = mock(InstanceIdentifier.class);
-        InstanceIdentifierCodec iidc = (InstanceIdentifierCodec) setField("instanceIdentifierCodec",
-                mock(InstanceIdentifierCodec.class));
-        when(iidc.bindingDeserializer(anyString())).thenReturn(result);
-        assertEquals(result, SouthboundUtil.deserializeInstanceIdentifier("iidString"));
-        verify(iidc).bindingDeserializer(anyString());
     }
 
     @SuppressWarnings("unchecked")
@@ -198,18 +166,5 @@ public class SouthboundUtilTest {
         testTarget = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
                 + "127.0.0.1" + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
         assertEquals("Incorrect Local controller host IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode));
-    }
-
-    private Object getField(String fieldName) throws Exception {
-        Field field = SouthboundUtil.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(SouthboundUtil.class);
-    }
-
-    private Object setField(String fieldName, InstanceIdentifierCodec fieldValue) throws Exception {
-        Field field = SouthboundUtil.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(field.get(SouthboundUtil.class), fieldValue);
-        return field.get(SouthboundUtil.class);
     }
 }

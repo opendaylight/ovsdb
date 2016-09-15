@@ -53,6 +53,7 @@ public class SouthboundProvider implements AutoCloseable {
     private EntityOwnershipCandidateRegistration registration;
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private OvsdbConnection ovsdbConnection;
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public SouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
@@ -64,8 +65,8 @@ public class SouthboundProvider implements AutoCloseable {
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
 
-        SouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
-                bindingNormalizedNodeSerializer));
+        this.instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService,
+                bindingNormalizedNodeSerializer);
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
     }
 
@@ -75,8 +76,8 @@ public class SouthboundProvider implements AutoCloseable {
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
         this.txInvoker = new TransactionInvokerImpl(db);
-        cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection);
-        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm);
+        cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection, instanceIdentifierCodec);
+        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =

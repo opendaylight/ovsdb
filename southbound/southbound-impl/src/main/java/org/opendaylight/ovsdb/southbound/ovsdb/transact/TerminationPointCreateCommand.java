@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
@@ -65,23 +66,24 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreated(events, OvsdbTerminationPointAugmentation.class),
-                TransactUtils.extractCreatedOrUpdated(events, Node.class));
+                TransactUtils.extractCreatedOrUpdated(events, Node.class), instanceIdentifierCodec);
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        Collection<DataTreeModification<Node>> modifications) {
+            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
                 TransactUtils.extractCreated(modifications, OvsdbTerminationPointAugmentation.class),
-                TransactUtils.extractCreatedOrUpdated(modifications, Node.class));
+                TransactUtils.extractCreatedOrUpdated(modifications, Node.class), instanceIdentifierCodec);
     }
 
     private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
-                                 OvsdbTerminationPointAugmentation>
-                                 createdTerminationPoints, Map<InstanceIdentifier<Node>, Node> nodes) {
+            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+                    createdTerminationPoints,
+            Map<InstanceIdentifier<Node>, Node> nodes, InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> entry :
                 createdTerminationPoints.entrySet()) {
             OvsdbTerminationPointAugmentation terminationPoint = entry.getValue();
@@ -98,7 +100,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 createInterface(terminationPoint, ovsInterface);
                 transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
-                stampInstanceIdentifier(transaction, entry.getKey(), ovsInterface.getName());
+                stampInstanceIdentifier(transaction, entry.getKey(), ovsInterface.getName(), instanceIdentifierCodec);
 
                 // Configure port with the above interface details
                 String portUuid = "Port_" + SouthboundMapper.getRandomUuid();
@@ -363,15 +365,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
         return bridge;
     }
 
-    public static void stampInstanceIdentifier(TransactionBuilder transaction, InstanceIdentifier
-            <OvsdbTerminationPointAugmentation> iid, String interfaceName) {
+    public static void stampInstanceIdentifier(TransactionBuilder transaction,
+            InstanceIdentifier<OvsdbTerminationPointAugmentation> iid, String interfaceName,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
         port.setName(interfaceName);
         port.setExternalIds(Collections.<String,String>emptyMap());
-        Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction,
-                iid,
-                port.getSchema(),
-                port.getExternalIdsColumn().getSchema());
+        Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction, iid, port.getSchema(),
+                port.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
         transaction.add(mutate
                 .where(port.getNameColumn().getSchema().opEqual(interfaceName))
                 .build());

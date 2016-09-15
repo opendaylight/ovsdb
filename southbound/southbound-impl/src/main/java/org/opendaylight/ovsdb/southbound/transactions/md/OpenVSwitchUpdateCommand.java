@@ -23,10 +23,10 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
@@ -56,9 +56,12 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenVSwitchUpdateCommand.class);
 
-    public OpenVSwitchUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
+
+    public OpenVSwitchUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
+            TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
-            final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(openVSwitch);
+            final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(instanceIdentifierCodec, openVSwitch);
 
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
 
@@ -81,12 +84,12 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
             setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
             OpenVSwitch oldEntry = deletedOpenVSwitchRows.get(entry.getKey());
-            setExternalIds(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
-            setOtherConfig(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
+            setExternalIds(instanceIdentifierCodec, transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
+            setOtherConfig(instanceIdentifierCodec, transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
             ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
 
             NodeBuilder nodeBuilder = new NodeBuilder();
-            nodeBuilder.setNodeId(getNodeId(openVSwitch));
+            nodeBuilder.setNodeId(getNodeId(instanceIdentifierCodec, openVSwitch));
             nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
                     ovsdbNodeBuilder.build());
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
@@ -94,7 +97,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOtherConfig(ReadWriteTransaction transaction,
+    private void setOtherConfig(InstanceIdentifierCodec instanceIdentifierCodec, ReadWriteTransaction transaction,
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch oldEntry, OpenVSwitch openVSwitch) {
         Map<String, String> oldOtherConfigs = null;
         Map<String, String> otherConfigs = null;
@@ -108,17 +111,18 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         if ((oldOtherConfigs == null) || oldOtherConfigs.isEmpty()) {
             setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
         } else if (otherConfigs != null && !otherConfigs.isEmpty()) {
-            removeOldConfigs(transaction, oldOtherConfigs, openVSwitch);
+            removeOldConfigs(instanceIdentifierCodec, transaction, oldOtherConfigs, openVSwitch);
             setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
         }
     }
 
-    private void removeOldConfigs(ReadWriteTransaction transaction, Map<String, String> oldOtherConfigs,
-            OpenVSwitch ovs) {
+    private void removeOldConfigs(InstanceIdentifierCodec instanceIdentifierCodec, ReadWriteTransaction transaction,
+            Map<String, String> oldOtherConfigs, OpenVSwitch ovs) {
         InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(getNodeId(ovs))).augmentation(OvsdbNodeAugmentation.class);
+                .child(Node.class, new NodeKey(getNodeId(instanceIdentifierCodec, ovs)))
+                .augmentation(OvsdbNodeAugmentation.class);
         Set<String> otherConfigKeys = oldOtherConfigs.keySet();
         for (String otherConfigKey : otherConfigKeys) {
             KeyedInstanceIdentifier<OpenvswitchOtherConfigs, OpenvswitchOtherConfigsKey> externalIid =
@@ -143,7 +147,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList);
     }
 
-    private void setExternalIds(ReadWriteTransaction transaction,
+    private void setExternalIds(InstanceIdentifierCodec instanceIdentifierCodec, ReadWriteTransaction transaction,
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch oldEntry, OpenVSwitch openVSwitch) {
         Map<String, String> oldExternalIds = null;
         Map<String, String> externalIds = null;
@@ -157,17 +161,18 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         if ((oldExternalIds == null) || oldExternalIds.isEmpty()) {
             setNewExternalIds(ovsdbNodeBuilder, externalIds);
         } else if (externalIds != null && !externalIds.isEmpty()) {
-            removeExternalIds(transaction, oldExternalIds, openVSwitch);
+            removeExternalIds(instanceIdentifierCodec, transaction, oldExternalIds, openVSwitch);
             setNewExternalIds(ovsdbNodeBuilder, externalIds);
         }
     }
 
-    private void removeExternalIds(ReadWriteTransaction transaction, Map<String, String> oldExternalIds,
-            OpenVSwitch ovs) {
+    private void removeExternalIds(InstanceIdentifierCodec instanceIdentifierCodec, ReadWriteTransaction transaction,
+            Map<String, String> oldExternalIds, OpenVSwitch ovs) {
         InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(getNodeId(ovs))).augmentation(OvsdbNodeAugmentation.class);
+                .child(Node.class, new NodeKey(getNodeId(instanceIdentifierCodec, ovs)))
+                .augmentation(OvsdbNodeAugmentation.class);
         Set<String> externalIdKeys = oldExternalIds.keySet();
         for (String externalIdKey : externalIdKeys) {
             KeyedInstanceIdentifier<OpenvswitchExternalIds, OpenvswitchExternalIdsKey> externalIid =
@@ -255,13 +260,14 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
+    private InstanceIdentifier<Node> getInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
+            OpenVSwitch ovs) {
         if (ovs.getExternalIdsColumn() != null
                 && ovs.getExternalIdsColumn().getData() != null
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
             InstanceIdentifier<Node> iid =
-                   (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+                    (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
             getOvsdbConnectionInstance().setInstanceIdentifier(iid);
         } else {
             String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
@@ -277,8 +283,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         return getOvsdbConnectionInstance().getInstanceIdentifier();
     }
 
-    private NodeId getNodeId(OpenVSwitch ovs) {
-        NodeKey nodeKey = getInstanceIdentifier(ovs).firstKeyOf(Node.class);
+    private NodeId getNodeId(InstanceIdentifierCodec instanceIdentifierCodec, OpenVSwitch ovs) {
+        NodeKey nodeKey = getInstanceIdentifier(instanceIdentifierCodec, ovs).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 }

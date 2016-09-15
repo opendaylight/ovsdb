@@ -43,6 +43,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -224,25 +225,27 @@ public class TransactUtilsTest {
         InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
         TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
         ColumnSchema<GenericTableSchema, Map<String,String>> columnSchema = mock(ColumnSchema.class);
+        InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
 
         PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "stampInstanceIdentifierMutation",
                 TransactionBuilder.class,
                 InstanceIdentifier.class,
                 TableSchema.class,
-                ColumnSchema.class));
-        when(TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema))
+                ColumnSchema.class,
+                InstanceIdentifierCodec.class));
+        when(TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
+                instanceIdentifierCodec))
                 .thenReturn(mock(Mutate.class));
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
-        TransactUtils.stampInstanceIdentifier(transaction, iid, tableSchema, columnSchema);
+        TransactUtils.stampInstanceIdentifier(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec);
         verify(transaction).add(any(Operation.class));
     }
 
     @SuppressWarnings({ "unchecked" })
     @Test
     public void testStampInstanceIdentifierMutation() throws Exception {
-        PowerMockito.mockStatic(SouthboundUtil.class);
-        PowerMockito.when(SouthboundUtil.serializeInstanceIdentifier(any(InstanceIdentifier.class)))
-                .thenReturn(IID_STRING);
+        InstanceIdentifierCodec instanceIdentifierCodec = Mockito.mock(InstanceIdentifierCodec.class);
+        when(instanceIdentifierCodec.serialize(any(InstanceIdentifier.class))).thenReturn(IID_STRING);
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
         Operations op = (Operations) setField("op");
@@ -263,8 +266,8 @@ public class TransactUtilsTest {
         InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
-        assertEquals(mutate,
-                TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema));
+        assertEquals(mutate, TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
+                instanceIdentifierCodec));
     }
 
     private Object setField(String fieldName) throws Exception {

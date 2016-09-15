@@ -39,6 +39,7 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -74,10 +75,10 @@ public class TerminationPointUpdateCommandTest {
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
                 TransactionBuilder.class, BridgeOperationalState.class,
-                InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class));
+                InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class, InstanceIdentifierCodec.class));
         doNothing().when(terminationPointUpdateCommand).updateTerminationPoint(any(TransactionBuilder.class),
                 any(BridgeOperationalState.class), any(InstanceIdentifier.class),
-                any(OvsdbTerminationPointAugmentation.class));
+                any(OvsdbTerminationPointAugmentation.class), any(InstanceIdentifierCodec.class));
 
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated
             = new HashMap<>();
@@ -87,7 +88,7 @@ public class TerminationPointUpdateCommandTest {
 
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
         terminationPointUpdateCommand.execute(transactionBuilder, mock(BridgeOperationalState.class),
-                mock(AsyncDataChangeEvent.class));
+                mock(AsyncDataChangeEvent.class), mock(InstanceIdentifierCodec.class));
         // TODO Verify something useful
     }
 
@@ -140,7 +141,8 @@ public class TerminationPointUpdateCommandTest {
         when(extraPort.getNameColumn()).thenReturn(column);
 
         InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
-        terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint);
+        terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint,
+                mock(InstanceIdentifierCodec.class));
         verify(transaction, times(1)).add(any(Operation.class));
     }
 

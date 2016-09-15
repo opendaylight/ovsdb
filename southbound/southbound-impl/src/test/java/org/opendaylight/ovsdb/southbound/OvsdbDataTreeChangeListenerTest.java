@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static org.mockito.Mockito.mock;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutionException;
@@ -33,17 +35,18 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  */
 public class OvsdbDataTreeChangeListenerTest extends AbstractDataBrokerTest {
 
-    private final OvsdbConnection ovsdbConnection = Mockito.mock(OvsdbConnection.class);
+    private final OvsdbConnection ovsdbConnection = mock(OvsdbConnection.class);
     private DataBroker dataBroker;
     private OvsdbDataTreeChangeListener listener;
 
     @Before
     public void setupListener() {
         dataBroker = getDataBroker();
-        EntityOwnershipService entityOwnershipService = Mockito.mock(EntityOwnershipService.class);
+        EntityOwnershipService entityOwnershipService = mock(EntityOwnershipService.class);
+        InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
         listener = new OvsdbDataTreeChangeListener(dataBroker,
                 new OvsdbConnectionManager(dataBroker, new TransactionInvokerImpl(dataBroker), entityOwnershipService,
-                        ovsdbConnection));
+                        ovsdbConnection, instanceIdentifierCodec), instanceIdentifierCodec);
     }
 
     @Test

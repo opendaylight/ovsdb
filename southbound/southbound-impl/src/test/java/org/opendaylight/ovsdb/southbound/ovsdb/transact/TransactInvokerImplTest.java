@@ -27,6 +27,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -64,7 +65,7 @@ public class TransactInvokerImplTest {
         TransactionBuilder tb = mock(TransactionBuilder.class);
         PowerMockito.whenNew(TransactionBuilder.class).withAnyArguments().thenReturn(tb);
         doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
-                any(AsyncDataChangeEvent.class));
+                any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
 
         ListenableFuture<List<OperationResult>> result = mock(ListenableFuture.class);
         when(tb.execute()).thenReturn(result);
@@ -73,7 +74,8 @@ public class TransactInvokerImplTest {
         when(tb.getOperations()).thenReturn(operation);
         List<OperationResult> got = new ArrayList<>();
         when(result.get()).thenReturn(got);
-        transactInvokerImpl.invoke(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class));
+        transactInvokerImpl.invoke(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class),
+                mock(InstanceIdentifierCodec.class));
         verify(result).get();
     }
 }

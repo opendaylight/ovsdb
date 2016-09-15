@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
@@ -38,14 +39,15 @@ public class ProtocolRemovedCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(events, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        Collection<DataTreeModification<Node>> modifications) {
+            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(modifications, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
     }

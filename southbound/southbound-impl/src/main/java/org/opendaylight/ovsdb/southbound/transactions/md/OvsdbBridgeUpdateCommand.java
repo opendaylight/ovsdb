@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -70,12 +71,14 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
     private Map<UUID,Bridge> updatedBridgeRows;
     private Map<UUID, Bridge> oldBridgeRows;
 
-    public OvsdbBridgeUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public OvsdbBridgeUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
+            TableUpdates updates, DatabaseSchema dbSchema) {
         super(key,updates,dbSchema);
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
     }
@@ -203,8 +206,9 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
         OvsdbNodeAugmentationBuilder ovsdbConnectionAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
         List<ManagedNodeEntry> managedBridges = new ArrayList<>();
-        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                bridge);
+        InstanceIdentifier<Node> bridgeIid =
+                SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
+                        bridge);
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
                 new OvsdbBridgeRef(bridgeIid)).build();
         managedBridges.add(managedBridge);
@@ -394,7 +398,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private InstanceIdentifier<Node> getInstanceIdentifier(Bridge bridge) {
-        return SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
+        return SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
                 bridge);
     }
 

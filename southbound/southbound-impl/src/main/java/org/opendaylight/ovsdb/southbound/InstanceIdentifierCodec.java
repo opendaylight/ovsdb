@@ -20,9 +20,13 @@ import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentifierCodec
     implements SchemaContextListener {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InstanceIdentifierCodec.class);
 
     private DataSchemaContextTree dataSchemaContextTree;
     private SchemaContext context;
@@ -65,12 +69,21 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
     }
 
-    public  InstanceIdentifier<?> bindingDeserializer(String iidString) throws DeserializationException {
+    public InstanceIdentifier<?> bindingDeserializer(String iidString) throws DeserializationException {
         YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
     }
 
     public InstanceIdentifier<?> bindingDeserializer(YangInstanceIdentifier yangIID) {
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
+    }
+
+    public InstanceIdentifier<?> bindingDeserializerOrNull(String iidString) {
+        try {
+            return bindingDeserializer(iidString);
+        } catch (DeserializationException e) {
+            LOG.warn("Unable to deserialize iidString", e);
+        }
+        return null;
     }
 }

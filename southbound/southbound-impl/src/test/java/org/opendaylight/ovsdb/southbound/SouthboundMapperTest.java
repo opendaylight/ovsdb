@@ -93,17 +93,16 @@ public class SouthboundMapperTest {
         when(column.getData()).thenReturn(map);
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
         InstanceIdentifier deserializedIid = InstanceIdentifier.create(Node.class);
-        when(iidc.bindingDeserializer("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
-        SouthboundUtil.setInstanceIdentifierCodec(iidc);
+        when(iidc.bindingDeserializerOrNull("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         assertEquals("Incorrect Instance Identifier received", deserializedIid,
-                SouthboundMapper.createInstanceIdentifier(client, bridge));
+                SouthboundMapper.createInstanceIdentifier(iidc, client, bridge));
 
         // When bridge is empty, we expect a new identifier pointing to the bridge
         when(bridge.getExternalIdsColumn()).thenReturn(null);
         when(client.getNodeKey().getNodeId().getValue()).thenReturn("uri");
         when(bridge.getName()).thenReturn("bridgeName");
-        InstanceIdentifier<Node> returnedIid = SouthboundMapper.createInstanceIdentifier(client, bridge);
+        InstanceIdentifier<Node> returnedIid = SouthboundMapper.createInstanceIdentifier(iidc, client, bridge);
         assertEquals("Incorrect identifier type", Node.class, returnedIid.getTargetType());
         assertEquals("Incorrect node key", new NodeId(new Uri("uri/bridge/bridgeName")),
                 returnedIid.firstKeyOf(Node.class).getNodeId());
@@ -122,17 +121,16 @@ public class SouthboundMapperTest {
         when(column.getData()).thenReturn(map);
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
         InstanceIdentifier deserializedIid = InstanceIdentifier.create(Node.class);
-        when(iidc.bindingDeserializer("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
-        SouthboundUtil.setInstanceIdentifierCodec(iidc);
+        when(iidc.bindingDeserializerOrNull("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         assertEquals("Incorrect Instance Identifier received", deserializedIid,
-                SouthboundMapper.createInstanceIdentifier(client, controller, "bridgeName"));
+                SouthboundMapper.createInstanceIdentifier(iidc, client, controller, "bridgeName"));
 
         // When controller is empty, we expect a new identifier pointing to the bridge
         when(controller.getExternalIdsColumn()).thenReturn(null);
         when(client.getNodeKey().getNodeId().getValue()).thenReturn("uri");
         InstanceIdentifier<Node> returnedIid =
-                SouthboundMapper.createInstanceIdentifier(client, controller, "bridgeName");
+                SouthboundMapper.createInstanceIdentifier(iidc, client, controller, "bridgeName");
         assertEquals("Incorrect identifier type", Node.class, returnedIid.getTargetType());
         assertEquals("Incorrect node key", new NodeId(new Uri("uri/bridge/bridgeName")),
                 returnedIid.firstKeyOf(Node.class).getNodeId());
@@ -455,13 +453,12 @@ public class SouthboundMapperTest {
         externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "test");
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
         InstanceIdentifier iid = InstanceIdentifier.create(Node.class);
-        when(iidc.bindingDeserializer("test")).thenReturn(iid);
-        SouthboundUtil.setInstanceIdentifierCodec(iidc);
-        assertEquals("Incorrect Instance Identifier received", iid, SouthboundMapper.getInstanceIdentifier(ovs));
+        when(iidc.bindingDeserializerOrNull("test")).thenReturn(iid);
+        assertEquals("Incorrect Instance Identifier received", iid, SouthboundMapper.getInstanceIdentifier(iidc, ovs));
         // if false
         externalIdMap.clear();
         UUID uuID = new UUID("test");
         when(ovs.getUuid()).thenReturn(uuID);
-        assertNotNull(SouthboundMapper.getInstanceIdentifier(ovs));
+        assertNotNull(SouthboundMapper.getInstanceIdentifier(iidc, ovs));
     }
 }

@@ -96,11 +96,13 @@ public class OvsdbConnectionInstance {
      * @param command The command to run.
      * @param state The current bridge state.
      * @param events The events to process.
+     * @param instanceIdentifierCodec The instance identifier codec to use.
      */
     public void transact(TransactCommand command, BridgeOperationalState state,
-                 AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events) {
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> events,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         for (TransactInvoker transactInvoker : transactInvokers.values()) {
-            transactInvoker.invoke(command, state, events);
+            transactInvoker.invoke(command, state, events, instanceIdentifierCodec);
         }
     }
 
@@ -110,11 +112,12 @@ public class OvsdbConnectionInstance {
      * @param command The command to run.
      * @param state The current bridge state.
      * @param modifications The modifications to process.
+     * @param instanceIdentifierCodec The instance identifier codec to use.
      */
     public void transact(TransactCommand command, BridgeOperationalState state,
-                 Collection<DataTreeModification<Node>> modifications) {
+            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
         for (TransactInvoker transactInvoker : transactInvokers.values()) {
-            transactInvoker.invoke(command, state, modifications);
+            transactInvoker.invoke(command, state, modifications, instanceIdentifierCodec);
         }
     }
 
@@ -123,10 +126,10 @@ public class OvsdbConnectionInstance {
         return client.transact(dbSchema, operations);
     }
 
-    public void registerCallbacks() {
+    public void registerCallbacks(InstanceIdentifierCodec instanceIdentifierCodec) {
         if (this.callback == null) {
             if (this.initialCreateData != null ) {
-                this.updateConnectionAttributes();
+                this.updateConnectionAttributes(instanceIdentifierCodec);
             }
 
             try {
@@ -134,7 +137,7 @@ public class OvsdbConnectionInstance {
                 DatabaseSchema dbSchema = getSchema(database).get();
                 if (dbSchema != null) {
                     LOG.info("Monitoring database: {}", database);
-                    callback = new OvsdbMonitorCallback(this, txInvoker);
+                    callback = new OvsdbMonitorCallback(instanceIdentifierCodec, this, txInvoker);
                     monitorTables(database, dbSchema);
                 } else {
                     LOG.info("No database {} found on {}", database, connectionInfo);
@@ -185,7 +188,7 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void updateConnectionAttributes() {
+    private void updateConnectionAttributes(InstanceIdentifierCodec instanceIdentifierCodec) {
         LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
                     this.initialCreateData.getConnectionInfo().getRemoteIp(),
                     this.initialCreateData.getConnectionInfo().getRemotePort());
@@ -198,7 +201,8 @@ public class OvsdbConnectionInstance {
 
             List<OpenvswitchExternalIds> externalIds = this.initialCreateData.getOpenvswitchExternalIds();
 
-            stampInstanceIdentifier(transaction,this.instanceIdentifier.firstIdentifierOf(Node.class));
+            stampInstanceIdentifier(transaction, this.instanceIdentifier.firstIdentifierOf(Node.class),
+                    instanceIdentifierCodec);
 
             try {
                 ovs.setExternalIds(
@@ -233,13 +237,12 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<Node> iid) {
+    private void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<Node> iid,
+            InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
         ovs.setExternalIds(Collections.<String,String>emptyMap());
-        TransactUtils.stampInstanceIdentifier(transaction,
-                iid,
-                ovs.getSchema(),
-                ovs.getExternalIdsColumn().getSchema());
+        TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(), ovs.getExternalIdsColumn().getSchema(),
+                instanceIdentifierCodec);
     }
 
     private void invoke(TransactionBuilder txBuilder) {

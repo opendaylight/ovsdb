@@ -32,6 +32,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -78,6 +79,7 @@ public class ReconciliationManager implements AutoCloseable {
     private static final long BRIDGE_CACHE_TIMEOUT_IN_SECONDS = 30;
 
     private final DataBroker db;
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final ExecutorService reconcilers;
     private final ScheduledExecutorService taskTriager;
 
@@ -89,8 +91,9 @@ public class ReconciliationManager implements AutoCloseable {
 
     private final ReconciliationTaskManager reconTaskManager = new ReconciliationTaskManager();
 
-    public ReconciliationManager(final DataBroker db) {
+    public ReconciliationManager(final DataBroker db, final InstanceIdentifierCodec instanceIdentifierCodec) {
         this.db = db;
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
         reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE,
                 "ovsdb-reconciler");
 
@@ -172,7 +175,8 @@ public class ReconciliationManager implements AutoCloseable {
                         nodeConnectionMetadata.getConnectionManager(),
                         nodeConnectionMetadata.getNode(),
                         nodeConnectionMetadata.getNodeIid(),
-                        nodeConnectionMetadata.getConnectionInstance()
+                        nodeConnectionMetadata.getConnectionInstance(),
+                        instanceIdentifierCodec
                 ));
             }
         }
@@ -231,7 +235,8 @@ public class ReconciliationManager implements AutoCloseable {
                                         bridgeNodeMetaData.getConnectionManager(),
                                         bridgeNodeMetaData.getNode(),
                                         bridgeIid,
-                                        bridgeNodeMetaData.getConnectionInstance());
+                                        bridgeNodeMetaData.getConnectionInstance(),
+                                        instanceIdentifierCodec);
                         enqueue(tpReconciliationTask);
                         bridgeNodeCache.invalidate(nodeKey);
                     } catch (UncheckedExecutionException ex) {

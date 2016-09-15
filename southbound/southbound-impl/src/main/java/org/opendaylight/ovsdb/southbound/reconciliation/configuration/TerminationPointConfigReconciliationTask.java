@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -43,14 +44,15 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
 
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointConfigReconciliationTask.class);
     private final OvsdbConnectionInstance connectionInstance;
+    private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public TerminationPointConfigReconciliationTask(final ReconciliationManager reconciliationManager,
-                                                    final OvsdbConnectionManager connectionManager,
-                                                    final Node bridgeNode,
-                                                    final InstanceIdentifier<?> bridgeIid,
-                                                    final OvsdbConnectionInstance connectionInstance) {
+            final OvsdbConnectionManager connectionManager, final Node bridgeNode,
+            final InstanceIdentifier<?> bridgeIid, final OvsdbConnectionInstance connectionInstance,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, bridgeIid, bridgeNode);
         this.connectionInstance = connectionInstance;
+        this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
@@ -99,7 +101,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
         };
 
         connectionInstance.transact(new TerminationPointCreateCommand(),
-                bridgeOperationalState, changeEvents);
+                bridgeOperationalState, changeEvents, instanceIdentifierCodec);
 
         return true;
     }

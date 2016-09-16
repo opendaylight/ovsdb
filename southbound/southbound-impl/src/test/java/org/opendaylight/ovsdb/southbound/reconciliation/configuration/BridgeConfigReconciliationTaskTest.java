@@ -79,9 +79,7 @@ public class BridgeConfigReconciliationTaskTest {
 
         when(topology.getNode()).thenReturn(bridgeNodes);
 
-        Optional<Topology> topologyOptional = mock(Optional.class);
-        when(topologyOptional.isPresent()).thenReturn(true);
-        when(topologyOptional.get()).thenReturn(topology);
+        Optional<Topology> topologyOptional = Optional.of(topology);
         CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture =
                 Futures.immediateCheckedFuture(topologyOptional);
 

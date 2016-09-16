@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.TyperException;
@@ -101,7 +102,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             if (typeMinNode != null) {
                 baseType.setMin(typeMinNode.asLong());
             }
-            populateEnum(type);
+            Optional<Set<Integer>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -114,13 +118,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(JsonNode node) {
+        private Optional<Set<Integer>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Long> nodesEnums = Sets.newHashSet();
+                Set<Integer> nodesEnums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
-                    nodesEnums.add(enm.asLong());
+                    nodesEnums.add(enm.asInt());
                 }
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.absent();
             }
         }
 
@@ -158,9 +165,9 @@ public abstract class BaseType<E extends BaseType<E>> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((enums == null) ? 0 : enums.hashCode());
-            result = prime * result + (int) (max ^ (max >>> 32));
-            result = prime * result + (int) (min ^ (min >>> 32));
+            result = prime * result + (enums == null ? 0 : enums.hashCode());
+            result = prime * result + (int) (max ^ max >>> 32);
+            result = prime * result + (int) (min ^ min >>> 32);
             return result;
         }
 
@@ -213,7 +220,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             if (typeMinNode != null) {
                 baseType.setMin(typeMinNode.asLong());
             }
-            populateEnum(type);
+            Optional<Set<Double>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -226,13 +236,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(JsonNode node) {
+        private Optional<Set<Double>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
                 Set<Double> nodesEnums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
                     nodesEnums.add(enm.asDouble());
                 }
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.absent();
             }
         }
 
@@ -269,12 +282,12 @@ public abstract class BaseType<E extends BaseType<E>> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((enums == null) ? 0 : enums.hashCode());
+            result = prime * result + (enums == null ? 0 : enums.hashCode());
             long temp;
             temp = Double.doubleToLongBits(max);
-            result = prime * result + (int) (temp ^ (temp >>> 32));
+            result = prime * result + (int) (temp ^ temp >>> 32);
             temp = Double.doubleToLongBits(min);
-            result = prime * result + (int) (temp ^ (temp >>> 32));
+            result = prime * result + (int) (temp ^ temp >>> 32);
             return result;
         }
 
@@ -356,7 +369,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             if (typeMinNode != null) {
                 baseType.setMinLength(typeMinNode.asInt());
             }
-            populateEnum(baseType, type);
+            Optional<Set<String>> typeEnumsOpt = populateEnum(type);
+            if (typeEnumsOpt.isPresent()) {
+                baseType.setEnums(typeEnumsOpt.get());
+            }
         }
 
         @Override
@@ -369,7 +385,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         }
 
-        private void populateEnum(StringBaseType baseType, JsonNode node) {
+        private Optional<Set<String>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
                 Set<String> nodesEnums = Sets.newHashSet();
                 JsonNode enumVal = node.get("enum");
@@ -381,7 +397,9 @@ public abstract class BaseType<E extends BaseType<E>> {
                 } else if (enumVal.isTextual()) {
                     nodesEnums.add(enumVal.asText());
                 }
-                baseType.setEnums(nodesEnums);
+                return Optional.of(nodesEnums);
+            } else {
+                return Optional.absent();
             }
         }
 
@@ -418,7 +436,7 @@ public abstract class BaseType<E extends BaseType<E>> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((enums == null) ? 0 : enums.hashCode());
+            result = prime * result + (enums == null ? 0 : enums.hashCode());
             result = prime * result + maxLength;
             result = prime * result + minLength;
             return result;
@@ -525,9 +543,9 @@ public abstract class BaseType<E extends BaseType<E>> {
             final int prime = 31;
             int result = 1;
             result = prime * result
-                    + ((refTable == null) ? 0 : refTable.hashCode());
+                    + (refTable == null ? 0 : refTable.hashCode());
             result = prime * result
-                    + ((refType == null) ? 0 : refType.hashCode());
+                    + (refType == null ? 0 : refType.hashCode());
             return result;
         }
 

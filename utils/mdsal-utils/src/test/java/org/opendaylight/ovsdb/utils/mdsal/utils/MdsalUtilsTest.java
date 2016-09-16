@@ -95,10 +95,8 @@ public class MdsalUtilsTest {
         ReadOnlyTransaction readOnlyTransaction = mock(ReadOnlyTransaction.class);
         when(databroker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
         CheckedFuture<Optional, ReadFailedException> future = mock(CheckedFuture.class);
-        Optional opt = mock(Optional.class);
-        when(opt.isPresent()).thenReturn(true);
         DataObject obj = mock(DataObject.class);
-        when(opt.get()).thenReturn(obj );
+        Optional opt = Optional.of(obj);
         when(future.checkedGet()).thenReturn(opt);
         when(readOnlyTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
 

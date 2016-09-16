@@ -82,12 +82,10 @@ public class BridgeOperationalStateTest {
         assertNotNull(optOvsdbBri);
         assertTrue(optOvsdbBri.equals(Optional.absent()));
 
-        Optional<Node> optNode = mock(Optional.class);
         suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeNode", InstanceIdentifier.class));
-        when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
-        when(optNode.isPresent()).thenReturn(true);
         Node node = mock(Node.class);
-        when(optNode.get()).thenReturn(node);
+        Optional<Node> optNode = Optional.of(node);
+        when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
         OvsdbBridgeAugmentation ovsdbBriAug = mock(OvsdbBridgeAugmentation.class);
         when(node.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBriAug);
         Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(iid);
@@ -102,16 +100,14 @@ public class BridgeOperationalStateTest {
         assertNotNull(optTerm);
         assertTrue(optTerm.equals(Optional.absent()));
 
-        Optional<Node> optNode = mock(Optional.class);
         TerminationPoint termPnt = mock(TerminationPoint.class);
         List<TerminationPoint> termPntList = new ArrayList<>();
         termPntList.add(termPnt);
 
         suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeNode", InstanceIdentifier.class));
-        when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
-        when(optNode.isPresent()).thenReturn(true);
         Node node = mock(Node.class);
-        when(optNode.get()).thenReturn(node);
+        Optional<Node> optNode = Optional.of(node);
+        when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
         when(node.getTerminationPoint()).thenReturn(termPntList);
         TerminationPointKey termPntKey = mock(TerminationPointKey.class);
         when(termPnt.getKey()).thenReturn(termPntKey);
@@ -133,13 +129,11 @@ public class BridgeOperationalStateTest {
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertTrue(optOvsdbTermPoint.equals(Optional.absent()));
 
-        Optional<TerminationPoint> termPntOptional = mock(Optional.class);
         PowerMockito.suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeTerminationPoint",
                 InstanceIdentifier.class));
-        when(briOperationState.getBridgeTerminationPoint(any(InstanceIdentifier.class))).thenReturn(termPntOptional);
-        when(termPntOptional.isPresent()).thenReturn(true);
         TerminationPoint termPoint = mock(TerminationPoint.class);
-        when(termPntOptional.get()).thenReturn(termPoint);
+        Optional<TerminationPoint> termPntOptional = Optional.of(termPoint);
+        when(briOperationState.getBridgeTerminationPoint(any(InstanceIdentifier.class))).thenReturn(termPntOptional);
         OvsdbTerminationPointAugmentation ovsdbTermPntAug = mock(OvsdbTerminationPointAugmentation.class);
         when(termPoint.getAugmentation(OvsdbTerminationPointAugmentation.class)).thenReturn(ovsdbTermPntAug);
         Optional<OvsdbTerminationPointAugmentation> ovsdbTermPointOpt = briOperationState

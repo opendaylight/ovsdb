@@ -119,11 +119,10 @@ public class OvsdbBridgeUpdateCommandTest {
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
-        Optional<Node> connection = mock(Optional.class);
+        Optional<Node> connection = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);
         when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
                 .thenReturn(connection);
-        when(connection.isPresent()).thenReturn(true);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "updateBridge",
                 ReadWriteTransaction.class, Bridge.class, InstanceIdentifier.class));

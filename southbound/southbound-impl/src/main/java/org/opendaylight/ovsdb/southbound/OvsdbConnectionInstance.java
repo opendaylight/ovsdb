@@ -164,7 +164,7 @@ public class OvsdbConnectionInstance {
         if (tables != null) {
             List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
-                if (!SouthboundConstants.SKIP_OVSDB_TABLE.containsKey(tableName)) {
+                if (!SouthboundConstants.SKIP_OVSDB_TABLE.contains(tableName)) {
                     LOG.info("Southbound monitoring OVSDB schema table {}", tableName);
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                     // We copy the columns so we can clean the set up later

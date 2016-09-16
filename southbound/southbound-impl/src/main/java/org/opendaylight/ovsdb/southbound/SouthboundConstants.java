@@ -8,9 +8,11 @@
 package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-
+import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -140,30 +142,28 @@ public class SouthboundConstants {
     public static final String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
     public static final String AUTOATTACH_ID_EXTERNAL_ID_KEY = "opendaylight-autoattach-id";
 
-    public static final ImmutableMap<String,String> SKIP_OVSDB_TABLE
-            = new ImmutableMap.Builder<String,String>()
-            .put("Flow_Table","Update callback registration for Flow Table is skipped")
-            .put("Mirror","Update callback registration for Mirror Table is skipped")
-            .put("NetFlow","Update callback registration for NetFlow Table is skipped")
-            .put("sFlow","Update callback registration for sFlow Table is skipped")
-            .put("IPFIX","Update callback registration for IPFIX Table is skipped")
-            .put("Flow_Sample_Collector_Set","Update callback registration for "
-                    + "Flow_Sample_Collector_Set Table is skipped")
+    static final ImmutableCollection<String> SKIP_OVSDB_TABLE = new ImmutableSet.Builder<String>()
+            .add("Flow_Table")
+            .add("Mirror")
+            .add("NetFlow")
+            .add("sFlow")
+            .add("IPFIX")
+            .add("Flow_Sample_Collector_Set")
             .build();
 
     //Note: _version is an internal column of ovsdb schema, that gets updated
     //with every change in the row of the table.
-    public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
+    static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
-            .put("Open_vSwitch", Arrays.asList(new String[]{"statistics","_version"}))
-            .put("Port", Arrays.asList(new String[]{"statistics","_version"}))
-            .put("Manager", Arrays.asList(new String[]{"_version"}))
-            .put("SSL", Arrays.asList(new String[]{"_version"}))
-            .put("QoS", Arrays.asList(new String[]{"_version"}))
-            .put("Queue", Arrays.asList(new String[]{"_version"}))
-            .put("Bridge", Arrays.asList(new String[]{"_version"}))
-            .put("Interface", Arrays.asList(new String[]{"statistics","_version"}))
-            .put("Controller", Arrays.asList(new String[]{"status","_version"}))
+            .put("Open_vSwitch", Arrays.asList("statistics","_version"))
+            .put("Port", Arrays.asList("statistics","_version"))
+            .put("Manager", Collections.singletonList("_version"))
+            .put("SSL", Collections.singletonList("_version"))
+            .put("QoS", Collections.singletonList("_version"))
+            .put("Queue", Collections.singletonList("_version"))
+            .put("Bridge", Collections.singletonList("_version"))
+            .put("Interface", Arrays.asList("statistics","_version"))
+            .put("Controller", Arrays.asList("status","_version"))
             .build();
 
     public enum VlanModes {

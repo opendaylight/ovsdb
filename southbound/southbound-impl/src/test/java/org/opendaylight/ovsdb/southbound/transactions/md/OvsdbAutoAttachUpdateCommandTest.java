@@ -102,11 +102,9 @@ public class OvsdbAutoAttachUpdateCommandTest {
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
 
         PowerMockito.mockStatic(SouthboundUtil.class);
-        Optional<Node> ovsdbNode = mock(Optional.class);
-        PowerMockito.when(SouthboundUtil.readNode(transaction, connectionIid)).thenReturn(ovsdbNode);
-        when(ovsdbNode.isPresent()).thenReturn(true);
         Node node = mock(Node.class);
-        when(ovsdbNode.get()).thenReturn(node);
+        Optional<Node> ovsdbNode = Optional.of(node);
+        PowerMockito.when(SouthboundUtil.readNode(transaction, connectionIid)).thenReturn(ovsdbNode);
         NodeId nodeId = mock(NodeId.class);
         when(node.getNodeId()).thenReturn(nodeId);
 

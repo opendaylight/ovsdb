@@ -84,12 +84,10 @@ public class OvsdbAutoAttachRemovedCommandTest {
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
 
         PowerMockito.mockStatic(SouthboundUtil.class);
-        Optional<Node> ovsdbNode = mock(Optional.class);
         transaction = mock(ReadWriteTransaction.class);
-        PowerMockito.when(SouthboundUtil.readNode(transaction, nodeIid)).thenReturn(ovsdbNode);
-        when(ovsdbNode.isPresent()).thenReturn(true);
         Node node = mock(Node.class);
-        when(ovsdbNode.get()).thenReturn(node);
+        Optional<Node> ovsdbNode = Optional.of(node);
+        PowerMockito.when(SouthboundUtil.readNode(transaction, nodeIid)).thenReturn(ovsdbNode);
         NodeId nodeId = mock(NodeId.class);
         when(node.getNodeId()).thenReturn(nodeId);
 

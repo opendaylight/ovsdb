@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,16 +136,15 @@ public class OvsdbManagersUpdateCommandTest {
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
 
-        Optional<Node> ovsdbNode = mock(Optional.class);
+        Optional<Node> ovsdbNode = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);
         when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
                 .thenReturn(ovsdbNode);
-        when(ovsdbNode.isPresent()).thenReturn(true);
-        when(ovsdbNode.get()).thenReturn(mock(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "updateManagers", transaction, updatedManagerRows);
-        verify(ovsdbNode, times(2)).get();
+        // TODO Verify something useful
+        // verify(ovsdbNode, times(2)).get();
     }
 
     @Test

@@ -72,20 +72,17 @@ public class SouthboundUtilTest {
         CheckedFuture<Optional<Node>, ReadFailedException> nf = mock(CheckedFuture.class);
         when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL), any(InstanceIdentifier.class))).thenReturn(nf);
         doNothing().when(transaction).close();
-        Optional<Node> optional = mock(Optional.class);
-        when(nf.get()).thenReturn(optional);
-        when(optional.isPresent()).thenReturn(true);
 
         //node, ovsdbNode not null
         Node node = mock(Node.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
-        when(optional.get()).thenReturn(node);
+        when(nf.get()).thenReturn(Optional.of(node));
         when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
         assertEquals("Failed to return correct Optional object", Optional.of(ovsdbNode),
                 SouthboundUtil.getManagingNode(db, mn));
 
         //node not null, ovsdbNode null
-        when(optional.get()).thenReturn(null);
+        when(nf.get()).thenReturn(Optional.absent());
         assertEquals("Failed to return correct Optional object", Optional.absent(),
                 SouthboundUtil.getManagingNode(db, mn));
 
@@ -103,7 +100,7 @@ public class SouthboundUtilTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadNode() throws Exception {
-        Optional<DataObject> node = mock(Optional.class);
+        Optional<DataObject> node = Optional.of(mock(DataObject.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         InstanceIdentifier<DataObject> connectionIid = mock(InstanceIdentifier.class);
         CheckedFuture<Optional<DataObject>, ReadFailedException> value = mock(CheckedFuture.class);

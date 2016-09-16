@@ -16,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +44,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -80,12 +78,6 @@ public class TerminationPointCreateCommandTest {
         when(asynEvent.getCreatedData()).thenReturn(map);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
 
-        Optional<TerminationPoint> terminationPointOptional = mock(Optional.class);
-        BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
-        when(bridgeOpState.getBridgeTerminationPoint(any(InstanceIdentifier.class)))
-                .thenReturn(terminationPointOptional);
-
-        when(terminationPointOptional.isPresent()).thenReturn(true);
         Interface ovsInterface = mock(Interface.class);
         PowerMockito.mockStatic(TyperUtils.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
@@ -109,6 +101,8 @@ public class TerminationPointCreateCommandTest {
         doNothing().when(bridge).setName(anyString());
         PowerMockito.whenNew(UUID.class).withAnyArguments().thenReturn(mock(UUID.class));
         doNothing().when(bridge).setPorts(any(HashSet.class));
+
+        BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
 
         terminationPointCreateCommand.execute(transaction, bridgeOpState, asynEvent,
                 mock(InstanceIdentifierCodec.class));

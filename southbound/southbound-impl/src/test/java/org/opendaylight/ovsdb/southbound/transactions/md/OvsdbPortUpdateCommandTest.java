@@ -154,11 +154,9 @@ public class OvsdbPortUpdateCommandTest {
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
 
         //case 1: portUpdatedRows & interfaceOldRows not null, not empty
-        Optional<Node> node = mock(Optional.class);
+        Optional<Node> node = Optional.of(mock(Node.class));
         PowerMockito.doReturn(node).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
                 any(InstanceIdentifier.class));
-        when(node.isPresent()).thenReturn(true);
-        when(node.get()).thenReturn(mock(Node.class));
         PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateTerminationPoints",
                 ReadWriteTransaction.class, Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
@@ -180,12 +178,9 @@ public class OvsdbPortUpdateCommandTest {
         when(port.getNameColumn()).thenReturn(bridgeColumn);
         when(bridgeColumn.getData()).thenReturn(TERMINATION_POINT_NAME);
 
-        Optional<InstanceIdentifier<Node>> bridgeIid = mock(Optional.class);
+        Optional<InstanceIdentifier<Node>> bridgeIid = Optional.of(mock(InstanceIdentifier.class));
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge", any(UUID.class));
 
-        //bridgeIid.isPresent() is true
-        when(bridgeIid.isPresent()).thenReturn(true);
-        when(bridgeIid.get()).thenReturn(mock(InstanceIdentifier.class));
         NodeId bridgeId = mock(NodeId.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
@@ -319,7 +314,7 @@ public class OvsdbPortUpdateCommandTest {
     public void testReadNode() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         InstanceIdentifier<Node> nodePath = mock(InstanceIdentifier.class);
-        Optional<Node> node = mock(Optional.class);
+        Optional<Node> node = Optional.of(mock(Node.class));
         CheckedFuture<Optional<Node>, ReadFailedException> checkedFuture = mock(CheckedFuture.class);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(checkedFuture);

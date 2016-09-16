@@ -99,11 +99,10 @@ public class TerminationPointUpdateCommandTest {
         BridgeOperationalState state = mock(BridgeOperationalState.class);
         OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
-        Optional<Node> optNode = (Optional<Node>)mock(Optional.class);
+        Node node = mock(Node.class);
+        when(node.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
+        Optional<Node> optNode = Optional.of(node);
         when(state.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
-        when(state.getBridgeNode(any(InstanceIdentifier.class)).get()).thenReturn(mock(Node.class));
-        when(state.getBridgeNode(any(InstanceIdentifier.class)).get().getAugmentation(OvsdbBridgeAugmentation.class))
-                .thenReturn(mock(OvsdbBridgeAugmentation.class));
 
         // Test updateInterface()
         Interface ovsInterface = mock(Interface.class);

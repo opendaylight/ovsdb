@@ -76,11 +76,9 @@ public class OvsdbNodeRemoveCommandTest {
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(ovsdbNodeFuture);
 
-        Optional<Node> ovsdbNodeOptional = mock(Optional.class);
-        when(ovsdbNodeFuture.get()).thenReturn(ovsdbNodeOptional);
-        when(ovsdbNodeOptional.isPresent()).thenReturn(true);
         Node ovsdbNode = mock(Node.class);
-        when(ovsdbNodeOptional.get()).thenReturn(ovsdbNode);
+        Optional<Node> ovsdbNodeOptional = Optional.of(ovsdbNode);
+        when(ovsdbNodeFuture.get()).thenReturn(ovsdbNodeOptional);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 

@@ -126,11 +126,9 @@ public class HwvtepConnectionInstance {
                 LOG.debug("HwvtepSouthbound monitoring table {} in {}", tableName, dbSchema.getName());
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                 Set<String> columns = tableSchema.getColumns();
-                MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
-                for (String column : columns) {
-                    monitorBuilder.addColumn(column);
-                }
-                monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
+                monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
+                        .addColumns(columns)
+                        .with(new MonitorSelect(true, true, true, true)).build());
             }
             this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
         } else {

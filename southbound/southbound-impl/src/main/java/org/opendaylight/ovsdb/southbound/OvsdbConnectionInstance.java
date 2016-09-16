@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -166,18 +167,16 @@ public class OvsdbConnectionInstance {
                 if (!SouthboundConstants.SKIP_OVSDB_TABLE.containsKey(tableName)) {
                     LOG.info("Southbound monitoring OVSDB schema table {}", tableName);
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-                    Set<String> columns = tableSchema.getColumns();
-                    MonitorRequestBuilder<GenericTableSchema> monitorBuilder
-                            = MonitorRequestBuilder.builder(tableSchema);
+                    // We copy the columns so we can clean the set up later
+                    Set<String> columns = new HashSet<>(tableSchema.getColumns());
                     List<String> skipColumns = SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get(tableName);
-                    for (String column : columns) {
-                        if ( skipColumns == null || !skipColumns.contains(column)) {
-                            monitorBuilder.addColumn(column);
-                        } else {
-                            LOG.info("Southbound NOT monitoring column {} in table {}", column, tableName);
-                        }
+                    if (skipColumns != null) {
+                        LOG.info("Southbound NOT monitoring columns {} in table {}", skipColumns, tableName);
+                        columns.removeAll(skipColumns);
                     }
-                    monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
+                    monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
+                            .addColumns(columns)
+                            .with(new MonitorSelect(true, true, true, true)).build());
                 }
             }
             this.callback.update(monitor(dbSchema, monitorRequests, callback), dbSchema);

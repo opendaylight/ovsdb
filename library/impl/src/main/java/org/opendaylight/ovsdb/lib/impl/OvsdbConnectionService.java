@@ -277,8 +277,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                 SSLEngine engine = sslContext.createSSLEngine();
                                 engine.setUseClientMode(false); // work in a server mode
                                 engine.setNeedClientAuth(true); // need client authentication
-                                //Disable SSLv3 and enable all other supported protocols
-                                String[] protocols = {"SSLv2Hello", "TLSv1", "TLSv1.1", "TLSv1.2"};
+                                //Disable SSLv3, TLSv1 and enable all other supported protocols
+                                String[] protocols = {"SSLv2Hello", "TLSv1.1", "TLSv1.2"};
                                 LOG.debug("Set enable protocols {}", Arrays.toString(protocols));
                                 engine.setEnabledProtocols(protocols);
                                 LOG.debug("Supported ssl protocols {}",
@@ -286,8 +286,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                 LOG.debug("Enabled ssl protocols {}",
                                         Arrays.toString(engine.getEnabledProtocols()));
                                 //Set cipher suites
-                                String[] cipherSuites = {"TLS_RSA_WITH_AES_128_CBC_SHA"};
-                                LOG.debug("Set enable cipher cuites {}", Arrays.toString(cipherSuites));
+                                String[] cipherSuites = {"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
+                                                         "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
+                                                         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+                                                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                                                         "TLS_RSA_WITH_AES_128_CBC_SHA256"};
                                 engine.setEnabledCipherSuites(cipherSuites);
                                 LOG.debug("Enabled cipher suites {}",
                                         Arrays.toString(engine.getEnabledCipherSuites()));

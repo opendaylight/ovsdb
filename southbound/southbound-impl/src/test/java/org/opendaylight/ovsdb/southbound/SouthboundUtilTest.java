@@ -151,7 +151,7 @@ public class SouthboundUtilTest {
         //NetworkInterface.getNetworkInterfaces() returns null case
         PowerMockito.mockStatic(NetworkInterface.class);
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
-        assertEquals(null, Whitebox.invokeMethod(SouthboundUtil.class, "getLocalControllerHostIpAddress"));
+        assertEquals(null, (String) Whitebox.invokeMethod(SouthboundUtil.class, "getLocalControllerHostIpAddress"));
 
         Enumeration<NetworkInterface> ifaces = mock(Enumeration.class);
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(ifaces);

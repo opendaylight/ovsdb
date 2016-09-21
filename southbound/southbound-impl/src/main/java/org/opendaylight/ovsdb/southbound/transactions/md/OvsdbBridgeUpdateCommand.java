@@ -399,7 +399,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private NodeId getNodeId(Bridge bridge) {
-        NodeKey nodeKey = getInstanceIdentifier(bridge).firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = getInstanceIdentifier(bridge).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 }

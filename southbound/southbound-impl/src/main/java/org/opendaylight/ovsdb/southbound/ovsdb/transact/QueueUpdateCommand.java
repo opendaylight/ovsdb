@@ -88,7 +88,7 @@ public class QueueUpdateCommand implements TransactCommand {
             }
             externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                     SouthboundUtil.serializeInstanceIdentifier(
-                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
+                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(Queues.class, new QueuesKey(queueEntry.getQueueId()))));
             queue.setExternalIds(externalIdsMap);

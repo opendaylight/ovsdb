@@ -98,7 +98,7 @@ public class QosUpdateCommand implements TransactCommand {
             }
             externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                     SouthboundUtil.serializeInstanceIdentifier(
-                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
+                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))));
             qos.setExternalIds(externalIdsMap);

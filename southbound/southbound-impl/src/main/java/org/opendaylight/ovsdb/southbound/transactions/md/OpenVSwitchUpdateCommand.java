@@ -278,7 +278,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
     }
 
     private NodeId getNodeId(OpenVSwitch ovs) {
-        NodeKey nodeKey = getInstanceIdentifier(ovs).firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = getInstanceIdentifier(ovs).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 }

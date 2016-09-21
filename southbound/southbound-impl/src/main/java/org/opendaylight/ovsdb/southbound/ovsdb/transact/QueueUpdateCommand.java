@@ -34,7 +34,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -87,7 +86,7 @@ public class QueueUpdateCommand implements TransactCommand {
             }
             externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                     SouthboundUtil.serializeInstanceIdentifier(
-                        SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class, NodeKey.class).getNodeId())
+                        SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Queues.class, new QueuesKey(queueEntry.getQueueId()))));
             try {

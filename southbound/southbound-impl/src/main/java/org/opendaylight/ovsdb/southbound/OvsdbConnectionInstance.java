@@ -348,7 +348,7 @@ public class OvsdbConnectionInstance {
     }
 
     public NodeKey getNodeKey() {
-        return getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
+        return getInstanceIdentifier().firstKeyOf(Node.class);
     }
 
     public NodeId getNodeId() {

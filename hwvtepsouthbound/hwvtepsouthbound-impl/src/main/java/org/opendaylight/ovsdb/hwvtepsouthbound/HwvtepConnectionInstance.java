@@ -231,7 +231,7 @@ public class HwvtepConnectionInstance {
 
     public NodeKey getNodeKey() {
         //TODO: What is the alternative here?
-        return getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
+        return getInstanceIdentifier().firstKeyOf(Node.class);
     }
 
     public NodeId getNodeId() {

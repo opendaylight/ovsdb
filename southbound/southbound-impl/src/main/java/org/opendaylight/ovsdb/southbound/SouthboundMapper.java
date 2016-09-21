@@ -144,7 +144,7 @@ public class SouthboundMapper {
     }
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        NodeKey nodeKey = iid.firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 

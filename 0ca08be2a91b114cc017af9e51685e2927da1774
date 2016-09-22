@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_f85b6d51",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-22T09:29:41Z",
+      "side": 1,
+      "message": "Please update this comment too.",
+      "revId": "0ca08be2a91b114cc017af9e51685e2927da1774",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

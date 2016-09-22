@@ -105,10 +105,11 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         if (oldEntry != null && oldEntry.getOtherConfigColumn() != null) {
             oldOtherConfigs = oldEntry.getOtherConfigColumn().getData();
         }
-        if ((oldOtherConfigs == null) || oldOtherConfigs.isEmpty()) {
-            setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
-        } else if (otherConfigs != null && !otherConfigs.isEmpty()) {
+
+        if ((oldOtherConfigs != null) && (!oldOtherConfigs.isEmpty())) {
             removeOldConfigs(transaction, oldOtherConfigs, openVSwitch);
+        }
+        if ((otherConfigs != null) && (!otherConfigs.isEmpty())) {
             setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
         }
     }

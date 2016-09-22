@@ -110,6 +110,11 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         } else if (otherConfigs != null && !otherConfigs.isEmpty()) {
             removeOldConfigs(transaction, oldOtherConfigs, openVSwitch);
             setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
+        } else if ( (otherConfigs == null || otherConfigs.isEmpty()) && oldOtherConfigs != null ) {
+	    // case is added to handle case when other_config column is removed
+	    // from Openvswitch table of ovsdb. In this case, old other_config will be set
+	    // and new other_config is NULL.
+            removeOldConfigs(transaction, oldOtherConfigs, openVSwitch);
         }
     }
 

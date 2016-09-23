@@ -28,8 +28,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-core/{{VERSION}}</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/{{VERSION}}</bundle>
-    <!--<bundle>mvn:com.fasterxml.jackson.datatype/jackson-datatype-json-org/{{VERSION}}</bundle>-->
-    <bundle>wrap:mvn:org.json/json/{{VERSION}}</bundle>
     <bundle>mvn:com.google.code.gson/gson/{{VERSION}}</bundle>
     <bundle>mvn:io.netty/netty-buffer/{{VERSION}}</bundle>
     <bundle>mvn:io.netty/netty-codec/{{VERSION}}</bundle>

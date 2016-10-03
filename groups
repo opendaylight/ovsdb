@@ -1,8 +1,8 @@
-# UUID                                  	Group Name
+# UUID                                                         	Group Name
 #
-14f982f1efce1d8523eb2e6274b5231fe6f56ca8	Non-interactive ovsdb users
-2373512464abcee3eaf50f265c4a4e428dab634e	Administrators
-c9025ab9ddc1e3171919e085449f22c54f8f7b54	GitHub Replication
-global:Anonymous-Users                  	Anonymous Users
-global:Registered-Users                 	Registered Users
+14f982f1efce1d8523eb2e6274b5231fe6f56ca8                       	Non-interactive ovsdb users
+2373512464abcee3eaf50f265c4a4e428dab634e                       	Administrators
+c9025ab9ddc1e3171919e085449f22c54f8f7b54                       	GitHub Replication
+global:Anonymous-Users                                         	Anonymous Users
+global:Registered-Users                                        	Registered Users
 ldap:cn=gerrit-ovsdb-commiters,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-ovsdb-commiters

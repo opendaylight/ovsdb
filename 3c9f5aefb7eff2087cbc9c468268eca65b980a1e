@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_4a0255b5",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/api/SouthboundCliCommands.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-10-06T18:28:36Z",
+      "side": 1,
+      "message": "Should make the package org.opendaylight.ovsdb.southbound.cli. That way we can also have hwvtep of org.opendaylight.ovsdb.hwvtepsouthbound.cli.\n\nDoes api add value?",
+      "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6a30f19e",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/api/SouthboundCliCommands.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-10-06T18:28:36Z",
+      "side": 1,
+      "message": "since this is in the southbound package can the class just be Commands?",
+      "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6a0911dd",
+        "filename": "southbound/southbound-features/src/main/features/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-10-06T18:28:36Z",
+      "side": 1,
+      "message": "should we just include the cli by default and not require a new feature?",
+      "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

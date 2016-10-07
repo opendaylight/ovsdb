@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_331cb46a",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/api/SouthboundCliCommands.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-07T11:59:41Z",
+      "side": 1,
+      "message": "Done for the refactor of the package name with southbound in it.\n\nRegarding the api, well, it is really a matter of personal opinion here.\n\nI like having api/impl/commands package for the southbound.cli so I know where things are expected to be. I could refactor if request.",
+      "parentUuid": "7a6b29fe_4a0255b5",
+      "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_6a30f19e",
         "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/api/SouthboundCliCommands.java",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_73258cad",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/api/SouthboundCliCommands.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-07T11:59:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_6a30f19e",
+      "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_6a0911dd",
         "filename": "southbound/southbound-features/src/main/features/features.xml",
         "patchSetId": 7
@@ -47,6 +83,24 @@
       "writtenOn": "2016-10-06T18:28:36Z",
       "side": 1,
       "message": "should we just include the cli by default and not require a new feature?",
+      "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5303300d",
+        "filename": "southbound/southbound-features/src/main/features/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-07T11:59:41Z",
+      "side": 1,
+      "message": "OK, done. I have no strong opinion personally.",
+      "parentUuid": "7a6b29fe_6a0911dd",
       "revId": "3c9f5aefb7eff2087cbc9c468268eca65b980a1e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -14,33 +14,33 @@ import java.util.List;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class MonitorRequestBuilder {
+public class MonitorRequestBuilder<E extends TableSchema<E>> {
 
-    private final TableSchema tableSchema;
+    private final E tableSchema;
     private final Collection<String> columns = new HashSet<>();
     private MonitorSelect select;
 
-    public MonitorRequestBuilder(TableSchema tableSchema) {
+    public MonitorRequestBuilder(E tableSchema) {
         this.tableSchema = tableSchema;
     }
 
-    public MonitorRequestBuilder addColumn(String column) {
+    public MonitorRequestBuilder<E> addColumn(String column) {
         this.columns.add(column);
         return this;
     }
 
-    public MonitorRequestBuilder addColumn(ColumnSchema<?> column) {
+    public MonitorRequestBuilder<E> addColumn(ColumnSchema<?, ?> column) {
         this.addColumn(column.getName());
         return this;
     }
 
-    public MonitorRequestBuilder addColumns(Collection<String> columns) {
+    public MonitorRequestBuilder<E> addColumns(Collection<String> columns) {
         this.columns.addAll(columns);
         return this;
     }
 
-    public MonitorRequestBuilder addColumns(List<ColumnSchema<?>> columns) {
-        for (ColumnSchema<?> schema : columns) {
+    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> columns) {
+        for (ColumnSchema<E, ?> schema : columns) {
             this.addColumn(schema);
         }
         return this;
@@ -50,7 +50,7 @@ public class MonitorRequestBuilder {
         return this.columns;
     }
 
-    public MonitorRequestBuilder with(MonitorSelect select) {
+    public MonitorRequestBuilder<E> with(MonitorSelect select) {
         this.select = select;
         return this;
     }

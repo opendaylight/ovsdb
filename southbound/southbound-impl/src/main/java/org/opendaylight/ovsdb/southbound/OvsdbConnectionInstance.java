@@ -44,6 +44,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -165,7 +166,7 @@ public class OvsdbConnectionInstance {
             for (String tableName : tables) {
                 if (!SouthboundConstants.SKIP_OVSDB_TABLE.contains(tableName)) {
                     LOG.info("Southbound monitoring OVSDB schema table {}", tableName);
-                    TableSchema tableSchema = dbSchema.table(tableName);
+                    GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                     // We copy the columns so we can clean the set up later
                     Set<String> columns = new HashSet<>(tableSchema.getColumns());
                     List<String> skipColumns = SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get(tableName);
@@ -173,7 +174,7 @@ public class OvsdbConnectionInstance {
                         LOG.info("Southbound NOT monitoring columns {} in table {}", skipColumns, tableName);
                         columns.removeAll(skipColumns);
                     }
-                    monitorRequests.add(new MonitorRequestBuilder(tableSchema)
+                    monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
                             .addColumns(columns)
                             .with(new MonitorSelect(true, true, true, true)).build());
                 }
@@ -203,7 +204,7 @@ public class OvsdbConnectionInstance {
                 ovs.setExternalIds(
                         YangUtils.convertYangKeyValueListToMap(externalIds, OpenvswitchExternalIds::getExternalIdKey,
                                 OpenvswitchExternalIds::getExternalIdValue));
-                Mutate mutate = op.mutate(ovs)
+                Mutate<GenericTableSchema> mutate = op.mutate(ovs)
                             .addMutation(ovs.getExternalIdsColumn().getSchema(),
                                 Mutator.INSERT,
                                 ovs.getExternalIdsColumn().getData());
@@ -268,13 +269,13 @@ public class OvsdbConnectionInstance {
         return client.transactBuilder(dbSchema);
     }
 
-    public TableUpdates monitor(
+    public <E extends TableSchema<E>> TableUpdates monitor(
             DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorHandle monitorHandle, MonitorCallBack callbackArgument) {
         return null;
     }
 
-    public TableUpdates monitor(
+    public <E extends TableSchema<E>> TableUpdates monitor(
             DatabaseSchema schema, List<MonitorRequest> monitorRequests,
             MonitorCallBack callbackArgument) {
         return client.monitor(schema, monitorRequests, callbackArgument);
@@ -309,17 +310,17 @@ public class OvsdbConnectionInstance {
         return client.getDatabaseSchema(dbName);
     }
 
-    public <T extends TypedBaseTable> T createTypedRowWrapper(Class<T> klazz) {
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz) {
         return client.createTypedRowWrapper(klazz);
     }
 
-    public <T extends TypedBaseTable> T createTypedRowWrapper(
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(
             DatabaseSchema dbSchema, Class<T> klazz) {
         return client.createTypedRowWrapper(dbSchema, klazz);
     }
 
-    public <T extends TypedBaseTable> T getTypedRowWrapper(Class<T> klazz,
-                                                           Row row) {
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(Class<T> klazz,
+            Row<GenericTableSchema> row) {
         return client.getTypedRowWrapper(klazz, row);
     }
 

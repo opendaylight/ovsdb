@@ -34,6 +34,7 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -45,8 +46,8 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerClass.class)
 public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientTestTypedIT.class);
-    private OvsdbClient ovs;
-    private DatabaseSchema dbSchema = null;
+    OvsdbClient ovs;
+    DatabaseSchema dbSchema = null;
     private static final String TEST_BRIDGE_NAME = "br_test";
     private static UUID testBridgeUuid = null;
 
@@ -63,8 +64,8 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
         rBridge.setStatus(ImmutableMap.of("key","value"));
         rBridge.setFloodVlans(Sets.newHashSet(34));
 
-        TableSchema ovsTable = dbSchema.table("Open_vSwitch");
-        ColumnSchema<Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
 
         String namedUuid = "br_test";
         int insertOperationIndex = 0;
@@ -116,10 +117,10 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
 
     @After
     public void tearDown() throws InterruptedException, ExecutionException {
-        TableSchema bridge = dbSchema.table("Bridge");
-        ColumnSchema<String> name = bridge.column("name", String.class);
-        TableSchema ovsTable = dbSchema.table("Open_vSwitch");
-        ColumnSchema<Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
+        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)
                 .add(op.delete(bridge)

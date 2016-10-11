@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -125,7 +126,7 @@ public class OvsdbManagersRemovedCommandTest {
         when(openVSwitch.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "oldOpenVSwitchRows").set(ovsdbManagersRemovedCommand,
                 oldOpenVSwitchRows);
-        Column<Set<UUID>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
         set.add(controllerUuid);
@@ -149,7 +150,7 @@ public class OvsdbManagersRemovedCommandTest {
         updatedManagerRows.put(uuid, updatedManager);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedManagerRows").set(ovsdbManagersRemovedCommand,
                 updatedManagerRows);
-        Column<String> column = mock(Column.class);
+        Column<GenericTableSchema, String> column = mock(Column.class);
         Manager removedManager = mock(Manager.class);
         when(removedManager.getTargetColumn()).thenReturn(column);
         when(updatedManager.getTargetColumn()).thenReturn(column);

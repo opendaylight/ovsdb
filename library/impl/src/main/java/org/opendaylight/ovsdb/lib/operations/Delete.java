@@ -13,17 +13,17 @@ import java.util.List;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class Delete extends Operation implements ConditionalOperation {
+public class Delete<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
     public static final String DELETE = "delete";
-    private List<Condition> where = Lists.newArrayList();
-    private Integer count;
+    List<Condition> where = Lists.newArrayList();
+    Integer count;
 
-    public Delete(TableSchema schema) {
+    public Delete(TableSchema<E> schema) {
         super(schema, DELETE);
     }
 
-    public Delete on(TableSchema schema) {
+    public Delete<E> on(TableSchema schema) {
         return this;
     }
 

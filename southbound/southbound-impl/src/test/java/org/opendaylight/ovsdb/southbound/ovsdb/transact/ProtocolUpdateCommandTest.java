@@ -39,6 +39,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -105,18 +106,18 @@ public class ProtocolUpdateCommandTest {
         doNothing().when(bridge).setProtocols(any(Set.class));
 
         Operations op = (Operations) setField("op");
-        Mutate mutate = mock(Mutate.class);
+        Mutate<GenericTableSchema> mutate = mock(Mutate.class);
         when(op.mutate(any(Bridge.class))).thenReturn(mutate);
-        Column<Set<String>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(bridge.getProtocolsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
         when(column.getData()).thenReturn(new HashSet<String>());
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
 
-        Column<String> nameColumn = mock(Column.class);
+        Column<GenericTableSchema, String> nameColumn = mock(Column.class);
         when(bridge.getNameColumn()).thenReturn(nameColumn);
         when(nameColumn.getData()).thenReturn(BRIDGE_NAME_COLUMN);
-        ColumnSchema<String> columnSchema = mock(ColumnSchema.class);
+        ColumnSchema<GenericTableSchema, String> columnSchema = mock(ColumnSchema.class);
         when(nameColumn.getSchema()).thenReturn(columnSchema);
         when(columnSchema.opEqual(anyString())).thenReturn(mock(Condition.class));
         Where where = mock(Where.class);

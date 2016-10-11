@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -140,7 +141,7 @@ public class BridgeUpdateCommand implements TransactCommand {
     private void setPort(TransactionBuilder transaction, Bridge bridge,
             OvsdbBridgeAugmentation ovsdbManagedNode) {
 
-        Insert interfaceInsert = setInterface(transaction,ovsdbManagedNode);
+        Insert<GenericTableSchema> interfaceInsert = setInterface(transaction,ovsdbManagedNode);
         // Port part
         String portNamedUuid = "Port_" + SouthboundMapper.getRandomUuid();
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
@@ -150,14 +151,14 @@ public class BridgeUpdateCommand implements TransactCommand {
         bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
     }
 
-    private Insert setInterface(TransactionBuilder transaction,
-                                OvsdbBridgeAugmentation ovsdbManagedNode) {
+    private Insert<GenericTableSchema> setInterface(TransactionBuilder transaction,
+            OvsdbBridgeAugmentation ovsdbManagedNode) {
         // Interface part
         String interfaceNamedUuid = "Interface_" + SouthboundMapper.getRandomUuid();
         Interface interfaceOvs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
         interfaceOvs.setName(ovsdbManagedNode.getBridgeName().getValue());
         interfaceOvs.setType(SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.class));
-        Insert result = op.insert(interfaceOvs).withId(interfaceNamedUuid);
+        Insert<GenericTableSchema> result = op.insert(interfaceOvs).withId(interfaceNamedUuid);
         transaction.add(result);
         return result;
     }

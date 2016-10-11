@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +45,11 @@ public class TyperUtilsTest {
     @Test
     public void testGetTableSchemaWithIncludedTypedTable() {
         // Given ...
-        TableSchema testTableSchema = new TableSchema("TestTypedTable");
+        GenericTableSchema testTableSchema = new GenericTableSchema("TestTypedTable");
         DatabaseSchema dbSchema = new DatabaseSchema(ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
-        TableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
+        GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
 
         // Then ...
         assertEquals(testTableSchema, tableSchema);
@@ -62,11 +62,11 @@ public class TyperUtilsTest {
     @Test
     public void testGetTableSchemaWithIncludedUntypedTable() {
         // Given ...
-        TableSchema testTableSchema = new TableSchema("TestUntypedTable");
+        GenericTableSchema testTableSchema = new GenericTableSchema("TestUntypedTable");
         DatabaseSchema dbSchema = new DatabaseSchema(ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
-        TableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
+        GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
 
         // Then ...
         assertEquals(testTableSchema, tableSchema);
@@ -96,19 +96,6 @@ public class TyperUtilsTest {
 
         // When ...
         TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
-    }
-
-    /**
-     * Test that {@link TyperUtils#getColumnSchema(TableSchema, String, Class)} returns {@code null} when the
-     * table schema doesn't contain a column matching the given name.
-     */
-    @Test
-    public void testGetColumnSchemaWithoutColumn() {
-        // Given ...
-        TableSchema tableSchema = new TableSchema("TestTable", Collections.emptyMap());
-
-        // When ...
-        Assert.assertNull(TyperUtils.getColumnSchema(tableSchema, "TestColumn", null));
     }
 
     /**

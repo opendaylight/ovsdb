@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
@@ -68,7 +69,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
             try {
                 ovs.setExternalIds(YangUtils.convertYangKeyValueListToMap(ovsdbNode.getOpenvswitchExternalIds(),
                         OpenvswitchExternalIds::getExternalIdKey, OpenvswitchExternalIds::getExternalIdValue));
-                Mutate mutate = op.mutate(ovs)
+                Mutate<GenericTableSchema> mutate = op.mutate(ovs)
                             .addMutation(ovs.getExternalIdsColumn().getSchema(),
                                 Mutator.INSERT,
                                 ovs.getExternalIdsColumn().getData());

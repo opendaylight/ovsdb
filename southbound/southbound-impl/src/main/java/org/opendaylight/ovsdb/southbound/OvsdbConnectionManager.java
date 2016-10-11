@@ -47,7 +47,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
@@ -478,11 +478,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     OvsdbSchemaContants.DATABASE_NAME,connectionInstance.getConnectionInfo(),e);
         }
         if (dbSchema != null) {
-            TableSchema openVSwitchSchema = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
+            GenericTableSchema openVSwitchSchema = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
 
             List<String> openVSwitchTableColumn = new ArrayList<>();
             openVSwitchTableColumn.addAll(openVSwitchSchema.getColumns());
-            Select selectOperation = op.select(openVSwitchSchema);
+            Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
             selectOperation.setColumns(openVSwitchTableColumn);
 
             List<Operation> operations = new ArrayList<>();

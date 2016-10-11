@@ -30,6 +30,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -89,13 +90,13 @@ public class OvsdbPortRemoveCommandTest {
         when(TyperUtils.extractRowsOld(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class)))
                 .thenReturn(bridgeUpdatedOldRows);
 
-        Column<Set<UUID>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(oldBridgeData.getPortsColumn()).thenReturn(column);
         Set<UUID> uuids = new HashSet<>();
         uuids.add(uuid);
         when(column.getData()).thenReturn(uuids);
 
-        Column<UUID> uuidColumn = mock(Column.class);
+        Column<GenericTableSchema, UUID> uuidColumn = mock(Column.class);
         when(port.getUuidColumn()).thenReturn(uuidColumn);
         when(uuidColumn.getData()).thenReturn(uuid);
 

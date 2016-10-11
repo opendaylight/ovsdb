@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 // Section 5.2 of ovsdb draft covers the various response structures for
 // each of the Operations covered by Transaction (Insert, Update, Delete, Mutate, etc...)
@@ -30,7 +31,7 @@ public class OperationResult {
     private int count;
     @JsonIgnore
     private UUID uuid;
-    private List<Row> rows;
+    private List<Row<GenericTableSchema>> rows;
     private String error;
     private String details;
 
@@ -51,11 +52,11 @@ public class OperationResult {
         this.uuid = new UUID(uuidList.get(1));
     }
 
-    public List<Row> getRows() {
+    public List<Row<GenericTableSchema>> getRows() {
         return rows;
     }
 
-    public void setRows(List<Row> rows) {
+    public void setRows(List<Row<GenericTableSchema>> rows) {
         this.rows = rows;
     }
 

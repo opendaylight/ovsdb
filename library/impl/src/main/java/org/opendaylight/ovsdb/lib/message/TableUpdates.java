@@ -25,7 +25,7 @@ public class TableUpdates extends Response {
         this.map = map;
     }
 
-    public <E extends TableSchema> TableUpdate getUpdate(TableSchema table) {
+    public <E extends TableSchema<E>> TableUpdate<E> getUpdate(TableSchema<E> table) {
         return this.map.get(table.getName());
     }
 

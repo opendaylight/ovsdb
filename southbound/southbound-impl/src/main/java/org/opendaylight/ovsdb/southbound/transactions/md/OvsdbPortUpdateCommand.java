@@ -27,6 +27,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -246,7 +247,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private void updateInterfaces(Interface interfaceUpdate,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
-        Column<String> typeColumn = interfaceUpdate.getTypeColumn();
+        Column<GenericTableSchema, String> typeColumn = interfaceUpdate.getTypeColumn();
         String type = typeColumn.getData();
         updateInterface(interfaceUpdate, type,ovsdbTerminationPointBuilder);
     }

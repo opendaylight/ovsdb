@@ -18,9 +18,9 @@ import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 
 
-public class ColumnSchema<D> {
-    private final String name;
-    private final ColumnType type;
+public class ColumnSchema<E extends TableSchema<E>, D> {
+    String name;
+    ColumnType type;
 
     public ColumnSchema(String name, ColumnType columnType) {
         this.name = name;

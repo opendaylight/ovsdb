@@ -20,46 +20,46 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
-public class Update extends Operation implements ConditionalOperation {
+public class Update<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
-    private static final String UPDATE = "update";
+    public static final String UPDATE = "update";
 
-    private Map<String, Object> row = Maps.newHashMap();
-    private String uuid;
+    Map<String, Object> row = Maps.newHashMap();
+    String uuid;
 
-    private List<Condition> where = Lists.newArrayList();
+    List<Condition> where = Lists.newArrayList();
 
     private String uuidName;
 
-    public Update(TableSchema schema) {
+    public Update(TableSchema<E> schema) {
         super(schema, UPDATE);
     }
 
-    public Update on(TableSchema schema) {
+    public Update<E> on(TableSchema schema) {
         return this;
     }
 
-    public Update(TableSchema schema, Row row) {
+    public Update(TableSchema<E> schema, Row<E> row) {
         super(schema, UPDATE);
-        Collection<Column<?>> columns = row.getColumns();
-        for (Column<?> column : columns) {
+        Collection<Column<E,?>> columns = row.getColumns();
+        for (Column<E,?> column : columns) {
             this.set(column);
         }
     }
 
-    public Update(TypedBaseTable typedTable) {
+    public Update(TypedBaseTable<E> typedTable) {
         this(typedTable.getSchema(), typedTable.getRow());
     }
 
-    public <D> Update set(ColumnSchema<D> columnSchema, D value) {
+    public <T extends TableSchema<T>, D> Update<E> set(ColumnSchema<T, D> columnSchema, D value) {
         columnSchema.validate(value);
         Object untypedValue = columnSchema.getNormalizeData(value);
         this.row.put(columnSchema.getName(), untypedValue);
         return this;
     }
 
-    public <D> Update set(Column<D> column) {
-        ColumnSchema<D> columnSchema = column.getSchema();
+    public <T extends TableSchema<T>, D> Update<E> set(Column<T, D> column) {
+        ColumnSchema<T, D> columnSchema = column.getSchema();
         D value = column.getData();
         return this.set(columnSchema, value);
     }

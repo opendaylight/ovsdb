@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.MethodType;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
@@ -21,28 +22,28 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * This class is a typed interface to the Flow_Sample_Collector_Set Table
  */
 @TypedTable(name="Flow_Sample_Collector_Set", database="Open_vSwitch", fromVersion="7.1.0")
-public interface FlowSampleCollectorSet extends TypedBaseTable {
+public interface FlowSampleCollectorSet extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="id", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    Column<Long> getIdColumn();
+    Column<GenericTableSchema, Long> getIdColumn();
 
     @TypedColumn(name="id", method=MethodType.SETDATA, fromVersion="7.1.0")
     void setId(Long id);
 
     @TypedColumn(name="bridge", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    Column<UUID> getBridgeColumn();
+    Column<GenericTableSchema, UUID> getBridgeColumn();
 
     @TypedColumn(name="bridge", method=MethodType.SETDATA, fromVersion="7.1.0")
     void setBridge(UUID bridge);
 
     @TypedColumn(name="ipfix", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    Column<UUID> getIpfixColumn();
+    Column<GenericTableSchema, UUID> getIpfixColumn();
 
     @TypedColumn(name="ipfix", method=MethodType.SETDATA, fromVersion="7.1.0")
     void setIpfix(UUID ipfix);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    Column<Map<String, String>> getExternalIdsColumn();
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
 
     @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="7.1.0")
     void setExternalIds(Map<String, String> externalIds);

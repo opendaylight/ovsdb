@@ -17,6 +17,8 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 /**
@@ -59,7 +61,9 @@ public interface OvsdbClient {
      *                       handle is used to later cancel ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */
-    TableUpdates monitor(DatabaseSchema schema, List<MonitorRequest> monitorRequests, MonitorCallBack callback);
+    <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                                                    List<MonitorRequest> monitorRequests,
+                                                    MonitorCallBack callback);
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
@@ -68,8 +72,10 @@ public interface OvsdbClient {
      *                       ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */
-    TableUpdates monitor(DatabaseSchema schema, List<MonitorRequest> monitorRequests, MonitorHandle monitorHandle,
-                         MonitorCallBack callback);
+    <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                                                    List<MonitorRequest> monitorRequests,
+                                                    MonitorHandle monitorHandle,
+                                                    MonitorCallBack callback);
 
     /**
      * Cancels an existing monitor method.
@@ -130,7 +136,7 @@ public interface OvsdbClient {
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
-    <T extends TypedBaseTable> T createTypedRowWrapper(Class<T> klazz);
+    <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz);
 
     /**
      * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given
@@ -140,7 +146,7 @@ public interface OvsdbClient {
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
-    <T extends TypedBaseTable> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
+    <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
 
     /**
      * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
@@ -150,8 +156,8 @@ public interface OvsdbClient {
      *            is just interested in getting ColumnSchema.
      * @return Proxy wrapper for the actual raw Row class.
      */
-    <T extends TypedBaseTable> T getTypedRowWrapper(final Class<T> klazz,
-                                                    final Row row);
+    <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
+                                                       final Row<GenericTableSchema> row);
 
     boolean isConnectionPublished();
 

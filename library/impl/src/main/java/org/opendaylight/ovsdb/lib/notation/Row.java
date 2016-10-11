@@ -19,45 +19,45 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 @JsonSerialize(using = RowSerializer.class)
-public class Row {
+public class Row<E extends TableSchema<E>> {
     @JsonIgnore
-    private TableSchema tableSchema;
-    protected Map<String, Column<?>> columns;
+    private TableSchema<E> tableSchema;
+    protected Map<String, Column<E, ?>> columns;
 
     public Row() {
         this.columns = Maps.newHashMap();
     }
 
-    public Row(TableSchema tableSchema) {
+    public Row(TableSchema<E> tableSchema) {
         this.tableSchema = tableSchema;
         this.columns = Maps.newHashMap();
     }
 
-    public Row(TableSchema tableSchema, List<Column<?>> columns) {
+    public Row(TableSchema<E> tableSchema, List<Column<E, ?>> columns) {
         this.tableSchema = tableSchema;
         this.columns = Maps.newHashMap();
-        for (Column<?> column : columns) {
+        for (Column<E, ?> column : columns) {
             this.columns.put(column.getSchema().getName(), column);
         }
     }
 
-    public <D> Column<D> getColumn(ColumnSchema<D> schema) {
-        return (Column<D>) columns.get(schema.getName());
+    public <D> Column<E, D> getColumn(ColumnSchema<E, D> schema) {
+        return (Column<E, D>) columns.get(schema.getName());
     }
 
-    public Collection<Column<?>> getColumns() {
+    public Collection<Column<E, ?>> getColumns() {
         return columns.values();
     }
 
-    public void addColumn(String columnName, Column<?> data) {
+    public void addColumn(String columnName, Column<E, ?> data) {
         this.columns.put(columnName, data);
     }
 
-    public TableSchema getTableSchema() {
+    public TableSchema<E> getTableSchema() {
         return tableSchema;
     }
 
-    public void setTableSchema(TableSchema tableSchema) {
+    public void setTableSchema(TableSchema<E> tableSchema) {
         this.tableSchema = tableSchema;
     }
 

@@ -35,6 +35,7 @@ import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -102,9 +103,9 @@ public class OvsdbNodeUpdateCommandTest {
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 
-        Mutate mutate = mock(Mutate.class);
+        Mutate<GenericTableSchema> mutate = mock(Mutate.class);
         Operations op = (Operations) setField("op");
-        Column<Map<String, String>> column = mock(Column.class);
+        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
         when(column.getData()).thenReturn(new HashMap<String, String>());

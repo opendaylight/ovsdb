@@ -12,20 +12,21 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class TableUpdate {
-    private Map<UUID, RowUpdate> rows;
+public class TableUpdate<E extends TableSchema<E>> {
+    private Map<UUID, RowUpdate<E>> rows;
 
-    public Map<UUID, RowUpdate> getRows() {
+    public Map<UUID, RowUpdate<E>> getRows() {
         return rows;
     }
 
-    public class RowUpdate {
+    public class RowUpdate<E extends TableSchema<E>> {
         private UUID uuid;
-        private Row oldRow;
-        private Row newRow;
+        private Row<E> oldRow;
+        private Row<E> newRow;
 
-        public RowUpdate(UUID uuid, Row oldRow, Row newRow) {
+        public RowUpdate(UUID uuid, Row<E> oldRow, Row<E> newRow) {
             this.uuid = uuid;
             this.oldRow = oldRow;
             this.newRow = newRow;
@@ -35,20 +36,20 @@ public class TableUpdate {
             return this.uuid;
         }
 
-        public Row getOld() {
+        public Row<E> getOld() {
             return oldRow;
         }
 
-        public void setOld(Row old) {
+        public void setOld(Row<E> old) {
             this.oldRow = old;
         }
 
-        public Row getNew() {
+        public Row<E> getNew() {
             return newRow;
         }
 
         @SuppressWarnings("checkstyle:HiddenField")
-        public void setNew(Row newRow) {
+        public void setNew(Row<E> newRow) {
             this.newRow = newRow;
         }
 
@@ -64,20 +65,20 @@ public class TableUpdate {
         rows = Maps.newHashMap();
     }
 
-    public void addRow(UUID uuid, Row oldRow, Row newRow) {
-        rows.put(uuid, new RowUpdate(uuid, oldRow, newRow));
+    public void addRow(UUID uuid, Row<E> oldRow, Row<E> newRow) {
+        rows.put(uuid, new RowUpdate<>(uuid, oldRow, newRow));
     }
 
-    public Row getOld(UUID uuid) {
-        RowUpdate rowUpdate = rows.get(uuid);
+    public Row<E> getOld(UUID uuid) {
+        RowUpdate<E> rowUpdate = rows.get(uuid);
         if (rowUpdate == null) {
             return null;
         }
         return rowUpdate.getOld();
     }
 
-    public Row getNew(UUID uuid) {
-        RowUpdate rowUpdate = rows.get(uuid);
+    public Row<E> getNew(UUID uuid) {
+        RowUpdate<E> rowUpdate = rows.get(uuid);
         if (rowUpdate == null) {
             return null;
         }

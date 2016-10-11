@@ -9,18 +9,19 @@ package org.opendaylight.ovsdb.lib.notation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class Column<D> {
+public class Column<E extends TableSchema<E>, D> {
     @JsonIgnore
-    private ColumnSchema<D> schema;
+    private ColumnSchema<E, D> schema;
     private D data;
 
-    public Column(ColumnSchema<D> schema, D data) {
+    public Column(ColumnSchema<E, D> schema, D data) {
         this.schema = schema;
         this.data = data;
     }
 
-    public <T> T getData(ColumnSchema<T> anotherSchema) {
+    public <E extends TableSchema<E>, T> T getData(ColumnSchema<E, T> anotherSchema) {
         return anotherSchema.validate(data);
     }
 
@@ -32,11 +33,11 @@ public class Column<D> {
         this.data = data;
     }
 
-    public ColumnSchema<D> getSchema() {
+    public ColumnSchema<E, D> getSchema() {
         return schema;
     }
 
-    public void setSchema(ColumnSchema<D> schema) {
+    public void setSchema(ColumnSchema<E, D> schema) {
         this.schema = schema;
     }
 

@@ -15,40 +15,40 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 public class Operations {
     public static Operations op = new Operations();
 
-    public Insert insert(TableSchema schema) {
-        return new Insert(schema);
+    public <E extends TableSchema<E>> Insert<E> insert(TableSchema<E> schema) {
+        return new Insert<>(schema);
     }
 
-    public Insert insert(TypedBaseTable typedTable) {
-        return new Insert(typedTable);
+    public <E extends TableSchema<E>> Insert<E> insert(TypedBaseTable<E> typedTable) {
+        return new Insert<>(typedTable);
     }
 
-    public Insert insert(TableSchema schema, Row row) {
-        return new Insert(schema, row);
+    public <E extends TableSchema<E>> Insert<E> insert(TableSchema<E> schema, Row<E> row) {
+        return new Insert<>(schema, row);
     }
 
-    public Update update(TableSchema schema) {
-        return new Update(schema);
+    public <E extends TableSchema<E>> Update<E> update(TableSchema<E> schema) {
+        return new Update<>(schema);
     }
 
-    public Update update(TypedBaseTable typedTable) {
-        return new Update(typedTable);
+    public <E extends TableSchema<E>> Update<E> update(TypedBaseTable<E> typedTable) {
+        return new Update<>(typedTable);
     }
 
-    public Update update(TableSchema schema, Row row) {
-        return new Update(schema, row);
+    public <E extends TableSchema<E>> Update<E> update(TableSchema<E> schema, Row<E> row) {
+        return new Update<>(schema, row);
     }
 
-    public Delete delete(TableSchema schema) {
-        return new Delete(schema);
+    public <E extends TableSchema<E>> Delete<E> delete(TableSchema<E> schema) {
+        return new Delete<>(schema);
     }
 
-    public Mutate mutate(TableSchema schema) {
-        return new Mutate(schema);
+    public <E extends TableSchema<E>> Mutate<E> mutate(TableSchema<E> schema) {
+        return new Mutate<>(schema);
     }
 
-    public Mutate mutate(TypedBaseTable typedTable) {
-        return new Mutate(typedTable.getSchema());
+    public <E extends TableSchema<E>> Mutate<E> mutate(TypedBaseTable<E> typedTable) {
+        return new Mutate<>(typedTable.getSchema());
     }
 
     public Commit commit(Boolean durable) {
@@ -59,8 +59,8 @@ public class Operations {
         return new Abort();
     }
 
-    public Select select(TableSchema schema) {
-        return new Select(schema);
+    public <E extends TableSchema<E>> Select<E> select(TableSchema<E> schema) {
+        return new Select<>(schema);
     }
 
     public Comment comment(String comment) {

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +31,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -135,15 +137,16 @@ public class OvsdbManagersUpdateCommandTest {
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
 
-        Optional<Node> ovsdbNode = Optional.of(mock(Node.class));
+        Optional<Node> ovsdbNode = mock(Optional.class);
         PowerMockito.mockStatic(SouthboundUtil.class);
         when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
                 .thenReturn(ovsdbNode);
+        when(ovsdbNode.isPresent()).thenReturn(true);
+        when(ovsdbNode.get()).thenReturn(mock(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "updateManagers", transaction, updatedManagerRows);
-        // TODO Actually test something useful
-        // verify(ovsdbNode, times(2)).get();
+        verify(ovsdbNode, times(2)).get();
     }
 
     @Test
@@ -170,7 +173,7 @@ public class OvsdbManagersUpdateCommandTest {
         Manager manager = mock(Manager.class);
         uuidManagerMap.put(mock(UUID.class), manager);
 
-        Column<String> column = mock(Column.class);
+        Column<GenericTableSchema, String> column = mock(Column.class);
         when(manager.getTargetColumn()).thenReturn(column);
         when(column.getData()).thenReturn(TARGET_COLUMN_DATA);
 

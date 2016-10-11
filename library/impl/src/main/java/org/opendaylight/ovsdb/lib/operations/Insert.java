@@ -19,53 +19,53 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 
-public class Insert extends Operation {
+public class Insert<E extends TableSchema<E>> extends Operation<E> {
 
     public static final String INSERT = "insert";
 
-    private String uuid;
+    String uuid;
 
     @JsonProperty("uuid-name")
     private String uuidName;
 
     private Map<String, Object> row = Maps.newHashMap();
 
-    public Insert on(TableSchema schema) {
+    public Insert<E> on(TableSchema<E> schema) {
         this.setTableSchema(schema);
         return this;
     }
 
-    public Insert withId(String name) {
+    public Insert<E> withId(String name) {
         this.uuidName = name;
         this.setOp(INSERT);
         return this;
     }
 
 
-    public Insert(TableSchema schema) {
+    public Insert(TableSchema<E> schema) {
         super(schema, INSERT);
     }
 
-    public Insert(TableSchema schema, Row row) {
+    public Insert(TableSchema<E> schema, Row<E> row) {
         super(schema, INSERT);
-        Collection<Column<?>> columns = row.getColumns();
-        for (Column<?> column : columns) {
+        Collection<Column<E,?>> columns = row.getColumns();
+        for (Column<E,?> column : columns) {
             this.value(column);
         }
     }
 
-    public Insert(TypedBaseTable typedTable) {
+    public Insert(TypedBaseTable<E> typedTable) {
         this(typedTable.getSchema(), typedTable.getRow());
     }
 
-    public <D, C extends TableSchema> Insert value(ColumnSchema<D> columnSchema, D value) {
+    public <D, C extends TableSchema<C>> Insert<E> value(ColumnSchema<C, D> columnSchema, D value) {
         Object untypedValue = columnSchema.getNormalizeData(value);
         row.put(columnSchema.getName(), untypedValue);
         return this;
     }
 
-    public <D, C extends TableSchema> Insert value(Column<D> column) {
-        ColumnSchema<D> columnSchema = column.getSchema();
+    public <D, C extends TableSchema<C>> Insert<E> value(Column<C, D> column) {
+        ColumnSchema<C, D> columnSchema = column.getSchema();
         D value = column.getData();
         return this.value(columnSchema, value);
     }

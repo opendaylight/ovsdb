@@ -45,6 +45,7 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.ops4j.pax.exam.Configuration;
@@ -219,20 +220,20 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
      *
      * @return MonitorRequest that includes all the Bridge Columns including _uuid
      */
-    public <T extends TypedBaseTable> MonitorRequest getAllColumnsMonitorRequest (Class <T> klazz) {
-        TypedBaseTable table = getClient().createTypedRowWrapper(klazz);
-        TableSchema tableSchema = table.getSchema();
+    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest (Class <T> klazz) {
+        TypedBaseTable<GenericTableSchema> table = getClient().createTypedRowWrapper(klazz);
+        GenericTableSchema tableSchema = table.getSchema();
         Set<String> columns = tableSchema.getColumns();
-        MonitorRequestBuilder bridgeBuilder = new MonitorRequestBuilder(table.getSchema());
+        MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = new MonitorRequestBuilder<>(table.getSchema());
         for (String column : columns) {
             bridgeBuilder.addColumn(column);
         }
         return bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public <T extends TableSchema> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
+    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
-        MonitorRequestBuilder monitorBuilder = new MonitorRequestBuilder(tableSchema);
+        MonitorRequestBuilder<T> monitorBuilder = new MonitorRequestBuilder<>(tableSchema);
         for (String column : columns) {
             monitorBuilder.addColumn(column);
         }
@@ -252,7 +253,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         assertNotNull("ovsdb tables should not be null", tables);
 
         for (String tableName : tables) {
-            TableSchema tableSchema = getDbSchema().table(tableName);
+            GenericTableSchema tableSchema = getDbSchema().table(tableName, GenericTableSchema.class);
             monitorRequests.add(this.getAllColumnsMonitorRequest(tableSchema));
         }
         TableUpdates updates = getClient().monitor(getDbSchema(), monitorRequests, new UpdateMonitor());

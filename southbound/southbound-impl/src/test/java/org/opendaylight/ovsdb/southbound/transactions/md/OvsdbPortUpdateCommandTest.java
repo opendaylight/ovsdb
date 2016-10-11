@@ -43,6 +43,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -172,13 +173,16 @@ public class OvsdbPortUpdateCommandTest {
         UUID uuid = mock(UUID.class);
         portUpdatedRows.put(uuid, port);
         field(OvsdbPortUpdateCommand.class, "portUpdatedRows").set(ovsdbPortUpdateCommand, portUpdatedRows);
-        Column<String> bridgeColumn = mock(Column.class);
+        Column<GenericTableSchema, String> bridgeColumn = mock(Column.class);
         when(port.getNameColumn()).thenReturn(bridgeColumn);
         when(bridgeColumn.getData()).thenReturn(TERMINATION_POINT_NAME);
 
-        Optional<InstanceIdentifier<Node>> bridgeIid = Optional.of(mock(InstanceIdentifier.class));
+        Optional<InstanceIdentifier<Node>> bridgeIid = mock(Optional.class);
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge", any(UUID.class));
 
+        //bridgeIid.isPresent() is true
+        when(bridgeIid.isPresent()).thenReturn(true);
+        when(bridgeIid.get()).thenReturn(mock(InstanceIdentifier.class));
         NodeId bridgeId = mock(NodeId.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
@@ -203,7 +207,7 @@ public class OvsdbPortUpdateCommandTest {
                 ReadWriteTransaction.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class,
                 Node.class, Entry.class));
 
-        Column<Set<UUID>> interfacesColumn = mock(Column.class);
+        Column<GenericTableSchema, Set<UUID>> interfacesColumn = mock(Column.class);
         when(port.getInterfacesColumn()).thenReturn(interfacesColumn);
         Set<UUID> uuids = new HashSet<>();
         UUID uuid2 = mock(UUID.class);
@@ -235,7 +239,7 @@ public class OvsdbPortUpdateCommandTest {
         doNothing().when(transaction).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(TerminationPoint.class));
 
-        Column<String> interfaceColumn = mock(Column.class);
+        Column<GenericTableSchema, String> interfaceColumn = mock(Column.class);
         when(interfaceUpdate.getNameColumn()).thenReturn(interfaceColumn);
         when(interfaceColumn.getData()).thenReturn(INTERFACE_NAME);
 
@@ -329,7 +333,7 @@ public class OvsdbPortUpdateCommandTest {
         bridgeUpdatedRows.put(bridgeUuid, bridge);
         field(OvsdbPortUpdateCommand.class, "bridgeUpdatedRows").set(ovsdbPortUpdateCommand, bridgeUpdatedRows);
 
-        Column<Set<UUID>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(bridge.getPortsColumn()).thenReturn(column);
         Set<UUID> set = new HashSet<>();
         UUID portUuid = mock(UUID.class);
@@ -396,7 +400,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdateInterfaces() throws Exception {
         Interface interfaceUpdate = mock(Interface.class);
-        Column<String> typeColumn = mock(Column.class);
+        Column<GenericTableSchema, String> typeColumn = mock(Column.class);
         when(interfaceUpdate.getTypeColumn()).thenReturn(typeColumn);
         when(typeColumn.getData()).thenReturn(OVSDB_INTERFACE_TYPE);
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterface", Interface.class,
@@ -502,7 +506,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdateVlan() throws Exception {
         Port port = mock(Port.class);
-        Column<Set<Long>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(port.getTagColumn()).thenReturn(column);
         Set<Long> vlanId = new HashSet<>();
         vlanId.add((long) 808);
@@ -519,7 +523,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdateVlanTrunks() throws Exception {
         Port port = mock(Port.class);
-        Column<Set<Long>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(port.getTrunksColumn()).thenReturn(column);
         Set<Long> portTrunks = new HashSet<>();
         portTrunks.add((long) 300);
@@ -541,7 +545,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdateVlanMode() throws Exception {
         Port port = mock(Port.class);
-        Column<Set<String>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(port.getVlanModeColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add(VLAN_MODE_ACCESS);
@@ -560,7 +564,7 @@ public class OvsdbPortUpdateCommandTest {
         Interface interf = mock(Interface.class);
         Set<Long> ofPorts = new HashSet<>();
         ofPorts.add((long) 10000);
-        Column<Set<Long>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(interf.getOpenFlowPortColumn()).thenReturn(column);
         when(column.getData()).thenReturn(ofPorts);
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
@@ -577,7 +581,7 @@ public class OvsdbPortUpdateCommandTest {
         Interface interf = mock(Interface.class);
         Set<Long> ofPortRequests = new HashSet<>();
         ofPortRequests.add((long) 10000);
-        Column<Set<Long>> column = mock(Column.class);
+        Column<GenericTableSchema, Set<Long>> column = mock(Column.class);
         when(interf.getOpenFlowPortRequestColumn()).thenReturn(column);
         when(column.getData()).thenReturn(ofPortRequests);
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
@@ -593,7 +597,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdateInterfaceExternalIds() throws Exception {
         Interface interf = mock(Interface.class);
-        Column<Map<String, String>> column = mock(Column.class);
+        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(interf.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
@@ -621,7 +625,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdatePortExternalIds() throws Exception {
         Port port = mock(Port.class);
-        Column<Map<String, String>> column = mock(Column.class);
+        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(port.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         when(column.getData()).thenReturn(map);
@@ -647,7 +651,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testUpdatePortOtherConfig() throws Exception {
         Port port = mock(Port.class);
-        Column<Map<String, String>> column = mock(Column.class);
+        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(port.getOtherConfigColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put(OTHER_CONFIG_KEY, OTHER_CONFIG_VALUE);
@@ -675,7 +679,7 @@ public class OvsdbPortUpdateCommandTest {
         Interface interf = mock(Interface.class);
         Map<String, String> interfaceOtherConfigMap = new HashMap<>();
         interfaceOtherConfigMap.put(OTHER_CONFIG_KEY, OTHER_CONFIG_VALUE);
-        Column<Map<String, String>> column = mock(Column.class);
+        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(interf.getOtherConfigColumn()).thenReturn(column);
         when(column.getData()).thenReturn(interfaceOtherConfigMap);
 
@@ -701,7 +705,7 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testGetInstanceIdentifier() throws Exception {
         Port port = mock(Port.class);
-        Column<Map<String, String>> column = mock(Column.class);
+        Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(port.getExternalIdsColumn()).thenReturn(column);
         Map<String, String> map = new HashMap<>();
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "opendaylight-iid");

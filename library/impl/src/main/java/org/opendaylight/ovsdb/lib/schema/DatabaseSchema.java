@@ -51,17 +51,17 @@ public class DatabaseSchema {
         return this.getTables().contains(table);
     }
 
-    public TableSchema table(String tableName) {
-        TableSchema table = tables.get(tableName);
+    public <E extends TableSchema<E>> E table(String tableName, Class<E> clazz) {
+        TableSchema<E> table = tables.get(tableName);
 
-        if (table != null) {
-            return table;
+        if (clazz.isInstance(table)) {
+            return clazz.cast(table);
         }
 
-        return createTableSchema(TableSchema.class, null);
+        return createTableSchema(clazz, table);
     }
 
-    protected <E extends TableSchema> E createTableSchema(Class<E> clazz, TableSchema table) {
+    protected <E extends TableSchema<E>> E createTableSchema(Class<E> clazz, TableSchema<E> table) {
         Constructor<E> declaredConstructor;
         try {
             declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
@@ -97,7 +97,7 @@ public class DatabaseSchema {
             LOG.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
             //todo : this needs to done by a factory
-            tables.put(table.getKey(), TableSchema.fromJson(table.getKey(), table.getValue()));
+            tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));
         }
 
         return new DatabaseSchema(dbName, dbVersion, tables);

@@ -523,6 +523,52 @@
       "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cbeb04af",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "why we want to leak md-sal transaction to other classes?",
+      "range": {
+        "startLine": 300,
+        "startChar": 4,
+        "endLine": 302,
+        "endChar": 5
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2bd0b8f6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "can you please make a comment on the method, why are we sanitizing the name? because it\u0027s not really obvious to understand the reason.",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 202,
+        "endChar": 5
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

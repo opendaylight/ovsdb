@@ -111,6 +111,29 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_2bcd5887",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 101,
+        "startChar": 48,
+        "endLine": 101,
+        "endChar": 61
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_6bc75065",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
         "patchSetId": 6
@@ -127,6 +150,53 @@
         "startChar": 13,
         "endLine": 34,
         "endChar": 45
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2bf7188e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "Given that it\u0027s listening on clusteredDataTreeChangeListener, i am assuming that logic is taking care of triggering the reconciliation only if the instance is owning the device, else this reconciliation logic will break in clustered environment.",
+      "range": {
+        "startLine": 34,
+        "startChar": 57,
+        "endLine": 34,
+        "endChar": 88
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f4cf9bb1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-20T07:27:18Z",
+      "side": 1,
+      "message": "hi suneel, what if the device is connected to all the nodes in the cluster?",
+      "parentUuid": "7a6b29fe_3dac7735",
+      "range": {
+        "startLine": 34,
+        "startChar": 57,
+        "endLine": 34,
+        "endChar": 88
       },
       "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
@@ -157,6 +227,52 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_6bf11095",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "move this to registerListener() method.",
+      "range": {
+        "startLine": 42,
+        "startChar": 8,
+        "endLine": 42,
+        "endChar": 88
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cbaf8493",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "\"Registering listener for path {}\"",
+      "range": {
+        "startLine": 52,
+        "startChar": 23,
+        "endLine": 52,
+        "endChar": 34
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_2b943843",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
         "patchSetId": 6
@@ -173,6 +289,29 @@
         "startChar": 23,
         "endLine": 54,
         "endChar": 33
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0b917c52",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "\"Cancel config reconciliation for node {}\"",
+      "range": {
+        "startLine": 79,
+        "startChar": 31,
+        "endLine": 79,
+        "endChar": 37
       },
       "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
@@ -203,6 +342,75 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_8b8c6c37",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please move this method to HwvtepSouthboundMapper.java",
+      "range": {
+        "startLine": 121,
+        "startChar": 4,
+        "endLine": 127,
+        "endChar": 5
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2b7b982a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/SwitchConfigOperationalChangeGetter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "\"private static final\"",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 16
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0b785c2a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/SwitchConfigOperationalChangeGetter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "No need to initialize the tpList here, because getPorts() anyways not returning null,it\u0027s either return the empty list of the list of termination points, so this initialization is creating unnecessary garbage.",
+      "range": {
+        "startLine": 36,
+        "startChar": 40,
+        "endLine": 36,
+        "endChar": 58
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_6b759031",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/SwitchConfigOperationalChangeGetter.java",
         "patchSetId": 6
@@ -219,6 +427,75 @@
         "startChar": 8,
         "endLine": 59,
         "endChar": 76
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4b72544a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/SwitchConfigOperationalChangeGetter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please use !isEmpty rather than explicit size check.",
+      "range": {
+        "startLine": 81,
+        "startChar": 112,
+        "endLine": 81,
+        "endChar": 124
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8bbaacbe",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please make it private.",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 56,
+        "endChar": 36
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ab8e8825",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "move it to same line.",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 30
       },
       "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",

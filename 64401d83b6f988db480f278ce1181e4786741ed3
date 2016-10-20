@@ -1,0 +1,251 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_6bdab018",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "remove extra line.",
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4bd7f4ed",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "remove instatement comments.",
+      "range": {
+        "startLine": 266,
+        "startChar": 82,
+        "endLine": 266,
+        "endChar": 91
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8bd74c23",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "Typo in the class name -- HwvtepReconciliationTask",
+      "range": {
+        "startLine": 43,
+        "startChar": 13,
+        "endLine": 43,
+        "endChar": 36
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0be33c06",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please use mdsal-utils classes for the data store read/write operations.",
+      "range": {
+        "startLine": 67,
+        "startChar": 4,
+        "endLine": 75,
+        "endChar": 5
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ebb36008",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please fix the typo, and also please rephrase the comment message \"Hwvtep configuration reconciliation interrupted\"",
+      "range": {
+        "startLine": 99,
+        "startChar": 47,
+        "endLine": 99,
+        "endChar": 60
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6bc75065",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "In my opinion, this class name is bit confusing. This is the class that triggers the reconciliation, so i would suggest that to rename it to HwvtepReconciliationManager or something on that line.",
+      "range": {
+        "startLine": 34,
+        "startChar": 13,
+        "endLine": 34,
+        "endChar": 45
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cb866413",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "move the logger just before the class name",
+      "range": {
+        "startLine": 39,
+        "startChar": 4,
+        "endLine": 39,
+        "endChar": 102
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2b943843",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please do not catch generic exceptions.",
+      "range": {
+        "startLine": 54,
+        "startChar": 23,
+        "endLine": 54,
+        "endChar": 33
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4b9b7472",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/ReconcileOperationalNodeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "\"Reconcile config for node {}, IP : {}\"",
+      "range": {
+        "startLine": 97,
+        "startChar": 35,
+        "endLine": 97,
+        "endChar": 44
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6b759031",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/SwitchConfigOperationalChangeGetter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "i think this should be moved to if{} condition, because empty NodeBuilder won\u0027t have any augmentation.",
+      "range": {
+        "startLine": 59,
+        "startChar": 8,
+        "endLine": 59,
+        "endChar": 76
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ebe6c0e7",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-10-10T07:20:19Z",
+      "side": 1,
+      "message": "please move these methods to HwvtepSouthboundUtil, so that it can be reused.",
+      "range": {
+        "startLine": 282,
+        "startChar": 4,
+        "endLine": 298,
+        "endChar": 5
+      },
+      "revId": "64401d83b6f988db480f278ce1181e4786741ed3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

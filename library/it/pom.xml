@@ -12,20 +12,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>it</artifactId>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>1.2.5-Beryllium-SR4</version>
     <relativePath>../../commons/it</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>library-it</artifactId>
-  <version>1.2.5-SNAPSHOT</version>
+  <version>1.2.5-Beryllium-SR4</version>
   <packaging>jar</packaging>
 
   <properties>
     <karaf.distro.groupId>org.opendaylight.ovsdb</karaf.distro.groupId>
     <karaf.distro.artifactId>library-karaf</karaf.distro.artifactId>
-    <karaf.distro.version>1.2.5-SNAPSHOT</karaf.distro.version>
+    <karaf.distro.version>1.2.5-Beryllium-SR4</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
   </properties>
 

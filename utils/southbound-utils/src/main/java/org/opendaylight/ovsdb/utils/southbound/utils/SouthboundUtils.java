@@ -109,6 +109,7 @@ public class SouthboundUtils {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtils.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
+    public static final TopologyId FLOW_TOPOLOGY_ID = new TopologyId(new Uri("flow:1"));
     private final MdsalUtils mdsalUtils;
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static short OPENFLOW_PORT = 6653;

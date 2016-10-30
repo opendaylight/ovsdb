@@ -39,4 +39,5 @@ public final class ItConstants {
     public static final String DOCKER_COMPOSE_FILE_NAME="docker.compose.file";
     public static final String DOCKER_RUN="docker.run";
     public static final String DOCKER_VENV_WS="docker.vEnvWs";
+    public static final String DOCKER_WAIT_FOR_PING_SECS = "docker.ping.wait.secs";
 }

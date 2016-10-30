@@ -122,6 +122,7 @@ public class DockerOvs implements AutoCloseable {
     private String envServerAddress;
     private String envServerPort;
     private String envDockerComposeFile;
+    private String envDockerWaitForPing;
     private boolean runDocker;
     private boolean runVenv;
 
@@ -145,6 +146,7 @@ public class DockerOvs implements AutoCloseable {
                                             ItConstants.USERSPACE_ENABLED,
                                             ItConstants.DOCKER_COMPOSE_FILE_NAME,
                                             ItConstants.DOCKER_RUN,
+                                            ItConstants.DOCKER_WAIT_FOR_PING_SECS,
                                             ItConstants.DOCKER_VENV_WS)
         };
     }
@@ -183,7 +185,8 @@ public class DockerOvs implements AutoCloseable {
         //runs like that <snaps fingers>
         ProcUtils.runProcess(60000, upCmd);
         isRunning = true;
-        waitForOvsdbServers(10 * 1000);
+        int waitSeconds = Integer.parseInt(envDockerWaitForPing);
+        waitForOvsdbServers(waitSeconds * 1000);
     }
 
     private void setupEnvForDockerCompose(String venvWs) {
@@ -211,6 +214,7 @@ public class DockerOvs implements AutoCloseable {
         Properties env = System.getProperties();
         envServerAddress = env.getProperty(ItConstants.SERVER_IPADDRESS);
         envServerPort = env.getProperty(ItConstants.SERVER_PORT);
+        envDockerWaitForPing = env.getProperty(ItConstants.DOCKER_WAIT_FOR_PING_SECS, "10");
         String envRunDocker = env.getProperty(ItConstants.DOCKER_RUN);
         String connType = env.getProperty(ItConstants.CONNECTION_TYPE, ItConstants.CONNECTION_TYPE_ACTIVE);
         String dockerFile = env.getProperty(ItConstants.DOCKER_COMPOSE_FILE_NAME);
@@ -393,6 +397,12 @@ public class DockerOvs implements AutoCloseable {
         if (null == root) {
             return ports;
         }
+
+        String composeVersion = (String)root.get("version");
+        if (null != composeVersion && composeVersion.equals("2")) {
+            root = (Map) root.get("services");
+        }
+
         for (Object entry : root.entrySet()) {
             String key = ((Map.Entry<String,Map>)entry).getKey();
             Map map = ((Map.Entry<String,Map>)entry).getValue();

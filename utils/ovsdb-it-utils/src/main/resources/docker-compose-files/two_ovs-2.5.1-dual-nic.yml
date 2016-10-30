@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+ ovs1:
+  image: jhershbe/centos7-ovs-dual-nic:latest
+  ports:
+    - "6641:6640"
+  command: "/usr/bin/supervisord -n"
+  privileged: true
+  networks:
+   odl:
+   external:
+ ovs2:
+  image: jhershbe/centos7-ovs-dual-nic:latest
+  ports:
+    - "6642:6640"
+  command: "/usr/bin/supervisord -n"
+  privileged: true
+  networks:
+   odl:
+   external:
+
+networks:
+ odl:
+  external: true
+ external:

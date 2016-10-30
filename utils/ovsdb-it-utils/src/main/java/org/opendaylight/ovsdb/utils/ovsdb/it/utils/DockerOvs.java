@@ -84,6 +84,9 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
  *  "To passively connect to a running Ovs:\n" +
  *  " -Dovsdbserver.connection=passive -Ddocker.run=false\n";
  * </pre>
+ * <strong>Note:</strong> Ommiting the environment variable ovsdb.controller.address will cause DockerOvs to use a
+ * predefined docker network called "odl". This network's subnet must be 172.99.0.0/16 and its gateway must be defined
+ * as 172.99.0.254. If the "odl" network is not present, DockerOvs will create it for you.
  * When DockerOvs does not run docker-compose getOvsdbAddress and getOvsdbPort return the address and port specified in
  * the system properties.
  */
@@ -110,6 +113,7 @@ public class DockerOvs implements AutoCloseable {
     private static final int COMPOSE_FILE_IDX = 3;
     private static final int COMPOSE_FILE_IDX_NO_SUDO = 2;
     private static final String DEFAULT_OVSDB_HOST = "127.0.0.1";
+    private static final String ODL_NET_GATEWAY = "172.99.0.254";
 
     private String[] psCmd = {"sudo", "docker-compose", "-f", null, "ps"};
     private String[] psCmdNoSudo = {"docker-compose", "-f", null, "ps"};
@@ -117,13 +121,21 @@ public class DockerOvs implements AutoCloseable {
     private String[] downCmd = {"sudo", "docker-compose", "-f", null, "stop"};
     private String[] execCmd = {"sudo", "docker-compose", "-f", null, "exec", null};
 
+    private String[] dockerPsCmdNoSudo = {"docker", "ps"};
+    private String[] dockerPsCmd = {"sudo", "docker", "ps"};
+    private String[] netInspectCmd = {"sudo", "docker", "network", "inspect", "odl"};
+    private String[] netCreateCmd = {"sudo", "docker", "network", "create",
+                                                            "--subnet=172.99.0.0/16", "--gateway=172.99.0.254", "odl"};
+
     private File tmpDockerComposeFile;
     boolean isRunning;
     private String envServerAddress;
     private String envServerPort;
     private String envDockerComposeFile;
+    private String envDockerWaitForPing;
     private boolean runDocker;
     private boolean runVenv;
+    private boolean createOdlNetwork;
 
     class DockerComposeServiceInfo {
         public String name;
@@ -145,6 +157,7 @@ public class DockerOvs implements AutoCloseable {
                                             ItConstants.USERSPACE_ENABLED,
                                             ItConstants.DOCKER_COMPOSE_FILE_NAME,
                                             ItConstants.DOCKER_RUN,
+                                            ItConstants.DOCKER_WAIT_FOR_PING_SECS,
                                             ItConstants.DOCKER_VENV_WS)
         };
     }
@@ -173,17 +186,19 @@ public class DockerOvs implements AutoCloseable {
         }
 
         tmpDockerComposeFile = createTempDockerComposeFile(yamlFileName);
-        buildDockerComposeCommands();
+        buildDockerCommands();
         parseDockerComposeYaml();
 
         isRunning = false;
+        networkUp();
         //We run this for A LONG TIME since on the first run docker must download the
         //image from docker hub. In experience it takes significantly less than this
         //even when downloading the image. Once the image is downloaded this command
         //runs like that <snaps fingers>
         ProcUtils.runProcess(60000, upCmd);
         isRunning = true;
-        waitForOvsdbServers(10 * 1000);
+        int waitSeconds = Integer.parseInt(envDockerWaitForPing);
+        waitForOvsdbServers(waitSeconds * 1000);
     }
 
     private void setupEnvForDockerCompose(String venvWs) {
@@ -211,6 +226,8 @@ public class DockerOvs implements AutoCloseable {
         Properties env = System.getProperties();
         envServerAddress = env.getProperty(ItConstants.SERVER_IPADDRESS);
         envServerPort = env.getProperty(ItConstants.SERVER_PORT);
+        envDockerWaitForPing = env.getProperty(ItConstants.DOCKER_WAIT_FOR_PING_SECS, "10");
+        createOdlNetwork = env.getProperty(ItConstants.CONTROLLER_IPADDRESS) == null;
         String envRunDocker = env.getProperty(ItConstants.DOCKER_RUN);
         String connType = env.getProperty(ItConstants.CONNECTION_TYPE, ItConstants.CONNECTION_TYPE_ACTIVE);
         String dockerFile = env.getProperty(ItConstants.DOCKER_COMPOSE_FILE_NAME);
@@ -245,13 +262,13 @@ public class DockerOvs implements AutoCloseable {
     }
 
     /**
-     * Verify and build the docker-compose commands we will be running. This function adds the docker-compose file
-     * to the command lines and also checks (and adjusts the command line) as to whether sudo is required. This is
-     * done by attempting to run "docker-compose ps" without and then with sudo
+     * Verify and build the docker and docker-compose commands we will be running. This function adds the docker-compose
+     * file to the command lines and also checks (and adjusts the command line) as to whether sudo is required. This is
+     * done by attempting to run commands without and then with sudo
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
-    private void buildDockerComposeCommands() throws IOException, InterruptedException {
+    private void buildDockerCommands() throws IOException, InterruptedException {
         psCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
         psCmdNoSudo[COMPOSE_FILE_IDX_NO_SUDO] = tmpDockerComposeFile.toString();
         upCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
@@ -259,19 +276,41 @@ public class DockerOvs implements AutoCloseable {
         execCmd[COMPOSE_FILE_IDX] = tmpDockerComposeFile.toString();
 
         if (0 == ProcUtils.tryProcess(null, 5000, psCmdNoSudo)) {
-            LOG.info("DockerOvs.buildDockerComposeCommands docker-compose does not require sudo");
-            String[] tmp;
-            tmp = Arrays.copyOfRange(upCmd, 1, upCmd.length);
-            upCmd = tmp;
-            tmp = Arrays.copyOfRange(downCmd, 1, downCmd.length);
-            downCmd = tmp;
-            tmp = Arrays.copyOfRange(execCmd, 1, execCmd.length);
-            execCmd = tmp;
+            LOG.info("DockerOvs.buildDockerCommands docker-compose does not require sudo");
+            upCmd = removeFirstEl(upCmd);
+            downCmd = removeFirstEl(downCmd);
+            execCmd = removeFirstEl(execCmd);
         } else if (0 == ProcUtils.tryProcess(null, 5000, psCmd)) {
-            LOG.info("DockerOvs.buildDockerComposeCommands docker-compose requires sudo");
+            LOG.info("DockerOvs.buildDockerCommands docker-compose requires sudo");
         } else {
             Assert.fail("docker-compose does not seem to work with or without sudo");
         }
+
+        if (0 == ProcUtils.tryProcess(null, 5000, dockerPsCmdNoSudo)) {
+            LOG.info("DockerOvs.buildDockerCommands docker does not require sudo");
+            netCreateCmd = removeFirstEl(netCreateCmd);
+            netInspectCmd = removeFirstEl(netInspectCmd);
+        } else if (0 == ProcUtils.tryProcess(null, 5000, dockerPsCmd)) {
+            LOG.info("DockerOvs.buildDockerCommands docker requires sudo");
+        } else {
+            Assert.fail("docker does not seem to work with or without sudo");
+        }
+    }
+
+    private String[] removeFirstEl(String[] arr) {
+        return Arrays.copyOfRange(arr, 1, arr.length);
+    }
+
+    private void networkUp() throws IOException, InterruptedException {
+        if (usingExternalDocker() || !createOdlNetwork) {
+            return;
+        }
+
+        if (0 != ProcUtils.tryProcess(null, 5000, netInspectCmd)) {
+            ProcUtils.runProcess(5000, netCreateCmd);
+        }
+
+        System.getProperties().setProperty(ItConstants.CONTROLLER_IPADDRESS, ODL_NET_GATEWAY);
     }
 
     /**
@@ -393,6 +432,12 @@ public class DockerOvs implements AutoCloseable {
         if (null == root) {
             return ports;
         }
+
+        String composeVersion = (String)root.get("version");
+        if (null != composeVersion && composeVersion.equals("2")) {
+            root = (Map) root.get("services");
+        }
+
         for (Object entry : root.entrySet()) {
             String key = ((Map.Entry<String,Map>)entry).getKey();
             Map map = ((Map.Entry<String,Map>)entry).getValue();

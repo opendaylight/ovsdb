@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_9572cce3",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/api/SouthboundCliCommands.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "Is this a template comment?",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_b5442875",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/commands/HelloWorld.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "I take it this file isn\u0027t necessary, is it?",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_f576a0d7",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/commands/SouthboundCliTestCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "This also looks like template Javadoc ;-).",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_d573a4e5",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/commands/SouthboundCliTestCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "Please update the scope and description.",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_754a9084",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/commands/SouthboundCliTestCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "Template Javadoc...",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_554f9492",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/commands/SouthboundCliTestCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "Template Javadoc (as a code comment).",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_f55d004a",
+        "filename": "southbound/southbound-cli/src/main/resources/org/opendaylight/blueprint/southbound-cli.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-02T09:06:15Z",
+      "side": 1,
+      "message": "Why is this repeated?",
+      "revId": "acf8ad7d503a03349f9160f20dd96462262384da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

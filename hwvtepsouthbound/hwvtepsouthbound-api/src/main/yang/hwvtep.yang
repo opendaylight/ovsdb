@@ -486,7 +486,7 @@ module hwvtep {
         }
         leaf src-mac {
             description "Source mac to be used by given tep";
-            type inet:ip-address;
+            type yang:mac-address;
         }
         uses hwvtep-physical-locator-attributes;
     }

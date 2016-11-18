@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.lib.impl;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -43,6 +42,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -96,7 +96,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             = Executors.newCachedThreadPool(connectionNotifierThreadFactory);
 
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
-    private static Map<OvsdbClient, Channel> connections = Maps.newHashMap();
+    private static Map<OvsdbClient, Channel> connections = new ConcurrentHashMap<>();
     private static OvsdbConnection connectionService;
     private static volatile boolean singletonCreated = false;
     private static final int IDLE_READER_TIMEOUT = 30;
@@ -176,6 +176,19 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public void registerConnectionListener(OvsdbConnectionListener listener) {
         LOG.info("registerConnectionListener: registering {}", listener.getClass().getSimpleName());
         connectionListeners.add(listener);
+        notifyAlreadyExistingConnectionsToListener(listener);
+    }
+
+    private void notifyAlreadyExistingConnectionsToListener(final OvsdbConnectionListener listener) {
+        for (final OvsdbClient client : getConnections()) {
+            connectionNotifierService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
+                    listener.connected(client);
+                }
+            });
+        }
     }
 
     @Override

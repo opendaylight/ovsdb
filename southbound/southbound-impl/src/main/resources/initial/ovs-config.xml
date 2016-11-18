@@ -1,0 +1,4 @@
+<ovs-service-config xmlns="urn:opendaylight:yang:ovs:config">
+  <use-ssl>false</use-ssl>
+  <protocols>SSLv2Hello,TLSv1.1,TLSv1.2</protocols>
+</ovs-service-config>

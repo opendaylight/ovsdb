@@ -85,6 +85,7 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "entityOwnershipService").set(ovsdbConnManager, entityOwnershipService);
         field(OvsdbConnectionManager.class, "reconciliationManager").set(ovsdbConnManager, reconciliationManager);
         field(OvsdbConnectionManager.class, "ovsdbConnection").set(ovsdbConnManager, ovsdbConnection);
+        field(OvsdbConnectionManager.class, "useSsl").set(ovsdbConnManager, false);
         entityConnectionMap = new ConcurrentHashMap<>();
 
         externalClient = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);

@@ -36,6 +36,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.ovs.config.rev161116.OvsServiceConfig;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -45,14 +46,17 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 public class SouthboundProviderTest extends AbstractDataBrokerTest {
 
     private EntityOwnershipService entityOwnershipService;
+    private OvsServiceConfig ovsConfig;
 
     @Before
     public void setUp() throws CandidateAlreadyRegisteredException {
         entityOwnershipService = mock(EntityOwnershipService.class);
+        ovsConfig = mock(OvsServiceConfig.class);
         when(entityOwnershipService.registerListener(anyString(), any(EntityOwnershipListener.class))).thenReturn(
                 mock(EntityOwnershipListenerRegistration.class));
         when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(mock(
                 EntityOwnershipCandidateRegistration.class));
+        when(ovsConfig.isUseSsl()).thenReturn(false);
     }
 
     @Test
@@ -66,7 +70,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(SchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class), null, ovsConfig)) {
 
             // Initiate the session
             southboundProvider.init();
@@ -90,7 +94,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(SchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class), null, ovsConfig)) {
 
             southboundProvider.init();
 
@@ -112,7 +116,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(SchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class), null, ovsConfig)) {
 
             southboundProvider.init();
 

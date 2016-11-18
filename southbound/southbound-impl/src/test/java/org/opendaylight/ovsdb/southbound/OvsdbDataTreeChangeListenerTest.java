@@ -46,7 +46,7 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractDataBrokerTest {
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
         listener = new OvsdbDataTreeChangeListener(dataBroker,
                 new OvsdbConnectionManager(dataBroker, new TransactionInvokerImpl(dataBroker), entityOwnershipService,
-                        ovsdbConnection, instanceIdentifierCodec), instanceIdentifierCodec);
+                        ovsdbConnection, instanceIdentifierCodec, null, false), instanceIdentifierCodec);
     }
 
     @Test

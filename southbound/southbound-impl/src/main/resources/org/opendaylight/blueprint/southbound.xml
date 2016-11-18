@@ -13,6 +13,13 @@
     interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
   <reference id="bindingNormalizedNodeSerializer"
     interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer" />
+  <reference id="aaaCertificateManager"
+        interface="org.opendaylight.aaa.cert.api.ICertificateManager"
+        odl:type="default-certificate-manager" />
+
+  <odl:clustered-app-config id="ovsConfig" default-config-file-name="ovs-config.xml"
+                            binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.yang.ovs.config.rev161116.OvsServiceConfig">
+  </odl:clustered-app-config>
 
   <bean id="southboundProvider"
     class="org.opendaylight.ovsdb.southbound.SouthboundProvider"
@@ -22,6 +29,8 @@
     <argument ref="ovsdbConnection" />
     <argument ref="schemaService" />
     <argument ref="bindingNormalizedNodeSerializer" />
+    <argument ref="aaaCertificateManager" />
+    <argument ref="ovsConfig" />
   </bean>
 
 </blueprint>

@@ -9,7 +9,9 @@ package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.concurrent.ExecutionException;
+import org.opendaylight.aaa.cert.api.ICertificateManager;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -27,6 +29,7 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.yang.ovs.config.rev161116.OvsServiceConfig;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -54,17 +57,21 @@ public class SouthboundProvider implements AutoCloseable {
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
+    private volatile ICertificateManager caManager;
+    private final OvsServiceConfig ovsConfig;
 
     public SouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
             final OvsdbConnection ovsdbConnection,
             final SchemaService schemaService,
-            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+            final ICertificateManager caManager, final OvsServiceConfig ovsConfig) {
         this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
-
+        this.caManager = caManager;
+        this.ovsConfig = ovsConfig;
         this.instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService,
                 bindingNormalizedNodeSerializer);
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
@@ -76,7 +83,8 @@ public class SouthboundProvider implements AutoCloseable {
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
         this.txInvoker = new TransactionInvokerImpl(db);
-        cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection, instanceIdentifierCodec);
+        cm = new OvsdbConnectionManager(db,txInvoker,entityOwnershipService, ovsdbConnection, instanceIdentifierCodec,
+                                        caManager, ovsConfig.isUseSsl());
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
 
         //Register listener for entityOnwership changes
@@ -92,7 +100,12 @@ public class SouthboundProvider implements AutoCloseable {
                 EntityOwnershipState ownershipState = ownershipStateOpt.get();
                 if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
                     ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+                    if (ovsConfig.isUseSsl()) {
+                        ovsdbConnection.startOvsdbManagerWithSsl(SouthboundConstants.DEFAULT_OVSDB_PORT,
+                                caManager.getServerContext(), ovsConfig.getProtocols().split(","));
+                    } else {
+                        ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+                    }
                     LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
                 }
             }
@@ -160,7 +173,12 @@ public class SouthboundProvider implements AutoCloseable {
             LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
         }
         ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+        if (ovsConfig.isUseSsl()) {
+            ovsdbConnection.startOvsdbManagerWithSsl(SouthboundConstants.DEFAULT_OVSDB_PORT,
+                    caManager.getServerContext(), ovsConfig.getProtocols().split(","));
+        } else {
+            ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+        }
     }
 
     private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

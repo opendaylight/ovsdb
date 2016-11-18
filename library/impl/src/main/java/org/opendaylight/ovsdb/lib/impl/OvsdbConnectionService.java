@@ -232,12 +232,12 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     @Override
     public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
-                                     final SSLContext sslContext) {
+                                     final SSLContext sslContext, String[] protocols) {
         if (!singletonCreated) {
             new Thread() {
                 @Override
                 public void run() {
-                    ovsdbManagerWithSsl(ovsdbListenPort, sslContext);
+                    ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols);
                 }
             }.start();
             singletonCreated = true;
@@ -252,14 +252,14 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * passive connection handle channel callbacks.
      */
     private static void ovsdbManager(int port) {
-        ovsdbManagerWithSsl(port, null /* SslContext */);
+        ovsdbManagerWithSsl(port, null /* SslContext */, null);
     }
 
     /**
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext) {
+    private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext, final String[] protocols) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -278,7 +278,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                 engine.setUseClientMode(false); // work in a server mode
                                 engine.setNeedClientAuth(true); // need client authentication
                                 //Disable SSLv3, TLSv1 and enable all other supported protocols
-                                String[] protocols = {"SSLv2Hello", "TLSv1.1", "TLSv1.2"};
                                 LOG.debug("Set enable protocols {}", Arrays.toString(protocols));
                                 engine.setEnabledProtocols(protocols);
                                 LOG.debug("Supported ssl protocols {}",

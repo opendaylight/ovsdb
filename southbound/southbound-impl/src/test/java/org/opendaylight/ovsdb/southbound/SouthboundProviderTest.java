@@ -66,7 +66,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(SchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class), null)) {
 
             // Initiate the session
             southboundProvider.init();
@@ -90,7 +90,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(SchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class), null)) {
 
             southboundProvider.init();
 
@@ -112,7 +112,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(SchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class), null)) {
 
             southboundProvider.init();
 

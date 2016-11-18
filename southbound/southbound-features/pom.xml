@@ -45,6 +45,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <restconf.version>1.5.0-SNAPSHOT</restconf.version>
     <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
     <mdsal.model.version>0.10.0-SNAPSHOT</mdsal.model.version>
+    <aaa.version>0.5.0-SNAPSHOT</aaa.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -70,12 +71,28 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.aaa</groupId>
+        <artifactId>features-aaa</artifactId>
+        <version>${aaa.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-yangtools</artifactId>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.aaa</groupId>
+      <artifactId>features-aaa</artifactId>
+      <version>${aaa.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>

@@ -14,10 +14,15 @@
     interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
   <reference id="bindingNormalizedNodeSerializer"
     interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer" />
+  <reference id="aaaCertificateManager"
+        interface="org.opendaylight.aaa.cert.api.ICertificateManager"
+        odl:type="default-certificate-manager" />
 
   <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.southbound" update-strategy="none">
     <cm:default-properties>
       <cm:property name="skip-monitoring-manager-status" value="false"/>
+      <cm:property name="use-ssl" value="false"/>
+      <cm:property name="ssl-protocols" value="SSLv2Hello,TLSv1.1,TLSv1.2"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -32,7 +37,11 @@
     <argument ref="ovsdbConnection" />
     <argument ref="schemaService" />
     <argument ref="bindingNormalizedNodeSerializer" />
+    <argument ref="aaaCertificateManager" />
+    <argument ref="ovsConfig" />
     <property name="skipMonitoringManagerStatus" value="${skip-monitoring-manager-status}"/>
+    <property name="useSsl" value="${use-ssl}"/>
+    <property name="sslProtocols" value="${ssl-protocols}"/>
   </bean>
 
 </blueprint>

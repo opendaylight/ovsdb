@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.aaa.cert.api.ICertificateManager;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -86,11 +87,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
+    private volatile ICertificateManager caManager;
+    private boolean useSsl;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,
                                   EntityOwnershipService entityOwnershipService,
                                   OvsdbConnection ovsdbConnection,
-                                  InstanceIdentifierCodec instanceIdentifierCodec) {
+                                  InstanceIdentifierCodec instanceIdentifierCodec,
+                                  ICertificateManager caManager, boolean useSsl) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
@@ -98,6 +102,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         this.ovsdbConnection = ovsdbConnection;
         this.reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
+        this.caManager = caManager;
+        this.useSsl = useSsl;
     }
 
     @Override
@@ -122,6 +128,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             externalClient.disconnect();
         }
 
+    }
+
+    public void setUseSsl(final boolean flag) {
+        this.useSsl = flag;
     }
 
     public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {
@@ -198,8 +208,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO use transaction chains to handle ordering issues between disconnected
         // TODO and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
-        OvsdbClient client = ovsdbConnection.connect(ip,
-                ovsdbNode.getConnectionInfo().getRemotePort().getValue());
+        OvsdbClient client = null;
+        if (useSsl) {
+            client = ovsdbConnection.connectWithSsl(ip,
+                    ovsdbNode.getConnectionInfo().getRemotePort().getValue(), caManager.getServerContext());
+        } else {
+            client = ovsdbConnection.connect(ip,
+                  ovsdbNode.getConnectionInfo().getRemotePort().getValue());
+        }
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         if (client != null) {

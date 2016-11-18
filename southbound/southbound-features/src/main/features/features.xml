@@ -15,6 +15,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/library-features/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.aaa/features-aaa/{{VERSION}}/xml/features</repository>
+
   <feature name='odl-ovsdb-southbound-api' version='${project.version}' description='OpenDaylight :: southbound :: api '>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-api/{{VERSION}}</bundle>
@@ -22,6 +24,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-ovsdb-southbound-impl' version='${project.version}' description='OpenDaylight :: southbound :: impl '>
     <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${project.version}'>odl-ovsdb-southbound-api</feature>
+    <feature version="${aaa.version}">odl-aaa-cert</feature>
+    <configfile finalname="etc/org.opendaylight.ovsdb.southbound.cfg">mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}/cfg/config</configfile>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.yang-utils/{{VERSION}}</bundle>

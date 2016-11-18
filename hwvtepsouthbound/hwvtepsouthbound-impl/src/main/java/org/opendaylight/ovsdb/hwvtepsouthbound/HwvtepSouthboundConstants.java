@@ -8,6 +8,9 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
@@ -15,6 +18,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 public class HwvtepSouthboundConstants {
 
@@ -31,4 +35,13 @@ public class HwvtepSouthboundConstants {
     public static final String HWVTEP_URI_PREFIX = "hwvtep";
     public static final String PSWITCH_URI_PREFIX = "physicalswitch";
     public static final String LOGICALSWITCH_UUID_PREFIX = "LogicalSwitch_";
+    public static final ImmutableMap<String,String> SKIP_HWVTEP_TABLE
+            = new ImmutableMap.Builder<String,String>()
+            .put("Logical_Binding_Stats", "Update callback registration for Logical_Binding_Stats Table is skipped")
+            .build();
+
+    public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_HWVTEP_TABLE
+            = new ImmutableMap.Builder<String,List<String>>()
+            .put("Manager", Arrays.asList(new String[]{"_version", "status"}))
+            .build();
 }

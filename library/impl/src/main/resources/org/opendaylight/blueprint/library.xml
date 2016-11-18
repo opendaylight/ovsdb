@@ -11,11 +11,17 @@
     specify the property in library.cfg file-->
     <cm:default-properties>
       <cm:property name="ovsdb-rpc-task-timeout" value="1000"/>
+      <cm:property name="use-ssl" value="false"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
+  <reference id="aaaCertificateManager"
+        interface="org.opendaylight.aaa.cert.api.ICertificateManager"
+        odl:type="default-certificate-manager"/>
+
   <bean id="library" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
     <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
+    <property name="useSsl" value="${use-ssl}"/>
   </bean>
 
   <!-- Notify OvsdbConnectionService with any change in the config properties value-->

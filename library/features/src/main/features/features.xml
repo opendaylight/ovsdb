@@ -13,9 +13,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.aaa/features-aaa-cert/{{VERSION}}/xml/features</repository>
+
   <feature name='odl-ovsdb-library' version='${project.version}' description='OpenDaylight :: library'>
     <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <feature version="${aaa.version}">odl-aaa-cert</feature>
     <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
     <!-- Test only (move to another feature) -->
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/{{VERSION}}</bundle>

@@ -66,6 +66,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.aaa</groupId>
+      <artifactId>aaa-cert</artifactId>
+      <version>0.4.3-SNAPSHOT</version>
+    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>

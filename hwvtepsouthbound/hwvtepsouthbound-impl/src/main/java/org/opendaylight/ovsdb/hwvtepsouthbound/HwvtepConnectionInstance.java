@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,14 +124,21 @@ public class HwvtepConnectionInstance {
         if (tables != null) {
             List<MonitorRequest> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
-                LOG.debug("HwvtepSouthbound monitoring table {} in {}", tableName, dbSchema.getName());
-                GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-                Set<String> columns = tableSchema.getColumns();
-                monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
-                        .addColumns(columns)
-                        .with(new MonitorSelect(true, true, true, true)).build());
+                if (!HwvtepSouthboundConstants.SKIP_HWVTEP_TABLE.containsKey(tableName)) {
+                    LOG.info("HwvtepSouthbound monitoring Hwvtep schema table {}", tableName);
+                    GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+                    Set<String> columns = new HashSet<>(tableSchema.getColumns());
+                    List<String> skipColumns = HwvtepSouthboundConstants.SKIP_COLUMN_FROM_HWVTEP_TABLE.get(tableName);
+                    if (skipColumns != null) {
+                        LOG.info("HwvtepSouthbound NOT monitoring columns {} in table {}", skipColumns, tableName);
+                        columns.removeAll(skipColumns);
+                    }
+                    monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
+                            .addColumns(columns)
+                            .with(new MonitorSelect(true, true, true, true)).build());
+                }
             }
-            this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
+            this.callback.update(monitor(dbSchema, monitorRequests, callback), dbSchema);
         } else {
             LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }

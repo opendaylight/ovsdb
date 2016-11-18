@@ -53,6 +53,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLPeerUnverifiedException;
+
+import org.opendaylight.aaa.cert.api.ICertificateManager;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
@@ -63,6 +65,10 @@ import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,6 +108,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
     private static final String OVSDB_RPC_TASK_TIMEOUT_PARAM = "ovsdb-rpc-task-timeout";
+    private static final String SSL_PROTOCOLS = "ssl-protocols";
+    private static final String SSL_CIPHER_SUITES = "ssl-cipher-suites";
+    private static String sslProtocols = "";
+    private static String sslCipherSuites = "";
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
@@ -158,6 +168,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             LOG.warn("Failed to connect {}:{}", address, port, e);
         }
         return null;
+    }
+
+    /**
+     * Connect with SSL using default Certificate manager service SSLContext.
+     * @param address InetAddress
+     * @param port number
+     * @return OvsdbClient with SSL connection
+     */
+    public OvsdbClient connectWithSsl(final InetAddress address, final int port) {
+        return connectWithSsl(address, port, getSslContext());
     }
 
     @Override
@@ -245,12 +265,34 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     @Override
     public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
-                                     final SSLContext sslContext) {
+                                     final SSLContext sslContext, String[] protocols, String[] cipherSuites) {
         if (!singletonCreated) {
             new Thread() {
                 @Override
                 public void run() {
-                    ovsdbManagerWithSsl(ovsdbListenPort, sslContext);
+                    ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites);
+                }
+            }.start();
+            singletonCreated = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Start ovsdb manager with SSL connection using default Certificate manager service SSLContext.
+     * Method that initiates the Passive OVSDB channel listening functionality
+     * with ssl.By default the ovsdb passive connection will listen in port
+     * 6640 which can be overridden using the ovsdb.listenPort system property.
+     */
+    public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort) {
+        if (!singletonCreated) {
+            new Thread() {
+                @Override
+                public void run() {
+                    ovsdbManagerWithSsl(ovsdbListenPort, getSslContext(), sslProtocols.split(","),
+                            sslCipherSuites.split(","));
                 }
             }.start();
             singletonCreated = true;
@@ -265,14 +307,15 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * passive connection handle channel callbacks.
      */
     private static void ovsdbManager(int port) {
-        ovsdbManagerWithSsl(port, null /* SslContext */);
+        ovsdbManagerWithSsl(port, null /* SslContext */, null, null);
     }
 
     /**
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext) {
+    private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext, final String[] protocols,
+            final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -290,23 +333,22 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                 SSLEngine engine = sslContext.createSSLEngine();
                                 engine.setUseClientMode(false); // work in a server mode
                                 engine.setNeedClientAuth(true); // need client authentication
-                                //Disable SSLv3, TLSv1 and enable all other supported protocols
-                                String[] protocols = {"SSLv2Hello", "TLSv1.1", "TLSv1.2"};
-                                LOG.debug("Set enable protocols {}", Arrays.toString(protocols));
-                                engine.setEnabledProtocols(protocols);
-                                LOG.debug("Supported ssl protocols {}",
-                                        Arrays.toString(engine.getSupportedProtocols()));
-                                LOG.debug("Enabled ssl protocols {}",
-                                        Arrays.toString(engine.getEnabledProtocols()));
-                                //Set cipher suites
-                                String[] cipherSuites = {"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
-                                                         "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
-                                                         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
-                                                         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
-                                                         "TLS_RSA_WITH_AES_128_CBC_SHA256"};
-                                engine.setEnabledCipherSuites(cipherSuites);
-                                LOG.debug("Enabled cipher suites {}",
-                                        Arrays.toString(engine.getEnabledCipherSuites()));
+                                if (protocols != null && protocols.length > 0) {
+                                    //Disable SSLv3, TLSv1 and enable all other supported protocols
+                                    LOG.debug("Set enable protocols {}", Arrays.toString(protocols));
+                                    engine.setEnabledProtocols(protocols);
+                                    LOG.debug("Supported ssl protocols {}",
+                                            Arrays.toString(engine.getSupportedProtocols()));
+                                    LOG.debug("Enabled ssl protocols {}",
+                                            Arrays.toString(engine.getEnabledProtocols()));
+                                }
+                                if (cipherSuites != null && cipherSuites.length > 0) {
+                                    //Set cipher suites
+                                    LOG.debug("Set enable cipher suites {}", Arrays.toString(cipherSuites));
+                                    engine.setEnabledCipherSuites(cipherSuites);
+                                    LOG.debug("Enabled cipher suites {}",
+                                            Arrays.toString(engine.getEnabledCipherSuites()));
+                                }
                                 channel.pipeline().addLast("ssl", new SslHandler(engine));
                             }
 
@@ -521,15 +563,55 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         JsonRpcEndpoint.setReaperInterval(timeout);
     }
 
+    /**
+     * Set the supported TLS protocols.
+     *
+     * @param protocols separate by , without space.
+     */
+    public void setSslProtocols(String protocols) {
+        sslProtocols = protocols;
+    }
+
+    /**
+     * Set the supported cipher suites for the TLS communication.
+     *
+     * @param cipherSuites separate by , without space
+     */
+    public void setSslCipherSuites(String cipherSuites) {
+        sslCipherSuites = cipherSuites;
+    }
+
+    /**
+     * Get the SSLContext object from default ICertificateManager service.
+     *
+     * @return SSLContext object.
+     */
+    private static SSLContext getSslContext() {
+        final BundleContext context = FrameworkUtil.getBundle(OvsdbConnectionService.class).getBundleContext();
+        try {
+            Collection<ServiceReference<ICertificateManager>> colSrv =
+                    context.getServiceReferences(ICertificateManager.class, "(type=default-certificate-manager)");
+            if (colSrv != null && !colSrv.isEmpty()) {
+                ServiceReference<ICertificateManager> servReference = colSrv.iterator().next();
+                ICertificateManager certManagerSrv = (ICertificateManager) context.getService(servReference);
+                return certManagerSrv.getServerContext();
+            }
+        } catch (InvalidSyntaxException e) {
+            LOG.error("Error while getServiceReferences", e);
+        }
+        return null;
+    }
+
     public void updateConfigParameter(Map<String, Object> configParameters) {
         LOG.debug("Config parameters received : {}", configParameters.entrySet());
         if (configParameters != null && !configParameters.isEmpty()) {
             for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {
                 if (paramEntry.getKey().equalsIgnoreCase(OVSDB_RPC_TASK_TIMEOUT_PARAM)) {
                     setOvsdbRpcTaskTimeout(Integer.parseInt((String)paramEntry.getValue()));
-
-                    //Please remove the break if you add more config nobs.
-                    break;
+                } else if (paramEntry.getKey().equalsIgnoreCase(SSL_PROTOCOLS)) {
+                    sslProtocols = paramEntry.getValue().toString();
+                } else if (paramEntry.getKey().equalsIgnoreCase(SSL_CIPHER_SUITES)) {
+                    sslCipherSuites = paramEntry.getValue().toString();
                 }
             }
         }

@@ -72,6 +72,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -79,7 +80,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
-
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>features-mdsal-model</artifactId>
@@ -88,7 +88,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>

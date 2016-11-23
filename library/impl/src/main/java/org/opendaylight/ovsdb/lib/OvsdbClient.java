@@ -156,8 +156,7 @@ public interface OvsdbClient {
      *            is just interested in getting ColumnSchema.
      * @return Proxy wrapper for the actual raw Row class.
      */
-    <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
-                                                       final Row<GenericTableSchema> row);
+    <T extends TypedBaseTable<?>> T getTypedRowWrapper(Class<T> klazz, Row<GenericTableSchema> row);
 
     boolean isConnectionPublished();
 

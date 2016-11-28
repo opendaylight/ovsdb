@@ -1,0 +1,495 @@
+{
+  "error": null,
+  "id": "0",
+  "result": {
+    "cksum": "58544667 7319",
+    "name": "hardware_vtep",
+    "tables": {
+      "Arp_Sources_Local": {
+        "columns": {
+          "locator": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              }
+            }
+          },
+          "src_mac": {
+            "type": "string"
+          }
+        },
+        "isRoot": true
+      },
+      "Arp_Sources_Remote": {
+        "columns": {
+          "locator": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              }
+            }
+          },
+          "src_mac": {
+            "type": "string"
+          }
+        },
+        "isRoot": true
+      },
+      "Global": {
+        "columns": {
+          "managers": {
+            "type": {
+              "key": {
+                "refTable": "Manager",
+                "type": "uuid"
+              },
+              "max": "unlimited",
+              "min": 0
+            }
+          },
+          "switches": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Switch",
+                "type": "uuid"
+              },
+              "max": "unlimited",
+              "min": 0
+            }
+          }
+        },
+        "isRoot": true,
+        "maxRows": 1
+      },
+      "Logical_Binding_Stats": {
+        "columns": {
+          "bytes_from_local": {
+            "type": "integer"
+          },
+          "bytes_to_local": {
+            "type": "integer"
+          },
+          "packets_from_local": {
+            "type": "integer"
+          },
+          "packets_to_local": {
+            "type": "integer"
+          }
+        }
+      },
+      "Logical_Router": {
+        "columns": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "static_routes": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "switch_binding": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": {
+                "refTable": "Logical_Switch",
+                "type": "uuid"
+              }
+            }
+          }
+        },
+        "indexes": [
+          [
+            "name"
+          ]
+        ],
+        "isRoot": true
+      },
+      "Logical_Switch": {
+        "columns": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "_uuid": {
+            "type": "string"
+          },
+          "tunnel_key": {
+            "type": {
+              "key": "integer",
+              "min": 0
+            }
+          }
+        },
+        "indexes": [
+          [
+            "name"
+          ]
+        ],
+        "isRoot": true
+      },
+      "Manager": {
+        "columns": {
+          "inactivity_probe": {
+            "type": {
+              "key": "integer",
+              "min": 0
+            }
+          },
+          "is_connected": {
+            "ephemeral": true,
+            "type": "boolean"
+          },
+          "max_backoff": {
+            "type": {
+              "key": {
+                "minInteger": 1000,
+                "type": "integer"
+              },
+              "min": 0
+            }
+          },
+          "other_config": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "status": {
+            "ephemeral": true,
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "indexes": [
+          [
+            "target"
+          ]
+        ]
+      },
+      "Mcast_Macs_Local": {
+        "columns": {
+          "MAC": {
+            "type": "string"
+          },
+          "ipaddr": {
+            "type": "string"
+          },
+          "locator_set": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator_Set",
+                "type": "uuid"
+              }
+            }
+          },
+          "logical_switch": {
+            "type": {
+              "key": {
+                "refTable": "Logical_Switch",
+                "type": "uuid"
+              }
+            }
+          }
+        },
+        "isRoot": true
+      },
+      "Mcast_Macs_Remote": {
+        "columns": {
+          "MAC": {
+            "type": "string"
+          },
+          "ipaddr": {
+            "type": "string"
+          },
+          "locator_set": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator_Set",
+                "type": "uuid"
+              }
+            }
+          },
+          "logical_switch": {
+            "type": {
+              "key": {
+                "refTable": "Logical_Switch",
+                "type": "uuid"
+              }
+            }
+          }
+        },
+        "isRoot": true
+      },
+      "Physical_Locator": {
+        "columns": {
+          "dst_ip": {
+            "mutable": false,
+            "type": "string"
+          },
+          "encapsulation_type": {
+            "mutable": false,
+            "type": {
+              "key": {
+                "enum": "vxlan_over_ipv4",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "indexes": [
+          [
+            "encapsulation_type",
+            "dst_ip"
+          ]
+        ]
+      },
+      "Physical_Locator_Set": {
+        "columns": {
+          "locators": {
+            "mutable": false,
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              },
+              "max": "unlimited"
+            }
+          }
+        }
+      },
+      "Physical_Port": {
+        "columns": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "port_fault_status": {
+            "ephemeral": true,
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0
+            }
+          },
+          "vlan_bindings": {
+            "type": {
+              "key": {
+                "maxInteger": 4095,
+                "minInteger": 0,
+                "type": "integer"
+              },
+              "max": "unlimited",
+              "min": 0,
+              "value": {
+                "refTable": "Logical_Switch",
+                "type": "uuid"
+              }
+            }
+          },
+          "vlan_stats": {
+            "type": {
+              "key": {
+                "maxInteger": 4095,
+                "minInteger": 0,
+                "type": "integer"
+              },
+              "max": "unlimited",
+              "min": 0,
+              "value": {
+                "refTable": "Logical_Binding_Stats",
+                "type": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "Physical_Switch": {
+        "columns": {
+          "description": {
+            "type": "string"
+          },
+          "management_ips": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "ports": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Port",
+                "type": "uuid"
+              },
+              "max": "unlimited",
+              "min": 0
+            }
+          },
+          "switch_fault_status": {
+            "ephemeral": true,
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0
+            }
+          },
+          "tunnel_ips": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0
+            }
+          },
+          "tunnels": {
+            "type": {
+              "key": {
+                "refTable": "Tunnel",
+                "type": "uuid"
+              },
+              "max": "unlimited",
+              "min": 0
+            }
+          }
+        },
+        "indexes": [
+          [
+            "name"
+          ]
+        ]
+      },
+      "Tunnel": {
+        "columns": {
+          "bfd_config_local": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "bfd_config_remote": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "bfd_params": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "bfd_status": {
+            "type": {
+              "key": "string",
+              "max": "unlimited",
+              "min": 0,
+              "value": "string"
+            }
+          },
+          "local": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              }
+            }
+          },
+          "remote": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "Ucast_Macs_Local": {
+        "columns": {
+          "MAC": {
+            "type": "string"
+          },
+          "ipaddr": {
+            "type": "string"
+          },
+          "locator": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              }
+            }
+          },
+          "logical_switch": {
+            "type": {
+              "key": {
+                "refTable": "Logical_Switch",
+                "type": "uuid"
+              }
+            }
+          }
+        },
+        "isRoot": true
+      },
+      "Ucast_Macs_Remote": {
+        "columns": {
+          "MAC": {
+            "type": "string"
+          },
+          "ipaddr": {
+            "type": "string"
+          },
+          "locator": {
+            "type": {
+              "key": {
+                "refTable": "Physical_Locator",
+                "type": "uuid"
+              }
+            }
+          },
+          "logical_switch": {
+            "type": {
+              "key": {
+                "refTable": "Logical_Switch",
+                "type": "uuid"
+              }
+            }
+          }
+        },
+        "isRoot": true
+      }
+    },
+    "version": "1.3.0"
+  }
+}

@@ -9,15 +9,20 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -42,6 +47,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +58,16 @@ import com.google.common.base.Preconditions;
 
 //TODO: need to be optimized, get entry by iid not name
 public class HwvtepOperationalState {
+
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
+
     private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
     private ReadWriteTransaction transaction;
     HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = Maps.newHashMap();
+    private HwvtepDeviceInfo deviceInfo;
+    private HwvtepConnectionInstance connectionInstance;
+    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
+    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
 
     public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
@@ -93,7 +106,17 @@ public class HwvtepOperationalState {
         }
     }
 
-    private Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {
+    public HwvtepOperationalState(HwvtepConnectionInstance connectionInstance) {
+        this.connectionInstance = connectionInstance;
+        this.deviceInfo = connectionInstance.getDeviceInfo();
+        transaction = connectionInstance.getDataBroker().newReadWriteTransaction();
+        Optional<Node> readNode = HwvtepSouthboundUtil.readNode(transaction, connectionInstance.getInstanceIdentifier());
+        if (readNode.isPresent()) {
+            operationalNodes.put(connectionInstance.getInstanceIdentifier(), readNode.get());
+        }
+    }
+
+    public Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
         return Optional.fromNullable(operationalNodes.get(nodeIid));
     }
@@ -173,7 +196,7 @@ public class HwvtepOperationalState {
             List<TerminationPoint> tpList = nodeOptional.get();
             for (TerminationPoint tp : tpList) {
                 HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
-                if (hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
+                if (hppAugmentation != null && hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
                     return Optional.fromNullable(hppAugmentation);
                 }
             }
@@ -189,7 +212,7 @@ public class HwvtepOperationalState {
             List<TerminationPoint> tpList = nodeOptional.get();
             for (TerminationPoint tp : tpList) {
                 HwvtepPhysicalLocatorAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                if (hppAugmentation.getDstIp().equals(dstIp)
+                if (hppAugmentation != null && hppAugmentation.getDstIp().equals(dstIp)
                         && hppAugmentation.getEncapsulationType().equals(encapType)) {
                     return Optional.fromNullable(hppAugmentation);
                 }
@@ -308,4 +331,37 @@ public class HwvtepOperationalState {
     public UUID getPhysicalLocatorInFlight(InstanceIdentifier<TerminationPoint> iid) {
         return inflightLocators.get(iid);
     }
+
+    public HwvtepConnectionInstance getConnectionInstance() {
+        return connectionInstance;
+    }
+
+    public HwvtepDeviceInfo getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void updateCurrentTxData(Class<? extends DataObject> cls, InstanceIdentifier key, UUID uuid) {
+        HwvtepSouthboundUtil.updateData(currentTxUUIDs, cls, key, uuid);
+        deviceInfo.markKeyAsInTransit(cls, key);
+    }
+
+    public void updateCurrentTxDeleteData(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        HwvtepSouthboundUtil.updateData(currentTxDeletedKeys, cls, key, Boolean.TRUE);
+    }
+
+    public UUID getUUIDFromCurrentTx(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        return HwvtepSouthboundUtil.getData(currentTxUUIDs, cls, key);
+    }
+
+    public boolean isKeyPartOfCurrentTx(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        return HwvtepSouthboundUtil.containsKey(currentTxUUIDs, cls, key);
+    }
+
+    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(Class<? extends DataObject> cls) {
+        if (currentTxDeletedKeys.containsKey(cls)) {
+            return currentTxDeletedKeys.get(cls).keySet();
+        }
+        return Collections.EMPTY_SET;
+    }
+
 }

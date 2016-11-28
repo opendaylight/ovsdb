@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommand;
@@ -67,14 +68,16 @@ public class HwvtepConnectionInstance {
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private HwvtepGlobalAugmentation initialCreatedData = null;
     private HwvtepDeviceInfo deviceInfo;
+    private DataBroker dataBroker;
 
     HwvtepConnectionInstance (ConnectionInfo key, OvsdbClient client,
-                              InstanceIdentifier<Node> iid, TransactionInvoker txInvoker) {
+                              InstanceIdentifier<Node> iid, TransactionInvoker txInvoker, DataBroker dataBroker) {
         this.connectionInfo = key;
         this.client = client;
         this.instanceIdentifier = iid;
         this.txInvoker = txInvoker;
-        this.deviceInfo = new HwvtepDeviceInfo();
+        this.deviceInfo = new HwvtepDeviceInfo(this);
+        this.dataBroker = dataBroker;
     }
 
     public void transact(TransactCommand command) {
@@ -153,6 +156,10 @@ public class HwvtepConnectionInstance {
          * Hwvtep doesn't have other_config or external_ids like
          * Open_vSwitch. What else will be needed?
          */
+    }
+
+    public DataBroker getDataBroker() {
+        return dataBroker;
     }
 
     public ListenableFuture<List<String>> getDatabases() {

@@ -215,7 +215,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         hwvtepConnectionInstance = new HwvtepConnectionInstance(key, externalClient, getInstanceIdentifier(key),
-                txInvoker);
+                txInvoker, db);
         hwvtepConnectionInstance.createTransactInvokers();
         return hwvtepConnectionInstance;
     }

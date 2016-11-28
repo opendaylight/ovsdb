@@ -97,16 +97,16 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
          *  topology.rev131021.node.attributes.SupportingNode$StreamWriter: frozen class (cannot edit)
          */
         if (dataBroker == null) {
-            dataBroker = getDataBroker();
+            dataBroker = super.getDataBroker();
         }
         entityOwnershipService = mock(EntityOwnershipService.class);
+        nodeUuid = java.util.UUID.randomUUID().toString();
+        nodeIid = createInstanceIdentifier(nodeUuid);
         loadSchema();
         mockConnectionInstance();
         mockConnectionManager();
         mockOperations();
 
-        nodeUuid = java.util.UUID.randomUUID().toString();
-        nodeIid = createInstanceIdentifier(nodeUuid);
         addNode(OPERATIONAL);
         addNode(CONFIGURATION);
         hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager);
@@ -151,12 +151,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         connectionInstance = PowerMockito.mock(HwvtepConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
         field(HwvtepConnectionInstance.class, "instanceIdentifier").set(connectionInstance, nodeIid);
         field(HwvtepConnectionInstance.class, "txInvoker").set(connectionInstance, transactionInvoker);
-        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo());
+        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
         field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
         when(connectionInstance.getConnectionInfo()).thenReturn(connectionInfo);
         when(connectionInstance.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
         when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
         doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
+        when(connectionInstance.getDataBroker()).thenReturn(dataBroker);
+        when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
         connectionInstance.createTransactInvokers();
     }
 

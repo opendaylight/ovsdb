@@ -8,13 +8,23 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.clearData;
+import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.getData;
+import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.updateData;
 
 /*
  * HwvtepDeviceInfo is used to store some of the table entries received
@@ -35,12 +45,43 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
  *
  */
 public class HwvtepDeviceInfo {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepDeviceInfo.class);
+
+    public static enum DeviceDataStatus {
+        IN_TRANSIT,
+        UNAVAILABLE,
+        AVAILABLE
+    }
+
+    static class DeviceData {
+        InstanceIdentifier key;
+        UUID uuid;
+        Object data;
+        DeviceDataStatus status;
+
+        public DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
+            this.data = data;
+            this.key = key;
+            this.status = status;
+            this.uuid = uuid;
+        }
+    }
+
+    //TODO remove this
     private Map<UUID, LogicalSwitch> logicalSwitches = null;
     private Map<UUID, PhysicalSwitch> physicalSwitches = null;
     private Map<UUID, PhysicalLocator> physicalLocators = null;
     private Map<UUID, UUID> mapTunnelToPhysicalSwitch = null;
 
-    public HwvtepDeviceInfo() {
+    private HwvtepConnectionInstance connectionInstance;
+
+    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, DeviceData>> configKeyVsData = new ConcurrentHashMap<>();
+    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, DeviceData>> opKeyVsData = new ConcurrentHashMap<>();
+    private Map<Class<? extends DataObject>, Map<UUID, Object>> uuidVsData = new ConcurrentHashMap<>();
+
+    public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
+        this.connectionInstance = hwvtepConnectionInstance;
         this.logicalSwitches = new HashMap<>();
         this.physicalSwitches = new HashMap<>();
         this.physicalLocators = new HashMap<>();
@@ -111,4 +152,47 @@ public class HwvtepDeviceInfo {
         return mapTunnelToPhysicalSwitch;
     }
 
+    public boolean isKeyInTransit(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        DeviceData deviceData = getData(opKeyVsData, cls, key);
+        return deviceData != null && DeviceDataStatus.IN_TRANSIT == deviceData.status;
+    }
+
+    public boolean isConfigDataAvailable(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        return getData(configKeyVsData, cls, key) != null;
+    }
+
+    public void updateConfigData(Class<? extends DataObject> cls, InstanceIdentifier key, Object data) {
+        updateData(configKeyVsData, cls, key,
+                new DeviceData(key, null, data, DeviceDataStatus.AVAILABLE));
+    }
+
+    public void clearConfigData(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        clearData(configKeyVsData, cls, key);
+    }
+
+    public void markKeyAsInTransit(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        updateData(opKeyVsData, cls, key,
+                new DeviceData(key, null, null, DeviceDataStatus.IN_TRANSIT));
+    }
+
+    public void updateDeviceOpData(Class<? extends DataObject> cls, InstanceIdentifier key, UUID uuid, Object data) {
+        updateData(opKeyVsData, cls, key,
+                new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE));
+    }
+
+    public void clearDeviceOpData(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        clearData(opKeyVsData, cls, key);
+    }
+
+    public Object getDeviceOpData(Class<? extends DataObject> cls, UUID uuid) {
+        return getData(uuidVsData, cls, uuid);
+    }
+
+    public UUID getUUID(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        DeviceData data = getData(opKeyVsData, cls, key);
+        if (data != null) {
+            return data.uuid;
+        }
+        return null;
+    }
 }

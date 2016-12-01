@@ -67,7 +67,10 @@ public class HwvtepOperationalState {
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
 
-    public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
+    public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
+                                  Collection<DataTreeModification<Node>> changes) {
+        this.connectionInstance = connectionInstance;
+        this.deviceInfo = connectionInstance.getDeviceInfo();
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
             TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
         if (nodeCreateOrUpdate != null) {
@@ -340,7 +343,6 @@ public class HwvtepOperationalState {
 
     public void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid) {
         HwvtepSouthboundUtil.updateData(currentTxUUIDs, cls, key, uuid);
-        deviceInfo.markKeyAsInTransit(cls, key);
     }
 
     public void updateCurrentTxDeleteData(Class<? extends Identifiable> cls, InstanceIdentifier key) {

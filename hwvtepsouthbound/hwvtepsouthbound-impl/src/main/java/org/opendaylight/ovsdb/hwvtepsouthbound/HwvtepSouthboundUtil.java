@@ -28,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -180,5 +181,9 @@ public class HwvtepSouthboundUtil {
         if (map.containsKey(cls)) {
             map.get(cls).remove(key);
         }
+    }
+
+    public static <T> boolean isEmpty(List<T> list) {
+        return list == null || list.isEmpty();
     }
 }

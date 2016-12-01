@@ -184,7 +184,8 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                 changesByConnectionInstance(changes).entrySet()) {
             HwvtepConnectionInstance connectionInstance = changesEntry.getKey();
             connectionInstance.transact(new TransactCommandAggregator(
-                new HwvtepOperationalState(db, changesEntry.getValue()),changesEntry.getValue()));
+                new HwvtepOperationalState(db, connectionInstance, changesEntry.getValue()),changesEntry.getValue()));
+            connectionInstance.getDeviceInfo().onConfigDataAvailable();
         }
     }
 

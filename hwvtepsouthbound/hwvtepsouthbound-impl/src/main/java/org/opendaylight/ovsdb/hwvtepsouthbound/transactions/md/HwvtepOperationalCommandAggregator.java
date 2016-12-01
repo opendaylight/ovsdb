@@ -19,9 +19,11 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 public class HwvtepOperationalCommandAggregator implements TransactionCommand {
 
     private List<TransactionCommand> commands = new ArrayList<>();
+    private final HwvtepConnectionInstance connectionInstance;
 
     public HwvtepOperationalCommandAggregator(HwvtepConnectionInstance key,TableUpdates updates,
             DatabaseSchema dbSchema) {
+        this.connectionInstance = key;
         commands.add(new GlobalUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalSwitchUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepPhysicalSwitchRemoveCommand(key, updates, dbSchema));
@@ -47,5 +49,6 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         for (TransactionCommand command: commands) {
             command.execute(transaction);
         }
+        connectionInstance.getDeviceInfo().onOpDataAvailable();
     }
 }

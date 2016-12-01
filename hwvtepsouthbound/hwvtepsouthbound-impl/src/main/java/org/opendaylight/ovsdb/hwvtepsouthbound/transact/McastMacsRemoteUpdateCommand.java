@@ -8,17 +8,12 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -27,15 +22,25 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
+    private static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
     public McastMacsRemoteUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -191,5 +196,26 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             }
         }
         return result;
+    }
+
+    static class McastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteMcastMacs> {
+
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteMcastMacs data) {
+            if (data == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+        }
+
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteMcastMacs data) {
+            if (data == null || HwvtepSouthboundUtil.isEmpty(data.getLocatorSet())) {
+                return Collections.EMPTY_LIST;
+            }
+            List<InstanceIdentifier<?>> locators = new ArrayList<>();
+            for (LocatorSet locator: data.getLocatorSet()) {
+                locators.add(locator.getLocatorRef().getValue());
+            }
+            return locators;
+        }
     }
 }

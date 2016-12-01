@@ -8,13 +8,15 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class TransactCommandAggregator implements TransactCommand {
 
@@ -44,5 +46,13 @@ public class TransactCommandAggregator implements TransactCommand {
         for (TransactCommand command:commands) {
             command.execute(transaction);
         }
+    }
+
+    @Override
+    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data) {
+    }
+
+    @Override
+    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data) {
     }
 }

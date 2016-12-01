@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
@@ -55,7 +57,7 @@ public class HwvtepDeviceInfo {
         private final Object data;
         private final DeviceDataStatus status;
 
-        public DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
+        DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
             this.data = data;
             this.key = key;
             this.status = status;
@@ -86,6 +88,7 @@ public class HwvtepDeviceInfo {
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> configKeyVsData = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> opKeyVsData = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<UUID, Object>> uuidVsData = new ConcurrentHashMap<>();
+    private DependencyQueue dependencyQueue;
 
     public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
         this.connectionInstance = hwvtepConnectionInstance;
@@ -93,6 +96,7 @@ public class HwvtepDeviceInfo {
         this.physicalSwitches = new HashMap<>();
         this.physicalLocators = new HashMap<>();
         this.mapTunnelToPhysicalSwitch = new HashMap<>();
+        this.dependencyQueue = new DependencyQueue(this);
     }
 
     public void putLogicalSwitch(UUID uuid, LogicalSwitch lSwitch) {
@@ -210,5 +214,17 @@ public class HwvtepDeviceInfo {
             return data.uuid;
         }
         return null;
+    }
+
+    public <T extends Identifiable> void addJobToQueue(DependentJob<T> job) {
+        dependencyQueue.addToQueue(job);
+    }
+
+    public void onConfigDataAvailable() {
+        dependencyQueue.processReadyJobsFromConfigQueue(connectionInstance);
+    }
+
+    public void onOpDataAvailable() {
+        dependencyQueue.processReadyJobsFromOpQueue(connectionInstance);
     }
 }

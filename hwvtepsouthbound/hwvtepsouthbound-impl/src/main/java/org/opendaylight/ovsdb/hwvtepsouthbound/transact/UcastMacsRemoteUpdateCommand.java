@@ -8,14 +8,8 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -27,16 +21,24 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteUcastMacs> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
+    private static final UcastMacUnMetDependencyGetter UCAST_MAC_DATA_VALIDATOR = new UcastMacUnMetDependencyGetter();
 
     public UcastMacsRemoteUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -64,8 +66,30 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
     }
 
     private void updateUcastMacsRemote(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<RemoteUcastMacs> remoteUcastMacs) {
-        for (RemoteUcastMacs remoteUcastMac: remoteUcastMacs) {
+                                       InstanceIdentifier<Node> instanceIdentifier,
+                                       List<RemoteUcastMacs> remoteUcastMacs) {
+        if (remoteUcastMacs == null) {
+            return;
+        }
+        for (RemoteUcastMacs remoteUcastMac : remoteUcastMacs) {
+            onConfigUpdate(transaction, instanceIdentifier, remoteUcastMac);
+        }
+    }
+
+    @Override
+    public void onConfigUpdate(TransactionBuilder transaction,
+                                  InstanceIdentifier<Node> nodeIid,
+                                  RemoteUcastMacs remoteUcastMacs) {
+        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+        //TODO uncommet in next commit
+        //processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
+        doDeviceTransaction(transaction, nodeIid, remoteUcastMacs);
+    }
+
+    @Override
+    public void doDeviceTransaction(TransactionBuilder transaction,
+                                       InstanceIdentifier<Node> instanceIdentifier, RemoteUcastMacs remoteUcastMac) {
             LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
             Optional<RemoteUcastMacs> operationalMacOptional =
                     getOperationalState().getRemoteUcastMacs(instanceIdentifier, remoteUcastMac.getKey());
@@ -75,7 +99,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             setLogicalSwitch(ucastMacsRemote, remoteUcastMac);
             if (!operationalMacOptional.isPresent()) {
                 setMac(ucastMacsRemote, remoteUcastMac, operationalMacOptional);
-                LOG.trace("execute: creating RemotUcastMac entry: {}", ucastMacsRemote);
+                LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.insert(ucastMacsRemote));
                 transaction.add(op.comment("UcastMacRemote: Creating " + remoteUcastMac.getMacEntryKey().getValue()));
             } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
@@ -83,7 +107,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                                 UcastMacsRemote.class, null);
                 extraMac.getUuidColumn().setData(macEntryUUID);
-                LOG.trace("execute: updating RemotUcastMac entry: {}", ucastMacsRemote);
+                LOG.trace("doDeviceTransaction: updating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.update(ucastMacsRemote)
                         .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                         .build());
@@ -92,7 +116,6 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                                 remoteUcastMac.getMacEntryKey().getValue());
             }
-        }
     }
 
     private void setLogicalSwitch(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
@@ -218,5 +241,22 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             }
         }
         return result;
+    }
+
+    static class UcastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteUcastMacs> {
+
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteUcastMacs data) {
+            if (data == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+        }
+
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteUcastMacs data) {
+            if (data == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return Lists.newArrayList(data.getLocatorRef().getValue());
+        }
     }
 }

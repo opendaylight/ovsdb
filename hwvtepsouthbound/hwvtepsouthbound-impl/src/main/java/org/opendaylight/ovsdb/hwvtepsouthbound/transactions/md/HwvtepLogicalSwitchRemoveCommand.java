@@ -23,7 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand {
+public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand<LogicalSwitches> {
 
     public HwvtepLogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -39,7 +39,7 @@ public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
             // TODO Delete any references
             transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            getOvsdbConnectionInstance().getDeviceInfo().removeLogicalSwitch(lSwitch.getUuid());
+            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(LogicalSwitches.class, switchIid);
         }
     }
 

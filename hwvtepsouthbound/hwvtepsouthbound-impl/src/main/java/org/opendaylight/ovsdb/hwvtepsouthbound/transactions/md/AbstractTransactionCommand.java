@@ -12,8 +12,9 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
-public abstract class AbstractTransactionCommand implements TransactionCommand{
+public abstract class AbstractTransactionCommand<T extends DataObject> implements TransactionCommand{
 
     private TableUpdates updates;
     private DatabaseSchema dbSchema;

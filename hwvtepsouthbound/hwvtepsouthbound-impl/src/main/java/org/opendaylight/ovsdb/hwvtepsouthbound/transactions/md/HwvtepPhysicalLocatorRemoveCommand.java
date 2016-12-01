@@ -37,7 +37,8 @@ public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionComma
             final InstanceIdentifier<TerminationPoint> nodePath = HwvtepSouthboundMapper
                     .createInstanceIdentifier(connectionIId, pLoc);
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
-            getOvsdbConnectionInstance().getDeviceInfo().removePhysicalLocator(pLoc.getUuid());
+            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(TerminationPoint.class, nodePath);
+
             //TODO: Check if any cleanup is required
         }
     }

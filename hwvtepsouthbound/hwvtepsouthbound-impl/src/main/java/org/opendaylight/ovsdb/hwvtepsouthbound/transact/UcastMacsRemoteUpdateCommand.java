@@ -77,17 +77,17 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     @Override
     protected void onConfigUpdate(TransactionBuilder transaction,
                                   InstanceIdentifier<Node> nodeIid,
-                                  RemoteUcastMacs remoteUcastMacs) {
+                                  RemoteUcastMacs remoteUcastMacs, Object... extraData) {
         InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
-        //TODO uncommet in next commit
-        //processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
-        doDeviceTransaction(transaction, nodeIid, remoteUcastMacs);
+        processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 
     @Override
     protected void doDeviceTransaction(TransactionBuilder transaction,
-                                       InstanceIdentifier<Node> instanceIdentifier, RemoteUcastMacs remoteUcastMac) {
+                                       InstanceIdentifier<Node> instanceIdentifier,
+                                       RemoteUcastMacs remoteUcastMac,
+                                       Object... extraData) {
         //for (RemoteUcastMacs remoteUcastMac: remoteUcastMacs) {
             LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
             Optional<RemoteUcastMacs> operationalMacOptional =

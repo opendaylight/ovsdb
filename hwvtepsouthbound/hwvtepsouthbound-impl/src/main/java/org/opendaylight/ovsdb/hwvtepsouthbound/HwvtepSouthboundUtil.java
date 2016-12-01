@@ -29,6 +29,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -178,5 +179,9 @@ public class HwvtepSouthboundUtil {
         if (map.containsKey(cls)) {
             map.get(cls).remove(key);
         }
+    }
+
+    public static <T> boolean isEmpty(List<T> list) {
+        return list == null || list.isEmpty();
     }
 }

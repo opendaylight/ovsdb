@@ -8,12 +8,13 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,17 +55,29 @@ public class HwvtepDeviceInfo {
         AVAILABLE
     }
 
-    static class DeviceData {
-        InstanceIdentifier key;
-        UUID uuid;
-        Object data;
-        DeviceDataStatus status;
+    public static class DeviceData {
+        private final InstanceIdentifier key;
+        private final UUID uuid;
+        private final Object data;
+        private final DeviceDataStatus status;
 
-        public DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
+        DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
             this.data = data;
             this.key = key;
             this.status = status;
             this.uuid = uuid;
+        }
+
+        public UUID getUuid() {
+            return uuid;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public DeviceDataStatus getStatus() {
+            return status;
         }
     }
 
@@ -78,7 +91,7 @@ public class HwvtepDeviceInfo {
 
     private Map<Class<? extends DataObject>, Map<InstanceIdentifier, DeviceData>> configKeyVsData = new ConcurrentHashMap<>();
     private Map<Class<? extends DataObject>, Map<InstanceIdentifier, DeviceData>> opKeyVsData = new ConcurrentHashMap<>();
-    private Map<Class<? extends DataObject>, Map<UUID, Object>> uuidVsData = new ConcurrentHashMap<>();
+    private DependencyQueue dependencyQueue;
 
     public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
         this.connectionInstance = hwvtepConnectionInstance;
@@ -86,6 +99,7 @@ public class HwvtepDeviceInfo {
         this.physicalSwitches = new HashMap<>();
         this.physicalLocators = new HashMap<>();
         this.mapTunnelToPhysicalSwitch = new HashMap<>();
+        dependencyQueue = new DependencyQueue(this);
     }
 
     public void putLogicalSwitch(UUID uuid, LogicalSwitch lSwitch) {
@@ -184,8 +198,8 @@ public class HwvtepDeviceInfo {
         clearData(opKeyVsData, cls, key);
     }
 
-    public Object getDeviceOpData(Class<? extends DataObject> cls, UUID uuid) {
-        return getData(uuidVsData, cls, uuid);
+    public DeviceData getDeviceOpData(Class<? extends DataObject> cls, InstanceIdentifier key) {
+        return getData(opKeyVsData, cls, key);
     }
 
     public UUID getUUID(Class<? extends DataObject> cls, InstanceIdentifier key) {
@@ -194,5 +208,17 @@ public class HwvtepDeviceInfo {
             return data.uuid;
         }
         return null;
+    }
+
+    public <T extends DataObject> void addJobToQueue(DependentJob<T> job) {
+        dependencyQueue.addToQueue(job);
+    }
+
+    public void onConfigDataAvailable() {
+        dependencyQueue.processReadyJobsFromConfigQueue(connectionInstance);
+    }
+
+    public void onOpDataAvailable() {
+        dependencyQueue.processReadyJobsFromOpQueue(connectionInstance);
     }
 }

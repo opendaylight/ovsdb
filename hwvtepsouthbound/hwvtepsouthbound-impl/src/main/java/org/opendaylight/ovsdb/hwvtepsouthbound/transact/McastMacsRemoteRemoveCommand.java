@@ -73,6 +73,9 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
                 LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());
             }
+            InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
+                    child(RemoteMcastMacs.class, mac.getKey());
+            updateCurrentTxDeleteData(macIid, mac);
         }
     }
 
@@ -113,6 +116,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
                     if (macListBefore != null) {
                         List<RemoteMcastMacs> macListRemoved = new ArrayList<RemoteMcastMacs>();
                         if (macListUpdated != null) {
+                            macListBefore = new ArrayList<>(macListBefore);
                             macListBefore.removeAll(macListUpdated);
                         }
                         //then exclude updated remoteMcastMacs

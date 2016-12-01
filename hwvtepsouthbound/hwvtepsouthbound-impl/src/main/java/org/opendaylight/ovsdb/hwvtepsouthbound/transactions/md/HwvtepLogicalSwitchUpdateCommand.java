@@ -57,7 +57,11 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(lSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-            getOvsdbConnectionInstance().getDeviceInfo().putLogicalSwitch(lSwitch.getUuid(), lSwitch);
+            InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
+            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, switchIid,
+                    lSwitch.getUuid(), lSwitch);
             // TODO: Delete entries that are no longer needed
         }
     }

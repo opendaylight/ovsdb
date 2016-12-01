@@ -17,7 +17,9 @@ public interface TransactCommand<T extends Identifiable> {
 
     void execute(TransactionBuilder transaction);
 
-    void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data);
+    void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
+                        InstanceIdentifier key, Object... extraData);
 
-    void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data);
+    void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
+                             InstanceIdentifier key, Object... extraData);
 }

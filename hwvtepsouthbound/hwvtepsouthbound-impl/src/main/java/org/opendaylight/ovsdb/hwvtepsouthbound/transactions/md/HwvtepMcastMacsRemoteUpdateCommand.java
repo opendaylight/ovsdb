@@ -39,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSetBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -73,8 +74,19 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
             // Update the connection node to let it know it manages this MCastMacsRemote
             Node connectionNode = buildConnectionNode(mMacRemote);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            InstanceIdentifier<RemoteMcastMacs> macIid = getMacIid(connectionIId, connectionNode);
+            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOpData(RemoteMcastMacs.class,
+                    macIid, mMacRemote.getUuid(), mMacRemote);
             // TODO: Delete entries that are no longer needed
         }
+    }
+
+    InstanceIdentifier<RemoteMcastMacs> getMacIid(InstanceIdentifier<Node> connectionIId, Node connectionNode) {
+        RemoteMcastMacsKey macsKey =
+                connectionNode.getAugmentation(HwvtepGlobalAugmentation.class).getRemoteMcastMacs().get(0).getKey();
+        InstanceIdentifier<RemoteMcastMacs> key = connectionIId.augmentation(HwvtepGlobalAugmentation.class).
+                child(RemoteMcastMacs.class, macsKey);
+        return key;
     }
 
     private Node buildConnectionNode(McastMacsRemote mMacRemote) {

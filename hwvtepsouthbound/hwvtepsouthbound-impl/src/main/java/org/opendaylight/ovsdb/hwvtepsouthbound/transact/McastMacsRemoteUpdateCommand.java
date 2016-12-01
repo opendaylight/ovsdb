@@ -10,10 +10,13 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.lang.reflect.ParameterizedType;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,17 +32,20 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
+public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteMcastMacs> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private static McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
@@ -71,6 +77,26 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
     private void updateMcastMacRemote(TransactionBuilder transaction,
             InstanceIdentifier<Node> instanceIdentifier, List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac: macList) {
+            onConfigUpdate(transaction, instanceIdentifier, mac);
+        }
+    }
+
+    @Override
+    protected void onConfigUpdate(TransactionBuilder transaction,
+                                  InstanceIdentifier<Node> nodeIid,
+                                  RemoteMcastMacs remoteMcastMac,
+                                  Object... extraData) {
+        InstanceIdentifier<RemoteMcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(RemoteMcastMacs.class, remoteMcastMac.getKey());
+        processDependencies(MCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteMcastMac);
+    }
+
+    @Override
+    protected void doDeviceTransaction(TransactionBuilder transaction,
+                                       InstanceIdentifier<Node> instanceIdentifier,
+                                       RemoteMcastMacs mac,
+                                       Object... extraData) {
+        //for (RemoteMcastMacs mac: macList) {
             LOG.debug("Creating remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<RemoteMcastMacs> operationalMacOptional =
                     getOperationalState().getRemoteMcastMacs(instanceIdentifier, mac.getKey());
@@ -97,7 +123,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                                 mac.getMacEntryKey().getValue());
             }
-        }
+        //}
     }
 
     private void setLogicalSwitch(McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac) {

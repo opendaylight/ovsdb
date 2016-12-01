@@ -47,6 +47,13 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
         if (!removeds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created:
                 removeds.entrySet()) {
+                if (created.getValue() != null) {
+                    for (LogicalSwitches lswitch : created.getValue()) {
+                        InstanceIdentifier<LogicalSwitches> lsKey = created.getKey().augmentation(
+                                HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
+                        updateCurrentTxDeleteData(lsKey, lswitch);
+                    }
+                }
                 removeLogicalSwitch(transaction,  created.getKey(), created.getValue());
             }
         }
@@ -109,7 +116,8 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
                     if (lswitchListBefore != null) {
                         List<LogicalSwitches> lswitchListRemoved = new ArrayList<LogicalSwitches>();
                         if (lswitchListUpdated != null) {
-                            lswitchListBefore.removeAll(lswitchListUpdated);
+                            lswitchListBefore = new ArrayList<>(lswitchListBefore);
+                            lswitchListBefore.removeAll(lswitchListUpdated);//operate on copy as it has side effect on LogicalSwitchUpdateCommand
                         }
                         //then exclude updated ones
                         if (lswitchListUpdated != null) {

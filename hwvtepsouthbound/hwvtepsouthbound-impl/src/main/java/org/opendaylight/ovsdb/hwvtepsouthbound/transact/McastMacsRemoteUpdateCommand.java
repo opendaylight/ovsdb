@@ -38,7 +38,7 @@ import java.util.Map.Entry;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
+public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteMcastMacs> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
@@ -70,6 +70,27 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
     private void updateMcastMacRemote(TransactionBuilder transaction,
             InstanceIdentifier<Node> instanceIdentifier, List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac: macList) {
+            onConfigUpdate(transaction, instanceIdentifier, mac, null);
+        }
+    }
+
+    @Override
+    public void onConfigUpdate(TransactionBuilder transaction,
+                                  InstanceIdentifier<Node> nodeIid,
+                                  RemoteMcastMacs remoteMcastMac,
+                                  InstanceIdentifier macKey,
+                                  Object... extraData) {
+        InstanceIdentifier<RemoteMcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(RemoteMcastMacs.class, remoteMcastMac.getKey());
+        processDependencies(MCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteMcastMac);
+    }
+
+    @Override
+    public void doDeviceTransaction(TransactionBuilder transaction,
+                                       InstanceIdentifier<Node> instanceIdentifier,
+                                       RemoteMcastMacs mac,
+                                       InstanceIdentifier macKey,
+                                       Object... extraData) {
             LOG.debug("Creating remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<RemoteMcastMacs> operationalMacOptional =
                     getOperationalState().getRemoteMcastMacs(instanceIdentifier, mac.getKey());
@@ -96,7 +117,6 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                                 mac.getMacEntryKey().getValue());
             }
-        }
     }
 
     private void setLogicalSwitch(McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac) {

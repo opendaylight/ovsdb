@@ -14,6 +14,8 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -99,20 +101,19 @@ public class HwvtepDeviceInfo {
         this.dependencyQueue = new DependencyQueue(this);
     }
 
-    public void putLogicalSwitch(UUID uuid, LogicalSwitch lSwitch) {
-        logicalSwitches.put(uuid, lSwitch);
-    }
-
     public LogicalSwitch getLogicalSwitch(UUID uuid) {
-        return logicalSwitches.get(uuid);
-    }
-
-    public LogicalSwitch removeLogicalSwitch(UUID uuid) {
-        return logicalSwitches.remove(uuid);
+        return (LogicalSwitch) getDeviceOpData(LogicalSwitches.class, uuid);
     }
 
     public Map<UUID, LogicalSwitch> getLogicalSwitches() {
-        return logicalSwitches;
+        Map<UUID, Object> switches = uuidVsData.get(LogicalSwitches.class);
+        Map<UUID, LogicalSwitch> result = new HashMap<>();
+        if (switches != null) {
+            for (Map.Entry<UUID, Object> entry : switches.entrySet()) {
+                result.put(entry.getKey(), (LogicalSwitch) entry.getValue());
+            }
+        }
+        return result;
     }
 
     public void putPhysicalSwitch(UUID uuid, PhysicalSwitch pSwitch) {
@@ -131,20 +132,19 @@ public class HwvtepDeviceInfo {
         return physicalSwitches;
     }
 
-    public void putPhysicalLocator(UUID uuid, PhysicalLocator pLocator) {
-        physicalLocators.put(uuid, pLocator);
-    }
-
     public PhysicalLocator getPhysicalLocator(UUID uuid) {
-        return physicalLocators.get(uuid);
-    }
-
-    public PhysicalLocator removePhysicalLocator(UUID uuid) {
-        return physicalLocators.remove(uuid);
+        return (PhysicalLocator) getDeviceOpData(TerminationPoint.class, uuid);
     }
 
     public Map<UUID, PhysicalLocator> getPhysicalLocators() {
-        return physicalLocators;
+        Map<UUID, Object> locators = uuidVsData.get(LogicalSwitches.class);
+        Map<UUID, PhysicalLocator> result = new HashMap<>();
+        if (locators != null) {
+            for (Map.Entry<UUID, Object> entry : locators.entrySet()) {
+                result.put(entry.getKey(), (PhysicalLocator) entry.getValue());
+            }
+        }
+        return result;
     }
 
     public void putPhysicalSwitchForTunnel(UUID uuid, UUID psUUID) {

@@ -8,6 +8,10 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import java.util.Collection;
+import java.util.Map;
+
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -16,9 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import java.util.Collection;
-import java.util.Map;
 
 public abstract class AbstractTransactCommand<T extends Identifiable> implements TransactCommand<T> {
 
@@ -42,6 +43,12 @@ public abstract class AbstractTransactCommand<T extends Identifiable> implements
         return changes;
     }
 
+    void updateCurrentTxDeleteData(InstanceIdentifier key, T data) {
+        Class<? extends Identifiable> cls = data.getClass();
+        operationalState.updateCurrentTxDeleteData(cls, key);
+        operationalState.getDeviceInfo().clearConfigData(cls, key);
+    }
+
     void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {
         operationalState.updateCurrentTxData(cls, key, uuid);
         operationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
@@ -52,7 +59,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable> implements
                              TransactionBuilder transaction,
                              final InstanceIdentifier<Node> nodeIid,
                              final InstanceIdentifier key,
-                             final T data) {
+                             final T data, final Object... extraData) {
 
         HwvtepDeviceInfo deviceInfo = operationalState.getDeviceInfo();
         Map inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(operationalState, data);
@@ -60,8 +67,15 @@ public abstract class AbstractTransactCommand<T extends Identifiable> implements
         //we can skip the config termination point dependency as we can create them in device as part of this tx
         confingDependencies.remove(TerminationPoint.class);
 
+        //If this key itself is in transit wait for the response of this key itself
+        if (deviceInfo.isKeyInTransit(data.getClass(), key)) {
+            inTransitDependencies.put(data.getClass(), Lists.newArrayList(key));
+        }
+
         if (confingDependencies.isEmpty() && inTransitDependencies.isEmpty()) {
-            doDeviceTransaction(transaction, nodeIid, data);
+            doDeviceTransaction(transaction, nodeIid, data, key, extraData);
+            //TODO put proper uuid
+            updateCurrentTxData(data.getClass(), key, new UUID("uuid"), data);
         }
         if (!confingDependencies.isEmpty()) {
             DependentJob<T> configWaitingJob = new DependentJob.ConfigWaitingJob(
@@ -71,12 +85,13 @@ public abstract class AbstractTransactCommand<T extends Identifiable> implements
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
                                                  TransactionBuilder transactionBuilder) {
                     AbstractTransactCommand.this.operationalState = operationalState;
-                    onConfigUpdate(transactionBuilder, nodeIid, data);
+                    onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
                 }
             };
             deviceInfo.addJobToQueue(configWaitingJob);
         }
         if (inTransitDependencies.size() > 0) {
+
             DependentJob<T> opWaitingJob = new DependentJob.OpWaitingJob(
                     key, data, inTransitDependencies) {
 
@@ -84,18 +99,20 @@ public abstract class AbstractTransactCommand<T extends Identifiable> implements
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
                                                  TransactionBuilder transactionBuilder) {
                     AbstractTransactCommand.this.operationalState = operationalState;
-                    onConfigUpdate(transactionBuilder, nodeIid, data);
+                    onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
                 }
             };
             deviceInfo.addJobToQueue(opWaitingJob);
         }
     }
 
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data) {
+    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
+                                    InstanceIdentifier key, Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data) {
+    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
+                               InstanceIdentifier key, Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 }

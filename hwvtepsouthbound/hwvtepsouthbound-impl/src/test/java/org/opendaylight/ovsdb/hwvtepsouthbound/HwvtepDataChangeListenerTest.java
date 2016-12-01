@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
@@ -72,6 +73,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
             {"FF:FF:FF:FF:FF:FF", "ls1", "192.168.122.10", "192.168.122.30"}
     };
 
+
     @Test
     public <T extends DataObject> void testLogicalSwitchAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
@@ -82,6 +84,8 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     public <T extends DataObject> void testUcastMacAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls0Iid, new UUID("ls0"), "ls0");
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls1Iid, new UUID("ls1"), "ls1");
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
@@ -94,6 +98,8 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     public <T extends DataObject> void testMcastMacAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls0Iid, new UUID("ls0"), "ls0");
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls1Iid, new UUID("ls1"), "ls0");
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
@@ -105,6 +111,8 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     public <T extends DataObject> void testAddMacs() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls0Iid, new UUID("ls0"), "ls0");
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls1Iid, new UUID("ls1"), "ls0");
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);

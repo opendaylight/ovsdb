@@ -49,10 +49,14 @@ public class TransactCommandAggregator implements TransactCommand {
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data) {
+    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data,
+                               InstanceIdentifier key,
+                               Object... extraData) {
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data) {
+    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data,
+                                    InstanceIdentifier key,
+                                    Object... extraData) {
     }
 }

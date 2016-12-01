@@ -72,24 +72,27 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             return;
         }
         for (RemoteUcastMacs remoteUcastMac : remoteUcastMacs) {
-            onConfigUpdate(transaction, instanceIdentifier, remoteUcastMac);
+            onConfigUpdate(transaction, instanceIdentifier, remoteUcastMac, null);
         }
     }
 
     @Override
     public void onConfigUpdate(TransactionBuilder transaction,
                                   InstanceIdentifier<Node> nodeIid,
-                                  RemoteUcastMacs remoteUcastMacs) {
+                                  RemoteUcastMacs remoteUcastMacs,
+                                  InstanceIdentifier macKey,
+                                  Object... extraData) {
         InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
-        //TODO uncommet in next commit
-        //processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
-        doDeviceTransaction(transaction, nodeIid, remoteUcastMacs);
+        processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 
     @Override
     public void doDeviceTransaction(TransactionBuilder transaction,
-                                       InstanceIdentifier<Node> instanceIdentifier, RemoteUcastMacs remoteUcastMac) {
+                                   InstanceIdentifier<Node> instanceIdentifier,
+                                   RemoteUcastMacs remoteUcastMac,
+                                   InstanceIdentifier macKey,
+                                   Object... extraData) {
             LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
             Optional<RemoteUcastMacs> operationalMacOptional =
                     getOperationalState().getRemoteUcastMacs(instanceIdentifier, remoteUcastMac.getKey());

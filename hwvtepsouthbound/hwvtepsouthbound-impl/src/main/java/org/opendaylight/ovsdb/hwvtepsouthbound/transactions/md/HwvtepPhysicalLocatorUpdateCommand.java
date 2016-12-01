@@ -8,9 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -31,7 +29,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Optional;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
 
@@ -79,7 +78,8 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
-                    getOvsdbConnectionInstance().getDeviceInfo().putPhysicalLocator(pLoc.getUuid(), pLoc);
+                    getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOpData(
+                            TerminationPoint.class, tpPath, pLoc.getUuid(), pLoc);
                 }
             }
         }

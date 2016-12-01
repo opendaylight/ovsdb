@@ -34,8 +34,10 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -49,7 +51,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +90,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     String nodeUuid;
     InstanceIdentifier<Node> nodeIid;
+    InstanceIdentifier<LogicalSwitches> ls0Iid;
+    InstanceIdentifier<LogicalSwitches> ls1Iid;
 
     @Before
     public void setupTest() throws Exception {
@@ -103,6 +106,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         entityOwnershipService = mock(EntityOwnershipService.class);
         nodeUuid = java.util.UUID.randomUUID().toString();
         nodeIid = createInstanceIdentifier(nodeUuid);
+        ls0Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
+        ls1Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
         loadSchema();
         mockConnectionInstance();
         mockConnectionManager();

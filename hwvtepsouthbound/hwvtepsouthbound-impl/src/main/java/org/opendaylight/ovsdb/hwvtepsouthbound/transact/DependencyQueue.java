@@ -97,12 +97,12 @@ public class DependencyQueue {
 
                         @Override
                         public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                   Identifiable data) {
+                                                   Identifiable data, InstanceIdentifier key, Object... extraData) {
                         }
 
                         @Override
                         public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                        Identifiable data) {
+                                                        Identifiable data, InstanceIdentifier key, Object... extraData) {
                         }
                     });
                 }

@@ -20,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -52,9 +53,13 @@ public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {
         assertEquals(uuid, resultUuid);
 
         boolean result = opState.getDeviceInfo().isKeyInTransit(LogicalSwitches.class, lsIid);
+        assertFalse(result);
+
+        opState.getDeviceInfo().markKeyAsInTransit(LogicalSwitches.class, lsIid);
+        result = opState.getDeviceInfo().isKeyInTransit(LogicalSwitches.class, lsIid);
         assertTrue(result);
 
-        opState.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, lsIid, uuid, null);
+        opState.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, lsIid, uuid, lsIid);
         result = opState.getDeviceInfo().isKeyInTransit(LogicalSwitches.class, lsIid);
         assertFalse(result);
 

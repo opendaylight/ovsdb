@@ -8,15 +8,8 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -47,14 +40,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 //TODO: need to be optimized, get entry by iid not name
 public class HwvtepOperationalState {
@@ -66,10 +64,13 @@ public class HwvtepOperationalState {
     HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = Maps.newHashMap();
     private HwvtepDeviceInfo deviceInfo;
     private HwvtepConnectionInstance connectionInstance;
-    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
-    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
+    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
+    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
 
-    public HwvtepOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
+    public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
+                                  Collection<DataTreeModification<Node>> changes) {
+        this.connectionInstance = connectionInstance;
+        this.deviceInfo = connectionInstance.getDeviceInfo();
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
             TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
         if (nodeCreateOrUpdate != null) {
@@ -340,24 +341,23 @@ public class HwvtepOperationalState {
         return deviceInfo;
     }
 
-    public void updateCurrentTxData(Class<? extends DataObject> cls, InstanceIdentifier key, UUID uuid) {
+    public void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid) {
         HwvtepSouthboundUtil.updateData(currentTxUUIDs, cls, key, uuid);
-        deviceInfo.markKeyAsInTransit(cls, key);
     }
 
-    public void updateCurrentTxDeleteData(Class<? extends DataObject> cls, InstanceIdentifier key) {
+    public void updateCurrentTxDeleteData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         HwvtepSouthboundUtil.updateData(currentTxDeletedKeys, cls, key, Boolean.TRUE);
     }
 
-    public UUID getUUIDFromCurrentTx(Class<? extends DataObject> cls, InstanceIdentifier key) {
+    public UUID getUUIDFromCurrentTx(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(currentTxUUIDs, cls, key);
     }
 
-    public boolean isKeyPartOfCurrentTx(Class<? extends DataObject> cls, InstanceIdentifier key) {
+    public boolean isKeyPartOfCurrentTx(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.containsKey(currentTxUUIDs, cls, key);
     }
 
-    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(Class<? extends DataObject> cls) {
+    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(Class<? extends Identifiable> cls) {
         if (currentTxDeletedKeys.containsKey(cls)) {
             return currentTxDeletedKeys.get(cls).keySet();
         }

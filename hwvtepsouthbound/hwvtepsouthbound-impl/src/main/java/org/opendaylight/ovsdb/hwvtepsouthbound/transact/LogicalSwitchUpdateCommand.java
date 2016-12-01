@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
@@ -63,6 +65,8 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
     private void updateLogicalSwitch(TransactionBuilder transaction,
             InstanceIdentifier<Node> instanceIdentifier, List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
+            InstanceIdentifier<LogicalSwitches> lsKey = instanceIdentifier.
+                    augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
             LOG.debug("Creating logcial switch named: {}", lswitch.getHwvtepNodeName());
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(instanceIdentifier, lswitch.getKey());
@@ -86,6 +90,8 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
                         .build());
                 transaction.add(op.comment("Logical Switch: Updating " + existingLogicalSwitchName));
             }
+            UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
+            updateCurrentTxData(LogicalSwitches.class, lsKey, lsUuid, lswitch);
         }
     }
 

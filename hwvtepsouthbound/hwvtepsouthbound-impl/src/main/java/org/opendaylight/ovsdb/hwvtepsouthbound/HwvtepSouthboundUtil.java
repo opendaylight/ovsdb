@@ -8,6 +8,9 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -19,7 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
@@ -29,9 +32,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 public class HwvtepSouthboundUtil {
 
@@ -141,7 +144,8 @@ public class HwvtepSouthboundUtil {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, "hw_vtep", ex.getMessage());
     }
 
-    public static <KeyType, D> void updateData(Map<Class<? extends DataObject>, Map<KeyType, D>> map , Class<? extends DataObject> cls, KeyType key, D data) {
+    public static <KeyType, D> void updateData(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
+                                               Class<? extends Identifiable> cls, KeyType key, D data) {
         if (key == null) {
             return;
         }
@@ -151,7 +155,8 @@ public class HwvtepSouthboundUtil {
         map.get(cls).put(key, data);
     }
 
-    public static <KeyType, D> D getData(Map<Class<? extends DataObject>, Map<KeyType, D>> map , Class<? extends DataObject> cls, KeyType key) {
+    public static <KeyType, D> D getData(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
+                                         Class<? extends Identifiable> cls, KeyType key) {
         if (key == null) {
             return null;
         }
@@ -161,7 +166,8 @@ public class HwvtepSouthboundUtil {
         return null;
     }
 
-    public static <KeyType, D> boolean containsKey(Map<Class<? extends DataObject>, Map<KeyType, D>> map , Class<? extends DataObject> cls, KeyType key) {
+    public static <KeyType, D> boolean containsKey(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
+                                                   Class<? extends Identifiable> cls, KeyType key) {
         if (key == null) {
             return false;
         }
@@ -171,12 +177,17 @@ public class HwvtepSouthboundUtil {
         return false;
     }
 
-    public static <KeyType, D> void clearData(Map<Class<? extends DataObject>, Map<KeyType, D>> map , Class<? extends DataObject> cls, KeyType key) {
+    public static <KeyType, D> void clearData(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
+                                              Class<? extends Identifiable> cls, KeyType key) {
         if (key == null) {
             return;
         }
         if (map.containsKey(cls)) {
             map.get(cls).remove(key);
         }
+    }
+
+    public static <T> boolean isEmpty(List<T> list) {
+        return list == null || list.isEmpty();
     }
 }

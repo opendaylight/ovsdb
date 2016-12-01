@@ -11,11 +11,13 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -35,8 +37,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
+public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteUcastMacs> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
+    private static UcastMacUnMetDependencyGetter UCAST_MAC_DATA_VALIDATOR = new UcastMacUnMetDependencyGetter();
 
     public UcastMacsRemoteUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -64,8 +67,28 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
     }
 
     private void updateUcastMacsRemote(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<RemoteUcastMacs> remoteUcastMacs) {
-        for (RemoteUcastMacs remoteUcastMac: remoteUcastMacs) {
+                                       InstanceIdentifier<Node> instanceIdentifier,
+                                       List<RemoteUcastMacs> remoteUcastMacs) {
+        for (RemoteUcastMacs remoteUcastMac : remoteUcastMacs) {
+            onConfigUpdate(transaction, instanceIdentifier, remoteUcastMac);
+        }
+    }
+
+    @Override
+    protected void onConfigUpdate(TransactionBuilder transaction,
+                                  InstanceIdentifier<Node> nodeIid,
+                                  RemoteUcastMacs remoteUcastMacs) {
+        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+        //TODO uncommet in next commit
+        //processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
+        doDeviceTransaction(transaction, nodeIid, remoteUcastMacs);
+    }
+
+    @Override
+    protected void doDeviceTransaction(TransactionBuilder transaction,
+                                       InstanceIdentifier<Node> instanceIdentifier, RemoteUcastMacs remoteUcastMac) {
+        //for (RemoteUcastMacs remoteUcastMac: remoteUcastMacs) {
             LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
             Optional<RemoteUcastMacs> operationalMacOptional =
                     getOperationalState().getRemoteUcastMacs(instanceIdentifier, remoteUcastMac.getKey());
@@ -92,7 +115,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
                 LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                                 remoteUcastMac.getMacEntryKey().getValue());
             }
-        }
+        //}
     }
 
     private void setLogicalSwitch(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
@@ -218,5 +241,22 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand {
             }
         }
         return result;
+    }
+
+    static class UcastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteUcastMacs> {
+
+        List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteUcastMacs data) {
+            if (data == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+        }
+
+        protected List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteUcastMacs data) {
+            if (data == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return Lists.newArrayList(data.getLocatorRef().getValue());
+        }
     }
 }

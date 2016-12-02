@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommand;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -177,16 +179,22 @@ public class HwvtepDeviceInfo {
                 new DeviceData(key, null, data, DeviceDataStatus.AVAILABLE));
     }
 
+    public Object getConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
+    }
+
     public void clearConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         HwvtepSouthboundUtil.clearData(configKeyVsData, cls, key);
     }
 
     public void markKeyAsInTransit(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        LOG.debug("Marking device data as intransit {}", key);
         HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
                 new DeviceData(key, null, null, DeviceDataStatus.IN_TRANSIT));
     }
 
     public void updateDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {
+        LOG.debug("Updating device data {}", key);
         HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
                 new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE));
         HwvtepSouthboundUtil.updateData(uuidVsData, cls, uuid, data);
@@ -226,5 +234,28 @@ public class HwvtepDeviceInfo {
 
     public void onOpDataAvailable() {
         dependencyQueue.processReadyJobsFromOpQueue(connectionInstance);
+    }
+
+    public void scheduleTransaction(final TransactCommand transactCommand) {
+        dependencyQueue.submit(new Runnable() {
+            @Override
+            public void run() {
+                connectionInstance.transact(transactCommand);
+            }
+        });
+    }
+
+    public void clearInTransitData() {
+        //TODO restore old data
+        for (Map<InstanceIdentifier, DeviceData> map : opKeyVsData.values()) {
+            Iterator<Map.Entry<InstanceIdentifier, DeviceData>> iterator = map.entrySet().iterator();
+            while ( iterator.hasNext() ) {
+                Map.Entry<InstanceIdentifier, DeviceData> entry = iterator.next();
+                if (entry.getValue().getStatus() == DeviceDataStatus.IN_TRANSIT) {
+                    iterator.remove();
+                }
+            }
+        }
+        onOpDataAvailable();
     }
 }

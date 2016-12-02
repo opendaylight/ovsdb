@@ -11,12 +11,10 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -24,11 +22,9 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -37,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
+public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalUpdateCommand.class);
 
     public UcastMacsLocalUpdateCommand(HwvtepOperationalState state,
@@ -47,14 +43,6 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> createds =
-                extractCreated(getChanges(),LocalUcastMacs.class);
-        if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LocalUcastMacs>> created:
-                createds.entrySet()) {
-                updateUcastMacsLocal(transaction,  created.getKey(), created.getValue());
-            }
-        }
         Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> updateds =
                 extractUpdated(getChanges(),LocalUcastMacs.class);
         if (!updateds.isEmpty()) {
@@ -161,60 +149,8 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<LocalUcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LocalUcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = TransactUtils.getCreated(mod);
-                if (created != null) {
-                    List<LocalUcastMacs> macListUpdated = null;
-                    HwvtepGlobalAugmentation hgAugmentation = created.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgAugmentation != null) {
-                        macListUpdated = hgAugmentation.getLocalUcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    protected List<LocalUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getLocalUcastMacs();
     }
 
-    private Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> extractUpdated(
-            Collection<DataTreeModification<Node>> changes, Class<LocalUcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LocalUcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<LocalUcastMacs> macListUpdated = null;
-                    List<LocalUcastMacs> macListBefore = null;
-                    HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgUpdated != null) {
-                        macListUpdated = hgUpdated.getLocalUcastMacs();
-                    }
-                    HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgBefore != null) {
-                        macListBefore = hgBefore.getLocalUcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        if (macListBefore != null) {
-                            macListUpdated.removeAll(macListBefore);
-                        }
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
-    }
 }

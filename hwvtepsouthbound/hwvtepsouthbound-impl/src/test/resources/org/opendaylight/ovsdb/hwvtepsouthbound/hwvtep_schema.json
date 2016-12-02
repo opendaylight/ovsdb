@@ -195,6 +195,9 @@
           "ipaddr": {
             "type": "string"
           },
+          "_uuid": {
+            "type": "string"
+          },
           "locator_set": {
             "type": {
               "key": {
@@ -220,6 +223,9 @@
             "type": "string"
           },
           "ipaddr": {
+            "type": "string"
+          },
+          "_uuid": {
             "type": "string"
           },
           "locator_set": {
@@ -257,6 +263,9 @@
             }
           }
         },
+        "_uuid": {
+          "type": "string"
+        },
         "indexes": [
           [
             "encapsulation_type",
@@ -266,6 +275,9 @@
       },
       "Physical_Locator_Set": {
         "columns": {
+          "_uuid": {
+            "type": "string"
+          },
           "locators": {
             "mutable": false,
             "type": {
@@ -281,6 +293,9 @@
       "Physical_Port": {
         "columns": {
           "description": {
+            "type": "string"
+          },
+          "_uuid": {
             "type": "string"
           },
           "name": {
@@ -329,6 +344,9 @@
       "Physical_Switch": {
         "columns": {
           "description": {
+            "type": "string"
+          },
+          "_uuid": {
             "type": "string"
           },
           "management_ips": {
@@ -443,6 +461,9 @@
           "ipaddr": {
             "type": "string"
           },
+          "_uuid": {
+            "type": "string"
+          },
           "locator": {
             "type": {
               "key": {
@@ -469,6 +490,12 @@
           },
           "ipaddr": {
             "type": "string"
+          },
+          "_uuid": {
+            "type": "uuid"
+          },
+          "uuid": {
+            "type": "uuid"
           },
           "locator": {
             "type": {

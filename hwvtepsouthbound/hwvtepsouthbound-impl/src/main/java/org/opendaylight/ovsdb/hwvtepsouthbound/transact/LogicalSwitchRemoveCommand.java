@@ -10,15 +10,14 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -26,13 +25,14 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
+public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalSwitches, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchRemoveCommand.class);
 
     public LogicalSwitchRemoveCommand(HwvtepOperationalState state,
@@ -44,17 +44,32 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalSwitches>> removeds =
                 extractRemoved(getChanges(),LogicalSwitches.class);
-        if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created:
-                removeds.entrySet()) {
-                if (created.getValue() != null) {
+        if (removeds != null) {
+            for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created: removeds.entrySet()) {
+                if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
                     for (LogicalSwitches lswitch : created.getValue()) {
                         InstanceIdentifier<LogicalSwitches> lsKey = created.getKey().augmentation(
                                 HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
-                        updateCurrentTxDeleteData(lsKey, lswitch);
+                        updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
                     }
+                    getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
+                        @Override
+                        public void execute(TransactionBuilder transactionBuilder) {
+                            LOG.debug("Running delete logical switch in seperate tx {}", created.getKey());
+                            removeLogicalSwitch(transactionBuilder, created.getKey(), created.getValue());
+                        }
+
+                        @Override
+                        public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid,
+                                                   Identifiable data, InstanceIdentifier key, Object... extraData) {
+                        }
+
+                        @Override
+                        public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
+                                                        Identifiable data, InstanceIdentifier key, Object... extraData) {
+                        }
+                    });
                 }
-                removeLogicalSwitch(transaction,  created.getKey(), created.getValue());
             }
         }
     }
@@ -80,68 +95,13 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<LogicalSwitches>> extractRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<LogicalSwitches> class1) {
-        Map<InstanceIdentifier<Node>, List<LogicalSwitches>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LogicalSwitches>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                //If the node which logical switches belong to is removed, all logical switches
-                //should be removed too.
-                Node removed = TransactUtils.getRemoved(mod);
-                if (removed != null) {
-                    List<LogicalSwitches> lswitchListRemoved = null;
-                    if (removed.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        lswitchListRemoved = removed.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    }
-                    if (lswitchListRemoved != null) {
-                        result.put(key, lswitchListRemoved);
-                    }
-                }
-                //If the node which logical switches belong to is updated, and logical switches may
-                //be created or updated or deleted, we need to get deleted ones.
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<LogicalSwitches> lswitchListUpdated = null;
-                    List<LogicalSwitches> lswitchListBefore = null;
-                    if (updated.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        lswitchListUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    }
-                    if (before.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        lswitchListBefore = before.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    }
-                    if (lswitchListBefore != null) {
-                        List<LogicalSwitches> lswitchListRemoved = new ArrayList<LogicalSwitches>();
-                        if (lswitchListUpdated != null) {
-                            lswitchListBefore = new ArrayList<>(lswitchListBefore);
-                            lswitchListBefore.removeAll(lswitchListUpdated);//operate on copy as it has side effect on LogicalSwitchUpdateCommand
-                        }
-                        //then exclude updated ones
-                        if (lswitchListUpdated != null) {
-                            for (LogicalSwitches lswitchBefore : lswitchListBefore) {
-                                int i = 0;
-                                for (; i < lswitchListUpdated.size(); i++) {
-                                    if (lswitchBefore.getHwvtepNodeName().equals(lswitchListUpdated.get(i).getHwvtepNodeName())) {
-                                        break;
-                                    }
-                                }
-                                if (i == lswitchListUpdated.size()) {
-                                    lswitchListRemoved.add(lswitchBefore);
-                                }
-                            }
-                        } else {
-                            lswitchListRemoved.addAll(lswitchListBefore);
-                        }
-                        if (!lswitchListRemoved.isEmpty()) {
-                            result.put(key, lswitchListRemoved);
-                        }
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected List<LogicalSwitches> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getLogicalSwitches();
+    }
+
+    @Override
+    protected boolean areEqual(LogicalSwitches a , LogicalSwitches b) {
+        return a.getKey().equals(b.getKey()) && Objects.equals(a.getTunnelKey(), b.getTunnelKey());
     }
 }

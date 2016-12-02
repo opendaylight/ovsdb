@@ -44,15 +44,16 @@ public class TestBuilders {
 
     public static final String VXLAN_OVER_IPV4 = "vxlan_over_ipv4";
 
-    public static void addLogicalSwitches(HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
+    public static List<LogicalSwitches> addLogicalSwitches(HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
         List<LogicalSwitches> logicalSwitcheses = Lists.newArrayList();
         for (String row[] : data) {
             logicalSwitcheses.add(TestBuilders.buildLogicalSwitch(row));
         }
         augmentationBuilder.setLogicalSwitches(logicalSwitcheses);
+        return logicalSwitcheses;
     }
 
-    public static void addRemoteMcastMacs(InstanceIdentifier<Node> iid,
+    public static List<RemoteMcastMacs> addRemoteMcastMacs(InstanceIdentifier<Node> iid,
                                           HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
         List<RemoteMcastMacs> remoteMcastMacses = Lists.newArrayList();
         for (String row[] : data) {
@@ -60,6 +61,7 @@ public class TestBuilders {
             remoteMcastMacses.add(TestBuilders.buildRemoteMcastMacs(iid, row[0], row[1], teps));
         }
         augmentationBuilder.setRemoteMcastMacs(remoteMcastMacses);
+        return remoteMcastMacses;
     }
 
     public static List<RemoteUcastMacs> addRemoteUcastMacs(InstanceIdentifier<Node> iid,

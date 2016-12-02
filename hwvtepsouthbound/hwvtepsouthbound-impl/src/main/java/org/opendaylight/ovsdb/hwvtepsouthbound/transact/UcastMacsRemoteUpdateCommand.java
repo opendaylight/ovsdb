@@ -10,15 +10,21 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -36,7 +42,7 @@ import java.util.Map.Entry;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteUcastMacs> {
+public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
     private static final UcastMacUnMetDependencyGetter UCAST_MAC_DATA_VALIDATOR = new UcastMacUnMetDependencyGetter();
 
@@ -47,14 +53,6 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> createds =
-                extractCreated(getChanges(),RemoteUcastMacs.class);
-        if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteUcastMacs>> created:
-                createds.entrySet()) {
-                updateUcastMacsRemote(transaction,  created.getKey(), created.getValue());
-            }
-        }
         Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> updateds =
                 extractUpdated(getChanges(),RemoteUcastMacs.class);
         if (!updateds.isEmpty()) {
@@ -151,21 +149,11 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
-                //TODO: need to optimize by eliminating reading Configuration datastore
-                //if no, get it from config DS and create id
-                locatorUuid = getOperationalState().getPhysicalLocatorInFlight(iid);
+                locatorUuid = getOperationalState().getUUIDFromCurrentTx(TerminationPoint.class, iid);
                 if (locatorUuid == null) {
-                    Optional<TerminationPoint> configLocatorOptional =
-                            TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
-                    if (configLocatorOptional.isPresent()) {
-                        HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                                configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
-                        getOperationalState().setPhysicalLocatorInFlight(iid, locatorUuid);
-                    } else {
-                        LOG.warn("Create or update remoteUcastMac: No physical locator found in operational datastore!"
-                                + "Its indentifier is {}", inputMac.getLocatorRef().getValue());
-                    }
+                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, getOperationalState(),
+                            (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue());
+                    updateCurrentTxData(TerminationPoint.class, iid, locatorUuid, null);
                 }
             }
             if (locatorUuid != null) {
@@ -189,61 +177,8 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<RemoteUcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<RemoteUcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = TransactUtils.getCreated(mod);
-                if (created != null) {
-                    List<RemoteUcastMacs> macListUpdated = null;
-                    HwvtepGlobalAugmentation hgAugmentation = created.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgAugmentation != null) {
-                        macListUpdated = hgAugmentation.getRemoteUcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    private Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> extractUpdated(
-            Collection<DataTreeModification<Node>> changes, Class<RemoteUcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<RemoteUcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<RemoteUcastMacs> macListUpdated = null;
-                    List<RemoteUcastMacs> macListBefore = null;
-                    HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgUpdated != null) {
-                        macListUpdated = hgUpdated.getRemoteUcastMacs();
-                    }
-                    HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgBefore != null) {
-                        macListBefore = hgBefore.getRemoteUcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        if (macListBefore != null) {
-                            macListUpdated.removeAll(macListBefore);
-                        }
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    protected List<RemoteUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getRemoteUcastMacs();
     }
 
     static class UcastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteUcastMacs> {

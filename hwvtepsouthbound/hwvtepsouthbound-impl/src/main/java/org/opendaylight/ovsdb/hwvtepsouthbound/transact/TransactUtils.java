@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
@@ -29,8 +30,11 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -147,20 +151,9 @@ public class TransactUtils {
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
-                locatorUuid = hwvtepOperationalState.getPhysicalLocatorInFlight(iid);
+                locatorUuid = hwvtepOperationalState.getUUIDFromCurrentTx(TerminationPoint.class, iid);
                 if (locatorUuid == null) {
-                    //if no, get it from config DS and create id
-                    Optional<TerminationPoint> configLocatorOptional =
-                            readNodeFromConfig(hwvtepOperationalState.getReadWriteTransaction(), iid);
-                    if (configLocatorOptional.isPresent()) {
-                        HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                                configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
-                        hwvtepOperationalState.setPhysicalLocatorInFlight(iid, locatorUuid);
-                    } else {
-                        LOG.warn("Create or update localMcastMac: No physical locator found in operational datastore!"
-                                + "Its indentifier is {}", locator.getLocatorRef().getValue());
-                    }
+                    locatorUuid = createPhysicalLocator(transaction, hwvtepOperationalState, iid);
                 }
             }
             if (locatorUuid != null) {
@@ -172,6 +165,27 @@ public class TransactUtils {
         String locatorSetUuid = "PhysicalLocatorSet_" + HwvtepSouthboundMapper.getRandomUUID();
         transaction.add(op.insert(physicalLocatorSet).withId(locatorSetUuid));
         return new UUID(locatorSetUuid);
+    }
+
+    public static UUID createPhysicalLocator(TransactionBuilder transaction, HwvtepOperationalState operationalState,
+                                             InstanceIdentifier<TerminationPoint> iid) {
+        Optional<TerminationPoint> configLocatorOptional = TransactUtils.readNodeFromConfig(
+                operationalState.getReadWriteTransaction(), iid);
+        HwvtepPhysicalLocatorAugmentationBuilder builder = new HwvtepPhysicalLocatorAugmentationBuilder();
+        HwvtepPhysicalLocatorAugmentation locatorAugmentation = null;
+        if (configLocatorOptional.isPresent()) {
+            locatorAugmentation = configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+        } else {
+            builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.class);
+            String tepKey = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
+            String ip = tepKey.substring(tepKey.indexOf(":")+1);
+            builder.setDstIp(new IpAddress(ip.toCharArray()));
+            locatorAugmentation = builder.build();
+        }
+        UUID locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+        operationalState.updateCurrentTxData(TerminationPoint.class, iid, locatorUuid);
+        operationalState.getDeviceInfo().markKeyAsInTransit(TerminationPoint.class, iid);
+        return locatorUuid;
     }
 
     public static UUID createPhysicalLocator(TransactionBuilder transaction, HwvtepPhysicalLocatorAugmentation inputLocator) {

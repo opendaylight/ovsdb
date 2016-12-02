@@ -26,9 +26,11 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoke
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.operations.Comment;
+import org.opendaylight.ovsdb.lib.operations.Delete;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Operations;
+import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -61,6 +63,7 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -184,11 +187,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     void resetOperations() {
         insertOpCapture = ArgumentCaptor.forClass(TypedBaseTable.class);
         Insert insert = mock(Insert.class);
+        Delete delete = mock(Delete.class);
+        Where where = mock(Where.class);
+        when(delete.where(any())).thenReturn(where);
         when(insert.withId(any(String.class))).thenReturn(insert);
         Operations.op = PowerMockito.mock(Operations.class);
-        when(Operations.op.comment(any(String.class))).thenReturn(mock(Comment.class));
         when(Operations.op.insert(insertOpCapture.capture())).thenReturn(insert);
-
+        when(Operations.op.delete(any())).thenReturn(delete);
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);
         when(ovsdbClient.transact(any(DatabaseSchema.class), transactCaptor.capture())).thenReturn(ft);
@@ -209,7 +214,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         tx.submit();
     }
 
-    void addData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
+    Node addData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
                  String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
@@ -226,7 +231,43 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             TestBuilders.addRemoteMcastMacs(nodeIid, builder, data);
         }
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
-        mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
+        return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
+    }
+
+    void deleteData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
+                 String[]... data) {
+        NodeBuilder nodeBuilder = prepareNode(nodeIid);
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
+        if (LogicalSwitches.class == dataObject) {
+            List<LogicalSwitches> logicalSwitches = TestBuilders.addLogicalSwitches(builder, data);
+
+            for (LogicalSwitches ls : logicalSwitches) {
+                InstanceIdentifier<LogicalSwitches> key = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                        child(LogicalSwitches.class, ls.getKey());
+                tx.delete(logicalDatastoreType, key);
+            }
+        }
+        if (TerminationPoint.class == dataObject) {
+            TestBuilders.addGlobalTerminationPoints(nodeBuilder, nodeIid, data);
+        }
+        if (RemoteUcastMacs.class == dataObject) {
+            List<RemoteUcastMacs> macs = TestBuilders.addRemoteUcastMacs(nodeIid, builder, data);
+            for (RemoteUcastMacs mac : macs) {
+                InstanceIdentifier<RemoteUcastMacs> key = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                        child(RemoteUcastMacs.class, mac.getKey());
+                tx.delete(logicalDatastoreType, key);
+            }
+        }
+        if (RemoteMcastMacs.class == dataObject) {
+            List<RemoteMcastMacs> macs = TestBuilders.addRemoteMcastMacs(nodeIid, builder, data);
+            for (RemoteMcastMacs mac : macs) {
+                InstanceIdentifier<RemoteMcastMacs> key = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                        child(RemoteMcastMacs.class, mac.getKey());
+                tx.delete(logicalDatastoreType, key);
+            }
+        }
+        tx.submit();
     }
 
     NodeBuilder prepareNode(InstanceIdentifier<Node> iid) {

@@ -49,6 +49,7 @@ public class DependencyQueue {
      * @return true if it is successfully added to the queue
      */
     public boolean addToQueue(DependentJob waitingJob) {
+        Executors.newCachedThreadPool(threadFact);
         boolean addedToQueue;
         if (waitingJob instanceof DependentJob.ConfigWaitingJob) {
             addedToQueue = configWaitQueue.offer(waitingJob);
@@ -130,5 +131,9 @@ public class DependencyQueue {
 
     public static void close() {
         executorService.shutdown();
+    }
+
+    public void submit(Runnable runnable) {
+        executorService.submit(runnable);
     }
 }

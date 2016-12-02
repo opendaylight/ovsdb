@@ -80,7 +80,7 @@ public class HwvtepConnectionInstance {
         this.dataBroker = dataBroker;
     }
 
-    public void transact(TransactCommand command) {
+    public synchronized void transact(TransactCommand command) {
         for (TransactInvoker transactInvoker: transactInvokers.values()) {
             transactInvoker.invoke(command);
         }

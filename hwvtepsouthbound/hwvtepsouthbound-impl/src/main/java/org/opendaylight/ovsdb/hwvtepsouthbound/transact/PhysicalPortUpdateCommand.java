@@ -61,7 +61,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
             }
         }
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updateds =
-                extractUpdated(getChanges(),HwvtepPhysicalPortAugmentation.class);
+                extractUpdated2(getChanges(),HwvtepPhysicalPortAugmentation.class);
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updated:
                 updateds.entrySet()) {
@@ -217,7 +217,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         return result;
     }
 
-    private Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractUpdated(
+    private Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractUpdated2(
             Collection<DataTreeModification<Node>> changes, Class<HwvtepPhysicalPortAugmentation> class1) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result
             = new HashMap<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>>();

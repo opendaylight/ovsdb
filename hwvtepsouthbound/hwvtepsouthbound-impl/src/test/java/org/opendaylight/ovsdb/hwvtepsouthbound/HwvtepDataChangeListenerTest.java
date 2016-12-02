@@ -9,9 +9,11 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -19,17 +21,20 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +82,10 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
             {"FF:FF:FF:FF:FF:FF", "ls1", "192.168.122.10", "192.168.122.30"}
     };
 
+    String[][] mcastMac2 = new String[][]{
+            {"FF:FF:FF:FF:FF:FF", "ls0", "192.168.122.20", "192.168.122.10"},
+            {"FF:FF:FF:FF:FF:FF", "ls1", "192.168.122.10", "192.168.122.20"}
+    };
 
     @Test
     public <T extends DataObject> void testLogicalSwitchAdd() throws Exception {
@@ -113,7 +122,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testAddMacs() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls0Iid, new UUID("ls0"), "ls0");
         connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls1Iid, new UUID("ls1"), "ls0");
@@ -124,10 +133,60 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        node = new MdsalUtils(dataBroker).read(CONFIGURATION, nodeIid);
+        for ( TerminationPoint tp : node.getTerminationPoint()) {
+            InstanceIdentifier<TerminationPoint> tpIid = nodeIid.child(TerminationPoint.class, tp.getKey());
+            connectionInstance.getDeviceInfo().updateDeviceOpData(TerminationPoint.class, tpIid,
+                    new UUID("tp1"), "tp");
+        }
+        resetOperations();
+        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        //2 mcast mac + 2 locator sets ( termination point already added )
+        verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
+    }
+
+    @Test
+    public <T extends DataObject> void testBackToBackMacsUpdate() throws Exception {
+        Whitebox.setInternalState(DependencyQueue.class, "executorService", MoreExecutors.sameThreadExecutor());
+
+        Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls0Iid, new UUID("ls0"), "ls0");
+        connectionInstance.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, ls1Iid, new UUID("ls1"), "ls0");
+        resetOperations();
+        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+
+        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        node = new MdsalUtils(dataBroker).read(CONFIGURATION, nodeIid);
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
+        verify(Operations.op,  times(0)).insert(Matchers.<McastMacsRemote>any());
+        resetOperations();
+        for ( TerminationPoint tp : node.getTerminationPoint()) {
+            InstanceIdentifier<TerminationPoint> tpIid = nodeIid.child(TerminationPoint.class, tp.getKey());
+            connectionInstance.getDeviceInfo().updateDeviceOpData(TerminationPoint.class, tpIid,
+                    new UUID("tp1"), "tp");
+        }
+        connectionInstance.getDeviceInfo().onOpDataAvailable();
+        //2 mcast mac + 2 locator sets ( termination point already added )
+        verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
+
+        resetOperations();
+        node = addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
+        verify(Operations.op,  times(0)).insert(Matchers.<McastMacsRemote>any());
+        HwvtepGlobalAugmentation augmentation = node.getAugmentation(HwvtepGlobalAugmentation.class);
+        for (RemoteMcastMacs mac : augmentation.getRemoteMcastMacs()) {
+            InstanceIdentifier<RemoteMcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteMcastMacs.class, mac.getKey());
+            connectionInstance.getDeviceInfo().updateDeviceOpData(RemoteMcastMacs.class, macIid,
+                    new UUID("tp1"), "tp");
+        }
+        connectionInstance.getDeviceInfo().onOpDataAvailable();
         verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
     }
 

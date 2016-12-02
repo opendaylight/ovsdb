@@ -209,7 +209,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         tx.submit();
     }
 
-    void addData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
+    Node addData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
                  String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
@@ -226,7 +226,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             TestBuilders.addRemoteMcastMacs(nodeIid, builder, data);
         }
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
-        mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
+        return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
     }
 
     NodeBuilder prepareNode(InstanceIdentifier<Node> iid) {

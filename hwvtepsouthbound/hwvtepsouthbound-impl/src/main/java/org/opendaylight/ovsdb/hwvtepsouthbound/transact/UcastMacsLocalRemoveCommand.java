@@ -10,20 +10,19 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand {
+public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalRemoveCommand.class);
 
     public UcastMacsLocalRemoveCommand(HwvtepOperationalState state,
@@ -75,68 +74,26 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> extractRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<LocalUcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LocalUcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                //If the node which remoteUcastMacs belong to is removed, all remoteUcastMacs should be removed too.
-                Node removed = TransactUtils.getRemoved(mod);
-                if (removed != null) {
-                    List<LocalUcastMacs> macListRemoved = null;
-                    if (removed.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        macListRemoved = removed.getAugmentation(HwvtepGlobalAugmentation.class).getLocalUcastMacs();
-                    }
-                    if (macListRemoved != null) {
-                        result.put(key, macListRemoved);
-                    }
-                }
-                //If the node which remoteUcastMacs belong to is updated, and remoteUcastMacs may
-                //be created or updated or deleted, we need to get deleted ones.
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<LocalUcastMacs> macListUpdated = null;
-                    List<LocalUcastMacs> macListBefore = null;
-                    HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgUpdated != null) {
-                        macListUpdated = hgUpdated.getLocalUcastMacs();
-                    }
-                    HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgBefore != null) {
-                        macListBefore = hgBefore.getLocalUcastMacs();
-                    }
-                    if (macListBefore != null) {
-                        List<LocalUcastMacs> macListRemoved = new ArrayList<LocalUcastMacs>();
-                        if (macListUpdated != null) {
-                            macListBefore.removeAll(macListUpdated);
-                        }
-                        //then exclude updated remoteUcastMacs
-                        if (macListUpdated != null) {
-                            for (LocalUcastMacs macBefore : macListBefore) {
-                                int i = 0;
-                                for (; i < macListUpdated.size(); i++) {
-                                    if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
-                                        break;
-                                    }
-                                }
-                                if (i == macListUpdated.size()) {
-                                    macListRemoved.add(macBefore);
-                                }
-                            }
-                        } else {
-                            macListRemoved.addAll(macListBefore);
-                        }
-                        if (!macListRemoved.isEmpty()) {
-                            result.put(key, macListRemoved);
-                        }
-                    }
-                }
-            }
+    @Override
+    protected List<LocalUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getLocalUcastMacs();
+    }
+
+    @Override
+    protected boolean cascadeDelete() {
+        return true;
+    }
+
+    @Override
+    protected UnMetDependencyGetter getDependencyGetter() {
+        return MAC_DEPENDENCY_GETTER;
+    }
+
+    static UnMetDependencyGetter MAC_DEPENDENCY_GETTER = new McastMacsLocalRemoveCommand.MacDependencyGetter();
+
+    public static class MacDependencyGetter extends UnMetDependencyGetter<LocalUcastMacs> {
+        List<InstanceIdentifier<?>> getLogicalSwitchDependencies(LocalMcastMacs data) {
+            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
         }
-        return result;
     }
 }

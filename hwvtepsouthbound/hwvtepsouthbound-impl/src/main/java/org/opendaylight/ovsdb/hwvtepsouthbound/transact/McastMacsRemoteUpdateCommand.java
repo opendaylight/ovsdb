@@ -9,8 +9,17 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.base.Optional;
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
@@ -28,17 +37,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteMcastMacs> {
+public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
@@ -49,14 +50,6 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> createds =
-                extractCreated(getChanges(),RemoteMcastMacs.class);
-        if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> created:
-                createds.entrySet()) {
-                updateMcastMacRemote(transaction,  created.getKey(), created.getValue());
-            }
-        }
         Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updateds =
                 extractUpdated(getChanges(),RemoteMcastMacs.class);
         if (!updateds.isEmpty()) {
@@ -70,7 +63,10 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     private void updateMcastMacRemote(TransactionBuilder transaction,
             InstanceIdentifier<Node> instanceIdentifier, List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac: macList) {
-            onConfigUpdate(transaction, instanceIdentifier, mac, null);
+            //add / update only if locator set got changed
+            if (!HwvtepSouthboundUtil.isEmpty(mac.getLocatorSet())) {
+                onConfigUpdate(transaction, instanceIdentifier, mac, null);
+            }
         }
     }
 
@@ -161,61 +157,14 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<RemoteMcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<RemoteMcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = TransactUtils.getCreated(mod);
-                if (created != null) {
-                    List<RemoteMcastMacs> macListUpdated = null;
-                    HwvtepGlobalAugmentation hgAugmentation = created.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgAugmentation != null) {
-                        macListUpdated = hgAugmentation.getRemoteMcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected List<RemoteMcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getRemoteMcastMacs();
     }
 
-    private Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> extractUpdated(
-            Collection<DataTreeModification<Node>> changes, Class<RemoteMcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<RemoteMcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<RemoteMcastMacs> macListUpdated = null;
-                    List<RemoteMcastMacs> macListBefore = null;
-                    HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgUpdated != null) {
-                        macListUpdated = hgUpdated.getRemoteMcastMacs();
-                    }
-                    HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgBefore != null) {
-                        macListBefore = hgBefore.getRemoteMcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        if (macListBefore != null) {
-                            macListUpdated.removeAll(macListBefore);
-                        }
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected boolean areEqual(RemoteMcastMacs a, RemoteMcastMacs b) {
+        return a.getKey().equals(b.getKey()) && Objects.equals(a.getLocatorSet(), b.getLocatorSet());
     }
 
     static class McastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteMcastMacs> {

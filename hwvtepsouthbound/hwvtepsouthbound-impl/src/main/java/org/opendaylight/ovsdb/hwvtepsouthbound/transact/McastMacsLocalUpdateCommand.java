@@ -11,12 +11,10 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -34,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
+public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsLocalUpdateCommand.class);
 
     public McastMacsLocalUpdateCommand(HwvtepOperationalState state,
@@ -44,14 +42,6 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> createds =
-                extractCreated(getChanges(),LocalMcastMacs.class);
-        if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LocalMcastMacs>> created:
-                createds.entrySet()) {
-                updateMcastMacsLocal(transaction,  created.getKey(), created.getValue());
-            }
-        }
         Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> updateds =
                 extractUpdated(getChanges(),LocalMcastMacs.class);
         if (!updateds.isEmpty()) {
@@ -137,60 +127,8 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<LocalMcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LocalMcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = TransactUtils.getCreated(mod);
-                if (created != null) {
-                    List<LocalMcastMacs> macListUpdated = null;
-                    HwvtepGlobalAugmentation hgAugmentation = created.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgAugmentation != null) {
-                        macListUpdated = hgAugmentation.getLocalMcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    private Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> extractUpdated(
-            Collection<DataTreeModification<Node>> changes, Class<LocalMcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LocalMcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<LocalMcastMacs> macListUpdated = null;
-                    List<LocalMcastMacs> macListBefore = null;
-                    HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgUpdated != null) {
-                        macListUpdated = hgUpdated.getLocalMcastMacs();
-                    }
-                    HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgBefore != null) {
-                        macListBefore = hgBefore.getLocalMcastMacs();
-                    }
-                    if (macListUpdated != null) {
-                        if (macListBefore != null) {
-                            macListUpdated.removeAll(macListBefore);
-                        }
-                        result.put(key, macListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected List<LocalMcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getLocalMcastMacs();
     }
 }

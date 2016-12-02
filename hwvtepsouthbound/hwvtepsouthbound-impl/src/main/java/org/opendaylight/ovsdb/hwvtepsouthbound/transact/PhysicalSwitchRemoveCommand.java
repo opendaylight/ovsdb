@@ -43,7 +43,7 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
     @Override
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> removeds =
-                extractRemoved(getChanges(),PhysicalSwitchAugmentation.class);
+                extractRemovedSwitches(getChanges(),PhysicalSwitchAugmentation.class);
         if (!removeds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> removed:
                 removeds.entrySet()) {
@@ -76,7 +76,7 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractRemoved(
+    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractRemovedSwitches(
             Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result
             = new HashMap<InstanceIdentifier<Node>, PhysicalSwitchAugmentation>();

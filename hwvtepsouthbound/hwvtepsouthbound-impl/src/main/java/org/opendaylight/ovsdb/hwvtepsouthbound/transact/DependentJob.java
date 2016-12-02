@@ -15,12 +15,13 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class DependentJob<T extends DataObject> {
+public abstract class DependentJob<T extends Identifiable> {
 
     private final long expiryTime;
     private final InstanceIdentifier key;
@@ -81,7 +82,7 @@ public abstract class DependentJob<T extends DataObject> {
         return data;
     }
 
-    public abstract static class ConfigWaitingJob<T extends DataObject> extends DependentJob {
+    public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob {
 
         public ConfigWaitingJob(InstanceIdentifier key, T data, Map dependencies) {
             super(key, data, dependencies);
@@ -93,7 +94,7 @@ public abstract class DependentJob<T extends DataObject> {
         }
     }
 
-    public abstract static class OpWaitingJob<T extends DataObject> extends DependentJob {
+    public abstract static class OpWaitingJob<T extends Identifiable> extends DependentJob {
 
         public OpWaitingJob(InstanceIdentifier key, T data, Map dependencies) {
             super(key, data, dependencies);

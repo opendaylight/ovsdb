@@ -67,7 +67,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             }
         }
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> updated =
-                extractUpdated(getChanges(),PhysicalSwitchAugmentation.class);
+                extractUpdated2(getChanges(),PhysicalSwitchAugmentation.class);
         if (!updated.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
                 updated.entrySet()) {
@@ -316,7 +316,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         return result;
     }
 
-    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdated(
+    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdated2(
             Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result
             = new HashMap<InstanceIdentifier<Node>, PhysicalSwitchAugmentation>();

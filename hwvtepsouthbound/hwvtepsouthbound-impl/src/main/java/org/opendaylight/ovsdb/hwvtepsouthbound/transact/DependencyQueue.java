@@ -27,8 +27,8 @@ import java.util.concurrent.ThreadFactory;
 public class DependencyQueue {
 
     private static final Logger LOG = LoggerFactory.getLogger(DependencyQueue.class);
-    private static final ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("hwvtep-waiting-job-%d").build();
-    private static final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(threadFact);
+    private static ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("hwvtep-waiting-job-%d").build();
+    private static ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(threadFact);
 
     private final LinkedBlockingQueue<DependentJob> configWaitQueue = new LinkedBlockingQueue<>(HwvtepSouthboundConstants.WAITING_QUEUE_CAPACITY);
     private final LinkedBlockingQueue<DependentJob> opWaitQueue = new LinkedBlockingQueue<>(HwvtepSouthboundConstants.WAITING_QUEUE_CAPACITY);
@@ -111,5 +111,9 @@ public class DependencyQueue {
             }
         }
         return readyJobs;
+    }
+
+    public void submit(Runnable runnable) {
+        executorService.submit(runnable);
     }
 }

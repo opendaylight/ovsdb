@@ -45,8 +45,9 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
+        //TODO reuse from base class instead of extractRemovedPorts
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> removeds =
-                extractRemoved(getChanges(),HwvtepPhysicalPortAugmentation.class);
+                extractRemovedPorts(getChanges(), HwvtepPhysicalPortAugmentation.class);
         if (!removeds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> removed:
                 removeds.entrySet()) {
@@ -83,7 +84,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractRemoved(
+    protected Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractRemovedPorts(
             Collection<DataTreeModification<Node>> changes, Class<HwvtepPhysicalPortAugmentation> class1) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result
             = new HashMap<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>>();

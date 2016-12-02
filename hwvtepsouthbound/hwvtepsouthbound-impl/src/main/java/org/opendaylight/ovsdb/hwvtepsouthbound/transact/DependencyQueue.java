@@ -131,4 +131,8 @@ public class DependencyQueue {
     public static void close() {
         executorService.shutdown();
     }
+
+    public void submit(Runnable runnable) {
+        executorService.submit(runnable);
+    }
 }

@@ -12,14 +12,13 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
+public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<RemoteMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteRemoveCommand.class);
 
     public McastMacsRemoteRemoveCommand(HwvtepOperationalState state,
@@ -49,6 +48,24 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
             for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> removed:
                 removeds.entrySet()) {
                 removeMcastMacRemote(transaction,  removed.getKey(), removed.getValue());
+            }
+        }
+        //Remove the ones whose locator set got emptied
+        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updated =
+                extractUpdated(getChanges(),RemoteMcastMacs.class);
+        if (!HwvtepSouthboundUtil.isEmptyMap(updated)) {
+            for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> entry:
+                    updated.entrySet()) {
+                List<RemoteMcastMacs> updatedList = entry.getValue();
+                List<RemoteMcastMacs> tobeRemovedList = new ArrayList<>();
+                if (!HwvtepSouthboundUtil.isEmpty(updatedList)) {
+                    for (RemoteMcastMacs mac: updatedList) {
+                        if (HwvtepSouthboundUtil.isEmpty(mac.getLocatorSet())) {
+                            tobeRemovedList.add(mac);
+                        }
+                    }
+                    removeMcastMacRemote(transaction, entry.getKey(), tobeRemovedList);
+                }
             }
         }
     }
@@ -75,73 +92,17 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand {
             }
             InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
                     child(RemoteMcastMacs.class, mac.getKey());
-            updateCurrentTxDeleteData(macIid, mac);
+            updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> extractRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<RemoteMcastMacs> class1) {
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> result
-            = new HashMap<InstanceIdentifier<Node>, List<RemoteMcastMacs>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                //If the node which remoteMcastMacs belong to is removed, all remoteMcastMacs should be removed too.
-                Node removed = TransactUtils.getRemoved(mod);
-                if (removed != null) {
-                    List<RemoteMcastMacs> macListRemoved = null;
-                    if (removed.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        macListRemoved = removed.getAugmentation(HwvtepGlobalAugmentation.class).getRemoteMcastMacs();
-                    }
-                    if (macListRemoved != null) {
-                        result.put(key, macListRemoved);
-                    }
-                }
-                //If the node which remoteMcastMacs belong to is updated, and remoteMcastMacs may
-                //be created or updated or deleted, we need to get deleted ones.
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<RemoteMcastMacs> macListUpdated = null;
-                    List<RemoteMcastMacs> macListBefore = null;
-                    HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgUpdated != null) {
-                        macListUpdated = hgUpdated.getRemoteMcastMacs();
-                    }
-                    HwvtepGlobalAugmentation hgBefore = before.getAugmentation(HwvtepGlobalAugmentation.class);
-                    if (hgBefore != null) {
-                        macListBefore = hgBefore.getRemoteMcastMacs();
-                    }
-                    if (macListBefore != null) {
-                        List<RemoteMcastMacs> macListRemoved = new ArrayList<RemoteMcastMacs>();
-                        if (macListUpdated != null) {
-                            macListBefore = new ArrayList<>(macListBefore);
-                            macListBefore.removeAll(macListUpdated);
-                        }
-                        //then exclude updated remoteMcastMacs
-                        if (macListUpdated != null) {
-                            for (RemoteMcastMacs macBefore : macListBefore) {
-                                int i = 0;
-                                for (; i < macListUpdated.size(); i++) {
-                                    if (macBefore.getKey().equals(macListUpdated.get(i).getKey())) {
-                                        break;
-                                    }
-                                }
-                                if (i == macListUpdated.size()) {
-                                    macListRemoved.add(macBefore);
-                                }
-                            }
-                        } else {
-                            macListRemoved.addAll(macListBefore);
-                        }
-                        if (!macListRemoved.isEmpty()) {
-                            result.put(key, macListRemoved);
-                        }
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected List<RemoteMcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getRemoteMcastMacs();
+    }
+
+    @Override
+    protected boolean areEqual(RemoteMcastMacs a, RemoteMcastMacs b) {
+        return a.getKey().equals(b.getKey()) && Objects.equals(a.getLocatorSet(), b.getLocatorSet());
     }
 }

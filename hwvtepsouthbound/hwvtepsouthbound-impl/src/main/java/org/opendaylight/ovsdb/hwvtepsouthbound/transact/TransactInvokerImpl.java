@@ -9,10 +9,16 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.List;
+import java.util.Map;
 
+import com.google.common.base.Strings;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.lib.operations.Delete;
+import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +44,21 @@ public class TransactInvokerImpl implements TransactInvoker {
         if (tb.getOperations().size() > 0) {
             try {
                 List<OperationResult> got = result.get();
-                LOG.debug("OVSDB transaction result: {}", got);
+                LOG.debug("HWVTEP transaction result: {}", got);
+                boolean errorOccured = false;
+                if (got != null && got.size() > 0) {
+                    for (OperationResult opResult : got) {
+                        if (!Strings.isNullOrEmpty(opResult.getError())) {
+                            LOG.error("HWVTEP transaction operation failed {} {}",
+                                    opResult.getError(), opResult.getDetails());
+                            errorOccured = true;
+                        }
+                    }
+                }
+                if (errorOccured) {
+                    connectionInstance.getDeviceInfo().clearInTransitData();
+                    printError(tb);
+                }
             } catch (Exception e) {
                 LOG.warn("Transact execution exception: ", e);
             }
@@ -46,4 +66,35 @@ public class TransactInvokerImpl implements TransactInvoker {
         }
     }
 
+    void printError(TransactionBuilder tb) {
+        StringBuffer sb = new StringBuffer();
+        for (Operation op : tb.getOperations()) {
+            if (op instanceof Insert) {
+                Insert insert = (Insert)op;
+                Map row = insert.getRow();
+                sb.append("insert [");
+                if (row != null) {
+                    for (Object key : row.keySet()) {
+                        sb.append(key + " : "+row.get(key)+" , ");
+                    }
+                }
+                sb.append("]   ");
+            } else if (op instanceof Delete) {
+                Delete delete = (Delete)op;
+                sb.append("delete from " );
+                sb.append(delete.getTableSchema().getName());
+            } else if (op instanceof Update) {
+                Update update = (Update)op;
+                sb.append("update [" );
+                Map row = update.getRow();
+                if (row != null) {
+                    for (Object key : row.keySet()) {
+                        sb.append(key + " : "+row.get(key)+" , ");
+                    }
+                }
+                sb.append("]");
+            }
+        }
+        LOG.error("Failed transaction {}", sb);
+    }
 }

@@ -38,7 +38,7 @@ public class GlobalConfigOperationalChangeGetter {
         HwvtepGlobalAugmentationBuilder oldAugmentation = getAugmentationFromNode(opNode);
 
         //fire removal of local ucast macs so that logical switches will be deleted
-        fillLocalMcacsToBeRemoved(oldAugmentation, configNode, opNode);
+        fillLocalMacsToBeRemoved(oldAugmentation, configNode, opNode);
 
         newNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, newAugmentation.build());
         oldNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, oldAugmentation.build());
@@ -46,8 +46,7 @@ public class GlobalConfigOperationalChangeGetter {
         return new DataTreeModificationImpl<Node>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
     }
 
-    static void fillLocalMcacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode,
-                                          Node opNode) {
+    static void fillLocalMacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode, Node opNode) {
         Set<String> logicalSwitchNamesToBeRemoved = getLogicalSwitchesToBeRemoved(configNode, opNode);
         List<LocalUcastMacs> localUcastMacsToBeRemoved = getLocalUcastMacsToBeRemoved(opNode,
                 logicalSwitchNamesToBeRemoved);
@@ -110,9 +109,12 @@ public class GlobalConfigOperationalChangeGetter {
         Set<String> opSwitchNames = new HashSet<>();
         Set<String> cfgSwitchNames = new HashSet<>();
         List<LogicalSwitches> cfgLogicalSwitches = Lists.newArrayList();
+        List<LogicalSwitches> opLogicalSwitches = Lists.newArrayList();
 
-        List<LogicalSwitches> opLogicalSwitches = opNode.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-        if (configNode != null) {
+        if (opNode != null && opNode.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
+            opLogicalSwitches = opNode.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+        }
+        if (configNode != null && configNode.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
             cfgLogicalSwitches = configNode.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
         }
         if (opLogicalSwitches != null) {

@@ -11,16 +11,14 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -34,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
+public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalSwitches, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchUpdateCommand.class);
 
     public LogicalSwitchUpdateCommand(HwvtepOperationalState state,
@@ -44,14 +42,6 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LogicalSwitches>> createds =
-                extractCreated(getChanges(),LogicalSwitches.class);
-        if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created:
-                createds.entrySet()) {
-                updateLogicalSwitch(transaction,  created.getKey(), created.getValue());
-            }
-        }
         Map<InstanceIdentifier<Node>, List<LogicalSwitches>> updateds =
                 extractUpdated(getChanges(),LogicalSwitches.class);
         if (!updateds.isEmpty()) {
@@ -78,6 +68,8 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
                 LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);
                 transaction.add(op.insert(logicalSwitch).withId(TransactUtils.getLogicalSwitchId(lswitch)));
                 transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
+                UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
+                updateCurrentTxData(LogicalSwitches.class, lsKey, lsUuid, lswitch);
             } else {
                 LogicalSwitches updatedLSwitch = operationalSwitchOptional.get();
                 String existingLogicalSwitchName = updatedLSwitch.getHwvtepNodeName().getValue();
@@ -90,8 +82,6 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
                         .build());
                 transaction.add(op.comment("Logical Switch: Updating " + existingLogicalSwitchName));
             }
-            UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
-            updateCurrentTxData(LogicalSwitches.class, lsKey, lsUuid, lswitch);
         }
     }
 
@@ -118,57 +108,13 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<LogicalSwitches>> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<LogicalSwitches> class1) {
-        Map<InstanceIdentifier<Node>, List<LogicalSwitches>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LogicalSwitches>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = TransactUtils.getCreated(mod);
-                if (created != null) {
-                    List<LogicalSwitches> lswitchListUpdated = null;
-                    if (created.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        lswitchListUpdated = created.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    }
-                    if (lswitchListUpdated != null) {
-                        result.put(key, lswitchListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected List<LogicalSwitches> getData(HwvtepGlobalAugmentation augmentation) {
+        return augmentation.getLogicalSwitches();
     }
 
-    private Map<InstanceIdentifier<Node>, List<LogicalSwitches>> extractUpdated(
-            Collection<DataTreeModification<Node>> changes, Class<LogicalSwitches> class1) {
-        Map<InstanceIdentifier<Node>, List<LogicalSwitches>> result
-            = new HashMap<InstanceIdentifier<Node>, List<LogicalSwitches>>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
-                if (updated != null && before != null) {
-                    List<LogicalSwitches> lswitchListUpdated = null;
-                    List<LogicalSwitches> lswitchListBefore = null;
-                    if (updated.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        lswitchListUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    }
-                    if (before.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-                        lswitchListBefore = before.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
-                    }
-                    if (lswitchListUpdated != null) {
-                        if (lswitchListBefore != null) {
-                            lswitchListUpdated.removeAll(lswitchListBefore);
-                        }
-                        result.put(key, lswitchListUpdated);
-                    }
-                }
-            }
-        }
-        return result;
+    @Override
+    protected boolean areEqual(LogicalSwitches a , LogicalSwitches b) {
+        return a.getKey().equals(b.getKey()) && Objects.equals(a.getTunnelKey(), b.getTunnelKey());
     }
 }

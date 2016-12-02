@@ -48,6 +48,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -66,8 +67,8 @@ public class HwvtepOperationalState {
     HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = Maps.newHashMap();
     private HwvtepDeviceInfo deviceInfo;
     private HwvtepConnectionInstance connectionInstance;
-    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
-    private Map<Class<? extends DataObject>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
+    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
+    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
 
     public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
                                   Collection<DataTreeModification<Node>> changes) {
@@ -343,19 +344,19 @@ public class HwvtepOperationalState {
         return deviceInfo;
     }
 
-    public void updateCurrentTxData(Class<? extends DataObject> cls, InstanceIdentifier key, UUID uuid) {
+    public void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid) {
         HwvtepSouthboundUtil.updateData(currentTxUUIDs, cls, key, uuid);
     }
 
-    public void updateCurrentTxDeleteData(Class<? extends DataObject> cls, InstanceIdentifier key) {
+    public void updateCurrentTxDeleteData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         HwvtepSouthboundUtil.updateData(currentTxDeletedKeys, cls, key, Boolean.TRUE);
     }
 
-    public UUID getUUIDFromCurrentTx(Class<? extends DataObject> cls, InstanceIdentifier key) {
+    public UUID getUUIDFromCurrentTx(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(currentTxUUIDs, cls, key);
     }
 
-    public boolean isKeyPartOfCurrentTx(Class<? extends DataObject> cls, InstanceIdentifier key) {
+    public boolean isKeyPartOfCurrentTx(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.containsKey(currentTxUUIDs, cls, key);
     }
 

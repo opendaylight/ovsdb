@@ -22,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -42,7 +43,7 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
     HwvtepOperationalState opState;
     RemoteMcastMacs mac;
     InstanceIdentifier<LogicalSwitches> lsIid;
-    Map<Class<? extends DataObject>, List<InstanceIdentifier>> unMetDependencies;
+    Map<Class<? extends Identifiable>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() {
         MCAST_MAC_DATA_VALIDATOR = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_c75c9728",
+        "filename": "southbound/southbound-cli/src/main/java/org/opendaylight/ovsdb/cli/commands/SouthboundCliTestCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-05T17:35:14Z",
+      "side": 1,
+      "message": "please remove tab.",
+      "revId": "c652b7313c6a32de44900b951625c36cda5c2a01",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

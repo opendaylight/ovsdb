@@ -28,6 +28,7 @@ target-ide/
 .DS_Store
 .checkstyle
 .factorypath
+.tox
 yang-gen-config
 yang-gen-sal
 maven-metadata-local.xml

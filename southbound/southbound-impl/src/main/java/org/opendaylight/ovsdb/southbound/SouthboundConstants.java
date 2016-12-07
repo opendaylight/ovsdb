@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -153,11 +154,12 @@ public class SouthboundConstants {
 
     //Note: _version is an internal column of ovsdb schema, that gets updated
     //with every change in the row of the table.
+    // The "Manager" entry needs to be a modifiable list, SouthboundProvider::setSkipManagerStatus() modifies it
     static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
             .put("Open_vSwitch", Arrays.asList("statistics","_version"))
             .put("Port", Arrays.asList("statistics","_version"))
-            .put("Manager", Collections.singletonList("_version"))
+            .put("Manager", new ArrayList<>(Collections.singletonList("_version")))
             .put("SSL", Collections.singletonList("_version"))
             .put("QoS", Collections.singletonList("_version"))
             .put("Queue", Collections.singletonList("_version"))

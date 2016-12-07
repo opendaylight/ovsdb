@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -48,11 +49,12 @@ public class SouthboundProvider implements AutoCloseable {
     private OvsdbConnectionManager cm;
     private TransactionInvoker txInvoker;
     private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
-    private EntityOwnershipService entityOwnershipService;
+    private final EntityOwnershipService entityOwnershipService;
     private EntityOwnershipCandidateRegistration registration;
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
-    private OvsdbConnection ovsdbConnection;
+    private final OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
+    private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
 
     public SouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
@@ -145,8 +147,8 @@ public class SouthboundProvider implements AutoCloseable {
     }
 
     private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
-        private SouthboundProvider sp;
-        private EntityOwnershipListenerRegistration listenerRegistration;
+        private final SouthboundProvider sp;
+        private final EntityOwnershipListenerRegistration listenerRegistration;
 
         SouthboundPluginInstanceEntityOwnershipListener(SouthboundProvider sp,
                 EntityOwnershipService entityOwnershipService) {
@@ -164,4 +166,24 @@ public class SouthboundProvider implements AutoCloseable {
         }
     }
 
+    public void updateConfigParameter(Map<String, Object> configParameters) {
+        if (configParameters != null && !configParameters.isEmpty()) {
+            LOG.debug("Config parameters received : {}", configParameters.entrySet());
+            for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {
+                if (paramEntry.getKey().equalsIgnoreCase(SKIP_MONITORING_MANAGER_STATUS_PARAM)) {
+                    setSkipMonitoringManagerStatus(Boolean.parseBoolean((String)paramEntry.getValue()));
+                    break;
+                }
+            }
+        }
+    }
+
+    public void setSkipMonitoringManagerStatus(boolean flag) {
+        LOG.debug("skipManagerStatus set to {}", flag);
+        if (flag) {
+            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").add("status");
+        } else {
+            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").remove("status");
+        }
+    }
 }

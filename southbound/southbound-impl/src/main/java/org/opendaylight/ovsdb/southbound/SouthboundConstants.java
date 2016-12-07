@@ -157,7 +157,7 @@ public class SouthboundConstants {
             = new ImmutableMap.Builder<String,List<String>>()
             .put("Open_vSwitch", Arrays.asList("statistics","_version"))
             .put("Port", Arrays.asList("statistics","_version"))
-            .put("Manager", Collections.singletonList("_version"))
+            .put("Manager", Arrays.asList("_version"))
             .put("SSL", Collections.singletonList("_version"))
             .put("QoS", Collections.singletonList("_version"))
             .put("Queue", Collections.singletonList("_version"))
@@ -165,6 +165,8 @@ public class SouthboundConstants {
             .put("Interface", Arrays.asList("statistics","_version"))
             .put("Controller", Arrays.asList("status","_version"))
             .build();
+
+    public static boolean skipManagerStatus = false;
 
     public enum VlanModes {
         ACCESS("access"),

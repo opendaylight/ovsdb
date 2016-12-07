@@ -70,9 +70,9 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
-    private OvsdbClient client;
+    private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
-    private TransactionInvoker txInvoker;
+    private final TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private InstanceIdentifier<Node> instanceIdentifier;
@@ -176,6 +176,10 @@ public class OvsdbConnectionInstance {
                     if (skipColumns != null) {
                         LOG.info("Southbound NOT monitoring columns {} in table {}", skipColumns, tableName);
                         columns.removeAll(skipColumns);
+                    }
+                    if ("Manager".equals(tableName) && SouthboundConstants.skipManagerStatus) {
+                        columns.remove("status");
+                        LOG.info("Southbound configured to NOT monitor column status in table Manager");
                     }
                     monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
                             .addColumns(columns)

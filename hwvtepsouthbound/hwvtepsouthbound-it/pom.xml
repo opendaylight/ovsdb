@@ -134,6 +134,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>hwvtepsouthbound-karaf</artifactId>
       <version>${project.version}</version>
+      <type>tar.gz</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

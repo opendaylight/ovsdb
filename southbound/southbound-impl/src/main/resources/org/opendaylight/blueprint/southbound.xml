@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
   odl:use-default-for-reference-types="true">
 
   <reference id="dataBroker"
@@ -14,14 +15,24 @@
   <reference id="bindingNormalizedNodeSerializer"
     interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer" />
 
+  <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.southbound" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="skip-monitoring-manager-status" value="false"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
   <bean id="southboundProvider"
     class="org.opendaylight.ovsdb.southbound.SouthboundProvider"
     init-method="init" destroy-method="close">
+   <cm:managed-properties persistent-id="org.opendaylight.ovsdb.southbound"
+                           update-strategy="component-managed"
+                           update-method="updateConfigParameter"/>
     <argument ref="dataBroker" />
     <argument ref="eos" />
     <argument ref="ovsdbConnection" />
     <argument ref="schemaService" />
     <argument ref="bindingNormalizedNodeSerializer" />
+    <property name="skipMonitoringManagerStatus" value="${skip-monitoring-manager-status}"/>
   </bean>
 
 </blueprint>

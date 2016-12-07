@@ -70,9 +70,9 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
-    private OvsdbClient client;
+    private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
-    private TransactionInvoker txInvoker;
+    private final TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private InstanceIdentifier<Node> instanceIdentifier;

@@ -50,5 +50,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${project.version}">odl-ovsdb-southbound-impl</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.mdsal-utils/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/utils.southbound-utils/{{VERSION}}</bundle>
+    <configfile finalname="etc/org.opendaylight.ovsdb.southbound.cfg">mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}/cfg/config</configfile>
   </feature>
 </features>

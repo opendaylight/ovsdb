@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_37ce545b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-12-07T00:31:06Z",
+      "side": 1,
+      "message": "Need some inputs on better way to do this. I\u0027d prefer to retain the existing logic as is and have config change add/remove to column list. I tried couple things but didn\u0027t work out.",
+      "range": {
+        "startLine": 180,
+        "startChar": 20,
+        "endLine": 183,
+        "endChar": 21
+      },
+      "revId": "0dc415ad2db7e2d54bf97afcb0884a75524fa2ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -206,6 +206,34 @@ module ovsdb {
             type boolean;
         }
 
+        list bridge_status {
+            description
+                "These key-value pairs reports the status of 802.1D-1998.
+                They are present only if STP is enabled (via the stp_enable column).
+
+                status : stp_bridge_id: optional string
+                    The bridge ID used in spanning tree advertisements, in the form xxxx.yyyyyyyyyyyy where the xs
+                    are the STP priority, the ys are the STP system ID, and each x and y is a hex digit.
+
+                status : stp_designated_root: optional string
+                    The designated root for this spanning tree, in the same form as status:stp_bridge_id. If this
+                    bridge is the root, this will have the same value as status:stp_bridge_id, otherwise it will differ.
+
+                status : stp_root_path_cost: optional string
+                    The path cost of reaching the designated bridge. A lower number is better. The value is 0 if this
+                    bridge is the root, otherwise it is higher.";
+
+            key "bridge-status-key";
+            leaf bridge-status-key {
+                description "bridge-status name/key";
+                type string;
+            }
+            leaf bridge-status-value {
+                description "bridge-status value";
+                type string;
+            }
+        }
+
         list bridge-external-ids {
             description
                "Key-value pairs for use by external frameworks that integrate

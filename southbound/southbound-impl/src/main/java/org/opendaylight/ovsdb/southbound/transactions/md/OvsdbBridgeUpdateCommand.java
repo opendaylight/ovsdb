@@ -55,6 +55,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeStatusBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
@@ -237,7 +239,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setOpenFlowNodeRef(ovsdbBridgeAugmentationBuilder, bridge);
         setManagedBy(ovsdbBridgeAugmentationBuilder);
         setAutoAttach(ovsdbBridgeAugmentationBuilder, bridge);
-        setStpEnalbe(ovsdbBridgeAugmentationBuilder,bridge);
+        setStpEnable(ovsdbBridgeAugmentationBuilder,bridge);
+        setStatus(ovsdbBridgeAugmentationBuilder,bridge);
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
         LOG.debug("Built with the intent to store bridge data {}",
@@ -342,12 +345,40 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private void setStpEnable(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               Bridge bridge) {
         if (bridge.getStpEnableColumn() != null) {
             Boolean stpEnable = bridge.getStpEnableColumn().getData();
             if (stpEnable != null) {
                 ovsdbBridgeAugmentationBuilder.setStpEnable(stpEnable);
+            }
+        }
+    }
+
+    private void setStatus(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                           Bridge bridge) {
+        if (bridge.getStatusColumn() != null && bridge.getStpEnableColumn() != null) {
+            Map<String, String> status = bridge
+                    .getStatusColumn().getData();
+            boolean stpEnable = bridge.getStpEnableColumn().getData();
+            if (!stpEnable) {
+                LOG.warn("STP is disabled");
+                return;
+            }
+            if (status != null && !status.isEmpty()) {
+                Set<String> statusKeys = status.keySet();
+                List<BridgeStatus> statusList = new ArrayList<>();
+                String statusValue;
+                for (String statusKey : statusKeys) {
+                    statusValue = status.get(statusKey);
+                    if (statusKey != null && statusValue != null) {
+                        statusList.add(new BridgeStatusBuilder()
+                                .setBridgeStatusKey(statusKey)
+                                .setBridgeStatusValue(statusValue)
+                                .build());
+                    }
+                }
+                ovsdbBridgeAugmentationBuilder.setBridgeStatus(statusList);
             }
         }
     }

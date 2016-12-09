@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_74eefded",
+        "filename": "docs/conf.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-09T07:46:35Z",
+      "side": 1,
+      "message": "vishal, i think we should add all the existing committer (stephen is missing).",
+      "range": {
+        "startLine": 53,
+        "startChar": 10,
+        "endLine": 53,
+        "endChar": 48
+      },
+      "revId": "4c784fe8fe25b187c8314538e868a44af93c3b54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

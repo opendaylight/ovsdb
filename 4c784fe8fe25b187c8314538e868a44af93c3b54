@@ -22,6 +22,30 @@
       "revId": "4c784fe8fe25b187c8314538e868a44af93c3b54",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_94f2b998",
+        "filename": "docs/conf.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-12-09T08:05:58Z",
+      "side": 1,
+      "message": "Done. We didn\u0027t have all mentioned in Genius and Netvirt so followed same, but for OVSDB since it is just four of us, makes sense.",
+      "parentUuid": "1a622d24_74eefded",
+      "range": {
+        "startLine": 53,
+        "startChar": 10,
+        "endLine": 53,
+        "endChar": 48
+      },
+      "revId": "4c784fe8fe25b187c8314538e868a44af93c3b54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

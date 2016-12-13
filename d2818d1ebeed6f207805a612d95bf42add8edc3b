@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_b431b5a4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconciliationTask.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-09T07:36:37Z",
+      "side": 1,
+      "message": "please limit it within 120 char.",
+      "range": {
+        "startLine": 91,
+        "startChar": 113,
+        "endLine": 91,
+        "endChar": 139
+      },
+      "revId": "d2818d1ebeed6f207805a612d95bf42add8edc3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_914650be",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/DataChangeListenerTestBase.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-08T07:13:44Z",
+      "side": 1,
+      "message": "remove tab.",
+      "revId": "c0cad97bdf491468bd12c7df12766f403b44e5fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

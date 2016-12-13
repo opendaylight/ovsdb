@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a622d24_5981a349",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-11-28T13:08:14Z",
+      "side": 1,
+      "message": "Please don\u0027t do this, it ties the test to the implementation. The test should check that the relevant data is present in the MD-SAL, not how it was inserted.",
+      "revId": "d484ebed649ba7ea8872133987ad98cbc40f8b56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_1dca5c4f",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListenerTest.java",
         "patchSetId": 3

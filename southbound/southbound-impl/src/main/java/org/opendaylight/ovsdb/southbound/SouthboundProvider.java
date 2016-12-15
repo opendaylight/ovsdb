@@ -28,7 +28,6 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -115,31 +114,13 @@ public class SouthboundProvider implements AutoCloseable {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
-        initializeTopology(type);
         ReadWriteTransaction transaction = db.newReadWriteTransaction();
         CheckedFuture<Optional<Topology>, ReadFailedException> ovsdbTp = transaction.read(type, path);
         try {
             if (!ovsdbTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID);
-                transaction.put(type, path, tpb.build());
-                transaction.submit();
-            } else {
-                transaction.cancel();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Error initializing ovsdb topology", e);
-        }
-    }
-
-    private void initializeTopology(LogicalDatastoreType type) {
-        ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
-        CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
-        try {
-            if (!topology.get().isPresent()) {
-                NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
-                transaction.put(type,path,ntb.build());
+                transaction.put(type, path, tpb.build(), true);
                 transaction.submit();
             } else {
                 transaction.cancel();

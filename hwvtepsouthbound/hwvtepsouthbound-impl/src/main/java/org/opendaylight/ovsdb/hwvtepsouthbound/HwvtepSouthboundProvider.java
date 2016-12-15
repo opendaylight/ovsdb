@@ -128,31 +128,13 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
-        initializeTopology(type);
         ReadWriteTransaction transaction = db.newReadWriteTransaction();
         CheckedFuture<Optional<Topology>, ReadFailedException> hwvtepTp = transaction.read(type, path);
         try {
             if (!hwvtepTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
-                transaction.put(type, path, tpb.build());
-                transaction.submit();
-            } else {
-                transaction.cancel();
-            }
-        } catch (Exception e) {
-            LOG.error("Error initializing hwvtep topology", e);
-        }
-    }
-
-    private void initializeTopology(LogicalDatastoreType type) {
-        ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
-        CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
-        try {
-            if (!topology.get().isPresent()) {
-                NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
-                transaction.put(type,path,ntb.build());
+                transaction.put(type, path, tpb.build(), true);
                 transaction.submit();
             } else {
                 transaction.cancel();

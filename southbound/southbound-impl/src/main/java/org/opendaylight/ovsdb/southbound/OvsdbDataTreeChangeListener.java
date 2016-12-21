@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.southbound;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -181,20 +182,21 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
     }
 
     private void updateData(@Nonnull Collection<DataTreeModification<Node>> changes) {
-        for (Entry<InstanceIdentifier<Node>, OvsdbConnectionInstance> connectionInstanceEntry :
-                connectionInstancesFromChanges(changes).entrySet()) {
-            OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getValue();
+        for (Entry<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> connectionInstanceEntry :
+                changesPerConnectionInstance(changes).entrySet()) {
+            OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
             connectionInstance.transact(new TransactCommandAggregator(),
-                    new BridgeOperationalState(db, changes), changes, instanceIdentifierCodec);
+                    new BridgeOperationalState(db, connectionInstanceEntry.getValue()),
+                    connectionInstanceEntry.getValue(), instanceIdentifierCodec);
         }
     }
 
-    private Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> connectionInstancesFromChanges(
+    private Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> changesPerConnectionInstance(
             @Nonnull Collection<DataTreeModification<Node>> changes) {
-        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =
-                new HashMap<>();
+        Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             OvsdbConnectionInstance client = null;
+            Collection<DataTreeModification<Node>> clientChanges = null;
             Node node = change.getRootNode().getDataAfter() != null
                     ? change.getRootNode().getDataAfter() : change.getRootNode().getDataBefore();
             if (node != null) {
@@ -240,7 +242,9 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                      */
                 if ( cm.getHasDeviceOwnership(client.getMDConnectionInfo())) {
                     LOG.debug("*This* instance of southbound plugin is an owner of the device {}", node);
-                    result.put(change.getRootPath().getRootIdentifier(), client);
+                    clientChanges = result.get(client) == null ? Collections.EMPTY_LIST:result.get(client);
+                    clientChanges.add(change);
+                    result.put(client, clientChanges);
                 } else {
                     LOG.debug("*This* instance of southbound plugin is *not* an owner of the device {}", node);
                 }
@@ -248,6 +252,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 LOG.debug("Did not find client for {}", node);
             }
         }
+
         return result;
     }
 }

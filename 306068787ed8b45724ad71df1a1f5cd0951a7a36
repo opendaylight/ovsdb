@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_bb3cd0c0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-12-21T13:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_2059b15a",
+      "revId": "306068787ed8b45724ad71df1a1f5cd0951a7a36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_404e6d97",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-12-21T13:09:47Z",
       "side": 1,
       "message": "In Java 8:\n\n    clientChanges \u003d result.putIfAbsent(client, new ArrayList\u003c\u003e());\n    clientChanges.add(change);\n\nIf we want to avoid creating a new ArrayList every time:\n\n    clientChanges \u003d result.computeIfAbsent(client, key -\u003e new ArrayList\u003c\u003e());\n    clientChanges.add(change);",
+      "revId": "306068787ed8b45724ad71df1a1f5cd0951a7a36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_fb46484e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-12-21T13:38:52Z",
+      "side": 1,
+      "message": "Done. Thanks for suggestion. 4 lines of code reduced to 1.",
+      "parentUuid": "1a622d24_404e6d97",
       "revId": "306068787ed8b45724ad71df1a1f5cd0951a7a36",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

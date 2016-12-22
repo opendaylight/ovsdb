@@ -177,10 +177,6 @@ public class OvsdbConnectionInstance {
                         LOG.info("Southbound NOT monitoring columns {} in table {}", skipColumns, tableName);
                         columns.removeAll(skipColumns);
                     }
-                    if ("Manager".equals(tableName) && SouthboundConstants.skipManagerStatus) {
-                        columns.remove("status");
-                        LOG.info("Southbound configured to NOT monitor column status in table Manager");
-                    }
                     monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
                             .addColumns(columns)
                             .with(new MonitorSelect(true, true, true, true)).build());

@@ -153,6 +153,8 @@ public class SouthboundConstants {
 
     //Note: _version is an internal column of ovsdb schema, that gets updated
     //with every change in the row of the table.
+    // The "Manager" entry needs to be a modifiable list, SouthboundProvider::setSkipManagerStatus() modifies it
+    @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
     static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
             .put("Open_vSwitch", Arrays.asList("statistics","_version"))
@@ -165,8 +167,6 @@ public class SouthboundConstants {
             .put("Interface", Arrays.asList("statistics","_version"))
             .put("Controller", Arrays.asList("status","_version"))
             .build();
-
-    public static boolean skipManagerStatus = false;
 
     public enum VlanModes {
         ACCESS("access"),

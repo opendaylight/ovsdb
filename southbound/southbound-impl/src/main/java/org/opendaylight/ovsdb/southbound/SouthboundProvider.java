@@ -199,6 +199,10 @@ public class SouthboundProvider implements AutoCloseable {
 
     public void setSkipManagerStatus(boolean flag) {
         LOG.debug("skipManagerStatus set to {}", flag);
-        SouthboundConstants.skipManagerStatus = flag;
+        if (flag) {
+            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").add("status");
+        } else {
+            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").remove("status");
+        }
     }
 }

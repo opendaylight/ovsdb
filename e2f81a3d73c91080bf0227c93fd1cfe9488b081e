@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_8850a75f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-12-22T12:20:23Z",
+      "side": 1,
+      "message": "This should be volatile too.",
+      "parentUuid": "1a622d24_65e4893b",
+      "range": {
+        "startLine": 169,
+        "startChar": 26,
+        "endLine": 169,
+        "endChar": 42
+      },
+      "revId": "e2f81a3d73c91080bf0227c93fd1cfe9488b081e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b47ed5e2",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
         "patchSetId": 1

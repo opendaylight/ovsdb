@@ -22,6 +22,214 @@
       "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_799b5b67",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "1a622d24_0fb174e1",
+      "range": {
+        "startLine": 209,
+        "startChar": 13,
+        "endLine": 209,
+        "endChar": 26
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_999f5750",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "please rename it to setBridgeStatus",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 17
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f9ae4b84",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "please modify the log message to \n\nLOG.warn(\"STP is disabled, so skipping bridge status setting.\");",
+      "range": {
+        "startLine": 125,
+        "startChar": 12,
+        "endLine": 125,
+        "endChar": 40
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_19bb47c5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "Please change the log message to (\"Error occured while setting bridge status for bridge {}\",ovsdbManagedNode,e)",
+      "range": {
+        "startLine": 132,
+        "startChar": 22,
+        "endLine": 132,
+        "endChar": 46
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_79b23be7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "please rename the method to setBridgeStatus",
+      "range": {
+        "startLine": 243,
+        "startChar": 8,
+        "endLine": 243,
+        "endChar": 17
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_59b5bfcb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "please make both the input parameters to final.",
+      "range": {
+        "startLine": 358,
+        "startChar": 27,
+        "endLine": 359,
+        "endChar": 40
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_b9cb3352",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "please keep it in one line for better readability.",
+      "range": {
+        "startLine": 361,
+        "startChar": 12,
+        "endLine": 362,
+        "endChar": 49
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_99c63748",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "modify the log message as i suggested in the previous file.",
+      "range": {
+        "startLine": 365,
+        "startChar": 26,
+        "endLine": 365,
+        "endChar": 42
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_d9c0af2c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-23T08:03:18Z",
+      "side": 1,
+      "message": "you don\u0027t have to create local reference to status.keySet(), you can do something like \n\nfor (String statusKey : status.keySet())",
+      "range": {
+        "startLine": 369,
+        "startChar": 16,
+        "endLine": 369,
+        "endChar": 57
+      },
+      "revId": "89d686fb11e195428c1ebdcb6dbe07b43cd8f070",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

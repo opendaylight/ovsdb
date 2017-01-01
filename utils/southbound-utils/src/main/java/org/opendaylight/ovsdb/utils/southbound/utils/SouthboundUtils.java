@@ -116,6 +116,8 @@ public class SouthboundUtils {
     public static final String BRIDGE_URI_PREFIX = "bridge";
     private static final String DISABLE_IN_BAND = "disable-in-band";
     private static final String PATCH_PORT_TYPE = "patch";
+    // External ID key used for mapping between an OVSDB port and an interface name
+    private static final String EXTERNAL_ID_INTERFACE_KEY = "iface-id";
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
@@ -1108,6 +1110,32 @@ public class SouthboundUtils {
             }
         }
 
+        return null;
+    }
+
+    public TerminationPoint getTerminationPointByExternalId(String interfaceName) {
+        List<Node> nodes = getOvsdbNodes();
+        for (Node node : nodes) {
+            TerminationPoint tp = getTerminationPointByExternalId(node, interfaceName);
+            if (tp != null) {
+                return tp;
+            }
+        }
+        return null;
+    }
+
+    public static TerminationPoint getTerminationPointByExternalId(Node bridgeNode, String interfaceName) {
+        for (TerminationPoint tp : bridgeNode.getTerminationPoint()) {
+            OvsdbTerminationPointAugmentation ovsdbTp = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTp.getInterfaceExternalIds() != null && !ovsdbTp.getInterfaceExternalIds().isEmpty()) {
+                for (InterfaceExternalIds entry : ovsdbTp.getInterfaceExternalIds()) {
+                    if (entry.getExternalIdKey().equals(EXTERNAL_ID_INTERFACE_KEY)
+                            && entry.getExternalIdValue().equals(interfaceName)) {
+                        return tp;
+                    }
+                }
+            }
+        }
         return null;
     }
 }

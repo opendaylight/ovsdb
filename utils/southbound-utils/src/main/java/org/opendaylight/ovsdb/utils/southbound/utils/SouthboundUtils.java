@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
@@ -116,6 +117,8 @@ public class SouthboundUtils {
     public static final String BRIDGE_URI_PREFIX = "bridge";
     private static final String DISABLE_IN_BAND = "disable-in-band";
     private static final String PATCH_PORT_TYPE = "patch";
+    // External ID key used for mapping between an OVSDB port and an interface name
+    private static final String EXTERNAL_INTERFACE_ID_KEY = "iface-id";
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
@@ -1108,6 +1111,79 @@ public class SouthboundUtils {
             }
         }
 
+        return null;
+    }
+
+    public TerminationPoint getTerminationPointByExternalId(final String interfaceName) {
+        List<Node> nodes = getOvsdbNodes();
+        if (nodes != null) {
+            for (Node node : nodes) {
+                TerminationPoint tp = getTerminationPointByExternalId(node, interfaceName);
+                if (tp != null) {
+                    return tp;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static TerminationPoint getTerminationPointByExternalId(final Node bridgeNode, final String interfaceName) {
+        if (bridgeNode.getTerminationPoint() != null) {
+            for (TerminationPoint tp : bridgeNode.getTerminationPoint()) {
+                OvsdbTerminationPointAugmentation ovsdbTp = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                String externalIdValue = getExternalInterfaceIdValue(ovsdbTp);
+                if (externalIdValue != null && externalIdValue.equals(interfaceName)) {
+                    LOG.debug("Found matching termination point with iface-id {} on bridgeNode {}, returning tp {}",
+                            interfaceName, bridgeNode, tp);
+                    return tp;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String getExternalInterfaceIdValue(final OvsdbTerminationPointAugmentation ovsdbTp) {
+        if (ovsdbTp != null) {
+            List<InterfaceExternalIds> ifaceExtIds = ovsdbTp.getInterfaceExternalIds();
+            if (ifaceExtIds != null) {
+                for (InterfaceExternalIds entry : ifaceExtIds) {
+                    if (entry.getExternalIdKey().equals(EXTERNAL_INTERFACE_ID_KEY)) {
+                        return entry.getExternalIdValue();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getDatapathIdFromTerminationPoint(final OvsdbTerminationPointAugmentation ovsdbTp) {
+        if (ovsdbTp == null) {
+            return null;
+        }
+
+        List<Node> nodes = getOvsdbNodes();
+        if (nodes == null) {
+            return null;
+        }
+
+        for (Node node : nodes) {
+            if (node.getTerminationPoint() == null) {
+                continue;
+            }
+            for (TerminationPoint curTp : node.getTerminationPoint()) {
+                OvsdbTerminationPointAugmentation curOvsdbTp = curTp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (curOvsdbTp == null) {
+                    continue;
+                }
+                if (curOvsdbTp.getPortUuid() != null && curOvsdbTp.getPortUuid().equals(ovsdbTp.getPortUuid())) {
+                    long dpId = getDataPathId(node);
+                    if (dpId == 0) {
+                        return null;
+                    }
+                    return String.valueOf(dpId);
+                }
+            }
+        }
         return null;
     }
 }

@@ -1,0 +1,303 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_553c91e2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "given that you are modifying the map while iterating it and also you are not breaking out after the first remove, it might give you unexpected iteration behavior.",
+      "range": {
+        "startLine": 247,
+        "startChar": 8,
+        "endLine": 253,
+        "endChar": 9
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_b52c05ad",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "Single thread for all the devices won\u0027t create bottleneck ?",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 19
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f51ddd74",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchRemoveCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "please use \"logical switch\" for better readability",
+      "range": {
+        "startLine": 58,
+        "startChar": 54,
+        "endLine": 58,
+        "endChar": 56
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_280ffc31",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/PhysicalPortUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "please user better prefix for method names, 1 and 2 don\u0027t give any clue about the method and the difference.",
+      "range": {
+        "startLine": 219,
+        "startChar": 0,
+        "endLine": 220,
+        "endChar": 80
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_c83488e0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "please use \"operational\" for better readability.",
+      "range": {
+        "startLine": 50,
+        "startChar": 19,
+        "endLine": 50,
+        "endChar": 21
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_8841f03b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "i believe all of these parameters can be final.",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 26
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_a8314cee",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "please maintain the order, move it as a first variable.",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 36
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e8522412",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "HwvtepDataChangeListener --\u003e HwvtepOperationalDataChangeListener",
+      "range": {
+        "startLine": 58,
+        "startChar": 30,
+        "endLine": 58,
+        "endChar": 54
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_c84be857",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "Registering --\u003e Registering listener for",
+      "range": {
+        "startLine": 69,
+        "startChar": 23,
+        "endLine": 69,
+        "endChar": 34
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_486fd8c5",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "please do not catch generic exception.",
+      "range": {
+        "startLine": 71,
+        "startChar": 23,
+        "endLine": 71,
+        "endChar": 34
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_0875e097",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "HwvtepDataChangeListener --\u003e HwvtepOperationalDataChangeListener",
+      "range": {
+        "startLine": 72,
+        "startChar": 22,
+        "endLine": 72,
+        "endChar": 46
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_8868d0bb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "if registration fails, hwvtep functionality might not work correctly, so better throw it as an error.",
+      "range": {
+        "startLine": 72,
+        "startChar": 16,
+        "endLine": 72,
+        "endChar": 20
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_686574e0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOpDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-12-13T09:05:31Z",
+      "side": 1,
+      "message": "please log warn/error",
+      "range": {
+        "startLine": 132,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 9
+      },
+      "revId": "a4d865789c38e89e622222246876956a0913d287",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

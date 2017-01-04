@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_3de37c06",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1120,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-01-04T03:05:21Z",
+      "side": 1,
+      "message": "you can optimize it by putting for loop in if(nodes !\u003d null) and returning the null at the end of the method.",
+      "range": {
+        "startLine": 1118,
+        "startChar": 8,
+        "endLine": 1120,
+        "endChar": 9
+      },
+      "revId": "ccd724616b1c6b68089b2d881c06ac245c9fbca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_fdb8e4e6",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1130,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-01-04T03:05:21Z",
+      "side": 1,
+      "message": "please make both the parameter final.",
+      "range": {
+        "startLine": 1130,
+        "startChar": 66,
+        "endLine": 1130,
+        "endChar": 81
+      },
+      "revId": "ccd724616b1c6b68089b2d881c06ac245c9fbca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_9df290d0",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-01-04T03:05:21Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 1131,
+        "startChar": 8,
+        "endLine": 1133,
+        "endChar": 9
+      },
+      "revId": "ccd724616b1c6b68089b2d881c06ac245c9fbca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_1db680fa",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1146,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-01-04T03:05:21Z",
+      "side": 1,
+      "message": "please make it final.",
+      "range": {
+        "startLine": 1146,
+        "startChar": 53,
+        "endLine": 1146,
+        "endChar": 94
+      },
+      "revId": "ccd724616b1c6b68089b2d881c06ac245c9fbca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_7dedf4ee",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1151,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-01-04T03:05:21Z",
+      "side": 1,
+      "message": "this is not required.",
+      "range": {
+        "startLine": 1151,
+        "startChar": 54,
+        "endLine": 1151,
+        "endChar": 101
+      },
+      "revId": "ccd724616b1c6b68089b2d881c06ac245c9fbca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_bdbe6cd2",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1162,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-01-04T03:05:21Z",
+      "side": 1,
+      "message": "please make it final.",
+      "range": {
+        "startLine": 1162,
+        "startChar": 52,
+        "endLine": 1162,
+        "endChar": 93
+      },
+      "revId": "ccd724616b1c6b68089b2d881c06ac245c9fbca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

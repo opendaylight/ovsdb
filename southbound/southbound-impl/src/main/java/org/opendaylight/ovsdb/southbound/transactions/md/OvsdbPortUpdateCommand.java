@@ -351,7 +351,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         Collection<UUID> qosUuidCol = port.getValue().getQosColumn().getData();
         if (!qosUuidCol.isEmpty()) {
             UUID qosUuid = qosUuidCol.iterator().next();
-            ovsdbTerminationPointBuilder.setQos(new Uuid(qosUuid.toString()));
+            //ovsdbTerminationPointBuilder.setQos(new Uuid(qosUuid.toString()));
 
             NodeId nodeId = node.getNodeId();
             OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);

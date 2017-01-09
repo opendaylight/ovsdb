@@ -85,8 +85,6 @@ public class QosUpdateCommand implements TransactCommand {
                     if (queue.getQueueRef() != null) {
                         newQueueList.put(queue.getQueueNumber(),
                                 new UUID(getQueueUuid(queue.getQueueRef(), operNode)));
-                    } else if (queue.getQueueUuid() != null) {
-                        newQueueList.put(queue.getQueueNumber(), new UUID(queue.getQueueUuid().getValue()));
                     }
                 }
             }

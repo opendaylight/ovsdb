@@ -536,11 +536,6 @@ module ovsdb {
                     type ovsdb-queue-ref;
                 }
 
-                leaf queue-uuid {
-                    description "The unique identifier of the queue record.";
-                    type yang:uuid;
-                    status deprecated;
-                }
             }
             list qos-external-ids {
                 key "qos-external-id-key";
@@ -1286,12 +1281,6 @@ module ovsdb {
                 description "bfd-status value";
                 type string;
             }
-        }
-
-        leaf qos {
-            description "The unique identifier of the QoS entry for this port.";
-            status deprecated;
-            type yang:uuid;
         }
 
         list qos-entry {

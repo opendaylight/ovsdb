@@ -323,9 +323,9 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 newQueueList.add(
                     new QueueListBuilder()
                     .setQueueNumber(queueEntry.getKey())
-                    .setQueueRef(new OvsdbQueueRef(queueIid))
-                    .setQueueUuid(new Uuid(queueEntry.getValue().toString())).build());
+                    .setQueueRef(new OvsdbQueueRef(queueIid)).build());
             }
+
         }
         qosEntryBuilder.setQueueList(newQueueList);
     }

@@ -48,6 +48,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -67,6 +68,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbQueueRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
@@ -184,6 +186,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             new NotifyingDataChangeListener(LogicalDatastoreType.CONFIGURATION);
     private static final NotifyingDataChangeListener OPERATIONAL_LISTENER =
             new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL);
+
 
     private static class NotifyingDataChangeListener implements DataChangeListener {
         private final LogicalDatastoreType type;
@@ -1122,6 +1125,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class TestQueue implements AutoCloseable {
         private final ConnectionInfo connectionInfo;
         private final Uri queueId;
+        private final InstanceIdentifier<Queues> qIid;
 
         /**
          * Creates a test queue entry which can be automatically removed when no longer necessary.
@@ -1146,7 +1150,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .setQueuesExternalIds(externalIds)
                 .setQueuesOtherConfig(otherConfigs)
                 .build();
-            InstanceIdentifier<Queues> qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(Queues.class, queue.getKey());
             final NotifyingDataChangeListener queueOperationalListener =
@@ -1164,6 +1168,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
+        public InstanceIdentifier<Queues> getInstanceIdentifier() {
+            return qIid;
+        }
         @Override
         public void close() {
             InstanceIdentifier<Queues> qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
@@ -1947,17 +1954,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointQos";
             ovsdbTerminationBuilder.setName(portName);
-            ovsdbTerminationBuilder.setQos(qosUuid);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
 
-            // READ and check that qos uuid has been added to the port
+
+           // READ and check that qos uuid has been added to the port
             InstanceIdentifier<TerminationPoint> tpEntryIid = getTpIid(connectionInfo, bridge)
                     .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
             TerminationPoint terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
             Assert.assertNotNull(terminationPoint);
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
-            Assert.assertEquals(ovsdbTerminationPointAugmentation.getQos(), qosUuid);
 
             // UPDATE - remove the qos entry from the port
             OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
@@ -1977,9 +1981,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // READ and verify that qos uuid has been removed from port
             TerminationPoint terminationPointUpdate = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
             Assert.assertNotNull(terminationPointUpdate);
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentationUpdate =
-                    terminationPointUpdate.getAugmentation(OvsdbTerminationPointAugmentation.class);
-            Assert.assertNull(ovsdbTerminationPointAugmentationUpdate.getQos());
 
             // DELETE handled by TestBridge
         }
@@ -2482,18 +2483,23 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // configuration of the Qos row.
             OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
                     LogicalDatastoreType.OPERATIONAL);
+
             Queues operQueue1 = getQueue(new Uri("queue1"), ovsdbNodeAugmentation);
+
             Assert.assertNotNull(operQueue1);
-            Uuid queue1Uuid = new Uuid(operQueue1.getQueueUuid().getValue());
+
+            InstanceIdentifier<Queues> queue1Iid = testQueue1.getInstanceIdentifier();
+            OvsdbQueueRef queue1Ref = new OvsdbQueueRef(queue1Iid);
+
             Queues operQueue2 = getQueue(new Uri("queue2"), ovsdbNodeAugmentation);
             Assert.assertNotNull(operQueue2);
-            Uuid queue2Uuid = new Uuid(operQueue2.getQueueUuid().getValue());
+            InstanceIdentifier<Queues> queue2Iid = testQueue2.getInstanceIdentifier();
+            OvsdbQueueRef queue2Ref = new OvsdbQueueRef(queue2Iid);
 
             List<QueueList> queueList = new ArrayList<>();
-            queueList.add(new QueueListBuilder().setQueueNumber(new Long("0"))
-                    .setQueueUuid(queue1Uuid).build());
-            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1"))
-                    .setQueueUuid(queue2Uuid).build());
+            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1")).setQueueRef(queue1Ref).build());
+            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1")).setQueueRef(queue2Ref).build());
+
             qosBuilder.setQueueList(queueList);
 
             Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
@@ -2526,10 +2532,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(operQos);
             operQueueList = operQos.getQueueList();
             Assert.assertNotNull(operQueueList);
+
             for (QueueList queueEntry : queueList) {
-                if (queueEntry.getQueueUuid().equals(queue2Uuid)) {
+                if (queueEntry.getQueueRef().equals(queue1Ref)) {
                     Assert.assertTrue(isQueueInList(operQueueList, queueEntry));
-                } else if (queueEntry.getQueueUuid().equals(queue1Uuid)) {
+                } else if (queueEntry.getQueueRef().equals(queue2Ref)) {
                     Assert.assertFalse(isQueueInList(operQueueList, queueEntry));
                 } else {
                     Assert.assertTrue("Unknown queue entry in qos queue list", false);
@@ -2552,10 +2559,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+
+
     private Boolean isQueueInList(List<QueueList> queueList, QueueList queue) {
         for (QueueList queueEntry : queueList) {
-            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())
-                && queueEntry.getQueueUuid().equals(queue.getQueueUuid())) {
+            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())&& queueEntry.getQueueRef().equals(queue.getQueueRef())) {
                 return true;
             }
         }

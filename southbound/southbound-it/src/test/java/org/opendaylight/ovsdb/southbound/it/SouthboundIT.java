@@ -1947,17 +1947,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointQos";
             ovsdbTerminationBuilder.setName(portName);
-            ovsdbTerminationBuilder.setQos(qosUuid);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
 
-            // READ and check that qos uuid has been added to the port
+
+           // READ and check that qos uuid has been added to the port
             InstanceIdentifier<TerminationPoint> tpEntryIid = getTpIid(connectionInfo, bridge)
                     .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
             TerminationPoint terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
             Assert.assertNotNull(terminationPoint);
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
-            Assert.assertEquals(ovsdbTerminationPointAugmentation.getQos(), qosUuid);
 
             // UPDATE - remove the qos entry from the port
             OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
@@ -1977,9 +1974,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             // READ and verify that qos uuid has been removed from port
             TerminationPoint terminationPointUpdate = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
             Assert.assertNotNull(terminationPointUpdate);
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentationUpdate =
-                    terminationPointUpdate.getAugmentation(OvsdbTerminationPointAugmentation.class);
-            Assert.assertNull(ovsdbTerminationPointAugmentationUpdate.getQos());
 
             // DELETE handled by TestBridge
         }
@@ -2485,15 +2479,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Queues operQueue1 = getQueue(new Uri("queue1"), ovsdbNodeAugmentation);
             Assert.assertNotNull(operQueue1);
             Uuid queue1Uuid = new Uuid(operQueue1.getQueueUuid().getValue());
+            QueueListBuilder queue1Ref = new OvsdbQueueRef(operQueue1.getQueueRef().getValue());
+
             Queues operQueue2 = getQueue(new Uri("queue2"), ovsdbNodeAugmentation);
             Assert.assertNotNull(operQueue2);
             Uuid queue2Uuid = new Uuid(operQueue2.getQueueUuid().getValue());
+            QueueListBuilder queue2Ref = new OvsdbQueueRef(operQueue2.getQueueRef().getValue());
 
             List<QueueList> queueList = new ArrayList<>();
-            queueList.add(new QueueListBuilder().setQueueNumber(new Long("0"))
-                    .setQueueUuid(queue1Uuid).build());
-            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1"))
-                    .setQueueUuid(queue2Uuid).build());
+            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1")).setQueueRef(queue1Ref).build());
+            queueList.add(new QueueListBuilder().setQueueNumber(new Long("1")).setQueueRef(queue2Ref).build());
+
             qosBuilder.setQueueList(queueList);
 
             Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
@@ -2526,10 +2522,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(operQos);
             operQueueList = operQos.getQueueList();
             Assert.assertNotNull(operQueueList);
+
             for (QueueList queueEntry : queueList) {
-                if (queueEntry.getQueueUuid().equals(queue2Uuid)) {
+                if (queueEntry.getQueueRef().equals(queue1Ref)) {
                     Assert.assertTrue(isQueueInList(operQueueList, queueEntry));
-                } else if (queueEntry.getQueueUuid().equals(queue1Uuid)) {
+                } else if (queueEntry.getQueueRef().equals(queue2Ref)) {
                     Assert.assertFalse(isQueueInList(operQueueList, queueEntry));
                 } else {
                     Assert.assertTrue("Unknown queue entry in qos queue list", false);
@@ -2554,8 +2551,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private Boolean isQueueInList(List<QueueList> queueList, QueueList queue) {
         for (QueueList queueEntry : queueList) {
-            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())
-                && queueEntry.getQueueUuid().equals(queue.getQueueUuid())) {
+            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())&& queueEntry.getQueueRef().equals(queue.getQueueRef())) {
                 return true;
             }
         }

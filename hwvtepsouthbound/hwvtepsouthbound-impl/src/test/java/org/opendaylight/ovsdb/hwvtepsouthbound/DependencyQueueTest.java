@@ -64,7 +64,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
                 child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.getKey()));
-        Whitebox.setInternalState(DependencyQueue.class, "executorService", MoreExecutors.sameThreadExecutor());
+        Whitebox.setInternalState(DependencyQueue.class, "executorService", MoreExecutors.newDirectExecutorService());
     }
 
     @Test

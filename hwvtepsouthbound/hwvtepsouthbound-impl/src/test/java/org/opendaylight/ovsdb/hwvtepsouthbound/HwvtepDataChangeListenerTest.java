@@ -94,7 +94,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Before
     public void setupListener() throws Exception {
-        setFinalStatic(DependencyQueue.class, "executorService", MoreExecutors.sameThreadExecutor());
+        setFinalStatic(DependencyQueue.class, "executorService", MoreExecutors.newDirectExecutorService());
         opDataChangeListener = new HwvtepOperationalDataChangeListener(dataBroker, hwvtepConnectionManager, connectionInstance);
     }
 

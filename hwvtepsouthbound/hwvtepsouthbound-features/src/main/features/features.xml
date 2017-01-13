@@ -40,7 +40,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-ovsdb-hwvtepsouthbound-ui' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: UI'>
     <feature version="${project.version}">odl-ovsdb-hwvtepsouthbound-rest</feature>
     <feature version="${controller.mdsal.version}">odl-mdsal-apidocs</feature>
-    <feature version="${controller.mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${dlux.version}">odl-dlux-yangui</feature>
   </feature>
   <feature name='odl-ovsdb-hwvtepsouthbound-test' version='${project.version}' description='OpenDaylight :: hwvtepsouthbound :: test'>

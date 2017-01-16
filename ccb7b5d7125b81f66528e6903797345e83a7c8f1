@@ -210,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_22432243",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-01-16T17:05:52Z",
+      "side": 1,
+      "message": "Problem is, all plugins use the same TCP port for connection, 6640. Using SSL with nonSSL would then require at least two TCP ports. 6640 is the only one we got from IANA. If we want to tomorrow support different for different plugins, we will first have to support different ports for different plugins.",
+      "parentUuid": "1a622d24_3f4979b7",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b5964f4a",
         "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
         "patchSetId": 4

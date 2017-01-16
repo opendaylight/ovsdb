@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_bf8629d9",
+        "filename": "library/impl/src/main/resources/initial/library.cfg",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-16T16:18:52Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1a622d24_75ae7782",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_55b37be8",
         "filename": "library/impl/src/main/resources/initial/library.cfg",
         "patchSetId": 4
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_dfcfa527",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-16T16:18:52Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1a622d24_95e5130b",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_d5eb0bda",
         "filename": "southbound/southbound-features/src/main/features/features.xml",
         "patchSetId": 4
@@ -81,6 +117,24 @@
       "writtenOn": "2017-01-16T06:47:27Z",
       "side": 1,
       "message": "I believe this is not needed anymore.",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_1fdd9de0",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-16T16:18:52Z",
+      "side": 1,
+      "message": "yes, will remove it",
+      "parentUuid": "1a622d24_35bcffdb",
       "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +192,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_3f4979b7",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-16T16:18:52Z",
+      "side": 1,
+      "message": "this is really confusing me. If we move use-ssl to library.cfg it will be across all the plugins (southbound, hwvtep and whatever future plugin) if that the case okay will move it. however, it gives less flexibility.",
+      "parentUuid": "1a622d24_b5cbef51",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b5964f4a",
         "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
         "patchSetId": 4
@@ -149,6 +221,24 @@
       "writtenOn": "2017-01-16T06:47:27Z",
       "side": 1,
       "message": "Since we\u0027re moving config to library, these changes shouldn\u0027t be needed anymore.",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_1f6f5d2c",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-16T16:18:52Z",
+      "side": 1,
+      "message": "ok, just forget to remove it",
+      "parentUuid": "1a622d24_b5964f4a",
       "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -200,6 +290,24 @@
       "writtenOn": "2017-01-16T06:47:27Z",
       "side": 1,
       "message": "remove from patch unless trailing whitespace",
+      "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_5fe395a3",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/SouthboundProviderTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-16T16:18:52Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1a622d24_55aedb98",
       "revId": "ccb7b5d7125b81f66528e6903797345e83a7c8f1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

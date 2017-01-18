@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Vishal Thapar <vishal.thapar@ericsson.com>
+Submitted-by: Vishal Thapar <vishal.thapar@ericsson.com>
+Submitted-at: Wed, 18 Jan 2017 22:27:31 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/50636
+Project: ovsdb
+Branch: refs/heads/stable/boron

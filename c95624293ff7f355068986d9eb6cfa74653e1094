@@ -22,6 +22,30 @@
       "revId": "c95624293ff7f355068986d9eb6cfa74653e1094",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_0e3e03da",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-01-18T23:49:51Z",
+      "side": 1,
+      "message": "Also, surprised how is build passing when this file isn\u0027t present anymore. I expect actual bring up to fail [try CSIT] though SFT should\u0027ve caught it.",
+      "parentUuid": "1a622d24_ee3467fd",
+      "range": {
+        "startLine": 142,
+        "startChar": 18,
+        "endLine": 142,
+        "endChar": 88
+      },
+      "revId": "c95624293ff7f355068986d9eb6cfa74653e1094",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

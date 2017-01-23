@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_a12188b6",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 581,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-01-23T16:14:24Z",
+      "side": 1,
+      "message": "nitpick(grammar): \u0027retrieving\u0027 or \u0027trying to retrieve\u0027.",
+      "range": {
+        "startLine": 581,
+        "startChar": 35,
+        "endLine": 581,
+        "endChar": 42
+      },
+      "revId": "c2a1358a4c52b11b48a18cfb69ea641059fdeba6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_41953ce3",
+        "filename": "library/impl/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-01-23T16:02:03Z",
+      "side": 1,
+      "message": "No, it\u0027s a AAA artifact, not a controller artifact. config-parent is a controller module, it doesn\u0027t know about AAA.",
+      "parentUuid": "fafc7978_01e5f4a7",
+      "range": {
+        "startLine": 72,
+        "startChar": 15,
+        "endLine": 72,
+        "endChar": 29
+      },
+      "revId": "32a8c44b6e3810aa29c7f360385692b77a719888",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b4611ed5",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 7

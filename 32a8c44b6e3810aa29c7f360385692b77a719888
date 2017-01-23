@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_01adf488",
+        "filename": "library/impl/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-23T15:40:42Z",
+      "side": 1,
+      "message": "actually we need it , aaa is not in the dependancy management of config-parent.",
+      "parentUuid": "1a622d24_7444a649",
+      "range": {
+        "startLine": 72,
+        "startChar": 15,
+        "endLine": 72,
+        "endChar": 29
+      },
+      "revId": "32a8c44b6e3810aa29c7f360385692b77a719888",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b4611ed5",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2017-01-19T08:54:53Z",
       "side": 1,
       "message": "nitpick: Error strings should be user friendly. something like, \u0027Error trying to get reference to Certificate Manager\u0027 perhaps?",
+      "range": {
+        "startLine": 581,
+        "startChar": 35,
+        "endLine": 581,
+        "endChar": 55
+      },
+      "revId": "32a8c44b6e3810aa29c7f360385692b77a719888",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e1a9d07c",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 581,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-01-23T15:40:42Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1a622d24_b4611ed5",
       "range": {
         "startLine": 581,
         "startChar": 35,

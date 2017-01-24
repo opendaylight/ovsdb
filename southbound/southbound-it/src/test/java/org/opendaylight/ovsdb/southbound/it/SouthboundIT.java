@@ -131,6 +131,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -165,8 +166,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final String FORMAT_STR = "%s_%s_%d";
     private static final Version AUTOATTACH_FROM_VERSION = Version.fromString("7.11.2");
     private static final Version IF_INDEX_FROM_VERSION = Version.fromString("7.2.1");
-    private static final Long MAX_BACKOFF = 10000L;
-    private static final Long INACTIVITY_PROBE = 30000L;
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;
@@ -252,10 +251,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             synchronized (this) {
                 long _start = System.currentTimeMillis();
                 LOG.info("Waiting for {} DataChanged creation on {}", type, iid);
-                while (!isCreated(iid) && System.currentTimeMillis() - _start < timeout) {
+                while (!isCreated(iid) && (System.currentTimeMillis() - _start) < timeout) {
                     wait(RETRY_WAIT);
                 }
-                LOG.info("Woke up, waited {}ms for creation of {}", System.currentTimeMillis() - _start, iid);
+                LOG.info("Woke up, waited {}ms for creation of {}", (System.currentTimeMillis() - _start), iid);
             }
         }
 
@@ -263,10 +262,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             synchronized (this) {
                 long _start = System.currentTimeMillis();
                 LOG.info("Waiting for {} DataChanged deletion on {}", type, iid);
-                while (!isRemoved(iid) && System.currentTimeMillis() - _start < timeout) {
+                while (!isRemoved(iid) && (System.currentTimeMillis() - _start) < timeout) {
                     wait(RETRY_WAIT);
                 }
-                LOG.info("Woke up, waited {}ms for deletion of {}", System.currentTimeMillis() - _start, iid);
+                LOG.info("Woke up, waited {}ms for deletion of {}", (System.currentTimeMillis() - _start), iid);
             }
         }
 
@@ -274,16 +273,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             synchronized (this) {
                 long _start = System.currentTimeMillis();
                 LOG.info("Waiting for {} DataChanged update on {}", type, iid);
-                while (!isUpdated(iid) && System.currentTimeMillis() - _start < timeout) {
+                while (!isUpdated(iid) && (System.currentTimeMillis() - _start) < timeout) {
                     wait(RETRY_WAIT);
                 }
-                LOG.info("Woke up, waited {}ms for update of {}", System.currentTimeMillis() - _start, iid);
+                LOG.info("Woke up, waited {}ms for update of {}", (System.currentTimeMillis() - _start), iid);
             }
         }
 
     }
 
-    @Override
     @Configuration
     public Option[] config() {
         Option[] options = super.config();
@@ -557,10 +555,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
             while (!OPERATIONAL_LISTENER.isCreated(
-                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for creation of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {} for creation of {}", (System.currentTimeMillis() - _start), iid);
         }
     }
 
@@ -569,10 +567,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
             while (!OPERATIONAL_LISTENER.isRemoved(
-                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for deletion of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {} for deletion of {}", (System.currentTimeMillis() - _start), iid);
         }
     }
 
@@ -581,10 +579,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged update on {}", iid);
             while (!OPERATIONAL_LISTENER.isUpdated(
-                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for update of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {} for update of {}", (System.currentTimeMillis() - _start), iid);
         }
     }
 
@@ -631,7 +629,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         Assert.assertEquals(dpType, bridge.getDatapathType());
 
                         // Add port for all dpdk interface types (dpdkvhost not supported in existing dpdk ovs)
-                        List<String> dpdkTypes = new ArrayList<>();
+                        List<String> dpdkTypes = new ArrayList<String>();
                         dpdkTypes.add("dpdk");
                         dpdkTypes.add("dpdkr");
                         dpdkTypes.add("dpdkvhostuser");
@@ -730,12 +728,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (entry.getTarget() != null) {
                     Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
                 }
-                if (entry.getMaxBackoff() != null) {
-                    Assert.assertEquals(entry.getMaxBackoff(), MAX_BACKOFF);
-                }
-                if (entry.getInactivityProbe() != null) {
-                    Assert.assertEquals(entry.getInactivityProbe(),INACTIVITY_PROBE);
-                }
             }
         }
     }
@@ -744,8 +736,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         List<ControllerEntry> controllerEntriesList = new ArrayList<>();
         controllerEntriesList.add(new ControllerEntryBuilder()
                 .setTarget(new Uri(controllerTarget))
-                .setMaxBackoff(MAX_BACKOFF)
-                .setInactivityProbe(INACTIVITY_PROBE)
                 .build());
         return controllerEntriesList;
     }
@@ -2119,7 +2109,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         OvsdbNodeAugmentation ovsdbNodeAugmentation;
         Uri qosUri = new Uri("QOS-ROW");
-        List<String> typeList = new ArrayList<>();
+        List<String> typeList = new ArrayList<String>();
         typeList.add(SouthboundConstants.QOS_LINUX_HTB);
         typeList.add(SouthboundConstants.QOS_LINUX_HFSC);
 
@@ -2185,9 +2175,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private Queues getQueue(Uri queueId, OvsdbNodeAugmentation node) {
         for (Queues queue : node.getQueues()) {
-            if (queue.getKey().getQueueId().getValue().equals(queueId.getValue())) {
+            if (queue.getKey().getQueueId().getValue().equals(queueId.getValue()))
                 return queue;
-            }
         }
         return null;
     }
@@ -2223,9 +2212,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private QosEntries getQos(Uri qosId, OvsdbNodeAugmentation node) {
         for (QosEntries qos : node.getQosEntries()) {
-            if (qos.getKey().getQosId().equals(qosId)) {
+            if (qos.getKey().getQosId().equals(qosId))
                 return qos;
-            }
         }
         return null;
     }
@@ -2847,7 +2835,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         @Override
         protected void setKey(Builder<InterfaceLldp> builder, String key) {
-            ((InterfaceLldpBuilder) builder).setLldpKey(key);
+            ((InterfaceLldpBuilder) builder).setLldpKey((key));
         }
 
         @Override

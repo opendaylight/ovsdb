@@ -167,21 +167,6 @@ module ovsdb {
             leaf is-connected {
                 type boolean;
             }
-            leaf max_backoff {
-                description
-                    "Maximum  number  of  milliseconds  to  wait between
-                connection attempts";
-                type uint32 {
-                    range "1000..max";
-                }
-            }
-            leaf inactivity_probe {
-                description
-                    "Maximum number of milliseconds of idle time on connection
-                to controller before sending an inactivity probe message.
-                A value of 0 disables inactivity probes.";
-                type uint32;
-            }
 
         }
 

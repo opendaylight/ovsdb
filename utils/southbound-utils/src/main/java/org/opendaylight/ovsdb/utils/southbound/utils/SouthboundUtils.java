@@ -589,19 +589,6 @@ public class SouthboundUtils {
      * @return success if the write to md-sal was successful
      */
     public boolean setBridgeController(Node ovsdbNode, String bridgeName, List<String> controllers) {
-        return setBridgeController(ovsdbNode, bridgeName, controllers, null, null);
-    }
-    /**
-     * Set the controllers of an existing bridge node
-     * @param ovsdbNode where the bridge is
-     * @param bridgeName Name of the bridge
-     * @param controllers controller strings
-     * @param maxBackoff Max backoff in milliseconds
-     * @param inactivityProbe inactivity probe in milliseconds
-     * @return success if the write to md-sal was successful
-     */
-    public boolean setBridgeController(Node ovsdbNode, String bridgeName, List<String> controllers,
-            Long maxBackoff, Long inactivityProbe) {
         LOG.debug("setBridgeController: ovsdbNode: {}, bridgeNode: {}, controller(s): {}",
                 ovsdbNode, bridgeName, controllers);
 
@@ -619,7 +606,7 @@ public class SouthboundUtils {
         List<ControllerEntry> newControllerEntries = new ArrayList<>();
         if(existingControllerEntries != null) {
             NEW_ENTRY_LOOP:
-            for (ControllerEntry newEntry : createControllerEntries(controllers, maxBackoff, inactivityProbe)) {
+            for (ControllerEntry newEntry : createControllerEntries(controllers)) {
                 for (ControllerEntry existingEntry : existingControllerEntries) {
                     if (newEntry.getTarget().equals(existingEntry.getTarget())) {
                         continue NEW_ENTRY_LOOP;
@@ -628,7 +615,7 @@ public class SouthboundUtils {
                 newControllerEntries.add(newEntry);
             }
         } else {
-            newControllerEntries = createControllerEntries(controllers,maxBackoff, inactivityProbe);
+            newControllerEntries = createControllerEntries(controllers);
         }
 
         if(newControllerEntries.isEmpty()) {
@@ -645,13 +632,7 @@ public class SouthboundUtils {
     }
 
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-            final Class<? extends DatapathTypeBase> dpType, String mac) {
-        return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, mac, null, null);
-    }
-
-    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-                             final Class<? extends DatapathTypeBase> dpType, String mac,
-                             Long maxBackoff, Long inactivityProbe) {
+                             final Class<? extends DatapathTypeBase> dpType, String mac) {
         boolean result;
 
         LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
@@ -662,8 +643,7 @@ public class SouthboundUtils {
             NodeId bridgeNodeId = createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(
-                    controllersStr, maxBackoff, inactivityProbe));
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(controllersStr));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode( OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
@@ -1021,19 +1001,12 @@ public class SouthboundUtils {
         return found;
     }
 
-    private List<ControllerEntry> createControllerEntries(List<String> controllersStr,
-            Long maxBackoff, Long inactivityProbe) {
+    private List<ControllerEntry> createControllerEntries(List<String> controllersStr) {
         List<ControllerEntry> controllerEntries = new ArrayList<>();
         if (controllersStr != null) {
             for (String controllerStr : controllersStr) {
                 ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
                 controllerEntryBuilder.setTarget(new Uri(controllerStr));
-                if (maxBackoff != null) {
-                    controllerEntryBuilder.setMaxBackoff(maxBackoff);
-                }
-                if (inactivityProbe != null) {
-                    controllerEntryBuilder.setInactivityProbe(inactivityProbe);
-                }
                 controllerEntries.add(controllerEntryBuilder.build());
             }
         }

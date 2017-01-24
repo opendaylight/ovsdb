@@ -331,23 +331,14 @@ public class SouthboundMapper {
             final org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid uuid =
                     new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang
                             .ietf.yang.types.rev130715.Uuid(controller.getUuid().toString());
-            ControllerEntryBuilder builder = new ControllerEntryBuilder();
-            if (controller.getMaxBackoffColumn() != null && controller.getMaxBackoffColumn().getData() != null) {
-                builder.setMaxBackoff(controller.getMaxBackoffColumn().getData());
-            }
-            if (controller.getInactivityProbeColumn() != null
-                    && controller.getInactivityProbeColumn().getData() != null
-                    && !controller.getInactivityProbeColumn().getData().isEmpty()) {
-                builder.setInactivityProbe(controller.getInactivityProbeColumn().getData().iterator().next());
-            }
-            controllerEntries.add(builder
+
+            controllerEntries.add(new ControllerEntryBuilder()
                     .setTarget(new Uri(targetString))
                     .setIsConnected(controller.getIsConnectedColumn().getData())
                     .setControllerUuid(uuid).build());
         }
     }
 
-    // This is not called from anywhere but test. Do we need this?
     public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
         Map<UUID,Controller> controllerMap = new HashMap<>();
@@ -450,8 +441,8 @@ public class SouthboundMapper {
             final String targetString = manager.getTargetColumn().getData();
 
             final Map<String, String> statusAttributeMap =
-                            manager.getStatusColumn() == null ? null : manager.getStatusColumn().getData();
-            if (statusAttributeMap != null && statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
+                            (manager.getStatusColumn() == null) ? null : manager.getStatusColumn().getData();
+            if ((statusAttributeMap != null) && statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
                 String numberOfConnectionValueStr = statusAttributeMap.get(N_CONNECTIONS_STR);
                 numberOfConnections = Integer.parseInt(numberOfConnectionValueStr);
             } else {

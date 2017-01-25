@@ -68,9 +68,16 @@ public class ControllerUpdateCommand implements TransactCommand {
                         && ovsdbBridge.getBridgeName() != null
                         && entry.getValue() != null
                         && entry.getValue().getTarget() != null) {
+                    ControllerEntry controllerEntry = entry.getValue();
                     Controller controller =
                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Controller.class);
-                    controller.setTarget(entry.getValue().getTarget().getValue());
+                    controller.setTarget(controllerEntry.getTarget().getValue());
+                    if (controllerEntry.getMaxBackoff() != null) {
+                        controller.setMaxBackoff(Sets.newHashSet(controllerEntry.getMaxBackoff()));
+                    }
+                    if (controllerEntry.getInactivityProbe() != null) {
+                        controller.setInactivityProbe(Sets.newHashSet(controllerEntry.getInactivityProbe()));
+                    }
                     String controllerNamedUuidString = SouthboundMapper.getRandomUuid();
                     UUID controllerNamedUuid = new UUID(controllerNamedUuidString);
                     transaction.add(op.insert(controller).withId(controllerNamedUuidString));

@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.NoSuchElementException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Version;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperationalCommandAggregator.class);
-    private List<TransactionCommand> commands = new ArrayList<>();
+    private final List<TransactionCommand> commands = new ArrayList<>();
 
     public OvsdbOperationalCommandAggregator(InstanceIdentifierCodec instanceIdentifierCodec,
             OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
@@ -57,7 +57,7 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         for (TransactionCommand command: commands) {
             try {
                 command.execute(transaction);
-            } catch (NullPointerException e) {
+            } catch (NullPointerException | NoSuchElementException | ClassCastException e) {
                 LOG.warn("Exception trying to execute {}", command, e);
             }
         }

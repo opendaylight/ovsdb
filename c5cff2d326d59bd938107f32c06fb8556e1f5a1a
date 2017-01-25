@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_543cce93",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-01-25T14:17:48Z",
+      "side": 1,
+      "message": "Stephen: I ran into issue where there were no elements in set but isEmpty() returned false, which I didn\u0027t expect. adding iterator.hasNext() works. Should I remove isEmpty() check or still need it?",
+      "range": {
+        "startLine": 337,
+        "startChar": 23,
+        "endLine": 338,
+        "endChar": 86
+      },
+      "revId": "c5cff2d326d59bd938107f32c06fb8556e1f5a1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b441ba0d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbOperationalCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-01-25T14:17:48Z",
+      "side": 1,
+      "message": "These are exceptions I ran into that were causing issues. ClassCast should help next time we use something wrongly define in schema. Ideally, this list should grow each time we run into a new exception.",
+      "range": {
+        "startLine": 60,
+        "startChar": 44,
+        "endLine": 60,
+        "endChar": 88
+      },
+      "revId": "c5cff2d326d59bd938107f32c06fb8556e1f5a1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -104,10 +104,10 @@ public interface Controller extends TypedBaseTable<GenericTableSchema> {
     void setOtherConfig(Map<String, String> otherConfig);
 
     @TypedColumn (name = "max_backoff", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    Column<GenericTableSchema, Long> getMaxBackoffColumn();
+    Column<GenericTableSchema, Set<Long>> getMaxBackoffColumn();
 
     @TypedColumn (name = "max_backoff", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    void setMaxBackoff(Long maxBackoff);
+    void setMaxBackoff(Set<Long> maxBackoff);
 
     @TypedColumn (name = "local_ip", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, Set<String>> getLocalIpColumn();

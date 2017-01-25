@@ -166,6 +166,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final String FORMAT_STR = "%s_%s_%d";
     private static final Version AUTOATTACH_FROM_VERSION = Version.fromString("7.11.2");
     private static final Version IF_INDEX_FROM_VERSION = Version.fromString("7.2.1");
+    private static final Long MAX_BACKOFF = 10000L;
+    private static final Long INACTIVITY_PROBE = 30000L;
     private static String addressStr;
     private static int portNumber;
     private static String connectionType;
@@ -728,6 +730,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (entry.getTarget() != null) {
                     Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
                 }
+                if (entry.getMaxBackoff() != null) {
+                    Assert.assertEquals(entry.getMaxBackoff(), MAX_BACKOFF);
+                }
+                if (entry.getInactivityProbe() != null) {
+                    Assert.assertEquals(entry.getInactivityProbe(),INACTIVITY_PROBE);
+                }
             }
         }
     }
@@ -736,6 +744,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         List<ControllerEntry> controllerEntriesList = new ArrayList<>();
         controllerEntriesList.add(new ControllerEntryBuilder()
                 .setTarget(new Uri(controllerTarget))
+                .setMaxBackoff(MAX_BACKOFF)
+                .setInactivityProbe(INACTIVITY_PROBE)
                 .build());
         return controllerEntriesList;
     }

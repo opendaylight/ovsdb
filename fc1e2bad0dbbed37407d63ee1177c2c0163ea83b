@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_91c8fa75",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-01-27T20:09:41Z",
+      "side": 1,
+      "message": "you can delete this line",
+      "revId": "fc1e2bad0dbbed37407d63ee1177c2c0163ea83b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_d188c224",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1950,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-01-27T20:09:41Z",
+      "side": 1,
+      "message": "Hmm - this applies to all the changes in this file.  Once this code is removed, what\u0027s left of the QoS tests doesn\u0027t really test anything since the tests are using the deprecated model elements.  So, either the test should be completely removed, or updated to use the new model elements.\n\nquestion - does the QoS CSIT tests you wrote use the new model elements?  If so, is there a need to update these tests here?  (that\u0027s a question for Anil)",
+      "revId": "fc1e2bad0dbbed37407d63ee1177c2c0163ea83b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

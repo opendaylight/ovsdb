@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_6b3e2fba",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-02-01T16:28:21Z",
+      "side": 1,
+      "message": "Initially I was doing it at the OvsdbConnectionService initialization but as this class kind of singletone Object, I didn\u0027t want to change the constructor or adding a factory method.  if u okay with that ? I can change  it.",
+      "parentUuid": "fafc7978_7c79df2e",
+      "range": {
+        "startLine": 133,
+        "startChar": 1,
+        "endLine": 134,
+        "endChar": 41
+      },
+      "revId": "c3e5740147797ebb05278f4cc2cf917814b02a15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_9cce4382",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-01T02:17:15Z",
       "side": 1,
       "message": "please replace \"null\" with \"not available\"",
+      "range": {
+        "startLine": 135,
+        "startChar": 57,
+        "endLine": 135,
+        "endChar": 62
+      },
+      "revId": "c3e5740147797ebb05278f4cc2cf917814b02a15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_cb4bdb57",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-02-01T16:28:21Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fafc7978_9cce4382",
       "range": {
         "startLine": 135,
         "startChar": 57,
@@ -117,6 +165,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_ab48175c",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-02-01T16:28:21Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fafc7978_9c7c8322",
+      "range": {
+        "startLine": 337,
+        "startChar": 36,
+        "endLine": 337,
+        "endChar": 45
+      },
+      "revId": "c3e5740147797ebb05278f4cc2cf917814b02a15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_bc73474c",
         "filename": "library/impl/src/main/resources/initial/library.cfg",
         "patchSetId": 9
@@ -128,6 +200,30 @@
       "writtenOn": "2017-02-01T02:17:15Z",
       "side": 1,
       "message": "can you please add following text on top of this config parameter \n\"This flag will be enforced across all the connection\u0027s if set to true\"",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 17
+      },
+      "revId": "c3e5740147797ebb05278f4cc2cf917814b02a15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_0b75e397",
+        "filename": "library/impl/src/main/resources/initial/library.cfg",
+        "patchSetId": 9
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2017-02-01T16:28:21Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fafc7978_bc73474c",
       "range": {
         "startLine": 5,
         "startChar": 0,

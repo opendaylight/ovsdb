@@ -57,6 +57,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         if (!createds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> created:
                 createds.entrySet()) {
+                LOG.debug("Created Key={}, Created Value={}", created.getKey(), created.getValue());
                 updatePhysicalPort(transaction,  created.getKey(), created.getValue(), createdPhysicalSwitches);
             }
         }
@@ -65,6 +66,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updated:
                 updateds.entrySet()) {
+                LOG.debug("Updated Key={}, Updated Value={}", updated.getKey(), updated.getValue());
                 updatePhysicalPort(transaction,  updated.getKey(), updated.getValue(), createdPhysicalSwitches);
             }
         }

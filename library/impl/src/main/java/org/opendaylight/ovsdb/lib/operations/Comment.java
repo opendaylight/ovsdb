@@ -22,4 +22,9 @@ public class Comment extends Operation {
     public String getComment() {
         return comment;
     }
+
+    @Override
+    public String toString() {
+        return "Comment [comment=" + comment + ", " + super.toString() + "]";
+    }
 }

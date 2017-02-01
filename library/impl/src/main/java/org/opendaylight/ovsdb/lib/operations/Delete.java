@@ -52,4 +52,9 @@ public class Delete<E extends TableSchema<E>> extends Operation<E> implements Co
     public void setCount(Integer count) {
         this.count = count;
     }
+
+    @Override
+    public String toString() {
+        return "Delete [where=" + where + ", count=" + count + ", " + super.toString() + "]";
+    }
 }

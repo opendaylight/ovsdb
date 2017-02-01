@@ -14,4 +14,9 @@ public class Abort extends Operation {
     public Abort() {
         super(null, ABORT);
     }
+
+    @Override
+    public String toString() {
+        return "Abort [" + super.toString() + "]";
+    }
 }

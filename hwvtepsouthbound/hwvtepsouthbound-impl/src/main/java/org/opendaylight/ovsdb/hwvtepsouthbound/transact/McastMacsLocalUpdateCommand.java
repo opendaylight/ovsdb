@@ -47,6 +47,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<LocalMcastMacs>> updated:
                 updateds.entrySet()) {
+                LOG.debug("Updated Key={}, Updated Value={}", updated.getKey(), updated.getValue());
                 updateMcastMacsLocal(transaction,  updated.getKey(), updated.getValue());
             }
         }

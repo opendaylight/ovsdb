@@ -22,4 +22,9 @@ public class Assert extends Operation {
     public String getLock() {
         return lock;
     }
+
+    @Override
+    public String toString() {
+        return "Assert [lock=" + lock + ", " + super.toString() + "]";
+    }
 }

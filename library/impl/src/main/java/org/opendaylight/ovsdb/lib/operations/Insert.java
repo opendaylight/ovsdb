@@ -94,4 +94,9 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
         this.row = row;
     }
 
+    @Override
+    public String toString() {
+        return "Insert [uuid=" + uuid + ", uuidName=" + uuidName + ", row=" + row + ", " + super.toString()
+                + "]";
+    }
 }

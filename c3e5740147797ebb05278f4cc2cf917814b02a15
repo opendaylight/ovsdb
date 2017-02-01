@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_7679f62e",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T21:05:38Z",
+      "side": 1,
+      "message": "I think passing the instance of cretificate-manager from blueprint is the correct approach. Rather then modifying the constructor, we can either use the init-method or we can use \u003cproperties\u003e and pass the reference of certificate manager through that property?",
+      "parentUuid": "fafc7978_6b3e2fba",
+      "range": {
+        "startLine": 133,
+        "startChar": 1,
+        "endLine": 134,
+        "endChar": 41
+      },
+      "revId": "c3e5740147797ebb05278f4cc2cf917814b02a15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_9cce4382",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 9

@@ -330,7 +330,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbClient getClient(ConnectionInfo connectionInfo) {
-        return getConnectionInstance(connectionInfo).getOvsdbClient();
+        OvsdbConnectionInstance connectionInstance = getConnectionInstance(connectionInfo);
+        if (connectionInstance != null) {
+            return connectionInstance.getOvsdbClient();
+        }
+        return null;
     }
 
     public OvsdbClient getClient(OvsdbBridgeAttributes mn) {

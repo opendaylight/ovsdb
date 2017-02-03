@@ -493,7 +493,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             operations.add(op.comment("Fetching Open_VSwitch table rows"));
             try {
                 List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
-                if (results != null ) {
+                if (results != null) {
                     OperationResult selectResult = results.get(0);
                     openVSwitchRow = TyperUtils.getTypedRowWrapper(
                             dbSchema,OpenVSwitch.class,selectResult.getRows().get(0));
@@ -509,7 +509,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private Entity getEntityFromConnectionInstance(@Nonnull OvsdbConnectionInstance ovsdbConnectionInstance) {
         InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();
-        if ( iid == null ) {
+        if (iid == null) {
             /* Switch initiated connection won't have iid, till it gets OpenVSwitch
              * table update but update callback is always registered after ownership
              * is granted. So we are explicitly fetch the row here to get the iid.

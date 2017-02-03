@@ -65,7 +65,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
                     public void run() {
                         for (OvsdbClient client : clientFutureMap.keySet()) {
                             Future<?> clientFuture = clientFutureMap.get(client);
-                            if ( !clientFuture.isDone() && !clientFuture.isCancelled()) {
+                            if (!clientFuture.isDone() && !clientFuture.isCancelled()) {
                                 clientFuture.cancel(true);
                             }
                             if (client.isActive()) {

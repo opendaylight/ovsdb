@@ -51,7 +51,7 @@ public class BridgeRemovedCommandTest {
         when(TransactUtils.extractRemoved(changes, OvsdbBridgeAugmentation.class)).thenReturn(removed);
         when(TransactUtils.extractOriginal(changes, OvsdbBridgeAugmentation.class)).thenReturn(originals);
 
-        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
+        TransactionBuilder transaction = mock(TransactionBuilder.class, Mockito.RETURNS_MOCKS);
         briRemovedCmd.execute(transaction, mock(BridgeOperationalState.class), changes,
                 mock(InstanceIdentifierCodec.class));
 

@@ -314,7 +314,7 @@ public class OpenVSwitchUpdateCommandTest {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
 
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
-        when(openVSwitch.getIfaceTypesColumn()).thenReturn(column );
+        when(openVSwitch.getIfaceTypesColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("dpdk");
         set.add("dpdkr");
@@ -356,7 +356,7 @@ public class OpenVSwitchUpdateCommandTest {
     public void testSetDataPathTypes() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
-        when(openVSwitch.getDatapathTypesColumn()).thenReturn(column );
+        when(openVSwitch.getDatapathTypesColumn()).thenReturn(column);
         Set<String> set = new HashSet<>();
         set.add("netdev");
         set.add("system");

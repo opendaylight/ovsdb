@@ -41,7 +41,7 @@ public class ExceptionHandler extends ChannelDuplexHandler {
         Catch the IOException and close the channel. Similarly if the peer is
         powered off, Catch the read time out exception and close the channel
          */
-            if ((cause instanceof IOException ) || (cause instanceof ReadTimeoutException)) {
+            if ((cause instanceof IOException) || (cause instanceof ReadTimeoutException)) {
                 LOG.info("Closing channel to ovsdb {}", ctx.channel());
                 ctx.channel().close();
                 return;

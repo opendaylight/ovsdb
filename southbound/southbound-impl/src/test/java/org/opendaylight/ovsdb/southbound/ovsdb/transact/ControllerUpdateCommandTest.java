@@ -48,7 +48,7 @@ public class ControllerUpdateCommandTest {
         when(TransactUtils.extractCreated(changes, ControllerEntry.class)).thenReturn(controllers);
         when(TransactUtils.extractUpdated(changes, OvsdbBridgeAugmentation.class)).thenReturn(bridges);
 
-        TransactionBuilder transaction = mock( TransactionBuilder.class, Mockito.RETURNS_MOCKS);
+        TransactionBuilder transaction = mock(TransactionBuilder.class, Mockito.RETURNS_MOCKS);
         contUpdateCmd.execute(transaction, mock(BridgeOperationalState.class), changes,
                 mock(InstanceIdentifierCodec.class));
 

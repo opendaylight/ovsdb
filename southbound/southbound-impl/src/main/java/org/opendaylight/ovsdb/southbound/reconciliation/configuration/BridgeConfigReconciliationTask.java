@@ -98,7 +98,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                                 tpChanges.add(node);
                             } else if (node.getKey().getNodeId().getValue().startsWith(
                                     nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
-                                    && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty() ) {
+                                    && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
                                 tpChanges.add(node);
                             }
                         }

@@ -172,7 +172,7 @@ public class BridgeUpdateCommand implements TransactCommand {
     private void setFailMode(Bridge bridge,
             OvsdbBridgeAugmentation ovsdbManagedNode) {
         if (ovsdbManagedNode.getFailMode() != null
-                && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
+                && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null) {
             bridge.setFailMode(Sets.newHashSet(
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
         }

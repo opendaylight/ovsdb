@@ -113,8 +113,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        if ( (portUpdatedRows == null && interfaceOldRows == null )
-                || ( interfaceOldRows.isEmpty() && portUpdatedRows.isEmpty())) {
+        if ((portUpdatedRows == null && interfaceOldRows == null)
+                || (interfaceOldRows.isEmpty() && portUpdatedRows.isEmpty())) {
             return;
         }
         Optional<Node> node = readNode(transaction, connectionIId);
@@ -129,7 +129,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             portName = portUpdate.getValue().getNameColumn().getData();
             Optional<InstanceIdentifier<Node>> bridgeIid = getTerminationPointBridge(portUpdate.getKey());
             if (!bridgeIid.isPresent()) {
-                bridgeIid = getTerminationPointBridge( transaction, node, portName);
+                bridgeIid = getTerminationPointBridge(transaction, node, portName);
             }
             if (bridgeIid.isPresent()) {
                 NodeId bridgeId = SouthboundMapper.createManagedNodeId(bridgeIid.get());
@@ -161,7 +161,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         for (Entry<UUID, Interface> interfaceUpdate : interfaceUpdatedRows.entrySet()) {
             String interfaceName = null;
             interfaceName = interfaceUpdatedRows.get(interfaceUpdate.getKey()).getNameColumn().getData();
-            Optional<InstanceIdentifier<Node>> bridgeIid = getTerminationPointBridge( transaction, node, interfaceName);
+            Optional<InstanceIdentifier<Node>> bridgeIid = getTerminationPointBridge(transaction, node, interfaceName);
             if (bridgeIid.isPresent()) {
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(interfaceName));
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
@@ -236,7 +236,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
         List<ManagedNodeEntry> managedNodes = ovsdbNode.getManagedNodeEntry();
         TpId tpId = new TpId(tpName);
-        for ( ManagedNodeEntry managedNodeEntry : managedNodes ) {
+        for (ManagedNodeEntry managedNodeEntry : managedNodes) {
             Node managedNode = readNode(transaction,
                     (InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue()).get();
             for (TerminationPoint tpEntry : managedNode.getTerminationPoint()) {

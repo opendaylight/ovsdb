@@ -117,7 +117,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataAfter();
                     ConnectionInfo key = ovsdbNode.getConnectionInfo();
                     InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
-                    if ( iid != null) {
+                    if (iid != null) {
                         LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
                                 + "to same device, hence dropping the request {}", key, ovsdbNode);
                     } else {
@@ -239,7 +239,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                      * multi threaded and i don't see any need to further parallelism per DataChange
                      * notifications processing.
                      */
-                if ( cm.getHasDeviceOwnership(client.getMDConnectionInfo())) {
+                if (cm.getHasDeviceOwnership(client.getMDConnectionInfo())) {
                     LOG.debug("*This* instance of southbound plugin is an owner of the device {}", node);
                     result.computeIfAbsent(client, key -> new ArrayList<>()).add(change);
                 } else {

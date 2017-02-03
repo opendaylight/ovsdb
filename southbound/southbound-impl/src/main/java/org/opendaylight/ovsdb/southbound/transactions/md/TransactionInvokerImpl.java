@@ -46,7 +46,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
-    private final AtomicBoolean runTask = new AtomicBoolean( true );
+    private final AtomicBoolean runTask = new AtomicBoolean(true);
 
     public TransactionInvokerImpl(DataBroker db) {
         this.db = db;

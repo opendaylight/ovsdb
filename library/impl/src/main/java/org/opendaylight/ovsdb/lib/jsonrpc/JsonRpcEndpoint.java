@@ -127,8 +127,8 @@ public class JsonRpcEndpoint {
                     @Override
                     public void run() {
                         CallContext cc = methodContext.remove(request.getId());
-                        if ( cc != null) {
-                            if ( cc.getFuture().isDone() || cc.getFuture().isCancelled()) {
+                        if (cc != null) {
+                            if (cc.getFuture().isDone() || cc.getFuture().isCancelled()) {
                                 return;
                             }
                             cc.getFuture().cancel(false);

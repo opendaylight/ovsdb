@@ -248,7 +248,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(any(List.class)))
                 .thenReturn(ovsdbConnectionAugmentationBuilder);
 
-        when(ovsdbConnectionAugmentationBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class) );
+        when(ovsdbConnectionAugmentationBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class));
         when(connectionNode.addAugmentation(eq(OvsdbNodeAugmentation.class), any(OvsdbNodeAugmentation.class)))
                 .thenReturn(connectionNode);
 

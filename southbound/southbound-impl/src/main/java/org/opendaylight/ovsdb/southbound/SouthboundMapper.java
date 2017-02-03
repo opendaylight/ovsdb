@@ -277,7 +277,7 @@ public class SouthboundMapper {
                 bridge, updatedControllerRows);
         final Set<UUID> controllerUuids = bridge.getControllerColumn().getData();
         final List<ControllerEntry> controllerEntries = new ArrayList<>();
-        for (UUID controllerUuid : controllerUuids ) {
+        for (UUID controllerUuid : controllerUuids) {
             final Controller controller = updatedControllerRows.get(controllerUuid);
             addControllerEntries(controllerEntries, controller);
         }

@@ -128,7 +128,7 @@ public class OvsdbConnectionInstance {
 
     public void registerCallbacks(InstanceIdentifierCodec instanceIdentifierCodec) {
         if (this.callback == null) {
-            if (this.initialCreateData != null ) {
+            if (this.initialCreateData != null) {
                 this.updateConnectionAttributes(instanceIdentifierCodec);
             }
 
@@ -192,7 +192,7 @@ public class OvsdbConnectionInstance {
         LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
                     this.initialCreateData.getConnectionInfo().getRemoteIp(),
                     this.initialCreateData.getConnectionInfo().getRemotePort());
-        for ( Map.Entry<DatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
+        for (Map.Entry<DatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
 
             TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
 
@@ -359,7 +359,7 @@ public class OvsdbConnectionInstance {
         return this.connectedEntity;
     }
 
-    public void setConnectedEntity(Entity entity ) {
+    public void setConnectedEntity(Entity entity) {
         this.connectedEntity = entity;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -66,6 +67,16 @@ public class HwvtepOperationalState {
     private HwvtepConnectionInstance connectionInstance;
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
+
+    /* stores the modified and deleted data for each child type of each node id
+       Map<nodeid , Pair < updated, deleted >
+       each updated/ deleted contains Map < child type, List<ChildData>>
+       child type is the child of hwvtep Global augmentation
+     */
+    private Map<InstanceIdentifier<Node>,
+            Pair<Map<Class<? extends Identifiable>, List<Identifiable>>,
+                    Map<Class<? extends Identifiable>, List<Identifiable>>>> modifiedData = new HashMap<>();
+    private boolean inReconciliation = false;
 
     public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
                                   Collection<DataTreeModification<Node>> changes) {
@@ -364,4 +375,41 @@ public class HwvtepOperationalState {
         return Collections.EMPTY_SET;
     }
 
+    public List<? extends Identifiable> getUpdatedData(final InstanceIdentifier<Node> key,
+                                                       final Class<? extends Identifiable> cls) {
+        List<Identifiable> result = null;
+        if (modifiedData.get(key) != null && modifiedData.get(key).getLeft() != null) {
+            result = modifiedData.get(key).getLeft().get(cls);
+        }
+        if (result == null) {
+            result = Collections.EMPTY_LIST;
+        }
+        return result;
+    }
+
+    public List<? extends Identifiable> getDeletedData(final InstanceIdentifier<Node> key,
+                                                       final Class<? extends Identifiable> cls) {
+        List<Identifiable> result = null;
+        if (modifiedData.get(key) != null && modifiedData.get(key).getRight() != null) {
+            result = modifiedData.get(key).getRight().get(cls);
+        }
+        if (result == null) {
+            result = Collections.EMPTY_LIST;
+        }
+        return result;
+    }
+
+    public void setModifiedData(final Map<InstanceIdentifier<Node>,
+            Pair<Map<Class<? extends Identifiable>, List<Identifiable>>,
+                    Map<Class<? extends Identifiable>, List<Identifiable>>>> modifiedData) {
+        this.modifiedData = modifiedData;
+    }
+
+    public boolean isInReconciliation() {
+        return inReconciliation;
+    }
+
+    public void setInReconciliation(boolean inReconciliation) {
+        this.inReconciliation = inReconciliation;
+    }
 }

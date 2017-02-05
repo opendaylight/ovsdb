@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -83,19 +84,20 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                                    InstanceIdentifier macKey,
                                    Object... extraData) {
             LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
-            Optional<RemoteUcastMacs> operationalMacOptional =
-                    getOperationalState().getRemoteUcastMacs(instanceIdentifier, remoteUcastMac.getKey());
+            HwvtepDeviceInfo.DeviceData deviceData =
+                    getOperationalState().getDeviceInfo().getDeviceOpData(RemoteUcastMacs.class, macKey);
+
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
             setIpAddress(ucastMacsRemote, remoteUcastMac);
             setLocator(transaction, ucastMacsRemote, remoteUcastMac);
             setLogicalSwitch(ucastMacsRemote, remoteUcastMac);
-            if (!operationalMacOptional.isPresent()) {
-                setMac(ucastMacsRemote, remoteUcastMac, operationalMacOptional);
+            if (deviceData == null) {
+                setMac(ucastMacsRemote, remoteUcastMac);
                 LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.insert(ucastMacsRemote));
                 transaction.add(op.comment("UcastMacRemote: Creating " + remoteUcastMac.getMacEntryKey().getValue()));
-            } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
-                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+            } else if (deviceData.getUuid() != null) {
+                UUID macEntryUUID = deviceData.getUuid();
                 UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                                 UcastMacsRemote.class, null);
                 extraMac.getUuidColumn().setData(macEntryUUID);
@@ -113,13 +115,12 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     private void setLogicalSwitch(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
-            Optional<LogicalSwitches> operationalSwitchOptional =
-                    getOperationalState().getLogicalSwitches(lswitchIid);
-            if (operationalSwitchOptional.isPresent()) {
-                Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
-                UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
-                ucastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
+            InstanceIdentifier<LogicalSwitches> lswitchIid =
+                    (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
+            HwvtepDeviceInfo.DeviceData deviceData = getOperationalState().getDeviceInfo().getDeviceOpData(
+                    LogicalSwitches.class, lswitchIid);
+            if (deviceData != null && deviceData.getUuid() != null) {
+                ucastMacsRemote.setLogicalSwitch(deviceData.getUuid());
             } else {
                 ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(lswitchIid));
             }
@@ -133,12 +134,10 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             @SuppressWarnings("unchecked")
             InstanceIdentifier<TerminationPoint> iid = (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
             //try to find locator in operational DS
-            Optional<HwvtepPhysicalLocatorAugmentation> operationalLocatorOptional =
-                    getOperationalState().getPhysicalLocatorAugmentation(iid);
-            if (operationalLocatorOptional.isPresent()) {
+            HwvtepDeviceInfo.DeviceData deviceData = getOperationalState().getDeviceInfo().getDeviceOpData(TerminationPoint.class, iid);
+            if (deviceData != null) {
                 //if exist, get uuid
-                HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
-                locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
+                locatorUuid = deviceData.getUuid();
             } else {
                 locatorUuid = getOperationalState().getUUIDFromCurrentTx(TerminationPoint.class, iid);
                 if (locatorUuid == null) {
@@ -159,12 +158,9 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private void setMac(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac,
-            Optional<RemoteUcastMacs> inputSwitchOptional) {
+    private void setMac(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
         if (inputMac.getMacEntryKey() != null) {
             ucastMacsRemote.setMac(inputMac.getMacEntryKey().getValue());
-        } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.get().getMacEntryKey() != null) {
-            ucastMacsRemote.setMac(inputSwitchOptional.get().getMacEntryKey().getValue());
         }
     }
 

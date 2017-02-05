@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -66,6 +67,11 @@ public class HwvtepOperationalState {
     private HwvtepConnectionInstance connectionInstance;
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
+
+    private Map<InstanceIdentifier<Node>,
+            Pair<Map<Class<? extends Identifiable>, List<Identifiable>>,
+                    Map<Class<? extends Identifiable>, List<Identifiable>>>> modifiedData = new HashMap<>();
+    private boolean inReconciliation = false;
 
     public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
                                   Collection<DataTreeModification<Node>> changes) {
@@ -364,4 +370,39 @@ public class HwvtepOperationalState {
         return Collections.EMPTY_SET;
     }
 
+    public List<? extends Identifiable> getUpdatedData(InstanceIdentifier<Node> key, Class<? extends Identifiable> cls) {
+        List<Identifiable> result = Collections.EMPTY_LIST;
+        if (modifiedData.get(key) != null && modifiedData.get(key).getLeft() != null) {
+            result = modifiedData.get(key).getLeft().get(cls);
+        }
+        if (result == null) {
+            result = Collections.EMPTY_LIST;
+        }
+        return result;
+    }
+
+    public List<? extends Identifiable> getDeletedData(InstanceIdentifier<Node> key, Class<? extends Identifiable> cls) {
+        List<Identifiable> result = Collections.EMPTY_LIST;
+        if (modifiedData.get(key) != null && modifiedData.get(key).getRight() != null) {
+            result = modifiedData.get(key).getRight().get(cls);
+        }
+        if (result == null) {
+            result = Collections.EMPTY_LIST;
+        }
+        return result;
+    }
+
+    public void setModifiedData(Map<InstanceIdentifier<Node>,
+            Pair<Map<Class<? extends Identifiable>, List<Identifiable>>,
+                    Map<Class<? extends Identifiable>, List<Identifiable>>>> modifiedData) {
+        this.modifiedData = modifiedData;
+    }
+
+    public boolean isInReconciliation() {
+        return inReconciliation;
+    }
+
+    public void setInReconciliation(boolean inReconciliation) {
+        this.inReconciliation = inReconciliation;
+    }
 }

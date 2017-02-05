@@ -188,9 +188,15 @@ public class HwvtepDeviceInfo {
     }
 
     public void markKeyAsInTransit(Class<? extends Identifiable> cls, InstanceIdentifier key) {
-        LOG.debug("Marking device data as intransit {}", key);
+        DeviceData deviceData = getDeviceOpData(cls, key);
+        UUID uuid = null;
+        Object data = null;
+        if (deviceData != null) {
+            uuid = deviceData.getUuid();
+            data = deviceData.getData();
+        }
         HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
-                new DeviceData(key, null, null, DeviceDataStatus.IN_TRANSIT));
+                new DeviceData(key, uuid, data, DeviceDataStatus.IN_TRANSIT));
     }
 
     public void updateDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {

@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
@@ -85,6 +86,7 @@ public class TransactCommandAggregator implements TransactCommand {
     }
 
     private void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
+        boolean readOperationalNodes = false;
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
@@ -93,7 +95,19 @@ public class TransactCommandAggregator implements TransactCommand {
             extractDataChanged(key, mod, updatedData, deletedData);
             modifiedData.put(key, Pair.of(updatedData, deletedData));
             operationalState.setModifiedData(modifiedData);
+            if (!isMacOnlyUpdate(updatedData, deletedData)) {
+                readOperationalNodes = true;
+            }
         }
+        if (readOperationalNodes) {
+            operationalState.readOperationalNodes();
+        }
+    }
+
+    private boolean isMacOnlyUpdate(final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
+                                    final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+        return (updatedData.containsKey(RemoteUcastMacs.class) && updatedData.size() == 1)
+                || (deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1);
     }
 
     private void extractDataChanged(final InstanceIdentifier<Node> key,

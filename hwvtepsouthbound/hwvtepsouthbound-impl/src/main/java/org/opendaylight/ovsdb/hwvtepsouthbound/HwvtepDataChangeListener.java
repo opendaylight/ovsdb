@@ -296,7 +296,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                     result.get(connection).add(change);
                 }
             } else {
-                LOG.warn("Failed to get the connection of changed node: {}", node);
+                LOG.trace("Failed to get the connection of changed node: {}", node);
             }
         }
         LOG.trace("Connection Change Map: {}", result);

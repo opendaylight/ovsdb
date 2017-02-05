@@ -169,7 +169,12 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                removed = getRemoved(change);
+                Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
+                if (operationalState.isInReconciliation()) {
+                    removed = getRemoved(change);
+                } else {
+                    removed = (List<T>) operationalState.getDeletedData(key, classType);
+                }
                 removed.addAll(getCascadeDeleteData(change));
                 result.put(key, removed);
             }
@@ -184,7 +189,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                result.put(key, getUpdated(change));
+                Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
+                List<T> updated = null;
+                if (operationalState.isInReconciliation()) {
+                    updated = getUpdated(change);
+                } else {
+                    updated = (List<T>) operationalState.getUpdatedData(key, classType);
+                }
+                result.put(key, updated);
             }
         }
         return result;
@@ -222,10 +234,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     List<T> getUpdated(DataTreeModification<Node> change) {
         DataObjectModification<Node> mod = change.getRootNode();
-        Node created = TransactUtils.getCreated(mod);
         Node updated = TransactUtils.getUpdated(mod);
         Node before = mod.getDataBefore();
-        return diffOf(created, updated, before, false);
+        return diffOf(updated, before, false);
     }
 
     List<T> diffOf(Node include, Node a, Node b, boolean compareKeyOnly) {
@@ -271,6 +282,13 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
             }
         }
         return result;
+    }
+
+
+    protected Type getClassType() {
+        Type type = getClass().getGenericSuperclass();
+        Type classType = ((ParameterizedType)type).getActualTypeArguments()[0];
+        return classType;
     }
 
     protected boolean areEqual(T a , T b) {

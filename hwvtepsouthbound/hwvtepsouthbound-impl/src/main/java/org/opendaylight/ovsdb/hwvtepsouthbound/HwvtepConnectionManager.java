@@ -226,6 +226,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public HwvtepConnectionInstance getConnectionInstance(ConnectionInfo key) {
+        if (key == null) {
+            return null;
+        }
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         return clients.get(connectionInfo);
     }

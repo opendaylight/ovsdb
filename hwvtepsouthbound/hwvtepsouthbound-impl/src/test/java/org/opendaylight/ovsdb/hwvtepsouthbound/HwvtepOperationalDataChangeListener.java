@@ -87,11 +87,11 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.getDataAfter());
         switch(type) {
             case WRITE:
-                connectionInstance.getDeviceInfo().updateDeviceOpData(childClass, instanceIdentifier,
+                connectionInstance.getDeviceInfo().updateDeviceOperData(childClass, instanceIdentifier,
                         new UUID("uuid"), mod.getDataAfter());
                 break;
             case DELETE:
-                connectionInstance.getDeviceInfo().clearDeviceOpData(childClass, instanceIdentifier);
+                connectionInstance.getDeviceInfo().clearDeviceOperData(childClass, instanceIdentifier);
                 break;
             case SUBTREE_MODIFIED:
         }

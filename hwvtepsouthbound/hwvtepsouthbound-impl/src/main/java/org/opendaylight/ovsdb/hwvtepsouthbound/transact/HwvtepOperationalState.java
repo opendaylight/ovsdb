@@ -77,13 +77,33 @@ public class HwvtepOperationalState {
             Pair<Map<Class<? extends Identifiable>, List<Identifiable>>,
                     Map<Class<? extends Identifiable>, List<Identifiable>>>> modifiedData = new HashMap<>();
     private boolean inReconciliation = false;
+    private final DataBroker db;
+    private final Collection<DataTreeModification<Node>> changes;
 
     public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
                                   Collection<DataTreeModification<Node>> changes) {
         this.connectionInstance = connectionInstance;
         this.deviceInfo = connectionInstance.getDeviceInfo();
+        this.db = db;
+        this.changes = changes;
+        this.transaction = db.newReadWriteTransaction();
+    }
+
+    public HwvtepOperationalState(HwvtepConnectionInstance connectionInstance) {
+        this.db = null;
+        this.changes = null;
+        this.connectionInstance = connectionInstance;
+        this.deviceInfo = connectionInstance.getDeviceInfo();
+        transaction = connectionInstance.getDataBroker().newReadWriteTransaction();
+        Optional<Node> readNode = HwvtepSouthboundUtil.readNode(transaction, connectionInstance.getInstanceIdentifier());
+        if (readNode.isPresent()) {
+            operationalNodes.put(connectionInstance.getInstanceIdentifier(), readNode.get());
+        }
+    }
+
+    public void readOperationalNodes() {
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
-            TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+                TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
         if (nodeCreateOrUpdate != null) {
             transaction = db.newReadWriteTransaction();
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
@@ -115,16 +135,6 @@ public class HwvtepOperationalState {
                     }
                 }
             }
-        }
-    }
-
-    public HwvtepOperationalState(HwvtepConnectionInstance connectionInstance) {
-        this.connectionInstance = connectionInstance;
-        this.deviceInfo = connectionInstance.getDeviceInfo();
-        transaction = connectionInstance.getDataBroker().newReadWriteTransaction();
-        Optional<Node> readNode = HwvtepSouthboundUtil.readNode(transaction, connectionInstance.getInstanceIdentifier());
-        if (readNode.isPresent()) {
-            operationalNodes.put(connectionInstance.getInstanceIdentifier(), readNode.get());
         }
     }
 

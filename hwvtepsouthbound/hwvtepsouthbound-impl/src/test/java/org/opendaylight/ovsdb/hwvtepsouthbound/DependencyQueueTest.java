@@ -102,7 +102,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         opState.getDeviceInfo().onOpDataAvailable();
         assertEquals(1, latch.getCount());
 
-        opState.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
+        opState.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
         opState.getDeviceInfo().onOpDataAvailable();
         assertEquals(0, latch.getCount());
 

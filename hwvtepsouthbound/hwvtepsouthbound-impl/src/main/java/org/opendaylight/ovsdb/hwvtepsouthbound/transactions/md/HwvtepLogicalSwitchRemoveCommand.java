@@ -39,7 +39,7 @@ public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
             // TODO Delete any references
             transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(LogicalSwitches.class, switchIid);
+            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalSwitches.class, switchIid);
         }
     }
 

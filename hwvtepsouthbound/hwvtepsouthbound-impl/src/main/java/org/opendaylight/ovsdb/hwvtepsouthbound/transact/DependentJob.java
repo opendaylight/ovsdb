@@ -99,7 +99,7 @@ public abstract class DependentJob<T extends Identifiable> {
 
         @Override
         protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, InstanceIdentifier iid) {
-            HwvtepDeviceInfo.DeviceData deviceData = deviceInfo.getDeviceOpData(cls, iid);
+            HwvtepDeviceInfo.DeviceData deviceData = deviceInfo.getDeviceOperData(cls, iid);
             return deviceData == null || deviceData.getStatus() != HwvtepDeviceInfo.DeviceDataStatus.IN_TRANSIT;
         }
     }

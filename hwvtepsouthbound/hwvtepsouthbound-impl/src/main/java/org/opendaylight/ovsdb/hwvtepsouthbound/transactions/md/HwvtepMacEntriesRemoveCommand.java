@@ -84,7 +84,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
                                     new RemoteUcastMacsKey(getLogicalSwitchRef(rum.getLogicalSwitchColumn().getData()),
                                                     getMacAddress(rum.getMac())));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, rumId);
-                getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(RemoteMcastMacs.class, rumId);
+                getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(RemoteUcastMacs.class, rumId);
             } else {
                 LOG.debug("Failed to delete UcastMacRemote entry {}", rum.getUuid());
             }
@@ -121,7 +121,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
                                     new RemoteMcastMacsKey(getLogicalSwitchRef(rmm.getLogicalSwitchColumn().getData()),
                                                     getMacAddress(rmm.getMac())));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, lumId);
-                getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(RemoteMcastMacs.class, lumId);
+                getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(RemoteMcastMacs.class, lumId);
             } else {
                 LOG.debug("Failed to delete McastMacRemote entry {}", rmm.getUuid());
             }

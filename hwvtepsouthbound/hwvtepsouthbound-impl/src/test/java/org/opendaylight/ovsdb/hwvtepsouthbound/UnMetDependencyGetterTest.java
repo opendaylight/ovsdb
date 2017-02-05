@@ -77,7 +77,7 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
         unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
         assertEquals(1, unMetDependencies.size());
 
-        opState.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
+        opState.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
         unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());
     }

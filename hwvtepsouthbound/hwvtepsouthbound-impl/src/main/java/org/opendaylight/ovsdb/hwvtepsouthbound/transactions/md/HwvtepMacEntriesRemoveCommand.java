@@ -84,7 +84,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
                                     new RemoteUcastMacsKey(getLogicalSwitchRef(rum.getLogicalSwitchColumn().getData()),
                                                     getMacAddress(rum.getMac())));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, rumId);
-                getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(RemoteMcastMacs.class, rumId);
+                getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(RemoteUcastMacs.class, rumId);
             } else {
                 LOG.debug("Failed to delete UcastMacRemote entry {}", rum.getUuid());
             }

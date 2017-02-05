@@ -54,6 +54,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     private void transactChangesToDevice(Collection<DataTreeModification<Node>> changes) {
         HwvtepOperationalState hwvtepOperationalState = new HwvtepOperationalState(db, connectionInstance, changes);
+        hwvtepOperationalState.setInReconciliation(true);
         connectionInstance.transact(new TransactCommandAggregator(hwvtepOperationalState,changes));
     }
 

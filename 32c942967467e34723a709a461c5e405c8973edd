@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_c76e1901",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2017-02-06T20:52:32Z",
+      "side": 1,
+      "message": "Same comment, need to catch specific exceptions, not generic one.",
+      "revId": "32c942967467e34723a709a461c5e405c8973edd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_67676d26",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2017-02-06T20:52:32Z",
+      "side": 1,
+      "message": "I think it would be better to catch specific exceptions, instead of generic exception, and decide if the exception should be handled locally.",
+      "revId": "32c942967467e34723a709a461c5e405c8973edd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

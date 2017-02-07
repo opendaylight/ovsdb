@@ -33,9 +33,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /*  TODO:
  * Copied over as-is from southbound plugin. Good candidate to be common
- * when refactoring code. 
+ * when refactoring code.
  */
-public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable {
+public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable,
+        Thread.UncaughtExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
@@ -49,13 +50,17 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
+    private volatile ReadWriteTransaction transactionInFlight = null;
 
     public TransactionInvokerImpl(DataBroker db) {
         this.db = db;
         this.chain = db.createTransactionChain(this);
-        ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
+        ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d")
+                .setUncaughtExceptionHandler(this).build();
         executor = Executors.newSingleThreadExecutor(threadFact);
-        executor.submit(this);
+        //Using the execute method here so that un caught exception handler gets triggered upon exception.
+        //The other way to do it is using submit method and wait on the future to catch any exceptions
+        executor.execute(this);
     }
 
     @Override
@@ -89,7 +94,6 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                 continue;
             }
 
-            ReadWriteTransaction transactionInFlight = null;
             try {
                 for (TransactionCommand command: commands) {
                     final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
@@ -108,6 +112,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                         }
                     });
                 }
+                transactionInFlight = null;
             } catch (IllegalStateException e) {
                 if (transactionInFlight != null) {
                     // TODO: This method should distinguish exceptions on which the command should be
@@ -116,6 +121,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     // this method will retry commands which will never be successful forever.
                     failedTransactionQueue.offer(transactionInFlight);
                 }
+                transactionInFlight = null;
                 LOG.warn("Failed to process an update notification from OVS.", e);
             }
         }
@@ -179,5 +185,15 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void close() throws Exception {
         this.executor.shutdown();
+    }
+
+    @Override
+    public void uncaughtException(Thread thread, Throwable e) {
+        LOG.error("Failed to execute hwvtep transact command, re-submitting the transaction again", e);
+        if (transactionInFlight != null) {
+            failedTransactionQueue.offer(transactionInFlight);
+        }
+        transactionInFlight = null;
+        executor.execute(this);
     }
 }

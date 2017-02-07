@@ -35,7 +35,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  * Copied over as-is from southbound plugin. Good candidate to be common
  * when refactoring code. 
  */
-public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable {
+public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable,
+        Thread.UncaughtExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
@@ -49,13 +50,15 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
+    private volatile ReadWriteTransaction transactionInFlight = null;
 
     public TransactionInvokerImpl(DataBroker db) {
         this.db = db;
         this.chain = db.createTransactionChain(this);
-        ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
+        ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d")
+                .setUncaughtExceptionHandler(this).build();
         executor = Executors.newSingleThreadExecutor(threadFact);
-        executor.submit(this);
+        executor.execute(this);
     }
 
     @Override
@@ -89,7 +92,6 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                 continue;
             }
 
-            ReadWriteTransaction transactionInFlight = null;
             try {
                 for (TransactionCommand command: commands) {
                     final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
@@ -179,5 +181,14 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void close() throws Exception {
         this.executor.shutdown();
+    }
+
+    @Override
+    public void uncaughtException(Thread thread, Throwable e) {
+        LOG.error("Failed to execute hwvtep transact command ", e);
+        if (transactionInFlight != null) {
+            failedTransactionQueue.offer(transactionInFlight);
+        }
+        executor.execute(this);
     }
 }

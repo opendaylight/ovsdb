@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -68,9 +68,11 @@ public class HwvtepConnectionInstance {
     private HwvtepGlobalAugmentation initialCreatedData = null;
     private HwvtepDeviceInfo deviceInfo;
     private DataBroker dataBroker;
+    private final HwvtepConnectionManager hwvtepConnectionManager;
 
-    HwvtepConnectionInstance (ConnectionInfo key, OvsdbClient client,
+    HwvtepConnectionInstance (HwvtepConnectionManager hwvtepConnectionManager, ConnectionInfo key, OvsdbClient client,
                               InstanceIdentifier<Node> iid, TransactionInvoker txInvoker, DataBroker dataBroker) {
+        this.hwvtepConnectionManager = hwvtepConnectionManager;
         this.connectionInfo = key;
         this.client = client;
         this.instanceIdentifier = iid;
@@ -254,6 +256,7 @@ public class HwvtepConnectionInstance {
 
     public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
+        hwvtepConnectionManager.putConnectionInstance(instanceIdentifier, this);
     }
 
     public Entity getConnectedEntity() {

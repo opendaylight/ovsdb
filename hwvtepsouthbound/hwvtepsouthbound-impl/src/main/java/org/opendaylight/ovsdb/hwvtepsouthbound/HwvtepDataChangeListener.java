@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -274,17 +274,8 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             final DataObjectModification<Node> mod = change.getRootNode();
             //From original node to get connection instance
             Node node = mod.getDataBefore()!=null ? mod.getDataBefore() : mod.getDataAfter();
-            HwvtepConnectionInstance connection = hcm.getConnectionInstance(node);
-            if(connection == null) {
-                //Let us try getting it from Operational DS
-                final ReadWriteTransaction transaction = db.newReadWriteTransaction();
-                InstanceIdentifier<Node> connectionIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
-                Optional<Node> optionalNode = HwvtepSouthboundUtil.readNode(transaction, connectionIid);
-                LOG.trace("Node in Operational DataStore for user node {} is {}", node, optionalNode);
-                if(optionalNode.isPresent()) {
-                    connection = hcm.getConnectionInstance(optionalNode.get());
-                }
-            }
+            HwvtepConnectionInstance connection = hcm.getConnectionInstanceFromNodeIid(
+                    change.getRootPath().getRootIdentifier());
             if (connection != null) {
                 if (!result.containsKey(connection)) {
                     List<DataTreeModification<Node>> tempChanges= new ArrayList<>();

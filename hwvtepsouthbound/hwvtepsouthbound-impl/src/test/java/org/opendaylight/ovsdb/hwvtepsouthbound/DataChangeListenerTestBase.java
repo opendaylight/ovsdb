@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -148,10 +148,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         field(HwvtepConnectionManager.class, "txInvoker").set(hwvtepConnectionManager, transactionInvoker);
         field(HwvtepConnectionManager.class, "entityOwnershipService").set(hwvtepConnectionManager, entityOwnershipService);
         suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstance", HwvtepPhysicalSwitchAttributes.class));
+        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstanceFromNodeIid",
+                InstanceIdentifier.class));
         when(hwvtepConnectionManager.getConnectionInstance(Mockito.any(HwvtepPhysicalSwitchAttributes.class))).
                 thenReturn(connectionInstance);
         when(hwvtepConnectionManager.getConnectionInstance(Mockito.any(Node.class))).
                 thenReturn(connectionInstance);
+        when(hwvtepConnectionManager.getConnectionInstanceFromNodeIid(Mockito.any(InstanceIdentifier.class)))
+                .thenReturn(connectionInstance);
     }
 
     void mockConnectionInstance() throws IllegalAccessException {

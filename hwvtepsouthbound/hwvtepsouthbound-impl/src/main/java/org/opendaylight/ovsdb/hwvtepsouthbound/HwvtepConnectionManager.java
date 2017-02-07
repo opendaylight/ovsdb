@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -82,6 +82,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private EntityOwnershipService entityOwnershipService;
     private HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
     private final ReconciliationManager reconciliationManager;
+    private final Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> nodeIidVsConnectionInstance =
+            new ConcurrentHashMap<>();
 
     public HwvtepConnectionManager(DataBroker db, TransactionInvoker txInvoker,
                     EntityOwnershipService entityOwnershipService) {
@@ -151,6 +153,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             //Controller initiated connection can be terminated from switch side.
             //So cleanup the instance identifier cache.
             removeInstanceIdentifier(key);
+            removeConnectionInstance(hwvtepConnectionInstance.getInstanceIdentifier());
             retryConnection(hwvtepConnectionInstance.getInstanceIdentifier(),
                     hwvtepConnectionInstance.getHwvtepGlobalAugmentation(),
                     ConnectionReconciliationTriggers.ON_DISCONNECT);
@@ -213,7 +216,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             removeConnectionInstance(key);
         }
 
-        hwvtepConnectionInstance = new HwvtepConnectionInstance(key, externalClient, getInstanceIdentifier(key),
+        hwvtepConnectionInstance = new HwvtepConnectionInstance(this, key, externalClient, getInstanceIdentifier(key),
                 txInvoker, db);
         hwvtepConnectionInstance.createTransactInvokers();
         return hwvtepConnectionInstance;
@@ -231,6 +234,18 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         return clients.get(connectionInfo);
+    }
+
+    public HwvtepConnectionInstance getConnectionInstanceFromNodeIid(final InstanceIdentifier<Node> nodeIid) {
+        HwvtepConnectionInstance hwvtepConnectionInstance = nodeIidVsConnectionInstance.get(nodeIid);
+        if (hwvtepConnectionInstance != null) {
+            return hwvtepConnectionInstance;
+        }
+        InstanceIdentifier<Node> globalNodeIid = HwvtepSouthboundUtil.getGlobalNodeIid(nodeIid);
+        if (globalNodeIid != null) {
+            return nodeIidVsConnectionInstance.get(globalNodeIid);
+        }
+        return null;
     }
 
     public HwvtepConnectionInstance getConnectionInstance(Node node) {
@@ -541,6 +556,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {
         return entityConnectionMap.get(entity);
+    }
+
+    void putConnectionInstance(final InstanceIdentifier<Node> nodeIid,
+                               final HwvtepConnectionInstance connectionInstance) {
+        nodeIidVsConnectionInstance.put(nodeIid, connectionInstance);
+    }
+
+    private void removeConnectionInstance(final InstanceIdentifier<Node> nodeIid) {
+         if (nodeIid != null) {
+             nodeIidVsConnectionInstance.remove(nodeIid);
+         }
     }
 
     private class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {

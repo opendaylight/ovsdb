@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_f24952d1",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1949,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-02-08T20:08:38Z",
+      "side": 1,
+      "message": "the test should be updated to replace setting the deprecated qos leaf entry with the QosEntry list.",
+      "revId": "c6d8c7c0221f8ded41170f604185dfc5528fb41d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_52393e40",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2490,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-02-08T20:08:38Z",
+      "side": 1,
+      "message": "the test should be updated to set QueueRef instead.",
+      "revId": "c6d8c7c0221f8ded41170f604185dfc5528fb41d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b23fca24",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2522,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-02-08T20:08:38Z",
+      "side": 1,
+      "message": "The checks here that used to check against QueueUuid should be replaced with QueueRef",
+      "revId": "c6d8c7c0221f8ded41170f604185dfc5528fb41d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_923a8632",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2542,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-02-08T20:08:38Z",
+      "side": 1,
+      "message": "Check for QueueRef too",
+      "revId": "c6d8c7c0221f8ded41170f604185dfc5528fb41d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright © 2017 Red Hat, Inc. and others.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>single-feature-parent</artifactId>
+        <version>1.8.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>org.opendaylight.ovsdb</groupId>
+    <artifactId>odl-ovsdb-southbound-impl</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+    <packaging>feature</packaging>
+
+    <name>OpenDaylight :: southbound :: impl</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-mdsal-broker</artifactId>
+            <version>1.5.0-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-ovsdb-southbound-api</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-ovsdb-library</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>southbound-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!--
+  <feature name='odl-ovsdb-southbound-impl' version='${project.version}' description=' '>
+    <bundle>mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.ovsdb/utils.yang-utils/{{VERSION}}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-core/{{VERSION}}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/{{VERSION}}</bundle>
+    <bundle>mvn:com.google.code.gson/gson/{{VERSION}}</bundle>
+    <bundle>mvn:io.netty/netty-buffer/{{VERSION}}</bundle>
+    <bundle>mvn:io.netty/netty-codec/{{VERSION}}</bundle>
+    <bundle>mvn:io.netty/netty-codec-http/{{VERSION}}</bundle>
+    <bundle>mvn:io.netty/netty-common/{{VERSION}}</bundle>
+    <bundle>mvn:io.netty/netty-handler/{{VERSION}}</bundle>
+    <bundle>mvn:io.netty/netty-transport/{{VERSION}}</bundle>
+    <feature version="${project.version}">odl-ovsdb-library</feature>
+  </feature>
+    -->
+    
+</project>

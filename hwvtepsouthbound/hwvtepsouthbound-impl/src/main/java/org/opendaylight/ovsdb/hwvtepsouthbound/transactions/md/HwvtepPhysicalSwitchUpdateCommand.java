@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,10 +10,15 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
@@ -73,12 +78,12 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for (PhysicalSwitch physicalSwitch : updatedPSRows.values()) {
-            updatePhysicalSwitch(transaction, physicalSwitch);
+        for (Map.Entry<UUID, PhysicalSwitch> entry : updatedPSRows.entrySet()) {
+            updatePhysicalSwitch(transaction, entry.getKey(), entry.getValue());
         }
     }
 
-    private void updatePhysicalSwitch(ReadWriteTransaction transaction, PhysicalSwitch pSwitch) {
+    private void updatePhysicalSwitch(ReadWriteTransaction transaction, UUID uuid, PhysicalSwitch pSwitch) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
@@ -91,13 +96,45 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             // Update the Physical Switch with whatever data we are getting
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(pSwitch);
             Node psNode = buildPhysicalSwitchNode(connection.get(), pSwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
+
+            PhysicalSwitch oldPSwitch = oldPSRows.get(uuid);
+            updateTunnelIps(pSwitch, oldPSwitch, transaction);
+
             getOvsdbConnectionInstance().getDeviceInfo().putPhysicalSwitch(pSwitch.getUuid(), pSwitch);
             // TODO: Delete entries that are no longer needed
             // TODO: Deletion of tunnels
             // TODO: Deletion of Tunnel BFD config and params
             //Deleting old switch fault status entries
             deleteEntries(transaction, getSwitchFaultStatusToRemove(psIid,pSwitch));
+        }
+    }
+
+    private InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp, final InstanceIdentifier<Node> psIid) {
+        IpAddress ip = new IpAddress(tunnelIp.toCharArray());
+        TunnelIps tunnelIps = new TunnelIpsBuilder().setKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
+        return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.getKey());
+    }
+
+    private void updateTunnelIps(final PhysicalSwitch newPSwitch, final PhysicalSwitch oldPSwitch,
+                                 final ReadWriteTransaction transaction) {
+        Set<String> oldTunnelIps = oldPSwitch != null && oldPSwitch.getTunnelIpsColumn() != null ? oldPSwitch
+                .getTunnelIpsColumn().getData() : Collections.EMPTY_SET;
+        Set<String> newTunelIps = newPSwitch != null && newPSwitch.getTunnelIpsColumn() != null ? newPSwitch
+                .getTunnelIpsColumn().getData() : Collections.EMPTY_SET;
+
+        Set<String> addedTunnelIps = Sets.difference(newTunelIps, oldTunnelIps);
+        Set<String> removedTunnelIps = Sets.difference(oldTunnelIps, newTunelIps);
+
+        InstanceIdentifier<Node> psIid = getInstanceIdentifier(newPSwitch);
+        for (String tunnelIp : removedTunnelIps) {
+            InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier);
+        }
+        for (String tunnelIp : addedTunnelIps) {
+            IpAddress ip = new IpAddress(tunnelIp.toCharArray());
+            InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
+            TunnelIps tunnelIps = new TunnelIpsBuilder().setKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
+            transaction.put(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier, tunnelIps, true);
         }
     }
 
@@ -110,7 +147,6 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         setManagedBy(psAugmentationBuilder);
         setPhysicalSwitchId(psAugmentationBuilder, pSwitch);
         setManagementIps(psAugmentationBuilder, pSwitch);
-        setTunnelIps(psAugmentationBuilder, pSwitch);
         setTunnels(psAugmentationBuilder, pSwitch);
         setSwitchFaultStatus(psAugmentationBuilder, pSwitch);
 

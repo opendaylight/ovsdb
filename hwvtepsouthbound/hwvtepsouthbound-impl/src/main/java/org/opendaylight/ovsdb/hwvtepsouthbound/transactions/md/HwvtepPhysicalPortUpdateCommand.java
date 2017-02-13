@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -215,12 +215,13 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             @SuppressWarnings("unchecked")
             Node switchNode = HwvtepSouthboundUtil
                     .readNode(transaction, (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
-            TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
             TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
-            tpBuilder.setKey(tpKey);
-            if (switchNode.getTerminationPoint() != null
-                    && switchNode.getTerminationPoint().contains(tpBuilder.build())) {
-                return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
+            if (switchNode.getTerminationPoint() != null) {
+                for (TerminationPoint terminationPoint : switchNode.getTerminationPoint()) {
+                    if (terminationPoint.getKey().equals(tpKey)) {
+                        return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
+                    }
+                }
             }
         }
         return Optional.absent();

@@ -107,6 +107,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static boolean useSSL = false;
     private static ICertificateManager certManagerSrv = null;
 
+    private static int jsonRpcDecoderMaxFrameLength = 100000;
+
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
 
@@ -159,7 +161,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     }
                     channel.pipeline().addLast(
                             //new LoggingHandler(LogLevel.INFO),
-                            new JsonRpcDecoder(100000),
+                            new JsonRpcDecoder(jsonRpcDecoderMaxFrameLength),
                             new StringEncoder(CharsetUtil.UTF_8),
                             new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                             new ReadTimeoutHandler(READ_TIMEOUT),
@@ -336,7 +338,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             }
 
                             channel.pipeline().addLast(
-                                 new JsonRpcDecoder(100000),
+                                 new JsonRpcDecoder(jsonRpcDecoderMaxFrameLength),
                                  new StringEncoder(CharsetUtil.UTF_8),
                                  new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                                  new ReadTimeoutHandler(READ_TIMEOUT),
@@ -562,6 +564,18 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     public void setCertificatManager(ICertificateManager certificateManagerSrv) {
         certManagerSrv = certificateManagerSrv;
+    }
+
+    /**
+     * Blueprint property setter method. Blueprint call this method and set the value of json rpc decoder
+     * max frame length to the value configured for config option (json-rpc-decoder-max-frame-length) in
+     * the configuration file. This option is only configured at the  boot time of the controller. Any
+     * change at the run time will have no impact.
+     * @param maxFrameLength Max frame length (default : 100000)
+     */
+    public void setJsonRpcDecoderMaxFrameLength(int maxFrameLength) {
+        jsonRpcDecoderMaxFrameLength = maxFrameLength;
+        LOG.info("Json Rpc Decoder Max Frame Length set to : {}", jsonRpcDecoderMaxFrameLength);
     }
 
     public void updateConfigParameter(Map<String, Object> configParameters) {

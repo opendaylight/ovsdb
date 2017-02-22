@@ -11,11 +11,13 @@
     specify the property in library.cfg file-->
     <cm:default-properties>
       <cm:property name="ovsdb-rpc-task-timeout" value="1000"/>
+      <cm:property name="json-rpc-decoder-max-frame-length" value="100000"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
   <bean id="library" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
     <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
+    <property name="jsonRpcDecoderMaxFrameLength" value="${json-rpc-decoder-max-frame-length}"/>
   </bean>
 
   <!-- Notify OvsdbConnectionService with any change in the config properties value-->

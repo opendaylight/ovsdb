@@ -16,6 +16,24 @@
       "revId": "80fe075275b9d1899c02684aa30c15a6ee1ccb0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_102f7640",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-22T07:34:37Z",
+      "side": 1,
+      "message": "that\u0027s clearly mentioned in the cfg file where user will modify the value.",
+      "parentUuid": "fafc7978_704a4227",
+      "revId": "80fe075275b9d1899c02684aa30c15a6ee1ccb0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

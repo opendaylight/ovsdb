@@ -93,7 +93,7 @@ public class SouthboundProvider implements AutoCloseable {
                 EntityOwnershipState ownershipState = ownershipStateOpt.get();
                 if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
                     ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+                    ovsdbConnection.startOvsdbManager();
                     LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
                 }
             }
@@ -143,7 +143,7 @@ public class SouthboundProvider implements AutoCloseable {
             LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
         }
         ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+        ovsdbConnection.startOvsdbManager();
     }
 
     private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

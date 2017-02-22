@@ -48,6 +48,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -99,7 +100,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
     private static Map<OvsdbClient, Channel> connections = new ConcurrentHashMap<>();
     private static OvsdbConnection connectionService;
-    private static volatile boolean singletonCreated = false;
+    private static AtomicBoolean singletonCreated = new AtomicBoolean(false);
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
     private static final String OVSDB_RPC_TASK_TIMEOUT_PARAM = "ovsdb-rpc-task-timeout";
@@ -108,6 +109,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static ICertificateManager certManagerSrv = null;
 
     private static int jsonRpcDecoderMaxFrameLength = 100000;
+    private static int listenerPort = 6640;
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
@@ -240,16 +242,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * be overridden using the ovsdb.listenPort system property.
      */
     @Override
-    public synchronized boolean startOvsdbManager(final int ovsdbListenPort) {
-        if (!singletonCreated) {
+    public synchronized boolean startOvsdbManager() {
+        final int ovsdbListenerPort = this.listenerPort;
+        if (!singletonCreated.getAndSet(true)) {
             LOG.info("startOvsdbManager: Starting");
             new Thread() {
                 @Override
                 public void run() {
-                    ovsdbManager(ovsdbListenPort);
+                    ovsdbManager(ovsdbListenerPort);
                 }
             }.start();
-            singletonCreated = true;
             return true;
         } else {
             return false;
@@ -264,14 +266,13 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
                                      final SSLContext sslContext, String[] protocols, String[] cipherSuites) {
-        if (!singletonCreated) {
+        if (!singletonCreated.getAndSet(true)) {
             new Thread() {
                 @Override
                 public void run() {
                     ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites);
                 }
             }.start();
-            singletonCreated = true;
             return true;
         } else {
             return false;
@@ -576,6 +577,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public void setJsonRpcDecoderMaxFrameLength(int maxFrameLength) {
         jsonRpcDecoderMaxFrameLength = maxFrameLength;
         LOG.info("Json Rpc Decoder Max Frame Length set to : {}", jsonRpcDecoderMaxFrameLength);
+    }
+
+    public void setOvsdbListenerPort(int portNumber) {
+        LOG.info("OVSDB port for listening connection is set to : {}", portNumber);
+        listenerPort = portNumber;
     }
 
     public void updateConfigParameter(Map<String, Object> configParameters) {

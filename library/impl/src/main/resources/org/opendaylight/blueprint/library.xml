@@ -10,6 +10,7 @@
     or config property is commented out. This will be overridden if user
     specify the property in library.cfg file-->
     <cm:default-properties>
+      <cm:property name="ovsdb-listener-port" value="6640"/>
       <cm:property name="ovsdb-rpc-task-timeout" value="1000"/>
       <cm:property name="use-ssl" value="false"/>
       <cm:property name="json-rpc-decoder-max-frame-length" value="100000"/>
@@ -21,6 +22,7 @@
         odl:type="default-certificate-manager"/>
 
   <bean id="library" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
+    <property name="ovsdbListenerPort" value="${ovsdb-listener-port}"/>
     <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
     <property name="useSsl" value="${use-ssl}"/>
     <property name="certificatManager" ref="aaaCertificateManager"/>

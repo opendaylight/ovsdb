@@ -55,7 +55,7 @@ public interface OvsdbConnection {
     /**
      * Method to start ovsdb server for passive connection.
      */
-    boolean startOvsdbManager(final int ovsdbListenPort);
+    boolean startOvsdbManager();
 
     /**
      * Method to start ovsdb server for passive connection with SSL.

@@ -94,7 +94,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
                 EntityOwnershipState ownershipState = ownershipStateOpt.get();
                 if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
                     ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager(HwvtepSouthboundConstants.DEFAULT_OVSDB_PORT);
+                    ovsdbConnection.startOvsdbManager();
                 }
             }
         } catch (CandidateAlreadyRegisteredException e) {
@@ -155,7 +155,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
             LOG.info("*This* instance of HWVTEP southbound provider is set as a SLAVE instance");
         }
         ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager(HwvtepSouthboundConstants.DEFAULT_OVSDB_PORT);
+        ovsdbConnection.startOvsdbManager();
     }
 
     private class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

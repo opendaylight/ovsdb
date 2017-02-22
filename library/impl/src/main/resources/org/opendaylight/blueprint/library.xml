@@ -12,6 +12,7 @@
     <cm:default-properties>
       <cm:property name="ovsdb-rpc-task-timeout" value="1000"/>
       <cm:property name="use-ssl" value="false"/>
+      <cm:property name="json-rpc-decoder-max-frame-length" value="100000"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -23,6 +24,7 @@
     <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
     <property name="useSsl" value="${use-ssl}"/>
     <property name="certificatManager" ref="aaaCertificateManager"/>
+    <property name="jsonRpcDecoderMaxFrameLength" value="${json-rpc-decoder-max-frame-length}"/>
   </bean>
 
   <!-- Notify OvsdbConnectionService with any change in the config properties value-->

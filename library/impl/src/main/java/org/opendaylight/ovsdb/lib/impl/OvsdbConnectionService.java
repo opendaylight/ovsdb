@@ -107,6 +107,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static boolean useSSL = false;
     private static ICertificateManager certManagerSrv = null;
 
+    private int jsonRpcDecoderMaxFrameLength = 100000;
+
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
 
@@ -562,6 +564,17 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     public void setCertificatManager(ICertificateManager certificateManagerSrv) {
         certManagerSrv = certificateManagerSrv;
+    }
+
+    /**
+     * Read the value of json-rpc-decoder-max-frame-length config from configuration file
+     * and set json rpc decoder  max frame length. This option is only configured at the
+     * boot time of the controller. Any change at the run time will have no impact.
+     * @param maxFrameLength Max frame length (default : 100000)
+     */
+    public void setJsonRpcDecoderMaxFrameLength(int maxFrameLength) {
+        LOG.info("Json Rpc Decoder Max Frame Length set to : {}", maxFrameLength);
+        this.jsonRpcDecoderMaxFrameLength = maxFrameLength;
     }
 
     public void updateConfigParameter(Map<String, Object> configParameters) {

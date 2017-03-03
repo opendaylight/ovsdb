@@ -19,6 +19,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <artifactId>hwvtepsouthbound-api</artifactId>
   <version>1.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
   <dependencyManagement>
     <dependencies>

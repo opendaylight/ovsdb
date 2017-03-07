@@ -204,12 +204,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     private void notifyAlreadyExistingConnectionsToListener(final OvsdbConnectionListener listener) {
         for (final OvsdbClient client : getConnections()) {
-            connectionNotifierService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
-                    listener.connected(client);
-                }
+            connectionNotifierService.submit(() -> {
+                LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
+                listener.connected(client);
             });
         }
     }
@@ -478,13 +475,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             executorService.schedule(new HandleNewPassiveSslRunner(channel, sslHandler),
                     retryPeriod, TimeUnit.MILLISECONDS);
         } else {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                        SocketConnectionType.NON_SSL);
-                    handleNewPassiveConnection(client);
-                }
+            executorService.execute(() -> {
+                OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
+                    SocketConnectionType.NON_SSL);
+                handleNewPassiveConnection(client);
             });
         }
     }
@@ -538,12 +532,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public static void notifyListenerForPassiveConnection(final OvsdbClient client) {
         client.setConnectionPublished(true);
         for (final OvsdbConnectionListener listener : connectionListeners) {
-            connectionNotifierService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
-                    listener.connected(client);
-                }
+            connectionNotifierService.submit(() -> {
+                LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
+                listener.connected(client);
             });
         }
     }
@@ -588,8 +579,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     public void updateConfigParameter(Map<String, Object> configParameters) {
-        LOG.debug("Config parameters received : {}", configParameters.entrySet());
         if (configParameters != null && !configParameters.isEmpty()) {
+            LOG.debug("Config parameters received : {}", configParameters.entrySet());
             for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {
                 if (paramEntry.getKey().equalsIgnoreCase(OVSDB_RPC_TASK_TIMEOUT_PARAM)) {
                     setOvsdbRpcTaskTimeout(Integer.parseInt((String)paramEntry.getValue()));

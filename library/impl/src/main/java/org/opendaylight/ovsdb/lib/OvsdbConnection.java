@@ -33,7 +33,7 @@ public interface OvsdbConnection {
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
      */
-    OvsdbClient connect(final InetAddress address, final int port);
+    OvsdbClient connect(InetAddress address, int port);
 
     /**
      * connect API can be used by the applications to initiate Active ssl
@@ -43,8 +43,7 @@ public interface OvsdbConnection {
      * @param sslContext Netty sslContext for channel configuration
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
      */
-    OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                               final SSLContext sslContext);
+    OvsdbClient connectWithSsl(InetAddress address, int port, SSLContext sslContext);
 
     /**
      * Method to disconnect an existing connection.
@@ -60,8 +59,8 @@ public interface OvsdbConnection {
     /**
      * Method to start ovsdb server for passive connection with SSL.
      */
-    boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
-                                     final SSLContext sslContext, String[] protocols, String[] cipherSuites);
+    boolean startOvsdbManagerWithSsl(int ovsdbListenPort,
+                                     SSLContext sslContext, String[] protocols, String[] cipherSuites);
 
     /**
      * Method to register a Passive Connection Listener with the ConnectionService.

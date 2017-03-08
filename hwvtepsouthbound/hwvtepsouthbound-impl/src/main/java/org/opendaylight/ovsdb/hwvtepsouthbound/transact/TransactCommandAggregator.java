@@ -33,7 +33,7 @@ public class TransactCommandAggregator implements TransactCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
 
-    private List<TransactCommand> commands = new ArrayList<TransactCommand>();
+    private List<TransactCommand> commands = new ArrayList<>();
     private final HwvtepOperationalState operationalState;
     /* stores the modified and deleted data for each child type of each node id
        Map<nodeid , Pair < updated, deleted >

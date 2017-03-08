@@ -48,8 +48,7 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         this.db = db;
         this.hcm = hcm;
         this.connectionInstance = connectionInstance;
-        DataTreeIdentifier<Node> treeId =
-                new DataTreeIdentifier<Node>(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
+        DataTreeIdentifier<Node> treeId = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
         registration = db.registerDataTreeChangeListener(treeId, HwvtepOperationalDataChangeListener.this);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2015, 2017 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -32,7 +32,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

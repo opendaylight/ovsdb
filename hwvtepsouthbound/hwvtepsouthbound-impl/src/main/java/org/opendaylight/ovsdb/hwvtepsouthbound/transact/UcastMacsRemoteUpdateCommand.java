@@ -10,8 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.collect.Lists;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;

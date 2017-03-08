@@ -152,6 +152,30 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     }
                 }
             }
+
+            if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.WRITE) {
+                DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
+                        change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
+                if (ovsdbNodeModification != null
+                        && ovsdbNodeModification.getModifiedChildContainer(ConnectionInfo.class) != null) {
+                    DataObjectModification<ConnectionInfo> connectionInfoDOM =
+                            ovsdbNodeModification.getModifiedChildContainer(ConnectionInfo.class);
+
+                    if (connectionInfoDOM.getModificationType() == DataObjectModification.ModificationType.DELETE
+                            && connectionInfoDOM.getDataBefore() != null) {
+                        ConnectionInfo key = connectionInfoDOM.getDataBefore();
+                        InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                        try {
+                            OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
+                            cm.disconnect(ovsdbNode);
+                            LOG.info("OVSDB node has been disconnected:{}", ovsdbNode);
+                            cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
+                        } catch (UnknownHostException e) {
+                            LOG.warn("Failed to disconnect ovsdbNode", e);
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2013, 2017 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,7 +18,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  *  This class is a typed interface to the QoS Table

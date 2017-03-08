@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2014, 2017 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -246,12 +246,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         final int ovsdbListenerPort = this.listenerPort;
         if (!singletonCreated.getAndSet(true)) {
             LOG.info("startOvsdbManager: Starting");
-            new Thread() {
-                @Override
-                public void run() {
-                    ovsdbManager(ovsdbListenerPort);
-                }
-            }.start();
+            new Thread(() -> ovsdbManager(ovsdbListenerPort)).start();
             return true;
         } else {
             return false;
@@ -267,12 +262,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
                                      final SSLContext sslContext, String[] protocols, String[] cipherSuites) {
         if (!singletonCreated.getAndSet(true)) {
-            new Thread() {
-                @Override
-                public void run() {
-                    ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites);
-                }
-            }.start();
+            new Thread(() -> ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites)).start();
             return true;
         } else {
             return false;

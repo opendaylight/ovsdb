@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2013, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,7 +22,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -87,59 +86,53 @@ public class JsonRpcEndpoint {
 
     public <T> T getClient(final Object context, Class<T> klazz) {
 
-        return Reflection.newProxy(klazz, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
-                if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
-                    if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) {
-                        return false;
-                    }
-                    requestCallbacks.put(context, (OvsdbRPC.Callback)args[0]);
-                    return true;
+        return Reflection.newProxy(klazz, (proxy, method, args) -> {
+            if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
+                if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) {
+                    return false;
                 }
-
-                JsonRpc10Request request = new JsonRpc10Request(UUID.randomUUID().toString());
-                request.setMethod(method.getName());
-
-                if (args != null && args.length != 0) {
-                    List<Object> params = null;
-
-                    if (args.length == 1) {
-                        if (args[0] instanceof Params) {
-                            params = ((Params) args[0]).params();
-                        } else if (args[0] instanceof List) {
-                            params = (List<Object>) args[0];
-                        }
-
-                        if (params == null) {
-                            throw new UnsupportedArgumentException("do not understand this argument yet");
-                        }
-                        request.setParams(params);
-                    }
-                }
-
-                String requestString = objectMapper.writeValueAsString(request);
-                LOG.trace("getClient Request : {}", requestString);
-
-                SettableFuture<Object> sf = SettableFuture.create();
-                methodContext.put(request.getId(), new CallContext(request, method, sf));
-                FUTURE_REAPER_SERVICE.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        CallContext cc = methodContext.remove(request.getId());
-                        if (cc != null) {
-                            if (cc.getFuture().isDone() || cc.getFuture().isCancelled()) {
-                                return;
-                            }
-                            cc.getFuture().cancel(false);
-                        }
-                    }
-                }, reaperInterval, TimeUnit.MILLISECONDS);
-
-                nettyChannel.writeAndFlush(requestString);
-
-                return sf;
+                requestCallbacks.put(context, (OvsdbRPC.Callback)args[0]);
+                return true;
             }
+
+            JsonRpc10Request request = new JsonRpc10Request(UUID.randomUUID().toString());
+            request.setMethod(method.getName());
+
+            if (args != null && args.length != 0) {
+                List<Object> params = null;
+
+                if (args.length == 1) {
+                    if (args[0] instanceof Params) {
+                        params = ((Params) args[0]).params();
+                    } else if (args[0] instanceof List) {
+                        params = (List<Object>) args[0];
+                    }
+
+                    if (params == null) {
+                        throw new UnsupportedArgumentException("do not understand this argument yet");
+                    }
+                    request.setParams(params);
+                }
+            }
+
+            String requestString = objectMapper.writeValueAsString(request);
+            LOG.trace("getClient Request : {}", requestString);
+
+            SettableFuture<Object> sf = SettableFuture.create();
+            methodContext.put(request.getId(), new CallContext(request, method, sf));
+            FUTURE_REAPER_SERVICE.schedule(() -> {
+                CallContext cc = methodContext.remove(request.getId());
+                if (cc != null) {
+                    if (cc.getFuture().isDone() || cc.getFuture().isCancelled()) {
+                        return;
+                    }
+                    cc.getFuture().cancel(false);
+                }
+            }, reaperInterval, TimeUnit.MILLISECONDS);
+
+            nettyChannel.writeAndFlush(requestString);
+
+            return sf;
         }
         );
     }

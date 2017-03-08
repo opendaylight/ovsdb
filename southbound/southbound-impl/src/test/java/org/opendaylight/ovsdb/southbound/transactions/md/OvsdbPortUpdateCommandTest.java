@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe Technologies and others.  All rights reserved.
+ * Copyright © 2015, 2017 Inocybe Technologies and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -35,7 +35,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -422,11 +421,7 @@ public class OvsdbPortUpdateCommandTest {
         when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
-                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
-                        return InterfaceTypeInternal.class;
-                    }
-                });
+                .thenAnswer((Answer<Class<? extends InterfaceTypeBase>>) invocation -> InterfaceTypeInternal.class);
         when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
                 OvsdbTerminationPointAugmentationBuilder.class));

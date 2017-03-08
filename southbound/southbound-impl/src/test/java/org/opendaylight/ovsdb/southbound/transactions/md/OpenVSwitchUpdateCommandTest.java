@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe Technologies and others.  All rights reserved.
+ * Copyright © 2015, 2017 Inocybe Technologies and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -332,11 +331,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(column.getData()).thenReturn(set);
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createInterfaceType(anyString()))
-                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
-                        return InterfaceTypeInternal.class;
-                    }
-                });
+                .thenAnswer((Answer<Class<? extends InterfaceTypeBase>>) invocation -> InterfaceTypeInternal.class);
 
         InterfaceTypeEntry ifEntry = mock(InterfaceTypeEntry.class);
         InterfaceTypeEntryBuilder interfaceTypeEntryBldr = mock(InterfaceTypeEntryBuilder.class);
@@ -363,11 +358,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(column.getData()).thenReturn(set);
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createDatapathType(anyString()))
-                .thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Exception {
-                        return DatapathTypeSystem.class;
-                    }
-                });
+                .thenAnswer((Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeSystem.class);
         DatapathTypeEntry dpEntry = mock(DatapathTypeEntry.class);
         DatapathTypeEntryBuilder datapathTypeEntryBuilder = mock(DatapathTypeEntryBuilder.class);
         PowerMockito.whenNew(DatapathTypeEntryBuilder.class).withNoArguments().thenReturn(datapathTypeEntryBuilder);

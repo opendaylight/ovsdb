@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2016, 2017 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -75,12 +75,7 @@ public class ReconciliationManager implements AutoCloseable {
     public void enqueueForRetry(final ReconciliationTask task) {
         LOG.trace("Reconciliation task re-queued for re-execution {}",task);
         reconTaskManager.cacheTask(task, taskTriager.schedule(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        task.checkReadinessAndProcess();
-                    }
-                }, task.retryDelayInMills(), TimeUnit.MILLISECONDS
+                () -> task.checkReadinessAndProcess(), task.retryDelayInMills(), TimeUnit.MILLISECONDS
             )
         );
     }

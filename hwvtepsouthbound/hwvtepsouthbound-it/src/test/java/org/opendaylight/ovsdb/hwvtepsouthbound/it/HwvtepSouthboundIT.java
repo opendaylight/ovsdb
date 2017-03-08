@@ -276,8 +276,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), getHwvtepTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
-        final DataTreeIdentifier<Node> treeId =
-                        new DataTreeIdentifier<Node>(LogicalDatastoreType.OPERATIONAL, iid);
+        final DataTreeIdentifier<Node> treeId = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, iid);
 
         dataBroker.registerDataTreeChangeListener(treeId, OPERATIONAL_LISTENER);
 

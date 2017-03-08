@@ -56,7 +56,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
     private void registerListener(final DataBroker db) {
         final DataTreeIdentifier<Node> treeId =
-                        new DataTreeIdentifier<Node>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
+                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
         try {
             LOG.trace("Registering on path: {}", treeId);
             registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
@@ -269,8 +269,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
     private Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> changesByConnectionInstance(
             Collection<DataTreeModification<Node>> changes) {
-        Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> result =
-                new HashMap<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>>();
+        Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             final DataObjectModification<Node> mod = change.getRootNode();
             //From original node to get connection instance
@@ -288,7 +287,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             }
             if (connection != null) {
                 if (!result.containsKey(connection)) {
-                    List<DataTreeModification<Node>> tempChanges= new ArrayList<DataTreeModification<Node>>();
+                    List<DataTreeModification<Node>> tempChanges= new ArrayList<>();
                     tempChanges.add(change);
                     result.put(connection, tempChanges);
                 } else {

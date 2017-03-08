@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright © 2015, 2017 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -102,7 +102,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
 
     private void setTunnelKey(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
         if (inputSwitch.getTunnelKey() != null) {
-            Set<Long> tunnel = new HashSet<Long>();
+            Set<Long> tunnel = new HashSet<>();
             tunnel.add(Long.valueOf(inputSwitch.getTunnelKey()));
             logicalSwitch.setTunnelKey(tunnel);
         }

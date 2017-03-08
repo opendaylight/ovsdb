@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright © 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -42,7 +42,7 @@ public class GlobalConfigOperationalChangeGetter {
         newNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, newAugmentation.build());
         oldNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, oldAugmentation.build());
 
-        return new DataTreeModificationImpl<Node>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
+        return new DataTreeModificationImpl<>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
     }
 
     static void fillLocalMacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode, Node opNode) {

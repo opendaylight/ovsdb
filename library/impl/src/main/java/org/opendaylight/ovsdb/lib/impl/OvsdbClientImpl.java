@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2014, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -413,7 +413,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      */
     @Override
     public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
-        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<GenericTableSchema>());
+        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<>());
     }
 
     /**

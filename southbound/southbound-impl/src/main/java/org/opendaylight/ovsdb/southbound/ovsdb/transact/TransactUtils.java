@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -56,70 +55,35 @@ public class TransactUtils {
     private TransactUtils() { }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBefore() {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return input != null && input.getDataBefore() != null;
-            }
-        };
+        return input -> input != null && input.getDataBefore() != null;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBeforeAndDataAfter() {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return input != null && input.getDataBefore() != null && input.getDataAfter() != null;
-            }
-        };
+        return input -> input != null && input.getDataBefore() != null && input.getDataAfter() != null;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasNoDataBefore() {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return input != null && input.getDataBefore() == null;
-            }
-        };
+        return input -> input != null && input.getDataBefore() == null;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataAfterAndMatchesFilter(
             final Predicate<DataObjectModification<T>> filter) {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return input != null && input.getDataAfter() != null && filter.apply(input);
-            }
-        };
+        return input -> input != null && input.getDataAfter() != null && filter.apply(input);
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> matchesEverything() {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return true;
-            }
-        };
+        return input -> true;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> modificationIsDeletion() {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return input != null && input.getModificationType() == DataObjectModification
-                        .ModificationType.DELETE;
-            }
-        };
+        return input -> input != null && input.getModificationType() == DataObjectModification
+                .ModificationType.DELETE;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>>
         modificationIsDeletionAndHasDataBefore() {
-        return new Predicate<DataObjectModification<T>>() {
-            @Override
-            public boolean apply(@Nullable DataObjectModification<T> input) {
-                return input != null && input.getModificationType() == DataObjectModification
-                        .ModificationType.DELETE && input.getDataBefore() != null;
-            }
-        };
+        return input -> input != null && input.getModificationType() == DataObjectModification
+                .ModificationType.DELETE && input.getDataBefore() != null;
     }
 
     public static Map<InstanceIdentifier<Node>,Node> extractNode(

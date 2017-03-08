@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -173,20 +172,12 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateDatapathType() throws Exception {
         OvsdbBridgeAugmentation mdsalbridge = mock(OvsdbBridgeAugmentation.class);
-        when(mdsalbridge.getDatapathType()).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-            public Class<? extends DatapathTypeBase> answer(
-                    InvocationOnMock invocation) throws Exception {
-                return DatapathTypeNetdev.class;
-            }
-        });
+        when(mdsalbridge.getDatapathType()).thenAnswer(
+                (Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeNetdev.class);
         assertEquals("netdev", SouthboundMapper.createDatapathType(mdsalbridge));
 
-        when(mdsalbridge.getDatapathType()).thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-            public Class<? extends DatapathTypeBase> answer(
-                    InvocationOnMock invocation) throws Exception {
-                return DatapathTypeSystem.class;
-            }
-        });
+        when(mdsalbridge.getDatapathType()).thenAnswer(
+                (Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeSystem.class);
         assertEquals("system", SouthboundMapper.createDatapathType(mdsalbridge));
     }
 
@@ -204,12 +195,8 @@ public class SouthboundMapperTest {
         ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
         protocolList.add(protocolEntry);
         when(ovsdbBridgeNode.getProtocolEntry()).thenReturn(protocolList);
-        when(protocolEntry.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
-            public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Exception {
-                return OvsdbBridgeProtocolOpenflow10.class;
-            }
-        });
+        when(protocolEntry.getProtocol()).thenAnswer(
+                (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
         Set<String> protocols = new HashSet<>();
         protocols.add("OpenFlow10");
         assertEquals(protocols, SouthboundMapper.createOvsdbBridgeProtocols(ovsdbBridgeNode));

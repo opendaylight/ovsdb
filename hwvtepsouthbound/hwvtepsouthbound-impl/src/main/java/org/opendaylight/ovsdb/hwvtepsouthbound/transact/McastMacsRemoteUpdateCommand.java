@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.base.Optional;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.ArrayList;
 import java.util.Collection;

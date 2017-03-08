@@ -18,7 +18,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  *  This class is a typed interface to the QoS Table

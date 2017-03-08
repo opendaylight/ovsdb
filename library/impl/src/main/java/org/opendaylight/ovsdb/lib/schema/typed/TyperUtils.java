@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2014, 2017 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -230,7 +230,7 @@ public class TyperUtils {
      * @param klazz Typed Class that represents a Table
      */
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
-        return getTypedRowWrapper(dbSchema, klazz,new Row<GenericTableSchema>());
+        return getTypedRowWrapper(dbSchema, klazz, new Row<>());
     }
 
     /**

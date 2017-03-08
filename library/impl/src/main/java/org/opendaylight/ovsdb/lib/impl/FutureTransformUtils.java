@@ -28,9 +28,8 @@ public class FutureTransformUtils {
     public static final ListenableFuture<List<OperationResult>> transformTransactResponse(
             ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return Futures.transform(transactResponseFuture, new Function<List<JsonNode>, List<OperationResult>>() {
-            @Override
-            public List<OperationResult> apply(List<JsonNode> jsonNodes) {
+        return Futures.transform(transactResponseFuture,
+            (Function<List<JsonNode>, List<OperationResult>>) jsonNodes -> {
                 final List<OperationResult> operationResults = new ArrayList<>();
                 for (int index = 0; index < jsonNodes.size(); index++) {
                     JsonNode jsonNode = jsonNodes.get(index);
@@ -72,7 +71,6 @@ public class FutureTransformUtils {
                 }
 
                 return operationResults;
-            }
-        });
+            });
     }
 }

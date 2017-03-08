@@ -83,30 +83,25 @@ public class DependencyQueue {
                                   LinkedBlockingQueue<DependentJob> queue) {
         final List<DependentJob> readyJobs =  getReadyJobs(queue);
         if (readyJobs.size() > 0) {
-            executorService.submit(new Runnable() {
+            executorService.submit(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
                 @Override
-                public void run() {
-                    hwvtepConnectionInstance.transact(new TransactCommand() {
-                        @Override
-                        public void execute(TransactionBuilder transactionBuilder) {
-                            HwvtepOperationalState operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
-                            for (DependentJob job : readyJobs) {
-                                job.onDependencyResolved(operationalState, transactionBuilder);
-                            }
-                        }
-
-                        @Override
-                        public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                   Identifiable data, InstanceIdentifier key, Object... extraData) {
-                        }
-
-                        @Override
-                        public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                        Identifiable data, InstanceIdentifier key, Object... extraData) {
-                        }
-                    });
+                public void execute(TransactionBuilder transactionBuilder) {
+                    HwvtepOperationalState operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
+                    for (DependentJob job : readyJobs) {
+                        job.onDependencyResolved(operationalState, transactionBuilder);
+                    }
                 }
-            });
+
+                @Override
+                public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid,
+                                           Identifiable data, InstanceIdentifier key, Object... extraData) {
+                }
+
+                @Override
+                public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
+                                                Identifiable data, InstanceIdentifier key, Object... extraData) {
+                }
+            }));
         }
     }
 

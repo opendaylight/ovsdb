@@ -246,12 +246,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         final int ovsdbListenerPort = this.listenerPort;
         if (!singletonCreated.getAndSet(true)) {
             LOG.info("startOvsdbManager: Starting");
-            new Thread() {
-                @Override
-                public void run() {
-                    ovsdbManager(ovsdbListenerPort);
-                }
-            }.start();
+            new Thread(() -> ovsdbManager(ovsdbListenerPort)).start();
             return true;
         } else {
             return false;
@@ -267,12 +262,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
                                      final SSLContext sslContext, String[] protocols, String[] cipherSuites) {
         if (!singletonCreated.getAndSet(true)) {
-            new Thread() {
-                @Override
-                public void run() {
-                    ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites);
-                }
-            }.start();
+            new Thread(() -> ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites)).start();
             return true;
         } else {
             return false;

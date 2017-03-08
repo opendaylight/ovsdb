@@ -86,8 +86,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
 
     protected Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractRemovedPorts(
             Collection<DataTreeModification<Node>> changes, Class<HwvtepPhysicalPortAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result
-            = new HashMap<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>>();
+        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -96,7 +95,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 //should be removed too.
                 Node removed = TransactUtils.getRemoved(mod);
                 if (removed != null) {
-                    List<HwvtepPhysicalPortAugmentation> lswitchListRemoved = new ArrayList<HwvtepPhysicalPortAugmentation>();
+                    List<HwvtepPhysicalPortAugmentation> lswitchListRemoved = new ArrayList<>();
                     if (removed.getTerminationPoint() != null) {
                         for (TerminationPoint tp : removed.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
@@ -114,9 +113,9 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 Node updated = TransactUtils.getUpdated(mod);
                 Node before = mod.getDataBefore();
                 if (updated != null && before != null) {
-                    List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<HwvtepPhysicalPortAugmentation>();
-                    List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<HwvtepPhysicalPortAugmentation>();
-                    List<HwvtepPhysicalPortAugmentation> portListRemoved = new ArrayList<HwvtepPhysicalPortAugmentation>();
+                    List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
+                    List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<>();
+                    List<HwvtepPhysicalPortAugmentation> portListRemoved = new ArrayList<>();
                     if (updated.getTerminationPoint() != null) {
                         for (TerminationPoint tp : updated.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);

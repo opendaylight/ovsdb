@@ -112,7 +112,7 @@ public class ProtocolUpdateCommandTest {
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
         when(bridge.getProtocolsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashSet<String>());
+        when(column.getData()).thenReturn(new HashSet<>());
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
 
         Column<GenericTableSchema, String> nameColumn = mock(Column.class);

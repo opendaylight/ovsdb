@@ -147,7 +147,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
     private void setManagementIps(PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation) {
-        Set<String> ipSet = new HashSet<String>();
+        Set<String> ipSet = new HashSet<>();
         if (physicalSwitchAugmentation.getManagementIps() != null) {
             for (ManagementIps ip: physicalSwitchAugmentation.getManagementIps()) {
                 ipSet.add(ip.getManagementIpsKey().getIpv4Address().getValue());
@@ -157,7 +157,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
     private void setTunnuleIps(PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation) {
-        Set<String> ipSet = new HashSet<String>();
+        Set<String> ipSet = new HashSet<>();
         if (physicalSwitchAugmentation.getTunnelIps() != null) {
             for (TunnelIps ip: physicalSwitchAugmentation.getTunnelIps()) {
                 ipSet.add(ip.getTunnelIpsKey().getIpv4Address().getValue());
@@ -298,8 +298,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractCreated(
             Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result
-            = new HashMap<InstanceIdentifier<Node>, PhysicalSwitchAugmentation>();
+        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -318,8 +317,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdatedSwitches(
             Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result
-            = new HashMap<InstanceIdentifier<Node>, PhysicalSwitchAugmentation>();
+        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();

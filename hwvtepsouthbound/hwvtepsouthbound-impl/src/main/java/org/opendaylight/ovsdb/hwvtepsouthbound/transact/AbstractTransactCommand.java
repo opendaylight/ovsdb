@@ -158,8 +158,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     protected Map<InstanceIdentifier<Node>, List<T>> extractRemoved(
             Collection<DataTreeModification<Node>> changes, Class<T> class1) {
-        Map<InstanceIdentifier<Node>, List<T>> result
-                = new HashMap<InstanceIdentifier<Node>, List<T>>();
+        Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
         List<T> removed = Collections.EMPTY_LIST;
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
@@ -174,8 +173,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     protected Map<InstanceIdentifier<Node>, List<T>> extractUpdated(
             Collection<DataTreeModification<Node>> changes, Class<T> class1) {
-        Map<InstanceIdentifier<Node>, List<T>> result
-                = new HashMap<InstanceIdentifier<Node>, List<T>>();
+        Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -195,7 +193,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         Set<InstanceIdentifier> deleted = getOperationalState().getDeletedKeysInCurrentTx(LogicalSwitches.class);
         UnMetDependencyGetter dependencyGetter = getDependencyGetter();
         if (!HwvtepSouthboundUtil.isEmpty(deleted) && !HwvtepSouthboundUtil.isEmpty(updatedData) && dependencyGetter != null) {
-            List<T> removed = new ArrayList<T>();
+            List<T> removed = new ArrayList<>();
             for (T ele : updatedData) {
                 if (deleted.containsAll(dependencyGetter.getLogicalSwitchDependencies(ele))) {
                     removed.add(ele);
@@ -235,7 +233,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
     }
 
     List<T> diffOf(Node a, Node b, boolean compareKeyOnly) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
 
         List<T> list1 = getData(a);
         List<T> list2 = getData(b);

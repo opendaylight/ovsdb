@@ -109,7 +109,7 @@ public class OvsdbNodeUpdateCommandTest {
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashMap<String, String>());
+        when(column.getData()).thenReturn(new HashMap<>());
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 

@@ -78,8 +78,7 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
 
     private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractRemovedSwitches(
             Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result
-            = new HashMap<InstanceIdentifier<Node>, PhysicalSwitchAugmentation>();
+        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();

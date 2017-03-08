@@ -43,7 +43,7 @@ public class GlobalConfigOperationalChangeGetter {
         newNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, newAugmentation.build());
         oldNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, oldAugmentation.build());
 
-        return new DataTreeModificationImpl<Node>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
+        return new DataTreeModificationImpl<>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
     }
 
     static void fillLocalMacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode, Node opNode) {

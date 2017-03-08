@@ -43,7 +43,7 @@ public class SwitchConfigOperationalChangeGetter {
             oldNodeBuilder.setTerminationPoint(tpList);
         }
 
-        return new DataTreeModificationImpl<Node>(psNodeId, newNodeBuilder.build(), oldNodeBuilder.build());
+        return new DataTreeModificationImpl<>(psNodeId, newNodeBuilder.build(), oldNodeBuilder.build());
 
     }
 

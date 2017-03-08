@@ -443,7 +443,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      */
     @Override
     public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
-        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<GenericTableSchema>());
+        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<>());
     }
 
     /**

@@ -230,7 +230,7 @@ public class TyperUtils {
      * @param klazz Typed Class that represents a Table
      */
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
-        return getTypedRowWrapper(dbSchema, klazz,new Row<GenericTableSchema>());
+        return getTypedRowWrapper(dbSchema, klazz, new Row<>());
     }
 
     /**

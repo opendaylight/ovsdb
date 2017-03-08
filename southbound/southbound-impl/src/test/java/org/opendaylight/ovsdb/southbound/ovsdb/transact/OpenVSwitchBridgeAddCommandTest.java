@@ -87,7 +87,7 @@ public class OpenVSwitchBridgeAddCommandTest {
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(ovs.getBridgesColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashSet<UUID>());
+        when(column.getData()).thenReturn(new HashSet<>());
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright © 2015, 2017 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -78,8 +78,7 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
 
     private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractRemovedSwitches(
             Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result
-            = new HashMap<InstanceIdentifier<Node>, PhysicalSwitchAugmentation>();
+        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Inocybe Technologies and others.  All rights reserved.
+ * Copyright © 2015, 2017 Inocybe Technologies and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -109,7 +109,7 @@ public class OvsdbNodeUpdateCommandTest {
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashMap<String, String>());
+        when(column.getData()).thenReturn(new HashMap<>());
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 

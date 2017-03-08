@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright © 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -28,11 +28,11 @@ public class DataTreeModificationImpl<T extends DataObject> implements DataTreeM
 
     @Override
     public DataTreeIdentifier<T> getRootPath() {
-        return new DataTreeIdentifier<T>(LogicalDatastoreType.CONFIGURATION, nodeId);
+        return new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, nodeId);
     }
 
     @Override
     public DataObjectModification<T> getRootNode() {
-        return new DataObjectModificationImpl<T>(nodeId, newNode, oldNode);
+        return new DataObjectModificationImpl<>(nodeId, newNode, oldNode);
     }
 }

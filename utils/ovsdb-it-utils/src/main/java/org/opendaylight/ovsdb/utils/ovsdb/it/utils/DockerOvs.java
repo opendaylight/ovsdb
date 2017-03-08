@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright © 2016, 2017 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -414,7 +414,7 @@ public class DockerOvs implements AutoCloseable {
      * @return a list of the external ports
      */
     private List<String> parseDockerComposeYaml() {
-        List<String> ports = new ArrayList<String>();
+        List<String> ports = new ArrayList<>();
 
         YamlReader yamlReader = null;
         Map root = null;

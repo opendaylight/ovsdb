@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright © 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -43,7 +43,7 @@ public class SwitchConfigOperationalChangeGetter {
             oldNodeBuilder.setTerminationPoint(tpList);
         }
 
-        return new DataTreeModificationImpl<Node>(psNodeId, newNodeBuilder.build(), oldNodeBuilder.build());
+        return new DataTreeModificationImpl<>(psNodeId, newNodeBuilder.build(), oldNodeBuilder.build());
 
     }
 

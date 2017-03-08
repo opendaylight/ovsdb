@@ -187,6 +187,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
         Channel channel = connections.get(client);
         if (channel != null) {
+            //It's an explicit disconnect from user, so no need to notify back
+            //to user about the disconnect.
+            client.setConnectionPublished(false);
             channel.disconnect();
         }
         connections.remove(client);

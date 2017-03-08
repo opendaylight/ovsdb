@@ -15,7 +15,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -528,12 +527,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 (InstanceIdentifier<Node>) HwvtepSouthboundUtil
                         .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
 
-        txInvoker.invoke(new TransactionCommand() {
-            @Override
-            public void execute(ReadWriteTransaction transaction) {
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
-            }
-        });
+        txInvoker.invoke(transaction -> transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid));
     }
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {

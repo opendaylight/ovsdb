@@ -37,7 +37,6 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.SocketConnectionType;
 import org.opendaylight.ovsdb.lib.error.ParsingException;
-import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
@@ -186,22 +185,13 @@ public class OvsdbClientImpl implements OvsdbClient {
                                                             final MonitorCallBack callback) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
-                new Function<MonitorRequest, String>() {
-                    @Override
-                    public String apply(MonitorRequest input) {
-                        return input.getTableName();
-                    }
-                });
+            input -> input.getTableName());
 
         final MonitorHandle monitorHandle = new MonitorHandle(UUID.randomUUID().toString());
         registerCallback(monitorHandle, callback, dbSchema);
 
-        ListenableFuture<JsonNode> monitor = rpc.monitor(new Params() {
-            @Override
-            public List<Object> params() {
-                return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
-            }
-        });
+        ListenableFuture<JsonNode> monitor = rpc.monitor(
+            () -> Lists.newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
             result = monitor.get();
@@ -219,21 +209,12 @@ public class OvsdbClientImpl implements OvsdbClient {
                                                            final MonitorCallBack callback) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
-                new Function<MonitorRequest, String>() {
-                    @Override
-                    public String apply(MonitorRequest input) {
-                        return input.getTableName();
-                    }
-                });
+            input -> input.getTableName());
 
         registerCallback(monitorHandle, callback, dbSchema);
 
-        ListenableFuture<JsonNode> monitor = rpc.monitor(new Params() {
-            @Override
-            public List<Object> params() {
-                return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
-            }
-        });
+        ListenableFuture<JsonNode> monitor = rpc.monitor(
+            () -> Lists.newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
             result = monitor.get();
@@ -251,12 +232,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public void cancelMonitor(final MonitorHandle handler) {
-        ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(new Params() {
-            @Override
-            public List<Object> params() {
-                return Lists.<Object>newArrayList(handler.getId());
-            }
-        });
+        ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(() -> Lists.newArrayList(handler.getId()));
 
         JsonNode result = null;
         try {
@@ -331,20 +307,17 @@ public class OvsdbClientImpl implements OvsdbClient {
 
         if (databaseSchema == null) {
             return Futures.transform(
-                    getSchemaFromDevice(Lists.newArrayList(database)),
-                    new Function<Map<String, DatabaseSchema>, DatabaseSchema>() {
-                        @Override
-                        public DatabaseSchema apply(Map<String, DatabaseSchema> result) {
-                            if (result.containsKey(database)) {
-                                DatabaseSchema dbSchema = result.get(database);
-                                dbSchema.populateInternallyGeneratedColumns();
-                                OvsdbClientImpl.this.schemas.put(database, dbSchema);
-                                return dbSchema;
-                            } else {
-                                return null;
-                            }
-                        }
-                    }, executorService);
+                getSchemaFromDevice(Lists.newArrayList(database)),
+                (Function<Map<String, DatabaseSchema>, DatabaseSchema>) result -> {
+                    if (result.containsKey(database)) {
+                        DatabaseSchema dbSchema = result.get(database);
+                        dbSchema.populateInternallyGeneratedColumns();
+                        OvsdbClientImpl.this.schemas.put(database, dbSchema);
+                        return dbSchema;
+                    } else {
+                        return null;
+                    }
+                }, executorService);
         } else {
             return Futures.immediateFuture(databaseSchema);
         }
@@ -366,23 +339,20 @@ public class OvsdbClientImpl implements OvsdbClient {
         }
 
         Futures.transform(rpc.get_schema(Lists.newArrayList(dbNames.get(0))),
-                new com.google.common.base.Function<JsonNode, Void>() {
-                    @Override
-                    public Void apply(JsonNode jsonNode) {
-                        try {
-                            schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));
-                            if (schema.size() > 1 && !sfuture.isCancelled()) {
-                                populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
-                            } else if (schema.size() == 1) {
-                                sfuture.set(schema);
-                            }
-                        } catch (ParsingException e) {
-                            LOG.warn("Failed to populate schema {}:{}", dbNames, schema, e);
-                            sfuture.setException(e);
-                        }
-                        return null;
+            (Function<JsonNode, Void>) jsonNode -> {
+                try {
+                    schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));
+                    if (schema.size() > 1 && !sfuture.isCancelled()) {
+                        populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
+                    } else if (schema.size() == 1) {
+                        sfuture.set(schema);
                     }
-                });
+                } catch (ParsingException e) {
+                    LOG.warn("Failed to populate schema {}:{}", dbNames, schema, e);
+                    sfuture.setException(e);
+                }
+                return null;
+            });
     }
 
     public void setRpc(OvsdbRPC rpc) {

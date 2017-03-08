@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -64,11 +63,9 @@ public class SouthboundUtilTest {
         ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(transaction);
         when(mn.getManagedBy()).thenReturn(ref);
-        when(ref.getValue()).thenAnswer(new Answer<InstanceIdentifier<Node>>() {
-            public InstanceIdentifier<Node> answer(InvocationOnMock invocation) throws Exception {
-                return (InstanceIdentifier<Node>) mock(InstanceIdentifier.class);
-            }
-        });
+        when(ref.getValue()).thenAnswer(
+                (Answer<InstanceIdentifier<Node>>) invocation -> (InstanceIdentifier<Node>) mock(
+                        InstanceIdentifier.class));
         CheckedFuture<Optional<Node>, ReadFailedException> nf = mock(CheckedFuture.class);
         when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL), any(InstanceIdentifier.class))).thenReturn(nf);
         doNothing().when(transaction).close();

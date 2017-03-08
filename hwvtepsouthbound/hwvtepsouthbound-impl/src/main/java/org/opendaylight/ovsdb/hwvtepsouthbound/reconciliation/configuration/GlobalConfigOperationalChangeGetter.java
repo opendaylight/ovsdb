@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -67,17 +66,9 @@ public class GlobalConfigOperationalChangeGetter {
             return null;
         }
         Iterable<LocalUcastMacs> removedLocalUcastMacs = Iterables.filter(localUcastMacs,
-                new Predicate<LocalUcastMacs>() {
-                    @Override
-                    public boolean apply(LocalUcastMacs mac) {
-                        String ls = mac.getLogicalSwitchRef().getValue().firstKeyOf(LogicalSwitches.class).
-                                getHwvtepNodeName().getValue();
-                        if (removedSwitchNames.contains(ls)) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
+                mac -> removedSwitchNames.contains(
+                        mac.getLogicalSwitchRef().getValue().firstKeyOf(LogicalSwitches.class).
+                                getHwvtepNodeName().getValue()));
         return Lists.newArrayList(removedLocalUcastMacs);
     }
 
@@ -91,17 +82,9 @@ public class GlobalConfigOperationalChangeGetter {
             return null;
         }
         Iterable<LocalMcastMacs> removedLocalMcastMacs = Iterables.filter(localMcastMacs,
-                new Predicate<LocalMcastMacs>() {
-                    @Override
-                    public boolean apply(LocalMcastMacs mac) {
-                        String ls = mac.getLogicalSwitchRef().getValue().firstKeyOf(LogicalSwitches.class).
-                                getHwvtepNodeName().getValue();
-                        if (removedSwitchNames.contains(ls)) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
+                mac -> removedSwitchNames.contains(
+                        mac.getLogicalSwitchRef().getValue().firstKeyOf(LogicalSwitches.class).
+                                getHwvtepNodeName().getValue()));
         return Lists.newArrayList(removedLocalMcastMacs);
     }
 

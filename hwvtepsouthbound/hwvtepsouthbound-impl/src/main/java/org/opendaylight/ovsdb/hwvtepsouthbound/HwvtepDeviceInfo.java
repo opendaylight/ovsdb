@@ -237,12 +237,7 @@ public class HwvtepDeviceInfo {
     }
 
     public void scheduleTransaction(final TransactCommand transactCommand) {
-        dependencyQueue.submit(new Runnable() {
-            @Override
-            public void run() {
-                connectionInstance.transact(transactCommand);
-            }
-        });
+        dependencyQueue.submit(() -> connectionInstance.transact(transactCommand));
     }
 
     public void clearInTransitData() {

@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.base.Optional;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -38,8 +39,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
 

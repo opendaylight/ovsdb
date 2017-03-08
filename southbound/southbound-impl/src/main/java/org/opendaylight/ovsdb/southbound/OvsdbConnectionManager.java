@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -55,7 +54,6 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.configuration.BridgeConfigReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
-import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -447,25 +445,22 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         @SuppressWarnings("unchecked") final InstanceIdentifier<Node> nodeIid =
                 (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializer(entity.getId());
 
-        txInvoker.invoke(new TransactionCommand() {
-            @Override
-            public void execute(ReadWriteTransaction transaction) {
-                Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
-                if (ovsdbNodeOpt.isPresent()) {
-                    Node ovsdbNode = ovsdbNodeOpt.get();
-                    OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                    if (nodeAugmentation != null) {
-                        if (nodeAugmentation.getManagedNodeEntry() != null) {
-                            for (ManagedNodeEntry managedNode : nodeAugmentation.getManagedNodeEntry()) {
-                                transaction.delete(
-                                        LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
-                            }
-                        } else {
-                            LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
+        txInvoker.invoke(transaction -> {
+            Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
+            if (ovsdbNodeOpt.isPresent()) {
+                Node ovsdbNode = ovsdbNodeOpt.get();
+                OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                if (nodeAugmentation != null) {
+                    if (nodeAugmentation.getManagedNodeEntry() != null) {
+                        for (ManagedNodeEntry managedNode : nodeAugmentation.getManagedNodeEntry()) {
+                            transaction.delete(
+                                    LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
                         }
+                    } else {
+                        LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
                     }
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
                 }
+                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
             }
         });
 

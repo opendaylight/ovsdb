@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -91,12 +90,8 @@ public class ProtocolUpdateCommandTest {
 
         OvsdbBridgeName ovsdbBridgeName = mock(OvsdbBridgeName.class);
         when(ovsdbBridge.getBridgeName()).thenReturn(ovsdbBridgeName);
-        when(protocolEntry.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
-            public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Exception {
-                return OvsdbBridgeProtocolOpenflow10.class;
-            }
-        });
+        when(protocolEntry.getProtocol()).thenAnswer(
+                (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
 
         Bridge bridge = mock(Bridge.class);
         PowerMockito.mockStatic(TyperUtils.class);

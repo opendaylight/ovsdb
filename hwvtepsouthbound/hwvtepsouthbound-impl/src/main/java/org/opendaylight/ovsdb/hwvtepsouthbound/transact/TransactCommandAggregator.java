@@ -20,7 +20,7 @@ import java.util.List;
 
 public class TransactCommandAggregator implements TransactCommand {
 
-    private List<TransactCommand> commands = new ArrayList<TransactCommand>();
+    private List<TransactCommand> commands = new ArrayList<>();
 
     public TransactCommandAggregator(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
         commands.add(new PhysicalSwitchUpdateCommand(state,changes));

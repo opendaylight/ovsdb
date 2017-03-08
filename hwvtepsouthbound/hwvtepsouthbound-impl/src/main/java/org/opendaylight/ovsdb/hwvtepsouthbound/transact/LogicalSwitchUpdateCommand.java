@@ -102,7 +102,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
 
     private void setTunnelKey(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
         if (inputSwitch.getTunnelKey() != null) {
-            Set<Long> tunnel = new HashSet<Long>();
+            Set<Long> tunnel = new HashSet<>();
             tunnel.add(Long.valueOf(inputSwitch.getTunnelKey()));
             logicalSwitch.setTunnelKey(tunnel);
         }

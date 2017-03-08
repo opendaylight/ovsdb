@@ -43,8 +43,7 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
 
     private void registerListener(final DataBroker db) {
         InstanceIdentifier<Node> iid = HwvtepSouthboundMapper.createInstanceIdentifier();
-        DataTreeIdentifier<Node> treeId =
-                        new DataTreeIdentifier<Node>(LogicalDatastoreType.OPERATIONAL, iid);
+        DataTreeIdentifier<Node> treeId = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, iid);
         LOG.trace("Registering listener for path {}", treeId);
         registration = db.registerDataTreeChangeListener(treeId, HwvtepReconciliationManager.this);
     }

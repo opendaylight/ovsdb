@@ -414,7 +414,7 @@ public class DockerOvs implements AutoCloseable {
      * @return a list of the external ports
      */
     private List<String> parseDockerComposeYaml() {
-        List<String> ports = new ArrayList<String>();
+        List<String> ports = new ArrayList<>();
 
         YamlReader yamlReader = null;
         Map root = null;

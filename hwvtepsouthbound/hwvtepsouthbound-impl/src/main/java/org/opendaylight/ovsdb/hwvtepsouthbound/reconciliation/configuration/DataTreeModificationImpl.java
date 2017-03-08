@@ -28,11 +28,11 @@ public class DataTreeModificationImpl<T extends DataObject> implements DataTreeM
 
     @Override
     public DataTreeIdentifier<T> getRootPath() {
-        return new DataTreeIdentifier<T>(LogicalDatastoreType.CONFIGURATION, nodeId);
+        return new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, nodeId);
     }
 
     @Override
     public DataObjectModification<T> getRootNode() {
-        return new DataObjectModificationImpl<T>(nodeId, newNode, oldNode);
+        return new DataObjectModificationImpl<>(nodeId, newNode, oldNode);
     }
 }

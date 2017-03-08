@@ -87,7 +87,7 @@ public class ProtocolRemovedCommandTest {
         Bridge bridge = mock(Bridge.class);
         when(bridge.getProtocolsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
-        when(column.getData()).thenReturn(new HashSet<String>());
+        when(column.getData()).thenReturn(new HashSet<>());
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
 
         PowerMockito.mockStatic(TyperUtils.class);

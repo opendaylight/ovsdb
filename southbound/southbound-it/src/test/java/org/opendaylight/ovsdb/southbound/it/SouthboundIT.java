@@ -630,7 +630,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         Assert.assertEquals(dpType, bridge.getDatapathType());
 
                         // Add port for all dpdk interface types (dpdkvhost not supported in existing dpdk ovs)
-                        List<String> dpdkTypes = new ArrayList<String>();
+                        List<String> dpdkTypes = new ArrayList<>();
                         dpdkTypes.add("dpdk");
                         dpdkTypes.add("dpdkr");
                         dpdkTypes.add("dpdkvhostuser");
@@ -2118,7 +2118,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         OvsdbNodeAugmentation ovsdbNodeAugmentation;
         Uri qosUri = new Uri("QOS-ROW");
-        List<String> typeList = new ArrayList<String>();
+        List<String> typeList = new ArrayList<>();
         typeList.add(SouthboundConstants.QOS_LINUX_HTB);
         typeList.add(SouthboundConstants.QOS_LINUX_HFSC);
 

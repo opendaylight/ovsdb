@@ -105,7 +105,7 @@ public class TransactUtils {
     //TODO: change this function to be generic
     public static Map<InstanceIdentifier<Node>, Node> extractCreatedOrUpdatedOrRemoved(
             Collection<DataTreeModification<Node>> changes, Class<Node> class1) {
-        Map<InstanceIdentifier<Node>, Node> result = new HashMap<InstanceIdentifier<Node>, Node>();
+        Map<InstanceIdentifier<Node>, Node> result = new HashMap<>();
         for(DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
@@ -137,7 +137,7 @@ public class TransactUtils {
     }
 
     public static UUID createPhysicalLocatorSet(HwvtepOperationalState hwvtepOperationalState, TransactionBuilder transaction, List<LocatorSet> locatorList) {
-        Set<UUID> locators = new HashSet<UUID>();
+        Set<UUID> locators = new HashSet<>();
         for (LocatorSet locator: locatorList) {
             UUID locatorUuid = null;
             @SuppressWarnings("unchecked")

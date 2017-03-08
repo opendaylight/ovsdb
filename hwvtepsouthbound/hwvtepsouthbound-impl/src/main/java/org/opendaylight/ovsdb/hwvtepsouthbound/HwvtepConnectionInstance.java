@@ -24,7 +24,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
-import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;

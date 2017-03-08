@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -62,12 +61,8 @@ public class ProtocolRemovedCommandTest {
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
 
         ProtocolEntry protocol = mock(ProtocolEntry.class);
-        when(protocol.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
-            public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Exception {
-                return OvsdbBridgeProtocolOpenflow10.class;
-            }
-        });
+        when(protocol.getProtocol()).thenAnswer(
+                (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
 
         BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
         when(bridgeOpState.getProtocolEntry(any(InstanceIdentifier.class))).thenReturn(Optional.of(protocol));

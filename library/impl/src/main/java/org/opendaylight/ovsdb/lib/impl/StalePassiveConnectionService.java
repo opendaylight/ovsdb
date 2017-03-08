@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 , NEC Corporation and others.  All rights reserved.
+ * Copyright © 2016, 2017 NEC Corporation and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -60,17 +60,14 @@ public class StalePassiveConnectionService implements AutoCloseable {
         // scheduled task for ping response timeout. Connections that don't response to the
         // ping or haven't disconnected after the timeout will be closed
         final ScheduledFuture<?> echoTimeoutFuture =
-                executorService.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (OvsdbClient client : clientFutureMap.keySet()) {
-                            Future<?> clientFuture = clientFutureMap.get(client);
-                            if (!clientFuture.isDone() && !clientFuture.isCancelled()) {
-                                clientFuture.cancel(true);
-                            }
-                            if (client.isActive()) {
-                                client.disconnect();
-                            }
+                executorService.schedule(() -> {
+                    for (OvsdbClient client : clientFutureMap.keySet()) {
+                        Future<?> clientFuture = clientFutureMap.get(client);
+                        if (!clientFuture.isDone() && !clientFuture.isCancelled()) {
+                            clientFuture.cancel(true);
+                        }
+                        if (client.isActive()) {
+                            client.disconnect();
                         }
                     }
                 }, ECHO_TIMEOUT, TimeUnit.SECONDS);

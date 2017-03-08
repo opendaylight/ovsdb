@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -126,12 +125,8 @@ public class BridgeConfigReconciliationTaskTest {
         when(ovsdbBridgeAugmentation.getBridgeName()).thenReturn(ovsdbBridgeName);
         ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
         ProtocolEntryKey protocolEntryKey = mock(ProtocolEntryKey.class);
-        Mockito.when(protocolEntry.getProtocol()).thenAnswer(new Answer<Class<? extends OvsdbBridgeProtocolBase>>() {
-            public Class<? extends OvsdbBridgeProtocolBase> answer(
-                    InvocationOnMock invocation) throws Exception {
-                return OvsdbBridgeProtocolOpenflow10.class;
-            }
-        });
+        Mockito.when(protocolEntry.getProtocol()).thenAnswer(
+                (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
         when(protocolEntry.getKey()).thenReturn(protocolEntryKey);
         when(ovsdbBridgeAugmentation.getProtocolEntry()).thenReturn(Arrays.asList(protocolEntry));
 

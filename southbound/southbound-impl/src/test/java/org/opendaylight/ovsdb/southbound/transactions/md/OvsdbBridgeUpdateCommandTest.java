@@ -34,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -333,11 +332,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(column.getData()).thenReturn("system");
         PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createDatapathType(anyString()))
-                .thenAnswer(new Answer<Class<? extends DatapathTypeBase>>() {
-                    public Class<? extends DatapathTypeBase> answer(InvocationOnMock invocation) throws Exception {
-                        return DatapathTypeSystem.class;
-                    }
-                });
+                .thenAnswer((Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeSystem.class);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
         when(ovsdbBridgeAugmentationBuilder.setDatapathType(any(Class.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);

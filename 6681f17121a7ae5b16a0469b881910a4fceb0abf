@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_2acd9366",
+        "filename": "library/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2017-03-08T01:21:29Z",
+      "side": 1,
+      "message": "features-aaa-cert",
+      "range": {
+        "startLine": 42,
+        "startChar": 20,
+        "endLine": 42,
+        "endChar": 32
+      },
+      "revId": "6681f17121a7ae5b16a0469b881910a4fceb0abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_cab207e4",
+        "filename": "library/features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2017-03-08T01:21:29Z",
+      "side": 1,
+      "message": "This was collapsed in Carbon by Mohamed.  This should be features-aaa-cert",
+      "range": {
+        "startLine": 16,
+        "startChar": 39,
+        "endLine": 16,
+        "endChar": 51
+      },
+      "revId": "6681f17121a7ae5b16a0469b881910a4fceb0abf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

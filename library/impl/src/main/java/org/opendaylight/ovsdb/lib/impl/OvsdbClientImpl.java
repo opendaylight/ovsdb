@@ -185,7 +185,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                                                             final MonitorCallBack callback) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
-            input -> input.getTableName());
+                MonitorRequest::getTableName);
 
         final MonitorHandle monitorHandle = new MonitorHandle(UUID.randomUUID().toString());
         registerCallback(monitorHandle, callback, dbSchema);
@@ -209,7 +209,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                                                            final MonitorCallBack callback) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
-            input -> input.getTableName());
+                MonitorRequest::getTableName);
 
         registerCallback(monitorHandle, callback, dbSchema);
 

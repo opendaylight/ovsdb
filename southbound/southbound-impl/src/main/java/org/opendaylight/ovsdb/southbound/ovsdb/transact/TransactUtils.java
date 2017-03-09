@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -68,7 +68,7 @@ public class TransactUtils {
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataAfterAndMatchesFilter(
             final Predicate<DataObjectModification<T>> filter) {
-        return input -> input != null && input.getDataAfter() != null && filter.apply(input);
+        return input -> input != null && input.getDataAfter() != null && filter.test(input);
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> matchesEverything() {
@@ -317,7 +317,7 @@ public class TransactUtils {
             DataObjectModification<? extends DataObject> change = remainingChanges.remove();
             InstanceIdentifier<? extends DataObject> path = remainingPaths.remove();
             // Is the change relevant?
-            if (clazz.isAssignableFrom(change.getDataType()) && filter.apply((DataObjectModification<T>) change)) {
+            if (clazz.isAssignableFrom(change.getDataType()) && filter.test((DataObjectModification<T>) change)) {
                 result.put((InstanceIdentifier<T>) path, (DataObjectModification<T>) change);
             }
             // Add any children to the queue

@@ -116,7 +116,7 @@ public class ReconciliationManager implements AutoCloseable {
     public void enqueueForRetry(final ReconciliationTask task) {
         LOG.trace("Reconciliation task re-queued for re-execution {}",task);
         reconTaskManager.cacheTask(task, taskTriager.schedule(
-                () -> task.checkReadinessAndProcess(), task.retryDelayInMills(), TimeUnit.MILLISECONDS
+                task::checkReadinessAndProcess, task.retryDelayInMills(), TimeUnit.MILLISECONDS
             )
         );
     }

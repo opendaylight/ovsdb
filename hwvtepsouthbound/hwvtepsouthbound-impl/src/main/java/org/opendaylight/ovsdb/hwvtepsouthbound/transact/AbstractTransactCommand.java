@@ -84,7 +84,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
         //If this key itself is in transit wait for the response of this key itself
         if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
-            inTransitDependencies.put((Class<? extends Identifiable>) classType, Lists.newArrayList(key));
+            inTransitDependencies.put(classType, Lists.newArrayList(key));
         }
 
         if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies) && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {

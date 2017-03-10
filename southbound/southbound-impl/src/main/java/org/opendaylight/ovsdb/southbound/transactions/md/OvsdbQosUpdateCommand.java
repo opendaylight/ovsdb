@@ -104,7 +104,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 qosEntryBuilder.setQosId(new Uri(getQosId(qos)));
                 qosEntryBuilder.setQosUuid(new Uuid(entry.getKey().toString()));
                 qosEntryBuilder.setQosType(
-                        SouthboundMapper.createQosType(qos.getTypeColumn().getData().toString()));
+                        SouthboundMapper.createQosType(qos.getTypeColumn().getData()));
                 Qos oldQos = oldQosRows.get(entry.getKey());
                 setOtherConfig(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
                 setExternalIds(transaction, qosEntryBuilder, oldQos, qos, nodeIId);

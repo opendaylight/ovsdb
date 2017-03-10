@@ -189,7 +189,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             String bridgeName, InstanceIdentifierCodec instanceIdentifierCodec) {
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
         bridge.setName(bridgeName);
-        bridge.setExternalIds(Collections.<String,String>emptyMap());
+        bridge.setExternalIds(Collections.emptyMap());
         Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction, iid, bridge.getSchema(),
                 bridge.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
         transaction.add(mutate

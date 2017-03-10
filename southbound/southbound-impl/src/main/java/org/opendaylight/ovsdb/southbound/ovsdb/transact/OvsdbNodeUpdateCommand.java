@@ -104,7 +104,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
     private void stampInstanceIdentifier(TransactionBuilder transaction, InstanceIdentifier<Node> iid,
             InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-        ovs.setExternalIds(Collections.<String,String>emptyMap());
+        ovs.setExternalIds(Collections.emptyMap());
         TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(),
                 ovs.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
     }

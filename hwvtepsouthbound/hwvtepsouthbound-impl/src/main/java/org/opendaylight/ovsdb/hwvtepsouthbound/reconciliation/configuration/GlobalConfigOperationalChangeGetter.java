@@ -7,9 +7,9 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -65,11 +65,11 @@ public class GlobalConfigOperationalChangeGetter {
         if (localUcastMacs == null) {
             return null;
         }
-        Iterable<LocalUcastMacs> removedLocalUcastMacs = Iterables.filter(localUcastMacs,
-                mac -> removedSwitchNames.contains(
-                        mac.getLogicalSwitchRef().getValue().firstKeyOf(LogicalSwitches.class).
-                                getHwvtepNodeName().getValue()));
-        return Lists.newArrayList(removedLocalUcastMacs);
+        return localUcastMacs.stream()
+                .filter(mac -> removedSwitchNames.contains(
+                        mac.getLogicalSwitchRef().getValue().firstKeyOf(
+                                LogicalSwitches.class).getHwvtepNodeName().getValue()))
+                .collect(Collectors.toList());
     }
 
     static List<LocalMcastMacs> getLocalMcastMacsToBeRemoved(Node opNode, final Set<String> removedSwitchNames) {
@@ -81,11 +81,11 @@ public class GlobalConfigOperationalChangeGetter {
         if (localMcastMacs == null) {
             return null;
         }
-        Iterable<LocalMcastMacs> removedLocalMcastMacs = Iterables.filter(localMcastMacs,
-                mac -> removedSwitchNames.contains(
-                        mac.getLogicalSwitchRef().getValue().firstKeyOf(LogicalSwitches.class).
-                                getHwvtepNodeName().getValue()));
-        return Lists.newArrayList(removedLocalMcastMacs);
+        return localMcastMacs.stream()
+                .filter(mac -> removedSwitchNames.contains(
+                        mac.getLogicalSwitchRef().getValue().firstKeyOf(
+                                LogicalSwitches.class).getHwvtepNodeName().getValue()))
+                .collect(Collectors.toList());
     }
 
     static  Set<String> getLogicalSwitchesToBeRemoved(Node configNode, Node opNode) {

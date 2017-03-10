@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright © 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -42,7 +42,7 @@ public class HwvtepSouthboundConstants {
 
     public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_HWVTEP_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
-            .put("Manager", Arrays.asList(new String[]{"_version", "status"}))
+            .put("Manager", Arrays.asList("_version", "status"))
             .build();
     public static final int WAITING_QUEUE_CAPACITY = 1000;
     public static final long WAITING_JOB_EXPIRY_TIME_MILLIS = 90000;

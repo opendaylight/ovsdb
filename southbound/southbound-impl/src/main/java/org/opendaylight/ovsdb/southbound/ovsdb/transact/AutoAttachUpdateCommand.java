@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Inocybe Technologies and others. All rights reserved.
+ * Copyright © 2016, 2017 Inocybe Technologies and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,8 +11,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,7 +149,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     final OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(iid, bridgeUri);
                     if (ovsdbBridgeAugmentation != null) {
                         bridge.setName(ovsdbBridgeAugmentation.getBridgeName().getValue());
-                        bridge.setAutoAttach(Sets.newHashSet(new UUID(namedUuid)));
+                        bridge.setAutoAttach(Collections.singleton(new UUID(namedUuid)));
                         LOG.trace("Create Autoattach table {}, and mutate the bridge {}",
                                 autoAttach.getAutoattachId(), getBridge(iid, bridgeUri).getBridgeName().getValue());
                         transaction.add(op.mutate(bridge)

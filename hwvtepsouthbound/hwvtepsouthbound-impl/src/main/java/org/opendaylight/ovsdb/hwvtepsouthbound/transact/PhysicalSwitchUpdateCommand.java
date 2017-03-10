@@ -12,6 +12,7 @@ import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schem
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,7 +102,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                             physicalSwitchAugmentation.getHwvtepNodeName().getValue()));
             //update global table
             Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Global.class);
-            global.setSwitches(Sets.newHashSet(new UUID(pswitchUuid)));
+            global.setSwitches(Collections.singleton(new UUID(pswitchUuid)));
 
             LOG.trace("execute: create physical switch: {}", physicalSwitch);
             transaction.add(op.mutate(global)
@@ -201,7 +202,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                             PhysicalSwitch pSwitch =
                                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                                                             PhysicalSwitch.class);
-                            pSwitch.setTunnels(Sets.newHashSet(new UUID(tunnelUuid)));
+                            pSwitch.setTunnels(Collections.singleton(new UUID(tunnelUuid)));
                             pSwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
                             transaction.add(op.mutate(pSwitch)
                                             .addMutation(pSwitch.getTunnels().getSchema(), Mutator.INSERT,

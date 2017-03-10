@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2014, 2017 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
@@ -17,8 +17,8 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 public class Select<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
     public static final String SELECT = "select";
-    List<Condition> where = Lists.newArrayList();
-    private List<String> columns = Lists.newArrayList();
+    private List<Condition> where = new ArrayList<>();
+    private List<String> columns = new ArrayList<>();
 
     public Select on(TableSchema schema) {
         this.setTableSchema(schema);

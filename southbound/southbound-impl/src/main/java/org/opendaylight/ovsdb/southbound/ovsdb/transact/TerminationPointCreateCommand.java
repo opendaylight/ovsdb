@@ -11,7 +11,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
 import java.util.Collections;
@@ -114,7 +113,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                 if (getBridge(entry.getKey(), nodes) != null) {
                     bridge.setName(getBridge(entry.getKey(), nodes).getBridgeName().getValue());
-                    bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
+                    bridge.setPorts(Collections.singleton(new UUID(portUuid)));
 
                     transaction.add(op.mutate(bridge)
                             .addMutation(bridge.getPortsColumn().getSchema(),
@@ -156,7 +155,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             final Port port, final String interfaceUuid) {
 
         port.setName(terminationPoint.getName());
-        port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
+        port.setInterfaces(Collections.singleton(new UUID(interfaceUuid)));
         createPortOtherConfig(terminationPoint, port);
         createPortVlanTag(terminationPoint, port);
         createPortVlanTrunk(terminationPoint, port);
@@ -170,7 +169,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
         Long ofPort = terminationPoint.getOfport();
         if (ofPort != null) {
-            ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
+            ovsInterface.setOpenFlowPort(Collections.singleton(ofPort));
         }
     }
 
@@ -180,7 +179,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
         Integer ofPortRequest = terminationPoint.getOfportRequest();
         if (ofPortRequest != null) {
-            ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
+            ovsInterface.setOpenFlowPortRequest(Collections.singleton(ofPortRequest.longValue()));
         }
     }
 

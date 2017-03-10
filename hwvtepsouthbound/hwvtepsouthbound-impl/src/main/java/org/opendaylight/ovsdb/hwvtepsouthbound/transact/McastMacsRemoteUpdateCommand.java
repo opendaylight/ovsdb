@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
@@ -170,14 +169,14 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteMcastMacs data) {
             if (data == null) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
-            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }
 
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteMcastMacs data) {
             if (data == null || HwvtepSouthboundUtil.isEmpty(data.getLocatorSet())) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             List<InstanceIdentifier<?>> locators = new ArrayList<>();
             for (LocatorSet locator: data.getLocatorSet()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2014, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.lib.notation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.Maps;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.json.RowSerializer;
@@ -22,20 +22,16 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 public class Row<E extends TableSchema<E>> {
     @JsonIgnore
     private TableSchema<E> tableSchema;
-    protected Map<String, Column<E, ?>> columns;
+    protected Map<String, Column<E, ?>> columns = new HashMap<>();
 
-    public Row() {
-        this.columns = Maps.newHashMap();
-    }
+    public Row() {}
 
     public Row(TableSchema<E> tableSchema) {
         this.tableSchema = tableSchema;
-        this.columns = Maps.newHashMap();
     }
 
     public Row(TableSchema<E> tableSchema, List<Column<E, ?>> columns) {
         this.tableSchema = tableSchema;
-        this.columns = Maps.newHashMap();
         for (Column<E, ?> column : columns) {
             this.columns.put(column.getSchema().getName(), column);
         }

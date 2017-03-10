@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2014, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -62,7 +62,7 @@ public class TableUpdate<E extends TableSchema<E>> {
 
     public TableUpdate() {
         super();
-        rows = Maps.newHashMap();
+        rows = new HashMap<>();
     }
 
     public void addRow(UUID uuid, Row<E> oldRow, Row<E> newRow) {

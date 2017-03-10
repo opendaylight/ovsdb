@@ -12,13 +12,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,8 +64,8 @@ public class OvsdbClientImpl implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
-    private Map<String, DatabaseSchema> schemas = Maps.newHashMap();
-    private Map<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
+    private Map<String, DatabaseSchema> schemas = new HashMap<>();
+    private Map<String, CallbackContext> monitorCallbacks = new HashMap<>();
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
@@ -152,7 +154,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     protected TableUpdates transformingCallback(JsonNode tableUpdatesJson, DatabaseSchema dbSchema) {
         //todo(ashwin): we should move all the JSON parsing logic to a utility class
         if (tableUpdatesJson instanceof ObjectNode) {
-            Map<String, TableUpdate> tableUpdateMap = Maps.newHashMap();
+            Map<String, TableUpdate> tableUpdateMap = new HashMap<>();
             ObjectNode updatesJson = (ObjectNode) tableUpdatesJson;
             for (Iterator<Map.Entry<String,JsonNode>> itr = updatesJson.fields(); itr.hasNext();) {
                 Map.Entry<String, JsonNode> entry = itr.next();
@@ -191,7 +193,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         registerCallback(monitorHandle, callback, dbSchema);
 
         ListenableFuture<JsonNode> monitor = rpc.monitor(
-            () -> Lists.newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap));
+            () -> Arrays.asList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
             result = monitor.get();
@@ -214,7 +216,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         registerCallback(monitorHandle, callback, dbSchema);
 
         ListenableFuture<JsonNode> monitor = rpc.monitor(
-            () -> Lists.newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap));
+            () -> Arrays.asList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
             result = monitor.get();
@@ -232,7 +234,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public void cancelMonitor(final MonitorHandle handler) {
-        ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(() -> Lists.newArrayList(handler.getId()));
+        ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(() -> Collections.singletonList(handler.getId()));
 
         JsonNode result = null;
         try {
@@ -307,7 +309,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
         if (databaseSchema == null) {
             return Futures.transform(
-                getSchemaFromDevice(Lists.newArrayList(database)),
+                getSchemaFromDevice(Collections.singletonList(database)),
                 (Function<Map<String, DatabaseSchema>, DatabaseSchema>) result -> {
                     if (result.containsKey(database)) {
                         DatabaseSchema dbSchema = result.get(database);
@@ -324,7 +326,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     private ListenableFuture<Map<String, DatabaseSchema>> getSchemaFromDevice(final List<String> dbNames) {
-        Map<String, DatabaseSchema> schema = Maps.newHashMap();
+        Map<String, DatabaseSchema> schema = new HashMap<>();
         SettableFuture<Map<String, DatabaseSchema>> future = SettableFuture.create();
         populateSchema(dbNames, schema, future);
         return future;
@@ -338,7 +340,7 @@ public class OvsdbClientImpl implements OvsdbClient {
             return;
         }
 
-        Futures.transform(rpc.get_schema(Lists.newArrayList(dbNames.get(0))),
+        Futures.transform(rpc.get_schema(Collections.singletonList(dbNames.get(0))),
             (Function<JsonNode, Void>) jsonNode -> {
                 try {
                     schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));

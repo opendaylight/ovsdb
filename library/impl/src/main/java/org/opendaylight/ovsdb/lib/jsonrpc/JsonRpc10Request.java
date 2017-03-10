@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2013, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,13 +9,14 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JsonRpc10Request {
 
     String id;
     String method;
-    List<Object> params = Lists.newArrayList();
+    List<Object> params = new ArrayList<>();
 
     public JsonRpc10Request(String id) {
         setId(id);

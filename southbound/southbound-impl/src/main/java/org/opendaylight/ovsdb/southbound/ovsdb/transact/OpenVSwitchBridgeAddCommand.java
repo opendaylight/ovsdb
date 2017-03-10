@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -46,7 +46,7 @@ public class OpenVSwitchBridgeAddCommand implements TransactCommand {
         List<Insert> inserts = TransactUtils.extractInsert(transaction, bridge.getSchema());
         for (Insert insert : inserts) {
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            ovs.setBridges(Sets.newHashSet(TransactUtils.extractNamedUuid(insert)));
+            ovs.setBridges(Collections.singleton(TransactUtils.extractNamedUuid(insert)));
             transaction.add(op.mutate(ovs).addMutation(ovs.getBridgesColumn().getSchema(),
                     Mutator.INSERT,
                     ovs.getBridgesColumn().getData()));

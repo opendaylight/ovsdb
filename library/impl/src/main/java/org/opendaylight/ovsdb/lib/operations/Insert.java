@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2014, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,8 +9,8 @@
 package org.opendaylight.ovsdb.lib.operations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Maps;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -28,7 +28,7 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
     @JsonProperty("uuid-name")
     private String uuidName;
 
-    private Map<String, Object> row = Maps.newHashMap();
+    private Map<String, Object> row = new HashMap<>();
 
     public Insert<E> on(TableSchema<E> schema) {
         this.setTableSchema(schema);

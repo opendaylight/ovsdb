@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -61,7 +61,7 @@ public class ControllerRemovedCommand implements TransactCommand {
             if (ovsdbBridge != null && controllerEntryOptional.isPresent()) {
                 ControllerEntry controllerEntry = controllerEntryOptional.get();
                 Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-                bridge.setController(Sets.newHashSet(new UUID(controllerEntry.getControllerUuid().getValue())));
+                bridge.setController(Collections.singleton(new UUID(controllerEntry.getControllerUuid().getValue())));
                 transaction.add(op.mutate(bridge).addMutation(bridge.getControllerColumn().getSchema(),
                         Mutator.DELETE, bridge.getControllerColumn().getData()));
             }

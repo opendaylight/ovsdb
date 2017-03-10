@@ -11,11 +11,10 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -443,8 +442,9 @@ public class TransactUtils {
                     externalIdsMap);
         Mutation deleteIidMutation = new Mutation(columnSchema.getName(),
                 Mutator.DELETE,
-                OvsdbSet.fromSet(Sets.newHashSet(SouthboundConstants.IID_EXTERNAL_ID_KEY)));
-        List<Mutation> mutations = Lists.newArrayList(Sets.newHashSet(deleteIidMutation));
+                OvsdbSet.fromSet(Collections.singleton(SouthboundConstants.IID_EXTERNAL_ID_KEY)));
+        List<Mutation> mutations = new ArrayList<>();
+        mutations.add(deleteIidMutation);
         mutations.addAll(mutate.getMutations());
         mutate.setMutations(mutations);
         return mutate;

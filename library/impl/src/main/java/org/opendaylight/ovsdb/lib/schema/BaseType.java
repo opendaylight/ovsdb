@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.TyperException;
@@ -120,7 +120,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         private Optional<Set<Integer>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Integer> nodesEnums = Sets.newHashSet();
+                Set<Integer> nodesEnums = new HashSet<>();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
                     nodesEnums.add(enm.asInt());
@@ -238,7 +238,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         private Optional<Set<Double>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Double> nodesEnums = Sets.newHashSet();
+                Set<Double> nodesEnums = new HashSet<>();
                 JsonNode anEnum = node.get("enum").get(1);
                 for (JsonNode enm : anEnum) {
                     nodesEnums.add(enm.asDouble());
@@ -387,7 +387,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         private Optional<Set<String>> populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<String> nodesEnums = Sets.newHashSet();
+                Set<String> nodesEnums = new HashSet<>();
                 JsonNode enumVal = node.get("enum");
                 if (enumVal.isArray()) {
                     JsonNode anEnum = enumVal.get(1);

@@ -8,9 +8,9 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -24,10 +24,10 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
 
     public static final String UPDATE = "update";
 
-    Map<String, Object> row = Maps.newHashMap();
-    String uuid;
+    private final Map<String, Object> row = new HashMap<>();
+    private String uuid;
 
-    List<Condition> where = Lists.newArrayList();
+    private final List<Condition> where = new ArrayList<>();
 
     private String uuidName;
 
@@ -90,7 +90,8 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
     }
 
     public void setRow(Map<String, Object> row) {
-        this.row = row;
+        this.row.clear();
+        this.row.putAll(row);
     }
 
     @Override
@@ -103,6 +104,7 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
     }
 
     public void setWhere(List<Condition> where) {
-        this.where = where;
+        this.where.clear();
+        this.where.addAll(where);
     }
 }

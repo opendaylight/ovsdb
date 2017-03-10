@@ -14,10 +14,10 @@ import static org.junit.Assert.assertTrue;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -62,7 +62,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
         TestBridge rBridge = ovs.createTypedRowWrapper(TestBridge.class);
         rBridge.setName(TEST_BRIDGE_NAME);
         rBridge.setStatus(ImmutableMap.of("key","value"));
-        rBridge.setFloodVlans(Sets.newHashSet(34));
+        rBridge.setFloodVlans(Collections.singleton(34));
 
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
@@ -74,7 +74,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
                 .add(op.insert(rBridge)
                         .withId(namedUuid))
                 .add(op.mutate(ovsTable)
-                        .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid))));
+                        .addMutation(bridges, Mutator.INSERT, Collections.singleton(new UUID(namedUuid))));
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults = results.get();
@@ -127,7 +127,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
                         .where(name.opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.mutate(ovsTable)
-                        .addMutation(bridges, Mutator.DELETE, Sets.newHashSet(testBridgeUuid)))
+                        .addMutation(bridges, Mutator.DELETE, Collections.singleton(testBridgeUuid)))
                 .add(op.commit(true))
                 .execute();
 

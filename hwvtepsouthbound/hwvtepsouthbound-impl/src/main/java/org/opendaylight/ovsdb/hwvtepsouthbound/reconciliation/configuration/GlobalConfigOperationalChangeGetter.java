@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -91,8 +90,8 @@ public class GlobalConfigOperationalChangeGetter {
     static  Set<String> getLogicalSwitchesToBeRemoved(Node configNode, Node opNode) {
         Set<String> opSwitchNames = new HashSet<>();
         Set<String> cfgSwitchNames = new HashSet<>();
-        List<LogicalSwitches> cfgLogicalSwitches = Lists.newArrayList();
-        List<LogicalSwitches> opLogicalSwitches = Lists.newArrayList();
+        List<LogicalSwitches> cfgLogicalSwitches = new ArrayList<>();
+        List<LogicalSwitches> opLogicalSwitches = new ArrayList<>();
 
         if (opNode != null && opNode.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
             opLogicalSwitches = opNode.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();

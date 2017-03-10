@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -62,7 +62,7 @@ public class TableUpdate<E extends TableSchema<E>> {
 
     public TableUpdate() {
         super();
-        rows = Maps.newHashMap();
+        rows = new HashMap<>();
     }
 
     public void addRow(UUID uuid, Row<E> oldRow, Row<E> newRow) {

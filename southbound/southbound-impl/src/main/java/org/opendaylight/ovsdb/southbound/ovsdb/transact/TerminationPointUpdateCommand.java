@@ -11,9 +11,9 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -168,7 +168,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
             final Port port,
             final OvsdbBridgeAugmentation operBridge) {
 
-        Set<UUID> uuidSet = Sets.newHashSet();
+        Set<UUID> uuidSet = new HashSet<>();
 
         // First check if QosEntry is present and use that
         if (terminationPoint.getQosEntry() != null && !terminationPoint.getQosEntry().isEmpty()) {
@@ -222,7 +222,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
 
         Long ofPort = terminationPoint.getOfport();
         if (ofPort != null) {
-            ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
+            ovsInterface.setOpenFlowPort(Collections.singleton(ofPort));
         }
     }
 
@@ -232,7 +232,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
 
         Integer ofPortRequest = terminationPoint.getOfportRequest();
         if (ofPortRequest != null) {
-            ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
+            ovsInterface.setOpenFlowPortRequest(Collections.singleton(ofPortRequest.longValue()));
         }
     }
 

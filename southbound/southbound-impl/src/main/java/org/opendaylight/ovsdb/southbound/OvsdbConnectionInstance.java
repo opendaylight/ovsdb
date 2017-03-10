@@ -9,9 +9,9 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -165,7 +165,7 @@ public class OvsdbConnectionInstance {
     private void monitorTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
-            List<MonitorRequest> monitorRequests = Lists.newArrayList();
+            List<MonitorRequest> monitorRequests = new ArrayList<>();
             for (String tableName : tables) {
                 if (!SouthboundConstants.SKIP_OVSDB_TABLE.contains(tableName)) {
                     LOG.info("Southbound monitoring OVSDB schema table {}", tableName);

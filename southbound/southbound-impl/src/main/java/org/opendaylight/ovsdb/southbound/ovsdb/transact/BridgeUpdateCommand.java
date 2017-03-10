@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -159,9 +158,9 @@ public class BridgeUpdateCommand implements TransactCommand {
         String portNamedUuid = "Port_" + SouthboundMapper.getRandomUuid();
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
         port.setName(ovsdbManagedNode.getBridgeName().getValue());
-        port.setInterfaces(Sets.newHashSet(TransactUtils.extractNamedUuid(interfaceInsert)));
+        port.setInterfaces(Collections.singleton(TransactUtils.extractNamedUuid(interfaceInsert)));
         transaction.add(op.insert(port).withId(portNamedUuid));
-        bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
+        bridge.setPorts(Collections.singleton(new UUID(portNamedUuid)));
     }
 
     private Insert<GenericTableSchema> setInterface(TransactionBuilder transaction,
@@ -180,7 +179,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             OvsdbBridgeAugmentation ovsdbManagedNode) {
         if (ovsdbManagedNode.getFailMode() != null
                 && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null) {
-            bridge.setFailMode(Sets.newHashSet(
+            bridge.setFailMode(Collections.singleton(
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
         }
     }

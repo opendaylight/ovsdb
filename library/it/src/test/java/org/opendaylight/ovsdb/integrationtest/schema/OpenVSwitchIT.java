@@ -19,8 +19,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,10 +111,10 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         Bridge bridge = getClient().createTypedRowWrapper(Bridge.class);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34L));
+        bridge.setFloodVlans(Collections.singleton(34L));
 
         OpenVSwitch openVSwitch = getClient().createTypedRowWrapper(OpenVSwitch.class);
-        openVSwitch.setBridges(Sets.newHashSet(new UUID(TEST_BRIDGE_NAME)));
+        openVSwitch.setBridges(Collections.singleton(new UUID(TEST_BRIDGE_NAME)));
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
                 .add(op.insert(bridge.getSchema())
@@ -152,7 +151,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Bridge: Deleting " + TEST_BRIDGE_NAME))
                 .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getBridgesColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(bridgeUuid)))
+                                Collections.singleton(bridgeUuid)))
                 .add(op.comment("Open_vSwitch: Mutating " + TEST_BRIDGE_NAME + " " + bridgeUuid))
                 .add(op.commit(true));
 
@@ -191,7 +190,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Controller: Inserting controller1 " + controller1.getTargetColumn().getData()))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(controllerUuidStr)))
+                                Collections.singleton(new UUID(controllerUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating controller1 " + controller1.getTargetColumn().getData()));
@@ -217,7 +216,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Controller: Inserting controller2 " + controller2.getTargetColumn().getData()))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(controllerUuidStr)))
+                                Collections.singleton(new UUID(controllerUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating controller2 " + controller2.getTargetColumn().getData()));
@@ -249,7 +248,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Controller: Deleting " + testController1Uuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a controller column in the Bridge table
                         .addMutation(bridge.getControllerColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testController1Uuid)))
+                                Collections.singleton(testController1Uuid)))
                 .add(op.comment("Bridge: Mutating " + testController1Uuid))
                 .add(op.commit(true));
 
@@ -262,7 +261,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Controller: Deleting " + testController2Uuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a controller column in the Bridge table
                         .addMutation(bridge.getControllerColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testController2Uuid)))
+                                Collections.singleton(testController2Uuid)))
                 .add(op.comment("Bridge: Mutating " + testController2Uuid))
                 .add(op.commit(true));
 
@@ -411,7 +410,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("FlowTable: Deleting " + testFlowTableUuid))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getFlowTablesColumn().getSchema(), Mutator.DELETE,
-                                Maps.newHashMap(ImmutableMap.of(1L, testFlowTableUuid))))
+                                ImmutableMap.of(1L, testFlowTableUuid)))
                 .add(op.comment("Bridge: Mutating " + testFlowTableUuid))
                 .add(op.commit(true));
 
@@ -469,7 +468,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("IPFIX: Inserting " + ipfixUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getIpfixColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(ipfixUuidStr)))
+                                Collections.singleton(new UUID(ipfixUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + ipfixUuidStr));
@@ -499,7 +498,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("IPFIX: Deleting " + testIpfixUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a controller column in the Bridge table
                         .addMutation(bridge.getMirrorsColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testIpfixUuid)))
+                                Collections.singleton(testIpfixUuid)))
                 .add(op.comment("Bridge: Mutating " + testIpfixUuid))
                 .add(op.commit(true));
 
@@ -523,8 +522,8 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         UUID openVSwitchRowUuid = getOpenVSwitchTableUuid(getClient(), getTableCache());
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         Manager manager = getClient().createTypedRowWrapper(Manager.class);
-        manager.setInactivityProbe(Sets.newHashSet(8192L));
-        manager.setMaxBackoff(Sets.newHashSet(4094L));
+        manager.setInactivityProbe(Collections.singleton(8192L));
+        manager.setMaxBackoff(Collections.singleton(4094L));
         manager.setTarget("tcp:172.16.50.50:6640");
         manager.setExternalIds(externalIds);
 
@@ -538,7 +537,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Manager: Inserting Slave Manager " + TEST_MANAGER_UUID_STR))
                 .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getManagerOptionsColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(TEST_MANAGER_UUID_STR)))
+                                Collections.singleton(new UUID(TEST_MANAGER_UUID_STR)))
                         .where(openVSwitch.getUuidColumn().getSchema().opEqual(openVSwitchRowUuid))
                         .build())
                 .add(op.comment("Open_vSwitch: Mutating " + TEST_MANAGER_UUID_STR));
@@ -565,7 +564,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Manager: Deleting " + TEST_MANAGER_UUID_STR))
                 .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getManagerOptionsColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testManagerUuid)))
+                                Collections.singleton(testManagerUuid)))
                 .add(op.comment("Open_vSwitch: Mutating " + TEST_MANAGER_UUID_STR + " " + testManagerUuid))
                 .add(op.commit(true));
 
@@ -601,7 +600,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Mirror: Inserting " + mirrorUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getMirrorsColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(mirrorUuidStr)))
+                                Collections.singleton(new UUID(mirrorUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -629,7 +628,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Mirror: Deleting " + testMirrorUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a controller column in the Bridge table
                         .addMutation(bridge.getMirrorsColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testMirrorUuid)))
+                                Collections.singleton(testMirrorUuid)))
                 .add(op.comment("Bridge: Mutating " + testMirrorUuid))
                 .add(op.commit(true));
 
@@ -669,7 +668,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Mirror: Inserting " + netFlowUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getNetflowColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(netFlowUuidStr)))
+                                Collections.singleton(new UUID(netFlowUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -697,7 +696,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("NetFlow: Deleting " + testNetFlowUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a controller column in the Bridge table
                         .addMutation(bridge.getNetflowColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testNetFlowUuid)))
+                                Collections.singleton(testNetFlowUuid)))
                 .add(op.comment("Bridge: Mutating " + testNetFlowUuid))
                 .add(op.commit(true));
 
@@ -760,7 +759,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                         .build())
                 .add(op.comment("Interface: Updating " + intfUuidStr))
                 .add(op.mutate(bridge.getSchema())
-                        .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT, Sets.newHashSet(new UUID(portUuidStr)))
+                        .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT, Collections.singleton(new UUID(portUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -799,7 +798,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Interface: Deleting " + testInterfaceUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a port column in the Bridge table
                         .addMutation(bridge.getPortsColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testPortUuid)))
+                                Collections.singleton(testPortUuid)))
                 .add(op.comment("Bridge: Mutating " + testPortUuid))
                 .add(op.commit(true));
 
@@ -837,7 +836,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Autoattach: Inserting " + autoattachUuid))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getAutoAttachColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(autoattachUuid)))
+                                Collections.singleton(new UUID(autoattachUuid)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -866,7 +865,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("AutoAttach: Deleting " + testAutoattachUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete auto_attach column in the Bridge table
                         .addMutation(bridge.getAutoAttachColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testAutoattachUuid)))
+                                Collections.singleton(testAutoattachUuid)))
                 .add(op.comment("Bridge: Mutating " + testAutoattachUuid))
                 .add(op.commit(true));
         executeTransaction(transactionBuilder, "AutoAttach, Bridge auto_attach column: Delete operation results");
@@ -936,7 +935,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Interface: Updating " + intfUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(portUuidStr)))
+                                Collections.singleton(new UUID(portUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -989,11 +988,11 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Qos: Deleting " + testQosUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete a port column in the Bridge table
                         .addMutation(bridge.getPortsColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testPortUuid)))
+                                Collections.singleton(testPortUuid)))
                 .add(op.comment("Bridge: Mutating " + testPortUuid))
                 .add(op.mutate(port.getSchema()) // Delete a qos column in the Port table
                         .addMutation(port.getQosColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testQosUuid)))
+                                Collections.singleton(testQosUuid)))
                 .add(op.comment("Port: Mutating " + testPortUuid))
                 .add(op.commit(true));
 
@@ -1072,7 +1071,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("Queue: Deleting " + testQueueUuid))
                 .add(op.mutate(qos.getSchema()) // Delete a queue column in the Qos table
                         .addMutation(qos.getQueuesColumn().getSchema(), Mutator.DELETE,
-                                Maps.newHashMap(ImmutableMap.of(0L,testQueueUuid))))
+                                ImmutableMap.of(0L,testQueueUuid)))
                 .add(op.comment("Queue: Mutating " + testQueueUuid))
                 .add(op.commit(true));
 
@@ -1119,7 +1118,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("sFlow: Inserting " + sFlowUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getSflowColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(sFlowUuidStr)))
+                                Collections.singleton(new UUID(sFlowUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -1147,7 +1146,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("SFlow: Deleting " + testSFlowUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete an sflow column in the Bridge table
                         .addMutation(bridge.getSflowColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testSFlowUuid)))
+                                Collections.singleton(testSFlowUuid)))
                 .add(op.comment("Bridge: Mutating " + testSFlowUuid))
                 .add(op.commit(true));
 
@@ -1189,7 +1188,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("SSL: Inserting " + sslUuidStr))
                 .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getSslColumn().getSchema(), Mutator.INSERT,
-                                Sets.newHashSet(new UUID(sslUuidStr)))
+                                Collections.singleton(new UUID(sslUuidStr)))
                         .where(openVSwitch.getUuidColumn().getSchema().opEqual(openVSwitchRowUuid))
                         .build())
                 .add(op.comment("Open_vSwitch: Mutating " + sslUuidStr));
@@ -1218,7 +1217,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 .add(op.comment("SSL: Deleting " + testSslUuid))
                 .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getSslColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testSslUuid)))
+                                Collections.singleton(testSslUuid)))
                 .add(op.comment("Open_vSwitch: Mutating " + testSslUuid))
                 .add(op.commit(true));
 
@@ -1237,7 +1236,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertNotNull(bridge);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34L));
+        bridge.setFloodVlans(Collections.singleton(34L));
         assertNotNull(bridge.toString());
 
         Bridge nullRowBridge = getClient().getTypedRowWrapper(Bridge.class, null);
@@ -1250,7 +1249,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertNotNull(bridge);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34L));
+        bridge.setFloodVlans(Collections.singleton(34L));
 
         assertTrue("Equals check on same Bridge object", bridge.equals(bridge));
 
@@ -1281,7 +1280,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertNotNull(bridge);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34L));
+        bridge.setFloodVlans(Collections.singleton(34L));
 
         assertNotSame(bridge.hashCode(), 0);
         Bridge nullRowBridge = getClient().getTypedRowWrapper(Bridge.class, null);

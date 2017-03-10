@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.lib.impl;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -39,6 +38,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,7 +97,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static ExecutorService connectionNotifierService
             = Executors.newCachedThreadPool(connectionNotifierThreadFactory);
 
-    private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
+    private static Set<OvsdbConnectionListener> connectionListeners = new HashSet<>();
     private static Map<OvsdbClient, Channel> connections = new ConcurrentHashMap<>();
     private static OvsdbConnection connectionService;
     private static AtomicBoolean singletonCreated = new AtomicBoolean(false);

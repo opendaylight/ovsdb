@@ -12,8 +12,8 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -78,7 +78,7 @@ public class ProtocolUpdateCommand implements TransactCommand {
                         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                         bridge.setName(ovsdbBridge.getBridgeName().getValue());
                         try {
-                            bridge.setProtocols(Sets.newHashSet(protocolString));
+                            bridge.setProtocols(Collections.singleton(protocolString));
                             transaction.add(op.mutate(bridge).addMutation(bridge.getProtocolsColumn().getSchema(),
                                         Mutator.INSERT,bridge.getProtocolsColumn().getData())
                                 .where(bridge.getNameColumn().getSchema().opEqual(bridge.getNameColumn().getData()))

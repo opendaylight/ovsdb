@@ -15,6 +15,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -36,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
 @RunWith(PaxExam.class)
@@ -58,10 +58,10 @@ public class LibraryIT extends LibraryIntegrationTestBase {
         Bridge bridge = ovsdbClient.createTypedRowWrapper(Bridge.class);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34L));
+        bridge.setFloodVlans(Collections.singleton(34L));
 
         OpenVSwitch openVSwitch = ovsdbClient.createTypedRowWrapper(OpenVSwitch.class);
-        openVSwitch.setBridges(Sets.newHashSet(new UUID(TEST_BRIDGE_NAME)));
+        openVSwitch.setBridges(Collections.singleton(new UUID(TEST_BRIDGE_NAME)));
 
         int insertOperationIndex = 0;
 
@@ -124,7 +124,7 @@ public class LibraryIT extends LibraryIntegrationTestBase {
                         .build())
                 .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getBridgesColumn().getSchema(),
-                                Mutator.DELETE, Sets.newHashSet(testBridgeUuid)))
+                                Mutator.DELETE, Collections.singleton(testBridgeUuid)))
                 .add(op.commit(true))
                 .execute();
 

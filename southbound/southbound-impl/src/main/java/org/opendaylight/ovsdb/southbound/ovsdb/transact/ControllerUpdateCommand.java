@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -73,10 +73,10 @@ public class ControllerUpdateCommand implements TransactCommand {
                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Controller.class);
                     controller.setTarget(controllerEntry.getTarget().getValue());
                     if (controllerEntry.getMaxBackoff() != null) {
-                        controller.setMaxBackoff(Sets.newHashSet(controllerEntry.getMaxBackoff()));
+                        controller.setMaxBackoff(Collections.singleton(controllerEntry.getMaxBackoff()));
                     }
                     if (controllerEntry.getInactivityProbe() != null) {
-                        controller.setInactivityProbe(Sets.newHashSet(controllerEntry.getInactivityProbe()));
+                        controller.setInactivityProbe(Collections.singleton(controllerEntry.getInactivityProbe()));
                     }
                     String controllerNamedUuidString = SouthboundMapper.getRandomUuid();
                     UUID controllerNamedUuid = new UUID(controllerNamedUuidString);
@@ -84,7 +84,7 @@ public class ControllerUpdateCommand implements TransactCommand {
 
                     Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     bridge.setName(ovsdbBridge.getBridgeName().getValue());
-                    bridge.setController(Sets.newHashSet(controllerNamedUuid));
+                    bridge.setController(Collections.singleton(controllerNamedUuid));
                     LOG.trace("Added controller : {} for bridge : {}",
                             controller.getTargetColumn(), bridge.getName());
                     transaction.add(op.mutate(bridge)

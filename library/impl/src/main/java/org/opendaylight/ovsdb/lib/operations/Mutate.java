@@ -7,7 +7,7 @@
  */
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
@@ -18,8 +18,8 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 public class Mutate<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
     public static final String MUTATE = "mutate";
-    List<Condition> where = Lists.newArrayList();
-    private List<Mutation> mutations = Lists.newArrayList();
+    List<Condition> where = new ArrayList<>();
+    private List<Mutation> mutations = new ArrayList<>();
 
     public Mutate on(TableSchema schema) {
         this.setTableSchema(schema);

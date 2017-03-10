@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2013, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -16,8 +16,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 public class TransactBuilder implements Params {
 
-    List<Operation> requests = Lists.newArrayList();
-    DatabaseSchema dbSchema;
+    private List<Operation> requests = new ArrayList<>();
+    private DatabaseSchema dbSchema;
 
     public TransactBuilder(DatabaseSchema dbSchema) {
         this.dbSchema = dbSchema;
@@ -29,9 +29,10 @@ public class TransactBuilder implements Params {
 
     @Override
     public List<Object> params() {
-        List<Object> lists = Lists.newArrayList((Object)dbSchema.getName());
-        lists.addAll(requests);
-        return lists;
+        List<Object> list = new ArrayList<>(requests.size() + 1);
+        list.add(dbSchema.getName());
+        list.addAll(requests);
+        return list;
     }
 
     public void addOperations(List<Operation> operation) {

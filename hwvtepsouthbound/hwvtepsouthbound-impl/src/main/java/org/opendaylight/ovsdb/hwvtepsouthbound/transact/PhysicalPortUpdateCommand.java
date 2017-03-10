@@ -12,6 +12,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortUpdateCommand.class);
@@ -95,7 +95,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 //update physical switch table
                 PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
                 physicalSwitch.setName(physicalSwitchBelong.getHwvtepNodeName().getValue());
-                physicalSwitch.setPorts(Sets.newHashSet(new UUID(portUuid)));
+                physicalSwitch.setPorts(Collections.singleton(new UUID(portUuid)));
                 LOG.trace("execute: mutating physical switch: {}", physicalSwitch);
                 transaction.add(op.mutate(physicalSwitch)
                         .addMutation(physicalSwitch.getPortsColumn().getSchema(), Mutator.INSERT,

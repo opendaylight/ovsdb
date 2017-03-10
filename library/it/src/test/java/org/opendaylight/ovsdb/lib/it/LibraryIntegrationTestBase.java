@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015, 2016 Red Hat, Inc. and others. All rights reserved.
+ * Copyright © 2015, 2017 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,9 +21,9 @@ import static org.ops4j.pax.exam.CoreOptions.vmOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -248,7 +248,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
         assertNotNull(getDbSchema());
 
-        List<MonitorRequest> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = new ArrayList<>();
         Set<String> tables = getDbSchema().getTables();
         assertNotNull("ovsdb tables should not be null", tables);
 

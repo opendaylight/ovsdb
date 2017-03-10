@@ -8,21 +8,19 @@
 
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 
 public class TableUpdates extends Response {
 
-    Map<String, TableUpdate> map = Maps.newHashMap();
+    private final Map<String, TableUpdate> map = new HashMap<>();
 
-    public TableUpdates() {
-        this(Maps.newHashMap());
-    }
+    public TableUpdates() {}
 
     public TableUpdates(Map<String, TableUpdate> map) {
-        this.map = map;
+        this.map.putAll(map);
     }
 
     public <E extends TableSchema<E>> TableUpdate<E> getUpdate(TableSchema<E> table) {

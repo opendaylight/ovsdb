@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +52,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class HwvtepConnectionInstance {
@@ -126,7 +126,7 @@ public class HwvtepConnectionInstance {
     private void monitorAllTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
-            List<MonitorRequest> monitorRequests = Lists.newArrayList();
+            List<MonitorRequest> monitorRequests = new ArrayList<>();
             for (String tableName : tables) {
                 if (!HwvtepSouthboundConstants.SKIP_HWVTEP_TABLE.containsKey(tableName)) {
                     LOG.info("HwvtepSouthbound monitoring Hwvtep schema table {}", tableName);

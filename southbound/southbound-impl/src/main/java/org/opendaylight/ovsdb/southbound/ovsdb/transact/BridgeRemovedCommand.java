@@ -11,8 +11,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -68,7 +68,7 @@ public class BridgeRemovedCommand implements TransactCommand {
                 transaction.add(op.comment("Bridge: Deleting " + original.getBridgeName()));
                 transaction.add(op.mutate(ovs.getSchema())
                         .addMutation(ovs.getBridgesColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(bridgeUuid)));
+                                Collections.singleton(bridgeUuid)));
                 transaction.add(op.comment("Open_vSwitch: Mutating " + original.getBridgeName() + " " + bridgeUuid));
                 LOG.info("Bridge Deleted: {}", ovsdbManagedNodeIid);
             } else {

@@ -10,8 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.collect.Lists;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -171,16 +169,16 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
-            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }
 
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
-            return Lists.newArrayList(data.getLocatorRef().getValue());
+            return Collections.singletonList(data.getLocatorRef().getValue());
         }
     }
 }

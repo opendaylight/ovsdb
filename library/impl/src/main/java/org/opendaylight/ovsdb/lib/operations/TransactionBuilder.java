@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2014, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,8 +8,8 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -18,7 +18,7 @@ public class TransactionBuilder {
 
     private DatabaseSchema databaseSchema;
     OvsdbClient ovs;
-    List<Operation> operations = Lists.newArrayList();
+    List<Operation> operations = new ArrayList<>();
 
     public TransactionBuilder(OvsdbClient ovs, DatabaseSchema schema) {
         this.ovs = ovs;

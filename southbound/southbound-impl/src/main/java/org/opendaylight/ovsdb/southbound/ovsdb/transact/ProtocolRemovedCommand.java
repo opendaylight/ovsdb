@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -12,8 +12,8 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -67,7 +67,7 @@ public class ProtocolRemovedCommand implements TransactCommand {
                     Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     String protocolString = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocolEntry.getProtocol());
                     if (protocolString != null) {
-                        bridge.setProtocols(Sets.newHashSet(protocolString));
+                        bridge.setProtocols(Collections.singleton(protocolString));
                         try {
                             transaction.add(op.mutate(bridge).addMutation(bridge.getProtocolsColumn().getSchema(),
                                     Mutator.DELETE,bridge.getProtocolsColumn().getData()));

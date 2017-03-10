@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -62,7 +61,7 @@ public class HwvtepOperationalState {
 
     private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
     private ReadWriteTransaction transaction;
-    HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = Maps.newHashMap();
+    HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
     private HwvtepDeviceInfo deviceInfo;
     private HwvtepConnectionInstance connectionInstance;
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();

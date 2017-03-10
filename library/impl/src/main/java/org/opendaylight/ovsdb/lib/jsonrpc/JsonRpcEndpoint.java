@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.google.common.collect.Maps;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
@@ -24,6 +23,7 @@ import io.netty.channel.Channel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -76,8 +76,8 @@ public class JsonRpcEndpoint {
 
     ObjectMapper objectMapper;
     Channel nettyChannel;
-    Map<String, CallContext> methodContext = Maps.newHashMap();
-    Map<Object, OvsdbRPC.Callback> requestCallbacks = Maps.newHashMap();
+    Map<String, CallContext> methodContext = new HashMap<>();
+    Map<Object, OvsdbRPC.Callback> requestCallbacks = new HashMap<>();
 
     public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel) {
         this.objectMapper = objectMapper;

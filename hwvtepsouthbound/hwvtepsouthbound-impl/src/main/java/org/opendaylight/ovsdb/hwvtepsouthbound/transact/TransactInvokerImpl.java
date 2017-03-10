@@ -75,7 +75,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                 sb.append("insert [");
                 if (row != null) {
                     for (Object key : row.keySet()) {
-                        sb.append(key + " : "+row.get(key)+" , ");
+                        sb.append(key).append(" : ").append(row.get(key)).append(" , ");
                     }
                 }
                 sb.append("]   ");
@@ -89,7 +89,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                 Map row = update.getRow();
                 if (row != null) {
                     for (Object key : row.keySet()) {
-                        sb.append(key + " : "+row.get(key)+" , ");
+                        sb.append(key).append(" : ").append(row.get(key)).append(" , ");
                     }
                 }
                 sb.append("]");

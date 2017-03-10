@@ -954,11 +954,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final boolean isOldSchema = schemaVersion.compareTo(AUTOATTACH_FROM_VERSION) < 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        String testAutoattachId = new String("testAutoattachEntry");
-        String testSystemName = new String("testSystemName");
-        String testSystemDescription = new String("testSystemDescription");
-        String testAutoattachExternalKey = new String("testAutoattachExternalKey");
-        String testAutoattachExternalValue = new String("testAutoattachExternalValue");
+        String testAutoattachId = "testAutoattachEntry";
+        String testSystemName = "testSystemName";
+        String testSystemDescription = "testSystemDescription";
+        String testAutoattachExternalKey = "testAutoattachExternalKey";
+        String testAutoattachExternalValue = "testAutoattachExternalValue";
 
         try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
@@ -1938,7 +1938,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testCRUDTerminationPointQos() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        String testQosId = new String("testQosEntry");
+        String testQosId = "testQosEntry";
 
         // CREATE
         try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);

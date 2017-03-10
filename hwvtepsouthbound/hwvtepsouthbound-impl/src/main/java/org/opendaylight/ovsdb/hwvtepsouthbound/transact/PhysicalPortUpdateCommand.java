@@ -145,7 +145,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
 
     private void setDescription(PhysicalPort physicalPort, HwvtepPhysicalPortAugmentation inputPhysicalPort) {
         if (inputPhysicalPort.getHwvtepNodeDescription() != null) {
-            physicalPort.setDescription(inputPhysicalPort.getHwvtepNodeDescription().toString());
+            physicalPort.setDescription(inputPhysicalPort.getHwvtepNodeDescription());
         }
     }
 

@@ -370,7 +370,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             InstanceIdentifierCodec instanceIdentifierCodec) {
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
         port.setName(interfaceName);
-        port.setExternalIds(Collections.<String,String>emptyMap());
+        port.setExternalIds(Collections.emptyMap());
         Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction, iid, port.getSchema(),
                 port.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
         transaction.add(mutate

@@ -18,7 +18,7 @@ public class TableUpdates extends Response {
     Map<String, TableUpdate> map = Maps.newHashMap();
 
     public TableUpdates() {
-        this(Maps.<String, TableUpdate>newHashMap());
+        this(Maps.newHashMap());
     }
 
     public TableUpdates(Map<String, TableUpdate> map) {

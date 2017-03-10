@@ -23,7 +23,7 @@ public class OvsdbSet<T> extends ForwardingSet<T> {
     Set<T> target = null;
 
     public OvsdbSet() {
-        this(Sets.<T>newHashSet());
+        this(Sets.newHashSet());
     }
 
     public OvsdbSet(Set<T> backing) {

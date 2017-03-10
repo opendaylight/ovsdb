@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2013, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,7 +23,7 @@ public class OvsdbSet<T> extends ForwardingSet<T> {
     Set<T> target = null;
 
     public OvsdbSet() {
-        this(Sets.<T>newHashSet());
+        this(Sets.newHashSet());
     }
 
     public OvsdbSet(Set<T> backing) {

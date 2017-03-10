@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2015, 2017 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -370,7 +370,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             InstanceIdentifierCodec instanceIdentifierCodec) {
         Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
         port.setName(interfaceName);
-        port.setExternalIds(Collections.<String,String>emptyMap());
+        port.setExternalIds(Collections.emptyMap());
         Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction, iid, port.getSchema(),
                 port.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
         transaction.add(mutate

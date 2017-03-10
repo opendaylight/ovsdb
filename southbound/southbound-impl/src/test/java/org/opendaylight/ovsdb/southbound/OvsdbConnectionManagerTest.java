@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,7 +93,7 @@ public class OvsdbConnectionManagerTest {
         when(externalClient.getConnectionInfo().getRemotePort()).thenReturn(8080);
         when(externalClient.getConnectionInfo().getLocalAddress()).thenReturn(mock(InetAddress.class));
         when(externalClient.getConnectionInfo().getLocalPort()).thenReturn(8080);
-        List<String> databases = Arrays.asList("Open_vSwitch");
+        List<String> databases = Collections.singletonList("Open_vSwitch");
         when(externalClient.getDatabases().get(1000, TimeUnit.MILLISECONDS)).thenReturn(databases);
 
         PowerMockito.mockStatic(SouthboundUtil.class);

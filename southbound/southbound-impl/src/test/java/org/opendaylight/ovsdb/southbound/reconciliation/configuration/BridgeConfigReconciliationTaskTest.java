@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,12 +129,12 @@ public class BridgeConfigReconciliationTaskTest {
         Mockito.when(protocolEntry.getProtocol()).thenAnswer(
                 (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
         when(protocolEntry.getKey()).thenReturn(protocolEntryKey);
-        when(ovsdbBridgeAugmentation.getProtocolEntry()).thenReturn(Arrays.asList(protocolEntry));
+        when(ovsdbBridgeAugmentation.getProtocolEntry()).thenReturn(Collections.singletonList(protocolEntry));
 
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         ControllerEntryKey controllerEntryKey = mock(ControllerEntryKey.class);
         when(controllerEntry.getKey()).thenReturn(controllerEntryKey);
-        when(ovsdbBridgeAugmentation.getControllerEntry()).thenReturn(Arrays.asList(controllerEntry));
+        when(ovsdbBridgeAugmentation.getControllerEntry()).thenReturn(Collections.singletonList(controllerEntry));
 
         when(ovsdbBridgeAugmentation.getManagedBy()).thenReturn(ovsdbNodeRef);
 

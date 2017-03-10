@@ -91,7 +91,7 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
                 PhysicalSwitchAugmentation physicalSwitch = node.getAugmentation(PhysicalSwitchAugmentation.class);
                 if (physicalSwitch != null) {
                     HwvtepConnectionInstance connection =
-                            hcm.getConnectionInstance((HwvtepPhysicalSwitchAttributes)physicalSwitch);
+                            hcm.getConnectionInstance(physicalSwitch);
                     if (connection != null) {
                         LOG.trace("Reconcile config for node {}, IP : {}", node.getKey(),
                                 connection.getConnectionInfo().getRemoteAddress());

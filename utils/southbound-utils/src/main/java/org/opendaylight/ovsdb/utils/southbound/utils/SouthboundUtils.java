@@ -1055,7 +1055,7 @@ public class SouthboundUtils {
         List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<>();
         if (node == null) {
             LOG.error("extractTerminationPointAugmentations: Node value is null");
-            return Collections.<OvsdbTerminationPointAugmentation>emptyList();
+            return Collections.emptyList();
         }
         List<TerminationPoint> terminationPoints = node.getTerminationPoint();
         if(terminationPoints != null && !terminationPoints.isEmpty()){
@@ -1102,7 +1102,7 @@ public class SouthboundUtils {
     public List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentations(Node node) {
         if (node == null) {
             LOG.error("readTerminationPointAugmentations: Node value is null");
-            return Collections.<OvsdbTerminationPointAugmentation>emptyList();
+            return Collections.emptyList();
         }
         Node operNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier
                 .create(NetworkTopology.class)

@@ -23,7 +23,7 @@ public class OvsdbMap<K, V> extends ForwardingMap<K, V> {
     Map<K, V> target = Maps.newHashMap();
 
     public OvsdbMap() {
-        this(Maps.<K,V>newHashMap());
+        this(Maps.newHashMap());
     }
 
     public OvsdbMap(Map<K, V> value) {

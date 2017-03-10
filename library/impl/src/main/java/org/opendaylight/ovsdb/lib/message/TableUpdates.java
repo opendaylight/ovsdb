@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright © 2014, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,7 +18,7 @@ public class TableUpdates extends Response {
     Map<String, TableUpdate> map = Maps.newHashMap();
 
     public TableUpdates() {
-        this(Maps.<String, TableUpdate>newHashMap());
+        this(Maps.newHashMap());
     }
 
     public TableUpdates(Map<String, TableUpdate> map) {

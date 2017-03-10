@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Intel Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright © 2016, 2017 Intel Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -104,7 +104,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 qosEntryBuilder.setQosId(new Uri(getQosId(qos)));
                 qosEntryBuilder.setQosUuid(new Uuid(entry.getKey().toString()));
                 qosEntryBuilder.setQosType(
-                        SouthboundMapper.createQosType(qos.getTypeColumn().getData().toString()));
+                        SouthboundMapper.createQosType(qos.getTypeColumn().getData()));
                 Qos oldQos = oldQosRows.get(entry.getKey());
                 setOtherConfig(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
                 setExternalIds(transaction, qosEntryBuilder, oldQos, qos, nodeIId);

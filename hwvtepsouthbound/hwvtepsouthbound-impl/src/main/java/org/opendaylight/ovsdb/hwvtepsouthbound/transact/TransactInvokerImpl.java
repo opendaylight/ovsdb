@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright © 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -75,7 +75,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                 sb.append("insert [");
                 if (row != null) {
                     for (Object key : row.keySet()) {
-                        sb.append(key + " : "+row.get(key)+" , ");
+                        sb.append(key).append(" : ").append(row.get(key)).append(" , ");
                     }
                 }
                 sb.append("]   ");
@@ -89,7 +89,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                 Map row = update.getRow();
                 if (row != null) {
                     for (Object key : row.keySet()) {
-                        sb.append(key + " : "+row.get(key)+" , ");
+                        sb.append(key).append(" : ").append(row.get(key)).append(" , ");
                     }
                 }
                 sb.append("]");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Inocybe and others.  All rights reserved.
+ * Copyright © 2016, 2017 Inocybe and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,8 +99,8 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
         final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
         final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
-        final Node data1 = new NodeBuilder(data).setSupportingNode(Arrays.asList(supportingNodeBuilder1)).build();
-        final Node data2 = new NodeBuilder(data).setSupportingNode(Arrays.asList(supportingNodeBuilder2)).build();
+        final Node data1 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder1)).build();
+        final Node data2 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc);
         assertEquals(data1, readDS());
@@ -125,8 +126,8 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
         final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
         final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
-        final Node data1 = new NodeBuilder(data).setSupportingNode(Arrays.asList(supportingNodeBuilder1)).build();
-        final Node data2 = new NodeBuilder(data).setSupportingNode(Arrays.asList(supportingNodeBuilder2)).build();
+        final Node data1 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder1)).build();
+        final Node data2 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc, true);
         assertEquals(data1, readDS());

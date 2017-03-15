@@ -139,6 +139,10 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
                     List<LocatorSet> plsList = new ArrayList<>();
                     for (UUID pLocUUID : plSet.getLocatorsColumn().getData()) {
                         PhysicalLocator pLoc = updatedPLocRows.get(pLocUUID);
+                        if (pLoc == null) {
+                            pLoc = (PhysicalLocator) getOvsdbConnectionInstance().
+                                    getDeviceInfo().getDeviceOperData(TerminationPoint.class, pLocUUID);
+                        }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), pLoc);
                         plsList.add(new LocatorSetBuilder()

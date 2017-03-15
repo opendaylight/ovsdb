@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -87,11 +87,11 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.getDataAfter());
         switch(type) {
             case WRITE:
-                connectionInstance.getDeviceInfo().updateDeviceOpData(childClass, instanceIdentifier,
+                connectionInstance.getDeviceInfo().updateDeviceOperData(childClass, instanceIdentifier,
                         new UUID("uuid"), mod.getDataAfter());
                 break;
             case DELETE:
-                connectionInstance.getDeviceInfo().clearDeviceOpData(childClass, instanceIdentifier);
+                connectionInstance.getDeviceInfo().clearDeviceOperData(childClass, instanceIdentifier);
                 break;
             case SUBTREE_MODIFIED:
         }

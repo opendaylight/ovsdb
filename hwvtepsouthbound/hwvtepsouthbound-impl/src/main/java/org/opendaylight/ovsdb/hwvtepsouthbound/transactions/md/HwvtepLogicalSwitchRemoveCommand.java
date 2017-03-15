@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,7 +39,7 @@ public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
             // TODO Delete any references
             transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOpData(LogicalSwitches.class, switchIid);
+            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalSwitches.class, switchIid);
         }
     }
 

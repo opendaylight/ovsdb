@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -104,7 +104,7 @@ public class HwvtepDeviceInfo {
     }
 
     public LogicalSwitch getLogicalSwitch(UUID uuid) {
-        return (LogicalSwitch) getDeviceOpData(LogicalSwitches.class, uuid);
+        return (LogicalSwitch) getDeviceOperData(LogicalSwitches.class, uuid);
     }
 
     public Map<UUID, LogicalSwitch> getLogicalSwitches() {
@@ -135,7 +135,7 @@ public class HwvtepDeviceInfo {
     }
 
     public PhysicalLocator getPhysicalLocator(UUID uuid) {
-        return (PhysicalLocator) getDeviceOpData(TerminationPoint.class, uuid);
+        return (PhysicalLocator) getDeviceOperData(TerminationPoint.class, uuid);
     }
 
     public Map<UUID, PhysicalLocator> getPhysicalLocators() {
@@ -189,7 +189,7 @@ public class HwvtepDeviceInfo {
 
     public void markKeyAsInTransit(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         LOG.debug("Marking device data as intransit {}", key);
-        DeviceData deviceData = getDeviceOpData(cls, key);
+        DeviceData deviceData = getDeviceOperData(cls, key);
         UUID uuid = null;
         Object data = null;
         if (deviceData != null) {
@@ -200,14 +200,14 @@ public class HwvtepDeviceInfo {
                 new DeviceData(key, uuid, data, DeviceDataStatus.IN_TRANSIT));
     }
 
-    public void updateDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {
+    public void updateDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {
         LOG.debug("Updating device data {}", key);
         HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
                 new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE));
         HwvtepSouthboundUtil.updateData(uuidVsData, cls, uuid, data);
     }
 
-    public void clearDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public void clearDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         if (deviceData != null && deviceData.uuid != null) {
             HwvtepSouthboundUtil.clearData(uuidVsData, cls, deviceData.uuid);
@@ -215,11 +215,11 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
 
-    public Object getDeviceOpData(Class<? extends Identifiable> cls, UUID uuid) {
+    public Object getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
         return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
     }
 
-    public DeviceData getDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public DeviceData getDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
     }
 
@@ -239,7 +239,7 @@ public class HwvtepDeviceInfo {
         dependencyQueue.processReadyJobsFromConfigQueue(connectionInstance);
     }
 
-    public void onOpDataAvailable() {
+    public void onOperDataAvailable() {
         dependencyQueue.processReadyJobsFromOpQueue(connectionInstance);
     }
 
@@ -263,6 +263,6 @@ public class HwvtepDeviceInfo {
                 }
             }
         }
-        onOpDataAvailable();
+        onOperDataAvailable();
     }
 }

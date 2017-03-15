@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -77,7 +77,7 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
         unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
         assertEquals(1, unMetDependencies.size());
 
-        opState.getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
+        opState.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
         unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());
     }

@@ -35,6 +35,8 @@ public class HwvtepSouthboundConstants {
     public static final String HWVTEP_URI_PREFIX = "hwvtep";
     public static final String PSWITCH_URI_PREFIX = "physicalswitch";
     public static final String LOGICALSWITCH_UUID_PREFIX = "LogicalSwitch_";
+    public static final String LOGICALROUTER_UUID_PREFIX = "LogicalRouter_";
+    public static final String ACL_UUID_PREFIX = "Acl_";
     public static final ImmutableMap<String,String> SKIP_HWVTEP_TABLE
             = new ImmutableMap.Builder<String,String>()
             .put("Logical_Binding_Stats", "Update callback registration for Logical_Binding_Stats Table is skipped")

@@ -39,6 +39,8 @@ public class TransactCommandAggregator implements TransactCommand {
         commands.add(new UcastMacsLocalRemoveCommand(state,changes));
         commands.add(new TunnelUpdateCommand(state,changes));
         commands.add(new TunnelRemoveCommand(state,changes));
+        commands.add(new LogicalRouterUpdateCommand(state,changes));
+        commands.add(new LogicalRouterRemoveCommand(state,changes));
     }
 
     @Override

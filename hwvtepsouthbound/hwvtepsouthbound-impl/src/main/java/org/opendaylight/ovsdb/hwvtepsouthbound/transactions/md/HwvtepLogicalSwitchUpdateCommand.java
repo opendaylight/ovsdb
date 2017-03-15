@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -60,7 +60,7 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
             InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
-            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOpData(LogicalSwitches.class, switchIid,
+            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, switchIid,
                     lSwitch.getUuid(), lSwitch);
             // TODO: Delete entries that are no longer needed
         }

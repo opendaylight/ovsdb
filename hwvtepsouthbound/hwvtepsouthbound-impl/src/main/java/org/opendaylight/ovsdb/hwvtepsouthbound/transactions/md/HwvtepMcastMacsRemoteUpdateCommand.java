@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -75,7 +75,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
             Node connectionNode = buildConnectionNode(mMacRemote);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
             InstanceIdentifier<RemoteMcastMacs> macIid = getMacIid(connectionIId, connectionNode);
-            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOpData(RemoteMcastMacs.class,
+            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteMcastMacs.class,
                     macIid, mMacRemote.getUuid(), mMacRemote);
             // TODO: Delete entries that are no longer needed
         }

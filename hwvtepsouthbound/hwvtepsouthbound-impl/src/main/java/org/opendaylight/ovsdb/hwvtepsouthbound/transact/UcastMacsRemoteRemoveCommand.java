@@ -28,8 +28,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
 public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<RemoteUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteRemoveCommand.class);
 
@@ -57,7 +55,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
             InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
                     child(RemoteUcastMacs.class, mac.getKey());
             HwvtepDeviceInfo.DeviceData deviceData =
-                    getOperationalState().getDeviceInfo().getDeviceOpData(RemoteUcastMacs.class, macIid);
+                    getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     UcastMacsRemote.class, null);
             if (deviceData != null && deviceData.getUuid() != null) {

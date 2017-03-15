@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 import com.google.common.base.Optional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -40,9 +41,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepUcastMacsLocalUpdateCommand.class);
     private Map<UUID, UcastMacsLocal> updatedUMacsLocalRows;
     private Map<UUID, PhysicalLocator> updatedPLocRows;
 
@@ -54,12 +58,10 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for (UcastMacsLocal ucastMacsLocal : updatedUMacsLocalRows.values()) {
-            updateData(transaction, ucastMacsLocal);
-        }
+        updateData(transaction, updatedUMacsLocalRows.values());
     }
 
-    private void updateData(ReadWriteTransaction transaction, UcastMacsLocal ucml) {
+    private void updateData(ReadWriteTransaction transaction, Collection<UcastMacsLocal> ucml) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
@@ -70,12 +72,21 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private Node buildConnectionNode(UcastMacsLocal ucml) {
+    private Node buildConnectionNode(final Collection<UcastMacsLocal> ucml) {
         //Update node with UcastMacsLocal reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
         InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
+        List<LocalUcastMacs> umclList = new ArrayList<>();
+        ucml.forEach( (mac) -> umclList.add(buildLocalUcastMac(mac)));
+        hgAugmentationBuilder.setLocalUcastMacs(umclList);
+        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        return connectionNode.build();
+    }
+
+    private LocalUcastMacs buildLocalUcastMac(final UcastMacsLocal ucml) {
+        InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         LocalUcastMacsBuilder ucmlBuilder = new LocalUcastMacsBuilder();
         if (ucml.getIpAddr() != null && !ucml.getIpAddr().isEmpty()) {
             ucmlBuilder.setIpaddr(new IpAddress(ucml.getIpAddr().toCharArray()));
@@ -85,6 +96,10 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
         if (ucml.getLocatorColumn() != null && ucml.getLocatorColumn().getData() != null) {
             UUID plocUUID = ucml.getLocatorColumn().getData();
             PhysicalLocator physicalLocator = updatedPLocRows.get(plocUUID);
+            if (physicalLocator == null) {
+                physicalLocator = (PhysicalLocator) getOvsdbConnectionInstance().
+                        getDeviceInfo().getDeviceOperData(TerminationPoint.class, plocUUID);
+            }
             if (physicalLocator != null) {
                 InstanceIdentifier<TerminationPoint> plIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, physicalLocator);
@@ -100,11 +115,7 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
                 ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitchIid));
             }
         }
-        List<LocalUcastMacs> umclList = new ArrayList<>();
-        umclList.add(ucmlBuilder.build());
-        hgAugmentationBuilder.setLocalUcastMacs(umclList);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
-        return connectionNode.build();
+        return ucmlBuilder.build();
     }
 
 }

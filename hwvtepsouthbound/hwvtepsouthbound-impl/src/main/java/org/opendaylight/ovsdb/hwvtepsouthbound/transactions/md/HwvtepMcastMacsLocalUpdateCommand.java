@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -125,6 +125,10 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
                     List<LocatorSet> plsList = new ArrayList<>();
                     for (UUID pLocUUID : plSet.getLocatorsColumn().getData()) {
                         PhysicalLocator pLoc = updatedPLocRows.get(pLocUUID);
+                        if (pLoc == null) {
+                            pLoc = (PhysicalLocator) getOvsdbConnectionInstance().
+                                    getDeviceInfo().getDeviceOperData(TerminationPoint.class, pLocUUID);
+                        }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), pLoc);
                         plsList.add(new LocatorSetBuilder()

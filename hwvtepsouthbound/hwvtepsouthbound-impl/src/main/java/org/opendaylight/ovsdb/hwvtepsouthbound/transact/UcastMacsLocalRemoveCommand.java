@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -24,6 +25,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -54,6 +57,13 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
     private void removeUcastMacLocal(TransactionBuilder transaction,
             InstanceIdentifier<Node> instanceIdentifier, List<LocalUcastMacs> macList) {
         for (LocalUcastMacs mac: macList) {
+            Set<InstanceIdentifier> logicalSwitchesTobeDeleted = getOperationalState().getDeletedKeysInCurrentTx(
+                    LogicalSwitches.class);
+            if (logicalSwitchesTobeDeleted != null && logicalSwitchesTobeDeleted.contains(
+                    mac.getLogicalSwitchRef().getValue())) {
+                //avoiding additional delete call to the device
+                return;
+            }
             LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<LocalUcastMacs> operationalMacOptional =
                     getOperationalState().getLocalUcastMacs(instanceIdentifier, mac.getKey());

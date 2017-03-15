@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -22,6 +23,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -54,6 +56,15 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
             LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
                     child(RemoteUcastMacs.class, mac.getKey());
+            Set<InstanceIdentifier> logicalSwitchesTobeDeleted = getOperationalState().getDeletedKeysInCurrentTx(
+                    LogicalSwitches.class);
+            if (logicalSwitchesTobeDeleted != null && logicalSwitchesTobeDeleted.contains(
+                    mac.getLogicalSwitchRef().getValue())) {
+                getOperationalState().getDeviceInfo().clearConfigData(RemoteUcastMacs.class, macIid);
+                updateCurrentTxDeleteData(RemoteUcastMacs.class, macIid, mac);
+                //avoiding additional delete call to the device
+                return;
+            }
             HwvtepDeviceInfo.DeviceData deviceData =
                     getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),

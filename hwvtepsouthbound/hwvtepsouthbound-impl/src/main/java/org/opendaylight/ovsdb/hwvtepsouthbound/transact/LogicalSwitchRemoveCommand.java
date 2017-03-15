@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 China Telecom Beijing Research Institute and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 China Telecom Beijing Research Institute and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,6 +22,10 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
+import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
+import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
+import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
+import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -88,6 +92,29 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                 transaction.add(op.delete(logicalSwitch.getSchema())
                         .where(logicalSwitch.getUuidColumn().getSchema().opEqual(logicalSwitchUuid)).build());
                 transaction.add(op.comment("Logical Switch: Deleting " + lswitch.getHwvtepNodeName().getValue()));
+
+                UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                        UcastMacsRemote.class, null);
+                transaction.add(op.delete(ucastMacsRemote.getSchema())
+                        .where(ucastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+
+                UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                        UcastMacsLocal.class, null);
+                transaction.add(op.delete(ucastMacsLocal.getSchema())
+                        .where(ucastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+
+                McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                        McastMacsRemote.class, null);
+                transaction.add(op.delete(mcastMacsRemote.getSchema())
+                        .where(mcastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+
+                McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                        McastMacsLocal.class, null);
+                transaction.add(op.delete(mcastMacsLocal.getSchema())
+                        .where(mcastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+                InstanceIdentifier<LogicalSwitches> logicalSwitchIid = instanceIdentifier.
+                        augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(LogicalSwitches.class, logicalSwitchIid);
             } else {
                 LOG.warn("Unable to delete logical switch {} because it was not found in the operational store",
                         lswitch.getHwvtepNodeName().getValue());

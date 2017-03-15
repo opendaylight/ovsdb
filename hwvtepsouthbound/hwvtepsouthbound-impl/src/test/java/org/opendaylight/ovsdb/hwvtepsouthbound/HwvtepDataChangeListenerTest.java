@@ -132,7 +132,9 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         deleteData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        verify(Operations.op,  times(2)).delete(any());
+        //delete logicalswitch, local ucast, remote ucast, local mcast, remote mcast
+        //for both the logical switches
+        verify(Operations.op,  times(10)).delete(any());
     }
 
     @Test

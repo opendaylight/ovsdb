@@ -25,10 +25,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Acls;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.AclsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
@@ -302,6 +306,26 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
+    public Optional<LogicalRouters> getLogicalRouters(InstanceIdentifier<?> iid, LogicalRoutersKey logicalRoutersKey) {
+        Preconditions.checkNotNull(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        if (nodeOptional.isPresent()) {
+            HwvtepGlobalAugmentation hgAugmentation = nodeOptional.get();
+            List<LogicalRouters> lRoutersList = null;
+            if (hgAugmentation != null) {
+                lRoutersList = hgAugmentation.getLogicalRouters();
+            }
+            if (lRoutersList != null) {
+                for (LogicalRouters lrouter: lRoutersList) {
+                    if (lrouter.getKey().equals(logicalRoutersKey)) {
+                        return Optional.fromNullable(lrouter);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
     public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
         Optional<TerminationPoint> tp = HwvtepSouthboundUtil.readNode(transaction, iid);
         if (tp.isPresent()) {
@@ -318,6 +342,11 @@ public class HwvtepOperationalState {
     public Optional<Tunnels> getTunnels(InstanceIdentifier<Tunnels> iid) {
         Optional<Tunnels> tunnels = HwvtepSouthboundUtil.readNode(transaction, iid);
         return tunnels;
+    }
+
+    public Optional<Acls> getAcls(InstanceIdentifier<Acls> iid) {
+        Optional<Acls> acl = HwvtepSouthboundUtil.readNode(transaction, iid);
+        return acl;
     }
 
     public ReadWriteTransaction getReadWriteTransaction() {

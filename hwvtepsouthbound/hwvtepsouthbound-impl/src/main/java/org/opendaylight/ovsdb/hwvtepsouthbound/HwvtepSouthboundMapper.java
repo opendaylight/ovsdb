@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
@@ -23,6 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Acls;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.AclsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
@@ -178,6 +181,16 @@ public class HwvtepSouthboundMapper {
         iid = client.getInstanceIdentifier().builder()
             .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())))).build()
          */
+        return iid;
+    }
+
+    public static InstanceIdentifier<Acls> createInstanceIdentifier(HwvtepConnectionInstance client, ACL acl) {
+        InstanceIdentifier<Acls> iid = null;
+        iid = InstanceIdentifier.builder(NetworkTopology.class)
+                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                        .child(Node.class, client.getNodeKey()).augmentation(HwvtepGlobalAugmentation.class)
+                        .child(Acls.class, new AclsKey(acl.getAclName()))
+                        .build();
         return iid;
     }
 

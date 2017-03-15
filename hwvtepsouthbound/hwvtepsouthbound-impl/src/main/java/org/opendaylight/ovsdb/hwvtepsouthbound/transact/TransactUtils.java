@@ -35,7 +35,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Acls;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -211,8 +213,12 @@ public class TransactUtils {
     }
 
     static String sanitizeUUID(HwvtepNodeName hwvtepNodeName) {
+        return sanitizeUUID(hwvtepNodeName.getValue());
+    }
+
+    static String sanitizeUUID(String nodeName) {
         //ovs is not accepting '-' in the named uuids
-        return hwvtepNodeName.getValue().replaceAll("-", "_");
+        return nodeName.replaceAll("-", "_");
     }
 
     public static String getLogicalSwitchId(LogicalSwitches lswitch){
@@ -222,5 +228,14 @@ public class TransactUtils {
     public static UUID getLogicalSwitchUUID(InstanceIdentifier<LogicalSwitches> lswitchIid){
         return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX +
                 sanitizeUUID(lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
+    }
+
+    public static String getLogicalRouterId(final LogicalRouters lrouter){
+        return HwvtepSouthboundConstants.LOGICALROUTER_UUID_PREFIX + sanitizeUUID(lrouter.getHwvtepNodeName());
+    }
+
+    public static UUID getAclUUID(final InstanceIdentifier<Acls> aclIid){
+        return new UUID(HwvtepSouthboundConstants.ACL_UUID_PREFIX +
+                sanitizeUUID(aclIid.firstKeyOf(Acls.class).getAclName()));
     }
 }

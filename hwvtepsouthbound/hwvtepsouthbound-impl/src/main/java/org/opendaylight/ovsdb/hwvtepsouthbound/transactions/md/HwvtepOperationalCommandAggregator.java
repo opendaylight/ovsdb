@@ -46,6 +46,8 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         commands.add(new HwvtepMcastMacsRemoteUpdateCommand(key, updates, dbSchema));
         commands.add(new HwvtepMacEntriesRemoveCommand(key, updates, dbSchema));
         commands.add(new HwvtepLogicalSwitchRemoveCommand(key, updates, dbSchema));
+        commands.add(new HwvtepLogicalRouterUpdateCommand(key, updates, dbSchema));
+        commands.add(new HwvtepLogicalRouterRemoveCommand(key, updates, dbSchema));
     }
 
     @Override

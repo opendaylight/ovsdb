@@ -48,7 +48,7 @@ public interface LogicalRouter extends TypedBaseTable<GenericTableSchema> {
 
 
     @TypedColumn(name="static_routes", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    Column<GenericTableSchema, Map<String, String>> setStaticRoutesColumn();
+    Column<GenericTableSchema, Map<String, String>> getStaticRoutesColumn();
 
     @TypedColumn(name="static_routes", method=MethodType.SETDATA, fromVersion="1.0.0")
     void setStaticRoutes(Map<String, String> staticRoutes);

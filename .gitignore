@@ -22,7 +22,6 @@ log.html
 output.xml
 report.html
 *.swp
-.gitignore
 target-ide/
 .vagrant
 .DS_Store

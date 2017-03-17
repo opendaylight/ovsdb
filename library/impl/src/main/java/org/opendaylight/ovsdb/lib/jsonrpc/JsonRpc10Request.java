@@ -9,13 +9,14 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JsonRpc10Request {
 
     String id;
     String method;
-    List<Object> params = Lists.newArrayList();
+    List<Object> params = new ArrayList<>();
 
     public JsonRpc10Request(String id) {
         setId(id);

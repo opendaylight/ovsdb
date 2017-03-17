@@ -11,7 +11,7 @@ package org.opendaylight.ovsdb.lib.notation;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ForwardingSet;
-import com.google.common.collect.Sets;
+import java.util.HashSet;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.notation.json.Converter;
 import org.opendaylight.ovsdb.lib.notation.json.OvsdbSetSerializer;
@@ -20,11 +20,9 @@ import org.opendaylight.ovsdb.lib.notation.json.OvsdbSetSerializer;
 @JsonSerialize(using = OvsdbSetSerializer.class)
 public class OvsdbSet<T> extends ForwardingSet<T> {
 
-    Set<T> target = null;
+    Set<T> target = new HashSet<>();
 
-    public OvsdbSet() {
-        this(Sets.newHashSet());
-    }
+    public OvsdbSet() {}
 
     public OvsdbSet(Set<T> backing) {
         this.target = backing;

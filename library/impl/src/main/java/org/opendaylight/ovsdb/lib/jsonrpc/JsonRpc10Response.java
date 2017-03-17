@@ -8,14 +8,14 @@
 
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JsonRpc10Response {
 
     String id;
     String error;
-    List<Object> result = Lists.newArrayList();
+    List<Object> result = new ArrayList<>();
 
     public JsonRpc10Response(String id) {
         setId(id);

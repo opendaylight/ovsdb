@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -84,7 +83,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
         //If this key itself is in transit wait for the response of this key itself
         if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
-            inTransitDependencies.put(classType, Lists.newArrayList(key));
+            inTransitDependencies.put(classType, Collections.singletonList(key));
         }
 
         if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies) && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
@@ -150,20 +149,19 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         if (augmentation != null) {
             List<T> data = getData(augmentation);
             if (data != null) {
-                return Lists.newArrayList(data);
+                return new ArrayList<>(data);
             }
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     protected Map<InstanceIdentifier<Node>, List<T>> extractRemoved(
             Collection<DataTreeModification<Node>> changes, Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
-        List<T> removed = Collections.EMPTY_LIST;
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                removed = getRemoved(change);
+                List<T> removed = getRemoved(change);
                 removed.addAll(getCascadeDeleteData(change));
                 result.put(key, removed);
             }
@@ -225,9 +223,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         List<T> data1 = getData(include);
         List<T> data2 = diffOf(a, b, compareKeyOnly);
         if (HwvtepSouthboundUtil.isEmpty(data1) && HwvtepSouthboundUtil.isEmpty(data2)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-        List<T> result = Lists.newArrayList(data1);
+        List<T> result = new ArrayList<>(data1);
         result.addAll(data2);
         return result;
     }
@@ -239,10 +237,10 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         List<T> list2 = getData(b);
 
         if (HwvtepSouthboundUtil.isEmpty(list1)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         if (HwvtepSouthboundUtil.isEmpty(list2)) {
-            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.EMPTY_LIST : list1;
+            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.emptyList() : list1;
         }
 
         Iterator<T> it1 = list1.iterator();

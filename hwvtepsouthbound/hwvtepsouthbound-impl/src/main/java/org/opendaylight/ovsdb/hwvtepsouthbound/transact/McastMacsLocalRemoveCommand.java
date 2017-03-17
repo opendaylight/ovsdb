@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -93,12 +92,12 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalMc
 
     public static class MacDependencyGetter extends UnMetDependencyGetter<LocalMcastMacs> {
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(LocalMcastMacs data) {
-            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }
 
         @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(LocalMcastMacs data) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 }

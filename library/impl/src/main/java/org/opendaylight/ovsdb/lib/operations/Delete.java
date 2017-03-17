@@ -8,7 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
@@ -16,7 +16,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 public class Delete<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
     public static final String DELETE = "delete";
-    List<Condition> where = Lists.newArrayList();
+    List<Condition> where = new ArrayList<>();
     Integer count;
 
     public Delete(TableSchema<E> schema) {

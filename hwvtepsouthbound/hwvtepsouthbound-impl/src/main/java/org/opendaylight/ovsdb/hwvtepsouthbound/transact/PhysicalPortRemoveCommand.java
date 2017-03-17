@@ -12,6 +12,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 
 public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
@@ -75,7 +75,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 transaction.add(op.comment("Physical Port: Deleting " + port.getHwvtepNodeName().getValue()));
                 transaction.add(op.mutate(physicalSwitch.getSchema())
                         .addMutation(physicalSwitch.getPortsColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(physicalPortUuid)));
+                                Collections.singleton(physicalPortUuid)));
                 transaction.add(op.comment("Physical Switch: Mutating " + port.getHwvtepNodeName().getValue() + " " + physicalPortUuid));
             } else {
                 LOG.warn("Unable to delete logical switch {} because it was not found in the operational store, "

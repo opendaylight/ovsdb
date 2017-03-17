@@ -808,7 +808,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         entry.addAugmentation(
                 OvsdbTerminationPointAugmentation.class,
                 ovsdbTerminationPointAugmentationBuilder.build());
-        portNodeBuilder.setTerminationPoint(Lists.newArrayList(entry.build()));
+        portNodeBuilder.setTerminationPoint(Collections.singletonList(entry.build()));
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 portIid, portNodeBuilder.build());
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1512,7 +1512,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     tpUpdateBuilder.addAugmentation(
                             OvsdbTerminationPointAugmentation.class,
                             tpUpdateAugmentationBuilder.build());
-                    portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+                    portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
                     Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                             portIid, portUpdateNodeBuilder.build()));
                     Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1746,7 +1746,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     OvsdbTerminationPointAugmentation.class,
                     tpUpdateAugmentationBuilder.build());
             tpUpdateBuilder.setTpId(new TpId(portName));
-            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
             Assert.assertTrue(
                     mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1816,7 +1816,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         OvsdbTerminationPointAugmentation.class,
                         tpUpdateAugmentationBuilder.build());
                 tpUpdateBuilder.setTpId(new TpId(portName));
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+                portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
                 Assert.assertTrue(
                         mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1843,12 +1843,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         int max = 4095;
         return Lists.newArrayList(
                 Collections.<Integer>emptySet(),
-                Sets.newHashSet(2222),
+                Collections.singleton(2222),
                 Sets.newHashSet(min, max, min + 1, max - 1, (max - min) / 2));
     }
 
     private List<Trunks> buildTrunkList(Set<Integer> trunkSet) {
-        List<Trunks> trunkList = Lists.newArrayList();
+        List<Trunks> trunkList = new ArrayList<>();
         for (Integer trunk : trunkSet) {
             TrunksBuilder trunkBuilder = new TrunksBuilder();
             trunkBuilder.setTrunk(new VlanId(trunk));
@@ -1859,7 +1859,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRUDTerminationPointVlanTrunks() throws InterruptedException {
-        final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Sets.newHashSet(2011));
+        final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Collections.singleton(2011));
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Iterable<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
@@ -1910,7 +1910,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         OvsdbTerminationPointAugmentation.class,
                         tpUpdateAugmentationBuilder.build());
                 tpUpdateBuilder.setTpId(new TpId(portName));
-                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+                portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
                 Assert.assertTrue(
                         mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);

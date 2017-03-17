@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
@@ -56,7 +55,7 @@ public class SwitchConfigOperationalChangeGetter {
         } else {
             newNodeBuilder = new NodeBuilder();
         }
-        List<TerminationPoint> emptyList = Lists.newArrayList();
+        List<TerminationPoint> emptyList = new ArrayList<>();
         newNodeBuilder.setTerminationPoint(emptyList);
 
         return newNodeBuilder;
@@ -64,7 +63,7 @@ public class SwitchConfigOperationalChangeGetter {
 
 
     static List<TerminationPoint> getPorts(Node node) {
-        ArrayList<TerminationPoint> tpList = Lists.newArrayList();
+        ArrayList<TerminationPoint> tpList = new ArrayList<>();
         if (node == null || node.getTerminationPoint() == null) {
             return tpList;
         }

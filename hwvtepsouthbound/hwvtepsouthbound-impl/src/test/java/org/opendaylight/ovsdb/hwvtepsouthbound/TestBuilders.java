@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -45,7 +46,7 @@ public class TestBuilders {
     public static final String VXLAN_OVER_IPV4 = "vxlan_over_ipv4";
 
     public static List<LogicalSwitches> addLogicalSwitches(HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
-        List<LogicalSwitches> logicalSwitcheses = Lists.newArrayList();
+        List<LogicalSwitches> logicalSwitcheses = new ArrayList<>();
         for (String row[] : data) {
             logicalSwitcheses.add(TestBuilders.buildLogicalSwitch(row));
         }
@@ -55,7 +56,7 @@ public class TestBuilders {
 
     public static List<RemoteMcastMacs> addRemoteMcastMacs(InstanceIdentifier<Node> iid,
                                           HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
-        List<RemoteMcastMacs> remoteMcastMacses = Lists.newArrayList();
+        List<RemoteMcastMacs> remoteMcastMacses = new ArrayList<>();
         for (String row[] : data) {
             String teps[] = Arrays.copyOfRange(row, 2, row.length);
             remoteMcastMacses.add(TestBuilders.buildRemoteMcastMacs(iid, row[0], row[1], teps));
@@ -67,7 +68,7 @@ public class TestBuilders {
     public static List<RemoteUcastMacs> addRemoteUcastMacs(InstanceIdentifier<Node> iid,
                                                            HwvtepGlobalAugmentationBuilder augmentationBuilder,
                                                            String[]... data) {
-        List<RemoteUcastMacs> remoteUcastMacses = Lists.newArrayList();
+        List<RemoteUcastMacs> remoteUcastMacses = new ArrayList<>();
         for (String row[] : data) {
             remoteUcastMacses.add(TestBuilders.buildRemoteUcastMacs(iid, row[0], row[1], row[2], row[3]));
         }
@@ -77,7 +78,7 @@ public class TestBuilders {
 
     public static void addGlobalTerminationPoints(NodeBuilder nodeBuilder, InstanceIdentifier<Node> nodeIid,
                                                   String[]... data) {
-        List<TerminationPoint> terminationPoints = Lists.newArrayList();
+        List<TerminationPoint> terminationPoints = new ArrayList<>();
         for (String row[] : data) {
             terminationPoints.add(TestBuilders.buildTerminationPoint(nodeIid, row[0]));
         }
@@ -141,7 +142,7 @@ public class TestBuilders {
         }
         mMacLocalBuilder.setMacEntryUuid(getUUid(mac));
         mMacLocalBuilder.setLogicalSwitchRef(buildLogicalSwitchesRef(iid, logicalSwitchName));
-        List<LocatorSet> locatorSets = Lists.newArrayList();
+        List<LocatorSet> locatorSets = new ArrayList<>();
         for (String tepIp : tepIps) {
             locatorSets.add(new LocatorSetBuilder().setLocatorRef(
                     buildLocatorRef(iid, tepIp)).build());

@@ -20,6 +20,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,7 +98,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         assertNotNull(dbSchema);
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
-        List<MonitorRequest> monitorRequests = Lists.newArrayList();
+        List<MonitorRequest> monitorRequests = new ArrayList<>();
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
@@ -110,7 +112,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         monitorRequests.add(builder.with(new MonitorSelect(true, true, true, true))
                                    .build());
 
-        final List<Object> results = Lists.newArrayList();
+        final List<Object> results = new ArrayList<>();
 
         TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
@@ -243,7 +245,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
                         .where(name.opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.mutate(ovsTable)
-                        .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid)))
+                        .addMutation(bridges, Mutator.INSERT, Collections.singleton(new UUID(namedUuid)))
                         .where(_uuid.opEqual(parentTable))
                         .build())
                 .add(op.commit(true));
@@ -354,7 +356,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
                         .where(name.opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.mutate(ovsTable)
-                        .addMutation(bridges, Mutator.DELETE, Sets.newHashSet(testBridgeUuid))
+                        .addMutation(bridges, Mutator.DELETE, Collections.singleton(testBridgeUuid))
                         .where(_uuid.opEqual(parentTable))
                         .build())
                 .add(op.commit(true))

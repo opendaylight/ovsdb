@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -78,7 +78,7 @@ public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
         String transactionUuidStr = "foobar";
 
         Global glbl = this.getClient().createTypedRowWrapper(Global.class);
-        glbl.setManagers(Sets.newHashSet(new UUID(transactionUuidStr)));
+        glbl.setManagers(Collections.singleton(new UUID(transactionUuidStr)));
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
                 .add(op.insert(manager.getSchema())
@@ -118,7 +118,7 @@ public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
                 .add(op.comment("Manager: Deleting " + testManagerUuid))
                 .add(op.mutate(global.getSchema())
                         .addMutation(global.getManagersColumn().getSchema(), Mutator.DELETE,
-                                Sets.newHashSet(testManagerUuid)))
+                                Collections.singleton(testManagerUuid)))
                 .add(op.comment("Global: Mutating " + testManagerUuid))
                 .add(op.commit(true));
 

@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_84b8ab2b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-03-20T19:17:33Z",
+      "side": 1,
+      "message": "please modify it to 2015, 2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_047cbb71",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-03-20T19:17:33Z",
+      "side": 1,
+      "message": "i think it\u0027s good to dump the whole command here, so we can get all the information to find out what\u0027s causing the NPE.",
+      "range": {
+        "startLine": 50,
+        "startChar": 50,
+        "endLine": 50,
+        "endChar": 84
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e4809748",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-03-20T19:17:33Z",
+      "side": 1,
+      "message": "please remove {}, not required.",
+      "range": {
+        "startLine": 53,
+        "startChar": 87,
+        "endLine": 53,
+        "endChar": 89
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_c4e8f318",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-03-20T19:17:33Z",
+      "side": 1,
+      "message": "change it to 2015, 2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_848f0b75",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-03-20T19:17:33Z",
+      "side": 1,
+      "message": "please use the format you used in TransactCommandAggregator.java\nAlso please rephrase it to \"Execution of command {} failed with the following exception. Continuing the execution of remaining commands\"",
+      "range": {
+        "startLine": 57,
+        "startChar": 16,
+        "endLine": 57,
+        "endChar": 106
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

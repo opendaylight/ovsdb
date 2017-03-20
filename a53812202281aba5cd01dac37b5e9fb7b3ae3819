@@ -1,0 +1,143 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_c55c51f0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-07T08:02:14Z",
+      "side": 1,
+      "message": "please use \"oper\" or \"operational\" for better readability.",
+      "range": {
+        "startLine": 191,
+        "startChar": 41,
+        "endLine": 191,
+        "endChar": 43
+      },
+      "revId": "a53812202281aba5cd01dac37b5e9fb7b3ae3819",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_656da598",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-07T08:02:14Z",
+      "side": 1,
+      "message": "change it to 2015-2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "a53812202281aba5cd01dac37b5e9fb7b3ae3819",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e527d562",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-07T08:02:14Z",
+      "side": 1,
+      "message": "does it require ? don\u0027t see any use in the modified code.",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 75,
+        "endChar": 26
+      },
+      "revId": "a53812202281aba5cd01dac37b5e9fb7b3ae3819",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_2e405c06",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-21T23:59:32Z",
+      "side": 1,
+      "message": "okay cool, please mark it final as it\u0027s been set through constructor.",
+      "parentUuid": "fafc7978_60fd933a",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 75,
+        "endChar": 26
+      },
+      "revId": "a53812202281aba5cd01dac37b5e9fb7b3ae3819",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_25739d81",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-07T08:02:14Z",
+      "side": 1,
+      "message": "make these variable final as you are initializing it in constructor.",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 76,
+        "endChar": 59
+      },
+      "revId": "a53812202281aba5cd01dac37b5e9fb7b3ae3819",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_85d7e922",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-07T08:02:14Z",
+      "side": 1,
+      "message": "mark these final.",
+      "range": {
+        "startLine": 102,
+        "startChar": 36,
+        "endLine": 103,
+        "endChar": 102
+      },
+      "revId": "a53812202281aba5cd01dac37b5e9fb7b3ae3819",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

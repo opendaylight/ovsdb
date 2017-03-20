@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_4ac0c94f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 6056
+      },
+      "writtenOn": "2017-03-09T14:46:11Z",
+      "side": 1,
+      "message": "I think that changes\u003d\u003dnull can raise an exception.",
+      "range": {
+        "startLine": 106,
+        "startChar": 16,
+        "endLine": 106,
+        "endChar": 84
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_8a111106",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 6056
+      },
+      "writtenOn": "2017-03-09T14:46:11Z",
+      "side": 1,
+      "message": "What if db\u003d\u003dnull?",
+      "range": {
+        "startLine": 108,
+        "startChar": 12,
+        "endLine": 108,
+        "endChar": 55
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_2a758531",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteRemoveCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 6056
+      },
+      "writtenOn": "2017-03-09T14:46:11Z",
+      "side": 1,
+      "message": "can you please explain the reason for this change?",
+      "range": {
+        "startLine": 53,
+        "startChar": 8,
+        "endLine": 68,
+        "endChar": 107
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class TransactCommandAggregator implements TransactCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
 
     private List<TransactCommand> commands = new ArrayList<TransactCommand>();
@@ -69,7 +68,13 @@ public class TransactCommandAggregator implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction) {
         for (TransactCommand command:commands) {
-            command.execute(transaction);
+            try {
+                LOG.trace("Executing command {}", command);
+                command.execute(transaction);
+            } catch (NullPointerException e) {
+                LOG.error("Execution of command {} failed with the following exception."
+                        + " Continuing the execution of remaining commands", command, e);
+            }
         }
     }
 

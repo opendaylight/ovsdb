@@ -15,9 +15,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HwvtepOperationalCommandAggregator implements TransactionCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalCommandAggregator.class);
     private List<TransactionCommand> commands = new ArrayList<>();
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -47,7 +50,14 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (TransactionCommand command: commands) {
-            command.execute(transaction);
+            try {
+                LOG.trace("Executing command {}", command);
+                command.execute(transaction);
+            } catch (NullPointerException e) {
+                LOG.error("Execution of command {} failed with the following exception."
+                        + " Continuing the execution of remaining commands", command, e);
+            }
+
         }
         connectionInstance.getDeviceInfo().onOperDataAvailable();
     }

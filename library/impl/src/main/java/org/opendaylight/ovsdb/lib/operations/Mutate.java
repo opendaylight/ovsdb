@@ -63,4 +63,9 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
+
+    @Override
+    public String toString() {
+        return "Mutate [where=" + where + ", mutations=" + mutations + ", " + super.toString() + "]";
+    }
 }

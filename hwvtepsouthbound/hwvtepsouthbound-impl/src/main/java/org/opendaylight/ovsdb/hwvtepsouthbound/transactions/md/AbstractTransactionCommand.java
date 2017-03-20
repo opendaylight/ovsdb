@@ -42,4 +42,9 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         this.key = key;
     }
 
+    @Override
+    public String toString() {
+        return getClass() + " [To device=" + key.getConnectionInfo().getRemoteAddress() + ":"
+                + key.getConnectionInfo().getRemotePort() + "]";
+    }
 }

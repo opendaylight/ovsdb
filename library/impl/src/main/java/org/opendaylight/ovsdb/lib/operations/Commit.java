@@ -22,4 +22,9 @@ public class Commit extends Operation {
     public Boolean isDurable() {
         return durable;
     }
+
+    @Override
+    public String toString() {
+        return "Commit [durable=" + durable + ", " + super.toString() + "]";
+    }
 }

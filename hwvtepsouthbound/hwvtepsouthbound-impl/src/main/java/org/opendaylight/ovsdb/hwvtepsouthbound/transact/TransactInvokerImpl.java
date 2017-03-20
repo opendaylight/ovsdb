@@ -49,7 +49,8 @@ public class TransactInvokerImpl implements TransactInvoker {
                 if (got != null && got.size() > 0) {
                     for (OperationResult opResult : got) {
                         if (!Strings.isNullOrEmpty(opResult.getError())) {
-                            LOG.error("HWVTEP transaction operation failed {} {}",
+                            LOG.error("HWVTEP transaction operation to device {} failed {} {}",
+                                    connectionInstance.getConnectionInfo().getRemoteAddress(),
                                     opResult.getError(), opResult.getDetails());
                             errorOccured = true;
                         }

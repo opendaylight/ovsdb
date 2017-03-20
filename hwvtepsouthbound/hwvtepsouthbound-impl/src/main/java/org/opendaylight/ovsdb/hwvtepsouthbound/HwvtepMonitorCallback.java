@@ -28,14 +28,18 @@ public class HwvtepMonitorCallback implements MonitorCallBack {
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
-        LOG.trace("result: {} dbSchema: {}",result,dbSchema.getName());
+        LOG.trace("From device: {}:{}, result: {} dbSchema: {}",
+                key.getConnectionInfo().getRemoteAddress(), key.getConnectionInfo().getRemotePort(),
+                result, dbSchema.getName());
         txInvoker.invoke(new HwvtepOperationalCommandAggregator(key, result, dbSchema));
-        LOG.trace("update exit");
+        LOG.trace("update exit for device {}:{}",
+                key.getConnectionInfo().getRemoteAddress(), key.getConnectionInfo().getRemotePort());
     }
 
     @Override
     public void exception(Throwable exception) {
-        LOG.warn("exception {}", exception);
+        LOG.warn("Device {}:{} raised exception: {} ",
+                key.getConnectionInfo().getRemoteAddress(), key.getConnectionInfo().getRemotePort(), exception);
     }
 
 }

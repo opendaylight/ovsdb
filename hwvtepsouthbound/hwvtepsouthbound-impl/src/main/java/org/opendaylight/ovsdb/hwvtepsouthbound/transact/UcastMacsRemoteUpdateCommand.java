@@ -58,6 +58,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<RemoteUcastMacs>> updated:
                 updateds.entrySet()) {
+                LOG.debug("Updated Key={}, Updated Value={}", updated.getKey(), updated.getValue());
                 updateUcastMacsRemote(transaction,  updated.getKey(), updated.getValue());
             }
         }

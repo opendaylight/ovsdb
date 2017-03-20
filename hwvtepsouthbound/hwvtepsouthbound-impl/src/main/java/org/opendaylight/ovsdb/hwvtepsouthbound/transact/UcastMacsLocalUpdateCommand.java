@@ -48,6 +48,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<LocalUcastMacs>> updated:
                 updateds.entrySet()) {
+                LOG.debug("Updated Key={}, Updated Value={}", updated.getKey(), updated.getValue());
                 updateUcastMacsLocal(transaction,  updated.getKey(), updated.getValue());
             }
         }

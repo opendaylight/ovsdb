@@ -59,4 +59,9 @@ public class Select<E extends TableSchema<E>> extends Operation<E> implements Co
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
+
+    @Override
+    public String toString() {
+        return "Select [where=" + where + ", columns=" + columns + ", " + super.toString() + "]";
+    }
 }

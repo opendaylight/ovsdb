@@ -105,4 +105,10 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
+
+    @Override
+    public String toString() {
+        return "Update [row=" + row + ", uuid=" + uuid + ", where=" + where + ", uuidName=" + uuidName + ", "
+                + super.toString() + "]";
+    }
 }

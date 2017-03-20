@@ -47,6 +47,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> updated:
                 updateds.entrySet()) {
+                LOG.debug("Updated Key={}, Updated Value={}", updated.getKey(), updated.getValue());
                 updateLogicalSwitch(transaction,  updated.getKey(), updated.getValue());
             }
         }

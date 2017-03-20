@@ -45,4 +45,10 @@ public class TransactionBuilder {
     public DatabaseSchema getDatabaseSchema() {
         return databaseSchema;
     }
+
+    @Override
+    public String toString() {
+        return "Transaction to " + ovs.getConnectionInfo().getRemoteAddress() + ". operations=" + operations
+                + "]";
+    }
 }

@@ -8,18 +8,20 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TransactCommandAggregator implements TransactCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
     private List<TransactCommand> commands = new ArrayList<TransactCommand>();
 
     public TransactCommandAggregator(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
@@ -44,7 +46,13 @@ public class TransactCommandAggregator implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction) {
         for (TransactCommand command:commands) {
-            command.execute(transaction);
+            try {
+                LOG.trace("Executing command {}", command.getClass().getSimpleName());
+                command.execute(transaction);
+            } catch (NullPointerException e) {
+                LOG.error("Failed executing command: {}, with the following exception: {}",
+                        command.getClass().getSimpleName(), e);
+            }
         }
     }
 

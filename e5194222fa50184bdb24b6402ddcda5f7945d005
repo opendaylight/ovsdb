@@ -1,0 +1,28 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_159fcf51",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-03-20T08:57:02Z",
+      "side": 1,
+      "message": "Copy-Paste error, Thanks.",
+      "parentUuid": "fafc7978_83d708ed",
+      "range": {
+        "startLine": 75,
+        "startChar": 18,
+        "endLine": 75,
+        "endChar": 19
+      },
+      "revId": "e5194222fa50184bdb24b6402ddcda5f7945d005",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

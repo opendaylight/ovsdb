@@ -57,7 +57,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         for (LogicalSwitches lswitch: lswitchList) {
             InstanceIdentifier<LogicalSwitches> lsKey = instanceIdentifier.
                     augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
-            LOG.debug("Creating logcial switch named: {}", lswitch.getHwvtepNodeName());
+            LOG.debug("Creating logical switch named: {}", lswitch.getHwvtepNodeName());
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(instanceIdentifier, lswitch.getKey());
             LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);

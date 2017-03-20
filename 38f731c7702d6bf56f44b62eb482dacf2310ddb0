@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_ee281488",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-21T20:46:52Z",
+      "side": 1,
+      "message": "please change it to 2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 23,
+        "endLine": 2,
+        "endChar": 27
+      },
+      "revId": "38f731c7702d6bf56f44b62eb482dacf2310ddb0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ce2d5097",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-21T20:46:52Z",
+      "side": 1,
+      "message": "please change it to 2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 24,
+        "endLine": 2,
+        "endChar": 28
+      },
+      "revId": "38f731c7702d6bf56f44b62eb482dacf2310ddb0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_4e3960d6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-21T20:46:52Z",
+      "side": 1,
+      "message": "In general it\u0027s good practice to clean-up before you write anything new, to avoid any situation where it can result in deleting the newly created tunnel-ip.So i would like to suggest to delete tunnel-ip before writing the new tunnel-ips. If it\u0027s done intentionally to take care of any corner case, please ignore the comment.",
+      "range": {
+        "startLine": 136,
+        "startChar": 2,
+        "endLine": 139,
+        "endChar": 9
+      },
+      "revId": "38f731c7702d6bf56f44b62eb482dacf2310ddb0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ae328cef",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-21T20:46:52Z",
+      "side": 1,
+      "message": "please remove the commented code.",
+      "range": {
+        "startLine": 151,
+        "startChar": 8,
+        "endLine": 151,
+        "endChar": 55
+      },
+      "revId": "38f731c7702d6bf56f44b62eb482dacf2310ddb0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

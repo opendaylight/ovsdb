@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_49dc1e75",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 2500,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-03-20T16:52:48Z",
+      "side": 1,
+      "message": "Looks like you\u0027re using the same queue number for both queues - they should be different.",
+      "revId": "292b51a6576dbcf5c466c08c0c2417cb21c01113",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_29d9da83",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 2517,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-03-20T16:52:48Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "292b51a6576dbcf5c466c08c0c2417cb21c01113",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

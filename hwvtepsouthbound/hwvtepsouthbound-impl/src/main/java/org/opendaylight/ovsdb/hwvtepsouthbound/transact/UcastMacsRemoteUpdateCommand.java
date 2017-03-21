@@ -135,7 +135,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             //try to find locator in operational DS
             HwvtepDeviceInfo.DeviceData deviceData = getOperationalState().getDeviceInfo().getDeviceOperData(TerminationPoint.class, iid);
             if (deviceData != null) {
-                //if exist, get uuid
+                //if exist, get uuid , this uuid may be deleted from the device by the time this transaction is made to device
                 locatorUuid = deviceData.getUuid();
             } else {
                 locatorUuid = getOperationalState().getUUIDFromCurrentTx(TerminationPoint.class, iid);

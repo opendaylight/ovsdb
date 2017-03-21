@@ -83,6 +83,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                 //TODO: locator in config DS is not deleted
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
                 mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
+		//could potentially delete the locators it is referring to
                 transaction.add(op.delete(mcastMacsRemote.getSchema()).
                         where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));

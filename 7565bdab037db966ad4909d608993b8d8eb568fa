@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_baa06aa6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-21T09:20:03Z",
+      "side": 1,
+      "message": "nitpick: copy paste?",
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7a9e0265",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-21T09:20:03Z",
+      "side": 1,
+      "message": "we\u0027ll probably have to revisit this later, the order here is crucial.",
+      "range": {
+        "startLine": 42,
+        "startChar": 8,
+        "endLine": 43,
+        "endChar": 68
+      },
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3a7bda2a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterRemoveCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-21T09:20:03Z",
+      "side": 1,
+      "message": "I\u0027d like to see some logs in here, a simple debug with routerKey would be enough.",
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_1a78962a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-21T09:20:03Z",
+      "side": 1,
+      "message": "Logs please :)",
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ba8eaa25",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-21T09:20:03Z",
+      "side": 1,
+      "message": "will need to revisit this later.",
+      "range": {
+        "startLine": 45,
+        "startChar": 8,
+        "endLine": 46,
+        "endChar": 83
+      },
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

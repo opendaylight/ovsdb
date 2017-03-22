@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_d1c38c36",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-03-22T10:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_84b8ab2b",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_047cbb71",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_11dd1415",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-03-22T10:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_047cbb71",
+      "range": {
+        "startLine": 50,
+        "startChar": 50,
+        "endLine": 50,
+        "endChar": 84
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_e4809748",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2017-03-20T19:17:33Z",
       "side": 1,
       "message": "please remove {}, not required.",
+      "range": {
+        "startLine": 53,
+        "startChar": 87,
+        "endLine": 53,
+        "endChar": 89
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_f1e170d1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-03-22T10:09:39Z",
+      "side": 1,
+      "message": "Done.\nRephrased it as in requested in another comment",
+      "parentUuid": "fafc7978_e4809748",
       "range": {
         "startLine": 53,
         "startChar": 87,
@@ -105,6 +177,30 @@
       "writtenOn": "2017-03-20T19:17:33Z",
       "side": 1,
       "message": "please use the format you used in TransactCommandAggregator.java\nAlso please rephrase it to \"Execution of command {} failed with the following exception. Continuing the execution of remaining commands\"",
+      "range": {
+        "startLine": 57,
+        "startChar": 16,
+        "endLine": 57,
+        "endChar": 106
+      },
+      "revId": "e2a78abf3a3ac253a674744443c702e3bc48b1d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_f11690a6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-03-22T10:09:39Z",
+      "side": 1,
+      "message": "Rephrased",
+      "parentUuid": "fafc7978_848f0b75",
       "range": {
         "startLine": 57,
         "startChar": 16,

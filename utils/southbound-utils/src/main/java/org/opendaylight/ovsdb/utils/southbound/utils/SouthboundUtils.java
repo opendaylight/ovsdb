@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015, 2017 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2017 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -651,6 +651,21 @@ public class SouthboundUtils {
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
                              final Class<? extends DatapathTypeBase> dpType, String mac,
                              Long maxBackoff, Long inactivityProbe) {
+        List<BridgeOtherConfigs> otherConfigs = new ArrayList<>();
+        if (mac != null) {
+            BridgeOtherConfigsBuilder macOtherConfigBuilder = new BridgeOtherConfigsBuilder();
+            macOtherConfigBuilder.setBridgeOtherConfigKey("hwaddr");
+            macOtherConfigBuilder.setBridgeOtherConfigValue(mac);
+            otherConfigs.add(macOtherConfigBuilder.build());
+        }
+
+        return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, otherConfigs, null, null);
+    }
+
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             List<BridgeOtherConfigs> otherConfigs,
+                             Long maxBackoff, Long inactivityProbe) {
         boolean result;
 
         LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
@@ -666,18 +681,17 @@ public class SouthboundUtils {
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode( OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
+            // TODO: Currently netvirt relies on this function to set disabled-in-band=true. However,
+            // TODO (cont): a better design would be to have netvirt pass that in. That way this function
+            // TODO (cont): can take a null otherConfigs to erase other_configs.
+            if (otherConfigs == null) {
+                otherConfigs = new ArrayList<>();
+            }
             BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
             bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(DISABLE_IN_BAND);
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
-            List<BridgeOtherConfigs> bridgeOtherConfigsList = new ArrayList<>();
-            bridgeOtherConfigsList.add(bridgeOtherConfigsBuilder.build());
-            if (mac != null) {
-                BridgeOtherConfigsBuilder macOtherConfigBuilder = new BridgeOtherConfigsBuilder();
-                macOtherConfigBuilder.setBridgeOtherConfigKey("hwaddr");
-                macOtherConfigBuilder.setBridgeOtherConfigValue(mac);
-                bridgeOtherConfigsList.add(macOtherConfigBuilder.build());
-            }
-            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(bridgeOtherConfigsList);
+            otherConfigs.add(bridgeOtherConfigsBuilder.build());
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
             if (dpType != null) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);

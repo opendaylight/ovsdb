@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2016 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 - 2017 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,7 +21,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
@@ -645,12 +644,27 @@ public class SouthboundUtils {
     }
 
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-            final Class<? extends DatapathTypeBase> dpType, String mac) {
-        return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, mac, null, null);
+            final Class<? extends DatapathTypeBase> dpType, final List<BridgeOtherConfigs> otherConfigs) {
+        return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, otherConfigs, null, null);
     }
 
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-                             final Class<? extends DatapathTypeBase> dpType, String mac,
+            final Class<? extends DatapathTypeBase> dpType, String mac) {
+
+        List<BridgeOtherConfigs> otherConfigs = new ArrayList<>();
+        if (mac != null) {
+            BridgeOtherConfigsBuilder macOtherConfigBuilder = new BridgeOtherConfigsBuilder();
+            macOtherConfigBuilder.setBridgeOtherConfigKey("hwaddr");
+            macOtherConfigBuilder.setBridgeOtherConfigValue(mac);
+            otherConfigs.add(macOtherConfigBuilder.build());
+        }
+
+        return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, otherConfigs, null, null);
+    }
+
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
+                             final Class<? extends DatapathTypeBase> dpType,
+                             List<BridgeOtherConfigs> otherConfigs,
                              Long maxBackoff, Long inactivityProbe) {
         boolean result;
 
@@ -667,18 +681,14 @@ public class SouthboundUtils {
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode( OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
+            if (otherConfigs == null) {
+                otherConfigs = new ArrayList<>();
+            }
             BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
             bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(DISABLE_IN_BAND);
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
-            List<BridgeOtherConfigs> bridgeOtherConfigsList = new ArrayList<>();
-            bridgeOtherConfigsList.add(bridgeOtherConfigsBuilder.build());
-            if (mac != null) {
-                BridgeOtherConfigsBuilder macOtherConfigBuilder = new BridgeOtherConfigsBuilder();
-                macOtherConfigBuilder.setBridgeOtherConfigKey("hwaddr");
-                macOtherConfigBuilder.setBridgeOtherConfigValue(mac);
-                bridgeOtherConfigsList.add(macOtherConfigBuilder.build());
-            }
-            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(bridgeOtherConfigsList);
+            otherConfigs.add(bridgeOtherConfigsBuilder.build());
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
             if (dpType != null) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);

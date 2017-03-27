@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_01dbe61b",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-27T16:24:26Z",
+      "side": 1,
+      "message": "Ideally I\u0027d prefer to use an updateBridge() method as this is technicaly a case of adding parameters to existing bridge.",
+      "revId": "8a95ecccd82115201afa5c10db6631be30836afe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_01f2c699",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-27T16:24:26Z",
+      "side": 1,
+      "message": "if otherConfigs \u003d\u003d null we shouldn\u0027t set OtheConfigs at all. Currently this being null will wipe out existing otherConfig, and so will passing empty list. We don\u0027t have any option to retain existing otherConfig. that is why set this only if not-null. Caller can always pass empty list to get the same behavior.",
+      "range": {
+        "startLine": 684,
+        "startChar": 12,
+        "endLine": 686,
+        "endChar": 13
+      },
+      "revId": "8a95ecccd82115201afa5c10db6631be30836afe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

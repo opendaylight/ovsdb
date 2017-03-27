@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_815a3681",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2017-03-27T16:41:18Z",
+      "side": 1,
+      "message": "does this always overwrite existing other_config?",
+      "revId": "8a95ecccd82115201afa5c10db6631be30836afe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_01f2c699",
         "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
         "patchSetId": 1

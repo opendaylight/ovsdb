@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_819fd602",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-27T16:48:38Z",
+      "side": 1,
+      "message": "That is the way lists work in mdsal and reason we\u0027re seeing this issue. If you want to actually update, you have to get existing list and then make modifications on top of it. Empty list is how you delete all entries in list.",
+      "parentUuid": "fafc7978_815a3681",
+      "revId": "8a95ecccd82115201afa5c10db6631be30836afe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_01f2c699",
         "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
         "patchSetId": 1

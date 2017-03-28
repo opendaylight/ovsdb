@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_324aba83",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-03-28T12:29:34Z",
+      "side": 1,
+      "message": "If, hypothetically, there were an updateBridge it would have an identical implementation. I\u0027m OK with addBridge since it \"adds it to the config DS\" but would be happy to compromise on writeBridge?",
+      "parentUuid": "fafc7978_01dbe61b",
+      "revId": "8a95ecccd82115201afa5c10db6631be30836afe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_815a3681",
         "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
         "patchSetId": 1
@@ -65,6 +83,30 @@
       "writtenOn": "2017-03-27T16:24:26Z",
       "side": 1,
       "message": "if otherConfigs \u003d\u003d null we shouldn\u0027t set OtheConfigs at all. Currently this being null will wipe out existing otherConfig, and so will passing empty list. We don\u0027t have any option to retain existing otherConfig. that is why set this only if not-null. Caller can always pass empty list to get the same behavior.",
+      "range": {
+        "startLine": 684,
+        "startChar": 12,
+        "endLine": 686,
+        "endChar": 13
+      },
+      "revId": "8a95ecccd82115201afa5c10db6631be30836afe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e295fd88",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-03-28T12:29:34Z",
+      "side": 1,
+      "message": "I\u0027d like to fix this after the netvirt patch is submitted so that it won\u0027t break anything. Currently, netvirt relies on this code to set disable-in-band. Placing a comment in the code.",
+      "parentUuid": "fafc7978_01f2c699",
       "range": {
         "startLine": 684,
         "startChar": 12,

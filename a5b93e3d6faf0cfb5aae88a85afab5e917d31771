@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_43215dfb",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 2529,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-03-30T17:29:10Z",
+      "side": 1,
+      "message": "This logic doesn\u0027t look right.  Above queue 1 and queue 2 are added to the list.  So here, they should both be present in the list.  This second check is looking for queue 1 to \u0027not\u0027 be in the list - which should cause a test failure (since it should be in the list).",
+      "revId": "a5b93e3d6faf0cfb5aae88a85afab5e917d31771",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_831b45c9",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 2538,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2017-03-30T17:29:10Z",
+      "side": 1,
+      "message": "This is also an error.  Since the 2 queues are added above with queue numbers \"1\" and \"2\".  Deleting with key (queue number) \"0\" won\u0027t delete anything.  So, the tests below to verify that 1 queue is still present in the list and the other has been deleted is also faulty.",
+      "revId": "a5b93e3d6faf0cfb5aae88a85afab5e917d31771",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_95af02e3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-30T06:01:29Z",
+      "side": 1,
+      "message": "Yeah, I think this should be covered by logging in individual commands.",
+      "parentUuid": "fafc7978_9526ed66",
+      "revId": "8f08978248f6fd04d4247bc9d849ce36cf9afd4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_f51499ea",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_3580d645",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-30T06:01:29Z",
+      "side": 1,
+      "message": "Southbound has InstantiationException and IllegalAccessException. We could reuse those, to err on side of caution and assuming we can get similar exceptions here too.",
+      "parentUuid": "fafc7978_f51499ea",
+      "revId": "8f08978248f6fd04d4247bc9d849ce36cf9afd4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_f5c2d951",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2017-03-28T14:24:16Z",
       "side": 1,
       "message": "same comments - the log and the exception differences.",
+      "revId": "8f08978248f6fd04d4247bc9d849ce36cf9afd4b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b5e2062d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepOperationalCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-03-30T06:01:29Z",
+      "side": 1,
+      "message": "Good catch Sam. OVSDB has following and would recommend we add those too:\n\nNullPointerException\nNoSuchElementException\nClassCastException\n\nWe\u0027re more likely to run into these in HWVTEP than OVSDB as HWVTEP is where new schema support is coming in.",
+      "parentUuid": "fafc7978_f5c2d951",
       "revId": "8f08978248f6fd04d4247bc9d849ce36cf9afd4b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

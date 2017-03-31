@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_146e6a01",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-karaf/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-03-31T13:22:07Z",
+      "side": 1,
+      "message": "This needs to be changed to the appropriate Karaf 4 feature repository.",
+      "revId": "f6b8b88592cc4cfdb9da634a857781cf4dcbcb76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_34728ee3",
+        "filename": "library/karaf/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-03-31T13:22:07Z",
+      "side": 1,
+      "message": "This needs to be changed to the appropriate Karaf 4 feature repository.",
+      "revId": "f6b8b88592cc4cfdb9da634a857781cf4dcbcb76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9481ba91",
+        "filename": "southbound/southbound-karaf/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-03-31T13:22:07Z",
+      "side": 1,
+      "message": "This needs to be changed to the appropriate Karaf 4 feature repository.",
+      "revId": "f6b8b88592cc4cfdb9da634a857781cf4dcbcb76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

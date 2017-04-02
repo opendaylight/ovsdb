@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da01753e_5487c20f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-04-02T10:57:58Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "fafc7978_baa06aa6",
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_7a9e0265",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactCommandAggregator.java",
         "patchSetId": 6
@@ -59,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "da01753e_7499266e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterRemoveCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-04-02T10:57:58Z",
+      "side": 1,
+      "message": "Added a log for each router",
+      "parentUuid": "fafc7978_3a7bda2a",
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_1a78962a",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
         "patchSetId": 6
@@ -70,6 +106,24 @@
       "writtenOn": "2017-03-21T09:20:03Z",
       "side": 1,
       "message": "Logs please :)",
+      "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_f4f19696",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 6365
+      },
+      "writtenOn": "2017-04-02T10:57:58Z",
+      "side": 1,
+      "message": "Added log for updating logical router",
+      "parentUuid": "fafc7978_1a78962a",
       "revId": "7565bdab037db966ad4909d608993b8d8eb568fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

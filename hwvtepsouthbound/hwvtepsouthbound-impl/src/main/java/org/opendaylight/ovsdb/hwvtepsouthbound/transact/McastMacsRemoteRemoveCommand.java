@@ -70,9 +70,30 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private void removeMcastMacRemote(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<RemoteMcastMacs> macList) {
-        for (RemoteMcastMacs mac: macList) {
+    private void removeMcastMacRemote(final TransactionBuilder transaction,
+                                      final InstanceIdentifier<Node> nodeIid, final List<RemoteMcastMacs> macList) {
+        for (RemoteMcastMacs mac : macList) {
+            InstanceIdentifier<RemoteMcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                    child(RemoteMcastMacs.class, mac.getKey());
+            onConfigUpdate(transaction, nodeIid, mac, macKey);
+        }
+    }
+
+    @Override
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final RemoteMcastMacs remoteMcastMac,
+                               final InstanceIdentifier macKey,
+                               final Object... extraData) {
+        processDependencies(null, transaction, nodeIid, macKey, remoteMcastMac);
+    }
+
+    @Override
+    public void doDeviceTransaction(final TransactionBuilder transaction,
+                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final RemoteMcastMacs mac,
+                                    final InstanceIdentifier macIid,
+                                    final Object... extraData) {
             LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<RemoteMcastMacs> operationalMacOptional =
                     getOperationalState().getRemoteMcastMacs(instanceIdentifier, mac.getKey());
@@ -86,14 +107,12 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                 transaction.add(op.delete(mcastMacsRemote.getSchema()).
                         where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, macIid);
             } else {
                 LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());
             }
-            InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
-                    child(RemoteMcastMacs.class, mac.getKey());
             updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
-        }
     }
 
     @Override
@@ -104,5 +123,10 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     @Override
     protected boolean areEqual(RemoteMcastMacs a, RemoteMcastMacs b) {
         return a.getKey().equals(b.getKey()) && Objects.equals(a.getLocatorSet(), b.getLocatorSet());
+    }
+
+    @Override
+    protected boolean isRemoveCommand() {
+        return true;
     }
 }

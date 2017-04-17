@@ -78,4 +78,8 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
         return augmentation.getRemoteUcastMacs();
     }
 
+    @Override
+    protected boolean isRemoveCommand() {
+        return true;
+    }
 }

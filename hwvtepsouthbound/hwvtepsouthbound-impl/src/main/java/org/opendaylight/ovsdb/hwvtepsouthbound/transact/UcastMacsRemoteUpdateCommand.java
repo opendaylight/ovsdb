@@ -52,9 +52,9 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private void updateUcastMacsRemote(TransactionBuilder transaction,
-                                       InstanceIdentifier<Node> instanceIdentifier,
-                                       List<RemoteUcastMacs> remoteUcastMacs) {
+    private void updateUcastMacsRemote(final TransactionBuilder transaction,
+                                       final InstanceIdentifier<Node> instanceIdentifier,
+                                       final List<RemoteUcastMacs> remoteUcastMacs) {
         if (remoteUcastMacs == null) {
             return;
         }
@@ -64,22 +64,22 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction,
-                                  InstanceIdentifier<Node> nodeIid,
-                                  RemoteUcastMacs remoteUcastMacs,
-                                  InstanceIdentifier macKey,
-                                  Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final RemoteUcastMacs remoteUcastMacs,
+                               final InstanceIdentifier macKey,
+                               final Object... extraData) {
         InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
         processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction,
-                                   InstanceIdentifier<Node> instanceIdentifier,
-                                   RemoteUcastMacs remoteUcastMac,
-                                   InstanceIdentifier macKey,
-                                   Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction,
+                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final RemoteUcastMacs remoteUcastMac,
+                                    final InstanceIdentifier macKey,
+                                    final Object... extraData) {
             LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
             HwvtepDeviceInfo.DeviceData deviceData =
                     getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macKey);
@@ -92,7 +92,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                 setMac(ucastMacsRemote, remoteUcastMac);
                 LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
                 transaction.add(op.insert(ucastMacsRemote));
-                transaction.add(op.comment("UcastMacRemote: Creating " + remoteUcastMac.getMacEntryKey().getValue()));
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
             } else if (deviceData.getUuid() != null) {
                 UUID macEntryUUID = deviceData.getUuid();
                 UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
@@ -102,7 +102,6 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                 transaction.add(op.update(ucastMacsRemote)
                         .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                         .build());
-                transaction.add(op.comment("UcastMacRemote: Updating " + remoteUcastMac.getMacEntryKey().getValue()));
             } else {
                 LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                                 remoteUcastMac.getMacEntryKey().getValue());

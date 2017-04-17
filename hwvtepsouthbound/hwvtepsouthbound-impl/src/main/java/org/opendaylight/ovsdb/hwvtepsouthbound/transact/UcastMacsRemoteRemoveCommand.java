@@ -48,9 +48,32 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
         }
     }
 
+
     private void removeUcastMacRemote(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<RemoteUcastMacs> macList) {
+                                      InstanceIdentifier<Node> instanceIdentifier,
+                                      List<RemoteUcastMacs> macList) {
         for (RemoteUcastMacs mac: macList) {
+            onConfigUpdate(transaction, instanceIdentifier, mac, null);
+        }
+    }
+
+    @Override
+    public void onConfigUpdate(TransactionBuilder transaction,
+                               InstanceIdentifier<Node> nodeIid,
+                               RemoteUcastMacs remoteUcastMacs,
+                               InstanceIdentifier macKey,
+                               Object... extraData) {
+        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+        processDependencies(null, transaction, nodeIid, macIid, remoteUcastMacs);
+    }
+
+    @Override
+    public void doDeviceTransaction(TransactionBuilder transaction,
+                                    InstanceIdentifier<Node> instanceIdentifier,
+                                    RemoteUcastMacs mac,
+                                    InstanceIdentifier macKey,
+                                    Object... extraData) {
             LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
                     child(RemoteUcastMacs.class, mac.getKey());
@@ -66,12 +89,12 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                 transaction.add(op.delete(ucastMacsRemote.getSchema()).
                         where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
             } else {
                 LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());
             }
             updateCurrentTxDeleteData(RemoteUcastMacs.class, macIid, mac);
-        }
     }
 
     protected List<RemoteUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {

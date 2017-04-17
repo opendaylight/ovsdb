@@ -104,4 +104,9 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     protected boolean areEqual(LogicalSwitches a , LogicalSwitches b) {
         return a.getKey().equals(b.getKey()) && Objects.equals(a.getTunnelKey(), b.getTunnelKey());
     }
+
+    @Override
+    protected boolean isRemoveCommand() {
+        return true;
+    }
 }

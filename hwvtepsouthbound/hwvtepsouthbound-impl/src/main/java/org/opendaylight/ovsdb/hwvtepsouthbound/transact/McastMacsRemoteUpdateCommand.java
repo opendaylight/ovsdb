@@ -97,6 +97,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                 LOG.trace("execute: create RemoteMcastMac entry: {}", mcastMacsRemote);
                 transaction.add(op.insert(mcastMacsRemote));
                 transaction.add(op.comment("McastMacRemote: Creating " + mac.getMacEntryKey().getValue()));
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, macKey);
             } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
                 McastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
@@ -107,6 +108,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                         .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                         .build());
                 transaction.add(op.comment("McastMacRemote: Updating " + macEntryUUID));
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, macKey);
             } else {
                 LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                                 mac.getMacEntryKey().getValue());

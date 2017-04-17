@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -74,9 +75,30 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
-    private void removeLogicalSwitch(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<LogicalSwitches> lswitchList) {
+    private void removeLogicalSwitch(final TransactionBuilder transaction,
+                                     final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
+            InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                    child(LogicalSwitches.class, lswitch.getKey());
+            onConfigUpdate(transaction, nodeIid, lswitch, lsKey);
+        }
+    }
+
+    @Override
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final LogicalSwitches lswitch,
+                               final InstanceIdentifier lsKey,
+                               final Object... extraData) {
+        processDependencies(null, transaction, nodeIid, lsKey, lswitch);
+    }
+
+    @Override
+    public void doDeviceTransaction(final TransactionBuilder transaction,
+                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final LogicalSwitches lswitch,
+                                    final InstanceIdentifier lsKey,
+                                    final Object... extraData) {
             LOG.debug("Removing logcial switch named: {}", lswitch.getHwvtepNodeName().getValue());
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(instanceIdentifier, lswitch.getKey());
@@ -88,11 +110,11 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                 transaction.add(op.delete(logicalSwitch.getSchema())
                         .where(logicalSwitch.getUuidColumn().getSchema().opEqual(logicalSwitchUuid)).build());
                 transaction.add(op.comment("Logical Switch: Deleting " + lswitch.getHwvtepNodeName().getValue()));
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, lsKey);
             } else {
                 LOG.warn("Unable to delete logical switch {} because it was not found in the operational store",
                         lswitch.getHwvtepNodeName().getValue());
             }
-        }
     }
 
     @Override

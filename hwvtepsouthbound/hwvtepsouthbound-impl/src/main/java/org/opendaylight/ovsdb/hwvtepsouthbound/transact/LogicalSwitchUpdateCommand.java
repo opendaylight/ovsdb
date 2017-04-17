@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -53,10 +54,29 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
     }
 
     private void updateLogicalSwitch(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<LogicalSwitches> lswitchList) {
+                                      InstanceIdentifier<Node> nodeIid, List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
-            InstanceIdentifier<LogicalSwitches> lsKey = instanceIdentifier.
-                    augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
+            InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
+                    child(LogicalSwitches.class, lswitch.getKey());
+            onConfigUpdate(transaction, nodeIid, lswitch, lsKey);
+        }
+    }
+
+    @Override
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final LogicalSwitches lswitch,
+                               final InstanceIdentifier lsKey,
+                               final Object... extraData) {
+        processDependencies(null, transaction, nodeIid, lsKey, lswitch);
+    }
+
+    @Override
+    public void doDeviceTransaction(final TransactionBuilder transaction,
+                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final LogicalSwitches lswitch,
+                                    final InstanceIdentifier lsKey,
+                                    final Object... extraData) {
             LOG.debug("Creating logical switch named: {}", lswitch.getHwvtepNodeName());
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(instanceIdentifier, lswitch.getKey());
@@ -69,7 +89,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                 transaction.add(op.insert(logicalSwitch).withId(TransactUtils.getLogicalSwitchId(lswitch)));
                 transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
                 UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
-                updateCurrentTxData(LogicalSwitches.class, lsKey, lsUuid, lswitch);
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, lsKey);
             } else {
                 LogicalSwitches updatedLSwitch = operationalSwitchOptional.get();
                 String existingLogicalSwitchName = updatedLSwitch.getHwvtepNodeName().getValue();
@@ -82,7 +102,6 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                         .build());
                 transaction.add(op.comment("Logical Switch: Updating " + existingLogicalSwitchName));
             }
-        }
     }
 
     private void setDescription(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {

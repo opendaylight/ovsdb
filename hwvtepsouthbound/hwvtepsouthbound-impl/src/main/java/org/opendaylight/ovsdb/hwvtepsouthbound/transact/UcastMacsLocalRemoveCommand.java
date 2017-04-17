@@ -101,4 +101,9 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
             return Collections.emptyList();
         }
     }
+
+    @Override
+    protected boolean isRemoveCommand() {
+        return true;
+    }
 }

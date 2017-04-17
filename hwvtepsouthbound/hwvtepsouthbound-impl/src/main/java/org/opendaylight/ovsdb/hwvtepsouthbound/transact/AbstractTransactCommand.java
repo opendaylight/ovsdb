@@ -62,7 +62,6 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {
         operationalState.updateCurrentTxData(cls, key, uuid);
-        operationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
         operationalState.getDeviceInfo().updateConfigData(cls, key, data);
     }
 
@@ -73,10 +72,15 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
                              final T data, final Object... extraData) {
 
         HwvtepDeviceInfo deviceInfo = operationalState.getDeviceInfo();
-        Map inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(operationalState, data);
-        Map confingDependencies = unMetDependencyGetter.getUnMetConfigDependencies(operationalState, data);
-        //we can skip the config termination point dependency as we can create them in device as part of this tx
-        confingDependencies.remove(TerminationPoint.class);
+        Map inTransitDependencies = Collections.EMPTY_MAP;
+        Map confingDependencies = Collections.EMPTY_MAP;
+
+        if (!isRemoveCommand() && unMetDependencyGetter != null) {
+            inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(operationalState, data);
+            confingDependencies = unMetDependencyGetter.getUnMetConfigDependencies(operationalState, data);
+            //we can skip the config termination point dependency as we can create them in device as part of this tx
+            confingDependencies.remove(TerminationPoint.class);
+        }
 
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType)type).getActualTypeArguments()[0];
@@ -88,7 +92,6 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
         if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies) && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
-            //TODO put proper uuid
             updateCurrentTxData((Class<? extends Identifiable>) classType, key, new UUID("uuid"), data);
         }
         if (!HwvtepSouthboundUtil.isEmptyMap(confingDependencies)) {
@@ -297,6 +300,10 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
      * @return true if this object needs to be deleted if its dependent object gets deleted
      */
     protected boolean cascadeDelete() {
+        return false;
+    }
+
+    protected boolean isRemoveCommand() {
         return false;
     }
 }

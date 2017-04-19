@@ -96,6 +96,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             // Update the Physical Switch with whatever data we are getting
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(pSwitch);
             Node psNode = buildPhysicalSwitchNode(connection.get(), pSwitch);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
 
             PhysicalSwitch oldPSwitch = oldPSRows.get(uuid);
             updateTunnelIps(pSwitch, oldPSwitch, transaction);

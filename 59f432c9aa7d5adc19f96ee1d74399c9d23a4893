@@ -1,0 +1,831 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_362f4bf8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundMapper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please make both of these parameters final.",
+      "range": {
+        "startLine": 187,
+        "startChar": 68,
+        "endLine": 187,
+        "endChar": 108
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_562c8f02",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundMapper.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "just return the IID, no need to create method local variable.",
+      "range": {
+        "startLine": 189,
+        "startChar": 8,
+        "endLine": 189,
+        "endChar": 14
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_9636f750",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please make both of these parameters final.",
+      "range": {
+        "startLine": 338,
+        "startChar": 54,
+        "endLine": 338,
+        "endChar": 116
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_7610b3a8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "you can optimize it to be more readable..\nif (hgAugmentation !\u003d null \u0026\u0026 hgAugmentation.getLogicalRouters() !\u003d null) {\nfor (....\n}",
+      "range": {
+        "startLine": 344,
+        "startChar": 12,
+        "endLine": 347,
+        "endChar": 39
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b6217bfe",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "directly return the acl, until and unless you want to log something in this method.",
+      "range": {
+        "startLine": 377,
+        "startChar": 8,
+        "endLine": 377,
+        "endChar": 29
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_162167fb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "remove this blank line.",
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_567acff1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "removeds --\u003e removed",
+      "range": {
+        "startLine": 43,
+        "startChar": 60,
+        "endLine": 43,
+        "endChar": 68
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_36646b48",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "mark both of these parameters final.",
+      "range": {
+        "startLine": 76,
+        "startChar": 14,
+        "endLine": 76,
+        "endChar": 91
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_f64943b8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "move this line in the if block.",
+      "range": {
+        "startLine": 81,
+        "startChar": 14,
+        "endLine": 81,
+        "endChar": 68
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_56c80f22",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "\"data store\"",
+      "range": {
+        "startLine": 90,
+        "startChar": 107,
+        "endLine": 90,
+        "endChar": 112
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_36cbcb1f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please mark it final.",
+      "range": {
+        "startLine": 97,
+        "startChar": 45,
+        "endLine": 97,
+        "endChar": 82
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_76ec3390",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please mark both of these final.",
+      "range": {
+        "startLine": 102,
+        "startChar": 33,
+        "endLine": 102,
+        "endChar": 69
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_36990b20",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please remove this blank line.\n\nhttps://wiki.opendaylight.org/view/GettingStarted:_Eclipse_Setup#Import_ordering",
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_76a3934f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please follow the best practices and move it on top of all the java.* import, before static import.",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 39
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d6899fcb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "updateds --\u003e updates.",
+      "range": {
+        "startLine": 48,
+        "startChar": 60,
+        "endLine": 48,
+        "endChar": 68
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b684dbb1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please do a null check here. isEmpty() check is not required as for() loop will exit if there is no update entries.",
+      "range": {
+        "startLine": 50,
+        "startChar": 12,
+        "endLine": 50,
+        "endChar": 31
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_56bdaf67",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "mark both of these parameter final.",
+      "range": {
+        "startLine": 58,
+        "startChar": 69,
+        "endLine": 59,
+        "endChar": 44
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_36c0ebdf",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "remove this todo.",
+      "range": {
+        "startLine": 60,
+        "startChar": 8,
+        "endLine": 60,
+        "endChar": 42
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_96b71786",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please remove this. Just say \"Creating...\"",
+      "range": {
+        "startLine": 78,
+        "startChar": 27,
+        "endLine": 78,
+        "endChar": 36
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_76ba736f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please remove \"execute\"",
+      "range": {
+        "startLine": 88,
+        "startChar": 27,
+        "endLine": 88,
+        "endChar": 36
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d6b07f8d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please mark these parameters final.",
+      "range": {
+        "startLine": 98,
+        "startChar": 32,
+        "endLine": 98,
+        "endChar": 87
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_f6a5c347",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "do you want to log warning message here if nodeDescription is null?",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 101,
+        "endChar": 9
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_56648f21",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please mark these methods final, until and unless you are planning to reassign the reference. Also please follow this practice throughout the patch.",
+      "range": {
+        "startLine": 103,
+        "startChar": 25,
+        "endLine": 104,
+        "endChar": 56
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_7671d3df",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "want to log a warning if switchBindings are null?",
+      "range": {
+        "startLine": 113,
+        "startChar": 8,
+        "endLine": 113,
+        "endChar": 37
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d677dfd2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please limit the length of line in 120 characters. Please follow throughout the patch.",
+      "range": {
+        "startLine": 123,
+        "startChar": 101,
+        "endLine": 123,
+        "endChar": 141
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b6721be1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "same as above.",
+      "range": {
+        "startLine": 133,
+        "startChar": 32,
+        "endLine": 133,
+        "endChar": 90
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b6597b5d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "you can call sanitizeUUID(String), remove the code duplication.",
+      "range": {
+        "startLine": 217,
+        "startChar": 15,
+        "endLine": 217,
+        "endChar": 62
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_1659675a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "mark it final.",
+      "range": {
+        "startLine": 234,
+        "startChar": 43,
+        "endLine": 234,
+        "endChar": 66
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_f6530337",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/TransactUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 238,
+        "startChar": 34,
+        "endLine": 238,
+        "endChar": 66
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_5632cf10",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "remove the blank line.",
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_36358bf7",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterRemoveCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please do null check on deletedLRRows.",
+      "range": {
+        "startLine": 37,
+        "startChar": 34,
+        "endLine": 37,
+        "endChar": 47
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d6251fc3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please remove the blank line.",
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b6205bb1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please remove the space.",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 0
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d4a3579c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "move it up after static import.",
+      "range": {
+        "startLine": 60,
+        "startChar": 1,
+        "endLine": 60,
+        "endChar": 37
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b49e9352",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "better to do null check for updatedLRRows",
+      "range": {
+        "startLine": 73,
+        "startChar": 48,
+        "endLine": 73,
+        "endChar": 61
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d4ca374e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please run precondition.null check on lrouter and lrouter.getAclBinidngColumn.",
+      "range": {
+        "startLine": 131,
+        "startChar": 12,
+        "endLine": 131,
+        "endChar": 41
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_d4d197fc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalRouterUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-19T19:26:32Z",
+      "side": 1,
+      "message": "please put a null check for lRouter and lRouter.getSwitchBindingColumn,",
+      "range": {
+        "startLine": 150,
+        "startChar": 12,
+        "endLine": 150,
+        "endChar": 44
+      },
+      "revId": "59f432c9aa7d5adc19f96ee1d74399c9d23a4893",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

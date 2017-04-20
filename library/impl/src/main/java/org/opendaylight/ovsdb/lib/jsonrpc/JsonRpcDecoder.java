@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
+ * Copyright (c) 2013, 2017 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,7 +7,6 @@
  */
 
 package org.opendaylight.ovsdb.lib.jsonrpc;
-
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -40,12 +39,12 @@ import org.slf4j.LoggerFactory;
 public class JsonRpcDecoder extends ByteToMessageDecoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcDecoder.class);
-    private int maxFrameLength;
+    private final int maxFrameLength;
     //Indicates if the frame limit warning was issued
     private boolean maxFrameLimitWasReached = false;
-    private JsonFactory jacksonJsonFactory = new MappingJsonFactory();
+    private final JsonFactory jacksonJsonFactory = new MappingJsonFactory();
 
-    private IOContext jacksonIOContext = new IOContext(new BufferRecycler(), null, false);
+    private final IOContext jacksonIOContext = new IOContext(new BufferRecycler(), null, false);
 
     // context for the previously read incomplete records
     private int lastRecordBytes = 0;
@@ -152,5 +151,4 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
             }
         }
     }
-
 }

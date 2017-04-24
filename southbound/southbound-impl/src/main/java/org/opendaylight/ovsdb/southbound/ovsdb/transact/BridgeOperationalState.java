@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class BridgeOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeOperationalState.class);
-    private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
 
     public BridgeOperationalState(DataBroker db, AsyncDataChangeEvent<InstanceIdentifier<?>,
             DataObject> changes) {
@@ -103,6 +103,8 @@ public class BridgeOperationalState {
                         }
                     }
                 }
+            } else {
+                LOG.debug("TerminationPoints or Operational BridgeNode missing for {}", iid);
             }
         }
         return Optional.absent();

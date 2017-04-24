@@ -107,8 +107,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 createPort(terminationPoint, port, interfaceUuid);
                 transaction.add(op.insert(port).withId(portUuid));
                 LOG.info("Created Termination Point : {} with Uuid : {}",
-                        terminationPoint.getName(),
-                        terminationPoint.getPortUuid());
+                        terminationPoint.getName(),portUuid);
                 //Configure bridge with the above port details
                 Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                 if (getBridge(entry.getKey(), nodes) != null) {

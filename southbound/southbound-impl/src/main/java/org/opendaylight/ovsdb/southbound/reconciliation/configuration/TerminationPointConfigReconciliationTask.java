@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 
-import com.google.common.base.Optional;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +22,6 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TerminationPointCreateCo
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -59,13 +56,6 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
         LOG.debug("Reconcile Termination Point Configuration for node {}", ((Node) configData).getNodeId());
         final Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         changes.putAll(SouthboundMapper.extractTerminationPointConfigurationChanges((Node) configData));
-        BridgeOperationalState bridgeOperationalState =
-            new BridgeOperationalState(reconciliationManager.getDb(), Collections.EMPTY_LIST) {
-                @Override
-                public Optional<TerminationPoint> getBridgeTerminationPoint(InstanceIdentifier<?> iid) {
-                    return Optional.absent();
-                }
-            };
 
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvents = new AsyncDataChangeEvent() {
             @Override
@@ -100,7 +90,8 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
         };
 
         connectionInstance.transact(new TerminationPointCreateCommand(),
-                bridgeOperationalState, changeEvents, instanceIdentifierCodec);
+                        new BridgeOperationalState(reconciliationManager.getDb(), changeEvents),
+                        changeEvents, instanceIdentifierCodec);
 
         return true;
     }

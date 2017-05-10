@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_ab1cc514",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionCommand.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-03T11:16:26Z",
+      "side": 1,
+      "message": "are you sure you want to have an empty default implementation here?  You probably did this for a good reason (doc?), but it strikes me as surprising .. so just wondering.  Actually, to be more perfectly honest, I would have to admit that I don\u0027t really get what you\u0027re doing here... so these TransactionCommand now, new, should track results?  But you cannot getResult() from them?  Then what is the point?  You don\u0027t actually really mean to use this instead, this would make more sense to me, do you:\n\n    ListenableFuture\u003cVoid\u003e execute(ReadWriteTransaction transaction);",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_eb688d89",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-03T11:16:26Z",
+      "side": 1,
+      "message": "personally I would just directly throw new NullPointerException() here instead... ;-)",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_cbf829c7",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-03T11:16:26Z",
+      "side": 1,
+      "message": "private static class ?",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_abf5e5cc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-03T11:16:26Z",
+      "side": 1,
+      "message": "private static class ?",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_ebffeda8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-03T11:16:26Z",
+      "side": 1,
+      "message": "private static class ?",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

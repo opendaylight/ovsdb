@@ -37,9 +37,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-  <prerequisites>
-    <maven>3.1.1</maven>
-  </prerequisites>
   <properties>
     <controller.mdsal.version>1.6.0-SNAPSHOT</controller.mdsal.version>
     <restconf.version>1.6.0-SNAPSHOT</restconf.version>

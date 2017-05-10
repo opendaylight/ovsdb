@@ -177,6 +177,24 @@
       "revId": "a054c02a3578622b62a96a923a101d329cbc70f3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_15aafd18",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-03-28T15:16:44Z",
+      "side": 1,
+      "message": "will this be enough to prevent infinite retry loops, for sure? I\u0027m not familiar enough with this code / would have to spend more time than I have to fully understand this class, but.. careful.  Thought it was worth to double check.",
+      "parentUuid": "fafc7978_ed237ebc",
+      "revId": "a054c02a3578622b62a96a923a101d329cbc70f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

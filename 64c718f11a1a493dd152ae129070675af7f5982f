@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_686447e5",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepUcastMacsLocalUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-20T02:15:41Z",
+      "side": 1,
+      "message": "please mark it final.",
+      "range": {
+        "startLine": 75,
+        "startChar": 37,
+        "endLine": 75,
+        "endChar": 68
+      },
+      "revId": "64c718f11a1a493dd152ae129070675af7f5982f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_8869abc0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepUcastMacsLocalUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-20T02:15:41Z",
+      "side": 1,
+      "message": "please mark it final.",
+      "range": {
+        "startLine": 88,
+        "startChar": 46,
+        "endLine": 88,
+        "endChar": 66
+      },
+      "revId": "64c718f11a1a493dd152ae129070675af7f5982f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_28735fb2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepUcastMacsLocalUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-20T02:15:41Z",
+      "side": 1,
+      "message": "you can return directly, no need for mac.",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 29
+      },
+      "revId": "64c718f11a1a493dd152ae129070675af7f5982f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_089dbbbc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepUcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-20T02:15:41Z",
+      "side": 1,
+      "message": "please move these imports above org.* imports.\n\nhttps://wiki.opendaylight.org/view/GettingStarted:_Eclipse_Setup#Import_ordering",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 20
+      },
+      "revId": "64c718f11a1a493dd152ae129070675af7f5982f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_e8867764",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepUcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-04-20T02:15:41Z",
+      "side": 1,
+      "message": "private?",
+      "revId": "64c718f11a1a493dd152ae129070675af7f5982f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

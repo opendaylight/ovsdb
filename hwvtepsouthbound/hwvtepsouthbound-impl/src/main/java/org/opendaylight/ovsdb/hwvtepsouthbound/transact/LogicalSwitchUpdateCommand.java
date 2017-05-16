@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schemaMismatchLog;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
@@ -83,6 +85,12 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
             LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);
             setDescription(logicalSwitch, lswitch);
             setTunnelKey(logicalSwitch, lswitch);
+            try {
+                setReplicationMode(logicalSwitch, lswitch);
+            }
+            catch (SchemaVersionMismatchException e) {
+                schemaMismatchLog("replication_mode", "Logical_Switch", e);
+            }
             if (!operationalSwitchOptional.isPresent()) {
                 setName(logicalSwitch, lswitch, operationalSwitchOptional);
                 LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);
@@ -124,6 +132,14 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
             Set<Long> tunnel = new HashSet<>();
             tunnel.add(Long.valueOf(inputSwitch.getTunnelKey()));
             logicalSwitch.setTunnelKey(tunnel);
+        }
+    }
+
+    private void setReplicationMode(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
+        if (inputSwitch.getReplicationMode() != null) {
+            Set<String> mode = new HashSet<>();
+            mode.add(inputSwitch.getReplicationMode());
+            logicalSwitch.setReplicationMode(mode);
         }
     }
 

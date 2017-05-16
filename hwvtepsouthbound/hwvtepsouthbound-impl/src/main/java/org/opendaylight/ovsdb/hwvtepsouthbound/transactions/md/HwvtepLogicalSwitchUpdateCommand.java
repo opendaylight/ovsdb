@@ -16,9 +16,11 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSchemaConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
@@ -34,10 +36,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private Map<UUID, LogicalSwitch> updatedLSRows;
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalSwitchUpdateCommand.class);
 
     public HwvtepLogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -75,6 +80,17 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         LogicalSwitchesBuilder lsBuilder = new LogicalSwitchesBuilder();
         lsBuilder.setLogicalSwitchUuid(new Uuid(lSwitch.getUuid().toString()));
         lsBuilder.setHwvtepNodeDescription(lSwitch.getDescription());
+        HwvtepGlobalAugmentation hwvtepGlobalAugmentation = getOvsdbConnectionInstance().getHwvtepGlobalAugmentation();
+        if (hwvtepGlobalAugmentation != null) {
+            Version minVersion = Version.fromString("1.6.0");
+            Version dbVersion = Version.fromString(hwvtepGlobalAugmentation.getDbVersion());
+            if (dbVersion.compareTo(minVersion) >= 0) {
+                if (lSwitch.getReplicationModeColumn().getData() != null && !lSwitch.getReplicationModeColumn().getData().isEmpty()) {
+                    lsBuilder.setReplicationMode(lSwitch.getReplicationModeColumn().getData().iterator().next());
+                }
+                LOG.debug("setReplicationMode to: {}", lSwitch.getReplicationModeColumn().getData().iterator().next());
+            }
+        }
         HwvtepNodeName hwvtepName = new HwvtepNodeName(lSwitch.getName());
         lsBuilder.setHwvtepNodeName(hwvtepName);
         lsBuilder.setKey(new LogicalSwitchesKey(hwvtepName));

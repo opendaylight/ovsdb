@@ -75,6 +75,9 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         LogicalSwitchesBuilder lsBuilder = new LogicalSwitchesBuilder();
         lsBuilder.setLogicalSwitchUuid(new Uuid(lSwitch.getUuid().toString()));
         lsBuilder.setHwvtepNodeDescription(lSwitch.getDescription());
+        if (lSwitch.getReplicationModeColumn().getData() != null && !lSwitch.getReplicationModeColumn().getData().isEmpty()) {
+            lsBuilder.setReplicationMode(lSwitch.getReplicationModeColumn().getData().iterator().next());
+        }
         HwvtepNodeName hwvtepName = new HwvtepNodeName(lSwitch.getName());
         lsBuilder.setHwvtepNodeName(hwvtepName);
         lsBuilder.setKey(new LogicalSwitchesKey(hwvtepName));

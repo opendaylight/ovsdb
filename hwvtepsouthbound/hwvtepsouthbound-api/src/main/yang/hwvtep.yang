@@ -365,6 +365,10 @@ module hwvtep {
             description "Per Logical Switch tunnel key";
             type string;
         }
+        leaf replication-mode {
+            description "Per Logical Switch replication mode";
+            type string;
+        }
     }
 
     grouping hwvtep-physical-port-attributes {

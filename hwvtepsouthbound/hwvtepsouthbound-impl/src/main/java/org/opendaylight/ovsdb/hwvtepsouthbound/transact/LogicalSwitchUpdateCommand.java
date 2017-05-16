@@ -63,6 +63,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
             LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);
             setDescription(logicalSwitch, lswitch);
             setTunnelKey(logicalSwitch, lswitch);
+            setReplicationMode(logicalSwitch, lswitch);
             if (!operationalSwitchOptional.isPresent()) {
                 setName(logicalSwitch, lswitch, operationalSwitchOptional);
                 LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);
@@ -105,6 +106,14 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
             Set<Long> tunnel = new HashSet<>();
             tunnel.add(Long.valueOf(inputSwitch.getTunnelKey()));
             logicalSwitch.setTunnelKey(tunnel);
+        }
+    }
+
+    private void setReplicationMode(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
+        if (inputSwitch.getReplicationMode() != null) {
+            Set<String> mode = new HashSet<>();
+            mode.add(inputSwitch.getReplicationMode());
+            logicalSwitch.setReplicationMode(mode);
         }
     }
 

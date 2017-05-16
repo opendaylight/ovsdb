@@ -58,8 +58,10 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
             hwvtepGlobalBuilder.setConnectionInfo(getConnectionInfo());
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setNodeId(getNodeId(hwvtepGlobal));
-            nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, hwvtepGlobalBuilder.build());
+            HwvtepGlobalAugmentation hwvtepGlobalAugmentation = hwvtepGlobalBuilder.build();
+            nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, hwvtepGlobalAugmentation);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
+            getOvsdbConnectionInstance().setHwvtepGlobalAugmentation(hwvtepGlobalAugmentation);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Intel Corp. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Intel Corp. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -91,12 +91,12 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortUpdateCommand.class);
 
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private Map<UUID, Port> portUpdatedRows;
-    private Map<UUID, Port> portOldRows;
-    private Map<UUID, Interface> interfaceUpdatedRows;
-    private Map<UUID, Interface> interfaceOldRows;
-    private Map<UUID, Bridge> bridgeUpdatedRows;
-    private Map<UUID, Qos> qosUpdatedRows;
+    private final Map<UUID, Port> portUpdatedRows;
+    private final Map<UUID, Port> portOldRows;
+    private final Map<UUID, Interface> interfaceUpdatedRows;
+    private final Map<UUID, Interface> interfaceOldRows;
+    private final Map<UUID, Bridge> bridgeUpdatedRows;
+    private final Map<UUID, Qos> qosUpdatedRows;
 
     public OvsdbPortUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -113,8 +113,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        if ((portUpdatedRows == null && interfaceOldRows == null)
-                || (interfaceOldRows.isEmpty() && portUpdatedRows.isEmpty())) {
+        if (portUpdatedRows == null && interfaceOldRows == null
+                || interfaceOldRows.isEmpty() && portUpdatedRows.isEmpty()) {
             return;
         }
         Optional<Node> node = readNode(transaction, connectionIId);
@@ -312,8 +312,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         .setTrunk(new VlanId(trunk.intValue())).build());
                 }
             }
-            ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
         }
+        ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
     }
 
     private void updateVlanMode(final Port port,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -52,8 +52,11 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         this.mdsalUtils = new MdsalUtils(db);
     }
 
-    private void transactChangesToDevice(Collection<DataTreeModification<Node>> changes) {
-        HwvtepOperationalState hwvtepOperationalState = new HwvtepOperationalState(db, connectionInstance, changes);
+    private void transactChangesToDevice(final Collection<DataTreeModification<Node>> changes,
+                                         final Node globalOperNode,
+                                         final Node psNode) {
+        HwvtepOperationalState hwvtepOperationalState = new HwvtepOperationalState(db, connectionInstance, changes,
+                globalOperNode, psNode);
         hwvtepOperationalState.setInReconciliation(true);
         connectionInstance.transact(new TransactCommandAggregator(hwvtepOperationalState,changes));
     }
@@ -88,7 +91,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
                 }
             }
         }
-        transactChangesToDevice(changes);
+        transactChangesToDevice(changes, globalOpNode, psNode);
         return true;
     }
 

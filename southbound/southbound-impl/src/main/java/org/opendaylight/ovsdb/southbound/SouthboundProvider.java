@@ -9,9 +9,15 @@ package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -32,11 +38,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SouthboundProvider implements AutoCloseable {
+public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
@@ -55,6 +62,8 @@ public class SouthboundProvider implements AutoCloseable {
     private final OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
+    private AtomicBoolean registered = new AtomicBoolean(false);
+    private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
 
     public SouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
@@ -90,17 +99,19 @@ public class SouthboundProvider implements AutoCloseable {
             Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
             if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager();
-                    LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
+                if (ownershipStateOpt.get().hasOwner() && ownershipStateOpt.get().isOwner()) {
+                    LOG.info("This instance is already owner initializing ovsdb topology");
+                    initializeOvsdbTopology(LogicalDatastoreType.OPERATIONAL);
+                    initializeOvsdbTopology(LogicalDatastoreType.CONFIGURATION);
+                } else {
+                    LOG.info("This instance is not owner not initializing topology");
                 }
             }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB Southbound Provider instance entity {} was already "
                     + "registered for ownership", instanceEntity, e);
         }
+
     }
 
     @Override
@@ -110,6 +121,10 @@ public class SouthboundProvider implements AutoCloseable {
         ovsdbDataTreeChangeListener.close();
         registration.close();
         providerOwnershipChangeListener.close();
+        if (operTopologyRegistration != null) {
+            operTopologyRegistration.close();
+            operTopologyRegistration = null;
+        }
     }
 
     private void initializeOvsdbTopology(LogicalDatastoreType type) {
@@ -142,8 +157,19 @@ public class SouthboundProvider implements AutoCloseable {
         } else {
             LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
         }
-        ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager();
+    }
+
+    @Override
+    public void onDataTreeChanged(Collection<DataTreeModification<Topology>> collection) {
+        if (!registered.getAndSet(true)) {
+            LOG.info("Starting the ovsdb port");
+            ovsdbConnection.registerConnectionListener(cm);
+            ovsdbConnection.startOvsdbManager();
+        }
+        if (operTopologyRegistration != null) {
+            operTopologyRegistration.close();
+            operTopologyRegistration = null;
+        }
     }
 
     private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

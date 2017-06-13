@@ -126,22 +126,10 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     private void setLocator(TransactionBuilder transaction, UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
         //get UUID by locatorRef
         if (inputMac.getLocatorRef() != null) {
-            UUID locatorUuid = null;
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<TerminationPoint> iid = (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
-            //try to find locator in operational DS
-            HwvtepDeviceInfo.DeviceData deviceData = getOperationalState().getDeviceInfo().getDeviceOperData(TerminationPoint.class, iid);
-            if (deviceData != null) {
-                //if exist, get uuid
-                locatorUuid = deviceData.getUuid();
-            } else {
-                locatorUuid = getOperationalState().getUUIDFromCurrentTx(TerminationPoint.class, iid);
-                if (locatorUuid == null) {
-                    locatorUuid = TransactUtils.createPhysicalLocator(transaction, getOperationalState(),
-                            (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue());
-                    updateCurrentTxData(TerminationPoint.class, iid, locatorUuid, null);
-                }
-            }
+            InstanceIdentifier<TerminationPoint> iid = (InstanceIdentifier<TerminationPoint>)
+                    inputMac.getLocatorRef().getValue();
+            UUID locatorUuid = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);
             if (locatorUuid != null) {
                 ucastMacsRemote.setLocator(locatorUuid);
             }

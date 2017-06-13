@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -139,24 +140,11 @@ public class TransactUtils {
     }
 
     public static UUID createPhysicalLocatorSet(HwvtepOperationalState hwvtepOperationalState, TransactionBuilder transaction, List<LocatorSet> locatorList) {
-        Set<UUID> locators = new HashSet<>();
+        Set<UUID> locators = new HashSet<UUID>();
         for (LocatorSet locator: locatorList) {
-            UUID locatorUuid = null;
             @SuppressWarnings("unchecked")
             InstanceIdentifier<TerminationPoint> iid =(InstanceIdentifier<TerminationPoint>) locator.getLocatorRef().getValue();
-            //try to find locator in operational DS
-            Optional<HwvtepPhysicalLocatorAugmentation> operationalLocatorOptional =
-                    hwvtepOperationalState.getPhysicalLocatorAugmentation(iid);
-            if (operationalLocatorOptional.isPresent()) {
-                //if exist, get uuid
-                HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
-                locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
-            } else {
-                locatorUuid = hwvtepOperationalState.getUUIDFromCurrentTx(TerminationPoint.class, iid);
-                if (locatorUuid == null) {
-                    locatorUuid = createPhysicalLocator(transaction, hwvtepOperationalState, iid);
-                }
-            }
+            UUID locatorUuid = createPhysicalLocator(transaction, hwvtepOperationalState, iid);
             if (locatorUuid != null) {
                 locators.add(locatorUuid);
             }
@@ -170,20 +158,25 @@ public class TransactUtils {
 
     public static UUID createPhysicalLocator(TransactionBuilder transaction, HwvtepOperationalState operationalState,
                                              InstanceIdentifier<TerminationPoint> iid) {
-        Optional<TerminationPoint> configLocatorOptional = TransactUtils.readNodeFromConfig(
-                operationalState.getReadWriteTransaction(), iid);
+        UUID locatorUuid = null;
+        HwvtepDeviceInfo.DeviceData deviceData = operationalState.getDeviceInfo().getDeviceOperData(
+                TerminationPoint.class, iid);
+        if (deviceData != null && deviceData.getUuid() != null) {
+            locatorUuid = deviceData.getUuid();
+            return locatorUuid;
+        }
+        locatorUuid = operationalState.getUUIDFromCurrentTx(TerminationPoint.class, iid);
+        if (locatorUuid != null) {
+            return locatorUuid;
+        }
         HwvtepPhysicalLocatorAugmentationBuilder builder = new HwvtepPhysicalLocatorAugmentationBuilder();
         HwvtepPhysicalLocatorAugmentation locatorAugmentation = null;
-        if (configLocatorOptional.isPresent()) {
-            locatorAugmentation = configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-        } else {
-            builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.class);
-            String tepKey = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
-            String ip = tepKey.substring(tepKey.indexOf(":")+1);
-            builder.setDstIp(new IpAddress(ip.toCharArray()));
-            locatorAugmentation = builder.build();
-        }
-        UUID locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+        builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.class);
+        String tepKey = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
+        String ip = tepKey.substring(tepKey.indexOf(":")+1);
+        builder.setDstIp(new IpAddress(ip.toCharArray()));
+        locatorAugmentation = builder.build();
+        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
         operationalState.updateCurrentTxData(TerminationPoint.class, iid, locatorUuid);
         operationalState.getDeviceInfo().markKeyAsInTransit(TerminationPoint.class, iid);
         return locatorUuid;

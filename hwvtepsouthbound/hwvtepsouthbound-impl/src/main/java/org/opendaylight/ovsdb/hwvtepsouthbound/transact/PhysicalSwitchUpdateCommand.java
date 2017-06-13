@@ -64,7 +64,8 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         if (!created.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
                 created.entrySet()) {
-                updatePhysicalSwitch(transaction,  physicalSwitchEntry.getKey(), physicalSwitchEntry.getValue());
+                //TODO fix tunnels creation
+                //updatePhysicalSwitch(transaction,  physicalSwitchEntry.getKey(), physicalSwitchEntry.getValue());
             }
         }
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> updated =
@@ -72,7 +73,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         if (!updated.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
                 updated.entrySet()) {
-                updatePhysicalSwitch(transaction,  physicalSwitchEntry.getKey(), physicalSwitchEntry.getValue());
+                //updatePhysicalSwitch(transaction,  physicalSwitchEntry.getKey(), physicalSwitchEntry.getValue());
             }
         }
     }

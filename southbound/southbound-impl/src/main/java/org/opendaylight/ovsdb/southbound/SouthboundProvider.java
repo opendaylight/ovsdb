@@ -89,18 +89,12 @@ public class SouthboundProvider implements AutoCloseable {
         try {
             Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
-            if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager();
-                    LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
-                }
-            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB Southbound Provider instance entity {} was already "
                     + "registered for ownership", instanceEntity, e);
         }
+        ovsdbConnection.registerConnectionListener(cm);
+        ovsdbConnection.startOvsdbManager();
     }
 
     @Override
@@ -142,8 +136,6 @@ public class SouthboundProvider implements AutoCloseable {
         } else {
             LOG.info("*This* instance of OVSDB southbound provider is set as a SLAVE instance");
         }
-        ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager();
     }
 
     private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

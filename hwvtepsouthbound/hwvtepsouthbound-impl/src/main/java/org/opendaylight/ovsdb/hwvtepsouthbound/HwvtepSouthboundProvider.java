@@ -88,17 +88,12 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         try {
             Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
-            if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager();
-                }
-            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("HWVTEP Southbound Provider instance entity {} was already "
                     + "registered for ownership", instanceEntity, e);
         }
+        ovsdbConnection.registerConnectionListener(cm);
+        ovsdbConnection.startOvsdbManager();
     }
 
     @Override
@@ -152,8 +147,6 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         } else {
             LOG.info("*This* instance of HWVTEP southbound provider is set as a SLAVE instance");
         }
-        ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager();
     }
 
     private class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

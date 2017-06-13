@@ -496,12 +496,6 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             // might went down abruptly and didn't get a chance to clean up the operational data store.
             if (!ownershipChange.hasOwner()) {
                 LOG.debug("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
-                // Below code might look weird but it's required. We want to give first opportunity to the
-                // previous owner of the device to clean up the operational data store if there is no owner now.
-                // That way we will avoid lot of nasty md-sal exceptions because of concurrent delete.
-                if (ownershipChange.wasOwner()) {
-                    cleanEntityOperationalData(ownershipChange.getEntity());
-                }
                 // If first cleanEntityOperationalData() was called, this call will be no-op.
                 cleanEntityOperationalData(ownershipChange.getEntity());
             }
@@ -543,8 +537,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         @SuppressWarnings("unchecked") final InstanceIdentifier<Node> nodeIid =
                 (InstanceIdentifier<Node>) HwvtepSouthboundUtil
                         .getInstanceIdentifierCodec().bindingDeserializer(entity.getId());
-
-        txInvoker.invoke(transaction -> transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid));
+        txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
     }
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(Entity entity) {

@@ -101,6 +101,22 @@ public class HwvtepOperationalState {
         }
     }
 
+    public HwvtepOperationalState(final DataBroker db,
+                                  final HwvtepConnectionInstance connectionInstance,
+                                  final Collection<DataTreeModification<Node>> changes,
+                                  final Node globalOperNode,
+                                  final Node psNode) {
+        this(db, connectionInstance, changes);
+        operationalNodes.put(connectionInstance.getInstanceIdentifier(), globalOperNode);
+        HwvtepGlobalAugmentation globalAugmentation = globalOperNode.getAugmentation(HwvtepGlobalAugmentation.class);
+        if (globalAugmentation != null) {
+            if (!HwvtepSouthboundUtil.isEmpty(globalAugmentation.getSwitches())) {
+                operationalNodes.put((InstanceIdentifier<Node>)
+                        globalAugmentation.getSwitches().get(0).getSwitchRef().getValue(), psNode);
+            }
+        }
+    }
+
     public void readOperationalNodes() {
         if (inReconciliation) {
             return;

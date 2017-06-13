@@ -60,25 +60,25 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
             InstanceIdentifier<Node> psNodeiid,
             List<HwvtepPhysicalPortAugmentation> listPort) {
         for (HwvtepPhysicalPortAugmentation port : listPort) {
-            LOG.debug("Removing a physical port named: {}", port.getHwvtepNodeName().getValue());
+            LOG.debug("Updating a physical port named: {}", port.getHwvtepNodeName().getValue());
             Optional<HwvtepPhysicalPortAugmentation> operationalPhysicalPortOptional =
                     getOperationalState().getPhysicalPortAugmentation(psNodeiid, port.getHwvtepNodeName());
-            PhysicalPort physicalPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class, null);
+            PhysicalPort physicalPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
+            physicalPort.setVlanBindings(new HashMap<>());
             //get managing global node of physicalSwitchBelong
             //InstanceIdentifier<?> globalNodeIid = physicalSwitchBelong.getManagedBy().getValue();
             if (operationalPhysicalPortOptional.isPresent()) {
-                UUID physicalPortUuid = new UUID(operationalPhysicalPortOptional.get().getPhysicalPortUuid().getValue());
-                PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        PhysicalSwitch.class, null);
-                transaction.add(op.delete(physicalPort.getSchema())
-                        .where(physicalPort.getUuidColumn().getSchema().opEqual(physicalPortUuid)).build());
-                transaction.add(op.comment("Physical Port: Deleting " + port.getHwvtepNodeName().getValue()));
-                transaction.add(op.mutate(physicalSwitch.getSchema())
-                        .addMutation(physicalSwitch.getPortsColumn().getSchema(), Mutator.DELETE,
-                                Collections.singleton(physicalPortUuid)));
-                transaction.add(op.comment("Physical Switch: Mutating " + port.getHwvtepNodeName().getValue() + " " + physicalPortUuid));
+                HwvtepPhysicalPortAugmentation updatedPhysicalPort = operationalPhysicalPortOptional.get();
+                String existingPhysicalPortName = updatedPhysicalPort.getHwvtepNodeName().getValue();
+                PhysicalPort extraPhyscialPort =
+                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
+                extraPhyscialPort.setName("");
+                LOG.trace("execute: updating physical port: {}", physicalPort);
+                transaction.add(op.update(physicalPort)
+                        .where(extraPhyscialPort.getNameColumn().getSchema().opEqual(existingPhysicalPortName))
+                        .build());
             } else {
-                LOG.warn("Unable to delete logical switch {} because it was not found in the operational store, "
+                LOG.warn("Unable to update physical port {} because it was not found in the operational store, "
                         + "and thus we cannot retrieve its UUID", port.getHwvtepNodeName().getValue());
             }
         }

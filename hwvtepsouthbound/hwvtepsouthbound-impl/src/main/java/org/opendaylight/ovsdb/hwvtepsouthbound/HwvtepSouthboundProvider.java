@@ -7,7 +7,16 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -29,14 +38,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
-public class HwvtepSouthboundProvider implements AutoCloseable {
+public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-hwvtepsouthbound-provider";
@@ -55,6 +62,8 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
     private HwvtepReconciliationManager hwvtepReconciliationManager;
+    private AtomicBoolean registered = new AtomicBoolean(false);
+    private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
 
     public HwvtepSouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
@@ -88,17 +97,18 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         try {
             Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
-            if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    ovsdbConnection.registerConnectionListener(cm);
-                    ovsdbConnection.startOvsdbManager();
-                }
-            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("HWVTEP Southbound Provider instance entity {} was already "
                     + "registered for ownership", instanceEntity, e);
         }
+        InstanceIdentifier<Topology> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
+        DataTreeIdentifier<Topology> treeId =
+                new DataTreeIdentifier<Topology>(LogicalDatastoreType.OPERATIONAL, path);
+
+        LOG.trace("Registering listener for path {}", treeId);
+        operTopologyRegistration = db.registerDataTreeChangeListener(treeId, this);
     }
 
     @Override
@@ -127,6 +137,10 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         if(hwvtepDTListener != null) {
             hwvtepDTListener.close();
             hwvtepDTListener = null;
+        }
+        if (operTopologyRegistration != null) {
+            operTopologyRegistration.close();
+            operTopologyRegistration = null;
         }
     }
 
@@ -160,8 +174,20 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
         } else {
             LOG.info("*This* instance of HWVTEP southbound provider is set as a SLAVE instance");
         }
-        ovsdbConnection.registerConnectionListener(cm);
-        ovsdbConnection.startOvsdbManager();
+    }
+
+
+    @Override
+    public void onDataTreeChanged(Collection<DataTreeModification<Topology>> collection) {
+        if (!registered.getAndSet(true)) {
+            LOG.info("Starting the ovsdb port");
+            ovsdbConnection.registerConnectionListener(cm);
+            ovsdbConnection.startOvsdbManager();
+        }
+        if (operTopologyRegistration != null) {
+            operTopologyRegistration.close();
+            operTopologyRegistration = null;
+        }
     }
 
     private class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

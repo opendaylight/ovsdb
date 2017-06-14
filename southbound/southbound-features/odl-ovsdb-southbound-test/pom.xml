@@ -52,7 +52,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <version>${project.version}</version>
             <type>cfg</type>
             <classifier>config</classifier>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

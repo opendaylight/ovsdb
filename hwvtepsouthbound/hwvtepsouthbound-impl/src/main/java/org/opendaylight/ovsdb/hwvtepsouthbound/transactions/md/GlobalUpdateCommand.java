@@ -9,13 +9,15 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
-
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSchemaConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
@@ -46,6 +48,13 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
             LOG.trace("Processing hardware_vtep update for nodePath: {}", nodePath);
 
             HwvtepGlobalAugmentationBuilder hwvtepGlobalBuilder = new HwvtepGlobalAugmentationBuilder();
+            try {
+                Version version = getOvsdbConnectionInstance().getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get().getVersion();
+                hwvtepGlobalBuilder.setDbVersion(version.toString());
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.debug("Failed to get schema version on {} due to {}",
+                        getOvsdbConnectionInstance().getConnectionInfo(), e.getMessage());
+            }
             hwvtepGlobalBuilder.setConnectionInfo(getConnectionInfo());
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setNodeId(getNodeId(hwvtepGlobal));

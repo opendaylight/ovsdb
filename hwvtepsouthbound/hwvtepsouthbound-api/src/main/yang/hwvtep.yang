@@ -233,6 +233,10 @@ module hwvtep {
         container connection-info {
             uses hwvtep-connection-info-attributes;
         }
+        leaf db-version {
+            description "The database schema version";
+            type string;
+        }
         list managers {
             description "";
             key "target";

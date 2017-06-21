@@ -11,7 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>1.9.0</version>
+    <version>2.0.0</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
@@ -24,7 +24,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <modules>
     <module>features</module>
-    <module>features4</module>
     <module>odl-ovsdb-hwvtepsouthbound-api</module>
     <module>odl-ovsdb-hwvtepsouthbound</module>
     <module>odl-ovsdb-hwvtepsouthbound-rest</module>

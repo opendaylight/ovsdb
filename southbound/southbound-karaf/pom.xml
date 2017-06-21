@@ -9,7 +9,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>karaf4-parent</artifactId>
-    <version>1.9.0</version>
+    <version>2.0.0</version>
     <relativePath/>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -19,26 +19,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
-  <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
-  <licenses>
-    <license>
-      <name>Eclipse Public License v1.0</name>
-      <url>http://www.eclipse.org/legal/epl-v10.html</url>
-    </license>
-  </licenses>
-  <developers>
-    <developer>
-      <name>Sam Hague</name>
-      <email>shague@gmail.com</email>
-      <url>https://github.com/shague</url>
-    </developer>
-  </developers>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-  </scm>
   <properties>
     <karaf.localFeature>odl-ovsdb-southbound-impl-ui</karaf.localFeature>
   </properties>
@@ -64,7 +44,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>southbound-features4</artifactId>
+      <artifactId>southbound-features</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>

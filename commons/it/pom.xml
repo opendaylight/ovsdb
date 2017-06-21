@@ -32,13 +32,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
-  <developers>
-    <developer>
-      <name>Sam Hague</name>
-      <email>shague@gmail.com</email>
-      <url>https://github.com/shague</url>
-    </developer>
-  </developers>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>

@@ -16,6 +16,24 @@
       "revId": "10ca5eebdf4d653f312dfab77b2b9a9f1e69a136",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_01b6953d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-06-29T08:09:37Z",
+      "side": 1,
+      "message": "Copied this over from similar field in OVSDB. Enum does sound better than string comparison, but would be good to be consistent betwen OVSDB and hwvtep.",
+      "parentUuid": "da2a55be_a1a50906",
+      "revId": "10ca5eebdf4d653f312dfab77b2b9a9f1e69a136",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

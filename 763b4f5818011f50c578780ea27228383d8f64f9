@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af78d9a_feee80b3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchRemoveCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2017-06-13T18:44:38Z",
+      "side": 1,
+      "message": "Nit, typo in \"logcial\", should be \"logical\"",
+      "revId": "763b4f5818011f50c578780ea27228383d8f64f9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -14,13 +14,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.8.2-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>odl-ovsdb-hwvtepsouthbound-ui</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <!-- <name> formatting is used by autorelease to parse and notify projects on
@@ -38,14 +38,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-mdsal-apidocs</artifactId>
-            <version>1.5.1-SNAPSHOT</version>
+            <version>1.5.2-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.dluxapps</groupId>
             <artifactId>odl-dluxapps-yangman</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5.2-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

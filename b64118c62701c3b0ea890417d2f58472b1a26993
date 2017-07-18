@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_029492e0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalSwitchUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-07-18T15:35:57Z",
+      "side": 1,
+      "message": "We may need to check for SchemaMismatchException here too.",
+      "revId": "b64118c62701c3b0ea890417d2f58472b1a26993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

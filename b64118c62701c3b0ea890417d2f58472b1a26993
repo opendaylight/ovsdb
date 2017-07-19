@@ -16,6 +16,24 @@
       "revId": "b64118c62701c3b0ea890417d2f58472b1a26993",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_998475b2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepLogicalSwitchUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2017-07-19T19:35:55Z",
+      "side": 1,
+      "message": "I\u0027m testing this on ovs2.5 now, to see if there is an exception generated for this condition. For others, ovs 2.5 does not include support for logical switch replication mode, so it would be good to test (and code inspect) to make sure this change does not cause issues.",
+      "parentUuid": "da2a55be_029492e0",
+      "revId": "b64118c62701c3b0ea890417d2f58472b1a26993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

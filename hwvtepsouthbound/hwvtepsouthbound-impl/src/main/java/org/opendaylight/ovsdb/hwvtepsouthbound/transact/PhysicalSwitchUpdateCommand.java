@@ -86,7 +86,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
         setDescription(physicalSwitch, physicalSwitchAugmentation);
         setManagementIps(physicalSwitch, physicalSwitchAugmentation);
-        setTunnuleIps(physicalSwitch, physicalSwitchAugmentation);
+        setTunnuleIps(physicalSwitch, operationalPhysicalSwitchOptional.get());
         try {
             setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation,
                             operationalPhysicalSwitchOptional.isPresent());

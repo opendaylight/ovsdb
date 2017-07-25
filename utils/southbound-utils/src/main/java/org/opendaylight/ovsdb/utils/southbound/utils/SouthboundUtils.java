@@ -25,6 +25,7 @@ import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
@@ -1215,5 +1216,17 @@ public class SouthboundUtils {
             return dpId;
         }
         return null;
+    }
+
+    public static boolean checkDbVersion(String dbVersion, String minVersion) {
+        if (dbVersion != null && !dbVersion.isEmpty() && minVersion != null
+                && !minVersion.isEmpty()) {
+            Version dbVer = Version.fromString(dbVersion);
+            Version minVer = Version.fromString(minVersion);
+            if (dbVer.compareTo(minVer) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

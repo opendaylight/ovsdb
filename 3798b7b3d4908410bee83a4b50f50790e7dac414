@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_a2dc90e5",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1221,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-07-26T00:02:29Z",
+      "side": 1,
+      "message": "i think we need to rename the method something that conveys what the method is actually doing. Is it checking that the version is \u003e min version?",
+      "range": {
+        "startLine": 1221,
+        "startChar": 26,
+        "endLine": 1221,
+        "endChar": 40
+      },
+      "revId": "3798b7b3d4908410bee83a4b50f50790e7dac414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_22c9c026",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1221,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-07-26T00:02:29Z",
+      "side": 1,
+      "message": "please make the parameters final.",
+      "range": {
+        "startLine": 1221,
+        "startChar": 41,
+        "endLine": 1221,
+        "endChar": 76
+      },
+      "revId": "3798b7b3d4908410bee83a4b50f50790e7dac414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

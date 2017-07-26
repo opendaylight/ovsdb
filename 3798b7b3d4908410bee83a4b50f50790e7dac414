@@ -45,6 +45,54 @@
       "revId": "3798b7b3d4908410bee83a4b50f50790e7dac414",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_59cdca5c",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1221,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2017-07-26T12:27:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da2a55be_22c9c026",
+      "range": {
+        "startLine": 1221,
+        "startChar": 41,
+        "endLine": 1221,
+        "endChar": 76
+      },
+      "revId": "3798b7b3d4908410bee83a4b50f50790e7dac414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_d9089a93",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1221,
+      "author": {
+        "id": 2029
+      },
+      "writtenOn": "2017-07-26T12:27:59Z",
+      "side": 1,
+      "message": "Yes, this method is checking that the database version running on the node is at the same or later version than the minimum version passed in.\n\nDo you have a particular method name in mind that you would like to see this renamed to? Maybe compareDbVersionToMinVersion()?",
+      "parentUuid": "da2a55be_a2dc90e5",
+      "range": {
+        "startLine": 1221,
+        "startChar": 26,
+        "endLine": 1221,
+        "endChar": 40
+      },
+      "revId": "3798b7b3d4908410bee83a4b50f50790e7dac414",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

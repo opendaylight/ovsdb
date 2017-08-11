@@ -77,6 +77,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         Preconditions.checkNotNull(tunnel.getLocalColumn().getData());
         Preconditions.checkNotNull(tunnel.getRemoteColumn().getData());
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        //TODO remove these reads
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         PhysicalSwitch pSwitch =
                         getOvsdbConnectionInstance().getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());

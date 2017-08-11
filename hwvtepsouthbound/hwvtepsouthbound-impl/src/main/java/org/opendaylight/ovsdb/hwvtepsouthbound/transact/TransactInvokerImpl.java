@@ -56,8 +56,10 @@ public class TransactInvokerImpl implements TransactInvoker {
                     }
                 }
                 if (errorOccured) {
-                    connectionInstance.getDeviceInfo().clearInTransitData();
                     printError(tb);
+                    command.onFailure();
+                } else {
+                    command.onSuccess();
                 }
             } catch (Exception e) {
                 LOG.warn("Transact execution exception: ", e);

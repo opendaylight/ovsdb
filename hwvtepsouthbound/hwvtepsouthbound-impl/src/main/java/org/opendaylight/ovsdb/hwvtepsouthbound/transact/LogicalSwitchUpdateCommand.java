@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -55,7 +56,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
-    private void updateLogicalSwitch(final TransactionBuilder transaction,
+    public void updateLogicalSwitch(final TransactionBuilder transaction,
                                      final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
             InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
@@ -80,22 +81,21 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                                     final InstanceIdentifier lsKey,
                                     final Object... extraData) {
             LOG.debug("Creating logical switch named: {}", lswitch.getHwvtepNodeName());
-            Optional<LogicalSwitches> operationalSwitchOptional =
-                    getOperationalState().getLogicalSwitches(instanceIdentifier, lswitch.getKey());
+            HwvtepDeviceInfo.DeviceData operationalSwitchOptional =
+                    getDeviceInfo().getDeviceOperData(LogicalSwitches.class, lsKey);
             LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);
             setDescription(logicalSwitch, lswitch);
             setTunnelKey(logicalSwitch, lswitch);
             setReplicationMode(logicalSwitch, lswitch);
-            if (!operationalSwitchOptional.isPresent()) {
-                setName(logicalSwitch, lswitch, operationalSwitchOptional);
+            if (operationalSwitchOptional == null) {
+                setName(logicalSwitch, lswitch);
                 LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);
                 transaction.add(op.insert(logicalSwitch).withId(TransactUtils.getLogicalSwitchId(lswitch)));
                 transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
                 UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
-                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, lsKey);
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(LogicalSwitches.class, lsKey);
             } else {
-                LogicalSwitches updatedLSwitch = operationalSwitchOptional.get();
-                String existingLogicalSwitchName = updatedLSwitch.getHwvtepNodeName().getValue();
+                String existingLogicalSwitchName = lswitch.getHwvtepNodeName().getValue();
                 // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
                 LogicalSwitch extraLogicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class);
                 extraLogicalSwitch.setName("");
@@ -113,12 +113,9 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
-    private void setName(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch,
-            Optional<LogicalSwitches> inputSwitchOptional) {
+    private void setName(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
         if (inputSwitch.getHwvtepNodeName() != null) {
             logicalSwitch.setName(inputSwitch.getHwvtepNodeName().getValue());
-        } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.get().getHwvtepNodeName() != null) {
-            logicalSwitch.setName(inputSwitchOptional.get().getHwvtepNodeName().getValue());
         }
     }
 

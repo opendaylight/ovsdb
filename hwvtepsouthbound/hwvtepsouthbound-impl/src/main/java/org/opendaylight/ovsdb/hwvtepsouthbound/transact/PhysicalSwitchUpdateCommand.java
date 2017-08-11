@@ -289,7 +289,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             if (confLocOptional.isPresent()) {
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation =
                                 confLocOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
-                locatorUUID = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+                locatorUUID = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);
             } else {
                 LOG.warn("Unable to find endpoint for tunnel. Endpoint indentifier is {}", iid);
             }

@@ -85,6 +85,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
 
     private void updatePhysicalSwitch(ReadWriteTransaction transaction, UUID uuid, PhysicalSwitch pSwitch) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        //TODO remove this read
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             LOG.debug("Connection {} is present", connection);

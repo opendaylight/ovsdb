@@ -58,18 +58,15 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        updateData(transaction, updatedUMacsLocalRows.values());
+        if (!updatedUMacsLocalRows.isEmpty()) {
+            updateData(transaction, updatedUMacsLocalRows.values());
+        }
     }
 
     private void updateData(ReadWriteTransaction transaction, Collection<UcastMacsLocal> ucml) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
-        if (connection.isPresent()) {
-            // Update the connection node to let it know it manages this UCastMacsLocal
-            Node connectionNode = buildConnectionNode(ucml);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-            // TODO: Delete entries that are no longer needed
-        }
+        Node connectionNode = buildConnectionNode(ucml);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsLocal> ucml) {

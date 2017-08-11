@@ -46,6 +46,7 @@ public class HwvtepSouthboundConstants {
             = new ImmutableMap.Builder<String,List<String>>()
             .put("Manager", Arrays.asList("_version", "status"))
             .build();
+    public static final String VERSION_COLUMN = "_version";
     public static final int WAITING_QUEUE_CAPACITY = 1000;
     public static final long WAITING_JOB_EXPIRY_TIME_MILLIS = 90000;
     public static final long IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS = 10000;

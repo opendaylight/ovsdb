@@ -55,17 +55,15 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        updateUcastMacsRemote(transaction, updatedUMacsRemoteRows.values());
+        if (!updatedUMacsRemoteRows.isEmpty()) {
+            updateUcastMacsRemote(transaction, updatedUMacsRemoteRows.values());
+        }
     }
 
     private void updateUcastMacsRemote(ReadWriteTransaction transaction, Collection<UcastMacsRemote> ucastMacsRemote) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
-        if (connection.isPresent()) {
-            Node connectionNode = buildConnectionNode(ucastMacsRemote);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-            //TODO: Handle any deletes
-        }
+        Node connectionNode = buildConnectionNode(ucastMacsRemote);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsRemote> uMacRemotes) {

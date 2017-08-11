@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -87,7 +88,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
             setIpAddress(ucastMacsRemote, remoteUcastMac);
             setLocator(transaction, ucastMacsRemote, remoteUcastMac);
-            setLogicalSwitch(ucastMacsRemote, remoteUcastMac);
+            setLogicalSwitch(transaction, ucastMacsRemote, remoteUcastMac);
             if (deviceData == null) {
                 setMac(ucastMacsRemote, remoteUcastMac);
                 LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
@@ -108,18 +109,12 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             }
     }
 
-    private void setLogicalSwitch(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
+    private void setLogicalSwitch(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote, final RemoteUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
                     (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
-            HwvtepDeviceInfo.DeviceData deviceData = getOperationalState().getDeviceInfo().getDeviceOperData(
-                    LogicalSwitches.class, lswitchIid);
-            if (deviceData != null && deviceData.getUuid() != null) {
-                ucastMacsRemote.setLogicalSwitch(deviceData.getUuid());
-            } else {
-                ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(lswitchIid));
-            }
+            ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid));
         }
     }
 
@@ -166,6 +161,20 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                 return Collections.emptyList();
             }
             return Collections.singletonList(data.getLocatorRef().getValue());
+        }
+    }
+
+    @Override
+    public void onCommandSucceeded() {
+        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+            RemoteUcastMacs newMac = (RemoteUcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
+            RemoteUcastMacs oldMac = (RemoteUcastMacs) mdsalUpdate.getOldData();
+            if (oldMac != null && !oldMac.equals(newMac)) {
+                getDeviceInfo().decRefCount(macIid, oldMac.getLocatorRef().getValue());
+            }
+            getDeviceInfo().updateRemoteUcast(
+                    (InstanceIdentifier<LogicalSwitches>) newMac.getLogicalSwitchRef().getValue(), macIid, newMac);
         }
     }
 }

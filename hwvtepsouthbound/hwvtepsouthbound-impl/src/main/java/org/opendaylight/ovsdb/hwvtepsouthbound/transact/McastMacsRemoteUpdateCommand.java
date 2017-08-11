@@ -186,4 +186,33 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             return locators;
         }
     }
+
+    private void updateLocatorRefCounts(MdsalUpdate mdsalUpdate) {
+        //decrement the refcounts from old mcast mac
+        //increment the refcounts for new mcast mac
+        RemoteMcastMacs newMac = (RemoteMcastMacs) mdsalUpdate.getNewData();
+        RemoteMcastMacs oldMac = (RemoteMcastMacs) mdsalUpdate.getOldData();
+        InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
+
+        if (oldMac != null && !oldMac.equals(newMac)) {
+            if (oldMac.getLocatorSet() != null) {
+                List<LocatorSet> removedLocators = new ArrayList(oldMac.getLocatorSet());
+                if (newMac.getLocatorSet() != null) {
+                    removedLocators.removeAll(newMac.getLocatorSet());
+                }
+                removedLocators.forEach( (iid) -> getDeviceInfo().decRefCount(macIid, iid.getLocatorRef().getValue()));
+            }
+        }
+    }
+
+    @Override
+    protected void onCommandSucceeded() {
+        for (MdsalUpdate mdsalUpdate : updates) {
+            updateLocatorRefCounts(mdsalUpdate);
+            RemoteMcastMacs mac = (RemoteMcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
+            getDeviceInfo().updateRemoteMcast(
+                    (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
+        }
+    }
 }

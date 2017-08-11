@@ -58,6 +58,7 @@ public class HwvtepConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionInstance.class);
     private ConnectionInfo connectionInfo;
     private OvsdbClient client;
+    private HwvtepTableReader hwvtepTableReader = null;
     private InstanceIdentifier<Node> instanceIdentifier;
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
@@ -79,6 +80,7 @@ public class HwvtepConnectionInstance {
         this.txInvoker = txInvoker;
         this.deviceInfo = new HwvtepDeviceInfo(this);
         this.dataBroker = dataBroker;
+        this.hwvtepTableReader = new HwvtepTableReader(this);
     }
 
     public synchronized void transact(TransactCommand command) {
@@ -133,6 +135,8 @@ public class HwvtepConnectionInstance {
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                     Set<String> columns = new HashSet<>(tableSchema.getColumns());
                     List<String> skipColumns = HwvtepSouthboundConstants.SKIP_COLUMN_FROM_HWVTEP_TABLE.get(tableName);
+                    skipColumns = skipColumns == null ? new ArrayList<>() : new ArrayList<>(skipColumns);
+                    skipColumns.add(HwvtepSouthboundConstants.VERSION_COLUMN);
                     if (skipColumns != null) {
                         LOG.info("HwvtepSouthbound NOT monitoring columns {} in table {}", skipColumns, tableName);
                         columns.removeAll(skipColumns);
@@ -305,5 +309,9 @@ public class HwvtepConnectionInstance {
 
     public OvsdbClient getOvsdbClient() {
         return client;
+    }
+
+    public HwvtepTableReader getHwvtepTableReader() {
+        return hwvtepTableReader;
     }
 }

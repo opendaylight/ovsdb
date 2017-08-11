@@ -8,17 +8,46 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import java.util.List;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class DependentJob<T extends Identifiable> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DependentJob.class);
+
+    private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT
+            = (controllerData) -> controllerData != null && controllerData.isInTransitState();
+
+    private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT_EXPIRED
+            = (controllerData) -> controllerData != null && controllerData.isInTransitState()
+            && controllerData.isIntransitTimeExpired();
+
+    //expecting the device to create the data
+    private static final BiPredicate<HwvtepDeviceInfo.DeviceData, Optional<TypedBaseTable>> INTRANSIT_DATA_CREATED
+            = (controllerData, deviceData) -> controllerData.getUuid() == null && deviceData.isPresent();
+
+    private static final BiPredicate<HwvtepDeviceInfo.DeviceData, Optional<TypedBaseTable>> INTRANSIT_DATA_NOT_CREATED
+            = (controllerData, deviceData) -> controllerData.getUuid() == null && !deviceData.isPresent();
+
+    //expecting the device to delete the data
+    private static final BiPredicate<HwvtepDeviceInfo.DeviceData, Optional<TypedBaseTable>> INTRANSIT_DATA_DELETED
+            = (controllerData, deviceData) -> controllerData.getUuid() != null && !deviceData.isPresent();
+
+    private static final BiPredicate<HwvtepDeviceInfo.DeviceData, Optional<TypedBaseTable>> INTRANSIT_DATA_NOT_DELETED
+            = (controllerData, deviceData) -> controllerData.getUuid() != null && deviceData.isPresent();
 
     private final long expiryTime;
     private final InstanceIdentifier key;
@@ -79,6 +108,16 @@ public abstract class DependentJob<T extends Identifiable> {
         return data;
     }
 
+    public boolean isConfigWaitingJob() {
+        return true;
+    }
+
+    public void onFailure() {
+    }
+
+    public void onSuccess() {
+    }
+
     public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob {
 
         public ConfigWaitingJob(InstanceIdentifier key, T data, Map dependencies) {
@@ -99,8 +138,47 @@ public abstract class DependentJob<T extends Identifiable> {
 
         @Override
         protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, InstanceIdentifier iid) {
-            HwvtepDeviceInfo.DeviceData deviceData = deviceInfo.getDeviceOperData(cls, iid);
-            return deviceData == null || deviceData.getStatus() != HwvtepDeviceInfo.DeviceDataStatus.IN_TRANSIT;
+            boolean depenencyMet = true;
+            HwvtepDeviceInfo.DeviceData controllerData = deviceInfo.getDeviceOperData(cls, iid);
+
+            if (DATA_INTRANSIT_EXPIRED.test(controllerData)) {
+                LOG.info("Intransit state expired for key: {} --- dependency {}", iid, getKey());
+                String clsName = cls.getSimpleName();
+
+                //either the device acted on the selected iid/uuid and sent the updated event or it did not
+                //here we are querying the device directly to get the latest status on the iid
+                Optional<TypedBaseTable> latestDeviceStatus = deviceInfo.getConnectionInstance().
+                        getHwvtepTableReader().getHwvtepTableEntryUUID(cls, iid, controllerData.getUuid());
+
+                TypedBaseTable latestDeviceData = latestDeviceStatus.isPresent() ? latestDeviceStatus.get() : null;
+
+                if (INTRANSIT_DATA_CREATED.test(controllerData, latestDeviceStatus)) {
+                    LOG.info("Intransit expired key is actually created but update is missed/delayed {}", iid);
+                    deviceInfo.updateDeviceOperData(cls, iid, latestDeviceStatus.get().getUuid(), latestDeviceData);
+
+                } else if (INTRANSIT_DATA_NOT_CREATED.test(controllerData, latestDeviceStatus)) {
+                    LOG.info("Intransit expired key is actually not created but update is missed/delayed {}", iid);
+                    deviceInfo.clearDeviceOperData(cls, iid);
+
+                } else if (INTRANSIT_DATA_DELETED.test(controllerData, latestDeviceStatus)) {
+                    //also deleted from device
+                    LOG.info("Intransit expired key is actually deleted but update is missed/delayed {}", iid);
+                    deviceInfo.clearDeviceOperData(cls, iid);
+
+                } else if (INTRANSIT_DATA_NOT_DELETED.test(controllerData, latestDeviceStatus)) {
+                    //not deleted from device we will reuse existing uuid
+                    LOG.info("Intransit expired key is actually not deleted but update is missed/delayed {}", iid);
+                    deviceInfo.updateDeviceOperData(cls, iid, latestDeviceStatus.get().getUuid(), latestDeviceData);
+                }
+            } else if (DATA_INTRANSIT.test(controllerData)) {
+                //device status is still in transit
+                depenencyMet = false;
+            }
+            return depenencyMet;
+        }
+
+        public boolean isConfigWaitingJob() {
+            return false;
         }
     }
 }

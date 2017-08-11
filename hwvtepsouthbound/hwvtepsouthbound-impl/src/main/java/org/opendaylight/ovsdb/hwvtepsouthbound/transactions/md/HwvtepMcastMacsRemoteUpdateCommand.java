@@ -69,16 +69,11 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
 
     private void updateData(ReadWriteTransaction transaction, McastMacsRemote mMacRemote) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
-        if (connection.isPresent()) {
-            // Update the connection node to let it know it manages this MCastMacsRemote
-            Node connectionNode = buildConnectionNode(mMacRemote);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-            InstanceIdentifier<RemoteMcastMacs> macIid = getMacIid(connectionIId, connectionNode);
-            getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteMcastMacs.class,
-                    macIid, mMacRemote.getUuid(), mMacRemote);
-            // TODO: Delete entries that are no longer needed
-        }
+        Node connectionNode = buildConnectionNode(mMacRemote);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+        InstanceIdentifier<RemoteMcastMacs> macIid = getMacIid(connectionIId, connectionNode);
+        getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteMcastMacs.class,
+                macIid, mMacRemote.getUuid(), mMacRemote);
     }
 
     InstanceIdentifier<RemoteMcastMacs> getMacIid(InstanceIdentifier<Node> connectionIId, Node connectionNode) {

@@ -168,4 +168,18 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             return Collections.singletonList(data.getLocatorRef().getValue());
         }
     }
+
+    @Override
+    public void onCommandSucceeded() {
+        for (MdsalUpdate mdsalUpdate : updates) {
+            RemoteUcastMacs newMac = (RemoteUcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
+            RemoteUcastMacs oldMac = (RemoteUcastMacs) mdsalUpdate.getOldData();
+            if (oldMac != null && !oldMac.equals(newMac)) {
+                getDeviceInfo().decRefCount(macIid, oldMac.getLocatorRef().getValue());
+            }
+            getDeviceInfo().updateRemoteUcast(
+                    (InstanceIdentifier<LogicalSwitches>) newMac.getLogicalSwitchRef().getValue(), macIid, newMac);
+        }
+    }
 }

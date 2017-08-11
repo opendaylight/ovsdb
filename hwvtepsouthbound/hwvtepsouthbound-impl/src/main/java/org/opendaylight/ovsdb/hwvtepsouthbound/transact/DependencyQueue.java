@@ -114,13 +114,16 @@ public class DependencyQueue {
         while(jobIterator.hasNext()) {
             DependentJob job = jobIterator.next();
             long currentTime = System.currentTimeMillis();
-            if (job.isExpired(currentTime)) {
-                jobIterator.remove();
-                continue;
-            }
+
+            //first check if its dependencies are met later check for expired status
             if (job.areDependenciesMet(deviceInfo)) {
                 jobIterator.remove();
                 readyJobs.add(job);
+                continue;
+            }
+            if (job.isExpired(currentTime)) {
+                jobIterator.remove();
+                continue;
             }
         }
         return readyJobs;

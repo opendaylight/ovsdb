@@ -66,12 +66,16 @@ public class HwvtepDeviceInfo {
         private final UUID uuid;
         private final Object data;
         private final DeviceDataStatus status;
+        private long intransitTimeStamp;
 
         DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
             this.data = data;
             this.key = key;
             this.status = status;
             this.uuid = uuid;
+            if (status == DeviceDataStatus.IN_TRANSIT) {
+                intransitTimeStamp = System.currentTimeMillis();
+            }
         }
 
         public Object getData() {
@@ -88,6 +92,15 @@ public class HwvtepDeviceInfo {
 
         public InstanceIdentifier getKey() {
             return key;
+        }
+
+        public boolean isIntransitTimeExpired() {
+            return System.currentTimeMillis()
+                    > intransitTimeStamp + HwvtepSouthboundConstants.IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS;
+        }
+
+        public boolean isInTransitState() {
+            return status == DeviceDataStatus.IN_TRANSIT;
         }
     }
 
@@ -383,5 +396,9 @@ public class HwvtepDeviceInfo {
             decRefCount(ucastIid, mac.getLocatorRef().getValue());
         }
         clearDeviceOperData(RemoteUcastMacs.class, ucastIid);
+    }
+
+    public HwvtepConnectionInstance getConnectionInstance() {
+        return connectionInstance;
     }
 }

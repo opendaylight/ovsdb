@@ -74,7 +74,7 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
      * Used by blueprint when starting the container.
      */
     public void init() {
-        LOG.info("HwvtepSouthboundProvider Session Initiated");
+        LOG.error("HwvtepSouthboundProvider Session Initiated ver1");
         txInvoker = new TransactionInvokerImpl(db);
         cm = new HwvtepConnectionManager(db, txInvoker, entityOwnershipService);
         hwvtepDTListener = new HwvtepDataChangeListener(db, cm);

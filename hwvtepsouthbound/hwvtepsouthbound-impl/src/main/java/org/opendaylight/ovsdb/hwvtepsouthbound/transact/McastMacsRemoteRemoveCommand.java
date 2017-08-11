@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -128,5 +129,17 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     @Override
     protected boolean isRemoveCommand() {
         return true;
+    }
+
+
+    @Override
+    public void onCommandSucceeded() {
+        //remove the refcounts of the deleted macs
+        for (MdsalUpdate mdsalUpdate : updates) {
+            RemoteMcastMacs deletedMac = (RemoteMcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
+            getDeviceInfo().removeRemoteMcast(
+                    (InstanceIdentifier<LogicalSwitches>) deletedMac.getLogicalSwitchRef().getValue(), macIid);
+        }
     }
 }

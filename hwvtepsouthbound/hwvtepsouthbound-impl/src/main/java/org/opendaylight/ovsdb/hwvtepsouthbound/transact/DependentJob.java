@@ -79,6 +79,12 @@ public abstract class DependentJob<T extends Identifiable> {
         return data;
     }
 
+    public void onFailure() {
+    }
+
+    public void onSuccess() {
+    }
+
     public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob {
 
         public ConfigWaitingJob(InstanceIdentifier key, T data, Map dependencies) {

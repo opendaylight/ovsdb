@@ -22,21 +22,27 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractTransactCommand<T extends Identifiable, Aug extends Augmentation<Node>> implements TransactCommand<T> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
     private HwvtepOperationalState operationalState;
     private Collection<DataTreeModification<Node>> changes;
+    protected List<MdsalUpdate<T>> updates = new ArrayList<>();
 
     protected AbstractTransactCommand() {
         // NO OP
@@ -57,12 +63,24 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     void updateCurrentTxDeleteData(Class<? extends Identifiable> cls, InstanceIdentifier key, T data) {
         operationalState.updateCurrentTxDeleteData(cls, key);
+        addToUpdates(key, data);
         operationalState.getDeviceInfo().clearConfigData(cls, key);
     }
 
-    void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, Object data) {
+    void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, T data) {
         operationalState.updateCurrentTxData(cls, key, uuid);
+        addToUpdates(key, data);
         operationalState.getDeviceInfo().updateConfigData(cls, key, data);
+    }
+
+    void addToUpdates(InstanceIdentifier key, T data) {
+        T oldData = null;
+        Type type = getClass().getGenericSuperclass();
+        Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
+        if (getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key) != null) {
+            oldData = (T) getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key).getData();
+        }
+        updates.add(new MdsalUpdate<T>(key, data, oldData));
     }
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
@@ -104,6 +122,16 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
                     AbstractTransactCommand.this.operationalState = operationalState;
                     onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
                 }
+
+                @Override
+                public void onFailure() {
+                    AbstractTransactCommand.this.onFailure();
+                }
+
+                @Override
+                public void onSuccess() {
+                    AbstractTransactCommand.this.onSuccess();
+                }
             };
             deviceInfo.addJobToQueue(configWaitingJob);
         }
@@ -115,8 +143,25 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
                 @Override
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
                                                  TransactionBuilder transactionBuilder) {
+                    //data would have got deleted by , push the data only if it is still in configds
                     AbstractTransactCommand.this.operationalState = operationalState;
-                    onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
+                    T data = (T)new MdsalUtils(operationalState.getDataBroker()).read(
+                            LogicalDatastoreType.CONFIGURATION, key);
+                    if (data != null) {
+                        onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
+                    } else {
+                        LOG.warn("Skipping add of key: {} as it is not present txId: {}", key);
+                    }
+                }
+
+                @Override
+                public void onFailure() {
+                    AbstractTransactCommand.this.onFailure();
+                }
+
+                @Override
+                public void onSuccess() {
+                    AbstractTransactCommand.this.onSuccess();
                 }
             };
             deviceInfo.addJobToQueue(opWaitingJob);
@@ -305,5 +350,23 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     protected boolean isRemoveCommand() {
         return false;
+    }
+
+    protected HwvtepDeviceInfo getDeviceInfo() {
+        return operationalState.getDeviceInfo();
+    }
+
+    public void onSuccess() {
+        onCommandSucceeded();
+    }
+
+    public void onFailure() {
+        onCommandFailed();
+    }
+
+    protected void onCommandSucceeded() {
+    }
+
+    protected void onCommandFailed() {
     }
 }

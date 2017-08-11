@@ -66,12 +66,16 @@ public class HwvtepDeviceInfo {
         private final UUID uuid;
         private final Object data;
         private final DeviceDataStatus status;
+        private long intransitTimeStamp;
 
         DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
             this.data = data;
             this.key = key;
             this.status = status;
             this.uuid = uuid;
+            if (status == DeviceDataStatus.IN_TRANSIT) {
+                intransitTimeStamp = System.currentTimeMillis();
+            }
         }
 
         public Object getData() {
@@ -88,6 +92,15 @@ public class HwvtepDeviceInfo {
 
         public InstanceIdentifier getKey() {
             return key;
+        }
+
+        public boolean isIntransitTimeExpired() {
+            return System.currentTimeMillis()
+                    > intransitTimeStamp + HwvtepSouthboundConstants.IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS;
+        }
+
+        public boolean isInTransitState() {
+            return status == DeviceDataStatus.IN_TRANSIT;
         }
     }
 
@@ -223,6 +236,7 @@ public class HwvtepDeviceInfo {
     }
 
     public void clearDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        LOG.debug("Clearing device data {}", key);
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
     public Object getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
@@ -253,7 +267,7 @@ public class HwvtepDeviceInfo {
         dependencyQueue.processReadyJobsFromConfigQueue(connectionInstance);
     }
 
-    public void onOperDataAvailable() {
+    public synchronized void onOperDataAvailable() {
         dependencyQueue.processReadyJobsFromOpQueue(connectionInstance);
     }
 
@@ -262,6 +276,7 @@ public class HwvtepDeviceInfo {
     }
 
     public void clearDeviceOperUUID(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid) {
+        LOG.debug("Clearing device data uuid {}", key);
         HwvtepSouthboundUtil.clearData(uuidVsData, cls, uuid);
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
@@ -341,7 +356,6 @@ public class HwvtepDeviceInfo {
         if (ucasts != null ) {
             ucasts.entrySet().forEach( (entry) -> removeRemoteUcast(logicalSwitchKey, entry.getKey()));
         }
-        clearDeviceOperData(LogicalSwitches.class, logicalSwitchKey);
     }
 
     public  void updateRemoteMcast(InstanceIdentifier<LogicalSwitches> lsIid,
@@ -383,5 +397,9 @@ public class HwvtepDeviceInfo {
             decRefCount(ucastIid, mac.getLocatorRef().getValue());
         }
         clearDeviceOperData(RemoteUcastMacs.class, ucastIid);
+    }
+
+    public HwvtepConnectionInstance getConnectionInstance() {
+        return connectionInstance;
     }
 }

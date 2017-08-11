@@ -58,6 +58,7 @@ public class HwvtepConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionInstance.class);
     private ConnectionInfo connectionInfo;
     private OvsdbClient client;
+    private HwvtepTableReader hwvtepTableReader = null;
     private InstanceIdentifier<Node> instanceIdentifier;
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
@@ -79,6 +80,7 @@ public class HwvtepConnectionInstance {
         this.txInvoker = txInvoker;
         this.deviceInfo = new HwvtepDeviceInfo(this);
         this.dataBroker = dataBroker;
+        this.hwvtepTableReader = new HwvtepTableReader(this);
     }
 
     public synchronized void transact(TransactCommand command) {
@@ -305,5 +307,9 @@ public class HwvtepConnectionInstance {
 
     public OvsdbClient getOvsdbClient() {
         return client;
+    }
+
+    public HwvtepTableReader getHwvtepTableReader() {
+        return hwvtepTableReader;
     }
 }

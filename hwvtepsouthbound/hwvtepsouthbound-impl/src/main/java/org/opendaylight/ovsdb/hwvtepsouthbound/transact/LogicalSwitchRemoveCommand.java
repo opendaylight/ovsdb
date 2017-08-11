@@ -154,4 +154,11 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     protected boolean isRemoveCommand() {
         return true;
     }
+
+    @Override
+    public void onCommandSucceeded() {
+        for (MdsalUpdate mdsalUpdate : updates) {
+            getDeviceInfo().clearLogicalSwitchRefs((InstanceIdentifier<LogicalSwitches>) mdsalUpdate.getKey());
+        }
+    }
 }

@@ -135,6 +135,8 @@ public class HwvtepConnectionInstance {
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                     Set<String> columns = new HashSet<>(tableSchema.getColumns());
                     List<String> skipColumns = HwvtepSouthboundConstants.SKIP_COLUMN_FROM_HWVTEP_TABLE.get(tableName);
+                    skipColumns = skipColumns == null ? new ArrayList<>() : new ArrayList<>(skipColumns);
+                    skipColumns.add(HwvtepSouthboundConstants.VERSION_COLUMN);
                     if (skipColumns != null) {
                         LOG.info("HwvtepSouthbound NOT monitoring columns {} in table {}", skipColumns, tableName);
                         columns.removeAll(skipColumns);

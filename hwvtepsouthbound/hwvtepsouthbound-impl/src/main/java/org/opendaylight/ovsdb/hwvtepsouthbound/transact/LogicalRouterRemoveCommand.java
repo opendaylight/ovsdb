@@ -12,10 +12,12 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -44,26 +46,27 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
       if (removed != null) {
           for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> created: removed.entrySet()) {
               if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
-                  for (LogicalRouters lRouter : created.getValue()) {
-                      InstanceIdentifier<LogicalRouters> lsKey = created.getKey().augmentation(
-                              HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lRouter.getKey());
-                      updateCurrentTxDeleteData(LogicalRouters.class, lsKey, lRouter);
-                  }
                   getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
                       @Override
                       public void execute(TransactionBuilder transactionBuilder) {
+                          HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
+                          HwvtepOperationalState operState = new HwvtepOperationalState(
+                                  connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
+                          threadLocalOperationalState.set(operState);
+                          threadLocalDeviceTransaction.set(transactionBuilder);
                           LOG.debug("Running delete logical router in seperate tx {}", created.getKey());
                           removeLogicalRouter(transactionBuilder, created.getKey(), created.getValue());
                       }
 
+
                       @Override
-                      public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                 Identifiable data, InstanceIdentifier key, Object... extraData) {
+                      public void onSuccess(TransactionBuilder deviceTransaction) {
+                          LogicalRouterRemoveCommand.this.onSuccess(deviceTransaction);
                       }
 
                       @Override
-                      public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                      Identifiable data, InstanceIdentifier key, Object... extraData) {
+                      public void onFailure(TransactionBuilder deviceTransaction) {
+                          LogicalRouterRemoveCommand.this.onFailure(deviceTransaction);
                       }
                   });
               }

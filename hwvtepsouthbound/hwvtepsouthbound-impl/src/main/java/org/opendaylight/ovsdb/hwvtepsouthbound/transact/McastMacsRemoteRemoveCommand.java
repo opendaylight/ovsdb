@@ -18,19 +18,19 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<RemoteMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteRemoveCommand.class);
@@ -95,24 +95,23 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final InstanceIdentifier macIid,
                                     final Object... extraData) {
             LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
-            Optional<RemoteMcastMacs> operationalMacOptional =
-                    getOperationalState().getRemoteMcastMacs(instanceIdentifier, mac.getKey());
+            HwvtepDeviceInfo.DeviceData operationalMacOptional =
+                    getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macIid);
             McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     McastMacsRemote.class, null);
-            if (operationalMacOptional.isPresent() && operationalMacOptional.get().getMacEntryUuid() != null) {
+            if (operationalMacOptional != null && operationalMacOptional.getUuid() != null) {
                 //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
                 //TODO: locator in config DS is not deleted
-                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                UUID macEntryUUID = operationalMacOptional.getUuid();
                 mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
                 transaction.add(op.delete(mcastMacsRemote.getSchema()).
                         where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
-                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, macIid);
+                updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
             } else {
                 LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());
             }
-            updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
     }
 
     @Override
@@ -128,5 +127,17 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     @Override
     protected boolean isRemoveCommand() {
         return true;
+    }
+
+
+    @Override
+    public void onCommandSucceeded() {
+        //remove the refcounts of the deleted macs
+        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+            RemoteMcastMacs deletedMac = (RemoteMcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
+            getDeviceInfo().removeRemoteMcast(
+                    (InstanceIdentifier<LogicalSwitches>) deletedMac.getLogicalSwitchRef().getValue(), macIid);
+        }
     }
 }

@@ -194,4 +194,15 @@ public class TransactCommandAggregator implements TransactCommand {
         }
         return null;
     }
+
+    @Override
+    public void onFailure(TransactionBuilder deviceTransaction) {
+        commands.forEach( cmd -> cmd.onFailure(deviceTransaction));
+        operationalState.clearIntransitKeys();
+    }
+
+    @Override
+    public void onSuccess(TransactionBuilder deviceTransaction) {
+        commands.forEach( cmd -> cmd.onSuccess(deviceTransaction));
+    }
 }

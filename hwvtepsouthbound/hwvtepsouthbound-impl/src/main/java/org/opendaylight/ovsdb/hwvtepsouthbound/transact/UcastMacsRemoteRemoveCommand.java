@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -89,12 +90,11 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                 transaction.add(op.delete(ucastMacsRemote.getSchema()).
                         where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
-                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
+                updateCurrentTxDeleteData(RemoteUcastMacs.class, macKey, mac);
             } else {
                 LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
                         mac.getMacEntryKey().getValue());
             }
-            updateCurrentTxDeleteData(RemoteUcastMacs.class, macIid, mac);
     }
 
     protected List<RemoteUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
@@ -104,5 +104,15 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     @Override
     protected boolean isRemoveCommand() {
         return true;
+    }
+
+    @Override
+    public void onCommandSucceeded() {
+        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+            RemoteUcastMacs deletedMac = (RemoteUcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
+            getDeviceInfo().removeRemoteUcast(
+                    (InstanceIdentifier<LogicalSwitches>) deletedMac.getLogicalSwitchRef().getValue(), macIid);
+        }
     }
 }

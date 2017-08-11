@@ -46,6 +46,12 @@ public class HwvtepSouthboundConstants {
             = new ImmutableMap.Builder<String,List<String>>()
             .put("Manager", Arrays.asList("_version", "status"))
             .build();
-    public static final int WAITING_QUEUE_CAPACITY = 1000;
-    public static final long WAITING_JOB_EXPIRY_TIME_MILLIS = 90000;
+    public static final int WAITING_QUEUE_CAPACITY = Integer.getInteger("hwvtep.wait.queue.capacity", 1000);
+    public static final long WAITING_JOB_EXPIRY_TIME_MILLIS = Integer.getInteger(
+            "hwvtep.wait.job.expiry.time.millis", 90000);
+    public static final long IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS = Integer.getInteger(
+            "hwvtep.intransit.job.expiry.time.millis", 10000);
+    public static final long IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS = Integer.getInteger(
+            "hwvtep.intransit.job.check.period.millis", 30000);
+
 }

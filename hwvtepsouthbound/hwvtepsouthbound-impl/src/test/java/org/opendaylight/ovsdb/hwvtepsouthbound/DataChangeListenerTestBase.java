@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -57,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -129,6 +132,20 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         deleteNode(CONFIGURATION);
     }
 
+    void setFinalStatic(Class cls, String fieldName, Object newValue) throws Exception {
+        Field fields[] = FieldUtils.getAllFields(cls);
+        for (Field field : fields) {
+            if (fieldName.equals(field.getName())) {
+                field.setAccessible(true);
+                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                field.set(null, newValue);
+                break;
+            }
+        }
+    }
+
     void loadSchema() {
         try (InputStream resourceAsStream = DataChangeListenerTestBase.class.getResourceAsStream("hwvtep_schema.json")) {
             ObjectMapper mapper = new ObjectMapper();
@@ -168,6 +185,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         field(HwvtepConnectionInstance.class, "txInvoker").set(connectionInstance, transactionInvoker);
         field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
         field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
+        when(connectionInstance.getOvsdbClient()).thenReturn(ovsdbClient);
+        when(ovsdbClient.isActive()).thenReturn(true);
         when(connectionInstance.getConnectionInfo()).thenReturn(connectionInfo);
         when(connectionInstance.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
         when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);

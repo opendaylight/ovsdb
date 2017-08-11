@@ -11,12 +11,14 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -53,26 +55,26 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
         if (removeds != null) {
             for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created: removeds.entrySet()) {
                 if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
-                    for (LogicalSwitches lswitch : created.getValue()) {
-                        InstanceIdentifier<LogicalSwitches> lsKey = created.getKey().augmentation(
-                                HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, lswitch.getKey());
-                        updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
-                    }
-                    getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
+                    getDeviceInfo().scheduleTransaction(new TransactCommand() {
                         @Override
                         public void execute(TransactionBuilder transactionBuilder) {
+                            HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
+                            HwvtepOperationalState operState = new HwvtepOperationalState(
+                                    connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
+                            threadLocalOperationalState.set(operState);
+                            threadLocalDeviceTransaction.set(transactionBuilder);
                             LOG.debug("Running delete logical switch in seperate tx {}", created.getKey());
                             removeLogicalSwitch(transactionBuilder, created.getKey(), created.getValue());
                         }
 
                         @Override
-                        public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                   Identifiable data, InstanceIdentifier key, Object... extraData) {
+                        public void onSuccess(TransactionBuilder deviceTransaction) {
+                            LogicalSwitchRemoveCommand.this.onSuccess(deviceTransaction);
                         }
 
                         @Override
-                        public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                                        Identifiable data, InstanceIdentifier key, Object... extraData) {
+                        public void onFailure(TransactionBuilder deviceTransaction) {
+                            LogicalSwitchRemoveCommand.this.onFailure(deviceTransaction);
                         }
                     });
                 }
@@ -133,7 +135,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                         McastMacsLocal.class, null);
                 transaction.add(op.delete(mcastMacsLocal.getSchema())
                         .where(mcastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
-                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, lsKey);
+                updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
             } else {
                 LOG.warn("Unable to delete logical switch {} because it was not found in the operational store",
                         lswitch.getHwvtepNodeName().getValue());
@@ -153,5 +155,15 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     @Override
     protected boolean isRemoveCommand() {
         return true;
+    }
+
+    @Override
+    public void onCommandSucceeded() {
+        if (getDeviceTransaction() == null || !updates.containsKey(getDeviceTransaction())) {
+            return;
+        }
+        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+            getDeviceInfo().clearLogicalSwitchRefs((InstanceIdentifier<LogicalSwitches>) mdsalUpdate.getKey());
+        }
     }
 }

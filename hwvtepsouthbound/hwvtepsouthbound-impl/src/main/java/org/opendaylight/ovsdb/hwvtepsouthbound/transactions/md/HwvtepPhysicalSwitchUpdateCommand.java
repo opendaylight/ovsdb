@@ -85,6 +85,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
 
     private void updatePhysicalSwitch(ReadWriteTransaction transaction, UUID uuid, PhysicalSwitch pSwitch) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        //TODO remove this read
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             LOG.debug("Connection {} is present", connection);
@@ -101,7 +102,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             PhysicalSwitch oldPSwitch = oldPSRows.get(uuid);
             updateTunnelIps(pSwitch, oldPSwitch, transaction);
 
-            getOvsdbConnectionInstance().getDeviceInfo().putPhysicalSwitch(pSwitch.getUuid(), pSwitch);
+            getDeviceInfo().updateDeviceOperData(Node.class, psIid, pSwitch.getUuid(), pSwitch);
             // TODO: Delete entries that are no longer needed
             // TODO: Deletion of tunnels
             // TODO: Deletion of Tunnel BFD config and params

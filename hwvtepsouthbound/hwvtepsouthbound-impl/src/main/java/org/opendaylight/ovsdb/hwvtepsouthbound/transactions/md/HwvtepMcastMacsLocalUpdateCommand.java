@@ -66,13 +66,8 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
 
     private void updateData(ReadWriteTransaction transaction, McastMacsLocal mMacLocal) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
-        if (connection.isPresent()) {
-            // Update the connection node to let it know it manages this MCastMacsLocal
-            Node connectionNode = buildConnectionNode(mMacLocal);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-            // TODO: Delete entries that are no longer needed
-        }
+        Node connectionNode = buildConnectionNode(mMacLocal);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
     }
 
     private Node buildConnectionNode(McastMacsLocal mMacLocal) {

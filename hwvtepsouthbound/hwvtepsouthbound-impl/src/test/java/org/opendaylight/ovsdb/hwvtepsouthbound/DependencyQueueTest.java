@@ -8,9 +8,9 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -28,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -55,7 +56,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     InstanceIdentifier<LogicalSwitches> lsIid;
     Map<Class<? extends Identifiable>, List<InstanceIdentifier>> unMetDependencies;
 
-    void setupForTest() {
+    void setupForTest() throws Exception {
         MCAST_MAC_DATA_VALIDATOR = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);
         opState = new HwvtepOperationalState(connectionInstance);
         mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
@@ -64,7 +65,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
                 child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.getKey()));
-        Whitebox.setInternalState(DependencyQueue.class, "executorService", MoreExecutors.newDirectExecutorService());
+        setFinalStatic(DependencyQueue.class, "executorService", PowerMockito.mock(SameThreadScheduledExecutor.class, Mockito.CALLS_REAL_METHODS));
     }
 
     @Test

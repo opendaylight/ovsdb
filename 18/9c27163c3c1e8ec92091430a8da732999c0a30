@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Sam Hague <shague@redhat.com>
+Code-Review+1: Victor Pickard <vpickard@redhat.com>
+Code-Review+2: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-by: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-at: Fri, 11 Aug 2017 08:06:24 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/60711
+Project: ovsdb
+Branch: refs/heads/stable/carbon

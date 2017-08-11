@@ -17,9 +17,17 @@ public interface TransactCommand<T extends Identifiable> {
 
     void execute(TransactionBuilder transaction);
 
-    void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
-                        InstanceIdentifier key, Object... extraData);
+    default void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
+                                InstanceIdentifier key, Object... extraData) {
+    }
 
-    void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
-                             InstanceIdentifier key, Object... extraData);
+    default void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
+                                     InstanceIdentifier key, Object... extraData) {
+    }
+
+    default void onSuccess(TransactionBuilder deviceTransaction) {
+    }
+
+    default void onFailure(TransactionBuilder deviceTransaction) {
+    }
 }

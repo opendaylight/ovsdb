@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.collect.Sets;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommand;
@@ -16,7 +17,11 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -25,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
@@ -60,12 +66,16 @@ public class HwvtepDeviceInfo {
         private final UUID uuid;
         private final Object data;
         private final DeviceDataStatus status;
+        private long intransitTimeStamp;
 
         DeviceData(InstanceIdentifier key, UUID uuid, Object data, DeviceDataStatus status) {
             this.data = data;
             this.key = key;
             this.status = status;
             this.uuid = uuid;
+            if (status == DeviceDataStatus.IN_TRANSIT) {
+                intransitTimeStamp = System.currentTimeMillis();
+            }
         }
 
         public Object getData() {
@@ -79,9 +89,24 @@ public class HwvtepDeviceInfo {
         public UUID getUuid() {
             return uuid;
         }
+
+        public InstanceIdentifier getKey() {
+            return key;
+        }
+
+        public boolean isIntransitTimeExpired() {
+            return System.currentTimeMillis()
+                    > intransitTimeStamp + HwvtepSouthboundConstants.IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS;
+        }
+
+        public boolean isInTransitState() {
+            return status == DeviceDataStatus.IN_TRANSIT;
+        }
     }
 
-    //TODO remove this
+    private Map<InstanceIdentifier, Set<InstanceIdentifier>> tepIdReferences;
+    private Map<InstanceIdentifier<LogicalSwitches>, Map<InstanceIdentifier<RemoteUcastMacs>, RemoteUcastMacs>> logicalSwitchVsUcasts;
+    private Map<InstanceIdentifier<LogicalSwitches>, Map<InstanceIdentifier<RemoteMcastMacs>, RemoteMcastMacs>> logicalSwitchVsMcasts;
     private Map<UUID, LogicalSwitch> logicalSwitches = null;
     private Map<UUID, PhysicalSwitch> physicalSwitches = null;
     private Map<UUID, PhysicalLocator> physicalLocators = null;
@@ -96,10 +121,13 @@ public class HwvtepDeviceInfo {
 
     public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
         this.connectionInstance = hwvtepConnectionInstance;
-        this.logicalSwitches = new HashMap<>();
-        this.physicalSwitches = new HashMap<>();
-        this.physicalLocators = new HashMap<>();
-        this.mapTunnelToPhysicalSwitch = new HashMap<>();
+        this.logicalSwitches = new ConcurrentHashMap<>();
+        this.physicalSwitches = new ConcurrentHashMap<>();
+        this.physicalLocators = new ConcurrentHashMap<>();
+        this.mapTunnelToPhysicalSwitch = new ConcurrentHashMap<>();
+        this.tepIdReferences = new ConcurrentHashMap<>();
+        this.logicalSwitchVsUcasts = new ConcurrentHashMap<>();
+        this.logicalSwitchVsMcasts = new ConcurrentHashMap<>();
         this.dependencyQueue = new DependencyQueue(this);
     }
 
@@ -139,7 +167,7 @@ public class HwvtepDeviceInfo {
     }
 
     public Map<UUID, PhysicalLocator> getPhysicalLocators() {
-        Map<UUID, Object> locators = uuidVsData.get(LogicalSwitches.class);
+        Map<UUID, Object> locators = uuidVsData.get(TerminationPoint.class);
         Map<UUID, PhysicalLocator> result = new HashMap<>();
         if (locators != null) {
             for (Map.Entry<UUID, Object> entry : locators.entrySet()) {
@@ -180,7 +208,11 @@ public class HwvtepDeviceInfo {
     }
 
     public Object getConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
-        return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
+        DeviceData deviceData = HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
+        if (deviceData != null) {
+            return deviceData.getData();
+        }
+        return null;
     }
 
     public void clearConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
@@ -239,7 +271,7 @@ public class HwvtepDeviceInfo {
         dependencyQueue.processReadyJobsFromConfigQueue(connectionInstance);
     }
 
-    public void onOperDataAvailable() {
+    public synchronized void onOperDataAvailable() {
         dependencyQueue.processReadyJobsFromOpQueue(connectionInstance);
     }
 
@@ -247,17 +279,120 @@ public class HwvtepDeviceInfo {
         dependencyQueue.submit(() -> connectionInstance.transact(transactCommand));
     }
 
-    public void clearInTransitData() {
-        //TODO restore old data
-        for (Map<InstanceIdentifier, DeviceData> map : opKeyVsData.values()) {
-            Iterator<Map.Entry<InstanceIdentifier, DeviceData>> iterator = map.entrySet().iterator();
-            while ( iterator.hasNext() ) {
-                Map.Entry<InstanceIdentifier, DeviceData> entry = iterator.next();
-                if (entry.getValue().getStatus() == DeviceDataStatus.IN_TRANSIT) {
-                    iterator.remove();
+    public void clearDeviceOperData(Class<? extends Identifiable> cls) {
+        Map<InstanceIdentifier, DeviceData> iids = opKeyVsData.get(cls);
+        if (iids != null && !iids.isEmpty()) {
+            Iterator<Map.Entry<InstanceIdentifier, DeviceData>> it = iids.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<InstanceIdentifier, DeviceData> entry = it.next();
+                DeviceData deviceData = entry.getValue();
+                if (deviceData != null && deviceData.getStatus() != DeviceDataStatus.IN_TRANSIT) {
+                    it.remove();
                 }
             }
         }
-        onOperDataAvailable();
+    }
+
+    public void clearInTransit(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        DeviceData deviceData = getDeviceOperData(cls, key);
+        if (deviceData != null && deviceData.isInTransitState()) {
+            if (deviceData.getData() != null) {
+                HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
+                        new DeviceData(key, deviceData.getUuid(), deviceData.getData(), DeviceDataStatus.AVAILABLE));
+            } else {
+                clearDeviceOperData(cls, key);
+            }
+        }
+    }
+
+    public Map<InstanceIdentifier, DeviceData> getDeviceOperData(Class<? extends Identifiable> cls) {
+        return opKeyVsData.get(cls);
+    }
+
+    public void incRefCount(InstanceIdentifier reference, InstanceIdentifier tep) {
+        if (reference == null || tep == null) {
+            return;
+        }
+        tepIdReferences.computeIfAbsent(tep, (tepId) -> Sets.newConcurrentHashSet());
+        tepIdReferences.get(tep).add(reference);
+    }
+
+    public int getRefCount(InstanceIdentifier tep) {
+        return tepIdReferences.containsKey(tep) ? tepIdReferences.get(tep).size() : 0;
+    }
+
+    public Set<InstanceIdentifier> getRefCounts(InstanceIdentifier tep) {
+        return tepIdReferences.get(tep);
+    }
+
+    public void decRefCount(InstanceIdentifier reference, InstanceIdentifier tep) {
+        if (reference == null || tep == null || !tepIdReferences.containsKey(tep)) {
+            return;
+        }
+        //synchronize to make sure that no two parallel deletes puts the key in transit state twice
+        synchronized (this) {
+            boolean removed = tepIdReferences.get(tep).remove(reference);
+            if (removed && tepIdReferences.get(tep).isEmpty()) {
+                LOG.debug("Marking the termination point as in transit ref count zero {} ", tep);
+                markKeyAsInTransit(TerminationPoint.class, tep);
+            }
+        }
+    }
+
+    public void clearLogicalSwitchRefs(InstanceIdentifier<LogicalSwitches> logicalSwitchKey) {
+        Map<InstanceIdentifier<RemoteMcastMacs>, RemoteMcastMacs> mcasts = logicalSwitchVsMcasts.get(logicalSwitchKey);
+        if (mcasts != null ) {
+            mcasts.entrySet().forEach( (entry) -> removeRemoteMcast(logicalSwitchKey, entry.getKey()));
+        }
+        Map<InstanceIdentifier<RemoteUcastMacs>, RemoteUcastMacs> ucasts = logicalSwitchVsUcasts.get(logicalSwitchKey);
+        if (ucasts != null ) {
+            ucasts.entrySet().forEach( (entry) -> removeRemoteUcast(logicalSwitchKey, entry.getKey()));
+        }
+        markKeyAsInTransit(LogicalSwitches.class, logicalSwitchKey);
+    }
+
+    public  void updateRemoteMcast(InstanceIdentifier<LogicalSwitches> lsIid,
+                                   InstanceIdentifier<RemoteMcastMacs> mcastIid,
+                                   RemoteMcastMacs mac) {
+        logicalSwitchVsMcasts.computeIfAbsent(lsIid, (lsKey) -> new ConcurrentHashMap<>());
+        logicalSwitchVsMcasts.get(lsIid).put(mcastIid, mac);
+        if (mac.getLocatorSet() != null) {
+            mac.getLocatorSet().forEach( (iid) -> incRefCount(mcastIid, iid.getLocatorRef().getValue()));
+        }
+    }
+
+    public  void updateRemoteUcast(InstanceIdentifier<LogicalSwitches> lsIid,
+                                   InstanceIdentifier<RemoteUcastMacs> ucastIid,
+                                   RemoteUcastMacs mac) {
+        logicalSwitchVsUcasts.computeIfAbsent(lsIid, (lsKey) -> new ConcurrentHashMap<>());
+        logicalSwitchVsUcasts.get(lsIid).put(ucastIid, mac);
+        incRefCount(ucastIid, mac.getLocatorRef().getValue());
+    }
+
+    public  void removeRemoteMcast(InstanceIdentifier<LogicalSwitches> lsIid, InstanceIdentifier<RemoteMcastMacs> mcastIid) {
+        if (!logicalSwitchVsMcasts.containsKey(lsIid)) {
+            return;
+        }
+        RemoteMcastMacs mac = logicalSwitchVsMcasts.get(lsIid).remove(mcastIid);
+        if (mac != null && mac.getLocatorSet() != null) {
+            mac.getLocatorSet().forEach((iid) -> decRefCount(mcastIid, iid.getLocatorRef().getValue()));
+        }
+        markKeyAsInTransit(RemoteMcastMacs.class, mcastIid);
+    }
+
+    public void removeRemoteUcast(InstanceIdentifier<LogicalSwitches> lsIid,
+                                   InstanceIdentifier<RemoteUcastMacs> ucastIid) {
+        if (!logicalSwitchVsUcasts.containsKey(lsIid)) {
+            return;
+        }
+        RemoteUcastMacs mac = logicalSwitchVsUcasts.get(lsIid).remove(ucastIid);
+        if (mac != null) {
+            decRefCount(ucastIid, mac.getLocatorRef().getValue());
+        }
+        markKeyAsInTransit(RemoteUcastMacs.class, ucastIid);
+    }
+
+    public HwvtepConnectionInstance getConnectionInstance() {
+        return connectionInstance;
     }
 }

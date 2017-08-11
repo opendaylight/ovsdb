@@ -472,4 +472,21 @@ public class HwvtepOperationalState {
     public void setInReconciliation(boolean inReconciliation) {
         this.inReconciliation = inReconciliation;
     }
+
+    public DataBroker getDataBroker() {
+        return db;
+    }
+
+
+    public void clearIntransitKeys() {
+        currentTxUUIDs.forEach( (cls, map) -> {
+            map.forEach( (iid, uuid) -> deviceInfo.clearInTransit(cls, iid));
+        });
+        currentTxDeletedKeys.forEach( (cls, map) -> {
+            map.forEach( (iid, val) -> deviceInfo.clearInTransit(cls, iid));
+        });
+        currentTxUUIDs.clear();
+        currentTxDeletedKeys.clear();
+        deviceInfo.onOperDataAvailable();
+    }
 }

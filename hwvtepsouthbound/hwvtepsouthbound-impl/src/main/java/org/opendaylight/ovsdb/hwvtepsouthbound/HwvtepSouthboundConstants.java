@@ -42,9 +42,10 @@ public class HwvtepSouthboundConstants {
             .put("Logical_Binding_Stats", "Update callback registration for Logical_Binding_Stats Table is skipped")
             .build();
 
+    public static final String VERSION_COLUMN = "_version";
     public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_HWVTEP_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
-            .put("Manager", Arrays.asList("_version", "status"))
+            .put("Manager", Arrays.asList(VERSION_COLUMN, "status"))
             .build();
     public static final int WAITING_QUEUE_CAPACITY = 1000;
     public static final long WAITING_JOB_EXPIRY_TIME_MILLIS = 90000;

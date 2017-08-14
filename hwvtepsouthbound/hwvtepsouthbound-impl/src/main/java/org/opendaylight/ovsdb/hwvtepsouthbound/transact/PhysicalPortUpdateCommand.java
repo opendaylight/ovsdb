@@ -18,23 +18,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +50,7 @@ import com.google.common.base.Optional;
 
 public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortUpdateCommand.class);
+    private static final VlanBindingsUnMetDependencyGetter DEPENDENCY_GETTER = new VlanBindingsUnMetDependencyGetter();
 
     public PhysicalPortUpdateCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {
@@ -57,7 +66,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         if (!createds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> created:
                 createds.entrySet()) {
-                updatePhysicalPort(transaction,  created.getKey(), created.getValue(), createdPhysicalSwitches);
+                updatePhysicalPort(transaction,  created.getKey(), created.getValue());
             }
         }
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updateds =
@@ -65,49 +74,29 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         if (!updateds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updated:
                 updateds.entrySet()) {
-                updatePhysicalPort(transaction,  updated.getKey(), updated.getValue(), createdPhysicalSwitches);
+                updatePhysicalPort(transaction,  updated.getKey(), updated.getValue());
             }
         }
     }
 
-    private void updatePhysicalPort(TransactionBuilder transaction,
-            InstanceIdentifier<Node> psNodeiid,
-            List<HwvtepPhysicalPortAugmentation> listPort,
-            Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> createdPhysicalSwitches ) {
+    public void updatePhysicalPort(final TransactionBuilder transaction,
+                                   final InstanceIdentifier<Node> psNodeiid,
+                                   final List<HwvtepPhysicalPortAugmentation> listPort) {
         //Get physical switch which the port belong to: in operation DS or new created
-        PhysicalSwitchAugmentation physicalSwitchBelong = getPhysicalSwitchBelong(psNodeiid, createdPhysicalSwitches);
         for (HwvtepPhysicalPortAugmentation port : listPort) {
             LOG.debug("Creating a physical port named: {}", port.getHwvtepNodeName().getValue());
-            Optional<HwvtepPhysicalPortAugmentation> operationalPhysicalPortOptional =
-                    getOperationalState().getPhysicalPortAugmentation(psNodeiid, port.getHwvtepNodeName());
-            PhysicalPort physicalPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
-            //get managing global node of physicalSwitchBelong
-            InstanceIdentifier<?> globalNodeIid = physicalSwitchBelong.getManagedBy().getValue();
-            setVlanBindings(globalNodeIid, physicalPort, port);
-            setDescription(physicalPort, port);
-            if (!operationalPhysicalPortOptional.isPresent()) {
-                //create a physical port
-                setName(physicalPort, port, operationalPhysicalPortOptional);
-                String portUuid = "PhysicalPort_" + HwvtepSouthboundMapper.getRandomUUID();
-                LOG.trace("execute: creating physical port: {}", physicalPort);
-                transaction.add(op.insert(physicalPort).withId(portUuid));
-                transaction.add(op.comment("Physical Port: Creating " + port.getHwvtepNodeName().getValue()));
-                //update physical switch table
-                PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class);
-                physicalSwitch.setName(physicalSwitchBelong.getHwvtepNodeName().getValue());
-                physicalSwitch.setPorts(Collections.singleton(new UUID(portUuid)));
-                LOG.trace("execute: mutating physical switch: {}", physicalSwitch);
-                transaction.add(op.mutate(physicalSwitch)
-                        .addMutation(physicalSwitch.getPortsColumn().getSchema(), Mutator.INSERT,
-                                physicalSwitch.getPortsColumn().getData())
-                        .where(physicalSwitch.getNameColumn().getSchema().opEqual(physicalSwitch.getNameColumn().getData()))
-                        .build());
-                transaction.add(op.comment("Physical Switch: Mutating " +
-                                port.getHwvtepNodeName().getValue() + " " + portUuid));
+            HwvtepDeviceInfo.DeviceData deviceOperdata = getDeviceInfo().getDeviceOperData(TerminationPoint.class,
+                    getTpIid(psNodeiid, port.getHwvtepNodeName().getValue()));
+            if (deviceOperdata == null) {
+                //create a physical port always happens from device
+                LOG.error("Physical port {} not present in oper datastore", port.getHwvtepNodeName().getValue());
             } else {
-                //updated physical port only
-                HwvtepPhysicalPortAugmentation updatedPhysicalPort = operationalPhysicalPortOptional.get();
-                String existingPhysicalPortName = updatedPhysicalPort.getHwvtepNodeName().getValue();
+                PhysicalPort physicalPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                        PhysicalPort.class);
+                physicalPort.setName(port.getHwvtepNodeName().getValue());
+                setVlanBindings(psNodeiid, physicalPort, port, transaction);
+                setDescription(physicalPort, port);
+                String existingPhysicalPortName = port.getHwvtepNodeName().getValue();
                 PhysicalPort extraPhyscialPort =
                         TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
                 extraPhyscialPort.setName("");
@@ -149,25 +138,108 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setVlanBindings(InstanceIdentifier<?> globalNodeIid, PhysicalPort physicalPort,
-            HwvtepPhysicalPortAugmentation inputPhysicalPort) {
+    private void setVlanBindings(final InstanceIdentifier<Node> psNodeiid,
+                                 final PhysicalPort physicalPort,
+                                 final HwvtepPhysicalPortAugmentation inputPhysicalPort,
+                                 final TransactionBuilder transaction) {
         if (inputPhysicalPort.getVlanBindings() != null) {
             //get UUID by LogicalSwitchRef
             Map<Long, UUID> bindingMap = new HashMap<>();
             for (VlanBindings vlanBinding: inputPhysicalPort.getVlanBindings()) {
+                InstanceIdentifier<VlanBindings> vlanIid = getVlanBindingIid(psNodeiid, physicalPort, vlanBinding);
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<LogicalSwitches> lswitchIid =
                         (InstanceIdentifier<LogicalSwitches>) vlanBinding.getLogicalSwitchRef().getValue();
-                Optional<LogicalSwitches> operationalSwitchOptional =
-                        getOperationalState().getLogicalSwitches(lswitchIid);
-                if (operationalSwitchOptional.isPresent()) {
-                    Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
-                    bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), new UUID(logicalSwitchUuid.getValue()));
-                }else{
-                    bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), TransactUtils.getLogicalSwitchUUID(lswitchIid));
+
+                Map inTransitDependencies = DEPENDENCY_GETTER.getInTransitDependencies(
+                        getOperationalState(), vlanBinding);
+                Map configDependencies = DEPENDENCY_GETTER.getUnMetConfigDependencies(
+                        getOperationalState(), vlanBinding);
+
+                if (!HwvtepSouthboundUtil.isEmptyMap(configDependencies)) {
+                    createConfigWaitJob(psNodeiid, inputPhysicalPort,
+                            vlanBinding, configDependencies, vlanIid);
+                    continue;
                 }
+                if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
+                    createOperWaitingJob(psNodeiid, inputPhysicalPort,
+                            vlanBinding, inTransitDependencies, vlanIid);
+                    continue;
+                }
+
+                bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(),
+                        TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid));
             }
             physicalPort.setVlanBindings(bindingMap);
+        }
+    }
+
+    private void createOperWaitingJob(final InstanceIdentifier<Node> psNodeiid,
+                                      final HwvtepPhysicalPortAugmentation inputPhysicalPort,
+                                      final VlanBindings vlanBinding,
+                                      final Map inTransitDependencies,
+                                      final InstanceIdentifier<VlanBindings> vlanIid) {
+
+        DependentJob<VlanBindings> opWaitingJob = new DependentJob.OpWaitingJob(
+                vlanIid, vlanBinding, inTransitDependencies) {
+            @Override
+            public void onDependencyResolved(final HwvtepOperationalState operationalState,
+                                             final TransactionBuilder transactionBuilder) {
+                PhysicalPortUpdateCommand.this.threadLocalOperationalState.set(operationalState);
+                PhysicalPortUpdateCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
+                updatePhysicalPort(transactionBuilder, psNodeiid, Lists.newArrayList(inputPhysicalPort));
+            }
+        };
+        getDeviceInfo().addJobToQueue(opWaitingJob);
+    }
+
+    private void createConfigWaitJob(final InstanceIdentifier<Node> psNodeiid,
+                                     final HwvtepPhysicalPortAugmentation inputPhysicalPort,
+                                     final VlanBindings vlanBinding,
+                                     final Map configDependencies,
+                                     final InstanceIdentifier<VlanBindings> vlanIid) {
+
+        DependentJob<VlanBindings> configWaitingJob = new DependentJob.ConfigWaitingJob(
+                vlanIid, vlanBinding, configDependencies) {
+            @Override
+            public void onDependencyResolved(final HwvtepOperationalState operationalState,
+                                             final TransactionBuilder transactionBuilder) {
+                PhysicalPortUpdateCommand.this.threadLocalOperationalState.set(operationalState);
+                PhysicalPortUpdateCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
+                updatePhysicalPort(transactionBuilder, psNodeiid, Lists.newArrayList(inputPhysicalPort));
+            }
+        };
+        getDeviceInfo().addJobToQueue(configWaitingJob);
+    }
+
+    private InstanceIdentifier<TerminationPoint> getTpIid(final InstanceIdentifier<Node> psNodeiid,
+                                                          final String portName) {
+        return psNodeiid.child(
+                TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+    }
+
+    private InstanceIdentifier<VlanBindings> getVlanBindingIid(
+            final InstanceIdentifier<Node> psNodeiid,
+            final PhysicalPort physicalPort,
+            final VlanBindings vlanBinding) {
+
+        return psNodeiid.child(
+                TerminationPoint.class, new TerminationPointKey(new TpId(physicalPort.getName())))
+                .augmentation(HwvtepPhysicalPortAugmentation.class)
+                .child(VlanBindings.class, new VlanBindingsKey(vlanBinding.getVlanIdKey()));
+    }
+
+    static class VlanBindingsUnMetDependencyGetter extends UnMetDependencyGetter<VlanBindings> {
+
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(VlanBindings data) {
+            if (data == null) {
+                return Collections.emptyList();
+            }
+            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
+        }
+
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(VlanBindings data) {
+            return Collections.emptyList();
         }
     }
 

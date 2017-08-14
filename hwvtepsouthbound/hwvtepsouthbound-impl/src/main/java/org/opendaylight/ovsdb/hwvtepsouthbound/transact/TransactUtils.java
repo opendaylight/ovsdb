@@ -10,12 +10,15 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -30,6 +33,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
@@ -218,9 +222,35 @@ public class TransactUtils {
         return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX + sanitizeUUID(lswitch.getHwvtepNodeName());
     }
 
-    public static UUID getLogicalSwitchUUID(InstanceIdentifier<LogicalSwitches> lswitchIid){
+    private static UUID getLogicalSwitchUUID(InstanceIdentifier<LogicalSwitches> lswitchIid){
         return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX +
                 sanitizeUUID(lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
+    }
+
+    public static UUID getLogicalSwitchUUID(final TransactionBuilder transaction,
+                                            final HwvtepOperationalState operationalState,
+                                            final InstanceIdentifier<LogicalSwitches> lswitchIid) {
+        HwvtepDeviceInfo hwvtepDeviceInfo = operationalState.getDeviceInfo();
+        HwvtepDeviceInfo.DeviceData lsData = hwvtepDeviceInfo.getDeviceOperData(LogicalSwitches.class, lswitchIid);
+        if (lsData != null) {
+            if (lsData.getUuid() != null) {
+                return lsData.getUuid();
+            }
+            if (lsData.isInTransitState()) {
+                return getLogicalSwitchUUID(lswitchIid);
+            }
+            return null;
+        }
+        LogicalSwitchUpdateCommand cmd = new LogicalSwitchUpdateCommand(operationalState, Collections.EMPTY_LIST);
+        MdsalUtils mdsalUtils = new MdsalUtils(operationalState.getDataBroker());
+        LogicalSwitches ls = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, lswitchIid);
+        if (ls != null) {
+            cmd.updateLogicalSwitch(transaction, lswitchIid.firstIdentifierOf(Node.class), Lists.newArrayList(ls));
+        } else {
+            LOG.error("Could not find logical switch in config ds {}", lswitchIid);
+            return null;
+        }
+        return getLogicalSwitchUUID(lswitchIid);
     }
 
     public static String getLogicalRouterId(final LogicalRouters lrouter){

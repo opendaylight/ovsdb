@@ -65,6 +65,7 @@ public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand 
                                 updatedPSwitchData).child(TerminationPoint.class,
                                 new TerminationPointKey(new TpId(portName)));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
+                getDeviceInfo().clearDeviceOperUUID(TerminationPoint.class, nodePath, pPort.getUuid());
             }
         }
     }

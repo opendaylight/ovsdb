@@ -66,7 +66,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
             LogicalRouter logicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalRouter.class);
             setDescription(logicalRouter, lrouter);
 
-            setSwitchBindings(logicalRouter, lrouter.getSwitchBindings());
+            setSwitchBindings(transaction, logicalRouter, lrouter.getSwitchBindings());
             setStaticRoutes(logicalRouter, lrouter.getStaticRoutes());
             setAclBindings(logicalRouter, lrouter.getAclBindings());
 
@@ -108,7 +108,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
         }
     }
 
-    private void setSwitchBindings(final LogicalRouter logicalRouter, final List<SwitchBindings> switchBindings) {
+    private void setSwitchBindings(final TransactionBuilder transaction, final LogicalRouter logicalRouter, final List<SwitchBindings> switchBindings) {
         if (switchBindings != null) {
             Map<String, UUID> bindingMap = new HashMap<String, UUID>();
             for (SwitchBindings switchBinding : switchBindings) {
@@ -123,7 +123,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                             new UUID(logicalSwitchUuid.getValue()));
                 }else{
                     bindingMap.put(switchBinding.getDestinationAddress().getIpv4Prefix().getValue(),
-                            TransactUtils.getLogicalSwitchUUID(lswitchIid));
+                            TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid));
                 }
             }
             logicalRouter.setSwitchBinding(bindingMap);

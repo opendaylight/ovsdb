@@ -9,15 +9,25 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.PhysicalPortUpdateCommand;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -32,6 +42,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatus;
@@ -59,12 +70,25 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     private Map<UUID, PhysicalPort> updatedPPRows;
     private Map<UUID, PhysicalPort> oldPPRows;
     private Map<UUID, PhysicalSwitch> switchUpdatedRows;
+    private Set<UUID> skipReconciliationPorts;
 
     public HwvtepPhysicalPortUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPPRows = TyperUtils.extractRowsUpdated(PhysicalPort.class, getUpdates(), getDbSchema());
         oldPPRows = TyperUtils.extractRowsOld(PhysicalPort.class, getUpdates(), getDbSchema());
         switchUpdatedRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
+        skipReconciliationPorts = new HashSet<>();
+        for (Entry<UUID, PhysicalPort> pPortUpdateEntry : updatedPPRows.entrySet()) {
+            Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(pPortUpdateEntry.getKey());
+            if (switchIid.isPresent()) {
+                if (getDeviceInfo().getDeviceOperData(Node.class, switchIid.get()) == null) {
+                    //This is the first update from switch do not have to do reconciliation of this port
+                    //it is taken care by switch reconciliation
+                    skipReconciliationPorts.add(pPortUpdateEntry.getKey());
+                }
+            }
+        }
+
     }
 
     @Override
@@ -105,6 +129,9 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 }
+                reconcileToPort(transaction, pPortUpdate, tpPath);
+                getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
+                        pPortUpdate.getUuid(), pPortUpdate);
                 // Update with Deleted VlanBindings
                 if (oldPPRows.get(pPortUpdateEntry.getKey()) != null
                         && oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn() != null) {
@@ -125,6 +152,48 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 deleteEntries(transaction,getPortFaultStatusToRemove( tpPath, pPortUpdate));
             }
         }
+    }
+
+    private void reconcileToPort(final ReadWriteTransaction transaction,
+                                 final PhysicalPort pPortUpdate,
+                                 final InstanceIdentifier<TerminationPoint> tpPath) {
+        if (skipReconciliationPorts.contains(pPortUpdate.getUuid())) {
+            //case of port added along with switch add
+            //switch reconciliation will take care of this port along with other ports
+            return;
+        }
+        if (getDeviceInfo().getDeviceOperData(TerminationPoint.class, tpPath) != null) {
+            //case of port update not new port add
+            return;
+        }
+        //case of individual port add , reconcile to this port
+        getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath, pPortUpdate.getUuid(), pPortUpdate);
+        Futures.addCallback(transaction.read(LogicalDatastoreType.CONFIGURATION, tpPath),
+                new FutureCallback<Optional<TerminationPoint>>() {
+                    @Override
+                    public void onSuccess(Optional<TerminationPoint> optionalConfigTp) {
+                        if (!optionalConfigTp.isPresent() || optionalConfigTp.get().getAugmentation(
+                                HwvtepPhysicalPortAugmentation.class) == null) {
+                            //TODO port came with some vlan bindings clean them up use PortRemovedCommand
+                            return;
+                        }
+                        getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
+                                pPortUpdate.getUuid(), pPortUpdate);
+                        TerminationPoint configTp = optionalConfigTp.get();
+                        getDeviceInfo().scheduleTransaction((transactionBuilder) -> {
+                            InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);
+                            HwvtepOperationalState operState = new HwvtepOperationalState(getOvsdbConnectionInstance());
+                            PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(
+                                    operState, Collections.EMPTY_LIST);
+                            portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid,
+                                    Lists.newArrayList(configTp.getAugmentation(HwvtepPhysicalPortAugmentation.class)));
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                    }
+                });
     }
 
     private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,

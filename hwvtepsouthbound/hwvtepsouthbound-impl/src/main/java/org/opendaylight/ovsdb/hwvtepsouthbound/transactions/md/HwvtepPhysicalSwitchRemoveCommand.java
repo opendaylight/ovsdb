@@ -43,7 +43,7 @@ public class HwvtepPhysicalSwitchRemoveCommand extends AbstractTransactionComman
             // TODO handle removal of reference to managed switch from model
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
             transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            getOvsdbConnectionInstance().getDeviceInfo().removePhysicalSwitch(pSwitch.getUuid());
+            getDeviceInfo().clearDeviceOperData(Node.class, switchIid);
         }
     }
 

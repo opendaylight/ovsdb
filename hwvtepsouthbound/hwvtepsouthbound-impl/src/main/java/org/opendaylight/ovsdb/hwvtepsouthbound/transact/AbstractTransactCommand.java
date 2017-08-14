@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTransactCommand<T extends Identifiable, Aug extends Augmentation<Node>> implements TransactCommand<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
-    private HwvtepOperationalState operationalState;
+    protected HwvtepOperationalState operationalState;
     private Collection<DataTreeModification<Node>> changes;
     protected List<MdsalUpdate<T>> updates = new ArrayList<>();
 

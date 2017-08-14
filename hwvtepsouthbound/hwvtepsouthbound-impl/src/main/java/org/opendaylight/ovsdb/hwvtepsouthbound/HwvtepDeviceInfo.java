@@ -236,6 +236,7 @@ public class HwvtepDeviceInfo {
     }
 
     public void clearDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        LOG.debug("Clearing device oper data {}", key);
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
     public Object getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
@@ -354,7 +355,6 @@ public class HwvtepDeviceInfo {
         if (ucasts != null ) {
             ucasts.entrySet().forEach( (entry) -> removeRemoteUcast(logicalSwitchKey, entry.getKey()));
         }
-        clearDeviceOperData(LogicalSwitches.class, logicalSwitchKey);
     }
 
     public  void updateRemoteMcast(InstanceIdentifier<LogicalSwitches> lsIid,

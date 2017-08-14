@@ -87,7 +87,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
             setIpAddress(ucastMacsRemote, remoteUcastMac);
             setLocator(transaction, ucastMacsRemote, remoteUcastMac);
-            setLogicalSwitch(ucastMacsRemote, remoteUcastMac);
+            setLogicalSwitch(transaction, ucastMacsRemote, remoteUcastMac);
             if (deviceData == null) {
                 setMac(ucastMacsRemote, remoteUcastMac);
                 LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
@@ -108,18 +108,12 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             }
     }
 
-    private void setLogicalSwitch(UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
+    private void setLogicalSwitch(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote, final RemoteUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
                     (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
-            HwvtepDeviceInfo.DeviceData deviceData = getOperationalState().getDeviceInfo().getDeviceOperData(
-                    LogicalSwitches.class, lswitchIid);
-            if (deviceData != null && deviceData.getUuid() != null) {
-                ucastMacsRemote.setLogicalSwitch(deviceData.getUuid());
-            } else {
-                ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(lswitchIid));
-            }
+            ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid));
         }
     }
 

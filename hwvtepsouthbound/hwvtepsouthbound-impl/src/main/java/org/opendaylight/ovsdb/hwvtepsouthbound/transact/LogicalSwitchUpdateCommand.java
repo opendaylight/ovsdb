@@ -55,8 +55,8 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
-    private void updateLogicalSwitch(final TransactionBuilder transaction,
-                                     final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
+    public void updateLogicalSwitch(final TransactionBuilder transaction,
+                                    final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
             InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                     child(LogicalSwitches.class, lswitch.getKey());
@@ -92,7 +92,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                 transaction.add(op.insert(logicalSwitch).withId(TransactUtils.getLogicalSwitchId(lswitch)));
                 transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
                 UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
-                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteMcastMacs.class, lsKey);
+                getOperationalState().getDeviceInfo().markKeyAsInTransit(LogicalSwitches.class, lsKey);
             } else {
                 LogicalSwitches updatedLSwitch = operationalSwitchOptional.get();
                 String existingLogicalSwitchName = updatedLSwitch.getHwvtepNodeName().getValue();

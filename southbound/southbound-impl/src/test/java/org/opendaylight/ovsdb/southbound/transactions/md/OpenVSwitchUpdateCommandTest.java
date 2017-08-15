@@ -318,6 +318,7 @@ public class OpenVSwitchUpdateCommandTest {
         set.add("dpdk");
         set.add("dpdkr");
         set.add("dpdkvhostuser");
+        set.add("dpdkvhostuserclient");
         set.add("geneve");
         set.add("gre");
         set.add("internal");
@@ -343,7 +344,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(ovsdbNodeBuilder.setInterfaceTypeEntry(any(List.class))).thenReturn(ovsdbNodeBuilder);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setInterfaceTypes", ovsdbNodeBuilder, openVSwitch);
         verify(openVSwitch).getIfaceTypesColumn();
-        verify(interfaceTypeEntryBldr,times(13)).setInterfaceType(InterfaceTypeInternal.class);
+        verify(interfaceTypeEntryBldr,times(14)).setInterfaceType(InterfaceTypeInternal.class);
     }
 
     @Test

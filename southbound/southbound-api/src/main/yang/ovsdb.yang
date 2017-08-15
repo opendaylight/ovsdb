@@ -800,6 +800,11 @@ module ovsdb {
         base interface-type-base;
     }
 
+    identity interface-type-dpdkvhostuserclient {
+        description "Interface type for dpdkvhostuserclient interfaces";
+        base interface-type-base;
+    }
+
     identity interface-type-stt {
         description "Interface type for stt interfaces";
         base interface-type-base;

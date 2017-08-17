@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
-import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
@@ -119,6 +120,10 @@ public class SouthboundUtils {
     private static final String PATCH_PORT_TYPE = "patch";
     // External ID key used for mapping between an OVSDB port and an interface name
     private static final String EXTERNAL_INTERFACE_ID_KEY = "iface-id";
+
+    private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
+    private static final Pattern PATTERN = Pattern.compile(FORMAT);
+
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
@@ -1219,11 +1224,16 @@ public class SouthboundUtils {
     }
 
     public static boolean compareDbVersionToMinVersion(final String dbVersion, final String minVersion) {
+        final Matcher dbVersionMatcher = PATTERN.matcher(dbVersion);
+        final Matcher minVersionMatcher = PATTERN.matcher(minVersion);
         if (dbVersion != null && !dbVersion.isEmpty() && minVersion != null
                 && !minVersion.isEmpty()) {
-            Version dbVer = Version.fromString(dbVersion);
-            Version minVer = Version.fromString(minVersion);
-            if (dbVer.compareTo(minVer) >= 0) {
+            if ((Integer.valueOf(dbVersionMatcher.group(1)).equals(Integer.valueOf(minVersionMatcher.group(1))) &&
+                    Integer.valueOf(dbVersionMatcher.group(2)).equals(Integer.valueOf(minVersionMatcher.group(2))) &&
+                    Integer.valueOf(dbVersionMatcher.group(3)).equals(Integer.valueOf(minVersionMatcher.group(3)))) ||
+                    Integer.valueOf(dbVersionMatcher.group(1)).intValue() > Integer.valueOf(minVersionMatcher.group(1)).intValue() ||
+                    Integer.valueOf(dbVersionMatcher.group(2)).intValue() >= Integer.valueOf(minVersionMatcher.group(2)).intValue() ||
+                    Integer.valueOf(dbVersionMatcher.group(3)).intValue() >= Integer.valueOf(minVersionMatcher.group(3)).intValue()) {
                 return true;
             }
         }

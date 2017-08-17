@@ -50,11 +50,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-topology</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>library</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <!-- testing dependencies -->
     <dependency>
       <groupId>junit</groupId>

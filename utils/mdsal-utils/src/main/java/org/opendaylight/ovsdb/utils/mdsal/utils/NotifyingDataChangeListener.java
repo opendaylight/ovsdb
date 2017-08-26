@@ -7,10 +7,15 @@
  */
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -18,16 +23,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * This class provides methods for checking or waiting for various md-sal operations to complete.
  * Once an instance is created one must invoke the registerDataChangeListener method
  * with a DataBroker.
  */
-public class NotifyingDataChangeListener implements AutoCloseable, DataChangeListener {
+public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChangeListener<DataObject> {
     private static final Logger LOG = LoggerFactory.getLogger(NotifyingDataChangeListener.class);
     private LogicalDatastoreType type;
     private final Set<InstanceIdentifier<?>> createdIids = new HashSet<>();
@@ -98,22 +99,36 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
     }
 
     @Override
-    public void onDataChanged(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asyncDataChangeEvent) {
+    public void onDataTreeChanged(Collection<DataTreeModification<DataObject>> changes) {
         if (!listen) {
             return;
         }
-        if ((mask & BIT_CREATE) == BIT_CREATE) {
-            LOG.info("{} DataChanged: created {}", type, asyncDataChangeEvent.getCreatedData().keySet());
-            createdIids.addAll(asyncDataChangeEvent.getCreatedData().keySet());
-        }
-        if ((mask & BIT_UPDATE) == BIT_UPDATE) {
-            LOG.info("{} DataChanged: updated {}", type, asyncDataChangeEvent.getUpdatedData().keySet());
-            updatedIids.addAll(asyncDataChangeEvent.getUpdatedData().keySet());
-        }
-        if ((mask & BIT_DELETE) == BIT_DELETE) {
-            LOG.info("{} DataChanged: removed {}", type, asyncDataChangeEvent.getRemovedPaths());
-            removedIids.addAll(asyncDataChangeEvent.getRemovedPaths());
+
+        for (DataTreeModification<DataObject> change: changes) {
+            DataObjectModification<DataObject> rootNode = change.getRootNode();
+            final InstanceIdentifier<DataObject> identifier = change.getRootPath().getRootIdentifier();
+            switch (rootNode.getModificationType()) {
+                case SUBTREE_MODIFIED:
+                case WRITE:
+                    if (rootNode.getDataBefore() == null) {
+                        if ((mask & BIT_CREATE) == BIT_CREATE) {
+                            LOG.info("{} DataTreeChanged: created {}", type, identifier);
+                            createdIids.add(identifier);
+                        }
+                    } else if ((mask & BIT_UPDATE) == BIT_UPDATE) {
+                        LOG.info("{} DataTreeChanged: updated {}", type, identifier);
+                        updatedIids.add(identifier);
+                    }
+                    break;
+                case DELETE:
+                    if ((mask & BIT_DELETE) == BIT_DELETE) {
+                        LOG.info("{} DataTreeChanged: removed {}", type, identifier);
+                        removedIids.add(identifier);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         synchronized (this) {
@@ -139,9 +154,10 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         removedIids.clear();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataChangeListener(type, iid, this,
-                AsyncDataBroker.DataChangeScope.SUBTREE);
+        listenerRegistration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
+                (InstanceIdentifier)iid), this);
     }
 
     public void waitForCreation() throws InterruptedException {
@@ -152,10 +168,10 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         synchronized (this) {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for {} DataChanged creation on {}", type, iid);
-            while (!isCreated(iid) && (System.currentTimeMillis() - _start) < timeout) {
+            while (!isCreated(iid) && System.currentTimeMillis() - _start < timeout) {
                 wait(RETRY_WAIT);
             }
-            LOG.info("Woke up, waited {}ms for creation of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {}ms for creation of {}", System.currentTimeMillis() - _start, iid);
         }
     }
 
@@ -167,10 +183,10 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         synchronized (this) {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for {} DataChanged update on {}", type, iid);
-            while (!isUpdated(iid) && (System.currentTimeMillis() - _start) < timeout) {
+            while (!isUpdated(iid) && System.currentTimeMillis() - _start < timeout) {
                 wait(RETRY_WAIT);
             }
-            LOG.info("Woke up, waited {}ms for update of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {}ms for update of {}", System.currentTimeMillis() - _start, iid);
         }
     }
 
@@ -182,10 +198,10 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataChangeLis
         synchronized (this) {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for {} DataChanged deletion on {}", type, iid);
-            while (!isRemoved(iid) && (System.currentTimeMillis() - _start) < timeout) {
+            while (!isRemoved(iid) && System.currentTimeMillis() - _start < timeout) {
                 wait(RETRY_WAIT);
             }
-            LOG.info("Woke up, waited {}ms for deletion of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {}ms for deletion of {}", System.currentTimeMillis() - _start, iid);
         }
     }
 

@@ -81,6 +81,34 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
     }
 
     @Test
+    public void testInitWithClose() throws CandidateAlreadyRegisteredException {
+        // Indicate that this is the owner
+        when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
+                Optional.of(new EntityOwnershipState(true, true)));
+
+        try (SouthboundProvider southboundProvider = new SouthboundProvider(
+                getDataBroker(),
+                entityOwnershipService,
+                Mockito.mock(OvsdbConnection.class),
+                Mockito.mock(SchemaService.class),
+                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+
+            // Initiate the session
+            southboundProvider.init();
+
+            // Verify that at least one listener was registered
+            verify(entityOwnershipService, atLeastOnce()).registerListener(
+                    anyString(), any(EntityOwnershipListener.class));
+
+            // Verify that a candidate was registered
+            verify(entityOwnershipService).registerCandidate(any(Entity.class));
+
+            //Close the session
+            southboundProvider.close();
+        }
+    }
+
+    @Test
     public void testGetDb() {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
                 Optional.of(new EntityOwnershipState(true, true)));

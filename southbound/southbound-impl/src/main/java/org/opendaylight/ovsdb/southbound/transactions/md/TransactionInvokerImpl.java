@@ -174,7 +174,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws InterruptedException {
+        this.chain.close();
         this.executor.shutdown();
         if (!this.executor.awaitTermination(1, TimeUnit.SECONDS)) {
             runTask.set(false);

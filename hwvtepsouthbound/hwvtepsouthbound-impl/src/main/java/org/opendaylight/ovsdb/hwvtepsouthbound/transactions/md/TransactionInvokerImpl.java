@@ -204,6 +204,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void close() throws Exception {
+        this.chain.close();
         this.executor.shutdown();
     }
 

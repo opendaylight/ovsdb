@@ -104,6 +104,14 @@ public class HwvtepSouthboundProvider implements AutoCloseable {
     @Override
     public void close() throws Exception {
         LOG.info("HwvtepSouthboundProvider Closed");
+        if (txInvoker != null) {
+            try {
+                txInvoker.close();
+                txInvoker = null;
+            } catch (Exception e) {
+                LOG.error("HWVTEP Southbound Provider failed to close TransactionInvoker", e);
+            }
+        }
         if(cm != null){
             cm.close();
             cm = null;

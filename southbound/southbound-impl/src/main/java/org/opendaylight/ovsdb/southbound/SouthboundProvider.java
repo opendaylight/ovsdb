@@ -106,6 +106,11 @@ public class SouthboundProvider implements AutoCloseable {
     @Override
     public void close() {
         LOG.info("SouthboundProvider Closed");
+        try {
+            txInvoker.close();
+        } catch (InterruptedException e) {
+            LOG.debug("SouthboundProvider failed to close TransactionInvoker.");
+        }
         cm.close();
         ovsdbDataTreeChangeListener.close();
         registration.close();

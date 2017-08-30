@@ -12,4 +12,6 @@ public interface TransactionInvoker {
 
     void invoke(TransactionCommand command);
 
+    void close () throws Exception;
+
 }

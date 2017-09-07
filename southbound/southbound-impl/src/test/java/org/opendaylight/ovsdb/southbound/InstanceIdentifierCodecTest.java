@@ -25,8 +25,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
@@ -49,7 +49,7 @@ public class InstanceIdentifierCodecTest {
     @Mock
     private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
     @Mock
-    private SchemaService schemaService;
+    private DOMSchemaService schemaService;
 
     @Before
     public void setUp() throws IllegalArgumentException, IllegalAccessException {

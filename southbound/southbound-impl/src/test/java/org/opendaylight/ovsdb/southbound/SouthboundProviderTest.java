@@ -33,8 +33,8 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -65,7 +65,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 getDataBroker(),
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(SchemaService.class),
+                Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class))) {
 
             // Initiate the session
@@ -90,7 +90,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 getDataBroker(),
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(SchemaService.class),
+                Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class))) {
 
             // Initiate the session
@@ -117,7 +117,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 getDataBroker(),
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(SchemaService.class),
+                Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class))) {
 
             southboundProvider.init();
@@ -139,7 +139,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 getDataBroker(),
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(SchemaService.class),
+                Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class))) {
 
             southboundProvider.init();

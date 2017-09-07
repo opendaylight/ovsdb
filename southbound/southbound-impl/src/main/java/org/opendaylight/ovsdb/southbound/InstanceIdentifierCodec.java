@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.southbound;
 
 import java.net.URI;
 
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -32,7 +32,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     private SchemaContext context;
     private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
-    public InstanceIdentifierCodec(SchemaService schemaService,
+    public InstanceIdentifierCodec(DOMSchemaService schemaService,
             BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
         schemaService.registerSchemaContextListener(this);
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;

@@ -1226,14 +1226,41 @@ public class SouthboundUtils {
     public static boolean compareDbVersionToMinVersion(final String dbVersion, final String minVersion) {
         final Matcher dbVersionMatcher = PATTERN.matcher(dbVersion);
         final Matcher minVersionMatcher = PATTERN.matcher(minVersion);
+        LOG.debug("dbVersion {}, minVersion {}", dbVersion, minVersion);
+        if (!dbVersionMatcher.find()){
+            LOG.error("Invalid DB version format {}", dbVersion);
+            return false;
+        }
+        if (!minVersionMatcher.find()){
+            LOG.error("Invalid Min DB version format {}", minVersion);
+            return false;
+        }
+
         if (dbVersion != null && !dbVersion.isEmpty() && minVersion != null
                 && !minVersion.isEmpty()) {
-            if ((Integer.valueOf(dbVersionMatcher.group(1)).equals(Integer.valueOf(minVersionMatcher.group(1))) &&
-                    Integer.valueOf(dbVersionMatcher.group(2)).equals(Integer.valueOf(minVersionMatcher.group(2))) &&
-                    Integer.valueOf(dbVersionMatcher.group(3)).equals(Integer.valueOf(minVersionMatcher.group(3)))) ||
-                    Integer.valueOf(dbVersionMatcher.group(1)).intValue() > Integer.valueOf(minVersionMatcher.group(1)).intValue() ||
-                    Integer.valueOf(dbVersionMatcher.group(2)).intValue() >= Integer.valueOf(minVersionMatcher.group(2)).intValue() ||
-                    Integer.valueOf(dbVersionMatcher.group(3)).intValue() >= Integer.valueOf(minVersionMatcher.group(3)).intValue()) {
+            if (Integer.valueOf(dbVersionMatcher.group(1)).equals(Integer.valueOf(minVersionMatcher.group(1))) &&
+                   Integer.valueOf(dbVersionMatcher.group(2)).equals(Integer.valueOf(minVersionMatcher.group(2))) &&
+                   Integer.valueOf(dbVersionMatcher.group(3)).equals(Integer.valueOf(minVersionMatcher.group(3)))) {
+                return true;
+            }
+
+            if (Integer.valueOf(dbVersionMatcher.group(1)).intValue() > Integer.valueOf(minVersionMatcher.group(1)).intValue()) {
+                return true;
+            }
+
+            if (Integer.valueOf(dbVersionMatcher.group(1)).intValue() < Integer.valueOf(minVersionMatcher.group(1)).intValue()) {
+                return false;
+            }
+
+            // major version is equal
+            if (Integer.valueOf(dbVersionMatcher.group(2)).intValue() > Integer.valueOf(minVersionMatcher.group(2)).intValue()) {
+                return true;
+            }
+            if (Integer.valueOf(dbVersionMatcher.group(2)).intValue() < Integer.valueOf(minVersionMatcher.group(2)).intValue()) {
+                return false;
+            }
+
+           if (Integer.valueOf(dbVersionMatcher.group(3)).intValue() > Integer.valueOf(minVersionMatcher.group(3)).intValue()) {
                 return true;
             }
         }

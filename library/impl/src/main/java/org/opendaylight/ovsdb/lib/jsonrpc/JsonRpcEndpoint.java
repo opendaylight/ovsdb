@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -76,7 +77,7 @@ public class JsonRpcEndpoint {
 
     ObjectMapper objectMapper;
     Channel nettyChannel;
-    Map<String, CallContext> methodContext = new HashMap<>();
+    Map<String, CallContext> methodContext = new ConcurrentHashMap<>();
     Map<Object, OvsdbRPC.Callback> requestCallbacks = new HashMap<>();
 
     public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel) {

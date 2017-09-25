@@ -29,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -70,6 +72,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
     private boolean isConnectionPublished;
+    private static final int OVSDB_RPC_TIMEOUT = 60;
 
     private static final ThreadFactory THREAD_FACTORY_SSL =
         new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-SSL-%d").build();
@@ -196,8 +199,8 @@ public class OvsdbClientImpl implements OvsdbClient {
             () -> Arrays.asList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
-            result = monitor.get();
-        } catch (InterruptedException | ExecutionException e) {
+            result = monitor.get(OVSDB_RPC_TIMEOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Failed to monitor {}", dbSchema, e);
             return null;
         }
@@ -219,8 +222,8 @@ public class OvsdbClientImpl implements OvsdbClient {
             () -> Arrays.asList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
-            result = monitor.get();
-        } catch (InterruptedException | ExecutionException e) {
+            result = monitor.get(OVSDB_RPC_TIMEOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Failed to monitor {}", dbSchema, e);
             return null;
         }
@@ -238,8 +241,8 @@ public class OvsdbClientImpl implements OvsdbClient {
 
         JsonNode result = null;
         try {
-            result = cancelMonitor.get();
-        } catch (InterruptedException | ExecutionException e) {
+            result = cancelMonitor.get(OVSDB_RPC_TIMEOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Exception when canceling monitor handler {}", handler.getId(), e);
         }
 

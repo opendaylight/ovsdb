@@ -63,6 +63,15 @@ public interface OvsdbConnection {
                                      SSLContext sslContext, String[] protocols, String[] cipherSuites);
 
     /**
+     * Method to restart ovsdb server for passive connection with SSL and user
+     * specifies protocols and cipher suites.
+     */
+    boolean restartOvsdbManagerWithSsl(int ovsdbListenPort,
+        SSLContext sslContext,
+        String[] protocols,
+        String[] cipherSuites);
+
+    /**
      * Method to register a Passive Connection Listener with the ConnectionService.
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */

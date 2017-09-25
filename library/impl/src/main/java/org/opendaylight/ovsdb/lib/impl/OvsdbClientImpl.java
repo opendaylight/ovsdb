@@ -29,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -70,6 +72,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
     private boolean isConnectionPublished;
+    private static final int NO_TIMEOUT = -1;
 
     private static final ThreadFactory THREAD_FACTORY_SSL =
         new ThreadFactoryBuilder().setNameFormat("OVSDB-PassiveConnection-SSL-%d").build();
@@ -183,8 +186,16 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
+                                                           List<MonitorRequest> monitorRequest,
+                                                           final MonitorCallBack callback) {
+        return monitor(dbSchema, monitorRequest, callback, NO_TIMEOUT);
+    }
+
+    @Override
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
                                                             List<MonitorRequest> monitorRequest,
-                                                            final MonitorCallBack callback) {
+                                                            final MonitorCallBack callback,
+                                                            int timeout) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
                 MonitorRequest::getTableName);
@@ -196,8 +207,12 @@ public class OvsdbClientImpl implements OvsdbClient {
             () -> Arrays.asList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
-            result = monitor.get();
-        } catch (InterruptedException | ExecutionException e) {
+            if (timeout == NO_TIMEOUT) {
+                result = monitor.get();
+            } else {
+                result = monitor.get(timeout, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Failed to monitor {}", dbSchema, e);
             return null;
         }
@@ -209,6 +224,15 @@ public class OvsdbClientImpl implements OvsdbClient {
                                                            List<MonitorRequest> monitorRequest,
                                                            final MonitorHandle monitorHandle,
                                                            final MonitorCallBack callback) {
+        return monitor(dbSchema, monitorRequest, monitorHandle, callback, NO_TIMEOUT);
+    }
+
+    @Override
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
+                                                           List<MonitorRequest> monitorRequest,
+                                                           final MonitorHandle monitorHandle,
+                                                           final MonitorCallBack callback,
+                                                           int timeout) {
 
         final ImmutableMap<String, MonitorRequest> reqMap = Maps.uniqueIndex(monitorRequest,
                 MonitorRequest::getTableName);
@@ -219,8 +243,12 @@ public class OvsdbClientImpl implements OvsdbClient {
             () -> Arrays.asList(dbSchema.getName(), monitorHandle.getId(), reqMap));
         JsonNode result;
         try {
-            result = monitor.get();
-        } catch (InterruptedException | ExecutionException e) {
+            if (timeout == NO_TIMEOUT) {
+                result = monitor.get();
+            } else {
+                result = monitor.get(timeout, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Failed to monitor {}", dbSchema, e);
             return null;
         }
@@ -234,12 +262,21 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public void cancelMonitor(final MonitorHandle handler) {
+        cancelMonitor(handler, NO_TIMEOUT);
+    }
+
+    @Override
+    public void cancelMonitor(final MonitorHandle handler, int timeout) {
         ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(() -> Collections.singletonList(handler.getId()));
 
         JsonNode result = null;
         try {
-            result = cancelMonitor.get();
-        } catch (InterruptedException | ExecutionException e) {
+            if (timeout == NO_TIMEOUT) {
+                result = cancelMonitor.get();
+            } else {
+                result = cancelMonitor.get(timeout, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Exception when canceling monitor handler {}", handler.getId(), e);
         }
 

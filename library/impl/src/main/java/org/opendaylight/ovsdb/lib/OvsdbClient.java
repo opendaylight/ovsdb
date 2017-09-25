@@ -67,6 +67,18 @@ public interface OvsdbClient {
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
+     * @param monitorRequests represents what needs to be monitored including a client specified monitor handle. This
+     *                       handle is used to later cancel ({@link #cancelMonitor(MonitorHandle)}) the monitor.
+     * @param callback receives the monitor response
+     * @param timeout time in seconds for monitor transaction timeout
+     */
+    <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                                                    List<MonitorRequest> monitorRequests,
+                                                    MonitorCallBack callback,
+                                                    int timeout);
+
+    /**
+     * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
      * @param monitorRequests represents what needs to be monitored
      * @param monitorHandle  A client specified monitor handle. This handle is used to later cancel
      *                       ({@link #cancelMonitor(MonitorHandle)}) the monitor.
@@ -78,11 +90,33 @@ public interface OvsdbClient {
                                                     MonitorCallBack callback);
 
     /**
+     * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
+     * @param monitorRequests represents what needs to be monitored
+     * @param monitorHandle  A client specified monitor handle. This handle is used to later cancel
+     *                       ({@link #cancelMonitor(MonitorHandle)}) the monitor.
+     * @param callback receives the monitor response
+     * @param timeout time in seconds for monitor transaction timeout
+     */
+    <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                                                    List<MonitorRequest> monitorRequests,
+                                                    MonitorHandle monitorHandle,
+                                                    MonitorCallBack callback,
+                                                    int timeout);
+
+    /**
      * Cancels an existing monitor method.
      * @param handler Handle identifying a specific monitor request that is being cancelled.
      * @throws java.lang.IllegalStateException if there is no outstanding monitor request for this handle
      */
     void cancelMonitor(MonitorHandle handler);
+
+    /**
+     * Cancels an existing monitor method.
+     * @param handler Handle identifying a specific monitor request that is being cancelled.
+     * @param timeout time in seconds for monitor transaction timeout
+     * @throws java.lang.IllegalStateException if there is no outstanding monitor request for this handle
+     */
+    void cancelMonitor(MonitorHandle handler, int timeout);
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.8">lock</a> operation.

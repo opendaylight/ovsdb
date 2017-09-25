@@ -13,7 +13,7 @@ public enum Function {
     LESS_THAN_OR_EQUALS("<="),
     EQUALS("=="),
     NOT_EQUALS("!="),
-    GREATER_THAN(">="),
+    GREATER_THAN(">"),
     GREATER_THAN_OR_EQUALS(">="),
     INCLUDES("includes"),
     EXCLUDES("excludes");

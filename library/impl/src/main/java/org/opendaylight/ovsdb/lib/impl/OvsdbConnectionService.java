@@ -86,7 +86,6 @@ import org.slf4j.LoggerFactory;
  */
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
-
     private static ThreadFactory passiveConnectionThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("OVSDBPassiveConnServ-%d").build();
     private static ScheduledExecutorService executorService
@@ -113,6 +112,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(executorService);
+    private static Channel serverChannel = null;
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
 
@@ -269,6 +269,19 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
+    @Override
+    public synchronized boolean restartOvsdbManagerWithSsl(final int ovsdbListenPort,
+        final SSLContext sslContext,
+        final String[] protocols,
+        final String[] cipherSuites) {
+        if (singletonCreated.getAndSet(false) && (serverChannel != null)) {
+            serverChannel.close();
+            LOG.info("Server channel closed");
+        }
+        serverChannel = null;
+        return startOvsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites);
+    }
+
     /**
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection handle channel callbacks.
@@ -344,6 +357,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             // Start the server.
             ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
             Channel serverListenChannel = channelFuture.channel();
+            serverChannel = serverListenChannel;
             // Wait until the server socket is closed.
             serverListenChannel.closeFuture().sync();
         } catch (InterruptedException e) {
@@ -396,6 +410,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     this.retryTimes = 3;
                 }
 
+                private void retry() {
+                    if (retryTimes > 0) {
+                        executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
+                    } else {
+                        LOG.debug("channel closed {}", channel);
+                        channel.disconnect();
+                    }
+                    retryTimes--;
+                }
+
                 @Override
                 public void run() {
                     HandshakeStatus status = sslHandler.engine().getHandshakeStatus();
@@ -407,7 +431,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                     .equals("SSL_NULL_WITH_NULL_NULL")) {
                                 // Not begin handshake yet. Retry later.
                                 LOG.debug("handshake not begin yet {}", status);
-                                executorService.schedule(this, retryPeriod, TimeUnit.MILLISECONDS);
+                                retry();
                             } else {
                               //Check if peer is trusted before notifying listeners
                                 try {
@@ -419,7 +443,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                 } catch (SSLPeerUnverifiedException e) {
                                     //Trust manager is still checking peer certificate. Retry later
                                     LOG.debug("Peer certifiacte is not verified yet {}", status);
-                                    executorService.schedule(this, retryPeriod, TimeUnit.MILLISECONDS);
+                                    retry();
                                 }
                             }
                             break;
@@ -428,7 +452,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                         case NEED_TASK:
                             //Handshake still ongoing. Retry later.
                             LOG.debug("handshake not done yet {}", status);
-                            executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
+                            retry();
                             break;
 
                         case NEED_WRAP:
@@ -436,6 +460,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                     .equals("SSL_NULL_WITH_NULL_NULL")) {
                                 /* peer not authenticated. No need to notify listener in this case. */
                                 LOG.error("Ssl handshake fail. channel {}", channel);
+                                channel.disconnect();
                             } else {
                                 /*
                                  * peer is authenticated. Give some time to wait for completion.
@@ -447,12 +472,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                  * since client will reconnect later.
                                  */
                                 LOG.debug("handshake not done yet {}", status);
-                                if (retryTimes > 0) {
-                                    executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
-                                } else {
-                                    LOG.debug("channel closed {}", channel);
-                                }
-                                retryTimes--;
+                                retry();
                             }
                             break;
 

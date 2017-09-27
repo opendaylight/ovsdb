@@ -18,7 +18,6 @@ public class Mutation {
     Object value;
 
     public Mutation(String column, Mutator mutator, Object value) {
-        super();
         this.column = column;
         this.mutator = mutator;
         this.value = value;

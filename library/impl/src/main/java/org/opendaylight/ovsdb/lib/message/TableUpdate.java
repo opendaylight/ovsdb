@@ -61,7 +61,6 @@ public class TableUpdate<E extends TableSchema<E>> {
     }
 
     public TableUpdate() {
-        super();
         rows = new HashMap<>();
     }
 

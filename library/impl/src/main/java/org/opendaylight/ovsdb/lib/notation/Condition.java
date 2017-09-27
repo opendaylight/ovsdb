@@ -19,7 +19,6 @@ public class Condition {
     Object value;
 
     public Condition(String column, Function function, Object value) {
-        super();
         this.column = column;
         this.function = function;
         this.value = value;

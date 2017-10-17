@@ -125,6 +125,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     public <T extends DataObject> void testLogicalSwitchAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         verifyThatLogicalSwitchCreated();
+        //test
     }
 
     @Test

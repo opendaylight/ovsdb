@@ -334,7 +334,10 @@ public class HwvtepDeviceInfo {
             boolean removed = tepIdReferences.get(tep).remove(reference);
             if (removed && tepIdReferences.get(tep).isEmpty()) {
                 LOG.debug("Marking the termination point as in transit ref count zero {} ", tep);
-                markKeyAsInTransit(TerminationPoint.class, tep);
+                DeviceData deviceData = getDeviceOperData(TerminationPoint.class, tep);
+                if (deviceData != null) {
+                    markKeyAsInTransit(TerminationPoint.class, tep);
+                }
             }
         }
     }
@@ -394,5 +397,9 @@ public class HwvtepDeviceInfo {
 
     public HwvtepConnectionInstance getConnectionInstance() {
         return connectionInstance;
+    }
+
+    public DependencyQueue getDependencyQueue() {
+        return dependencyQueue;
     }
 }

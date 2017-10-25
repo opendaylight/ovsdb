@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -28,7 +27,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -59,13 +57,12 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     void setupForTest() throws Exception {
         MCAST_MAC_DATA_VALIDATOR = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);
         opState = new HwvtepOperationalState(connectionInstance);
-        mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
+        mac = TestBuilders.buildRemoteMcastMacs(nodeIid, "FF:FF:FF:FF:FF:FF", "ls0",
                 new String[]{"192.168.122.20", "192.168.122.30"});
         lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.getKey()));
-        setFinalStatic(DependencyQueue.class, "executorService", PowerMockito.mock(SameThreadScheduledExecutor.class, Mockito.CALLS_REAL_METHODS));
     }
 
     @Test
@@ -84,7 +81,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         assertEquals(1, latch.getCount());
         addData(CONFIGURATION, LogicalSwitches.class, new String[]{"ls0", "100"});
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        assertEquals(0, latch.getCount());
+        getAwaiter().until(() -> latch.getCount() == 0);
     }
 
     @Test
@@ -105,7 +102,6 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
 
         opState.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
         opState.getDeviceInfo().onOperDataAvailable();
-        assertEquals(0, latch.getCount());
-
+        getAwaiter().until(() -> latch.getCount() == 0);
     }
 }

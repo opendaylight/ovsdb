@@ -11,23 +11,30 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.hwvtepsouthbound.device.DeviceTransactionInvokerImpl;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.operations.Delete;
 import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.Update;
@@ -61,7 +68,11 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -73,11 +84,19 @@ import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastor
 import static org.powermock.api.support.membermodification.MemberMatcher.field;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
-public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
+public class DataChangeListenerTestBase extends AbstractConcurrentDataBrokerTest {
 
+    public static final int TEST_TIMEOUT = 10;
+    public static final int CONDITION_POLL_INTERVAL = 100;
+    public static final int INTRANSIT_EXPIRY_CHECK_POLL = 2000;
     static Logger LOG = LoggerFactory.getLogger(DataChangeListenerTestBase.class);
 
     static DataBroker dataBroker;
+    static final Predicate<InstanceIdentifier> DATA_AVAILABLE = (iid) -> {
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        return HwvtepSouthboundUtil.readNode(tx, iid).isPresent();
+    };
+    static final Predicate<InstanceIdentifier> DATA_NOT_AVAILABLE = DATA_AVAILABLE.negate();
 
     EntityOwnershipService entityOwnershipService;
     OvsdbClient ovsdbClient;
@@ -89,6 +108,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     HwvtepDataChangeListener hwvtepDataChangeListener;
     HwvtepConnectionManager hwvtepConnectionManager;
     HwvtepConnectionInstance connectionInstance;
+    HwvtepMonitorCallback hwvtepMonitorCallback = null;
+    DeviceTransactionInvokerImpl deviceTransactionInvoker = null;
+    HwvtepDeviceInfo hwvtepDeviceInfo = null;
+    DependencyQueue dependencyQueue = null;
 
     ArgumentCaptor<TypedBaseTable> insertOpCapture;
     ArgumentCaptor<List> transactCaptor;
@@ -115,10 +138,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         ls1Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
+        setFinalStatic(HwvtepSouthboundConstants.class, "IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS",
+                new Long(CONDITION_POLL_INTERVAL));
+        setFinalStatic(HwvtepSouthboundConstants.class, "IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS",
+                new Long(INTRANSIT_EXPIRY_CHECK_POLL));
         loadSchema();
         mockConnectionInstance();
         mockConnectionManager();
-        mockOperations();
 
         addNode(OPERATIONAL);
         addNode(CONFIGURATION);
@@ -175,29 +201,54 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 .thenReturn(connectionInstance);
     }
 
+    abstract class OvsdbClientImpl implements OvsdbClient {
+
+        DeviceTransactionInvokerImpl invoker;
+
+        void setInvoker(DeviceTransactionInvokerImpl invoker) {
+            this.invoker = invoker;
+        }
+        @Override
+        public boolean isActive() {
+            return true;
+        }
+
+        @Override
+        public ListenableFuture<List<OperationResult>> transact(DatabaseSchema databaseSchema, List<Operation> operations) {
+            SettableFuture<List<OperationResult>> ft = SettableFuture.create();
+
+            List<OperationResult> i = invoker.select(operations);
+            ft.set(i);
+            return ft;
+        }
+
+        @Override
+        public ListenableFuture<List<String>> echo() {
+            return null;
+        }
+    }
+
     void mockConnectionInstance() throws IllegalAccessException {
         connectionInfo = mock(OvsdbConnectionInfo.class);
-        ovsdbClient = mock(OvsdbClient.class);
+        ovsdbClient = mock(OvsdbClientImpl.class, Mockito.CALLS_REAL_METHODS);
         transactionInvoker =  new TransactionInvokerImpl(dataBroker);
 
         connectionInstance = PowerMockito.mock(HwvtepConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
         field(HwvtepConnectionInstance.class, "instanceIdentifier").set(connectionInstance, nodeIid);
         field(HwvtepConnectionInstance.class, "txInvoker").set(connectionInstance, transactionInvoker);
-        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
         field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
-        when(connectionInstance.getOvsdbClient()).thenReturn(ovsdbClient);
-        when(ovsdbClient.isActive()).thenReturn(true);
+        //when(connectionInstance.getOvsdbClient()).thenReturn(ovsdbClient);
+        //when(ovsdbClient.isActive()).thenReturn(true);
         when(connectionInstance.getConnectionInfo()).thenReturn(connectionInfo);
         when(connectionInstance.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
         when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
         doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
         when(connectionInstance.getDataBroker()).thenReturn(dataBroker);
         when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
-        connectionInstance.createTransactInvokers();
-    }
-
-    void mockOperations() {
-        resetOperations();
+        createTransactInvokers();
+        HwvtepTableReader hwvtepTableReader = new HwvtepTableReader(connectionInstance);
+        field(HwvtepConnectionInstance.class, "hwvtepTableReader").set(connectionInstance, hwvtepTableReader);
+        ((OvsdbClientImpl)ovsdbClient).setInvoker(deviceTransactionInvoker);
     }
 
     /**
@@ -215,10 +266,24 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         when(Operations.op.insert(insertOpCapture.capture())).thenReturn(insert);
         when(Operations.op.update(insertOpCapture.capture())).thenReturn(update);
         when(update.where(any())).thenReturn(where);
-        when(Operations.op.delete(any())).thenReturn(delete);
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);
         when(ovsdbClient.transact(any(DatabaseSchema.class), transactCaptor.capture())).thenReturn(ft);
+    }
+
+    public void createTransactInvokers() throws IllegalAccessException {
+        hwvtepDeviceInfo = new HwvtepDeviceInfo(connectionInstance);
+        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance,
+                hwvtepDeviceInfo);
+        hwvtepMonitorCallback = new HwvtepMonitorCallback(connectionInstance, transactionInvoker);
+        deviceTransactionInvoker = new DeviceTransactionInvokerImpl(connectionInstance, dbSchema,
+                hwvtepMonitorCallback);
+        HashMap transactInvokers = new HashMap<>();
+        transactInvokers.put(dbSchema, deviceTransactionInvoker);
+
+        field(HwvtepConnectionInstance.class, "transactInvokers").set(connectionInstance, transactInvokers);
+        field(HwvtepConnectionInstance.class, "callback").set(connectionInstance, hwvtepMonitorCallback);
+        dependencyQueue = (DependencyQueue)Whitebox.getInternalState(hwvtepDeviceInfo, "dependencyQueue");
     }
 
     void addNode(LogicalDatastoreType logicalDatastoreType) throws Exception {
@@ -314,5 +379,63 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 .child(Topology.class, topoKey)
                 .child(Node.class, nodeKey)
                 .build();
+    }
+
+    protected ConditionFactory getAwaiter() {
+        return Awaitility.await("TestableListener")
+                .atMost(TEST_TIMEOUT, TimeUnit.SECONDS)
+                .pollInterval(CONDITION_POLL_INTERVAL, TimeUnit.MILLISECONDS);
+    }
+
+    protected void waitForData(List iids) {
+        getAwaiter().until(() -> {
+            return iids.stream().allMatch((iid) -> DATA_AVAILABLE.test((InstanceIdentifier)iid));
+        });
+    }
+
+    protected void waitForDataDelete(List iids) {
+        getAwaiter().until(() -> {
+            return iids.stream().allMatch((iid) -> DATA_NOT_AVAILABLE.test((InstanceIdentifier)iid));
+        });
+    }
+
+    protected void waitForMcastLocators(List<InstanceIdentifier<RemoteMcastMacs>> iids) {
+        getAwaiter().until(() -> {
+            return iids.stream().allMatch( (iid) -> {
+                ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+                RemoteMcastMacs mac = HwvtepSouthboundUtil.readNode(tx, iid).get();
+                return mac.getLocatorSet().stream().allMatch( (locator) -> {
+                    return DATA_AVAILABLE.test(locator.getLocatorRef().getValue());
+                });
+            });
+        });
+    }
+
+    protected void waitForMcastLocatorsDelete(List<RemoteMcastMacs> macs) {
+        getAwaiter().until(() -> {
+            return macs.stream().allMatch( (mac) -> {
+                return mac.getLocatorSet().stream().allMatch( (locator) -> {
+                    return DATA_NOT_AVAILABLE.test(locator.getLocatorRef().getValue());
+                });
+            });
+        });
+    }
+
+    protected void waitForUcastLocators(List<InstanceIdentifier<RemoteUcastMacs>> iids) {
+        getAwaiter().until(() -> {
+            return iids.stream().allMatch( (iid) -> {
+                ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+                RemoteUcastMacs mac = HwvtepSouthboundUtil.readNode(tx, iid).get();
+                return DATA_AVAILABLE.test(mac.getLocatorRef().getValue());
+            });
+        });
+    }
+
+    protected void waitForUcastLocatorsDelete(List<RemoteUcastMacs> macs) {
+        getAwaiter().until(() -> {
+            return macs.stream().allMatch( (mac) -> {
+                return DATA_NOT_AVAILABLE.test(mac.getLocatorRef().getValue());
+            });
+        });
     }
 }

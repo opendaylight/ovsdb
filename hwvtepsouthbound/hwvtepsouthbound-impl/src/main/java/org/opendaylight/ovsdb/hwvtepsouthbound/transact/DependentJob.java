@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +61,10 @@ public abstract class DependentJob<T extends Identifiable> {
         this.key = key;
         this.data = data;
         this.dependencies = dependencies;
+    }
+
+    public Map<Class<? extends DataObject>, List<InstanceIdentifier>> getDependencies() {
+        return new HashMap<>(dependencies);
     }
 
     /**

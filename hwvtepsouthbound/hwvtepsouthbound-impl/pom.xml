@@ -79,6 +79,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <type>test-jar</type>
       </dependency>
       <dependency>
+          <groupId>org.awaitility</groupId>
+          <artifactId>awaitility</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
           <scope>test</scope>

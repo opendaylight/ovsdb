@@ -93,13 +93,13 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     HwvtepOperationalDataChangeListener opDataChangeListener;
 
-    @Before
+    //@Before
     public void setupListener() throws Exception {
         setFinalStatic(DependencyQueue.class, "executorService", PowerMockito.mock(SameThreadScheduledExecutor.class, Mockito.CALLS_REAL_METHODS));
         opDataChangeListener = new HwvtepOperationalDataChangeListener(dataBroker, hwvtepConnectionManager, connectionInstance);
     }
 
-    @After
+    //@After
     public void cleanupListener() {
         try {
             opDataChangeListener.close();
@@ -121,13 +121,13 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         }
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testLogicalSwitchAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         verifyThatLogicalSwitchCreated();
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testLogicalSwitchDelete() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -136,7 +136,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(10)).delete(any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testUcastMacAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -148,7 +148,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         //TODO add finer grained validation
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testUcastMacAddWithoutConfigTep() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -159,7 +159,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         //TODO add finer grained validation
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testUcastMacDelete() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -174,7 +174,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         //TODO add finer grained validation
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testMcastMacAdd() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -185,7 +185,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(7)).insert(Matchers.<McastMacsRemote>any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testMcastMacAddWithoutConfigTep() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -195,7 +195,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(7)).insert(Matchers.<McastMacsRemote>any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testMcastMacDelete() throws Exception {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -209,7 +209,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(2)).delete(Matchers.any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testAddMacs() throws Exception {
         Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -226,7 +226,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testUpdateMacs() throws Exception {
         Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -249,7 +249,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(0)).delete(Matchers.any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testUpdateMacsWithZeroLocators() throws Exception {
         Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
@@ -270,7 +270,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         verify(Operations.op,  times(2)).delete(Matchers.any());
     }
 
-    @Test
+    //@Test
     public <T extends DataObject> void testBackToBackMacsUpdate() throws Exception {
         Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);

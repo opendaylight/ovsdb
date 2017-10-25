@@ -123,7 +123,7 @@
             "type": "string"
           },
           "_uuid": {
-            "type": "string"
+            "type": "uuid"
           },
           "tunnel_key": {
             "type": {
@@ -261,10 +261,10 @@
                 "type": "string"
               }
             }
+          },
+          "_uuid": {
+            "type": "uuid"
           }
-        },
-        "_uuid": {
-          "type": "string"
         },
         "indexes": [
           [

@@ -150,4 +150,8 @@ public class DependencyQueue {
     public void submit(Runnable runnable) {
         executorService.submit(runnable);
     }
+
+    public Iterator<DependentJob> getOperationalWaitingJobs() {
+        return opWaitQueue.iterator();
+    }
 }

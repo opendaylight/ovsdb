@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a245df4_4378478f",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-10-25T23:22:52Z",
+      "side": 1,
+      "message": "i think it you don\u0027t have to negate this condition, because you want to stop the channel if the manager was already running and if manager was already running, then singletonCreated will be true and in that case !singletonCreated will be false and it will skip closing the existing channel. am i missing something here?",
+      "revId": "9109de658cbd1a453caec9917686091851ac1db7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

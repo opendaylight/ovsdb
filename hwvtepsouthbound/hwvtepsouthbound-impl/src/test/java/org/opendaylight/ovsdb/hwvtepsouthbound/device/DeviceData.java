@@ -40,6 +40,14 @@ public class DeviceData {
         return tableNameForUuid.get(uuid);
     }
 
+    private boolean isPhysicalLocatorRow(UUID uuid) {
+        return Objects.equals(Predicates.PHYSICAL_LOCATOR, tableNameForUuid.get(uuid));
+    }
+
+    private boolean isPhysicalLocatorSetRow(UUID uuid) {
+        return Objects.equals(Predicates.PHYSICAL_LOCATOR_SET, tableNameForUuid.get(uuid));
+    }
+
     private boolean hasEmptyInboundRefsFor(UUID uuid) {
         return incomingRefsForUuid.get(uuid) == null || incomingRefsForUuid.get(uuid).isEmpty();
     }
@@ -59,10 +67,55 @@ public class DeviceData {
         updateReferences();
     }
 
+    public synchronized void clearLocatorSets() {
+        boolean updatedLocatorSets = false;
+        Iterator<Map.Entry<UUID, Row>> iterator = allRowsByUuid.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Map.Entry<UUID, Row> entry = iterator.next();
+            if (isPhysicalLocatorSetRow(entry.getKey()) && hasEmptyInboundRefsFor(entry.getKey())) {
+                iterator.remove();
+                tableNameForUuid.remove(entry.getKey());
+                updatedLocatorSets = true;
+            }
+        }
+        if (updatedLocatorSets) {
+            updateReferences();
+        }
+    }
+
+    public synchronized Map<UUID, Row> clearLocators() {
+        Map<UUID, Row> deletedLocators = new HashMap<>();
+        Iterator<Map.Entry<UUID, Row>> iterator = allRowsByUuid.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Map.Entry<UUID, Row> entry = iterator.next();
+            if (isPhysicalLocatorRow(entry.getKey()) && hasEmptyInboundRefsFor(entry.getKey())) {
+                deletedLocators.put(entry.getKey(), entry.getValue());
+                iterator.remove();
+                tableNameForUuid.remove(entry.getKey());
+            }
+        }
+        return deletedLocators;
+    }
+
     private void updateReferences() {
         incomingRefsForUuid.clear();
         outgoingRefsForUuid.clear();
-        //TODO
+        List<Row> rows = new ArrayList<>(allRowsByUuid.values());
+        rows.stream().forEach((row) -> {
+            UUID srcUuid = TableUtil.getUuidOfRow(row);
+            outgoingRefsForUuid.putIfAbsent(srcUuid, new HashSet());
+            row.getColumns()
+                    .stream()
+                    .filter(Predicates.IS_NOT_UUID_COLUMN)
+                    .forEach(column -> {
+                        TableUtil.getOutGoingRefs((Column)column)
+                                .forEach(dstUuid -> {
+                                    incomingRefsForUuid.putIfAbsent(dstUuid, new HashSet());
+                                    incomingRefsForUuid.get(dstUuid).add(srcUuid);
+                                    outgoingRefsForUuid.get(srcUuid).add(dstUuid);
+                                });
+                    });
+        });
     }
 
     public Row getRow(String tableName, String columnName, Object columnValue) {

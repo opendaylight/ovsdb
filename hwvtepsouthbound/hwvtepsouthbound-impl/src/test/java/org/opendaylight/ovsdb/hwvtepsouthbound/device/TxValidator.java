@@ -25,7 +25,9 @@ public class TxValidator {
     }
 
     private boolean hasLiveReferencesForDeletedData(TxData currentTxData, DeviceData deviceData) {
-        return false;//TODO
+        return currentTxData.getDeletedUuids()
+                .stream()
+                .anyMatch((deletedUuid) -> currentTxData.hasLiveReferences(deviceData, (UUID) deletedUuid));
     }
 
     private boolean containsvalidUuidRefs(TxData currentTxData, DeviceData deviceData) {
@@ -37,6 +39,10 @@ public class TxValidator {
     }
 
     private boolean isValidRow(Row row, TxData currentTxData, DeviceData deviceData) {
-        return false;//TODO
+        return row.getColumns()
+                .stream()
+                .filter(Predicates.IS_NOT_UUID_COLUMN)
+                .flatMap(Predicates.GET_OUTGOING_REF_UUIDS)
+                .allMatch((referred) -> currentTxData.isValidRef(deviceData, (UUID)referred));
     }
 }

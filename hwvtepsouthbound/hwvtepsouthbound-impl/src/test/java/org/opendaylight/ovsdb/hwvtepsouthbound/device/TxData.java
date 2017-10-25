@@ -68,4 +68,35 @@ public class TxData {
     public Map<UUID, String> getCurrentTableNamesByUuid() {
         return currentTableNamesByUuid;
     }
+
+    public boolean isDeleted(UUID uuid) {
+        return deleted.contains(uuid);
+    }
+
+    public boolean isDeleted(Collection<UUID> uuids) {
+        return uuids == null || uuids.isEmpty() || deleted.containsAll(uuids);
+    }
+
+    public boolean isCreatedOrUpdated(UUID uuid) {
+        return created.containsKey(uuid) || updated.containsKey(uuid) || namedUuidsInCurrentTx.containsKey(uuid);
+    }
+
+    public boolean isValidRef(DeviceData deviceData, UUID referred) {
+        return (deviceData.isValidRow(referred) || isCreatedOrUpdated(referred)) && !isDeleted(referred);
+    }
+
+    public boolean hasLiveReferences(DeviceData deviceData, UUID referred) {
+        Set<UUID> incomingRefs = deviceData.getIncomingRefsForUuid(referred);
+        boolean allDeleted = isDeleted(incomingRefs);
+        if (!allDeleted) {
+            //LOG.error("Still some refs for deleted uuid "+ referred);
+        }
+        return !allDeleted;
+    }
+
+    public void replaceNamedUuidRefs() {
+        Collection<Row> createdOrUpdated = new ArrayList(created.values());
+        createdOrUpdated.addAll(updated.values());
+        TableUtil.replaceNamedUuidRefs(createdOrUpdated, this);
+    }
 }

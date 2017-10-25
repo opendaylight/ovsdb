@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.device;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,6 +30,9 @@ public class Predicates {
     public static final Predicate<Column> IS_UUID_COLUMN = (column) -> column.getSchema().getName().equals(UUID_COLUMN_NAME);
     public static final Predicate<Column> IS_NOT_UUID_COLUMN = IS_UUID_COLUMN.negate();
 
+    public static final Predicate<String> IS_UUID_COLUMN_NAME
+            = (columnName) -> Objects.equals(columnName, UUID_COLUMN_NAME);
+
     public static final Predicate<Collection> IS_UUID_COLLECTION = (collection) -> {
         return !collection.isEmpty() && collection.iterator().next() instanceof UUID;
     };
@@ -38,6 +42,9 @@ public class Predicates {
         return !map.isEmpty() && map.values().iterator().next() instanceof UUID;
     };
     public static final Predicate<Map> IS_NOT_UUID_MAP = IS_UUID_MAP.negate();
+
+    public static final Function<Column, Stream<UUID>> GET_OUTGOING_REF_UUIDS
+            = (column) -> TableUtil.getOutGoingRefs(column);
 
     public static final BiFunction<DeviceData, Map.Entry<UUID, Row>, Row> GET_OLD_ROW_FOR_CREATE
             = (deviceData, entry) -> null;

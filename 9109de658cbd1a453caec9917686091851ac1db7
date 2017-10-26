@@ -16,6 +16,24 @@
       "revId": "9109de658cbd1a453caec9917686091851ac1db7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_54bd9b67",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2017-10-26T18:33:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_4378478f",
+      "revId": "9109de658cbd1a453caec9917686091851ac1db7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

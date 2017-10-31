@@ -157,7 +157,7 @@ public interface OvsdbClient {
 
     OvsdbConnectionInfo getConnectionInfo();
 
-    boolean isActive();
+    Boolean isActive();
 
     void disconnect();
 

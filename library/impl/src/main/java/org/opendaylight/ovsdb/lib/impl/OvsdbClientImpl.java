@@ -476,7 +476,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public boolean isActive() {
+    public Boolean isActive() {
         return channel.isActive();
     }
 

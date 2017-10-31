@@ -153,7 +153,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             dbSchema = DatabaseSchema.fromJson(HwvtepSchemaConstants.HARDWARE_VTEP,
                     jsonNode.get("result"));
             listenableDbSchema = mock(ListenableFuture.class);
-            when(listenableDbSchema.get()).thenReturn(dbSchema);
+            doReturn(dbSchema).when(listenableDbSchema).get();
         } catch (Exception e) {
             LOG.error("Failed to load schema", e);
         }
@@ -167,32 +167,33 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstance", HwvtepPhysicalSwitchAttributes.class));
         suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstanceFromNodeIid",
                 InstanceIdentifier.class));
-        when(hwvtepConnectionManager.getConnectionInstance(Mockito.any(HwvtepPhysicalSwitchAttributes.class))).
-                thenReturn(connectionInstance);
-        when(hwvtepConnectionManager.getConnectionInstance(Mockito.any(Node.class))).
-                thenReturn(connectionInstance);
-        when(hwvtepConnectionManager.getConnectionInstanceFromNodeIid(Mockito.any(InstanceIdentifier.class)))
-                .thenReturn(connectionInstance);
+        doReturn(connectionInstance).when(
+                hwvtepConnectionManager).getConnectionInstance(Mockito.any(HwvtepPhysicalSwitchAttributes.class));
+        doReturn(connectionInstance).when(
+                hwvtepConnectionManager).getConnectionInstance(Mockito.any(Node.class));
+        doReturn(connectionInstance).when(
+                hwvtepConnectionManager).getConnectionInstanceFromNodeIid(Mockito.any(InstanceIdentifier.class));
     }
 
     void mockConnectionInstance() throws IllegalAccessException {
         connectionInfo = mock(OvsdbConnectionInfo.class);
+        doReturn(mock(InetAddress.class)).when(connectionInfo).getRemoteAddress();
+
         ovsdbClient = mock(OvsdbClient.class);
+        doReturn(true).when(ovsdbClient).isActive();
+        doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
+
         transactionInvoker =  new TransactionInvokerImpl(dataBroker);
 
         connectionInstance = PowerMockito.mock(HwvtepConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
         field(HwvtepConnectionInstance.class, "instanceIdentifier").set(connectionInstance, nodeIid);
         field(HwvtepConnectionInstance.class, "txInvoker").set(connectionInstance, transactionInvoker);
-        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
         field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
-        when(connectionInstance.getOvsdbClient()).thenReturn(ovsdbClient);
-        when(ovsdbClient.isActive()).thenReturn(true);
-        when(connectionInstance.getConnectionInfo()).thenReturn(connectionInfo);
-        when(connectionInstance.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
-        when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
+        doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
         doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
-        when(connectionInstance.getDataBroker()).thenReturn(dataBroker);
-        when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
+        doReturn(dataBroker).when(connectionInstance).getDataBroker();
+        doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
+        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
         connectionInstance.createTransactInvokers();
     }
 
@@ -209,16 +210,16 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         Insert insert = mock(Insert.class);
         Delete delete = mock(Delete.class);
         Where where = mock(Where.class);
-        when(delete.where(any())).thenReturn(where);
-        when(insert.withId(any(String.class))).thenReturn(insert);
+        doReturn(where).when(delete).where(any());
+        doReturn(insert).when(insert).withId(any(String.class));
         Operations.op = PowerMockito.mock(Operations.class);
-        when(Operations.op.insert(insertOpCapture.capture())).thenReturn(insert);
-        when(Operations.op.update(insertOpCapture.capture())).thenReturn(update);
-        when(update.where(any())).thenReturn(where);
-        when(Operations.op.delete(any())).thenReturn(delete);
+        doReturn(insert).when(Operations.op).insert(insertOpCapture.capture());
+        doReturn(update).when(Operations.op).update(insertOpCapture.capture());
+        doReturn(where).when(update).where(any());
+        doReturn(delete).when(Operations.op).delete(any());
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);
-        when(ovsdbClient.transact(any(DatabaseSchema.class), transactCaptor.capture())).thenReturn(ft);
+        doReturn(ft).when(ovsdbClient).transact(any(DatabaseSchema.class), transactCaptor.capture());
     }
 
     void addNode(LogicalDatastoreType logicalDatastoreType) throws Exception {

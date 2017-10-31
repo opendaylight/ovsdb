@@ -177,7 +177,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     void mockConnectionInstance() throws IllegalAccessException {
         connectionInfo = mock(OvsdbConnectionInfo.class);
-        ovsdbClient = mock(OvsdbClient.class);
+        ovsdbClient = mock(OvsdbClientImpl.class, Mockito.CALLS_REAL_METHODS);
         transactionInvoker =  new TransactionInvokerImpl(dataBroker);
 
         connectionInstance = PowerMockito.mock(HwvtepConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
@@ -186,7 +186,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
         field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
         when(connectionInstance.getOvsdbClient()).thenReturn(ovsdbClient);
-        when(ovsdbClient.isActive()).thenReturn(true);
         when(connectionInstance.getConnectionInfo()).thenReturn(connectionInfo);
         when(connectionInstance.getConnectionInfo().getRemoteAddress()).thenReturn(mock(InetAddress.class));
         when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
@@ -194,6 +193,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         when(connectionInstance.getDataBroker()).thenReturn(dataBroker);
         when(connectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
         connectionInstance.createTransactInvokers();
+    }
+
+    abstract class OvsdbClientImpl implements OvsdbClient {
+
+        @Override
+        public boolean isActive() {
+            return true;
+        }
     }
 
     void mockOperations() {

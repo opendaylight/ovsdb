@@ -845,58 +845,300 @@ module ovsdb {
     }
 
     grouping ovsdb-port-interface-attributes {
+        leaf name {
+            description "The name of the OVSDB port";
+            type string;
+        }
+
+
         leaf port-uuid {
             description "The unique identifier of the OVSDB port";
             type yang:uuid;
         }
 
-        leaf interface-uuid {
-            description "The unique identifier of the OVSDB interface";
-            type yang:uuid;
-        }
-
-        leaf name {
-            description "The name of the OVSDB port/interface";
-            type string;
-        }
-
-        leaf ifindex {
-            description "The ifindex is useful for seamless integration with protocols such as SNMP and sFlow.
-                It is a positive interface index as defined for SNMP MIB-II in RFCs 1213 and 2863 if the interface
-                has one, otherwise 0. It is a read-only column and an integer in the range 0 to 4,294,967,295";
-            type uint32;
-            config false;
-        }
-
-        leaf interface-type {
-            description "The type of the OVSDB interface";
-            type identityref {
-                base interface-type-base;
+        list interface-list {
+            description "The list of interfaces used by the port";
+            key "name";
+            leaf interface-uuid {
+                description "The unique identifier of the OVSDB interface";
+                type yang:uuid;
             }
-        }
-
-        list options {
-            description "Port/Interface related optional input values";
-            key "option";
-            leaf option {
-                description "Option name";
+    
+            leaf name {
+                description "The name of the OVSDB interface";
                 type string;
             }
-            leaf value {
-                description "Option value";
-                type string;
+    
+            leaf ifindex {
+                description "The ifindex is useful for seamless integration with protocols such as SNMP and sFlow.
+                    It is a positive interface index as defined for SNMP MIB-II in RFCs 1213 and 2863 if the interface
+                    has one, otherwise 0. It is a read-only column and an integer in the range 0 to 4,294,967,295";
+                type uint32;
+                config false;
             }
-        }
+    
+            leaf interface-type {
+                description "The type of the OVSDB interface";
+                type identityref {
+                    base interface-type-base;
+                }
+            }
+    
+            list options {
+                description "Port/Interface related optional input values";
+                key "option";
+                leaf option {
+                    description "Option name";
+                    type string;
+                }
+                leaf value {
+                    description "Option value";
+                    type string;
+                }
+            }
+    
+            leaf ofport {
+                description "Port/Interface related optional ofport";
+                type uint32;
+            }
+    
+            leaf ofport_request {
+                description "Port/Interface related optional ofport_request, in range 1 to 65279";
+                type uint16 {
+                    range "1..65279";
+                }
+            }
 
-        leaf ofport {
-            description "Port/Interface related optional ofport";
-            type uint32;
-        }
+            list interface-other-configs {
+                description "Other config attributes for Interfaces
+    
+                other_config : enable-vlan-splinters: optional string
+                   either true or false. Set to true to enable VLAN splinters on this
+                   interface. Defaults to false.";
+    
+                key "other-config-key";
+                leaf other-config-key {
+                    description "interface-other-config name/key";
+                    type string;
+                }
+                leaf other-config-value {
+                    description "interface-other-config value";
+                    type string;
+                }
+            }
 
-        leaf ofport_request {
-            description "Port/Interface related optional ofport_request, in range 1 to 65279";
-            type uint16 {
-                range "1..65279";
+            list interface-external-ids {
+                description "Interface external ids
+    
+                external_ids : attached-mac: optional string.
+                   The MAC address programmed into the ''virtual hardware'' for this interface, in
+                   the form xx:xx:xx:xx:xx:xx. For Citrix XenServer, this is the
+                   value of the MAC field in the VIF record for this interface.
+    
+                external_ids : iface-id: optional string.
+                   A system-unique identifier for the interface. On XenServer, this will commonly
+                   be the same as external_ids:xs-vif-uuid.
+    
+                external_ids : iface-status: optional string
+                   either active or inactive Hypervisors may sometimes have more than one interface
+                   associated with a given external_ids:iface-id, only one of
+                   which is actually in use at a given time.
+    
+                external_ids : xs-vif-uuid: optional string.
+                   The virtual interface associated with this interface.
+    
+                external_ids : xs-network-uuid: optional string.
+                   The virtual network to which this interface is attached.
+    
+                external_ids : vm-id: optional string.
+                   The VM to which this interface belongs. On XenServer, this will be the same as
+                   external_ids:xsvm-uuid.
+    
+                external_ids : xs-vm-uuid: optional string.
+                   The VM to which this interface belongs";
+    
+                key "external-id-key";
+                leaf external-id-key {
+                    description "external-id name/key";
+                    type string;
+                    mandatory true;
+                }
+                leaf external-id-value {
+                    description "external-id value";
+                    type string;
+                    mandatory true;
+                }
+            }
+    
+            list interface-lldp {
+                description "Auto Attach configuration for a particular interface.
+                    If LLDP is enabled on an interface, the interface processes received
+                    LLDP packets and never passes them to OpenFlow or forwards them.
+    
+                    lldp : enable: optional string, either true or false
+                           True to enable LLDP on this Interface. If not specified, LLDP
+                           will be disabled by default.";
+    
+                key "lldp-key";
+                leaf lldp-key {
+                    description "lldp name/key";
+                    type string;
+                }
+                leaf lldp-value {
+                    description "lldp value";
+                    type string;
+                }
+            }
+    
+            list interface-bfd {
+                description "BFD configuration for a particular interface.
+                    BFD, defined in RFC 5880 and RFC 5881, allows point-to-point
+                    detection of connectivity failures by occasional transmission of
+                    BFD control messages.
+    
+                    bfd : enable: optional string, either true or false
+                           True to enable BFD on this Interface. If not specified, BFD
+                           will be disabled by default.
+    
+                    bfd : min_rx: optional string
+                           containing an integer, at least 1.
+                           The shortest interval, in milliseconds, at which this BFD session
+                           offers to receive BFD control messages.  The remote endpoint may
+                           choose to send messages at a slower rate.  Defaults to 1000.
+    
+                    bfd : min_tx: optional string
+                           containing an integer, at least 1.
+                           The shortest interval, in milliseconds, at which this BFD session is
+                           willing to transmit BFD control messages.  Messages will actually be
+                           transmitted at a slower rate if the remote endpoint is not willing to
+                           receive as quickly as specified.  Defaults to 100.
+    
+                    bfd : decay_min_rx: optional string
+                           containing an integer
+                           An alternate receive interval, in milliseconds, that must be greater
+                           than or equal to bfd:min_rx.  The implementation switches from
+                           bfd:min_rx to bfd:decay_min_rx when there is no obvious incoming
+                           data traffic at the interface, to reduce the CPU and bandwidth cost
+                           of monitoring an idle interface.  This feature may be disabled by
+                           setting a value of 0. This feature is reset whenever bfd:decay_min_rx
+                           bfd:min_rx changes.
+    
+                    bfd : forwarding_if_rx: optional string, either true or false
+                           When true, traffic received on the Interface is used to
+                           indicate the capability of packet I/O. BFD control packets are
+                           still transmitted and received.  At least one BFD control
+                           packet must be received every 100 * bfd:min_rx amount of time.
+                           Otherwise, even if traffic are received, the bfd-status:forwarding
+                           will be false.
+    
+                    bfd : cpath_down: optional string, either true or false
+                           Set to true to notify the remote endpoint that traffic should not be
+                           forwarded to this system for some reason other than a connectivity
+                           failure on the interface being monitored.  The typical underlying
+                           reason is concatenated path down, that is, that connectivity
+                           beyond the local system is down.  Defaults to false.
+    
+                    bfd : cpath_down: optional string, either true or false
+                           Set to true to notify the remote endpoint that traffic should not be
+                           forwarded to this system for some reason other than a connectivity
+                           failure on the interface being monitored.  The typical underlying
+                           reason is concatenated path down, that is, that connectivity
+                           beyond the local system is down.  Defaults to false.
+    
+                    bfd : check_tnl_key: optional string, either true or false
+                           Set to true to make BFD accept only control messages with a tunnel
+                           key of zero.  By default, BFD accepts control messages with any
+                           tunnel key.
+    
+                    bfd : bfd_local_dst_mac: optional string, mac address
+                           Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx
+                           to set the MAC used as destination for transmitted BFD packets. The
+                           default is 00:23:20:00:00:01
+    
+                    bfd : bfd_remote_dst_mac: optional string, mac address
+                           Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx
+                           to set the MAC used for checking the destination of received BFD packets.
+                           Packets with different destination MAC will not be considered as BFD packets.
+                           If not specified the destination MAC address of received BFD packets
+                           are not checked.
+    
+                    bfd : bfd_src_ip: optional string, ip address
+                           Set to an IPv4 address to set the IP address used as source
+                           for transmitted BFD packets.  The default is 169.254.1.1
+    
+                    bfd : bfd_dst_ip: optional string, ip address
+                           Set to an IPv4 address to set the IP address used as destination
+                           for transmitted BFD packets.  The default is 169.254.1.0";
+    
+                key "bfd-key";
+                leaf bfd-key {
+                    description "bfd name/key";
+                    type string;
+                }
+                leaf bfd-value {
+                    description "bfd value";
+                    type string;
+                }
+            }
+    
+            list interface-bfd-status {
+                description "BFD status for a particular interface.
+                    The switch sets key-value pairs in the bfd_status column to
+                    report the status of BFD on this interface.  When BFD is not
+                    enabled, with bfd:enable, the switch clears all key-value
+                    pairs from bfd_status.
+    
+                    bfd_status : state: optional string, one of [admin_down, down, init, up]
+                           Reports the state of the BFD session.  The BFD session is fully
+                           healthy and negotiated if UP.
+    
+                    bfd_status : forwarding: optional string, true or false
+                           Reports whether the BFD session believes this Interface
+                           may be used to forward traffic.  Typically this means
+                           the local session is signaling UP, and the remote
+                           system isn't signaling a problem such as concatenated path down.
+    
+                    bfd_status : diagnostic: optional string
+                           A diagnostic code specifying the local system's reason for the
+                           last change in session state. The error messages are defined in
+                           section 4.1 of [RFC 5880].
+    
+                    bfd_status : remote_state: optional string, one of [admin_down, down, init, up]
+                           Reports the state of the remote endpoint's BFD session.
+    
+                    bfd_status : remote_diagnostic: optional string
+                           A diagnostic code specifying the remote system's reason for the
+                           last change in session state. The error messages are defined in
+                           section 4.1 of [RFC 5880].
+    
+                    bfd_status : flap_count: optional string,
+                           containing an integer, minimum 0
+                           Counts the number of bfd_status:forwarding flaps since start.
+                           A flap is considered as a change of the bfd_status:forwarding value.";
+    
+                key "bfd-status-key";
+                leaf bfd-status-key {
+                    description "bfd-status name/key";
+                    type string;
+                }
+                leaf bfd-status-value {
+                    description "bfd-status value";
+                    type string;
+                }
+            }
+
+            leaf ingress-policing-rate {
+                description "Maximum rate for data received on this interface in kbps.
+                    Data received faster than this rate is dropped.  Set to 0 (default)
+                    to disable policing";
+                type uint32;
+            }
+
+            leaf ingress-policing-burst {
+                description "Maximum burst size for data received on this interface in kb.
+                    The default burst size if set to 0 is 1000 kb.  This value has no
+                    effect if ingress-policing-rate is 0.";
+                type uint32;
             }
         }
 
@@ -904,14 +1146,14 @@ module ovsdb {
             description "The VLAN tag of the termination point.";
             type ethertype:vlan-id;
         }
-
+        
         list trunks {
             description "Represents the trunks of a termination point.";
             leaf trunk {
                 type ethertype:vlan-id;
             }
         }
-
+        
         leaf vlan-mode {
             description "The VLAN mode of the termination point.";
             type enumeration {
@@ -1064,24 +1306,6 @@ module ovsdb {
             }
         }
 
-        list interface-other-configs {
-            description "Other config attributes for Interfaces
-
-            other_config : enable-vlan-splinters: optional string
-               either true or false. Set to true to enable VLAN splinters on this
-               interface. Defaults to false.";
-
-            key "other-config-key";
-            leaf other-config-key {
-                description "interface-other-config name/key";
-                type string;
-            }
-            leaf other-config-value {
-                description "interface-other-config value";
-                type string;
-            }
-        }
-
         list port-external-ids {
             description "Port external ids
 
@@ -1103,206 +1327,6 @@ module ovsdb {
             }
         }
 
-        list interface-external-ids {
-            description "Interface external ids
-
-            external_ids : attached-mac: optional string.
-               The MAC address programmed into the ''virtual hardware'' for this interface, in
-               the form xx:xx:xx:xx:xx:xx. For Citrix XenServer, this is the
-               value of the MAC field in the VIF record for this interface.
-
-            external_ids : iface-id: optional string.
-               A system-unique identifier for the interface. On XenServer, this will commonly
-               be the same as external_ids:xs-vif-uuid.
-
-            external_ids : iface-status: optional string
-               either active or inactive Hypervisors may sometimes have more than one interface
-               associated with a given external_ids:iface-id, only one of
-               which is actually in use at a given time.
-
-            external_ids : xs-vif-uuid: optional string.
-               The virtual interface associated with this interface.
-
-            external_ids : xs-network-uuid: optional string.
-               The virtual network to which this interface is attached.
-
-            external_ids : vm-id: optional string.
-               The VM to which this interface belongs. On XenServer, this will be the same as
-               external_ids:xsvm-uuid.
-
-            external_ids : xs-vm-uuid: optional string.
-               The VM to which this interface belongs";
-
-            key "external-id-key";
-            leaf external-id-key {
-                description "external-id name/key";
-                type string;
-                mandatory true;
-            }
-            leaf external-id-value {
-                description "external-id value";
-                type string;
-                mandatory true;
-            }
-        }
-
-        list interface-lldp {
-            description "Auto Attach configuration for a particular interface.
-                If LLDP is enabled on an interface, the interface processes received
-                LLDP packets and never passes them to OpenFlow or forwards them.
-
-                lldp : enable: optional string, either true or false
-                       True to enable LLDP on this Interface. If not specified, LLDP
-                       will be disabled by default.";
-
-            key "lldp-key";
-            leaf lldp-key {
-                description "lldp name/key";
-                type string;
-            }
-            leaf lldp-value {
-                description "lldp value";
-                type string;
-            }
-        }
-
-        list interface-bfd {
-            description "BFD configuration for a particular interface.
-                BFD, defined in RFC 5880 and RFC 5881, allows point-to-point
-                detection of connectivity failures by occasional transmission of
-                BFD control messages.
-
-                bfd : enable: optional string, either true or false
-                       True to enable BFD on this Interface. If not specified, BFD
-                       will be disabled by default.
-
-                bfd : min_rx: optional string
-                       containing an integer, at least 1.
-                       The shortest interval, in milliseconds, at which this BFD session
-                       offers to receive BFD control messages.  The remote endpoint may
-                       choose to send messages at a slower rate.  Defaults to 1000.
-
-                bfd : min_tx: optional string
-                       containing an integer, at least 1.
-                       The shortest interval, in milliseconds, at which this BFD session is
-                       willing to transmit BFD control messages.  Messages will actually be
-                       transmitted at a slower rate if the remote endpoint is not willing to
-                       receive as quickly as specified.  Defaults to 100.
-
-                bfd : decay_min_rx: optional string
-                       containing an integer
-                       An alternate receive interval, in milliseconds, that must be greater
-                       than or equal to bfd:min_rx.  The implementation switches from
-                       bfd:min_rx to bfd:decay_min_rx when there is no obvious incoming
-                       data traffic at the interface, to reduce the CPU and bandwidth cost
-                       of monitoring an idle interface.  This feature may be disabled by
-                       setting a value of 0. This feature is reset whenever bfd:decay_min_rx
-                       bfd:min_rx changes.
-
-                bfd : forwarding_if_rx: optional string, either true or false
-                       When true, traffic received on the Interface is used to
-                       indicate the capability of packet I/O. BFD control packets are
-                       still transmitted and received.  At least one BFD control
-                       packet must be received every 100 * bfd:min_rx amount of time.
-                       Otherwise, even if traffic are received, the bfd-status:forwarding
-                       will be false.
-
-                bfd : cpath_down: optional string, either true or false
-                       Set to true to notify the remote endpoint that traffic should not be
-                       forwarded to this system for some reason other than a connectivity
-                       failure on the interface being monitored.  The typical underlying
-                       reason is concatenated path down, that is, that connectivity
-                       beyond the local system is down.  Defaults to false.
-
-                bfd : cpath_down: optional string, either true or false
-                       Set to true to notify the remote endpoint that traffic should not be
-                       forwarded to this system for some reason other than a connectivity
-                       failure on the interface being monitored.  The typical underlying
-                       reason is concatenated path down, that is, that connectivity
-                       beyond the local system is down.  Defaults to false.
-
-                bfd : check_tnl_key: optional string, either true or false
-                       Set to true to make BFD accept only control messages with a tunnel
-                       key of zero.  By default, BFD accepts control messages with any
-                       tunnel key.
-
-                bfd : bfd_local_dst_mac: optional string, mac address
-                       Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx
-                       to set the MAC used as destination for transmitted BFD packets. The
-                       default is 00:23:20:00:00:01
-
-                bfd : bfd_remote_dst_mac: optional string, mac address
-                       Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx
-                       to set the MAC used for checking the destination of received BFD packets.
-                       Packets with different destination MAC will not be considered as BFD packets.
-                       If not specified the destination MAC address of received BFD packets
-                       are not checked.
-
-                bfd : bfd_src_ip: optional string, ip address
-                       Set to an IPv4 address to set the IP address used as source
-                       for transmitted BFD packets.  The default is 169.254.1.1
-
-                bfd : bfd_dst_ip: optional string, ip address
-                       Set to an IPv4 address to set the IP address used as destination
-                       for transmitted BFD packets.  The default is 169.254.1.0";
-
-            key "bfd-key";
-            leaf bfd-key {
-                description "bfd name/key";
-                type string;
-            }
-            leaf bfd-value {
-                description "bfd value";
-                type string;
-            }
-        }
-
-        list interface-bfd-status {
-            description "BFD status for a particular interface.
-                The switch sets key-value pairs in the bfd_status column to
-                report the status of BFD on this interface.  When BFD is not
-                enabled, with bfd:enable, the switch clears all key-value
-                pairs from bfd_status.
-
-                bfd_status : state: optional string, one of [admin_down, down, init, up]
-                       Reports the state of the BFD session.  The BFD session is fully
-                       healthy and negotiated if UP.
-
-                bfd_status : forwarding: optional string, true or false
-                       Reports whether the BFD session believes this Interface
-                       may be used to forward traffic.  Typically this means
-                       the local session is signaling UP, and the remote
-                       system isn't signaling a problem such as concatenated path down.
-
-                bfd_status : diagnostic: optional string
-                       A diagnostic code specifying the local system's reason for the
-                       last change in session state. The error messages are defined in
-                       section 4.1 of [RFC 5880].
-
-                bfd_status : remote_state: optional string, one of [admin_down, down, init, up]
-                       Reports the state of the remote endpoint's BFD session.
-
-                bfd_status : remote_diagnostic: optional string
-                       A diagnostic code specifying the remote system's reason for the
-                       last change in session state. The error messages are defined in
-                       section 4.1 of [RFC 5880].
-
-                bfd_status : flap_count: optional string,
-                       containing an integer, minimum 0
-                       Counts the number of bfd_status:forwarding flaps since start.
-                       A flap is considered as a change of the bfd_status:forwarding value.";
-
-            key "bfd-status-key";
-            leaf bfd-status-key {
-                description "bfd-status name/key";
-                type string;
-            }
-            leaf bfd-status-value {
-                description "bfd-status value";
-                type string;
-            }
-        }
-
         list qos-entry {
             key "qos-key";
             max-elements 1;
@@ -1318,20 +1342,6 @@ module ovsdb {
                 type ovsdb-qos-ref;
                 mandatory true;
             }
-        }
-
-        leaf ingress-policing-rate {
-            description "Maximum rate for data received on this interface in kbps.
-                Data received faster than this rate is dropped.  Set to 0 (default)
-                to disable policing";
-            type uint32;
-        }
-
-        leaf ingress-policing-burst {
-            description "Maximum burst size for data received on this interface in kb.
-                The default burst size if set to 0 is 1000 kb.  This value has no
-                effect if ingress-policing-rate is 0.";
-            type uint32;
         }
     }
 

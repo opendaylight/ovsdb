@@ -65,10 +65,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
@@ -220,8 +223,8 @@ public class OvsdbPortUpdateCommandTest {
         interfaceOldRows.put(uuid2, iface);
         field(OvsdbPortUpdateCommand.class, "interfaceUpdatedRows").set(ovsdbPortUpdateCommand, ifUpdatedRows);
         field(OvsdbPortUpdateCommand.class, "interfaceOldRows").set(ovsdbPortUpdateCommand, interfaceOldRows);
-        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint",
-                OvsdbTerminationPointAugmentationBuilder.class, Interface.class));
+        PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaceList",
+                Entry.class, OvsdbTerminationPointAugmentationBuilder.class));
 
         when(tpAugmentationBuilder.build()).thenReturn(mock(OvsdbTerminationPointAugmentation.class));
         when(tpBuilder.addAugmentation(eq(OvsdbTerminationPointAugmentation.class),
@@ -250,7 +253,7 @@ public class OvsdbPortUpdateCommandTest {
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateTerminationPoints", transaction, node);
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("getInstanceIdentifier",
                 any(OvsdbTerminationPointAugmentationBuilder.class), any(Port.class));
-        verify(transaction, times(2)).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(TerminationPoint.class));
     }
 
@@ -285,26 +288,6 @@ public class OvsdbPortUpdateCommandTest {
         verify(tpAugmentationBuilder).setPortUuid(any(Uuid.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updatePort", any(ReadWriteTransaction.class),
                 any(Node.class), any(InstanceIdentifier.class), any(Entry.class),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
-    }
-
-    @Test
-    public void testBuildTerminationPoint1() throws Exception {
-        Interface interfaceUpdate = mock(Interface.class);
-        when(interfaceUpdate.getName()).thenReturn(INTERFACE_NAME);
-        when(interfaceUpdate.getUuid()).thenReturn(mock(UUID.class));
-        PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        when(tpAugmentationBuilder.setName(anyString())).thenReturn(tpAugmentationBuilder);
-        when(tpAugmentationBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(tpAugmentationBuilder);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterfaces", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
-
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", tpAugmentationBuilder, interfaceUpdate);
-        verify(tpAugmentationBuilder).setName(anyString());
-        verify(tpAugmentationBuilder).setInterfaceUuid(any(Uuid.class));
-        PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaces", any(Interface.class),
                 any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
@@ -400,14 +383,14 @@ public class OvsdbPortUpdateCommandTest {
         when(interfaceUpdate.getTypeColumn()).thenReturn(typeColumn);
         when(typeColumn.getData()).thenReturn(OVSDB_INTERFACE_TYPE);
         MemberModifier.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "updateInterface", Interface.class,
-                String.class, OvsdbTerminationPointAugmentationBuilder.class));
+                String.class, InterfaceListBuilder.class));
 
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaces", interfaceUpdate,
-                ovsdbTerminationPointBuilder);
+        InterfaceListBuilder interfaceListBuilder = mock(
+                InterfaceListBuilder.class);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interfaceUpdate, typeColumn.getData(),
+                interfaceListBuilder);
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterface", any(Interface.class), anyString(),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
+                any(InterfaceListBuilder.class));
     }
 
     @Test
@@ -418,44 +401,50 @@ public class OvsdbPortUpdateCommandTest {
                 OvsdbTerminationPointAugmentationBuilder.class);
         when(interf.getUuid()).thenReturn(mock(UUID.class));
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
-        when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
+        InterfaceList interfList = mock(InterfaceList.class);
+        InterfaceListBuilder interfaceListBuilder = mock(InterfaceListBuilder.class);
+        when(interfaceListBuilder.setName(any(String.class))).thenReturn(interfaceListBuilder);
+        when(interfaceListBuilder.build()).thenReturn(interfList);
+        List<InterfaceList> interfaceList = new ArrayList<>();
+        interfaceList.add(interfList);
+        when(ovsdbTerminationPointBuilder.setInterfaceList(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
+        //verify(ovsdbTerminationPointBuilder).setInterfaceList(any(List.class));
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
                 .thenAnswer((Answer<Class<? extends InterfaceTypeBase>>) invocation -> InterfaceTypeInternal.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
+        when(interfaceListBuilder.setInterfaceType(any(Class.class))).thenReturn(interfaceListBuilder);
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPortRequest", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceExternalIds", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateOptions", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceOtherConfig", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceLldp", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceBfd", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateInterfaceBfdStatus", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateIfIndex", Interface.class,
-                OvsdbTerminationPointAugmentationBuilder.class));
+                InterfaceListBuilder.class));
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interf, OVSDB_INTERFACE_TYPE,
-                ovsdbTerminationPointBuilder);
-        verify(ovsdbTerminationPointBuilder).setInterfaceUuid(any(Uuid.class));
-        verify(ovsdbTerminationPointBuilder).setInterfaceType(any(Class.class));
+                interfaceListBuilder);        
+        verify(interfaceListBuilder).setInterfaceType(any(Class.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOfPort", any(Interface.class),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
+                any(InterfaceListBuilder.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOfPortRequest", any(Interface.class),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
+                any(InterfaceListBuilder.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceExternalIds", any(Interface.class),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
+                any(InterfaceListBuilder.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateOptions", any(Interface.class),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
+                any(InterfaceListBuilder.class));
         PowerMockito.verifyPrivate(ovsdbPortUpdateCommand).invoke("updateInterfaceOtherConfig", any(Interface.class),
-                any(OvsdbTerminationPointAugmentationBuilder.class));
+                any(InterfaceListBuilder.class));
     }
 
     @Test
@@ -561,10 +550,18 @@ public class OvsdbPortUpdateCommandTest {
         when(column.getData()).thenReturn(ofPorts);
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setOfport(any(Long.class))).thenReturn(ovsdbTerminationPointBuilder);
+        //for InterfaceList
+        InterfaceList interfList = mock(InterfaceList.class);
+        InterfaceListBuilder interfaceListBuilder = mock(InterfaceListBuilder.class);
+        when(interfaceListBuilder.setOfport(any(Long.class))).thenReturn(interfaceListBuilder);
+        when(interfaceListBuilder.build()).thenReturn(interfList);
+        List<InterfaceList> interfaceList = new ArrayList<>();
+        interfaceList.add(interfList);
+        when(ovsdbTerminationPointBuilder.setInterfaceList(any(List.class)))
+                .thenReturn(ovsdbTerminationPointBuilder);
         when(interf.getName()).thenReturn(INTERFACE_NAME);
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateOfPort", interf, ovsdbTerminationPointBuilder);
-        verify(ovsdbTerminationPointBuilder).setOfport(any(Long.class));
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateOfPort", interf, interfaceListBuilder);
+        verify(interfaceListBuilder).setOfport(any(Long.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -578,11 +575,18 @@ public class OvsdbPortUpdateCommandTest {
         when(column.getData()).thenReturn(ofPortRequests);
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setOfportRequest(any(Integer.class)))
+        //for InterfaceList
+        InterfaceList interfList = mock(InterfaceList.class);
+        InterfaceListBuilder interfaceListBuilder = mock(InterfaceListBuilder.class);
+        when(interfaceListBuilder.setOfportRequest(any(Integer.class))).thenReturn(interfaceListBuilder);
+        when(interfaceListBuilder.build()).thenReturn(interfList);
+        List<InterfaceList> interfaceList = new ArrayList<>();
+        interfaceList.add(interfList);
+        when(ovsdbTerminationPointBuilder.setInterfaceList(any(List.class)))
                 .thenReturn(ovsdbTerminationPointBuilder);
         when(interf.getName()).thenReturn(INTERFACE_NAME);
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateOfPortRequest", interf, ovsdbTerminationPointBuilder);
-        verify(ovsdbTerminationPointBuilder).setOfportRequest(any(Integer.class));
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateOfPortRequest", interf, interfaceListBuilder);
+        verify(interfaceListBuilder).setOfportRequest(any(Integer.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -605,9 +609,17 @@ public class OvsdbPortUpdateCommandTest {
         when(interfaceExternalIdsBuilder.build()).thenReturn(mock(InterfaceExternalIds.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBldr = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBldr.setInterfaceExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBldr);
+        //for InterfaceList
+        InterfaceList interfList = mock(InterfaceList.class);
+        InterfaceListBuilder interfaceListBuilder = mock(InterfaceListBuilder.class);
+        when(interfaceListBuilder.setInterfaceExternalIds(any(List.class))).thenReturn(interfaceListBuilder);
+        when(interfaceListBuilder.build()).thenReturn(interfList);
+        List<InterfaceList> interfaceList = new ArrayList<>();
+        interfaceList.add(interfList);
+        when(ovsdbTerminationPointBldr.setInterfaceList(any(List.class)))
+                .thenReturn(ovsdbTerminationPointBldr);
 
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceExternalIds", interf, ovsdbTerminationPointBldr);
+        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceExternalIds", interf, interfaceListBuilder);
         verify(interfaceExternalIdsBuilder).setExternalIdKey(anyString());
         verify(interfaceExternalIdsBuilder).setExternalIdValue(anyString());
 
@@ -657,7 +669,7 @@ public class OvsdbPortUpdateCommandTest {
         when(portOtherConfigsBuilder.build()).thenReturn(mock(PortOtherConfigs.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
+        when(ovsdbTerminationPointBuilder.setPortOtherConfigs(any(List.class)))
                 .thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortOtherConfig", port, ovsdbTerminationPointBuilder);
@@ -684,11 +696,18 @@ public class OvsdbPortUpdateCommandTest {
         when(interfaceOtherConfigsBuilder.build()).thenReturn(mock(InterfaceOtherConfigs.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
+        //for InterfaceList
+        InterfaceList interfList = mock(InterfaceList.class);
+        InterfaceListBuilder interfaceListBuilder = mock(InterfaceListBuilder.class);
+        when(interfaceListBuilder.setInterfaceOtherConfigs(any(List.class))).thenReturn(interfaceListBuilder);
+        when(interfaceListBuilder.build()).thenReturn(interfList);
+        List<InterfaceList> interfaceList = new ArrayList<>();
+        interfaceList.add(interfList);
+        when(ovsdbTerminationPointBuilder.setInterfaceList(any(List.class)))
                 .thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceOtherConfig", interf,
-                ovsdbTerminationPointBuilder);
+                interfaceListBuilder);
         verify(interfaceOtherConfigsBuilder).setOtherConfigKey(anyString());
         verify(interfaceOtherConfigsBuilder).setOtherConfigValue(anyString());
     }

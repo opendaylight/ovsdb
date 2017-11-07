@@ -49,7 +49,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -112,14 +114,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceLldp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceLldpBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
@@ -685,9 +689,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
                                         .getAugmentation(OvsdbTerminationPointAugmentation.class);
                                 if (ovsdbTerminationPointAugmentation.getName().equals(testPortname)) {
-                                    Class<? extends InterfaceTypeBase> opPort = ovsdbTerminationPointAugmentation
-                                            .getInterfaceType();
-                                    Assert.assertEquals(dpdkIfType, opPort);
+                                	List<InterfaceList> interfaceList = ovsdbTerminationPointAugmentation.getInterfaceList();
+                                    for (InterfaceList interf : interfaceList) {
+                                        if (interf.getName().equals(testPortname)) {
+                                        	Class<? extends InterfaceTypeBase> opPort = interf.getInterfaceType();
+                                        	Assert.assertEquals(dpdkIfType, opPort);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -784,34 +792,82 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return protocolList;
     }
 
-    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
+    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder(
+    	    final String portName) {
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
                 new OvsdbTerminationPointAugmentationBuilder();
-        ovsdbTerminationPointAugmentationBuilder.setInterfaceType(
+        ovsdbTerminationPointAugmentationBuilder.setName(portName);
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
+        interfaceListBuilder.setName(portName);
+        interfaceListBuilder.setInterfaceType(
                 new InterfaceTypeEntryBuilder()
                         .setInterfaceType(
                                 SouthboundMapper.createInterfaceType("internal"))
                         .build().getInterfaceType());
+        newInterfaceList.add(interfaceListBuilder.build());
+        ovsdbTerminationPointAugmentationBuilder.setInterfaceList(newInterfaceList);
+        return ovsdbTerminationPointAugmentationBuilder;
+    }
+    
+    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder(
+            final String portName, final Class<? extends InterfaceTypeBase> type) {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationPointAugmentationBuilder.setName(portName);
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
+        interfaceListBuilder.setName(portName);
+        interfaceListBuilder.setInterfaceType(type);
+        newInterfaceList.add(interfaceListBuilder.build());
+        ovsdbTerminationPointAugmentationBuilder.setInterfaceList(newInterfaceList);
+        return ovsdbTerminationPointAugmentationBuilder;
+    }
+    
+    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder(
+            final String portName, final Long ofPort, final Integer ofPortRequest) {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationPointAugmentationBuilder.setName(portName);
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
+        interfaceListBuilder.setName(portName);
+        interfaceListBuilder.setOfport(ofPort);
+        interfaceListBuilder.setOfportRequest(ofPortRequest);
+        newInterfaceList.add(interfaceListBuilder.build());
+        ovsdbTerminationPointAugmentationBuilder.setInterfaceList(newInterfaceList);
+        return ovsdbTerminationPointAugmentationBuilder;
+    }
+    
+    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder(
+            final String portName, final Long ofPort) {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationPointAugmentationBuilder.setName(portName);
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
+        interfaceListBuilder.setName(portName);
+        interfaceListBuilder.setOfport(ofPort);
+        newInterfaceList.add(interfaceListBuilder.build());
+        ovsdbTerminationPointAugmentationBuilder.setInterfaceList(newInterfaceList);
         return ovsdbTerminationPointAugmentationBuilder;
     }
 
     private OvsdbTerminationPointAugmentationBuilder createGenericDpdkOvsdbTerminationPointAugmentationBuilder(
             final String portName) {
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                createGenericOvsdbTerminationPointAugmentationBuilder();
-        ovsdbTerminationBuilder.setName(portName);
-        Class<? extends InterfaceTypeBase> ifType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
+    	Class<? extends InterfaceTypeBase> ifType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
                 .get("dpdk");
-        ovsdbTerminationBuilder.setInterfaceType(ifType);
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder(portName, ifType);
+        
         return ovsdbTerminationBuilder;
     }
 
     private OvsdbTerminationPointAugmentationBuilder createSpecificDpdkOvsdbTerminationPointAugmentationBuilder(
             String testPortname,Class<? extends InterfaceTypeBase> dpdkIfType) {
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                createGenericOvsdbTerminationPointAugmentationBuilder();
-        ovsdbTerminationBuilder.setName(testPortname);
-        ovsdbTerminationBuilder.setInterfaceType(dpdkIfType);
+                createGenericOvsdbTerminationPointAugmentationBuilder(testPortname, dpdkIfType);
+
         return ovsdbTerminationBuilder;
     }
 
@@ -1337,10 +1393,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             LOG.info("bridge: {}", bridge);
             NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
-            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                    createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testIfIndex";
-            ovsdbTerminationBuilder.setName(portName);
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder(portName);
 
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
@@ -1353,9 +1408,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ifIndex = ovsdbTerminationPointAugmentation.getIfindex();
-                    Assert.assertNotNull(ifIndex);
-                    LOG.info("ifIndex: {} for the port:{}", ifIndex, portName);
+                	List<InterfaceList> interfaceList = ovsdbTerminationPointAugmentation.getInterfaceList();
+                    for (InterfaceList interf : interfaceList) {
+                    	Long ifIndex = interf.getIfindex();
+                        Assert.assertNotNull(ifIndex);
+                        LOG.info("ifIndex: {} for the port:{}", ifIndex, portName);
+                    }
                 }
             }
         }
@@ -1374,12 +1432,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             LOG.info("bridge: {}", bridge);
             NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
-            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                    createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testOfPort";
-            ovsdbTerminationBuilder.setName(portName);
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder(portName, OFPORT_EXPECTED);
 
-            ovsdbTerminationBuilder.setOfport(OFPORT_EXPECTED);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1391,10 +1447,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
-                    // if ephemeral port 45002 is in use, ofPort is set to 1
-                    Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(1L));
-                    LOG.info("ofPort: {}", ofPort);
+                	List<InterfaceList> interfaceList = ovsdbTerminationPointAugmentation.getInterfaceList();
+                    for (InterfaceList interf : interfaceList) {
+                    	Long ofPort = interf.getOfport();
+                        // if ephemeral port 45002 is in use, ofPort is set to 1
+                        Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(1L));
+                        LOG.info("ofPort: {}", ofPort);
+                    }
                 }
             }
 
@@ -1419,13 +1478,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(bridge);
             NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
-            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                    createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testOfPortRequest";
-            ovsdbTerminationBuilder.setName(portName);
             Integer ofPortRequestExpected = OFPORT_EXPECTED.intValue();
-            ovsdbTerminationBuilder.setOfport(OFPORT_INPUT);
-            ovsdbTerminationBuilder.setOfportRequest(ofPortRequestExpected);
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder(portName, OFPORT_INPUT, ofPortRequestExpected);
+
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1437,14 +1494,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
-                    // if ephemeral port 45008 is in use, ofPort is set to 1
-                    Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(1L));
-                    LOG.info("ofPort: {}", ofPort);
+                	List<InterfaceList> interfaceList = ovsdbTerminationPointAugmentation.getInterfaceList();
+                    for (InterfaceList interf : interfaceList) {
+                    	Long ofPort = interf.getOfport();
+                        // if ephemeral port 45008 is in use, ofPort is set to 1
+                        Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(1L));
+                        LOG.info("ofPort: {}", ofPort);
 
-                    Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest();
-                    Assert.assertTrue(ofPortRequest.equals(ofPortRequestExpected));
-                    LOG.info("ofPortRequest: {}", ofPortRequest);
+                        Integer ofPortRequest = interf.getOfportRequest();
+                        Assert.assertTrue(ofPortRequest.equals(ofPortRequestExpected));
+                        LOG.info("ofPortRequest: {}", ofPortRequest);
+                    }
                 }
             }
 
@@ -1498,8 +1558,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             SouthboundUtils.createInstanceIdentifier(connectionInfo,
                                     new OvsdbBridgeName(testBridgeAndPortName)));
                     OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder =
-                            createGenericOvsdbTerminationPointAugmentationBuilder();
-                    tpCreateAugmentationBuilder.setName(testBridgeAndPortName);
+                            createGenericOvsdbTerminationPointAugmentationBuilder(testBridgeAndPortName);
                     helper.writeValues(tpCreateAugmentationBuilder, updateFromTestCase.inputValues);
                     Assert.assertTrue(
                             addTerminationPoint(testBridgeNodeId, testBridgeAndPortName, tpCreateAugmentationBuilder));
@@ -1583,49 +1642,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * Tests the CRUD operations for <code>Interface</code> <code>external_ids</code>.
-     *
-     * @see <code>SouthboundIT.generateInterfaceExternalIdsTestCases()</code> for specific test case information
-     */
-    @Test
-    public void testCRUDTerminationPointInterfaceExternalIds() throws InterruptedException {
-        testCRUDTerminationPoint(new SouthboundInterfaceExternalIdsBuilder(), "TPInterfaceExternalIds",
-                new InterfaceExternalIdsSouthboundHelper());
-    }
-
-    /*
-     * Tests the CRUD operations for <code>Interface</code> <code>lldp</code>.
-     *
-     * @see <code>SouthboundIT.generateInterfaceLldpTestCases()</code> for specific test case information
-     */
-    @Test
-    public void testCRUDTerminationPointInterfaceLldp() throws InterruptedException {
-        testCRUDTerminationPoint(new SouthboundInterfaceLldpBuilder(), "TPInterfaceLldp",
-                new InterfaceLldpSouthboundHelper());
-    }
-
-    /*
-     * Tests the CRUD operations for <code>TerminationPoint</code> <code>options</code>.
-     *
-     * @see <code>SouthboundIT.generateTerminationPointOptions()</code> for specific test case information
-     */
-    @Test
-    public void testCRUDTerminationPointOptions() throws InterruptedException {
-        testCRUDTerminationPoint(new SouthboundOptionsBuilder(), "TPOptions", new OptionsSouthboundHelper());
-    }
-
-    /*
-     * Tests the CRUD operations for <code>Interface</code> <code>other_configs</code>.
-     *
-     * @see <code>SouthboundIT.generateInterfaceExternalIdsTestCases()</code> for specific test case information
-     */
-    @Test
-    public void testCRUDTerminationPointInterfaceOtherConfigs() throws InterruptedException {
-        testCRUDTerminationPoint(new SouthboundInterfaceOtherConfigsBuilder(), "TPInterfaceOtherConfigs",
-                new InterfaceOtherConfigsSouthboundHelper());
-    }
-
-    /*
      * Tests the CRUD operations for <code>Port</code> <code>other_configs</code>.
      *
      * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for specific test case information
@@ -1647,12 +1663,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(bridge);
             NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
-            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                    createGenericOvsdbTerminationPointAugmentationBuilder();
-
-            // add and delete a single port
+             // add and delete a single port
             String portName = port1;
-            ovsdbTerminationBuilder.setName(portName);
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder(portName);
+
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1732,10 +1747,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(bridge);
             NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
-            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                    createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointVlanId";
-            ovsdbTerminationBuilder.setName(portName);
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder(portName);
+
             ovsdbTerminationBuilder.setVlanTag(new VlanId(CREATED_VLAN_ID));
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
@@ -1805,10 +1820,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertNotNull(bridge);
                 NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                         connectionInfo, bridge.getBridgeName()));
-                OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                        createGenericOvsdbTerminationPointAugmentationBuilder();
                 String portName = "testTerminationPointVlanMode" + vlanMode.toString();
-                ovsdbTerminationBuilder.setName(portName);
+                OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                        createGenericOvsdbTerminationPointAugmentationBuilder(portName);
+
                 ovsdbTerminationBuilder.setVlanMode(vlanMode);
                 Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
                 InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
@@ -1895,10 +1910,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
                 Assert.assertNotNull(bridge);
                 NodeId nodeId = SouthboundUtils.createManagedNodeId(connectionInfo, bridge.getBridgeName());
-                OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                        createGenericOvsdbTerminationPointAugmentationBuilder();
                 String portName = "testTerminationPointVlanTrunks" + testCase;
-                ovsdbTerminationBuilder.setName(portName);
+                OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                        createGenericOvsdbTerminationPointAugmentationBuilder(portName);
+                
                 List<Trunks> trunks = buildTrunkList(vlanSet);
                 ovsdbTerminationBuilder.setTrunks(trunks);
                 Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
@@ -1977,10 +1992,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
             NodeId nodeId = SouthboundUtils.createManagedNodeId(connectionInfo, bridge.getBridgeName());
-            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                    createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointQos";
-            ovsdbTerminationBuilder.setName(portName);
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                    createGenericOvsdbTerminationPointAugmentationBuilder(portName);
+            
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
 
 
@@ -3076,61 +3091,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         @Override
         public List<PortExternalIds> readValues(OvsdbTerminationPointAugmentation augmentation) {
             return augmentation.getPortExternalIds();
-        }
-    }
-
-    private static class InterfaceExternalIdsSouthboundHelper implements
-            SouthboundTerminationPointHelper<InterfaceExternalIds> {
-        @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceExternalIds> values) {
-            builder.setInterfaceExternalIds(values);
-        }
-
-        @Override
-        public List<InterfaceExternalIds> readValues(OvsdbTerminationPointAugmentation augmentation) {
-            return augmentation.getInterfaceExternalIds();
-        }
-    }
-
-    private static class InterfaceLldpSouthboundHelper implements
-    SouthboundTerminationPointHelper<InterfaceLldp> {
-        @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceLldp> values) {
-            builder.setInterfaceLldp(values);
-        }
-
-        @Override
-        public List<InterfaceLldp> readValues(OvsdbTerminationPointAugmentation augmentation) {
-            return augmentation.getInterfaceLldp();
-        }
-    }
-
-    private static class OptionsSouthboundHelper implements SouthboundTerminationPointHelper<Options> {
-        @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<Options> values) {
-            builder.setOptions(values);
-        }
-
-        @Override
-        public List<Options> readValues(OvsdbTerminationPointAugmentation augmentation) {
-            return augmentation.getOptions();
-        }
-    }
-
-    private static class InterfaceOtherConfigsSouthboundHelper implements
-            SouthboundTerminationPointHelper<InterfaceOtherConfigs> {
-        @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceOtherConfigs> values) {
-            builder.setInterfaceOtherConfigs(values);
-        }
-
-        @Override
-        public List<InterfaceOtherConfigs> readValues(OvsdbTerminationPointAugmentation augmentation) {
-            return augmentation.getInterfaceOtherConfigs();
         }
     }
 

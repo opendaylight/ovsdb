@@ -84,12 +84,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.InterfaceExternalIdsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes._interface.list.OptionsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -736,11 +738,15 @@ public class SouthboundUtils {
             Long ofPort) {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
 
         tpAugmentationBuilder.setName(portName);
-        tpAugmentationBuilder.setOfport(ofPort);
+        
+        interfaceListBuilder.setName(portName);
+        interfaceListBuilder.setOfport(ofPort);
         if (type != null) {
-            tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
+        	interfaceListBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
 
         if (options != null && options.size() > 0) {
@@ -752,7 +758,7 @@ public class SouthboundUtils {
                 optionsBuilder.setValue(entry.getValue());
                 optionsList.add(optionsBuilder.build());
             }
-            tpAugmentationBuilder.setOptions(optionsList);
+            interfaceListBuilder.setOptions(optionsList);
         }
 
         if (externalIds != null && externalIds.size() > 0) {
@@ -764,8 +770,10 @@ public class SouthboundUtils {
                 interfaceExternalIdsBuilder.setExternalIdValue(entry.getValue());
                 externalIdsList.add(interfaceExternalIdsBuilder.build());
             }
-            tpAugmentationBuilder.setInterfaceExternalIds(externalIdsList);
+            interfaceListBuilder.setInterfaceExternalIds(externalIdsList);
         }
+        newInterfaceList.add(interfaceListBuilder.build());
+        tpAugmentationBuilder.setInterfaceList(newInterfaceList);
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
@@ -783,10 +791,14 @@ public class SouthboundUtils {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(
                 bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
 
         tpAugmentationBuilder.setName(portName);
+        
+        interfaceListBuilder.setName(portName);
         if (type != null) {
-            tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
+        	interfaceListBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
 
         List<Options> optionsList = new ArrayList<>();
@@ -797,7 +809,9 @@ public class SouthboundUtils {
             optionsBuilder.setValue(entry.getValue());
             optionsList.add(optionsBuilder.build());
         }
-        tpAugmentationBuilder.setOptions(optionsList);
+        interfaceListBuilder.setOptions(optionsList);
+        newInterfaceList.add(interfaceListBuilder.build());
+        tpAugmentationBuilder.setInterfaceList(newInterfaceList);
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
@@ -810,11 +824,17 @@ public class SouthboundUtils {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
                 new OvsdbTerminationPointAugmentationBuilder();
+        List<InterfaceList> newInterfaceList = new ArrayList<>();
+        InterfaceListBuilder interfaceListBuilder = new InterfaceListBuilder();
 
         tpAugmentationBuilder.setName(portName);
+        
+        interfaceListBuilder.setName(portName);
         if (type != null) {
-            tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
+        	interfaceListBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
+        newInterfaceList.add(interfaceListBuilder.build());
+        tpAugmentationBuilder.setInterfaceList(newInterfaceList);
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
@@ -1204,11 +1224,14 @@ public class SouthboundUtils {
 
     public static String getExternalInterfaceIdValue(final OvsdbTerminationPointAugmentation ovsdbTp) {
         if (ovsdbTp != null) {
-            List<InterfaceExternalIds> ifaceExtIds = ovsdbTp.getInterfaceExternalIds();
-            if (ifaceExtIds != null) {
-                for (InterfaceExternalIds entry : ifaceExtIds) {
-                    if (entry.getExternalIdKey().equals(EXTERNAL_INTERFACE_ID_KEY)) {
-                        return entry.getExternalIdValue();
+        	List<InterfaceList> ifaceLists = ovsdbTp.getInterfaceList();
+            for (InterfaceList ifaceList : ifaceLists) {
+                List<InterfaceExternalIds> ifaceExtIds = ifaceList.getInterfaceExternalIds();
+                if (ifaceExtIds != null) {
+                    for (InterfaceExternalIds entry : ifaceExtIds) {
+                        if (entry.getExternalIdKey().equals(EXTERNAL_INTERFACE_ID_KEY)) {
+                            return entry.getExternalIdValue();
+                        }
                     }
                 }
             }

@@ -497,6 +497,12 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             if (!ownershipChange.hasOwner()) {
                 LOG.debug("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
                 // If first cleanEntityOperationalData() was called, this call will be no-op.
+                // Is this the right call here ?
+                // Assume this is controller2
+                // and if the client got disconnected from controller1 and connected to controller1 again
+                // and controller1 deleted and created the node already as part of its handling
+                // this call which is a little late to got scheduled in this controller(controller2)
+                // is going to delete the created node again ?
                 cleanEntityOperationalData(ownershipChange.getEntity());
             }
             return;
@@ -518,6 +524,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
+            //Should it register immediately ?
+            //Assume this is controller2 and the client got disconnected from controller1 and connected here
+            //as part of controller1 cleanup , controller1 will delete the node in oper datastore
+            //as part of controller2 processing , the following call will end up create the node
+            //what if the controller1 cleanup scheduling is delayed, we end up deleting the node.
             hwvtepConnectionInstance.registerCallbacks();
 
         } else {

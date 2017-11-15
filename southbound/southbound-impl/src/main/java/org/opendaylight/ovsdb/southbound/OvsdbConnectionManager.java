@@ -67,21 +67,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-    private Map<ConnectionInfo, OvsdbConnectionInstance> clients =
+    private final Map<ConnectionInfo, OvsdbConnectionInstance> clients =
             new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
     private static final String ENTITY_TYPE = "ovsdb";
     private static final int DB_FETCH_TIMEOUT = 1000;
 
-    private DataBroker db;
-    private TransactionInvoker txInvoker;
-    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
+    private final DataBroker db;
+    private final TransactionInvoker txInvoker;
+    private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
             new ConcurrentHashMap<>();
-    private Map<Entity, OvsdbConnectionInstance> entityConnectionMap =
+    private final Map<Entity, OvsdbConnectionInstance> entityConnectionMap =
             new ConcurrentHashMap<>();
-    private EntityOwnershipService entityOwnershipService;
-    private OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
-    private OvsdbConnection ovsdbConnection;
+    private final EntityOwnershipService entityOwnershipService;
+    private final OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
+    private final OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
@@ -578,11 +578,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 break;
             case ON_DISCONNECT:
             {
-                ReadOnlyTransaction tx = db.newReadOnlyTransaction();
-                CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture =
-                        tx.read(LogicalDatastoreType.CONFIGURATION, iid);
-
-                final OvsdbConnectionManager connectionManager = this;
+                CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
+                try (ReadOnlyTransaction tx = db.newReadOnlyTransaction()) {
+                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+                }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
                     public void onSuccess(@Nullable Optional<Node> node) {
@@ -618,8 +617,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     private class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
-        private OvsdbConnectionManager cm;
-        private EntityOwnershipListenerRegistration listenerRegistration;
+        private final OvsdbConnectionManager cm;
+        private final EntityOwnershipListenerRegistration listenerRegistration;
 
         OvsdbDeviceEntityOwnershipListener(OvsdbConnectionManager cm, EntityOwnershipService entityOwnershipService) {
             this.cm = cm;

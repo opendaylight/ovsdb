@@ -35,9 +35,9 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
     private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
     private InstanceIdentifier<?> iid;
-    private final static int RETRY_WAIT = 100;
-    private final static int MDSAL_TIMEOUT_OPERATIONAL = 10000;
-    private final static int MDSAL_TIMEOUT_CONFIG = 1000;
+    private static final int RETRY_WAIT = 100;
+    private static final int MDSAL_TIMEOUT_OPERATIONAL = 10000;
+    private static final int MDSAL_TIMEOUT_CONFIG = 1000;
     private ListenerRegistration<?> listenerRegistration;
     private List<NotifyingDataChangeListener> waitList = null;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
@@ -55,7 +55,8 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     }
 
     /**
-     * Create a new NotifyingDataChangeListener
+     * Create a new NotifyingDataChangeListener.
+     *
      * @param type DataStore type
      * @param iid of the md-sal object we're waiting for
      * @param waitList for tracking outstanding changes
@@ -69,29 +70,29 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
             this.waitList.add(this);
         }
 
-        mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
+        this.mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
         if (type == LogicalDatastoreType.CONFIGURATION) {
-            mdsalTimeout = MDSAL_TIMEOUT_CONFIG;
+            this.mdsalTimeout = MDSAL_TIMEOUT_CONFIG;
         }
-        listen = true;
-        mask = BIT_ALL;
+        this.listen = true;
+        this.mask = BIT_ALL;
     }
 
     /**
      * Completely reset the state of this NotifyingDataChangeListener.
-     * @param type DataStore type
-     * @param iid of the md-sal object we're waiting for
-     * @throws Exception
+     * @param logicalDatastoreType DataStore type
+     * @param instanceIdentifier of the md-sal object we're waiting for
      */
-    public void modify(LogicalDatastoreType type, InstanceIdentifier<?> iid) throws Exception {
+    public void modify(LogicalDatastoreType logicalDatastoreType, InstanceIdentifier<?> instanceIdentifier)
+            throws Exception {
         this.close();
         this.clear();
-        this.type = type;
-        this.iid = iid;
+        this.type = logicalDatastoreType;
+        this.iid = instanceIdentifier;
     }
 
-    public void setlisten(Boolean listen) {
-        this.listen = listen;
+    public void setlisten(Boolean isListening) {
+        this.listen = isListening;
     }
 
     public void setMask(int mask) {
@@ -136,16 +137,16 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
         }
     }
 
-    public boolean isCreated(InstanceIdentifier<?> iid) {
-        return createdIids.remove(iid);
+    public boolean isCreated(InstanceIdentifier<?> instanceIdentifier) {
+        return createdIids.remove(instanceIdentifier);
     }
 
-    public boolean isUpdated(InstanceIdentifier<?> iid) {
-        return updatedIids.remove(iid);
+    public boolean isUpdated(InstanceIdentifier<?> instanceIdentifier) {
+        return updatedIids.remove(instanceIdentifier);
     }
 
-    public boolean isRemoved(InstanceIdentifier<?> iid) {
-        return removedIids.remove(iid);
+    public boolean isRemoved(InstanceIdentifier<?> instanceIdentifier) {
+        return removedIids.remove(instanceIdentifier);
     }
 
     public void clear() {
@@ -166,12 +167,12 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
 
     public void waitForCreation(long timeout) throws InterruptedException {
         synchronized (this) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for {} DataChanged creation on {}", type, iid);
-            while (!isCreated(iid) && System.currentTimeMillis() - _start < timeout) {
+            while (!isCreated(iid) && System.currentTimeMillis() - start < timeout) {
                 wait(RETRY_WAIT);
             }
-            LOG.info("Woke up, waited {}ms for creation of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {}ms for creation of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
@@ -181,12 +182,12 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
 
     public void waitForUpdate(long timeout) throws InterruptedException {
         synchronized (this) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for {} DataChanged update on {}", type, iid);
-            while (!isUpdated(iid) && System.currentTimeMillis() - _start < timeout) {
+            while (!isUpdated(iid) && System.currentTimeMillis() - start < timeout) {
                 wait(RETRY_WAIT);
             }
-            LOG.info("Woke up, waited {}ms for update of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {}ms for update of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
@@ -196,24 +197,18 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
 
     public void waitForDeletion(long timeout) throws InterruptedException {
         synchronized (this) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for {} DataChanged deletion on {}", type, iid);
-            while (!isRemoved(iid) && System.currentTimeMillis() - _start < timeout) {
+            while (!isRemoved(iid) && System.currentTimeMillis() - start < timeout) {
                 wait(RETRY_WAIT);
             }
-            LOG.info("Woke up, waited {}ms for deletion of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {}ms for deletion of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
     @Override
     public void close() throws Exception {
-        if (listenerRegistration != null) {
-            try {
-                listenerRegistration.close();
-            } catch (final Exception ex) {
-                LOG.warn("Failed to close registration {}, iid {}", listenerRegistration, iid, ex);
-            }
-        }
+        listenerRegistration.close();
         if (waitList != null) {
             waitList.remove(this);
         }

@@ -185,7 +185,7 @@ public class MdsalUtilsAsync {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
+            public void onFailure(final Throwable throwable) {
                 transaction.close();
             }
         };
@@ -199,12 +199,13 @@ public class MdsalUtilsAsync {
      * level and throw an {@link IllegalStateException} if the transaction
      * failed.
      *
-     * @param transaction
+     * @param transactionFuture
      *            The transaction to commit.
      * @param operationDesc
      *            A description of the transaction to commit.
      */
-    void assignDefaultCallback(final CheckedFuture<Void, TransactionCommitFailedException> transactionFuture, final String operationDesc) {
+    void assignDefaultCallback(final CheckedFuture<Void, TransactionCommitFailedException> transactionFuture,
+                               final String operationDesc) {
         Futures.addCallback(transactionFuture, new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
@@ -212,9 +213,10 @@ public class MdsalUtilsAsync {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                LOG.error("Transaction({}) {} FAILED!", operationDesc, t);
-                throw new IllegalStateException("  Transaction(" + operationDesc + ") not committed correctly", t);
+            public void onFailure(final Throwable throwable) {
+                LOG.error("Transaction({}) {} FAILED!", operationDesc, throwable);
+                throw new IllegalStateException("  Transaction(" + operationDesc + ") not committed correctly",
+                                                throwable);
             }
         });
     }

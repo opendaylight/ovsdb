@@ -62,18 +62,19 @@ public class BridgeOperationalState {
     }
 
     public BridgeOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
-        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-        Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdateOrRemove =
-                TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-        for (Entry<InstanceIdentifier<Node>, Node> entry : nodeCreateOrUpdateOrRemove.entrySet()) {
-            try {
-                Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey())
-                            .checkedGet();
-                if (nodeOptional.isPresent()) {
-                    operationalNodes.put(entry.getKey(), nodeOptional.get());
+        try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
+            Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdateOrRemove =
+                    TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+            for (Entry<InstanceIdentifier<Node>, Node> entry : nodeCreateOrUpdateOrRemove.entrySet()) {
+                try {
+                    Optional<Node> nodeOptional =
+                            transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey()).checkedGet();
+                    if (nodeOptional.isPresent()) {
+                        operationalNodes.put(entry.getKey(), nodeOptional.get());
+                    }
+                } catch (ReadFailedException e) {
+                    LOG.warn("Error reading from datastore", e);
                 }
-            } catch (ReadFailedException e) {
-                LOG.warn("Error reading from datastore", e);
             }
         }
     }

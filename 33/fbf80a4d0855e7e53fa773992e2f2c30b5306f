@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Anil Vishnoi <vishnoianil@gmail.com>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Submitted-by: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-at: Thu, 30 Nov 2017 09:01:00 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/65573
+Project: ovsdb
+Branch: refs/heads/stable/nitrogen

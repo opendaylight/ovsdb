@@ -170,6 +170,8 @@ public class TyperUtilsTest {
      * @param to The maximum supported version.
      * @throws SchemaVersionMismatchException if the schema version isn't supported.
      */
+    // We extract the real cause, which “loses” the original cause, but that’s fine
+    @SuppressWarnings("checkstyle:AvoidHidingCauseException")
     private void callCheckVersion(Version schema, Version from, Version to) throws SchemaVersionMismatchException {
         try {
             Method method =

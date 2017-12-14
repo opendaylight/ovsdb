@@ -58,35 +58,33 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxSfq;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
-public class SouthboundConstants {
+public interface SouthboundConstants {
 
-    private SouthboundConstants() { }
-
-    public static final String OPEN_V_SWITCH = "Open_vSwitch";
-    public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
-    public static final String OVSDB_URI_PREFIX = "ovsdb";
-    public static final String BRIDGE_URI_PREFIX = "bridge";
-    public static final String TP_URI_PREFIX = "terminationpoint";
-    public static final String QOS_URI_PREFIX = "qos";
-    public static final String QOS_NAMED_UUID_PREFIX = "QOS";
-    public static final Integer PORT_QOS_LIST_KEY = 1;
-    public static final String QUEUE_URI_PREFIX = "queue";
-    public static final String QUEUE_NAMED_UUID_PREFIX = "QUEUE";
-    public static final String AUTOATTACH_URI_PREFIX = "autoattach";
-    public static final String AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION = "7.11.2";
-    public static final Integer DEFAULT_OVSDB_PORT = 6640;
-    public static final String DEFAULT_OPENFLOW_PORT = "6653";
-    public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
-    public static final String UUID = "uuid";
-    public static final String QOS_LINUX_HTB = "linux-htb";
-    public static final String QOS_LINUX_HFSC = "linux-hfsc";
+    String OPEN_V_SWITCH = "Open_vSwitch";
+    TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
+    String OVSDB_URI_PREFIX = "ovsdb";
+    String BRIDGE_URI_PREFIX = "bridge";
+    String TP_URI_PREFIX = "terminationpoint";
+    String QOS_URI_PREFIX = "qos";
+    String QOS_NAMED_UUID_PREFIX = "QOS";
+    Integer PORT_QOS_LIST_KEY = 1;
+    String QUEUE_URI_PREFIX = "queue";
+    String QUEUE_NAMED_UUID_PREFIX = "QUEUE";
+    String AUTOATTACH_URI_PREFIX = "autoattach";
+    String AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION = "7.11.2";
+    Integer DEFAULT_OVSDB_PORT = 6640;
+    String DEFAULT_OPENFLOW_PORT = "6653";
+    String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
+    String UUID = "uuid";
+    String QOS_LINUX_HTB = "linux-htb";
+    String QOS_LINUX_HFSC = "linux-hfsc";
     // The following four QoS types are present in OVS 2.5+
     // Refer to http://openvswitch.org/support/dist-docs/ovs-vswitchd.conf.db.5.txt
-    public static final String QOS_LINUX_SFQ = "linux-sfq";
-    public static final String QOS_LINUX_CODEL = "linux-codel";
-    public static final String QOS_LINUX_FQ_CODEL = "linux-fq_codel";
-    public static final String QOS_EGRESS_POLICER = "egress-policer";
-    public static final ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
+    String QOS_LINUX_SFQ = "linux-sfq";
+    String QOS_LINUX_CODEL = "linux-codel";
+    String QOS_LINUX_FQ_CODEL = "linux-fq_codel";
+    String QOS_EGRESS_POLICER = "egress-policer";
+    ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
         = new ImmutableBiMap.Builder<Class<? extends QosTypeBase>,String>()
             .put(QosTypeLinuxHtb.class,QOS_LINUX_HTB)
             .put(QosTypeLinuxHfsc.class,QOS_LINUX_HFSC)
@@ -96,7 +94,7 @@ public class SouthboundConstants {
             .put(QosTypeEgressPolicer.class,QOS_EGRESS_POLICER)
             .build();
 
-    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
+    ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
         = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
             .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
             .put(OvsdbBridgeProtocolOpenflow11.class,"OpenFlow11")
@@ -106,13 +104,13 @@ public class SouthboundConstants {
             .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
             .build();
 
-    public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP
+    ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP
         = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
             .put(OvsdbFailModeStandalone.class,"standalone")
             .put(OvsdbFailModeSecure.class,"secure")
             .build();
 
-    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
+    ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
         = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
             .put("internal", InterfaceTypeInternal.class)
             .put("vxlan", InterfaceTypeVxlan.class)
@@ -134,18 +132,18 @@ public class SouthboundConstants {
             .put("stt", InterfaceTypeStt.class)
             .build();
 
-    public static final ImmutableBiMap<Class<? extends DatapathTypeBase>,String> DATAPATH_TYPE_MAP
+    ImmutableBiMap<Class<? extends DatapathTypeBase>,String> DATAPATH_TYPE_MAP
         = new ImmutableBiMap.Builder<Class<? extends DatapathTypeBase>,String>()
             .put(DatapathTypeSystem.class,"system")
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
 
-    public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
-    public static final String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";
-    public static final String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
-    public static final String AUTOATTACH_ID_EXTERNAL_ID_KEY = "opendaylight-autoattach-id";
+    String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
+    String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";
+    String QUEUE_ID_EXTERNAL_ID_KEY = "opendaylight-queue-id";
+    String AUTOATTACH_ID_EXTERNAL_ID_KEY = "opendaylight-autoattach-id";
 
-    static final ImmutableCollection<String> SKIP_OVSDB_TABLE = new ImmutableSet.Builder<String>()
+    ImmutableCollection<String> SKIP_OVSDB_TABLE = new ImmutableSet.Builder<String>()
             .add("Flow_Table")
             .add("Mirror")
             .add("NetFlow")
@@ -157,7 +155,7 @@ public class SouthboundConstants {
     //Note: _version is an internal column of ovsdb schema, that gets updated
     //with every change in the row of the table.
     // The "Manager" entry needs to be a modifiable list, SouthboundProvider::setSkipManagerStatus() modifies it
-    static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
+    ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_TABLE
             = new ImmutableMap.Builder<String,List<String>>()
             .put("Open_vSwitch", Arrays.asList("statistics","_version"))
             .put("Port", Arrays.asList("statistics","_version"))
@@ -170,7 +168,7 @@ public class SouthboundConstants {
             .put("Controller", Arrays.asList("status","_version"))
             .build();
 
-    public enum VlanModes {
+    enum VlanModes {
         ACCESS("access"),
         NATIVE_TAGGED("native-tagged"),
         NATIVE_UNTAGGED("native-untagged"),
@@ -192,7 +190,7 @@ public class SouthboundConstants {
         }
     }
 
-    public enum OwnershipStates {
+    enum OwnershipStates {
         OWNER("OWNER"),
         NONOWNER("NON-OWNER");
 

@@ -9,23 +9,22 @@ package org.opendaylight.ovsdb.utils.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.powermock.api.mockito.PowerMockito;
 import org.osgi.framework.FrameworkUtil;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {System.class, FrameworkUtil.class} )
- public class ConfigPropertiesTest {
+@PrepareForTest({System.class, FrameworkUtil.class})
+public class ConfigPropertiesTest {
 
     private static final String TEST_PROPERTY_KEY1 = "foobar34465$3467";
     private static final String TEST_PROPERTY_MOCK_VALUE1 = "xbarMock1";
@@ -38,7 +37,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
     public void testGetProperty() {
         Bundle bundleWithoutBundleNoContext = mock(Bundle.class);
         Bundle bundle = mock(Bundle.class);
-        BundleContext bundleContext = mock(BundleContext.class);
 
         // mock #1
         PowerMockito.mockStatic(FrameworkUtil.class);
@@ -46,6 +44,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
         PowerMockito.when(FrameworkUtil.getBundle(ConfigPropertiesTestMockingBundleNoContext.class))
                 .thenReturn(bundleWithoutBundleNoContext);
         // mock #2
+        BundleContext bundleContext = mock(BundleContext.class);
         when(bundle.getBundleContext()).thenReturn(bundleContext);
         when(bundleWithoutBundleNoContext.getBundleContext()).thenReturn(null);
         // mock #3
@@ -62,7 +61,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
         assertNull(FrameworkUtil.getBundle(ConfigPropertiesTestMocking.class));
         assertEquals(FrameworkUtil.getBundle(ConfigPropertiesTest.class), bundle);
         assertEquals(FrameworkUtil.getBundle(ConfigPropertiesTestMockingBundleNoContext.class),
-                     bundleWithoutBundleNoContext);
+                bundleWithoutBundleNoContext);
 
         // test 2. bundleContext is null
         assertNull(bundleWithoutBundleNoContext.getBundleContext());
@@ -77,25 +76,28 @@ import org.powermock.modules.junit4.PowerMockRunner;
         final String value41 = ConfigProperties.getProperty(ConfigPropertiesTestMocking.class, TEST_PROPERTY_KEY1);
         assertNull(value41);  // class has no bundle
         final String value42 = ConfigProperties.getProperty(ConfigPropertiesTestMockingBundleNoContext.class,
-                                                            TEST_PROPERTY_KEY1);
+                TEST_PROPERTY_KEY1);
         assertNull(value42);  // class has no bundleContext
         final String value43 = ConfigProperties.getProperty(this.getClass(), TEST_PROPERTY_KEY_NOT_FOUND);
         assertNull(value43);  // bundleContext will not know about key provided
 
         // test 5. value returned from ConfigProperties.getProperty is the default value provided
-        final String value5 = ConfigProperties.getProperty(this.getClass(), TEST_PROPERTY_KEY_NOT_FOUND, DEFAULT_PROPERTY_VALUE);
+        final String value5 =
+                ConfigProperties.getProperty(this.getClass(), TEST_PROPERTY_KEY_NOT_FOUND, DEFAULT_PROPERTY_VALUE);
         assertEquals(DEFAULT_PROPERTY_VALUE, value5);
 
         // test 6. value returned from ConfigProperties.getProperty is the mocked value
         final String value61 = ConfigProperties.getProperty(this.getClass(), TEST_PROPERTY_KEY1);
         assertEquals(TEST_PROPERTY_MOCK_VALUE1, value61);
-        final String value62 = ConfigProperties.getProperty(this.getClass(), TEST_PROPERTY_KEY1, DEFAULT_PROPERTY_VALUE);
+        final String value62 =
+                ConfigProperties.getProperty(this.getClass(), TEST_PROPERTY_KEY1, DEFAULT_PROPERTY_VALUE);
         assertEquals(TEST_PROPERTY_MOCK_VALUE1, value62);
     }
 
     // Helper classes used to de-mux mock behaviors
     private class ConfigPropertiesTestMockingBundleNoContext {
     }
+
     private class ConfigPropertiesTestMocking {
     }
 }

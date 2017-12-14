@@ -7,14 +7,12 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-public class OvsdbSchemaContants {
+public interface OvsdbSchemaContants {
 
-    public static final String DATABASE_NAME = "Open_vSwitch";
-    private static final String BRIDGE_NAME = "Bridge";
+    String DATABASE_NAME = "Open_vSwitch";
+    String BRIDGE_NAME = "Bridge";
 
-    private OvsdbSchemaContants() { }
-
-    public enum OvsdbSchemaTables {
+    enum OvsdbSchemaTables {
         OPENVSWITCH(DATABASE_NAME,null,null),
         BRIDGE(BRIDGE_NAME, DATABASE_NAME, "bridges"),
         PORT("Port", BRIDGE_NAME, "ports"),

@@ -7,10 +7,13 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection;
 
+import java.net.ConnectException;
+import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -18,13 +21,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.ConnectException;
-import java.net.UnknownHostException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
- * Copied from org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask
+ * Copied from org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask.
  *
+ * <p>
  * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
  */
 public class ConnectionReconciliationTask extends ReconciliationTask {
@@ -47,7 +47,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
         boolean result = false;
         connectionAttempt.incrementAndGet();
         InstanceIdentifier<Node> nIid = (InstanceIdentifier<Node>) nodeIid;
-        HwvtepGlobalAugmentation hwvtepNode = (HwvtepGlobalAugmentation)configData;
+        HwvtepGlobalAugmentation hwvtepNode = (HwvtepGlobalAugmentation) configData;
 
         LOG.info("Retry({}) connection to Ovsdb Node {} ", connectionAttempt.get(), hwvtepNode.getConnectionInfo());
         OvsdbClient client = null;
@@ -61,7 +61,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
                         connectionAttempt.get(), hwvtepNode.getConnectionInfo());
             }
         } catch (UnknownHostException | ConnectException e) {
-            LOG.warn("Connection retry({}) failed with exception. ",connectionAttempt.get(), e);
+            LOG.warn("Connection retry({}) failed with exception. ", connectionAttempt.get(), e);
         }
         return result;
     }
@@ -69,7 +69,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     @Override
     public void doRetry(boolean wasLastAttemptSuccessful) {
 
-        if( !wasLastAttemptSuccessful && connectionAttempt.get() <= MAX_ATTEMPT ) {
+        if (!wasLastAttemptSuccessful && connectionAttempt.get() <= MAX_ATTEMPT) {
             reconciliationManager.enqueueForRetry(ConnectionReconciliationTask.this);
         } else {
             reconciliationManager.dequeue(this);

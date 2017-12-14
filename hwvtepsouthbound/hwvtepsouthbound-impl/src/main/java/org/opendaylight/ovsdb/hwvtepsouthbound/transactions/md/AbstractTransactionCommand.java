@@ -11,14 +11,11 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public abstract class AbstractTransactionCommand<T extends DataObject> implements TransactionCommand{
+public abstract class AbstractTransactionCommand<T extends DataObject> implements TransactionCommand {
 
     private TableUpdates updates;
     private DatabaseSchema dbSchema;
@@ -40,7 +37,7 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         return key;
     }
 
-    public AbstractTransactionCommand(HwvtepConnectionInstance key,TableUpdates updates, DatabaseSchema dbSchema) {
+    public AbstractTransactionCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         this.updates = updates;
         this.dbSchema = dbSchema;
         this.key = key;

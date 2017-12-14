@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Utility class to retrieve the unmet dependencies (config/operational) of the given object
+ * Utility class to retrieve the unmet dependencies (config/operational) of the given object.
+ *
  * @param <T>
  */
 public abstract class UnMetDependencyGetter<T extends Identifiable> {
@@ -34,10 +35,11 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
 
     /**
      * Returns the iids this data depends upon
-     * which are already intransit in the previous transaction if any
-     * @param opState   The operatonal state
-     * @param data      The data object
-     * @return          The depenencies
+     * which are already intransit in the previous transaction if any.
+     *
+     * @param opState The operatonal state
+     * @param data The data object
+     * @return The depenencies
      */
     public Map<Class<? extends Identifiable>, List<InstanceIdentifier>> getInTransitDependencies(
             HwvtepOperationalState opState, T data) {
@@ -46,9 +48,10 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
 
     /**
      * Returns the iids this data depends upon
-     * which are not yet present in the config data store if any
-     * @param opState   The operatonal state
-     * @param data      The data object
+     * which are not yet present in the config data store if any.
+     *
+     * @param opState The operatonal state
+     * @param data The data object
      * @return the      depenencies
      */
     public Map<Class<? extends Identifiable>, List<InstanceIdentifier>> getUnMetConfigDependencies(
@@ -91,12 +94,12 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
         }
 
         abstract boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                                         Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key);
+                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key);
     }
 
     class ConfigDependencyGetter extends DependencyGetter {
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
+                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
             return deviceInfo.isConfigDataAvailable(cls, key) || isConfigDataAvailable(opState, key);
         }
 
@@ -109,7 +112,7 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
 
     class InTransitDependencyGetter extends DependencyGetter {
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
+                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
             return opState.isKeyPartOfCurrentTx(cls, key) || !deviceInfo.isKeyInTransit(cls, key);
         }
     }

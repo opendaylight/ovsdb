@@ -14,6 +14,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * VersionIncompatibleBridge is used to test the Version Compatibility logic in the Library
  * with an absurdly low fromVersion and untilVersion which will fail for all the OVS versions.
  */
-@TypedTable(name="Bridge", database="Open_vSwitch", fromVersion="0.0.1", untilVersion="0.0.2")
+@TypedTable(name = "Bridge", database = "Open_vSwitch", fromVersion = "0.0.1", untilVersion = "0.0.2")
 public interface VersionIncompatibleBridge extends TypedBaseTable {
 }

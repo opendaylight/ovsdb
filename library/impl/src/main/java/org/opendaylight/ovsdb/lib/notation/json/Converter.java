@@ -18,7 +18,7 @@ import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
-public class Converter {
+public final class Converter {
 
     static AtomDeser atomDeser = new AtomDeser();
     static MapDeser mapDeser = new MapDeser();

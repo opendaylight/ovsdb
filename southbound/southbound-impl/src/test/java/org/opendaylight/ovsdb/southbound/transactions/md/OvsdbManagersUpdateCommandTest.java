@@ -57,8 +57,7 @@ public class OvsdbManagersUpdateCommandTest {
 
     private static final String TARGET_COLUMN_DATA = "Manager Column";
     private static final String NODE_ID = "Node ID String";
-    private Map<UUID, Manager> updatedManagerRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
+
     private OvsdbManagersUpdateCommand ovsdbManagersUpdateCommand;
 
     @Before
@@ -79,7 +78,7 @@ public class OvsdbManagersUpdateCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        updatedManagerRows = new HashMap<>();
+        Map<UUID, Manager> updatedManagerRows = new HashMap<>();
         updatedManagerRows.put(mock(UUID.class), mock(Manager.class));
         MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedManagerRows").set(ovsdbManagersUpdateCommand,
                 updatedManagerRows);
@@ -87,7 +86,7 @@ public class OvsdbManagersUpdateCommandTest {
         PowerMockito.doReturn(updatedManagerRowsWithUri).when(ovsdbManagersUpdateCommand, "getUriManagerMap",
                 any(Map.class));
 
-        updatedOpenVSwitchRows = new HashMap<>();
+        Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = new HashMap<>();
         updatedOpenVSwitchRows.put(mock(UUID.class), mock(OpenVSwitch.class));
         MemberModifier.field(OvsdbManagersUpdateCommand.class, "updatedOpenVSwitchRows").set(ovsdbManagersUpdateCommand,
                 updatedOpenVSwitchRows);

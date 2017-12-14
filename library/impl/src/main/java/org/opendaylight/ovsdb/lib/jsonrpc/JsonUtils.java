@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class JsonUtils {
+public final class JsonUtils {
 
     private static ObjectMapper mapper = new ObjectMapper();
     private static ObjectWriter prettyWriter = mapper.writerWithDefaultPrettyPrinter();

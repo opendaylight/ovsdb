@@ -69,7 +69,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SouthboundMapper {
+public final class SouthboundMapper {
 
     private SouthboundMapper() { }
 

@@ -38,7 +38,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTransactCommand<T extends Identifiable, Aug extends Augmentation<Node>> implements TransactCommand<T> {
+public abstract class AbstractTransactCommand<T extends Identifiable, A extends Augmentation<Node>>
+        implements TransactCommand<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
     protected static final UUID TXUUID = new UUID("TXUUID");
@@ -88,10 +89,10 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
     }
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
-                             final TransactionBuilder transaction,
-                             final InstanceIdentifier<Node> nodeIid,
-                             final InstanceIdentifier key,
-                             final T data, final Object... extraData) {
+            final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> nodeIid,
+            final InstanceIdentifier key,
+            final T data, final Object... extraData) {
 
         this.threadLocalDeviceTransaction.set(transaction);
         HwvtepDeviceInfo deviceInfo = getOperationalState().getDeviceInfo();
@@ -106,14 +107,15 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         }
 
         Type type = getClass().getGenericSuperclass();
-        Type classType = ((ParameterizedType)type).getActualTypeArguments()[0];
+        Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
 
         //If this key itself is in transit wait for the response of this key itself
         if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
             inTransitDependencies.put(classType, Collections.singletonList(key));
         }
 
-        if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies) && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
+        if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies) && HwvtepSouthboundUtil.isEmptyMap(
+                inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
             if (isRemoveCommand()) {
                 getDeviceInfo().clearConfigData((Class<? extends Identifiable>) classType, key);
@@ -127,7 +129,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
                 @Override
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
-                                                 TransactionBuilder transactionBuilder) {
+                        TransactionBuilder transactionBuilder) {
                     AbstractTransactCommand.this.threadLocalOperationalState.set(operationalState);
                     AbstractTransactCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
                     onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
@@ -150,11 +152,11 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
                 @Override
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
-                                                 TransactionBuilder transactionBuilder) {
+                        TransactionBuilder transactionBuilder) {
                     //data would have got deleted by , push the data only if it is still in configds
                     threadLocalOperationalState.set(operationalState);
                     threadLocalDeviceTransaction.set(transactionBuilder);
-                    T data = (T)new MdsalUtils(operationalState.getDataBroker()).read(
+                    T data = (T) new MdsalUtils(operationalState.getDataBroker()).read(
                             LogicalDatastoreType.CONFIGURATION, key);
                     if (data != null) {
                         onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
@@ -176,31 +178,32 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
     }
 
     public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
-                                    InstanceIdentifier key, Object... extraData) {
+            InstanceIdentifier key, Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
     public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
-                               InstanceIdentifier key, Object... extraData) {
+            InstanceIdentifier key, Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
-    protected Aug getAugmentation(Node node) {
+    protected A getAugmentation(Node node) {
         if (node == null) {
             return null;
         }
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
-        Class<? extends Augmentation<Node>> augType = (Class<? extends Augmentation<Node>>) parameterizedType.getActualTypeArguments()[1];
+        Class<? extends Augmentation<Node>> augType =
+                (Class<? extends Augmentation<Node>>) parameterizedType.getActualTypeArguments()[1];
         Augmentation<Node> augmentation = node.getAugmentation(augType);
-        return (Aug)augmentation;
+        return (A) augmentation;
     }
 
-    protected List<T> getData(Aug augmentation) {
+    protected List<T> getData(A augmentation) {
         return Collections.EMPTY_LIST;
     }
 
     protected List<T> getData(Node node) {
-        Aug augmentation = getAugmentation(node);
+        A augmentation = getAugmentation(node);
         if (augmentation != null) {
             List<T> data = getData(augmentation);
             if (data != null) {
@@ -249,7 +252,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         return result;
     }
 
-    List<T>  getCascadeDeleteData(DataTreeModification<Node> change) {
+    List<T> getCascadeDeleteData(DataTreeModification<Node> change) {
         if (!cascadeDelete()) {
             return Collections.EMPTY_LIST;
         }
@@ -258,7 +261,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
         List<T> updatedData = getData(updatedNode);
         Set<InstanceIdentifier> deleted = getOperationalState().getDeletedKeysInCurrentTx(LogicalSwitches.class);
         UnMetDependencyGetter dependencyGetter = getDependencyGetter();
-        if (!HwvtepSouthboundUtil.isEmpty(deleted) && !HwvtepSouthboundUtil.isEmpty(updatedData) && dependencyGetter != null) {
+        if (!HwvtepSouthboundUtil.isEmpty(deleted) && !HwvtepSouthboundUtil.isEmpty(updatedData)
+                && dependencyGetter != null) {
             List<T> removed = new ArrayList<>();
             for (T ele : updatedData) {
                 if (deleted.containsAll(dependencyGetter.getLogicalSwitchDependencies(ele))) {
@@ -312,14 +316,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
         Iterator<T> it1 = list1.iterator();
 
-        while(it1.hasNext()) {
+        while (it1.hasNext()) {
             T ele = it1.next();
             Iterator<T> it2 = list2.iterator();
             boolean found = false;
             while (it2.hasNext()) {
-                T other  = it2.next();
+                T other = it2.next();
                 found = compareKeyOnly ? Objects.equals(ele.getKey(), other.getKey()) : areEqual(ele, other);
-                if ( found ) {
+                if (found) {
                     it2.remove();
                     break;
                 }
@@ -334,11 +338,11 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
 
     protected Type getClassType() {
         Type type = getClass().getGenericSuperclass();
-        Type classType = ((ParameterizedType)type).getActualTypeArguments()[0];
+        Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
         return classType;
     }
 
-    protected boolean areEqual(T a , T b) {
+    protected boolean areEqual(T a, T b) {
         return a.getKey().equals(b.getKey());
     }
 
@@ -349,6 +353,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
     /**
      * Tells if this object needs to be deleted if its dependent object gets deleted
      * Ex : LocalUcastMac and LocalMacstMac
+     *
      * @return true if this object needs to be deleted if its dependent object gets deleted
      */
     protected boolean cascadeDelete() {
@@ -379,7 +384,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, Aug extend
             return;
         }
         for (MdsalUpdate mdsalUpdate : updates.get(deviceTransaction)) {
-            getDeviceInfo().clearInTransit((Class<? extends Identifiable>)mdsalUpdate.getClass(), mdsalUpdate.getKey());
+            getDeviceInfo().clearInTransit((Class<? extends Identifiable>) mdsalUpdate.getClass(),
+                    mdsalUpdate.getKey());
         }
         onCommandFailed();
     }

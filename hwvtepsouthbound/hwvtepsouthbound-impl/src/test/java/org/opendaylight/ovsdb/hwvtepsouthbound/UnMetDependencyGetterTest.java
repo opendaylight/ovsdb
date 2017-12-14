@@ -44,10 +44,11 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
     Map<Class<? extends Identifiable>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() {
-        MCAST_MAC_DATA_VALIDATOR = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);
+        MCAST_MAC_DATA_VALIDATOR =
+                Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);
         opState = new HwvtepOperationalState(connectionInstance);
-        mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
-                new String[]{"192.168.122.20", "192.168.122.30"});
+        mac = TestBuilders.buildRemoteMcastMacs(nodeIid, "FF:FF:FF:FF:FF:FF", "ls0",
+                new String[] {"192.168.122.20", "192.168.122.30"});
         lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
                 child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
     }

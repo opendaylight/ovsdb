@@ -108,8 +108,7 @@ public class OvsdbConnectionManagerTest {
         doNothing().when(client).registerCallbacks(any());
 
         //TODO: Write unit tests for EntityOwnershipService
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(client.getInstanceIdentifier()).thenReturn(iid);
+        when(client.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
         field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnManager, entityConnectionMap);
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getEntityFromConnectionInstance",
                 OvsdbConnectionInstance.class));
@@ -136,8 +135,7 @@ public class OvsdbConnectionManagerTest {
         when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
 
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getInstanceIdentifier", ConnectionInfo.class));
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(ovsdbConnManager.getInstanceIdentifier(key)).thenReturn(iid);
+        when(ovsdbConnManager.getInstanceIdentifier(key)).thenReturn(mock(InstanceIdentifier.class));
 
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getConnectionInstance", ConnectionInfo.class));
         when(ovsdbConnManager.getConnectionInstance(key)).thenReturn(null);
@@ -350,8 +348,7 @@ public class OvsdbConnectionManagerTest {
         when(ovsdbConnManager.connectedButCallBacksNotRegistered(any(OvsdbClient.class)))
                 .thenReturn(ovsdbConnectionInstance);
 
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(iid);
+        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
         field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnManager, entityConnectionMap);
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "getEntityFromConnectionInstance",
                 OvsdbConnectionInstance.class));

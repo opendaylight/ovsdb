@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SouthboundUtil {
+public final class SouthboundUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtil.class);
     private static final String SCHEMA_VERSION_MISMATCH =

@@ -7,14 +7,12 @@
  */
 package org.opendaylight.ovsdb.utils.yang;
 
+import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.google.common.base.Preconditions;
 
 /**
  * YANG utility functions.

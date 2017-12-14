@@ -34,13 +34,13 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return this;
     }
 
-    public MonitorRequestBuilder<E> addColumns(Collection<String> columns) {
-        this.columns.addAll(columns);
+    public MonitorRequestBuilder<E> addColumns(Collection<String> extraColumns) {
+        this.columns.addAll(extraColumns);
         return this;
     }
 
-    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> columns) {
-        for (ColumnSchema<E, ?> schema : columns) {
+    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> extraColumns) {
+        for (ColumnSchema<E, ?> schema : extraColumns) {
             this.addColumn(schema);
         }
         return this;
@@ -50,8 +50,8 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
         return this.columns;
     }
 
-    public MonitorRequestBuilder<E> with(MonitorSelect select) {
-        this.select = select;
+    public MonitorRequestBuilder<E> with(MonitorSelect what) {
+        this.select = what;
         return this;
     }
 

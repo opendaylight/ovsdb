@@ -8,9 +8,25 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+import static org.powermock.api.support.membermodification.MemberMatcher.field;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -57,22 +73,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.net.InetAddress;
-import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-import static org.powermock.api.support.membermodification.MemberMatcher.field;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
-
 public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     static Logger LOG = LoggerFactory.getLogger(DataChangeListenerTestBase.class);
@@ -111,10 +111,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         entityOwnershipService = mock(EntityOwnershipService.class);
         nodeUuid = java.util.UUID.randomUUID().toString();
         nodeIid = createInstanceIdentifier(nodeUuid);
-        ls0Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
-        ls1Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
+        ls0Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
+                new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
+        ls1Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
+                new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
         loadSchema();
         mockConnectionInstance();
         mockConnectionManager();
@@ -133,7 +133,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     void setFinalStatic(Class cls, String fieldName, Object newValue) throws Exception {
-        Field fields[] = FieldUtils.getAllFields(cls);
+        Field[] fields = FieldUtils.getAllFields(cls);
         for (Field field : fields) {
             if (fieldName.equals(field.getName())) {
                 field.setAccessible(true);
@@ -147,14 +147,15 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     void loadSchema() {
-        try (InputStream resourceAsStream = DataChangeListenerTestBase.class.getResourceAsStream("hwvtep_schema.json")) {
+        try (InputStream resourceAsStream = DataChangeListenerTestBase.class.getResourceAsStream(
+                "hwvtep_schema.json")) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(resourceAsStream);
             dbSchema = DatabaseSchema.fromJson(HwvtepSchemaConstants.HARDWARE_VTEP,
                     jsonNode.get("result"));
             listenableDbSchema = mock(ListenableFuture.class);
             doReturn(dbSchema).when(listenableDbSchema).get();
-        } catch (Exception e) {
+        } catch (IOException | ExecutionException | InterruptedException e) {
             LOG.error("Failed to load schema", e);
         }
     }
@@ -163,8 +164,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         hwvtepConnectionManager = PowerMockito.mock(HwvtepConnectionManager.class, Mockito.CALLS_REAL_METHODS);
         field(HwvtepConnectionManager.class, "db").set(hwvtepConnectionManager, dataBroker);
         field(HwvtepConnectionManager.class, "txInvoker").set(hwvtepConnectionManager, transactionInvoker);
-        field(HwvtepConnectionManager.class, "entityOwnershipService").set(hwvtepConnectionManager, entityOwnershipService);
-        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstance", HwvtepPhysicalSwitchAttributes.class));
+        field(HwvtepConnectionManager.class, "entityOwnershipService").set(hwvtepConnectionManager,
+                entityOwnershipService);
+        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstance",
+                HwvtepPhysicalSwitchAttributes.class));
         suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstanceFromNodeIid",
                 InstanceIdentifier.class));
         doReturn(connectionInstance).when(
@@ -183,7 +186,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(true).when(ovsdbClient).isActive();
         doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
 
-        transactionInvoker =  new TransactionInvokerImpl(dataBroker);
+        transactionInvoker = new TransactionInvokerImpl(dataBroker);
 
         connectionInstance = PowerMockito.mock(HwvtepConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
         field(HwvtepConnectionInstance.class, "instanceIdentifier").set(connectionInstance, nodeIid);
@@ -193,7 +196,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
         doReturn(dataBroker).when(connectionInstance).getDataBroker();
         doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
-        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
+        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance,
+                new HwvtepDeviceInfo(connectionInstance));
         connectionInstance.createTransactInvokers();
     }
 
@@ -202,18 +206,18 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     /**
-     * resets the captures so that we can validate the captors of the immediate next execution
+     * Resets the captures so that we can validate the captors of the immediate next execution.
      */
     void resetOperations() {
         insertOpCapture = ArgumentCaptor.forClass(TypedBaseTable.class);
-        Update update = mock(Update.class);
-        Insert insert = mock(Insert.class);
         Delete delete = mock(Delete.class);
         Where where = mock(Where.class);
         doReturn(where).when(delete).where(any());
+        Insert insert = mock(Insert.class);
         doReturn(insert).when(insert).withId(any(String.class));
         Operations.op = PowerMockito.mock(Operations.class);
         doReturn(insert).when(Operations.op).insert(insertOpCapture.capture());
+        Update update = mock(Update.class);
         doReturn(update).when(Operations.op).update(insertOpCapture.capture());
         doReturn(where).when(update).where(any());
         doReturn(delete).when(Operations.op).delete(any());
@@ -238,7 +242,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     Node addData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
-                 String[]... data) {
+            String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         if (LogicalSwitches.class == dataObject) {
@@ -258,7 +262,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     void deleteData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
-                 String[]... data) {
+            String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
@@ -266,8 +270,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             List<LogicalSwitches> logicalSwitches = TestBuilders.addLogicalSwitches(builder, data);
 
             for (LogicalSwitches ls : logicalSwitches) {
-                InstanceIdentifier<LogicalSwitches> key = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                        child(LogicalSwitches.class, ls.getKey());
+                InstanceIdentifier<LogicalSwitches> key =
+                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, ls.getKey());
                 tx.delete(logicalDatastoreType, key);
             }
         }
@@ -277,16 +281,16 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         if (RemoteUcastMacs.class == dataObject) {
             List<RemoteUcastMacs> macs = TestBuilders.addRemoteUcastMacs(nodeIid, builder, data);
             for (RemoteUcastMacs mac : macs) {
-                InstanceIdentifier<RemoteUcastMacs> key = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                        child(RemoteUcastMacs.class, mac.getKey());
+                InstanceIdentifier<RemoteUcastMacs> key =
+                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, mac.getKey());
                 tx.delete(logicalDatastoreType, key);
             }
         }
         if (RemoteMcastMacs.class == dataObject) {
             List<RemoteMcastMacs> macs = TestBuilders.addRemoteMcastMacs(nodeIid, builder, data);
             for (RemoteMcastMacs mac : macs) {
-                InstanceIdentifier<RemoteMcastMacs> key = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                        child(RemoteMcastMacs.class, mac.getKey());
+                InstanceIdentifier<RemoteMcastMacs> key =
+                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, mac.getKey());
                 tx.delete(logicalDatastoreType, key);
             }
         }

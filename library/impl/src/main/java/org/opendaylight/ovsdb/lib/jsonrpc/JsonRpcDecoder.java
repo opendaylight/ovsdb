@@ -21,6 +21,7 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
 
             if (leftCurlies != 0 && leftCurlies == rightCurlies && !inS) {
                 ByteBuf slice = buf.readSlice(1 + index - buf.readerIndex());
-                JsonParser jp = jacksonJsonFactory.createParser(new ByteBufInputStream(slice));
+                JsonParser jp = jacksonJsonFactory.createParser((InputStream) new ByteBufInputStream(slice));
                 JsonNode root = jp.readValueAsTree();
                 out.add(root);
                 leftCurlies = 0;

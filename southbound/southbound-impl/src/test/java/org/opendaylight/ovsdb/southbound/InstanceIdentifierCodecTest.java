@@ -18,7 +18,7 @@ import static org.powermock.api.support.membermodification.MemberMatcher.field;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,7 +75,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        when(context.findModuleByName(anyString(), any(Date.class))).thenReturn(module);
+        when(context.findModule(anyString(), any(Optional.class))).thenReturn(Optional.of(module));
         assertEquals("Error, did not return correct Module object", module, instanceIdCodec.moduleForPrefix(""));
     }
 
@@ -83,8 +83,8 @@ public class InstanceIdentifierCodecTest {
     public void testPrefixForNamespace() throws URISyntaxException {
         Module module = mock(Module.class);
         URI namespace = new URI("");
-        when(context.findModuleByNamespaceAndRevision(any(URI.class), any(Date.class))).thenReturn(null)
-                .thenReturn(module);
+        when(context.findModule(any(URI.class), any(Optional.class))).thenReturn(Optional.empty()).thenReturn(
+                Optional.of(module));
         when(module.getName()).thenReturn("");
         assertEquals("Error, null should have been returned", null, instanceIdCodec.prefixForNamespace(namespace));
         assertEquals("Error, did not return the correct module name", anyString(),

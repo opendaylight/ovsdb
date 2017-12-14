@@ -49,7 +49,9 @@ import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
-public final class TransactUtils {
+// This class needs to be mocked
+@SuppressWarnings("checkstyle:FinalClass")
+public class TransactUtils {
 
     private TransactUtils() { }
 

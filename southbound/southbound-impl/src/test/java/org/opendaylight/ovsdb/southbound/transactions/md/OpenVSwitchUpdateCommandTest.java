@@ -138,8 +138,7 @@ public class OpenVSwitchUpdateCommandTest {
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setInterfaceTypes",
                 OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class));
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setExternalIds",
-                InstanceIdentifierCodec.class, ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class,
-                OpenVSwitch.class, OpenVSwitch.class));
+                ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class, OpenVSwitch.class, OpenVSwitch.class));
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setOtherConfig",
                 InstanceIdentifierCodec.class, ReadWriteTransaction.class, OvsdbNodeAugmentationBuilder.class,
                 OpenVSwitch.class, OpenVSwitch.class));
@@ -187,18 +186,18 @@ public class OpenVSwitchUpdateCommandTest {
         when(column.getData()).thenReturn(map);
         when(oldEntry.getOtherConfigColumn()).thenReturn(column);
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeOldConfigs",
-                InstanceIdentifierCodec.class, ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
+                ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setNewOtherConfigs",
                 OvsdbNodeAugmentationBuilder.class, Map.class));
 
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setOtherConfig", mock(InstanceIdentifierCodec.class),
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setOtherConfig",
                 transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
         verify(openVSwitch, times(2)).getOtherConfigColumn();
         verify(oldEntry, times(2)).getOtherConfigColumn();
         PowerMockito.verifyPrivate(openVSwitchUpdateCommand).invoke("removeOldConfigs",
-                any(InstanceIdentifierCodec.class), any(ReadWriteTransaction.class),
+                any(ReadWriteTransaction.class),
                 any(Map.class), any(OpenVSwitch.class));
     }
 
@@ -211,11 +210,10 @@ public class OpenVSwitchUpdateCommandTest {
 
         //suppress getNodeId()
         MemberModifier.suppress(
-                MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", InstanceIdentifierCodec.class,
-                        OpenVSwitch.class));
+                MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", OpenVSwitch.class));
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(mock(NodeKey.class));
         OpenVSwitch ovs = mock(OpenVSwitch.class);
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeOldConfigs", mock(InstanceIdentifierCodec.class),
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeOldConfigs",
                 transaction, oldOtherConfigs, ovs);
         verify(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
     }
@@ -254,18 +252,18 @@ public class OpenVSwitchUpdateCommandTest {
         when(column.getData()).thenReturn(map);
         when(oldEntry.getExternalIdsColumn()).thenReturn(column);
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "removeExternalIds",
-                InstanceIdentifierCodec.class, ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
+                ReadWriteTransaction.class, Map.class, OpenVSwitch.class));
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "setNewExternalIds",
                 OvsdbNodeAugmentationBuilder.class, Map.class));
 
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setExternalIds", mock(InstanceIdentifierCodec.class),
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "setExternalIds",
                 transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
         verify(openVSwitch, times(2)).getExternalIdsColumn();
         verify(oldEntry, times(2)).getExternalIdsColumn();
         PowerMockito.verifyPrivate(openVSwitchUpdateCommand).invoke("removeExternalIds",
-                any(InstanceIdentifierCodec.class), any(ReadWriteTransaction.class), any(Map.class),
+                any(ReadWriteTransaction.class), any(Map.class),
                 any(OpenVSwitch.class));
     }
 
@@ -278,11 +276,10 @@ public class OpenVSwitchUpdateCommandTest {
 
         //suppress getNodeId()
         MemberModifier.suppress(
-                MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", InstanceIdentifierCodec.class,
-                        OpenVSwitch.class));
+                MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getNodeId", OpenVSwitch.class));
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(mock(NodeKey.class));
         OpenVSwitch ovs = mock(OpenVSwitch.class);
-        Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeExternalIds", mock(InstanceIdentifierCodec.class),
+        Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeExternalIds",
                 transaction, oldExternalIds, ovs);
         verify(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
     }

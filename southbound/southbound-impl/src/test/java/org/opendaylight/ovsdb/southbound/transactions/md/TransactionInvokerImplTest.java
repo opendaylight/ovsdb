@@ -93,10 +93,9 @@ public class TransactionInvokerImplTest {
     public void testOnTransactionChainFailed() throws Exception {
         field(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
                 failedTransactionQ);
-        TransactionChain<?, ?> chain = mock(TransactionChain.class);
         AsyncTransaction<?, ?> transaction = mock(AsyncTransaction.class);
         Throwable cause = mock(Throwable.class);
-        transactionInvokerImpl.onTransactionChainFailed(chain, transaction, cause);
+        transactionInvokerImpl.onTransactionChainFailed(mock(TransactionChain.class), transaction, cause);
         BlockingQueue<AsyncTransaction<?, ?>> testFailedTransactionQueue = Whitebox
                 .getInternalState(transactionInvokerImpl, "failedTransactionQueue");
         assertTrue(testFailedTransactionQueue.contains(transaction));

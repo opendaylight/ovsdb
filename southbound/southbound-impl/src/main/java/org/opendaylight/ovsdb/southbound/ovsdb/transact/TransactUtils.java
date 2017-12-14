@@ -49,7 +49,7 @@ import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
-public class TransactUtils {
+public final class TransactUtils {
 
     private TransactUtils() { }
 

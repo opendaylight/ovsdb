@@ -33,7 +33,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 /**
  * Utility methods for typed OVSDB schema data.
  */
-public class TyperUtils {
+public final class TyperUtils {
 
     private static final String GET_STARTS_WITH = "get";
     private static final String SET_STARTS_WITH = "set";

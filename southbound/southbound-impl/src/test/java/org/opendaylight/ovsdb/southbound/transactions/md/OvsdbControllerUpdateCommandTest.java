@@ -59,12 +59,10 @@ import org.powermock.reflect.Whitebox;
 @PrepareForTest({ OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class,
         InstanceIdentifier.class })
 public class OvsdbControllerUpdateCommandTest {
-    private Map<UUID, Controller> updatedControllerRows;
-    private Map<UUID, Bridge> updatedBridgeRows;
-    private OvsdbControllerUpdateCommand ovsdbControllerUpdateCommand;
-
     private static final String BRIDGE_NAME = "br-int";
     private static final String NODE_ID = "OF|00:00:00:0c:29:70:45:9b";
+
+    private OvsdbControllerUpdateCommand ovsdbControllerUpdateCommand;
 
     @Before
     public void setUp() {
@@ -86,7 +84,7 @@ public class OvsdbControllerUpdateCommandTest {
 
     @Test
     public void testExecute() throws Exception {
-        updatedControllerRows = new HashMap<>();
+        Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         updatedControllerRows.put(mock(UUID.class), mock(Controller.class));
         MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedControllerRows")
                 .set(ovsdbControllerUpdateCommand, updatedControllerRows);
@@ -102,7 +100,7 @@ public class OvsdbControllerUpdateCommandTest {
                 any(ReadWriteTransaction.class), any(Map.class));
 
         // updatedBridgeRows not null case
-        updatedBridgeRows = new HashMap<>();
+        Map<UUID, Bridge> updatedBridgeRows = new HashMap<>();
         updatedBridgeRows.put(mock(UUID.class), mock(Bridge.class));
         MemberModifier.field(OvsdbControllerUpdateCommand.class, "updatedBridgeRows").set(ovsdbControllerUpdateCommand,
                 updatedBridgeRows);

@@ -21,11 +21,11 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * Reusing the existing Table definitions and many of columns are not defined here
  * TODO : Fill up the missing Columns and include Supported DB Version
  */
-@TypedTable(name="Capability", database="Open_vSwitch")
+@TypedTable(name = "Capability", database = "Open_vSwitch")
 public interface Capability extends TypedBaseTable<GenericTableSchema> {
-    @TypedColumn(name="details", method=MethodType.GETCOLUMN)
+    @TypedColumn(name = "details", method = MethodType.GETCOLUMN)
     Column<GenericTableSchema, Map<String, String>> getDetailsColumn();
 
-    @TypedColumn(name="details", method=MethodType.SETDATA)
+    @TypedColumn(name = "details", method = MethodType.SETDATA)
     void setDetails(Map<String, String> details);
 }

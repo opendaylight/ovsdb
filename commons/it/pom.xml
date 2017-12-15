@@ -64,7 +64,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.codehaus.sonar-plugins.java</groupId>
+        <groupId>org.sonarsource.java</groupId>
         <artifactId>sonar-jacoco-listeners</artifactId>
         <version>${sonar-jacoco-listeners.version}</version>
         <scope>test</scope>

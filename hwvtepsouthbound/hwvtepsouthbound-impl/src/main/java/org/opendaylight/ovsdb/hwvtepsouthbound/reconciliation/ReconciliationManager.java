@@ -56,7 +56,9 @@ public class ReconciliationManager implements AutoCloseable {
 
     public ReconciliationManager(final DataBroker db) {
         this.db = db;
-        reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE, "ovsdb-reconciler");
+        reconcilers =
+                SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE, "ovsdb-reconciler",
+                        getClass());
 
         ThreadFactory threadFact = new ThreadFactoryBuilder()
                 .setNameFormat("ovsdb-recon-task-triager-%d").build();

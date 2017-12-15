@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import java.net.URI;
 
+import java.util.Optional;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -45,13 +46,12 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
 
     @Override
     protected Module moduleForPrefix(final String prefix) {
-        return context.findModuleByName(prefix, null);
+        return context.findModule(prefix, Optional.empty()).orElse(null);
     }
 
     @Override
     protected String prefixForNamespace(final URI namespace) {
-        final Module module = context.findModuleByNamespaceAndRevision(namespace, null);
-        return module == null ? null : module.getName();
+        return context.findModule(namespace, Optional.empty()).map(Module::getName).orElse(null);
     }
 
     @Override

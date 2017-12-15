@@ -95,7 +95,7 @@ public class ReconciliationManager implements AutoCloseable {
         this.db = db;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE,
-                "ovsdb-reconciler");
+                "ovsdb-reconciler", getClass());
 
         ThreadFactory threadFact = new ThreadFactoryBuilder()
                 .setNameFormat("ovsdb-recon-task-triager-%d").build();

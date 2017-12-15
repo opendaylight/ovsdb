@@ -9,9 +9,9 @@
 package org.opendaylight.ovsdb.lib.notation.json;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DatabindContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
@@ -40,11 +40,11 @@ public  class OvsdbTypesIdResolver extends TypeIdResolverBase {
     }
 
     @Override
-    public JavaType typeFromId(String id) {
+    public JavaType typeFromId(DatabindContext context, String id) {
         if ("set".equals(id)) {
-            return TypeFactory.defaultInstance().constructCollectionType(OvsdbSet.class, Object.class);
+            return context.getTypeFactory().constructCollectionType(OvsdbSet.class, Object.class);
         } else if ("uuid".equals(id) || "named-uuid".equals(id)) {
-            return TypeFactory.defaultInstance().constructType(UUID.class);
+            return context.constructType(UUID.class);
         }
         return null;
     }

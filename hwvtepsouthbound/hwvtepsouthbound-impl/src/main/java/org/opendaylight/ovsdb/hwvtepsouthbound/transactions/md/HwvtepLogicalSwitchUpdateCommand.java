@@ -87,8 +87,9 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
             if (dbVersion.compareTo(minVersion) >= 0) {
                 if (lSwitch.getReplicationModeColumn().getData() != null && !lSwitch.getReplicationModeColumn().getData().isEmpty()) {
                     lsBuilder.setReplicationMode(lSwitch.getReplicationModeColumn().getData().iterator().next());
+                    LOG.debug("setReplicationMode to: {}",
+                            lSwitch.getReplicationModeColumn().getData().iterator().next());
                 }
-                LOG.debug("setReplicationMode to: {}", lSwitch.getReplicationModeColumn().getData().iterator().next());
             }
         }
         HwvtepNodeName hwvtepName = new HwvtepNodeName(lSwitch.getName());

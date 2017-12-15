@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -28,9 +32,22 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
+import org.opendaylight.ovsdb.schema.hardwarevtep.ACLEntry;
+import org.opendaylight.ovsdb.schema.hardwarevtep.ArpSourcesLocal;
+import org.opendaylight.ovsdb.schema.hardwarevtep.ArpSourcesRemote;
+import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
+import org.opendaylight.ovsdb.schema.hardwarevtep.Manager;
+import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
+import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
@@ -46,6 +63,26 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 public class HwvtepTableReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTableReader.class);
+
+    private final Class alltables[] = new Class[] {
+            ACLEntry.class,
+            ACL.class,
+            ArpSourcesLocal.class,
+            Global.class,
+            ArpSourcesRemote.class,
+            LogicalRouter.class,
+            Manager.class,
+            LogicalSwitch.class,
+            McastMacsLocal.class,
+            PhysicalLocator.class,
+            McastMacsRemote.class,
+            PhysicalPort.class,
+            Tunnel.class,
+            PhysicalLocatorSet.class,
+            PhysicalSwitch.class,
+            UcastMacsLocal.class,
+            UcastMacsRemote.class
+    };
 
     private final Map<Class, Function<InstanceIdentifier, List<Condition>>> whereClauseGetterMap = new HashMap();
     private final Map<Class, Class> tableMap = new HashMap();
@@ -257,5 +294,45 @@ public class HwvtepTableReader {
             LOG.error("Failed to get the hwvtep ", e);
         }
         return Collections.emptyList();
+    }
+
+    public TableUpdates readAllTables() throws ExecutionException, InterruptedException {
+        Map<String, TableUpdate> tableUpdates =  new HashMap<>();
+        DatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+
+        List<Operation> operations = Arrays.asList(alltables).stream()
+                .map(tableClass -> TyperUtils.getTableSchema(dbSchema, tableClass))
+                .map(tableSchema -> buildSelectOperationFor(tableSchema))
+                .collect(Collectors.toList());
+
+        List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
+        if (results != null && !results.isEmpty()) {
+            results.stream()
+                    .filter(result -> result.getRows() != null)
+                    .flatMap(result -> result.getRows().stream())
+                    .forEach(row -> {
+                        tableUpdates.compute(row.getTableSchema().getName(), (tableName, tableUpdate) -> {
+                            if (tableUpdate == null) {
+                                tableUpdate = new TableUpdate();
+                            }
+                            tableUpdate.addRow(getRowUuid(row), null, row);
+                            return tableUpdate;
+                        });
+                    });
+        }
+        return new TableUpdates(tableUpdates);
+    }
+
+    private Select<GenericTableSchema> buildSelectOperationFor(GenericTableSchema tableSchema) {
+        Select<GenericTableSchema> selectOpearation = op.select(tableSchema);
+        selectOpearation.setColumns(new ArrayList<>(tableSchema.getColumns()));
+        return selectOpearation;
+    }
+
+    private UUID getRowUuid(Row<GenericTableSchema> row) {
+        return row.getColumns().stream()
+                .filter(column -> column.getSchema().getName().equals("_uuid"))
+                .map(column -> (UUID) column.getData())
+                .findFirst().orElse(new UUID("test"));
     }
 }

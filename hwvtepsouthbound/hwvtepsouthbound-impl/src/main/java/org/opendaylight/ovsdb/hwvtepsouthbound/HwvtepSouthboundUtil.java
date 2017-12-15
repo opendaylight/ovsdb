@@ -205,4 +205,12 @@ public class HwvtepSouthboundUtil {
         }
         return physicalNodeIid.firstIdentifierOf(Topology.class).child(Node.class , new NodeKey(new NodeId(nodeId)));
     }
+
+    public static Integer getRemotePort(Node node) {
+        HwvtepGlobalAugmentation augmentation = node.getAugmentation(HwvtepGlobalAugmentation.class);
+        if (augmentation != null && augmentation.getConnectionInfo() != null) {
+            return augmentation.getConnectionInfo().getRemotePort().getValue();
+        }
+        return 0;
+    }
 }

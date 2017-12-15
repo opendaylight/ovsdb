@@ -314,4 +314,9 @@ public class HwvtepConnectionInstance {
     public HwvtepTableReader getHwvtepTableReader() {
         return hwvtepTableReader;
     }
+
+    public void refreshOperNode() throws ExecutionException, InterruptedException {
+        TableUpdates tableUpdates = hwvtepTableReader.readAllTables();
+        callback.update(tableUpdates, getDatabaseSchema(HwvtepSchemaConstants.HARDWARE_VTEP));
+    }
 }

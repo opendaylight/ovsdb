@@ -114,6 +114,7 @@ public class SouthboundUtils {
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     private final MdsalUtils mdsalUtils;
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
+    public static final String OPENFLOW_SECURE_PROTOCOL = "ssl";
     public static short OPENFLOW_PORT = 6653;
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
@@ -895,6 +896,18 @@ public class SouthboundUtils {
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
                                 controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
                                 controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
+                                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
+                            } else {
+                                LOG.warn("Ovsdb Node does not contain connection info: {}", node);
+                            }
+                        } else if (tokens.length == 3 && tokens[0].equalsIgnoreCase("ssl")) {
+                            controllersStr.add(OPENFLOW_SECURE_PROTOCOL
+                                    + ":" + tokens[1] + ":" + getControllerOFPort());
+                        } else if (tokens[0].equalsIgnoreCase("pssl")) {
+                            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
+                                controllersStr.add(OPENFLOW_SECURE_PROTOCOL
                                         + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
                             } else {
                                 LOG.warn("Ovsdb Node does not contain connection info: {}", node);

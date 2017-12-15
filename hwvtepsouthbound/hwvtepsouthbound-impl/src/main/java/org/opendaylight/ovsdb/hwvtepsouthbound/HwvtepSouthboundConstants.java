@@ -53,4 +53,6 @@ public class HwvtepSouthboundConstants {
             "hwvtep.intransit.job.expiry.time.millis", 10000);
     public static final long IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS = Integer.getInteger(
             "hwvtep.intransit.job.check.period.millis", 30000);
+    public static final long OPER_NODE_DELETE_MAX_DELAY_MS = Integer.getInteger(
+            "oper.node.delete.max.delay.ms", 10000);
 }

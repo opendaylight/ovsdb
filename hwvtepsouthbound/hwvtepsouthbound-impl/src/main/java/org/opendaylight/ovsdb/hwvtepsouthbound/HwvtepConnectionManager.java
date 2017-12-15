@@ -60,6 +60,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -82,6 +83,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final ReconciliationManager reconciliationManager;
     private final Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> nodeIidVsConnectionInstance =
             new ConcurrentHashMap<>();
+    private HwvtepOperGlobalListener hwvtepOperGlobalListener;
 
     public HwvtepConnectionManager(DataBroker db, TransactionInvoker txInvoker,
                     EntityOwnershipService entityOwnershipService) {
@@ -90,6 +92,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         this.entityOwnershipService = entityOwnershipService;
         this.hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this,entityOwnershipService);
         this.reconciliationManager = new ReconciliationManager(db);
+        this.hwvtepOperGlobalListener = new HwvtepOperGlobalListener(db, this);
     }
 
     @Override
@@ -141,10 +144,13 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             // not be used as a candidate in Entity election (given that this instance is
             // about to disconnect as well), if current owner get disconnected from
             // HWVTEP device.
-            unregisterEntityForOwnership(hwvtepConnectionInstance);
-
-            //TODO: remove all the hwvtep nodes
-            txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
+            if (hwvtepConnectionInstance.getHasDeviceOwnership()) {
+                unregisterEntityForOwnership(hwvtepConnectionInstance);
+                txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
+            } else {
+                unregisterEntityForOwnership(hwvtepConnectionInstance);
+                //Do not delete if client disconnected from follower HwvtepGlobalRemoveCommand
+            }
 
             removeConnectionInstance(key);
 
@@ -319,6 +325,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private void registerEntityForOwnership(HwvtepConnectionInstance hwvtepConnectionInstance) {
 
         Entity candidateEntity = getEntityFromConnectionInstance(hwvtepConnectionInstance);
+        if (entityConnectionMap.get(candidateEntity) != null) {
+            disconnected(entityConnectionMap.get(candidateEntity).getOvsdbClient());
+            putConnectionInstance(hwvtepConnectionInstance.getInstanceIdentifier(), hwvtepConnectionInstance);
+        }
         entityConnectionMap.put(candidateEntity, hwvtepConnectionInstance);
         hwvtepConnectionInstance.setConnectedEntity(candidateEntity);
 
@@ -330,23 +340,39 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
             //If entity already has owner, it won't get notification from EntityOwnershipService
             //so cache the connection instances.
-            Optional<EntityOwnershipState> ownershipStateOpt =
-                    entityOwnershipService.getOwnershipState(candidateEntity);
-            if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    if (getConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo()) != null) {
-                        LOG.info("OVSDB entity {} is already owned by other southbound plugin "
-                                + "instance, so *this* instance is NOT an OWNER of the device",
-                                hwvtepConnectionInstance.getConnectionInfo());
-                        putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(),hwvtepConnectionInstance);
-                    }
-                }
-            }
+            handleOwnershipState(candidateEntity, hwvtepConnectionInstance);
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
 
+    }
+
+    private void handleOwnershipState(Entity candidateEntity, HwvtepConnectionInstance hwvtepConnectionInstance) {
+        //If entity already has owner, it won't get notification from EntityOwnershipService
+        //so cache the connection instances.
+        Optional<EntityOwnershipState> ownershipStateOpt =
+                entityOwnershipService.getOwnershipState(candidateEntity);
+        if (ownershipStateOpt.isPresent()) {
+            EntityOwnershipState ownershipState = ownershipStateOpt.get();
+            putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
+            if (ownershipState.hasOwner()) {
+                hwvtepConnectionInstance.setHasDeviceOwnership(ownershipState.isOwner());
+                if (!ownershipState.isOwner()) {
+                    LOG.info("HWVTEP entity {} is already owned by other southbound plugin "
+                                    + "instance, so *this* instance is NOT an OWNER of the device",
+                            hwvtepConnectionInstance.getConnectionInfo());
+                } else {
+                    afterTakingOwnership(hwvtepConnectionInstance);
+                }
+            }
+        }
+    }
+
+    private void afterTakingOwnership(HwvtepConnectionInstance hwvtepConnectionInstance) {
+        txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
+        putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
+        hwvtepConnectionInstance.setHasDeviceOwnership(true);
+        hwvtepConnectionInstance.registerCallbacks();
     }
 
     private Global getHwvtepGlobalTableEntry(HwvtepConnectionInstance connectionInstance) {
@@ -452,6 +478,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     @Override
                     public void onSuccess(@Nullable Optional<Node> node) {
                         if (node.isPresent()) {
+                            HwvtepGlobalAugmentation augmentation = node.get()
+                                    .getAugmentation(HwvtepGlobalAugmentation.class);
+                            if (augmentation == null || augmentation.getConnectionInfo() == null) {
+                                return;
+                            }
                             LOG.info("Disconnected/Failed connection {} was controller initiated, attempting " +
                                     "reconnection", hwvtepNode.getConnectionInfo());
                             reconciliationManager.enqueue(task);
@@ -518,7 +549,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
-            hwvtepConnectionInstance.registerCallbacks();
+            afterTakingOwnership(hwvtepConnectionInstance);
 
         } else {
             //You were owner of the device, but now you are not. With the current ownership

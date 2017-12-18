@@ -56,6 +56,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>library</artifactId>
       <version>${project.version}</version>
     </dependency>
+      <dependency>
+          <groupId>org.apache.karaf.shell</groupId>
+          <artifactId>org.apache.karaf.shell.console</artifactId>
+          <version>3.0.3</version>
+      </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>schema.hardwarevtep</artifactId>

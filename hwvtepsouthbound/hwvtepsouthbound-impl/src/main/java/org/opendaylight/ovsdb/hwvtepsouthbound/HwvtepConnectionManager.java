@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.hwvtepsouthbound.events.ClientConnected;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationTask;
@@ -42,6 +43,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionLog;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
@@ -75,6 +78,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionManager.class);
     private static final String ENTITY_TYPE = "hwvtep";
     private static final int DB_FETCH_TIMEOUT = 1000;
+    private static final int TRANSACTION_LOGS_CAPACITY = 10000;
+    private static final int TRANSACTION_LOGS_WATERMARK = 7500;
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
@@ -87,6 +92,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             new ConcurrentHashMap<>();
     private HwvtepOperGlobalListener hwvtepOperGlobalListener;
     private final Timer timer = new Timer();
+    private final Map<InstanceIdentifier<Node>, TransactionLog> controllerTxLog = new ConcurrentHashMap<>();
+    private final Map<InstanceIdentifier<Node>, TransactionLog> deviceUpdateLog = new ConcurrentHashMap<>();
 
     public HwvtepConnectionManager(DataBroker db, TransactionInvoker txInvoker,
                     EntityOwnershipService entityOwnershipService) {
@@ -143,6 +150,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstance(key);
         if (hwvtepConnectionInstance != null) {
+            deviceUpdateLog.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToLog(
+                    TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+
             // Unregister Entity ownership as soon as possible ,so this instance should
             // not be used as a candidate in Entity election (given that this instance is
             // about to disconnect as well), if current owner get disconnected from
@@ -424,7 +434,16 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             hwvtepConnectionInstance.setInstanceIdentifier(iid);
             LOG.info("InstanceIdentifier {} generated for device "
                     + "connection {}",iid, hwvtepConnectionInstance.getConnectionInfo());
-
+            controllerTxLog.putIfAbsent(iid,
+                    new TransactionLog(TRANSACTION_LOGS_CAPACITY,TRANSACTION_LOGS_WATERMARK));
+            deviceUpdateLog.putIfAbsent(iid,
+                    new TransactionLog(TRANSACTION_LOGS_CAPACITY, TRANSACTION_LOGS_WATERMARK));
+            TransactionLog controllerLog = controllerTxLog.get(iid);
+            TransactionLog deviceLog = deviceUpdateLog.get(iid);
+            int port = hwvtepConnectionInstance.getOvsdbClient().getConnectionInfo().getRemotePort();
+            deviceLog.addToLog(TransactionType.ADD, new ClientConnected(port));
+            hwvtepConnectionInstance.setControllerTxLog(controllerLog);
+            hwvtepConnectionInstance.setDeviceUpdateLog(deviceLog);
         }
         YangInstanceIdentifier entityId =
                 HwvtepSouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(iid);
@@ -596,6 +615,14 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
          if (nodeIid != null) {
              nodeIidVsConnectionInstance.remove(nodeIid);
          }
+    }
+
+    public Map<InstanceIdentifier<Node>, TransactionLog> getControllerTxLog() {
+        return controllerTxLog;
+    }
+
+    public Map<InstanceIdentifier<Node>, TransactionLog> getDeviceUpdateLog() {
+        return deviceUpdateLog;
     }
 
     private class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {

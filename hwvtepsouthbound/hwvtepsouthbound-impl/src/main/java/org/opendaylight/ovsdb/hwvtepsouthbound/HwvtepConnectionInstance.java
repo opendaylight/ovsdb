@@ -50,6 +50,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionLog;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -80,6 +81,8 @@ public class HwvtepConnectionInstance {
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     private final SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
     private final AtomicBoolean firstUpdateTriggered = new AtomicBoolean(false);
+    private TransactionLog controllerTxLog;
+    private TransactionLog deviceUpdateLog;
 
     HwvtepConnectionInstance (HwvtepConnectionManager hwvtepConnectionManager, ConnectionInfo key, OvsdbClient client,
                               InstanceIdentifier<Node> iid, TransactionInvoker txInvoker, DataBroker dataBroker) {
@@ -357,5 +360,31 @@ public class HwvtepConnectionInstance {
 
     public HwvtepTableReader getHwvtepTableReader() {
         return hwvtepTableReader;
+    }
+
+    public MonitorCallBack getCallback() {
+        return callback;
+    }
+
+    public void setCallback(MonitorCallBack callback) {
+        this.callback = callback;
+    }
+
+    public TransactionLog getControllerTxLog() {
+        return controllerTxLog;
+    }
+
+    public void setControllerTxLog(TransactionLog controllerTxLog) {
+        deviceInfo.setControllerTxLog(controllerTxLog);
+        this.controllerTxLog = controllerTxLog;
+    }
+
+    public TransactionLog getDeviceUpdateLog() {
+        return deviceUpdateLog;
+    }
+
+    public void setDeviceUpdateLog(TransactionLog deviceUpdateLog) {
+        deviceInfo.setDeviceUpdateLog(deviceUpdateLog);
+        this.deviceUpdateLog = deviceUpdateLog;
     }
 }

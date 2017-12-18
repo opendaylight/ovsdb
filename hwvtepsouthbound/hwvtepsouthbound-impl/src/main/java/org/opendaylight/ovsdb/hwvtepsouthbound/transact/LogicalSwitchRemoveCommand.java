@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
@@ -136,6 +137,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                 transaction.add(op.delete(mcastMacsLocal.getSchema())
                         .where(mcastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
                 updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
+                updateControllerTxLog(TransactionType.DELETE, lswitch);
             } else {
                 LOG.warn("Unable to delete logical switch {} because it was not found in the operational store",
                         lswitch.getHwvtepNodeName().getValue());

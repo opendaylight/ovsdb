@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
@@ -105,6 +106,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                         .where(extraPhyscialPort.getNameColumn().getSchema().opEqual(existingPhysicalPortName))
                         .build());
                 transaction.add(op.comment("Physical Port: Updating " + existingPhysicalPortName));
+                updateControllerTxLog(TransactionType.UPDATE, physicalPort);
             }
         }
     }

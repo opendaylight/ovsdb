@@ -26,6 +26,8 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.hwvtepsouthbound.events.PortEvent;
+import org.opendaylight.ovsdb.hwvtepsouthbound.events.ReconcilePortEvent;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.PhysicalPortUpdateCommand;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -35,6 +37,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -51,6 +54,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -129,6 +133,12 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 }
+                NodeId psNodeId = tpPath.firstKeyOf(Node.class).getNodeId();
+                if (getDeviceInfo().getDeviceOperData(TerminationPoint.class, tpPath) == null) {
+                    addToDeviceUpdate(TransactionType.ADD, new PortEvent(pPortUpdate, psNodeId));
+                } else {
+                    addToDeviceUpdate(TransactionType.UPDATE, new PortEvent(pPortUpdate, psNodeId));
+                }
                 reconcileToPort(transaction, pPortUpdate, tpPath);
                 getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
                         pPortUpdate.getUuid(), pPortUpdate);
@@ -177,6 +187,8 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                             //TODO port came with some vlan bindings clean them up use PortRemovedCommand
                             return;
                         }
+                        addToDeviceUpdate(TransactionType.ADD,
+                                new ReconcilePortEvent(pPortUpdate, tpPath.firstKeyOf(Node.class).getNodeId()));
                         getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
                                 pPortUpdate.getUuid(), pPortUpdate);
                         TerminationPoint configTp = optionalConfigTp.get();

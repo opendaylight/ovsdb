@@ -16,6 +16,8 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionLog;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -118,6 +120,9 @@ public class HwvtepDeviceInfo {
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> opKeyVsData = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<UUID, Object>> uuidVsData = new ConcurrentHashMap<>();
     private DependencyQueue dependencyQueue;
+    private TransactionLog controllerTxLog;
+    private TransactionLog deviceUpdateLog;
+
 
     public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
         this.connectionInstance = hwvtepConnectionInstance;
@@ -394,5 +399,25 @@ public class HwvtepDeviceInfo {
 
     public HwvtepConnectionInstance getConnectionInstance() {
         return connectionInstance;
+    }
+
+    public void setConfigKeyVsData(Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> configKeyVsData) {
+        this.configKeyVsData = configKeyVsData;
+    }
+
+    public void setControllerTxLog(TransactionLog controllerTxLog) {
+        this.controllerTxLog = controllerTxLog;
+    }
+
+    public void setDeviceUpdateLog(TransactionLog deviceUpdateLog) {
+        this.deviceUpdateLog = deviceUpdateLog;
+    }
+
+    public void addToControllerTx(TransactionType transactionType, Object object) {
+        controllerTxLog.addToLog(transactionType, object);
+    }
+
+    public void addToDeviceUpdate(TransactionType transactionType, Object object) {
+        deviceUpdateLog.addToLog(transactionType, object);
     }
 }

@@ -54,6 +54,7 @@ import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -207,6 +208,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
         field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance,
                 new HwvtepDeviceInfo(connectionInstance));
+        connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
+        connectionInstance.setDeviceUpdateHistory(new TransactionHistory(10000, 7500));
         connectionInstance.createTransactInvokers();
     }
 

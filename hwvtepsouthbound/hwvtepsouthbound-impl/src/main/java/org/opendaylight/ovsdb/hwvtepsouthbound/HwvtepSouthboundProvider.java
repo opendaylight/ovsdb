@@ -212,4 +212,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
         }
     }
 
+    public HwvtepConnectionManager getHwvtepConnectionManager() {
+        return cm;
+    }
 }

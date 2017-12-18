@@ -24,4 +24,12 @@
     <argument ref="bindingNormalizedNodeSerializer" />
   </bean>
 
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+    <command>
+        <action class="org.opendaylight.ovsdb.hwvtepsouthbound.TransactionHistoryCmd">
+            <property name="dataBroker" ref="dataBroker" />
+            <property name="hwvtepProvider" ref="hwvtepProvider" />
+        </action>
+    </command>
+    </command-bundle>
 </blueprint>

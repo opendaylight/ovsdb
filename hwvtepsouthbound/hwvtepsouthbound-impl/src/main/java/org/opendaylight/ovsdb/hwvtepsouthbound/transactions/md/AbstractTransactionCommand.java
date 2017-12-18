@@ -13,6 +13,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
@@ -46,5 +47,9 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
 
     public HwvtepDeviceInfo getDeviceInfo() {
         return key.getDeviceInfo();
+    }
+
+    void addToDeviceUpdate(TransactionType transactionType, Object element) {
+        key.getDeviceInfo().addToDeviceUpdate(transactionType, element);
     }
 }

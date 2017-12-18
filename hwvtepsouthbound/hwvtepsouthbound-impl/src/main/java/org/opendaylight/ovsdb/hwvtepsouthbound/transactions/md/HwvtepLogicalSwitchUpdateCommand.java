@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -67,6 +68,7 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
             getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, switchIid,
                     lSwitch.getUuid(), lSwitch);
+            addToDeviceUpdate(TransactionType.ADD, lSwitch);
             // TODO: Delete entries that are no longer needed
         }
     }

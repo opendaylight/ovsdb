@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Submitted-by: Stephen Kitt <skitt@redhat.com>
+Submitted-at: Mon, 18 Dec 2017 10:14:34 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/66556
+Project: ovsdb
+Branch: refs/heads/stable/nitrogen

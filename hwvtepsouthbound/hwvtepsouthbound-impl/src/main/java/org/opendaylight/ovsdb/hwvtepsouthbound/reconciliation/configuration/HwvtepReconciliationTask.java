@@ -58,7 +58,8 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         HwvtepOperationalState hwvtepOperationalState = new HwvtepOperationalState(db, connectionInstance, changes,
                 globalOperNode, psNode);
         hwvtepOperationalState.setInReconciliation(true);
-        connectionInstance.transact(new TransactCommandAggregator(hwvtepOperationalState,changes));
+        boolean reconcile = true;
+        connectionInstance.transact(new TransactCommandAggregator(hwvtepOperationalState,changes), reconcile);
     }
 
     @Override

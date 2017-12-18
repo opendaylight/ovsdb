@@ -15,9 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -70,6 +77,9 @@ public class HwvtepConnectionInstance {
     private HwvtepDeviceInfo deviceInfo;
     private DataBroker dataBroker;
     private final HwvtepConnectionManager hwvtepConnectionManager;
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private final SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
+    private final AtomicBoolean firstUpdateTriggered = new AtomicBoolean(false);
 
     HwvtepConnectionInstance (HwvtepConnectionManager hwvtepConnectionManager, ConnectionInfo key, OvsdbClient client,
                               InstanceIdentifier<Node> iid, TransactionInvoker txInvoker, DataBroker dataBroker) {
@@ -83,9 +93,43 @@ public class HwvtepConnectionInstance {
         this.hwvtepTableReader = new HwvtepTableReader(this);
     }
 
-    public synchronized void transact(TransactCommand command) {
-        for (TransactInvoker transactInvoker: transactInvokers.values()) {
-            transactInvoker.invoke(command);
+    public void transact(final TransactCommand command) {
+        String nodeId = getNodeId().getValue();
+        boolean firstUpdate = firstUpdateTriggered.compareAndSet(false, true);
+        if (reconciliationFt.isDone()) {
+            transact(command, false);
+        } else {
+            LOG.info("Job waiting for reconciliation {}", nodeId);
+            Futures.addCallback(reconciliationFt, new FutureCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    LOG.info("Running the job waiting for reconciliation {}", nodeId);
+                    transact(command, false);
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    LOG.info("Running the job waiting for reconciliation {}", nodeId);
+                    transact(command, false);
+                }
+            });
+            if (firstUpdate) {
+                LOG.info("Scheduling the reconciliation timeout task {}", nodeId);
+                scheduledExecutorService.schedule( () -> reconciliationFt.set(Boolean.TRUE),
+                        HwvtepSouthboundConstants.CONFIG_NODE_UPDATE_MAX_DELAY_MS, TimeUnit.MILLISECONDS);
+            }
+        }
+    }
+
+    public synchronized void transact(TransactCommand command, boolean reconcile) {
+        try {
+            for (TransactInvoker transactInvoker : transactInvokers.values()) {
+                transactInvoker.invoke(command);
+            }
+        } finally {
+            if (reconcile) {
+                reconciliationFt.set(Boolean.TRUE);
+            }
         }
     }
 

@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -62,6 +63,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -189,6 +191,11 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         field(HwvtepConnectionInstance.class, "instanceIdentifier").set(connectionInstance, nodeIid);
         field(HwvtepConnectionInstance.class, "txInvoker").set(connectionInstance, transactionInvoker);
         field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
+        SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
+        reconciliationFt.set(Boolean.TRUE);
+        field(HwvtepConnectionInstance.class, "reconciliationFt").set(connectionInstance, reconciliationFt);
+        field(HwvtepConnectionInstance.class, "firstUpdateTriggered").set(connectionInstance,
+                new AtomicBoolean(Boolean.TRUE));
         doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
         doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
         doReturn(dataBroker).when(connectionInstance).getDataBroker();

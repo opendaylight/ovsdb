@@ -16,10 +16,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
@@ -117,8 +119,8 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
                 //if no, get it from config DS and create id
-                Optional<TerminationPoint> configLocatorOptional =
-                        TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
+                Optional<TerminationPoint> configLocatorOptional = new MdsalUtils(
+                        getOperationalState().getDataBroker()).readOptional(LogicalDatastoreType.CONFIGURATION, iid);
                 if (configLocatorOptional.isPresent()) {
                     HwvtepPhysicalLocatorAugmentation locatorAugmentation =
                             configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);

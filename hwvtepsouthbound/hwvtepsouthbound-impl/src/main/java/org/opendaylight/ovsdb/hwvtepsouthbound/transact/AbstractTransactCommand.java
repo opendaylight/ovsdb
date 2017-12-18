@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -59,6 +60,10 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     public HwvtepOperationalState getOperationalState() {
         return threadLocalOperationalState.get();
+    }
+
+    public DataBroker getDataBroker() {
+        return getOperationalState().getDataBroker();
     }
 
     public Collection<DataTreeModification<Node>> getChanges() {

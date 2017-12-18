@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
@@ -100,16 +101,12 @@ public class HwvtepSouthboundUtil {
 
     public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
         try {
-            ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
             @SuppressWarnings("unchecked")
             // Note: erasure makes this safe in combination with the typecheck
             // below
             InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
 
-            CheckedFuture<Optional<Node>, ReadFailedException> nf =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, path);
-            transaction.close();
-            Optional<Node> optional = nf.get();
+            Optional<Node> optional = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
             if (optional != null && optional.isPresent()) {
                 HwvtepGlobalAugmentation hwvtepNode = null;
                 Node node = optional.get();

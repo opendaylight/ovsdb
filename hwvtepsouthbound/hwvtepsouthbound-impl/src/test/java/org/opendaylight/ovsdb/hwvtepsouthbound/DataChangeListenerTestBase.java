@@ -35,6 +35,7 @@ import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -69,7 +70,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 import static org.powermock.api.support.membermodification.MemberMatcher.field;
@@ -200,7 +200,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
         doReturn(dataBroker).when(connectionInstance).getDataBroker();
         doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
-        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance, new HwvtepDeviceInfo(connectionInstance));
+        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance,
+                new HwvtepDeviceInfo(connectionInstance));
+        connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
+        connectionInstance.setDeviceUpdateHistory(new TransactionHistory(10000, 7500));
         connectionInstance.createTransactInvokers();
     }
 

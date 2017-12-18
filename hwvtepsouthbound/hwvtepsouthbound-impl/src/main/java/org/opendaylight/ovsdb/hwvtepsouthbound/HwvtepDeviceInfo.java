@@ -16,12 +16,12 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -118,6 +118,9 @@ public class HwvtepDeviceInfo {
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> opKeyVsData = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<UUID, Object>> uuidVsData = new ConcurrentHashMap<>();
     private DependencyQueue dependencyQueue;
+    private TransactionHistory controllerTxHistory;
+    private TransactionHistory deviceUpdateHistory;
+
 
     public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
         this.connectionInstance = hwvtepConnectionInstance;
@@ -394,5 +397,25 @@ public class HwvtepDeviceInfo {
 
     public HwvtepConnectionInstance getConnectionInstance() {
         return connectionInstance;
+    }
+
+    public void setConfigKeyVsData(Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> configKeyVsData) {
+        this.configKeyVsData = configKeyVsData;
+    }
+
+    public void setControllerTxHistory(TransactionHistory controllerTxHistory) {
+        this.controllerTxHistory = controllerTxHistory;
+    }
+
+    public void setDeviceUpdateHistory(TransactionHistory deviceUpdateHistory) {
+        this.deviceUpdateHistory = deviceUpdateHistory;
+    }
+
+    public void addToControllerTx(TransactionType transactionType, Object object) {
+        controllerTxHistory.addToHistory(transactionType, object);
+    }
+
+    public void addToDeviceUpdate(TransactionType transactionType, Object object) {
+        deviceUpdateHistory.addToHistory(transactionType, object);
     }
 }

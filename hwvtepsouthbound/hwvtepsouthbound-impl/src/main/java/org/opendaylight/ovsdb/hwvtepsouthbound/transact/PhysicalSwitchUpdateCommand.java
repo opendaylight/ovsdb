@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -31,6 +32,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
@@ -284,8 +286,8 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         } else {
             // TODO/FIXME: Not in operational, do we create a new one?
             LOG.warn("Trying to create tunnel without creating physical locators first");
-            Optional<TerminationPoint> confLocOptional =
-                            TransactUtils.readNodeFromConfig(getOperationalState().getReadWriteTransaction(), iid);
+            Optional<TerminationPoint> confLocOptional = new MdsalUtils(getOperationalState().getDataBroker())
+                    .readOptional(LogicalDatastoreType.CONFIGURATION, iid);
             if (confLocOptional.isPresent()) {
                 HwvtepPhysicalLocatorAugmentation locatorAugmentation =
                                 confLocOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);

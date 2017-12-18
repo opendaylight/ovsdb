@@ -131,17 +131,6 @@ public class TransactUtils {
         return result;
     }
 
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNodeFromConfig(
-            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
-        Optional<D> node = Optional.absent();
-        try {
-            node = transaction.read(LogicalDatastoreType.CONFIGURATION, connectionIid).checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.warn("Read Configration/DS for Node failed! {}", connectionIid, e);
-        }
-        return node;
-    }
-
     public static UUID createPhysicalLocatorSet(HwvtepOperationalState hwvtepOperationalState, TransactionBuilder transaction, List<LocatorSet> locatorList) {
         Set<UUID> locators = new HashSet<UUID>();
         for (LocatorSet locator: locatorList) {

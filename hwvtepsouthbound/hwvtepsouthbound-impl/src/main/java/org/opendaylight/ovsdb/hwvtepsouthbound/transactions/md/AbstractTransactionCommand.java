@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -37,7 +38,7 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         return key;
     }
 
-    public AbstractTransactionCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public AbstractTransactionCommand(HwvtepConnectionInstance key,TableUpdates updates, DatabaseSchema dbSchema) {
         this.updates = updates;
         this.dbSchema = dbSchema;
         this.key = key;

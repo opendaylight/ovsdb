@@ -15,6 +15,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,8 @@ import org.slf4j.LoggerFactory;
 public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
     private DataBroker databroker = null;
-
+    private static int MDSAL_MAX_READ_TRIALS = Integer.getInteger("mdsalutil.max.tries", 30);
+    private static int MDSAL_READ_SLEEP_INTERVAL_MS = Integer.getInteger("mdsalutil.sleep.between.mdsal.reads", 1000);
     /**
      * Class constructor setting the data broker.
      *
@@ -109,24 +111,46 @@ public class MdsalUtils {
      * @param <D> the data object type
      * @return the result as the data object requested
      */
-    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
-        D result = null;
-        final ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
-        Optional<D> optionalDataObject;
-        CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
-        try {
-            optionalDataObject = future.checkedGet();
-            if (optionalDataObject.isPresent()) {
-                result = optionalDataObject.get();
-            } else {
-                LOG.debug("{}: Failed to read {}",
-                        Thread.currentThread().getStackTrace()[1], path);
-            }
-        } catch (ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
+    public <D extends DataObject> D read(
+            final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path) {
+        Optional<D> optionalDataObject = readOptional(store, path);
+        if (optionalDataObject.isPresent()) {
+            return optionalDataObject.get();
         }
-        transaction.close();
-        return result;
+        LOG.debug("{}: Failed to read {}",
+                Thread.currentThread().getStackTrace()[1], path);
+        return null;
+    }
+
+    public <D extends DataObject> Optional<D> readOptional(
+            final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path)  {
+        int trialNo = 0;
+        ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
+        do {
+            try {
+                Optional<D> result = transaction.read(store, (InstanceIdentifier<D>)path).checkedGet();
+                transaction.close();
+                return result;
+            } catch (ReadFailedException e) {
+                if (trialNo == 0) {
+                    logReadFailureError(path, " mdsal Read failed exception retrying the read after sleep");
+                }
+                try {
+                    transaction.close();
+                    Thread.sleep(MDSAL_READ_SLEEP_INTERVAL_MS);
+                    transaction = databroker.newReadOnlyTransaction();
+                } catch (InterruptedException e1) {
+                    logReadFailureError(path, " Sleep interrupted");
+                }
+            }
+        } while (trialNo++ < MDSAL_MAX_READ_TRIALS);
+        logReadFailureError(path, " All read trials exceeded");
+        return Optional.absent();
+    }
+
+    private <D extends org.opendaylight.yangtools.yang.binding.DataObject> void logReadFailureError(
+            InstanceIdentifier<D> path, String cause) {
+        LOG.error("{}: Failed to read {} Cause : {}", Thread.currentThread().getStackTrace()[2], path, cause);
+
     }
 }

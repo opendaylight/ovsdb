@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -72,6 +73,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 transaction.add(op.update(physicalPort)
                         .where(extraPhyscialPort.getNameColumn().getSchema().opEqual(existingPhysicalPortName))
                         .build());
+                updateControllerTxHistory(TransactionType.UPDATE, physicalPort);
             } else {
                 LOG.warn("Unable to update physical port {} because it was not found in the operational store, "
                         + "and thus we cannot retrieve its UUID", port.getHwvtepNodeName().getValue());

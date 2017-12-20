@@ -189,7 +189,10 @@ module ovsdb {
             description "Datapath-id of the bridge";
             type datapath-id;
         }
-
+        leaf tombstoned {
+            description "This bridge is marked for scale in workflow";
+            type boolean;
+	}
         leaf datapath-type {
             description "The datapath type of the bridge";
             type identityref {

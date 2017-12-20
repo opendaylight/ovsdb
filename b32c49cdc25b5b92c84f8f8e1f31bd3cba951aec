@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4fdd02a1_b1e94142",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2017-12-20T07:34:23Z",
+      "side": 1,
+      "message": "Is this a schema field? If not this should be in external_ids and that doesn\u0027t require any yang changes.",
+      "range": {
+        "startLine": 192,
+        "startChar": 13,
+        "endLine": 192,
+        "endChar": 23
+      },
+      "revId": "b32c49cdc25b5b92c84f8f8e1f31bd3cba951aec",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

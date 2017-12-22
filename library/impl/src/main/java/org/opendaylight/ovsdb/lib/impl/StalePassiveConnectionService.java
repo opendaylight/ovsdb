@@ -96,7 +96,9 @@ public class StalePassiveConnectionService implements AutoCloseable {
         for (OvsdbClient pendingClient : pendingConnectionClients.keySet()) {
             // set the future result for pending connections that wait for this client to be disconnected
             if (pendingClient.getConnectionInfo().getRemoteAddress()
-                    .equals(disconnectedClient.getConnectionInfo().getRemoteAddress())) {
+                    .equals(disconnectedClient.getConnectionInfo().getRemoteAddress())
+                    && pendingClient.getConnectionInfo().getRemotePort()
+                    == disconnectedClient.getConnectionInfo().getRemotePort()) {
                 Map<OvsdbClient, SettableFuture> clientFutureMap = pendingConnectionClients.get(pendingClient);
                 if (clientFutureMap.containsKey(disconnectedClient)) {
                     clientFutureMap.get(disconnectedClient).set(null);
@@ -129,7 +131,14 @@ public class StalePassiveConnectionService implements AutoCloseable {
 
             @Override
             public void onFailure(Throwable throwable) {
-                LOG.error("Error in checking stale connections)", throwable);
+                LOG.warn("Connection to node {} seems stale as no echo response received from node. Reason : ",
+                        cbForClient.getConnectionInfo(), throwable);
+                clientFutureMap.remove(cbForClient);
+                OvsdbConnectionService.channelClosed(cbForClient);
+                if (clientFutureMap.isEmpty()) {
+                    OvsdbConnectionService.notifyListenerForPassiveConnection(newClient);
+                    pendingConnectionClients.remove(newClient);
+                }
             }
         };
     }

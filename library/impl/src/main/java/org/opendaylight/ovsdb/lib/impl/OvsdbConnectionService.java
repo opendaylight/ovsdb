@@ -475,13 +475,17 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     public static void channelClosed(final OvsdbClient client) {
         LOG.info("Connection closed {}", client.getConnectionInfo().toString());
-        connections.remove(client);
+        Channel channel = connections.remove(client);
+        if (channel == null) {
+            LOG.warn("Channel {} is already closed. Ignore the notification.", client.getConnectionInfo());
+            return;
+        }
+        STALE_PASSIVE_CONNECTION_SERVICE.clientDisconnected(client);
         if (client.isConnectionPublished()) {
             for (OvsdbConnectionListener listener : connectionListeners) {
                 listener.disconnected(client);
             }
         }
-        STALE_PASSIVE_CONNECTION_SERVICE.clientDisconnected(client);
     }
 
     @Override
@@ -512,6 +516,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             if (!client.equals(ovsdbClient)
                     && client.getConnectionInfo().getRemoteAddress()
                             .equals(ovsdbClient.getConnectionInfo().getRemoteAddress())
+                    && (client.getConnectionInfo().getRemotePort() != ovsdbClient.getConnectionInfo().getRemotePort())
                     && client.getConnectionInfo().getType() == ConnectionType.PASSIVE) {
                 passiveClients.add(client);
             }

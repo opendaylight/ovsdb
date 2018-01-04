@@ -42,14 +42,22 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        String portName = null;
         Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
                 Port.class, getUpdates(), getDbSchema()).values();
+        Map<UUID, Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
+                Port.class, getUpdates(), getDbSchema());
         Map<UUID,Bridge> bridgeUpdatedRows = TyperUtils.extractRowsUpdated(
                 Bridge.class, getUpdates(), getDbSchema());
         Map<UUID,Bridge> bridgeUpdatedOldRows = TyperUtils.extractRowsOld(
                 Bridge.class, getUpdates(), getDbSchema());
         for (Port port : portRemovedRows) {
+            final String portName = port.getName();
+            boolean isPortInUpdatedRows = portUpdatedRows.values()
+                .stream().anyMatch(updatedPort -> portName.equals(updatedPort.getName()));
+            if (isPortInUpdatedRows) {
+                LOG.debug("port {} present in updated rows, skipping delete", portName);
+                continue;
+            }
             Bridge updatedBridgeData = null;
             for (UUID bridgeUuid : bridgeUpdatedOldRows.keySet()) {
                 Bridge oldBridgeData = bridgeUpdatedOldRows.get(bridgeUuid);
@@ -64,7 +72,6 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
                 LOG.warn("Bridge not found for port {}",port);
                 continue;
             }
-            portName = port.getName();
             final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
                     .createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
                             updatedBridgeData).child(

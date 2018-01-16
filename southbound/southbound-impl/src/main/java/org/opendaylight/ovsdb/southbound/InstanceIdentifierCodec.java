@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
@@ -32,6 +33,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     private DataSchemaContextTree dataSchemaContextTree;
     private SchemaContext context;
     private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
+    private final static Optional<Revision> revision = Optional.of(Revision.of("2013-10-21"));
 
     public InstanceIdentifierCodec(DOMSchemaService schemaService,
             BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
@@ -46,12 +48,12 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
 
     @Override
     protected Module moduleForPrefix(final String prefix) {
-        return context.findModule(prefix, Optional.empty()).orElse(null);
+        return context.findModule(prefix, revision).orElse(null);
     }
 
     @Override
     protected String prefixForNamespace(final URI namespace) {
-        return context.findModule(namespace, Optional.empty()).map(Module::getName).orElse(null);
+        return context.findModule(namespace, revision).map(Module::getName).orElse(null);
     }
 
     @Override

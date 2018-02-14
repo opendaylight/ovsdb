@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "894d90ab_423180c9",
+        "filename": "utils/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-02-14T12:35:16Z",
+      "side": 1,
+      "message": "I may be confused myself, but isn\u0027t the right parent for an odl-* feature artifact the single-feature-parent and not the feature-repo-parent you\u0027ve used here?",
+      "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

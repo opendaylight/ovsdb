@@ -52,6 +52,24 @@
       "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "434897ac_d06e4450",
+        "filename": "utils/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-02-14T12:51:23Z",
+      "side": 1,
+      "message": "The minimum requirement is a single feature, using single-feature-parent. A feature repo is nice to have, but not indispensable (it’s mostly used for integration/distribution nowadays).",
+      "parentUuid": "07de19f2_78e88bcc",
+      "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -34,6 +34,24 @@
       "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07de19f2_78e88bcc",
+        "filename": "utils/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-02-14T12:48:44Z",
+      "side": 1,
+      "message": "and both the new feature and *-features also have to be added to the artifacts?",
+      "parentUuid": "57b4b406_a2dc0458",
+      "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

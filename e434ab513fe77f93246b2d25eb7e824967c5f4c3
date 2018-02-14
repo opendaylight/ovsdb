@@ -16,6 +16,24 @@
       "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57b4b406_a2dc0458",
+        "filename": "utils/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-02-14T12:44:31Z",
+      "side": 1,
+      "message": "Wait.. you probably do both need a feature-repo-parent as well as a single-feature-parent.. utils/features/odl-ovsdb-utils/pom.xml \u003cartifactId\u003eodl-ovsdb-utils with single-feature-parent as parent and utils/features/pom.xml \u003cartifactId\u003eutils-features with feature-repo-parent as parent should depend on utils/features/pom.xml odl-ovsdb-utils?",
+      "parentUuid": "894d90ab_423180c9",
+      "revId": "e434ab513fe77f93246b2d25eb7e824967c5f4c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

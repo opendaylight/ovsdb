@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af78d9a_0727a565",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-06-20T21:56:08Z",
+      "side": 1,
+      "message": "If your device is already configured to connect to the plugin and then you will start your controller (this is a general case of reboot as well), it will registerConnectionlistener at the time of init(), but if the ownership is not yet decided and plugin didn\u0027t get the ownershipChange notification, it will not initialize the topology in the config and operational data store. And because config and operational topology is missing, it will end up throwing lot of exception and plugin might end up in bad state. I think to resolve your issue, you should have an AtomicBoolean and set it to true where ever you register the connection listener (init or ownershipChangeHandler).",
+      "revId": "08056b3e7461529bb8dc73bc156c08073e71c1ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

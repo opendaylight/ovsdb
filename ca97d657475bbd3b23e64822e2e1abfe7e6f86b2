@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7742bd14_3196bd95",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/events/ClientDisConnected.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-02-16T06:11:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07c6b684_5bdaded1",
+      "revId": "ca97d657475bbd3b23e64822e2e1abfe7e6f86b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "168f5773_c3169de9",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2017-12-20T18:23:27Z",
       "side": 1,
       "message": "Should there be an update here?\n\nupdateControllerTxHistory(TransactionType.UPDATE, lswitch);",
+      "revId": "ca97d657475bbd3b23e64822e2e1abfe7e6f86b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "594e7f83_ca921bc9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-02-16T06:11:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "168f5773_c3169de9",
       "revId": "ca97d657475bbd3b23e64822e2e1abfe7e6f86b2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

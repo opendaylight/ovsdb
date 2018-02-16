@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_f61652a6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-07-25T00:49:15Z",
+      "side": 1,
+      "message": "please follow the import best practices. Put java.* packages above org.* packages.\n\nhttps://wiki.opendaylight.org/view/GettingStarted:_Eclipse_Setup#Import_ordering",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 1
+      },
+      "revId": "7e7038e6ca7d91ae19ba09308f511e6c41c80224",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_167b26f6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-07-25T00:49:15Z",
+      "side": 1,
+      "message": "i think you don\u0027t need to initializeTopology again here, because this will happen in handleOnwershipChange method, because this method will definitely be called for the owner, and we want only owner to initialize the topology.",
+      "revId": "7e7038e6ca7d91ae19ba09308f511e6c41c80224",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_b645fab4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-07-25T00:49:15Z",
+      "side": 1,
+      "message": "did you test this code? I think this callback method won\u0027t be called, because you didn\u0027t register this listner to data broker.",
+      "revId": "7e7038e6ca7d91ae19ba09308f511e6c41c80224",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

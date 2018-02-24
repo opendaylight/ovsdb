@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -72,7 +74,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         List<HwvtepTransactionLogElement> deviceUpdateLog = deviceUpdateLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
         //deviceUpdateLog.forEach( (log) -> log.setDeviceLog(true));
-        List<HwvtepTransactionLogElement> allLogs = mergeLogsByDate(controllerTxLog, deviceUpdateLog);
+        List<Pair<HwvtepTransactionLogElement, Boolean>> allLogs = mergeLogsByDate(controllerTxLog, deviceUpdateLog);
         session.getConsole().println("======================================");
         session.getConsole().println("======================================");
         session.getConsole().print("printing logs for node ");
@@ -89,38 +91,37 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         });
     }
 
-    private List<HwvtepTransactionLogElement> mergeLogsByDate(
+    private List<Pair<HwvtepTransactionLogElement, Boolean>> mergeLogsByDate(
             List<HwvtepTransactionLogElement> logs1,
             List<HwvtepTransactionLogElement> logs2) {
 
-        ArrayList<HwvtepTransactionLogElement> result = new ArrayList();
+        ArrayList<Pair<HwvtepTransactionLogElement, Boolean>> result = new ArrayList();
         int firstIdx = 0;
         int secondIdx = 0;
         int firstSize = logs1.size();
         int secondSize = logs2.size();
         while ( firstIdx < firstSize && secondIdx < secondSize) {
             if (logs1.get(firstIdx).getDate() < logs2.get(secondIdx).getDate()) {
-                result.add(logs1.get(firstIdx));
-                firstIdx++;
+                result.add(ImmutablePair.of(logs1.get(firstIdx++), Boolean.TRUE));
             } else {
-                result.add(logs2.get(secondIdx));
-                secondIdx++;
+                result.add(ImmutablePair.of(logs2.get(secondIdx++), Boolean.FALSE));
             }
         }
         while (firstIdx < firstSize) {
-            result.add(logs1.get(firstIdx));
-            firstIdx++;
+            result.add(ImmutablePair.of(logs1.get(firstIdx++), Boolean.TRUE));
         }
         while (secondIdx < secondSize) {
-            result.add(logs2.get(secondIdx));
-            secondIdx++;
+            result.add(ImmutablePair.of(logs2.get(secondIdx++), Boolean.FALSE));
         }
         return result;
     }
 
-    private void printLogs(List<HwvtepTransactionLogElement> logs) {
-        logs.forEach( (log) -> {
+    private void printLogs(List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {
+        logs.forEach( (pair) -> {
+            HwvtepTransactionLogElement log = pair.getLeft();
             session.getConsole().print(new Date(log.getDate()));
+            session.getConsole().print(" ");
+            session.getConsole().print(pair.getRight() ? "CONTROLLER" : "DEVICE");
             session.getConsole().print(" ");
             session.getConsole().print(log.getTransactionType());
             session.getConsole().print(" ");

@@ -14,6 +14,7 @@
       <cm:property name="ovsdb-rpc-task-timeout" value="1000"/>
       <cm:property name="use-ssl" value="false"/>
       <cm:property name="json-rpc-decoder-max-frame-length" value="100000"/>
+      <cm:property name="use-ha-proxy" value="false"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -25,6 +26,7 @@
     <property name="ovsdbListenerPort" value="${ovsdb-listener-port}"/>
     <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
     <property name="useSsl" value="${use-ssl}"/>
+    <property name="useHaProxy" value="${use-ha-proxy}"/>
     <property name="certificatManager" ref="aaaCertificateManager"/>
     <property name="jsonRpcDecoderMaxFrameLength" value="${json-rpc-decoder-max-frame-length}"/>
   </bean>

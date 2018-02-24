@@ -38,6 +38,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final int READ_TIMEOUT = 180;
     private static final String OVSDB_RPC_TASK_TIMEOUT_PARAM = "ovsdb-rpc-task-timeout";
     private static final String USE_SSL = "use-ssl";
+    private static final String USE_HA_PROXY = "use-ha-proxy";
     private static boolean useSSL = false;
+    private static boolean useHaProxy = false;
     private static ICertificateManager certManagerSrv = null;
 
     private static int jsonRpcDecoderMaxFrameLength = 100000;
@@ -527,6 +530,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     private static List<OvsdbClient> getPassiveClientsFromSameNode(OvsdbClient ovsdbClient) {
+        if (useHaProxy) {
+            //cannot distinguish the clients by their client ip if proxied by haproxy
+            return Collections.emptyList();
+        }
         List<OvsdbClient> passiveClients = new ArrayList<>();
         for (OvsdbClient client : connections.keySet()) {
             if (!client.equals(ovsdbClient)
@@ -560,6 +567,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     public void setUseSsl(boolean flag) {
         useSSL = flag;
+    }
+
+    public void setUseHaProxy(boolean flag) {
+        useHaProxy = flag;
     }
 
     /**
@@ -596,6 +607,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     setOvsdbRpcTaskTimeout(Integer.parseInt((String)paramEntry.getValue()));
                 } else if (paramEntry.getKey().equalsIgnoreCase(USE_SSL)) {
                     useSSL = Boolean.parseBoolean(paramEntry.getValue().toString());
+                }  else if (paramEntry.getKey().equalsIgnoreCase(USE_HA_PROXY)) {
+                    useHaProxy = Boolean.parseBoolean(paramEntry.getValue().toString());
                 }
             }
         }

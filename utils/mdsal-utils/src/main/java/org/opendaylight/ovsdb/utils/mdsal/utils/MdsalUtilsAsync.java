@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -185,7 +186,7 @@ public class MdsalUtilsAsync {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
+            public void onFailure(final Throwable ex) {
                 transaction.close();
             }
         };
@@ -204,7 +205,8 @@ public class MdsalUtilsAsync {
      * @param operationDesc
      *            A description of the transaction to commit.
      */
-    void assignDefaultCallback(final CheckedFuture<Void, TransactionCommitFailedException> transactionFuture, final String operationDesc) {
+    void assignDefaultCallback(final CheckedFuture<Void, TransactionCommitFailedException> transactionFuture,
+            final String operationDesc) {
         Futures.addCallback(transactionFuture, new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
@@ -212,10 +214,10 @@ public class MdsalUtilsAsync {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                LOG.error("Transaction({}) {} FAILED!", operationDesc, t);
-                throw new IllegalStateException("  Transaction(" + operationDesc + ") not committed correctly", t);
+            public void onFailure(final Throwable ex) {
+                LOG.error("Transaction({}) {} FAILED!", operationDesc, ex);
+                throw new IllegalStateException("  Transaction(" + operationDesc + ") not committed correctly", ex);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 }

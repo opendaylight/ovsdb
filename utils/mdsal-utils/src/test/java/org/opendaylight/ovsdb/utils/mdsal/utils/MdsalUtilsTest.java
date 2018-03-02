@@ -16,6 +16,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -30,12 +32,8 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 /**
- * Unit test for class {@link MdsalUtils}
- *
+ * Unit test for class {@link MdsalUtils}.
  */
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -50,7 +48,7 @@ public class MdsalUtilsTest {
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
-        when(writeTransaction.submit()).thenReturn(future );
+        when(writeTransaction.submit()).thenReturn(future);
 
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class));
 
@@ -65,11 +63,13 @@ public class MdsalUtilsTest {
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
-        when(writeTransaction.submit()).thenReturn(future );
+        when(writeTransaction.submit()).thenReturn(future);
 
-        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class), mock(DataObject.class));
+        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                mock(InstanceIdentifier.class), mock(DataObject.class));
 
-        verify(writeTransaction, times(1)).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(DataObject.class), anyBoolean());
+        verify(writeTransaction, times(1)).merge(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class), anyBoolean());
         verify(writeTransaction, times(1)).submit();
 
         assertTrue("Error, the merge transaction failed", result);
@@ -80,11 +80,13 @@ public class MdsalUtilsTest {
         WriteTransaction writeTransaction = mock(WriteTransaction.class);
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         CheckedFuture<Void, TransactionCommitFailedException> future = mock(CheckedFuture.class);
-        when(writeTransaction.submit()).thenReturn(future );
+        when(writeTransaction.submit()).thenReturn(future);
 
-        boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class), mock(DataObject.class));
+        boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
+                mock(InstanceIdentifier.class), mock(DataObject.class));
 
-        verify(writeTransaction, times(1)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(DataObject.class), anyBoolean());
+        verify(writeTransaction, times(1)).put(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class), anyBoolean());
         verify(writeTransaction, times(1)).submit();
 
         assertTrue("Error, the put transaction failed", result);
@@ -98,7 +100,8 @@ public class MdsalUtilsTest {
         DataObject obj = mock(DataObject.class);
         Optional opt = Optional.of(obj);
         when(future.checkedGet()).thenReturn(opt);
-        when(readOnlyTransaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class))).thenReturn(future);
+        when(readOnlyTransaction.read(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class))).thenReturn(future);
 
         DataObject result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class));
 

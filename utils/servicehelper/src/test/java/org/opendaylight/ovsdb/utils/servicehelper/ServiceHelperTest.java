@@ -13,7 +13,6 @@ import static org.mockito.Matchers.any;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -31,9 +30,7 @@ public class ServiceHelperTest {
      * Test method for
      * {@link ServiceHelper#getGlobalInstance(Class, Object)}
      */
-    public void getGlobalInstanceTest () {
-        Bundle bundle = new MockBundle();
-
+    public void getGlobalInstanceTest() {
         PowerMockito.mockStatic(FrameworkUtil.class);
 
         PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
@@ -42,7 +39,7 @@ public class ServiceHelperTest {
         assertNull("Service should be null", object);
 
         PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
-                .thenReturn(bundle);
+                .thenReturn(new MockBundle());
         object = ServiceHelper.getGlobalInstance(Test.class, this);
         assertNotNull("Service should not be null", object);
     }

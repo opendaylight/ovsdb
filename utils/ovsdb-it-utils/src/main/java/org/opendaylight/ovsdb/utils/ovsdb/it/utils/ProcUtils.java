@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Run subprocesses and log or return their output.
  */
-public class ProcUtils {
+public final class ProcUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ProcUtils.class);
+
+    private ProcUtils() {
+    }
 
      /**
      * Run a process and assert the exit code is 0.
@@ -97,7 +99,7 @@ public class ProcUtils {
                         logText != null ? logText : "", stderr.readLine());
             }
 
-            StringBuilder stdoutStringBuilder = (capturedStdout != null) ? capturedStdout : new StringBuilder();
+            StringBuilder stdoutStringBuilder = capturedStdout != null ? capturedStdout : new StringBuilder();
             int read;
             char[] buf = new char[1024];
             while (-1 != (read = stdout.read(buf))) {
@@ -131,7 +133,7 @@ public class ProcUtils {
                 exitValue = proc.exitValue();
                 break;
             } catch (IllegalThreadStateException e) {
-                if ((System.currentTimeMillis() - startTime) < waitFor) {
+                if (System.currentTimeMillis() - startTime < waitFor) {
                     Thread.sleep(200);
                 } else {
                     LOG.warn("ProcUtils.waitForExitValue: timed out while waiting for command to complete", e);

@@ -16,7 +16,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import java.util.Arrays;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
@@ -52,7 +52,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
     private static final NodeId NODE_ID = new NodeId("test");
     private static final NodeKey NODE_KEY =  new NodeKey(NODE_ID);
-    private static final Node data = new NodeBuilder().setKey(NODE_KEY).setNodeId(NODE_ID).build();
+    private static final Node DATA = new NodeBuilder().setKey(NODE_KEY).setNodeId(NODE_ID).build();
 
     private static final InstanceIdentifier<Node> TEST_IID = InstanceIdentifier
             .create(NetworkTopology.class)
@@ -67,12 +67,14 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
     @Test
     public void testDelete() {
-        final CheckedFuture<Void, TransactionCommitFailedException> fut = mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data);
+        final CheckedFuture<Void, TransactionCommitFailedException> fut = mdsalUtilsAsync.put(
+                LogicalDatastoreType.CONFIGURATION, TEST_IID, DATA);
         Futures.addCallback(fut, new FutureCallback<Void>() {
 
             @Override
             public void onSuccess(final Void result) {
-                final CheckedFuture<Void, TransactionCommitFailedException> future = mdsalUtilsAsync.delete(LogicalDatastoreType.CONFIGURATION, TEST_IID);
+                final CheckedFuture<Void, TransactionCommitFailedException> future =
+                        mdsalUtilsAsync.delete(LogicalDatastoreType.CONFIGURATION, TEST_IID);
                 Futures.addCallback(future, new FutureCallback<Void>() {
 
                     @Override
@@ -81,31 +83,37 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        fail(t.getMessage());
+                    public void onFailure(final Throwable ex) {
+                        fail(ex.getMessage());
                     }
-                });
+                }, MoreExecutors.directExecutor());
             }
+
             @Override
-            public void onFailure(final Throwable t) {
-                fail(t.getMessage());
+            public void onFailure(final Throwable ex) {
+                fail(ex.getMessage());
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     @Test
     public void testPutWithoutCallback() {
         final String operationDesc = "testPut";
-        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
-        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
+        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(
+                new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
+        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(
+                new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
-        final Node data1 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder1)).build();
-        final Node data2 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder2)).build();
+        final Node data1 = new NodeBuilder(DATA).setSupportingNode(
+                Collections.singletonList(supportingNodeBuilder1)).build();
+        final Node data2 = new NodeBuilder(DATA).setSupportingNode(
+                Collections.singletonList(supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc);
         assertEquals(data1, readDS());
 
-        final CheckedFuture<Void, TransactionCommitFailedException> future = mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data2);
+        final CheckedFuture<Void, TransactionCommitFailedException> future = mdsalUtilsAsync.put(
+                LogicalDatastoreType.CONFIGURATION, TEST_IID, data2);
         Futures.addCallback(future, new FutureCallback<Void>() {
 
             @Override
@@ -114,25 +122,30 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                fail(t.getMessage());
+            public void onFailure(final Throwable ex) {
+                fail(ex.getMessage());
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     @Test
     public void testMerge() {
         final String operationDesc = "testMerge";
-        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
-        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
+        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(
+                new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
+        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(
+                new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
-        final Node data1 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder1)).build();
-        final Node data2 = new NodeBuilder(data).setSupportingNode(Collections.singletonList(supportingNodeBuilder2)).build();
+        final Node data1 = new NodeBuilder(DATA).setSupportingNode(
+                Collections.singletonList(supportingNodeBuilder1)).build();
+        final Node data2 = new NodeBuilder(DATA).setSupportingNode(
+                Collections.singletonList(supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc, true);
         assertEquals(data1, readDS());
 
-        final CheckedFuture<Void, TransactionCommitFailedException> future = mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data2, true);
+        final CheckedFuture<Void, TransactionCommitFailedException> future =
+                mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data2, true);
         Futures.addCallback(future, new FutureCallback<Void>() {
 
             @Override
@@ -141,26 +154,27 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                fail(t.getMessage());
+            public void onFailure(final Throwable ex) {
+                fail(ex.getMessage());
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     @Test
     public void testRead() {
-        final CheckedFuture<Void, TransactionCommitFailedException> fut = mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data);
+        final CheckedFuture<Void, TransactionCommitFailedException> fut =
+                mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, DATA);
 
         Futures.addCallback(fut, new FutureCallback<Void>() {
-
             @Override
             public void onSuccess(final Void result) {
-                final CheckedFuture<Optional<Node>, ReadFailedException> future = mdsalUtilsAsync.read(LogicalDatastoreType.CONFIGURATION, TEST_IID);
+                final CheckedFuture<Optional<Node>, ReadFailedException> future =
+                        mdsalUtilsAsync.read(LogicalDatastoreType.CONFIGURATION, TEST_IID);
                 Optional<Node> optNode;
                 try {
                     optNode = future.get();
                     if (optNode.isPresent()) {
-                        assertEquals(data, optNode.get());
+                        assertEquals(DATA, optNode.get());
                     } else {
                         fail("Couldn't read node");
                     }
@@ -170,15 +184,16 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                fail(t.getMessage());
+            public void onFailure(final Throwable ex) {
+                fail(ex.getMessage());
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private Node readDS() {
         try {
-            final Optional<Node> result = databroker.newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION, TEST_IID).get();
+            final Optional<Node> result = databroker.newReadOnlyTransaction().read(
+                    LogicalDatastoreType.CONFIGURATION, TEST_IID).get();
             if (result.isPresent()) {
                 return result.get();
             }

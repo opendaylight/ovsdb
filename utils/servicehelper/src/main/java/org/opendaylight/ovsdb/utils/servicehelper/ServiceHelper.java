@@ -10,20 +10,23 @@ package org.opendaylight.ovsdb.utils.servicehelper;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The class helps to register and retrieve OSGi service registry
+ * The class helps to register and retrieve OSGi service registry.
  */
 public final class ServiceHelper {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceHelper.class);
     private static final Map<Class<?>, Object> OVERRIDES = new HashMap<>();
+
+    private ServiceHelper() {
+    }
 
     /**
      * Override a global instance. This should generally only be used for testing.
@@ -70,7 +73,7 @@ public final class ServiceHelper {
     /**
      * Retrieve all the Instances of a Service, optionally
      * filtered via serviceFilter if non-null else all the results are
-     * returned if null
+     * returned if null.
      *
      * @param clazz The target class
      * @param bundle The caller
@@ -78,23 +81,23 @@ public final class ServiceHelper {
      */
     private static Object[] getGlobalInstances(Class<?> clazz, Object bundle,
                                               String serviceFilter) {
-        Object instances[] = null;
+        Object[] instances = null;
         try {
             Bundle ourBundle = FrameworkUtil.getBundle(bundle.getClass());
             if (ourBundle != null) {
-                BundleContext bCtx = ourBundle.getBundleContext();
+                BundleContext bundleContext = ourBundle.getBundleContext();
 
-                ServiceReference<?>[] services = bCtx.getServiceReferences(clazz
+                ServiceReference<?>[] services = bundleContext.getServiceReferences(clazz
                         .getName(), serviceFilter);
 
                 if (services != null) {
                     instances = new Object[services.length];
                     for (int i = 0; i < services.length; i++) {
-                        instances[i] = bCtx.getService(services[i]);
+                        instances[i] = bundleContext.getService(services[i]);
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException | InvalidSyntaxException e) {
             LOG.error("Error retrieving global instances of {} from caller {} with filter {}",
                     clazz, bundle, serviceFilter, e);
         }

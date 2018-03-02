@@ -22,9 +22,6 @@ public class MdsalObject {
 
     @Override
     public String toString() {
-        return "MdsalObject{" +
-                "dataObject=" + dataObject +
-                ", iid=" + iid +
-                '}';
+        return "MdsalObject{" + "dataObject=" + dataObject + ", iid=" + iid + '}';
     }
 }

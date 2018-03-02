@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.utils.hwvtepsouthbound.utils;
 
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
-import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -29,13 +28,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepSouthboundUtils {
+public final class HwvtepSouthboundUtils {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundUtils.class);
-    private static final int HWVTEP_UPDATE_TIMEOUT = 1000;
-    private final MdsalUtils mdsalUtils;
 
-    public HwvtepSouthboundUtils(MdsalUtils mdsalUtils) {
-        this.mdsalUtils = mdsalUtils;
+    private HwvtepSouthboundUtils() {
     }
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {

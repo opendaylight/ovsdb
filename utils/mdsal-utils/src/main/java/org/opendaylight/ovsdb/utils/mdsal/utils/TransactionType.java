@@ -8,11 +8,6 @@
 
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-
 public enum TransactionType {
     ADD,
     UPDATE,

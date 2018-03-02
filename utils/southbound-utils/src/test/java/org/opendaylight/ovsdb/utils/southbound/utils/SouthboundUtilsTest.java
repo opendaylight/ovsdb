@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.utils.southbound.utils;
 
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class SouthboundUtilsTest {

@@ -22,9 +22,11 @@ import org.slf4j.LoggerFactory;
 
 public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
-    private DataBroker databroker = null;
     private static int MDSAL_MAX_READ_TRIALS = Integer.getInteger("mdsalutil.max.tries", 30);
     private static int MDSAL_READ_SLEEP_INTERVAL_MS = Integer.getInteger("mdsalutil.sleep.between.mdsal.reads", 1000);
+
+    private final DataBroker databroker;
+
     /**
      * Class constructor setting the data broker.
      *

@@ -8,12 +8,16 @@
 
 package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
+
+import com.esotericsoftware.yamlbeans.YamlException;
+import com.esotericsoftware.yamlbeans.YamlReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -29,17 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.esotericsoftware.yamlbeans.YamlException;
-import com.esotericsoftware.yamlbeans.YamlReader;
 import org.junit.Assert;
 import org.ops4j.pax.exam.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 
 /**
  * Run OVS(s) using docker-compose for use in integration tests.
@@ -66,19 +65,22 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
  * to accept OVSDB connections.
  * Any docker-compose file must have a port mapping.
  *
+ * <p>
  * The following explains how system properties are used to configure DockerOvs
  * <pre>
  *  private static String ENV_USAGE =
  *  "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n" +
  *  "-Dovsdbserver.ipaddress - specify IP address of ovsdb server - implies -Ddocker.run=false\n" +
  *  "-Dovsdbserver.port - specify the port of the ovsdb server - required with -Dovsdbserver.ipaddress\n" +
- *  "-Ddocker.compose.file - docker compose file in META-INF/docker-compose-files/. If not specified, default file is used\n" +
+ *  "-Ddocker.compose.file - docker compose file in META-INF/docker-compose-files/.
+ *      If not specified, default file is used\n" +
  *  "-Dovsdb.userspace.enabled - true when Ovs is running in user space (usually the case with docker)\n" +
  *  "-Dovsdb.controller.address - IP address of the controller (usually the docker0 interface with docker)\n" +
  *  "To auto-run Ovs and connect actively:\n" +
  *  " -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes [-Ddocker.compose.file=ffff]\n" +
  *  "To auto-run Ovs and connect passively:\n" +
- *  " -Dovsdbserver.connection=passive -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes [-Ddocker.compose.file=ffff]\n" +
+ *  " -Dovsdbserver.connection=passive -Dovsdb.controller.address=x.x.x.x
+ *    -Dovsdb.userspace.enabled=yes [-Ddocker.compose.file=ffff]\n" +
  *  "To actively connect to a running Ovs:\n" +
  *  " -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=6641 -Dovsdb.controller.address=y.y.y.y\n" +
  *  "To passively connect to a running Ovs:\n" +
@@ -91,21 +93,22 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
  * the system properties.
  */
 public class DockerOvs implements AutoCloseable {
-    private static String ENV_USAGE = "Usage:\n" +
-            "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n" +
-                    "-Dovsdbserver.ipaddress - specify IP address of ovsdb server - implies -Ddocker.run=false\n" +
-                    "-Dovsdbserver.port - specify the port of the ovsdb server - required with -Dovsdbserver.ipaddress\n" +
-                    "-Ddocker.compose.file - docker compose file in META-INF/docker-compose-files/. If not specified, default file is used\n" +
-                    "-Dovsdb.userspace.enabled - true when Ovs is running in user space (usually the case with docker)\n" +
-                    "-Dovsdb.controller.address - IP address of the controller (usually the docker0 interface with docker)\n" +
-                    "To auto-run Ovs and connect actively:\n" +
-                    " -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n" +
-                    "To auto-run Ovs and connect passively:\n" +
-                    " -Dovsdbserver.connection=passive -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n" +
-                    "To actively connect to a running Ovs:\n" +
-                    " -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=6641 -Dovsdb.controller.address=y.y.y.y\n" +
-                    "To passively connect to a running Ovs:\n" +
-                    " -Dovsdbserver.connection=passive -Ddocker.run=false\n";
+    private static String ENV_USAGE = "Usage:\n"
+        + "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n"
+        + "-Dovsdbserver.ipaddress - specify IP address of ovsdb server - implies -Ddocker.run=false\n"
+        + "-Dovsdbserver.port - specify the port of the ovsdb server - required with -Dovsdbserver.ipaddress\n"
+        + "-Ddocker.compose.file - docker compose file in META-INF/docker-compose-files/. "
+        + "If not specified, default file is used\n"
+        + "-Dovsdb.userspace.enabled - true when Ovs is running in user space (usually the case with docker)\n"
+        + "-Dovsdb.controller.address - IP address of the controller (usually the docker0 interface with docker)\n"
+        + "To auto-run Ovs and connect actively:\n"
+        + " -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes <-Ddocker.compose.file=ffff>\n"
+        + "To auto-run Ovs and connect passively:\n"
+        + " -Dovsdbserver.connection=passive -Dovsdb.controller.address=x.x.x.x -Dovsdb.userspace.enabled=yes "
+        + "<-Ddocker.compose.file=ffff>\n"
+        + "To actively connect to a running Ovs:\n"
+        + " -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=6641 -Dovsdb.controller.address=y.y.y.y\n"
+        + "To passively connect to a running Ovs:\n" + " -Dovsdbserver.connection=passive -Ddocker.run=false\n";
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerOvs.class);
     private static final String DEFAULT_DOCKER_FILE = "ovs-2.5.0-hwvtep.yml";
@@ -121,11 +124,11 @@ public class DockerOvs implements AutoCloseable {
     private String[] downCmd = {"sudo", "docker-compose", "-f", null, "stop"};
     private String[] execCmd = {"sudo", "docker-compose", "-f", null, "exec", null};
 
-    private String[] dockerPsCmdNoSudo = {"docker", "ps"};
-    private String[] dockerPsCmd = {"sudo", "docker", "ps"};
+    private final String[] dockerPsCmdNoSudo = {"docker", "ps"};
+    private final String[] dockerPsCmd = {"sudo", "docker", "ps"};
     private String[] netInspectCmd = {"sudo", "docker", "network", "inspect", "odl"};
     private String[] netCreateCmd = {"sudo", "docker", "network", "create",
-                                                            "--subnet=172.99.0.0/16", "--gateway=172.99.0.254", "odl"};
+                                     "--subnet=172.99.0.0/16", "--gateway=172.99.0.254", "odl"};
 
     private File tmpDockerComposeFile;
     boolean isRunning;
@@ -134,14 +137,14 @@ public class DockerOvs implements AutoCloseable {
     private String envDockerComposeFile;
     private String envDockerWaitForPing;
     private boolean runDocker;
-    private boolean runVenv;
     private boolean createOdlNetwork;
 
     class DockerComposeServiceInfo {
         public String name;
         public String port;
     }
-    private Map<String, DockerComposeServiceInfo> dockerComposeServices = new HashMap<>();
+
+    private final Map<String, DockerComposeServiceInfo> dockerComposeServices = new HashMap<>();
 
     /**
      * Get the array of system properties as pax exam Option objects for use in pax exam
@@ -203,17 +206,12 @@ public class DockerOvs implements AutoCloseable {
 
     private void setupEnvForDockerCompose(String venvWs) {
         String dockerCompose = venvWs + "/venv/bin/docker-compose";
-        String[] psCmdVenv = {"sudo", dockerCompose, "-f", null, "ps"};
-        String[] psCmdNoSudoVenv = {dockerCompose, "-f", null, "ps"};
-        String[] upCmdVenv = {"sudo", dockerCompose, "-f", null, "up", "-d", "--force-recreate"};
-        String[] downCmdVenv = {"sudo", dockerCompose, "-f", null, "stop"};
-        String[] execCmdVenv = {"sudo", dockerCompose, "-f", null, "exec", null};
 
-        psCmd = psCmdVenv;
-        psCmdNoSudo = psCmdNoSudoVenv;
-        upCmd = upCmdVenv;
-        downCmd = downCmdVenv;
-        execCmd = execCmdVenv;
+        psCmd = new String[]{"sudo", dockerCompose, "-f", null, "ps"};
+        psCmdNoSudo = new String[]{dockerCompose, "-f", null, "ps"};
+        upCmd = new String[]{"sudo", dockerCompose, "-f", null, "up", "-d", "--force-recreate"};
+        downCmd = new String[]{"sudo", dockerCompose, "-f", null, "stop"};
+        execCmd = new String[]{"sudo", dockerCompose, "-f", null, "exec", null};
     }
 
     /**
@@ -229,25 +227,25 @@ public class DockerOvs implements AutoCloseable {
         envDockerWaitForPing = env.getProperty(ItConstants.DOCKER_WAIT_FOR_PING_SECS, "10");
         createOdlNetwork = env.getProperty(ItConstants.CONTROLLER_IPADDRESS) == null;
         String envRunDocker = env.getProperty(ItConstants.DOCKER_RUN);
-        String connType = env.getProperty(ItConstants.CONNECTION_TYPE, ItConstants.CONNECTION_TYPE_ACTIVE);
         String dockerFile = env.getProperty(ItConstants.DOCKER_COMPOSE_FILE_NAME);
         String venvWs = env.getProperty(ItConstants.DOCKER_VENV_WS);
         envDockerComposeFile = DOCKER_FILE_PATH + (null == dockerFile ? DEFAULT_DOCKER_FILE : dockerFile);
 
         //Are we running docker? If we specified docker.run, that's the answer. Otherwise, if there is a server
         //address we assume docker is already running
-        runDocker = (envRunDocker != null) ? Boolean.parseBoolean(envRunDocker) : envServerAddress == null;
+        runDocker = envRunDocker != null ? Boolean.parseBoolean(envRunDocker) : envServerAddress == null;
 
         //Should we run in a virtual environment? Needed for jenkins and docker-compose
-        if ((venvWs != null) && (!venvWs.isEmpty())) {
+        if (venvWs != null && !venvWs.isEmpty()) {
             LOG.info("Setting up virtual environment for docker compose");
             setupEnvForDockerCompose(venvWs);
         }
 
-        if(runDocker) {
+        if (runDocker) {
             return;
         }
 
+        String connType = env.getProperty(ItConstants.CONNECTION_TYPE, ItConstants.CONNECTION_TYPE_ACTIVE);
         if (connType.equals(ItConstants.CONNECTION_TYPE_PASSIVE)) {
             return;
         }
@@ -314,7 +312,8 @@ public class DockerOvs implements AutoCloseable {
     }
 
     /**
-     * Are we using some other OVS, not a docker we spin up?
+     * Are we using some other OVS, not a docker we spin up?.
+     *
      * @return true if we are *not* running a docker image to test against
      */
     public boolean usingExternalDocker() {
@@ -367,6 +366,7 @@ public class DockerOvs implements AutoCloseable {
             return "ovs" + numOvs;
         }
     }
+
     public String[] getExecCmdPrefix(int numOvs) {
         String[] res = new String[execCmd.length];
         System.arraycopy(execCmd, 0, res, 0, execCmd.length);
@@ -468,20 +468,15 @@ public class DockerOvs implements AutoCloseable {
 
     /**
      * Shut everything down.
-     * @throws Exception but not really
      */
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException, InterruptedException {
         if (isRunning) {
             ProcUtils.runProcess(10000, downCmd);
             isRunning = false;
         }
 
-        try {
-            tmpDockerComposeFile.delete();
-        } catch (Exception ignored) {
-            //No reason to fail the test, we're just being polite here.
-        }
+        tmpDockerComposeFile.delete();
     }
 
     /**
@@ -490,7 +485,7 @@ public class DockerOvs implements AutoCloseable {
      * checked to make sure the Open_Vswitch DB is present. Note that this thread will
      * run until it succeeds unless its interrupt() method is called.
      */
-    class OvsdbPing extends Thread {
+    private class OvsdbPing extends Thread {
 
         private final String host;
         private final int port;
@@ -503,7 +498,7 @@ public class DockerOvs implements AutoCloseable {
          * @param ovsNumber which OVS is this?
          * @param result an AtomicInteger that is incremented upon a successful "ping"
          */
-        public OvsdbPing(int ovsNumber, AtomicInteger result) {
+        OvsdbPing(int ovsNumber, AtomicInteger result) {
             this.host = getOvsdbAddress(ovsNumber);
             this.port = Integer.parseInt(getOvsdbPort(ovsNumber));
             this.result = result;
@@ -547,8 +542,8 @@ public class DockerOvs implements AutoCloseable {
                 LOG.warn("OvsdbPing interrupted", e);
                 //return true here because we're done, ne'er to return again.
                 return true;
-            } catch (Exception e) {
-                LOG.info("OvsdbPing exception while attempting connect {}", e.toString());
+            } catch (IOException e) {
+                LOG.info("OvsdbPing exception while attempting connect", e);
             }
             return false;
         }
@@ -574,13 +569,13 @@ public class DockerOvs implements AutoCloseable {
             pingers[0].start();
         } else {
             for (int i = 0; i < numOvs; i++) {
-                pingers[i] = new OvsdbPing(i+1, numRunningOvs);
+                pingers[i] = new OvsdbPing(i + 1, numRunningOvs);
                 pingers[i].start();
             }
         }
 
         long startTime = System.currentTimeMillis();
-        while ( (System.currentTimeMillis() - startTime) < waitFor) {
+        while (System.currentTimeMillis() - startTime < waitFor) {
             if (numRunningOvs.get() >= numOvs) {
                 LOG.info("DockerOvs.waitForOvsdbServers all OVS instances running");
                 break;

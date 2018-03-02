@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -32,16 +31,16 @@ public class NodeInfo {
     private static final Logger LOG = LoggerFactory.getLogger(NodeInfo.class);
     public static final String INTEGRATION_BRIDGE_NAME = "br-int";
 
-    private ConnectionInfo connectionInfo;
-    private InstanceIdentifier<Node> ovsdbIid;
-    InstanceIdentifier<Node> bridgeIid;
+    private final ConnectionInfo connectionInfo;
+    private final InstanceIdentifier<Node> ovsdbIid;
+    private final InstanceIdentifier<Node> bridgeIid;
     public long datapathId;
     public Node ovsdbNode;
     public Node bridgeNode;
-    NotifyingDataChangeListener ovsdbWaiter;
-    NotifyingDataChangeListener bridgeWaiter;
-    List<NotifyingDataChangeListener> waitList;
-    OvsdbItUtils itUtils;
+    private NotifyingDataChangeListener ovsdbWaiter;
+    private NotifyingDataChangeListener bridgeWaiter;
+    private final List<NotifyingDataChangeListener> waitList;
+    private final OvsdbItUtils itUtils;
 
     /**
      * Create a new NodeInfo object.
@@ -106,13 +105,11 @@ public class NodeInfo {
         bridgeWaiter.setMask(NotifyingDataChangeListener.BIT_DELETE);
         assertTrue(itUtils.southboundUtils.deleteBridge(connectionInfo, INTEGRATION_BRIDGE_NAME, 0));
         bridgeWaiter.waitForDeletion();
-        Node bridgeNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
-        assertNull("Bridge should not be found", bridgeNode);
+        assertNull("Bridge should not be found", itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid));
         assertTrue(itUtils.southboundUtils.disconnectOvsdbNode(connectionInfo, 0));
         ovsdbWaiter.waitForDeletion();
-        Node ovsdbNode = itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid);
-        assertNull("Ovsdb node should not be found", ovsdbNode);
+        assertNull("Ovsdb node should not be found",
+                itUtils.mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbIid));
         closeWaiters();
     }
-
 }

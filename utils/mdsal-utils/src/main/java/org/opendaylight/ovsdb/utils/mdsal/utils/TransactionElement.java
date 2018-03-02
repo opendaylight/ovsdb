@@ -9,9 +9,9 @@
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 public class TransactionElement {
-    private long date;
-    private TransactionType transactionType;
-    private Object data;
+    private final long date;
+    private final TransactionType transactionType;
+    private final Object data;
 
     public TransactionElement(TransactionType transactionType, Object data) {
         this.data = data;
@@ -33,10 +33,6 @@ public class TransactionElement {
 
     @Override
     public String toString() {
-        return "TransactionElement{" +
-                "date=" + date +
-                ", transactionType=" + transactionType +
-                ", data=" + data +
-                '}';
+        return "TransactionElement{" + "date=" + date + ", transactionType=" + transactionType + ", data=" + data + '}';
     }
 }

@@ -8,14 +8,12 @@
 
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
+import java.util.ArrayList;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 
 public class TransactionHistory extends ArrayList<TransactionElement> {
+    private static final long serialVersionUID = 1L;
 
     private final int capacity;
     private final int watermark;

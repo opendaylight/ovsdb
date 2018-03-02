@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.schema.openvswitch;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.MethodType;
@@ -19,7 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 /**
- * This class is a typed interface to the Flow_Table Table
+ * This class is a typed interface to the Flow_Table Table.
  */
 @TypedTable(name = "Flow_Table", database = "Open_vSwitch", fromVersion = "6.5.0")
 public interface FlowTable extends TypedBaseTable<GenericTableSchema> {

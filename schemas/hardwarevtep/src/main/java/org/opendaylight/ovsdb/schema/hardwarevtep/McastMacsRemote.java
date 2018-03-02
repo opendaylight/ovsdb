@@ -16,37 +16,35 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-@TypedTable(name="Mcast_Macs_Remote", database="hardware_vtep", fromVersion="1.0.0")
+@TypedTable(name = "Mcast_Macs_Remote", database = "hardware_vtep", fromVersion = "1.0.0")
 public interface McastMacsRemote extends TypedBaseTable<GenericTableSchema> {
-    @TypedColumn(name="MAC", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "MAC", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, String> getMacColumn();
 
-    @TypedColumn(name="MAC", method=MethodType.GETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "MAC", method = MethodType.GETDATA, fromVersion = "1.0.0")
     String getMac();
 
-    @TypedColumn(name="MAC", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "MAC", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setMac(String mac);
 
-
-    @TypedColumn(name="logical_switch", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "logical_switch", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, UUID> getLogicalSwitchColumn();
 
-    @TypedColumn(name="logical_switch", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "logical_switch", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setLogicalSwitch(UUID logicalSwitch);
 
-    @TypedColumn(name="locator_set", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "locator_set", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, UUID> getLocatorSetColumn();
 
-    @TypedColumn(name="locator_set", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "locator_set", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setLocatorSet(UUID locatorSet);
 
-
-    @TypedColumn(name="ipaddr", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "ipaddr", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, String> getIpAddrColumn();
 
-    @TypedColumn(name="ipaddr", method=MethodType.GETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "ipaddr", method = MethodType.GETDATA, fromVersion = "1.0.0")
     String getIpAddr();
 
-    @TypedColumn(name="ipaddr", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "ipaddr", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setIpAddress(String ipAddr);
 }

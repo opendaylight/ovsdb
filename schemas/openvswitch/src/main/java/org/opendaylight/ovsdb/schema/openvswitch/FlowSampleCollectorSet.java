@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.schema.openvswitch;
 
 import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -19,7 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 /**
- * This class is a typed interface to the Flow_Sample_Collector_Set Table
+ * This class is a typed interface to the Flow_Sample_Collector_Set Table.
  */
 @TypedTable(name = "Flow_Sample_Collector_Set", database = "Open_vSwitch", fromVersion = "7.1.0")
 public interface FlowSampleCollectorSet extends TypedBaseTable<GenericTableSchema> {

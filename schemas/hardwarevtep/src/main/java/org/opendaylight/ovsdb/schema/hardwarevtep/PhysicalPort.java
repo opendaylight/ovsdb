@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.schema.hardwarevtep;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -19,59 +18,53 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-@TypedTable(name="Physical_Port", database="hardware_vtep", fromVersion="1.0.0")
+@TypedTable(name = "Physical_Port", database = "hardware_vtep", fromVersion = "1.0.0")
 public interface PhysicalPort extends TypedBaseTable<GenericTableSchema> {
-    @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "name", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, String> getNameColumn();
 
-    @TypedColumn(name="name", method=MethodType.GETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "name", method = MethodType.GETDATA, fromVersion = "1.0.0")
     String getName();
 
-    @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "name", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setName(String name);
 
-
-    @TypedColumn(name="description", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "description", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, String> getDescriptionColumn();
 
-    @TypedColumn(name="description", method=MethodType.GETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "description", method = MethodType.GETDATA, fromVersion = "1.0.0")
     String getDescription();
 
-    @TypedColumn(name="description", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "description", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setDescription(String description);
 
-
-    @TypedColumn(name="vlan_bindings", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "vlan_bindings", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, Map<Long, UUID>> getVlanBindingsColumn();
 
-    @TypedColumn(name="vlan_bindings", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "vlan_bindings", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setVlanBindings(Map<Long, UUID> vlanBindings);
 
-
-    @TypedColumn(name="acl_bindings", method=MethodType.GETCOLUMN, fromVersion="1.4.0")
+    @TypedColumn(name = "acl_bindings", method = MethodType.GETCOLUMN, fromVersion = "1.4.0")
     Column<GenericTableSchema, Map<Long, UUID>> getAclBindingsColumn();
 
-    @TypedColumn(name="acl_bindings", method=MethodType.SETDATA, fromVersion="1.4.0")
+    @TypedColumn(name = "acl_bindings", method = MethodType.SETDATA, fromVersion = "1.4.0")
     void setAclBindings(Map<Long, UUID> aclBindings);
 
-
-    @TypedColumn(name="vlan_stats", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name = "vlan_stats", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, Map<Long, UUID>> getVlanStatsColumn();
 
-    @TypedColumn(name="vlan_stats", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name = "vlan_stats", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setVlanStats(Map<Long, UUID> vlanStats);
 
-
-    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.5.1")
+    @TypedColumn(name = "other_config", method = MethodType.GETCOLUMN, fromVersion = "1.5.1")
     Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
 
-    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.5.1")
+    @TypedColumn(name = "other_config", method = MethodType.SETDATA, fromVersion = "1.5.1")
     void setOtherConfig(Map<String, String> otherConfig);
 
-
-    @TypedColumn(name="port_fault_status", method=MethodType.GETCOLUMN, fromVersion="1.1.0")
+    @TypedColumn(name = "port_fault_status", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
     Column<GenericTableSchema, Set<String>> getPortFaultStatusColumn();
 
-    @TypedColumn(name="port_fault_status", method=MethodType.SETDATA, fromVersion="1.1.0")
+    @TypedColumn(name = "port_fault_status", method = MethodType.SETDATA, fromVersion = "1.1.0")
     void setPortFaultStatus(Set<String> portFaultStatus);
 }

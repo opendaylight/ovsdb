@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class HardwareVTEPTest {
     @Test
-    public void setManagersTest () {
+    public void setManagersTest() {
         assertTrue(true);
     }
 }

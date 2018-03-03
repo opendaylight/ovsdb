@@ -10,13 +10,13 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -29,8 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
@@ -95,7 +93,8 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                     List<HwvtepPhysicalPortAugmentation> lswitchListRemoved = new ArrayList<>();
                     if (removed.getTerminationPoint() != null) {
                         for (TerminationPoint tp : removed.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                            HwvtepPhysicalPortAugmentation hppAugmentation =
+                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 lswitchListRemoved.add(hppAugmentation);
                             }
@@ -115,7 +114,8 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                     List<HwvtepPhysicalPortAugmentation> portListRemoved = new ArrayList<>();
                     if (updated.getTerminationPoint() != null) {
                         for (TerminationPoint tp : updated.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                            HwvtepPhysicalPortAugmentation hppAugmentation =
+                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListUpdated.add(hppAugmentation);
                             }
@@ -123,7 +123,8 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                     }
                     if (before.getTerminationPoint() != null) {
                         for (TerminationPoint tp : before.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                            HwvtepPhysicalPortAugmentation hppAugmentation =
+                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListBefore.add(hppAugmentation);
                             }
@@ -132,13 +133,13 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                     portListBefore.removeAll(portListUpdated);
                     //then exclude updated physical ports
                     for (HwvtepPhysicalPortAugmentation portBefore: portListBefore) {
-                        int i = 0;
-                        for(; i < portListUpdated.size(); i++) {
-                            if (portBefore.getHwvtepNodeName().equals(portListUpdated.get(i).getHwvtepNodeName())) {
+                        int index = 0;
+                        for (; index < portListUpdated.size(); index++) {
+                            if (portBefore.getHwvtepNodeName().equals(portListUpdated.get(index).getHwvtepNodeName())) {
                                 break;
                             }
                         }
-                        if (i == portListUpdated.size()) {
+                        if (index == portListUpdated.size()) {
                             portListRemoved.add(portBefore);
                         }
                     }

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -82,8 +81,8 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     private void removeLogicalSwitch(final TransactionBuilder transaction,
                                      final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
-            InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                    child(LogicalSwitches.class, lswitch.getKey());
+            InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                    .child(LogicalSwitches.class, lswitch.getKey());
             onConfigUpdate(transaction, nodeIid, lswitch, lsKey);
         }
     }
@@ -103,41 +102,42 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                                     final LogicalSwitches lswitch,
                                     final InstanceIdentifier lsKey,
                                     final Object... extraData) {
-            LOG.debug("Removing logical switch named: {}", lswitch.getHwvtepNodeName().getValue());
-            HwvtepDeviceInfo.DeviceData deviceData  = getOperationalState().getDeviceInfo().getDeviceOperData(
-                    LogicalSwitches.class, lsKey);
-            LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalSwitch.class, null);
+        LOG.debug("Removing logical switch named: {}", lswitch.getHwvtepNodeName().getValue());
+        HwvtepDeviceInfo.DeviceData deviceData  = getOperationalState().getDeviceInfo().getDeviceOperData(
+                LogicalSwitches.class, lsKey);
+        LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                LogicalSwitch.class, null);
 
-            if (deviceData != null && deviceData.getUuid() != null) {
-                UUID logicalSwitchUuid = deviceData.getUuid();
-                transaction.add(op.delete(logicalSwitch.getSchema())
-                        .where(logicalSwitch.getUuidColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+        if (deviceData != null && deviceData.getUuid() != null) {
+            UUID logicalSwitchUuid = deviceData.getUuid();
+            transaction.add(op.delete(logicalSwitch.getSchema())
+                    .where(logicalSwitch.getUuidColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-                UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        UcastMacsRemote.class, null);
-                transaction.add(op.delete(ucastMacsRemote.getSchema())
-                        .where(ucastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+            UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    UcastMacsRemote.class, null);
+            transaction.add(op.delete(ucastMacsRemote.getSchema())
+                    .where(ucastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-                UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        UcastMacsLocal.class, null);
-                transaction.add(op.delete(ucastMacsLocal.getSchema())
-                        .where(ucastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+            UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    UcastMacsLocal.class, null);
+            transaction.add(op.delete(ucastMacsLocal.getSchema())
+                    .where(ucastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-                McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        McastMacsRemote.class, null);
-                transaction.add(op.delete(mcastMacsRemote.getSchema())
-                        .where(mcastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+            McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    McastMacsRemote.class, null);
+            transaction.add(op.delete(mcastMacsRemote.getSchema())
+                    .where(mcastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-                McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        McastMacsLocal.class, null);
-                transaction.add(op.delete(mcastMacsLocal.getSchema())
-                        .where(mcastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
-                updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
-                updateControllerTxHistory(TransactionType.DELETE, lswitch);
-            } else {
-                LOG.warn("Unable to delete logical switch {} because it was not found in the operational store",
-                        lswitch.getHwvtepNodeName().getValue());
-            }
+            McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    McastMacsLocal.class, null);
+            transaction.add(op.delete(mcastMacsLocal.getSchema())
+                    .where(mcastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
+            updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
+            updateControllerTxHistory(TransactionType.DELETE, lswitch);
+        } else {
+            LOG.warn("Unable to delete logical switch {} because it was not found in the operational store",
+                    lswitch.getHwvtepNodeName().getValue());
+        }
     }
 
     @Override
@@ -146,8 +146,8 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     }
 
     @Override
-    protected boolean areEqual(LogicalSwitches a , LogicalSwitches b) {
-        return a.getKey().equals(b.getKey()) && Objects.equals(a.getTunnelKey(), b.getTunnelKey());
+    protected boolean areEqual(LogicalSwitches sw1, LogicalSwitches sw2) {
+        return sw1.getKey().equals(sw2.getKey()) && Objects.equals(sw1.getTunnelKey(), sw2.getTunnelKey());
     }
 
     @Override
@@ -161,7 +161,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
             return;
         }
         for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
-            getDeviceInfo().clearLogicalSwitchRefs((InstanceIdentifier<LogicalSwitches>) mdsalUpdate.getKey());
+            getDeviceInfo().clearLogicalSwitchRefs(mdsalUpdate.getKey());
         }
     }
 }

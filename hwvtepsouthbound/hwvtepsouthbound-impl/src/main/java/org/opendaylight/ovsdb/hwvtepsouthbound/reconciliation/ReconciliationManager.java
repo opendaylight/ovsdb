@@ -8,16 +8,20 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
-
 /**
- * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager
+ * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager.
  *
+ * <p>
  * This class provides the implementation of ovsdb southbound plugins
  * configuration reconciliation engine. This engine provide interfaces
  * to enqueue (one time retry)/ enqueueForRetry(periodic retry)/ dequeue
@@ -31,6 +35,7 @@ import java.util.concurrent.*;
  * Ideally, addition of any type of reconciliation task should not require
  * any change in this reconciliation manager execution engine.
  *
+ * <p>
  * 3-Node Cluster:
  * Reconciliation manager is agnostic of whether it's running in single
  * node cluster or 3-node cluster. It's a responsibility of the task
@@ -40,6 +45,7 @@ import java.util.concurrent.*;
  * the 3-nodes in the cluster, because connection to individual controller
  * can be interrupted for various reason.
  *
+ * <p>
  * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
  */
 public class ReconciliationManager implements AutoCloseable {

@@ -9,13 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
-import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,42 +16,51 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DependencyQueue {
 
     private static final Logger LOG = LoggerFactory.getLogger(DependencyQueue.class);
-    private static final ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("hwvtep-waiting-job-%d").
-            build();
-    private static final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(threadFact);
+    private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor(
+            new ThreadFactoryBuilder().setNameFormat("hwvtep-waiting-job-%d").build());
 
     private final LinkedBlockingQueue<DependentJob> configWaitQueue = new LinkedBlockingQueue<>(
             HwvtepSouthboundConstants.WAITING_QUEUE_CAPACITY);
     private final LinkedBlockingQueue<DependentJob> opWaitQueue = new LinkedBlockingQueue<>(
             HwvtepSouthboundConstants.WAITING_QUEUE_CAPACITY);
     private final HwvtepDeviceInfo deviceInfo;
-    private ScheduledFuture expiredTasksMonitorJob;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     public DependencyQueue(HwvtepDeviceInfo hwvtepDeviceInfo) {
         this.deviceInfo = hwvtepDeviceInfo;
-        expiredTasksMonitorJob = executorService.scheduleWithFixedDelay(() -> {
+
+        final AtomicReference<ScheduledFuture<?>> expiredTasksMonitorJob = new AtomicReference<>();
+        expiredTasksMonitorJob.set(EXECUTOR_SERVICE.scheduleWithFixedDelay(() -> {
             try {
                 LOG.debug("Processing dependencies");
                 if (!deviceInfo.getConnectionInstance().getOvsdbClient().isActive()) {
-                    expiredTasksMonitorJob.cancel(false);
+                    if (expiredTasksMonitorJob.get() != null) {
+                        expiredTasksMonitorJob.get().cancel(false);
+                    }
                 }
                 deviceInfo.onOperDataAvailable();
-            } catch (Throwable e) {
+            } catch (RuntimeException e) {
                 //If execution of one run throws error , subsequent runs are suppressed, hence catching the throwable
                 LOG.error("Failed to process dependencies", e);
             }
-        }, 0, HwvtepSouthboundConstants.IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+        }, 0, HwvtepSouthboundConstants.IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS, TimeUnit.MILLISECONDS));
     }
 
     /**
-     * Tries to add the job to the waiting queue
+     * Tries to add the job to the waiting queue.
+     *
      * @param waitingJob The job to be enqueued
      * @return true if it is successfully added to the queue
      */
@@ -78,7 +80,8 @@ public class DependencyQueue {
     }
 
     /**
-     * Checks if any config data dependent jobs are ready to be processed and process them
+     * Checks if any config data dependent jobs are ready to be processed and process them.
+     *
      * @param connectionInstance The connection instance
      */
     public void processReadyJobsFromConfigQueue(HwvtepConnectionInstance connectionInstance) {
@@ -86,7 +89,8 @@ public class DependencyQueue {
     }
 
     /**
-     * Checks if any operational data dependent jobs are ready to be processed and process them
+     * Checks if any operational data dependent jobs are ready to be processed and process them.
+     *
      * @param connectionInstance The connection instance
      */
     public void processReadyJobsFromOpQueue(HwvtepConnectionInstance connectionInstance) {
@@ -97,7 +101,7 @@ public class DependencyQueue {
                                   LinkedBlockingQueue<DependentJob> queue) {
         final List<DependentJob> readyJobs =  getReadyJobs(queue);
         if (readyJobs.size() > 0) {
-            executorService.submit(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
+            EXECUTOR_SERVICE.execute(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
                 HwvtepOperationalState operationalState;
                 @Override
                 public void execute(TransactionBuilder transactionBuilder) {
@@ -125,7 +129,7 @@ public class DependencyQueue {
     private List<DependentJob> getReadyJobs(LinkedBlockingQueue<DependentJob> queue) {
         List<DependentJob> readyJobs = new ArrayList<>();
         Iterator<DependentJob> jobIterator = queue.iterator();
-        while(jobIterator.hasNext()) {
+        while (jobIterator.hasNext()) {
             DependentJob job = jobIterator.next();
             long currentTime = System.currentTimeMillis();
 
@@ -144,10 +148,10 @@ public class DependencyQueue {
     }
 
     public static void close() {
-        executorService.shutdown();
+        EXECUTOR_SERVICE.shutdown();
     }
 
     public void submit(Runnable runnable) {
-        executorService.submit(runnable);
+        EXECUTOR_SERVICE.execute(runnable);
     }
 }

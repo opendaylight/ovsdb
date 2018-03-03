@@ -7,6 +7,12 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -16,14 +22,6 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Command(scope = "hwvtep", name = "txlog", description = "prints hwvtep tx log")
 public class TransactionHistoryCmd extends OsgiCommandSupport {
@@ -55,10 +53,10 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         } else {
             Map<InstanceIdentifier<Node>, TransactionHistory> txlogs
                     = controllerTxLogs.isEmpty() ? deviceUpdateLogs : controllerTxLogs;
-            txlogs.keySet().forEach( (iid) -> {
+            txlogs.keySet().forEach(iid -> {
                 printLogs(controllerTxLogs, deviceUpdateLogs, iid);
             });
-            session.getConsole().println("Device tx logs size "+deviceUpdateLogs.keySet().size());
+            session.getConsole().println("Device tx logs size " + deviceUpdateLogs.keySet().size());
         }
         return null;
     }
@@ -66,27 +64,32 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     private void printLogs(Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
                            Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
                            InstanceIdentifier<Node> iid) {
-        session.getConsole().println("Printing for iid "+ iid);
+        session.getConsole().println("Printing for iid " + iid);
+        session.getConsole().println("======================================");
+        session.getConsole().println("======================================");
+        session.getConsole().print("printing logs for node ");
+        session.getConsole().println(iid);
+
         List<HwvtepTransactionLogElement> controllerTxLog = controllerTxLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
         List<HwvtepTransactionLogElement> deviceUpdateLog = deviceUpdateLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
         //deviceUpdateLog.forEach( (log) -> log.setDeviceLog(true));
-        List<HwvtepTransactionLogElement> allLogs = mergeLogsByDate(controllerTxLog, deviceUpdateLog);
-        session.getConsole().println("======================================");
-        session.getConsole().println("======================================");
-        session.getConsole().print("printing logs for node ");
-        session.getConsole().println(iid);
-        printLogs(allLogs);
+        printLogs(mergeLogsByDate(controllerTxLog, deviceUpdateLog));
+    }
+
+    private void printLogs(List<HwvtepTransactionLogElement> logs) {
+        logs.forEach(log -> {
+            session.getConsole().print(new Date(log.getDate()));
+            session.getConsole().print(" ");
+            session.getConsole().print(log.getTransactionType());
+            session.getConsole().print(" ");
+            session.getConsole().println(log.getData());
+        });
     }
 
     private void sortLogsByDate(ArrayList<TransactionElement> logs) {
-        Collections.sort(logs, new Comparator<TransactionElement>() {
-            @Override
-            public int compare(TransactionElement o1, TransactionElement o2) {
-                return (int) (o1.getDate() - o2.getDate());
-            }
-        });
+        Collections.sort(logs, (o1, o2) -> (int) (o1.getDate() - o2.getDate()));
     }
 
     private List<HwvtepTransactionLogElement> mergeLogsByDate(
@@ -98,7 +101,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         int secondIdx = 0;
         int firstSize = logs1.size();
         int secondSize = logs2.size();
-        while ( firstIdx < firstSize && secondIdx < secondSize) {
+        while (firstIdx < firstSize && secondIdx < secondSize) {
             if (logs1.get(firstIdx).getDate() < logs2.get(secondIdx).getDate()) {
                 result.add(logs1.get(firstIdx));
                 firstIdx++;
@@ -116,15 +119,5 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
             secondIdx++;
         }
         return result;
-    }
-
-    private void printLogs(List<HwvtepTransactionLogElement> logs) {
-        logs.forEach( (log) -> {
-            session.getConsole().print(new Date(log.getDate()));
-            session.getConsole().print(" ");
-            session.getConsole().print(log.getTransactionType());
-            session.getConsole().print(" ");
-            session.getConsole().println(log.getData());
-        });
     }
 }

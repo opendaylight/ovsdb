@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
@@ -38,15 +39,14 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
@@ -84,44 +84,40 @@ import org.slf4j.LoggerFactory;
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
  * and a Singleton object in a non-OSGi environment.
  */
+@SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
-    private static ThreadFactory passiveConnectionThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("OVSDBPassiveConnServ-%d").build();
-    private static ScheduledExecutorService executorService
-            = Executors.newScheduledThreadPool(10, passiveConnectionThreadFactory);
-
-    private static ThreadFactory connectionNotifierThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("OVSDBConnNotifSer-%d").build();
-    private static ExecutorService connectionNotifierService
-            = Executors.newCachedThreadPool(connectionNotifierThreadFactory);
-
-    private static Set<OvsdbConnectionListener> connectionListeners = new HashSet<>();
-    private static Map<OvsdbClient, Channel> connections = new ConcurrentHashMap<>();
-    private static OvsdbConnection connectionService;
-    private static AtomicBoolean singletonCreated = new AtomicBoolean(false);
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
     private static final String OVSDB_RPC_TASK_TIMEOUT_PARAM = "ovsdb-rpc-task-timeout";
     private static final String USE_SSL = "use-ssl";
-    private static boolean useSSL = false;
-    private static ICertificateManager certManagerSrv = null;
+    private static final int RETRY_PERIOD = 100; // retry after 100 milliseconds
 
-    private static int jsonRpcDecoderMaxFrameLength = 100000;
-    private static int listenerPort = 6640;
+    private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(10,
+            new ThreadFactoryBuilder().setNameFormat("OVSDBPassiveConnServ-%d").build());
+
+    private static final ExecutorService CONNECTION_NOTIFIER_SERVICE = Executors
+            .newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("OVSDBConnNotifSer-%d").build());
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
-            new StalePassiveConnectionService(executorService);
-    private static Channel serverChannel = null;
+            new StalePassiveConnectionService(EXECUTOR_SERVICE);
 
-    private static int retryPeriod = 100; // retry after 100 milliseconds
+    private static final OvsdbConnection CONNECTION_SERVICE = new OvsdbConnectionService();
 
+    private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
+    private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
+
+    private static volatile boolean useSSL = false;
+    private static volatile ICertificateManager certManagerSrv;
+
+    private static volatile int jsonRpcDecoderMaxFrameLength = 100000;
+    private static volatile Channel serverChannel;
+
+    private final AtomicBoolean singletonCreated = new AtomicBoolean(false);
+    private volatile int listenerPort = 6640;
 
     public static OvsdbConnection getService() {
-        if (connectionService == null) {
-            connectionService = new OvsdbConnectionService();
-        }
-        return connectionService;
+        return CONNECTION_SERVICE;
     }
 
     /**
@@ -185,26 +181,26 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         if (client == null) {
             return;
         }
-        Channel channel = connections.get(client);
+        Channel channel = CONNECTIONS.get(client);
         if (channel != null) {
             //It's an explicit disconnect from user, so no need to notify back
             //to user about the disconnect.
             client.setConnectionPublished(false);
             channel.disconnect();
         }
-        connections.remove(client);
+        CONNECTIONS.remove(client);
     }
 
     @Override
     public void registerConnectionListener(OvsdbConnectionListener listener) {
         LOG.info("registerConnectionListener: registering {}", listener.getClass().getSimpleName());
-        connectionListeners.add(listener);
+        CONNECTION_LISTENERS.add(listener);
         notifyAlreadyExistingConnectionsToListener(listener);
     }
 
     private void notifyAlreadyExistingConnectionsToListener(final OvsdbConnectionListener listener) {
         for (final OvsdbClient client : getConnections()) {
-            connectionNotifierService.submit(() -> {
+            CONNECTION_NOTIFIER_SERVICE.execute(() -> {
                 LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
                 listener.connected(client);
             });
@@ -213,7 +209,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Override
     public void unregisterConnectionListener(OvsdbConnectionListener listener) {
-        connectionListeners.remove(listener);
+        CONNECTION_LISTENERS.remove(listener);
     }
 
     private static OvsdbClient getChannelClient(Channel channel, ConnectionType type,
@@ -230,7 +226,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         OvsdbRPC rpc = factory.getClient(channel, OvsdbRPC.class);
         OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, socketConnType);
         client.setConnectionPublished(true);
-        connections.put(client, channel);
+        CONNECTIONS.put(client, channel);
         ChannelFuture closeFuture = channel.closeFuture();
         closeFuture.addListener(new ChannelConnectionHandler(client));
         return client;
@@ -274,7 +270,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         final SSLContext sslContext,
         final String[] protocols,
         final String[] cipherSuites) {
-        if (singletonCreated.getAndSet(false) && (serverChannel != null)) {
+        if (singletonCreated.getAndSet(false) && serverChannel != null) {
             serverChannel.close();
             LOG.info("Server channel closed");
         }
@@ -389,7 +385,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 LOG.error("Probe failed to OVSDB switch. Disconnecting the channel {}", client.getConnectionInfo());
                 client.disconnect();
             }
-        }, connectionNotifierService);
+        }, CONNECTION_NOTIFIER_SERVICE);
     }
 
     private static void handleNewPassiveConnection(final Channel channel) {
@@ -400,19 +396,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
         if (sslHandler != null) {
             class HandleNewPassiveSslRunner implements Runnable {
-                public SslHandler sslHandler;
-                public final Channel channel;
-                private int retryTimes;
-
-                HandleNewPassiveSslRunner(Channel channel, SslHandler sslHandler) {
-                    this.channel = channel;
-                    this.sslHandler = sslHandler;
-                    this.retryTimes = 3;
-                }
+                private int retryTimes = 3;
 
                 private void retry() {
                     if (retryTimes > 0) {
-                        executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
+                        EXECUTOR_SERVICE.schedule(this,  RETRY_PERIOD, TimeUnit.MILLISECONDS);
                     } else {
                         LOG.debug("channel closed {}", channel);
                         channel.disconnect();
@@ -482,10 +470,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 }
             }
 
-            executorService.schedule(new HandleNewPassiveSslRunner(channel, sslHandler),
-                    retryPeriod, TimeUnit.MILLISECONDS);
+            EXECUTOR_SERVICE.schedule(new HandleNewPassiveSslRunner(),
+                    RETRY_PERIOD, TimeUnit.MILLISECONDS);
         } else {
-            executorService.execute(() -> {
+            EXECUTOR_SERVICE.execute(() -> {
                 OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
                     SocketConnectionType.NON_SSL);
                 handleNewPassiveConnection(client);
@@ -495,9 +483,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     public static void channelClosed(final OvsdbClient client) {
         LOG.info("Connection closed {}", client.getConnectionInfo().toString());
-        connections.remove(client);
+        CONNECTIONS.remove(client);
         if (client.isConnectionPublished()) {
-            for (OvsdbConnectionListener listener : connectionListeners) {
+            for (OvsdbConnectionListener listener : CONNECTION_LISTENERS) {
                 listener.disconnected(client);
             }
         }
@@ -506,7 +494,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Override
     public Collection<OvsdbClient> getConnections() {
-        return connections.keySet();
+        return CONNECTIONS.keySet();
     }
 
     @Override
@@ -517,8 +505,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Override
     public OvsdbClient getClient(Channel channel) {
-        for (OvsdbClient client : connections.keySet()) {
-            Channel ctx = connections.get(client);
+        for (Entry<OvsdbClient, Channel> entry : CONNECTIONS.entrySet()) {
+            OvsdbClient client = entry.getKey();
+            Channel ctx = entry.getValue();
             if (ctx.equals(channel)) {
                 return client;
             }
@@ -528,7 +517,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     private static List<OvsdbClient> getPassiveClientsFromSameNode(OvsdbClient ovsdbClient) {
         List<OvsdbClient> passiveClients = new ArrayList<>();
-        for (OvsdbClient client : connections.keySet()) {
+        for (OvsdbClient client : CONNECTIONS.keySet()) {
             if (!client.equals(ovsdbClient)
                     && client.getConnectionInfo().getRemoteAddress()
                             .equals(ovsdbClient.getConnectionInfo().getRemoteAddress())
@@ -541,8 +530,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     public static void notifyListenerForPassiveConnection(final OvsdbClient client) {
         client.setConnectionPublished(true);
-        for (final OvsdbConnectionListener listener : connectionListeners) {
-            connectionNotifierService.submit(() -> {
+        for (final OvsdbConnectionListener listener : CONNECTION_LISTENERS) {
+            CONNECTION_NOTIFIER_SERVICE.execute(() -> {
                 LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
                 listener.connected(client);
             });

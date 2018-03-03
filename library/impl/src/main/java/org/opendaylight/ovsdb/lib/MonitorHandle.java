@@ -11,7 +11,9 @@ package org.opendaylight.ovsdb.lib;
 import java.io.Serializable;
 
 public class MonitorHandle implements Serializable {
-    String id;
+    private static final long serialVersionUID = 1L;
+
+    private final String id;
 
     public MonitorHandle(String id) {
         this.id = id;

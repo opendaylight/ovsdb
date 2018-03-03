@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -65,7 +65,9 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     protected static final String ASSERT_TRANS_OPERATION_COUNT = "Transaction should match number of operations";
     protected static final String ASSERT_TRANS_UUID = "Transaction UUID should not be null";
     protected static Version schemaVersion;
+    protected static DatabaseSchema dbSchema;
     private static boolean schemaSupported = false;
+    private static AtomicBoolean setup = new AtomicBoolean(false);
     protected static OvsdbClient ovsdbClient;
     private static Map<String, Map<UUID, Row>> tableCache = new HashMap<>();
     private static boolean monitorReady = false;
@@ -75,16 +77,14 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return tableCache;
     }
 
-    protected OvsdbClient getClient () {
+    protected OvsdbClient getClient() {
         return ovsdbClient;
     }
 
-    protected static DatabaseSchema dbSchema;
-    protected DatabaseSchema getDbSchema () {
+    protected DatabaseSchema getDbSchema() {
         return dbSchema;
     }
 
-    private static AtomicBoolean setup = new AtomicBoolean(false);
     protected static boolean getSetup() {
         return setup.get();
     }
@@ -152,7 +152,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
     protected BindingAwareBroker.ProviderContext getProviderContext() {
         BindingAwareBroker.ProviderContext providerContext = null;
-        for (int i=0; i < 60; i++) {
+        for (int i = 0; i < 60; i++) {
             LOG.info("Looking for ProviderContext, try {}", i);
             providerContext = getSession();
             if (providerContext != null) {
@@ -175,55 +175,54 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return providerContext;
     }
 
-    public boolean checkSchema (String schema) {
+    public boolean checkSchema(String schemaStr)
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
         if (schemaSupported) {
-            LOG.info("Schema ({}) is supported", schema);
+            LOG.info("Schema ({}) is supported", schemaStr);
             return true;
         }
-        try {
-            ovsdbClient = LibraryIntegrationTestUtils.getTestConnection(this);
-            assertNotNull("Invalid Client. Check connection params", ovsdbClient);
-            if (isSchemaSupported(ovsdbClient, schema)) {
-                dbSchema = ovsdbClient.getSchema(schema).get();
-                assertNotNull(dbSchema);
-                LOG.info("{} schema in {} with tables: {}",
-                        schema, ovsdbClient.getConnectionInfo(), dbSchema.getTables());
-                schemaSupported = true;
-                return true;
-            }
-        } catch (Exception e) {
-            fail("Exception: " + e);
+
+        ovsdbClient = LibraryIntegrationTestUtils.getTestConnection(this);
+        assertNotNull("Invalid Client. Check connection params", ovsdbClient);
+        if (isSchemaSupported(ovsdbClient, schemaStr)) {
+            dbSchema = ovsdbClient.getSchema(schemaStr).get();
+            assertNotNull(dbSchema);
+            LOG.info("{} schema in {} with tables: {}",
+                    schemaStr, ovsdbClient.getConnectionInfo(), dbSchema.getTables());
+            schemaSupported = true;
+            return true;
         }
 
-        LOG.info("Schema ({}) is not supported", schema);
+        LOG.info("Schema ({}) is not supported", schemaStr);
         return false;
     }
 
-    public boolean isSchemaSupported (String schema) throws ExecutionException,
+    public boolean isSchemaSupported(String schemaStr) throws ExecutionException,
             InterruptedException {
-        return isSchemaSupported(ovsdbClient, schema);
+        return isSchemaSupported(ovsdbClient, schemaStr);
     }
 
-    public boolean isSchemaSupported (OvsdbClient client, String schema) throws ExecutionException, InterruptedException {
+    public boolean isSchemaSupported(OvsdbClient client, String schemaStr)
+            throws ExecutionException, InterruptedException {
         ListenableFuture<List<String>> databases = client.getDatabases();
         List<String> dbNames = databases.get();
         assertNotNull(dbNames);
-        return dbNames.contains(schema);
+        return dbNames.contains(schemaStr);
     }
 
     /**
-     * As per RFC 7047, section 4.1.5, if a Monitor request is sent without any columns, the update response will not include
-     * the _uuid column.
-     * ----------------------------------------------------------------------------------------------------------------------------------
-     * Each &lt;monitor-request&gt; specifies one or more columns and the manner in which the columns (or the entire table) are to be monitored.
-     * The "columns" member specifies the columns whose values are monitored. It MUST NOT contain duplicates.
-     * If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
-     * ----------------------------------------------------------------------------------------------------------------------------------
+     * As per RFC 7047, section 4.1.5, if a Monitor request is sent without any columns, the update response will
+     * not include the _uuid column.
+     * ---------------------------------------------------------------------------------------------------------------
+     * Each &lt;monitor-request&gt; specifies one or more columns and the manner in which the columns (or the entire
+     * table) are to be monitored. The "columns" member specifies the columns whose values are monitored. It MUST NOT
+     * contain duplicates. If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
+     * ---------------------------------------------------------------------------------------------------------------
      * In order to overcome this limitation, this method
      *
      * @return MonitorRequest that includes all the Bridge Columns including _uuid
      */
-    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest (Class <T> klazz) {
+    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest(Class<T> klazz) {
         TypedBaseTable<GenericTableSchema> table = getClient().createTypedRowWrapper(klazz);
         GenericTableSchema tableSchema = table.getSchema();
         Set<String> columns = tableSchema.getColumns();
@@ -234,7 +233,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest (T tableSchema) {
+    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest(T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
         MonitorRequestBuilder<T> monitorBuilder = new MonitorRequestBuilder<>(tableSchema);
         for (String column : columns) {
@@ -243,7 +242,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return monitorBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public boolean monitorTables () throws ExecutionException, InterruptedException, IOException {
+    public boolean monitorTables() throws ExecutionException, InterruptedException, IOException {
         if (monitorReady) {
             LOG.info("Monitoring is already initialized.");
             return monitorReady;
@@ -271,23 +270,23 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     @SuppressWarnings("unchecked")
     protected void updateTableCache(TableUpdates updates) {
         for (String tableName : updates.getUpdates().keySet()) {
-            Map<UUID, Row> tUpdate = getTableCache().get(tableName);
+            Map<UUID, Row> rowUpdates = getTableCache().get(tableName);
             TableUpdate update = updates.getUpdates().get(tableName);
             for (UUID uuid : (Set<UUID>)update.getRows().keySet()) {
                 if (update.getNew(uuid) != null) {
-                    if (tUpdate == null) {
-                        tUpdate = new HashMap<>();
-                        getTableCache().put(tableName, tUpdate);
+                    if (rowUpdates == null) {
+                        rowUpdates = new HashMap<>();
+                        getTableCache().put(tableName, rowUpdates);
                     }
-                    tUpdate.put(uuid, update.getNew(uuid));
+                    rowUpdates.put(uuid, update.getNew(uuid));
                 } else {
-                    tUpdate.remove(uuid);
+                    rowUpdates.remove(uuid);
                 }
             }
         }
     }
 
-    public List<OperationResult> executeTransaction (TransactionBuilder transactionBuilder, String text)
+    public List<OperationResult> executeTransaction(TransactionBuilder transactionBuilder, String text)
             throws ExecutionException, InterruptedException {
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults = results.get();
@@ -301,18 +300,14 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return operationResults;
     }
 
+    @Override
     public void setup() throws Exception {
         if (getSetup()) {
             LOG.info("Skipping setUp, already initialized");
             return;
         }
 
-        try {
-            super.setup();
-        } catch (Exception e) {
-            LOG.warn("Failed to setup test", e);
-            fail("Failed to setup test: " + e);
-        }
+        super.setup();
 
         assertNotNull("ProviderContext was not found", getProviderContext());
         if (schema.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH)) {
@@ -332,12 +327,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
             return;
         }
 
-        try {
-            super.setup();
-        } catch (Exception e) {
-            LOG.warn("Failed to setup test", e);
-            fail("Failed to setup test: " + e);
-        }
+        super.setup();
 
         assertNotNull("ProviderContext was not found", getProviderContext());
         setSetup(true);
@@ -345,13 +335,13 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
     private class UpdateMonitor implements MonitorCallBack {
         @Override
-        public void update(TableUpdates result, DatabaseSchema dbSchema) {
+        public void update(TableUpdates result, DatabaseSchema unused) {
             updateTableCache(result);
         }
 
         @Override
-        public void exception(Throwable t) {
-            LOG.error("Exception t = " + t);
+        public void exception(Throwable ex) {
+            LOG.error("Exception t = " + ex);
         }
     }
 }

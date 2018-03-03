@@ -58,20 +58,20 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
      * are verified.
      */
     @Test
-    public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        TestBridge rBridge = ovs.createTypedRowWrapper(TestBridge.class);
-        rBridge.setName(TEST_BRIDGE_NAME);
-        rBridge.setStatus(ImmutableMap.of("key","value"));
-        rBridge.setFloodVlans(Collections.singleton(34));
+    public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException,
+            NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        TestBridge testBridge = ovs.createTypedRowWrapper(TestBridge.class);
+        testBridge.setName(TEST_BRIDGE_NAME);
+        testBridge.setStatus(ImmutableMap.of("key","value"));
+        testBridge.setFloodVlans(Collections.singleton(34));
 
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
 
         String namedUuid = "br_test";
-        int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovs.transactBuilder(dbSchema)
-                .add(op.insert(rBridge)
+                .add(op.insert(testBridge)
                         .withId(namedUuid))
                 .add(op.mutate(ovsTable)
                         .addMutation(bridges, Mutator.INSERT, Collections.singleton(new UUID(namedUuid))));
@@ -82,6 +82,8 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
         // Check if Results matches the number of operations in transaction
         assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         LOG.info("Insert & Update operation results = {}", operationResults);
+
+        int insertOperationIndex = 0;
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
     }
 
@@ -90,16 +92,17 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
         List<String> dbNames = databases.get();
         assertNotNull(dbNames);
         boolean hasOpenVswitchSchema = false;
-        for(String dbName : dbNames) {
-           if (dbName.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH)) {
+        for (String dbName : dbNames) {
+            if (dbName.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH)) {
                 hasOpenVswitchSchema = true;
                 break;
-           }
+            }
         }
         assertTrue(LibraryIntegrationTestUtils.OPEN_VSWITCH
                 + " schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
+    @Override
     @Before
     public void setup() throws Exception {
         schema = LibraryIntegrationTestUtils.OPEN_VSWITCH;

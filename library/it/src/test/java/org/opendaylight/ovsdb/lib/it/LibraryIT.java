@@ -13,12 +13,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,9 +37,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListenableFuture;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class LibraryIT extends LibraryIntegrationTestBase {
@@ -46,6 +44,7 @@ public class LibraryIT extends LibraryIntegrationTestBase {
     private static final String TEST_BRIDGE_NAME = "br_test";
     private static UUID testBridgeUuid = null;
 
+    @Override
     @Before
     public void setup() throws Exception {
         schema = LibraryIntegrationTestUtils.OPEN_VSWITCH;
@@ -62,8 +61,6 @@ public class LibraryIT extends LibraryIntegrationTestBase {
 
         OpenVSwitch openVSwitch = ovsdbClient.createTypedRowWrapper(OpenVSwitch.class);
         openVSwitch.setBridges(Collections.singleton(new UUID(TEST_BRIDGE_NAME)));
-
-        int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovsdbClient.transactBuilder(dbSchema)
                 .add(op.insert(bridge.getSchema())
@@ -87,6 +84,8 @@ public class LibraryIT extends LibraryIntegrationTestBase {
         for (OperationResult result : operationResults) {
             assertNull(result.getError());
         }
+
+        int insertOperationIndex = 0;
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
         assertNotNull(testBridgeUuid);
     }

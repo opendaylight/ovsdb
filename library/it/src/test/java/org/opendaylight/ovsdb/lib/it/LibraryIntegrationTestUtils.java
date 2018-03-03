@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.lib.it;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -19,7 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -36,8 +36,8 @@ public final class LibraryIntegrationTestUtils {
     public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     public static final String SERVER_PORT = "ovsdbserver.port";
     public static final String CONNECTION_TYPE = "ovsdbserver.connection";
-    public final static String OPEN_VSWITCH = "Open_vSwitch";
-    public final static String HARDWARE_VTEP = "hardware_vtep";
+    public static final String OPEN_VSWITCH = "Open_vSwitch";
+    public static final String HARDWARE_VTEP = "hardware_vtep";
     private static final String CONNECTION_TYPE_ACTIVE = "active";
     private static final String CONNECTION_TYPE_PASSIVE = "passive";
     private static final String DEFAULT_SERVER_PORT = "6640";
@@ -65,7 +65,7 @@ public final class LibraryIntegrationTestUtils {
             InetAddress address;
             try {
                 address = InetAddress.getByName(addressStr);
-            } catch (Exception e) {
+            } catch (UnknownHostException e) {
                 LOG.warn("Unable to resolve {}", addressStr, e);
                 return null;
             }
@@ -99,6 +99,7 @@ public final class LibraryIntegrationTestUtils {
 
     private static class PassiveListener implements Callable<OvsdbClient>, OvsdbConnectionListener {
         OvsdbClient client = null;
+
         @Override
         public OvsdbClient call() throws Exception {
             OvsdbConnection connection = (OvsdbConnection)ServiceHelper.getGlobalInstance(OvsdbConnection.class, this);
@@ -110,13 +111,13 @@ public final class LibraryIntegrationTestUtils {
         }
 
         @Override
-        public void connected(OvsdbClient client) {
-            this.client = client;
+        public void connected(OvsdbClient newClient) {
+            this.client = newClient;
         }
 
         @Override
-        public void disconnected(OvsdbClient client) {
-            if (!Objects.equals(this.client.getConnectionInfo(), client.getConnectionInfo())) {
+        public void disconnected(OvsdbClient newClient) {
+            if (!Objects.equals(this.client.getConnectionInfo(), newClient.getConnectionInfo())) {
                 throw new IllegalStateException("disconnected unexpected client");
             }
             this.client = null;

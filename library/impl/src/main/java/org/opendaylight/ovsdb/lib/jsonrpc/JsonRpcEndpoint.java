@@ -20,7 +20,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -32,7 +31,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.ovsdb.lib.error.UnexpectedResultException;
 import org.opendaylight.ovsdb.lib.error.UnsupportedArgumentException;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -51,7 +49,7 @@ public class JsonRpcEndpoint {
 
     private static int reaperInterval = 1000;
 
-    public class CallContext {
+    public static class CallContext {
         Method method;
         JsonRpc10Request request;
         SettableFuture<Object> future;
@@ -89,7 +87,7 @@ public class JsonRpcEndpoint {
 
         return Reflection.newProxy(klazz, (proxy, method, args) -> {
             if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
-                if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) {
+                if (args == null || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) {
                     return false;
                 }
                 requestCallbacks.put(context, (OvsdbRPC.Callback)args[0]);
@@ -196,12 +194,11 @@ public class JsonRpcEndpoint {
         if (request.getMethod().equals("echo")) {
             JsonRpc10Response response = new JsonRpc10Response(request.getId());
             response.setError(null);
-            String jsonString = null;
             try {
-                jsonString = objectMapper.writeValueAsString(response);
+                String jsonString = objectMapper.writeValueAsString(response);
                 nettyChannel.writeAndFlush(jsonString);
             } catch (JsonProcessingException e) {
-                LOG.error("Exception while processing JSON string {}", jsonString, e);
+                LOG.error("Exception while processing JSON response {}", response, e);
             }
             return;
         }
@@ -210,12 +207,11 @@ public class JsonRpcEndpoint {
         if (request.getMethod().equals("list_dbs")) {
             JsonRpc10Response response = new JsonRpc10Response(request.getId());
             response.setError(null);
-            String jsonString = null;
             try {
-                jsonString = objectMapper.writeValueAsString(response);
+                String jsonString = objectMapper.writeValueAsString(response);
                 nettyChannel.writeAndFlush(jsonString);
             } catch (JsonProcessingException e) {
-                LOG.error("Exception while processing JSON string {}", jsonString, e);
+                LOG.error("Exception while processing JSON response {}", response, e);
             }
             return;
         }

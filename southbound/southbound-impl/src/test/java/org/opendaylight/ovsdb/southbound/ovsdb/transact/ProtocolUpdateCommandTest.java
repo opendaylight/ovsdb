@@ -16,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,12 +53,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InstanceIdentifier.class, ProtocolUpdateCommand.class, TyperUtils.class})
+@PrepareForTest({InstanceIdentifier.class, ProtocolUpdateCommand.class, TyperUtils.class, Operations.class})
 public class ProtocolUpdateCommandTest {
 
     private static final String BRIDGE_NAME_COLUMN = null;
-    private Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols = new HashMap<>();
-    private ProtocolUpdateCommand protocolUpdateCommand = new ProtocolUpdateCommand();
+    private final Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols = new HashMap<>();
+    private final ProtocolUpdateCommand protocolUpdateCommand = new ProtocolUpdateCommand();
     @Mock private ProtocolEntry protocolEntry;
 
     @SuppressWarnings("unchecked")
@@ -101,7 +100,7 @@ public class ProtocolUpdateCommandTest {
         doNothing().when(bridge).setName(anyString());
         doNothing().when(bridge).setProtocols(any(Set.class));
 
-        Operations op = (Operations) setField("op");
+        Operations op = OvsdbNodeUpdateCommandTest.setOpField();
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
         when(op.mutate(any(Bridge.class))).thenReturn(mutate);
         Column<GenericTableSchema, Set<String>> column = mock(Column.class);
@@ -125,12 +124,5 @@ public class ProtocolUpdateCommandTest {
 
         // TODO What are we trying to verify here?
         // verify(transaction).add(any(Operation.class));
-    }
-
-    private Object setField(String fieldName) throws Exception {
-        Field field = Operations.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(field.get(Operations.class), mock(Operations.class));
-        return field.get(Operations.class);
     }
 }

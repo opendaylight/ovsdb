@@ -17,11 +17,8 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 
 public  class OvsdbTypesIdResolver extends TypeIdResolverBase {
 
-    private JavaType baseType;
-
     @Override
     public void init(JavaType bt) {
-        this.baseType = bt;
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -30,7 +29,6 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -227,12 +225,20 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(where).when(delete).where(any());
         Insert insert = mock(Insert.class);
         doReturn(insert).when(insert).withId(any(String.class));
-        Operations.op = PowerMockito.mock(Operations.class);
-        doReturn(insert).when(Operations.op).insert(insertOpCapture.capture());
+        Operations mockOp = PowerMockito.mock(Operations.class);
+        doReturn(insert).when(mockOp).insert(insertOpCapture.capture());
         Update update = mock(Update.class);
-        doReturn(update).when(Operations.op).update(insertOpCapture.capture());
+        doReturn(update).when(mockOp).update(insertOpCapture.capture());
         doReturn(where).when(update).where(any());
-        doReturn(delete).when(Operations.op).delete(any());
+        doReturn(delete).when(mockOp).delete(any());
+
+        Field opField = PowerMockito.field(Operations.class, "op");
+        try {
+            opField.set(Operations.class, mockOp);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError("Set of Operations.op field failed", e);
+        }
+
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);
         doReturn(ft).when(ovsdbClient).transact(any(DatabaseSchema.class), transactCaptor.capture());

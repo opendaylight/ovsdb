@@ -158,14 +158,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <failsOnError>true</failsOnError>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 

@@ -8,51 +8,44 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.List;
-
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
-
-public class HwvtepSouthboundConstants {
-
-    public static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
-    public static final Integer DEFAULT_OVSDB_PORT = 6640;
-    public static final String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
-    public static final String UUID = "uuid";
-    public static final ImmutableBiMap<Class<? extends EncapsulationTypeBase>,String> ENCAPS_TYPE_MAP
-    = new ImmutableBiMap.Builder<Class<? extends EncapsulationTypeBase>,String>()
-        .put(EncapsulationTypeVxlanOverIpv4.class,"vxlan_over_ipv4")
-        .build();
-    public static final MacAddress UNKNOWN_DST_MAC = new MacAddress("00:00:00:00:00:00");
-    public static final String UNKNOWN_DST_STRING = "unknown-dst";
-    public static final String HWVTEP_URI_PREFIX = "hwvtep";
-    public static final String PSWITCH_URI_PREFIX = "physicalswitch";
-    public static final String LOGICALSWITCH_UUID_PREFIX = "LogicalSwitch_";
-    public static final String LOGICALROUTER_UUID_PREFIX = "LogicalRouter_";
-    public static final String ACL_UUID_PREFIX = "Acl_";
-    public static final ImmutableMap<String,String> SKIP_HWVTEP_TABLE
-            = new ImmutableMap.Builder<String,String>()
+public interface HwvtepSouthboundConstants {
+    TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
+    Integer DEFAULT_OVSDB_PORT = 6640;
+    String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
+    String UUID = "uuid";
+    ImmutableBiMap<Class<? extends EncapsulationTypeBase>,String> ENCAPS_TYPE_MAP
+        = new ImmutableBiMap.Builder<Class<? extends EncapsulationTypeBase>,String>()
+            .put(EncapsulationTypeVxlanOverIpv4.class,"vxlan_over_ipv4").build();
+    MacAddress UNKNOWN_DST_MAC = new MacAddress("00:00:00:00:00:00");
+    String UNKNOWN_DST_STRING = "unknown-dst";
+    String HWVTEP_URI_PREFIX = "hwvtep";
+    String PSWITCH_URI_PREFIX = "physicalswitch";
+    String LOGICALSWITCH_UUID_PREFIX = "LogicalSwitch_";
+    String LOGICALROUTER_UUID_PREFIX = "LogicalRouter_";
+    String ACL_UUID_PREFIX = "Acl_";
+    ImmutableMap<String,String> SKIP_HWVTEP_TABLE = new ImmutableMap.Builder<String,String>()
             .put("Logical_Binding_Stats", "Update callback registration for Logical_Binding_Stats Table is skipped")
             .build();
-    public static final String VERSION_COLUMN = "_version";
-    public static final ImmutableMap<String,List<String>> SKIP_COLUMN_FROM_HWVTEP_TABLE
-            = new ImmutableMap.Builder<String,List<String>>()
-            .put("Manager", Arrays.asList(VERSION_COLUMN, "status"))
-            .build();
-    public static final int WAITING_QUEUE_CAPACITY = Integer.getInteger("hwvtep.wait.queue.capacity", 1000);
-    public static final long WAITING_JOB_EXPIRY_TIME_MILLIS = Integer.getInteger(
+    String VERSION_COLUMN = "_version";
+    ImmutableMap<String, List<String>> SKIP_COLUMN_FROM_HWVTEP_TABLE = new ImmutableMap.Builder<String, List<String>>()
+            .put("Manager", Arrays.asList(VERSION_COLUMN, "status")).build();
+    int WAITING_QUEUE_CAPACITY = Integer.getInteger("hwvtep.wait.queue.capacity", 1000);
+    long WAITING_JOB_EXPIRY_TIME_MILLIS = Integer.getInteger(
             "hwvtep.wait.job.expiry.time.millis", 90000);
-    public static final long IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS = Integer.getInteger(
+    long IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS = Integer.getInteger(
             "hwvtep.intransit.job.expiry.time.millis", 10000);
-    public static final long IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS = Integer.getInteger(
+    long IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS = Integer.getInteger(
             "hwvtep.intransit.job.check.period.millis", 30000);
-    public static final long CONFIG_NODE_UPDATE_MAX_DELAY_MS = Integer.getInteger(
+    long CONFIG_NODE_UPDATE_MAX_DELAY_MS = Integer.getInteger(
             "config.node.update.max.delay.ms", 10000);
 }

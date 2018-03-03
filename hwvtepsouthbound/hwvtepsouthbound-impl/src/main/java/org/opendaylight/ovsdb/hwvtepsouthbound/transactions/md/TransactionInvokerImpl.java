@@ -8,6 +8,11 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,8 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
-
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -28,10 +31,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /*  TODO:
  * Copied over as-is from southbound plugin. Good candidate to be common
@@ -42,13 +41,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
-    private DataBroker db;
-    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
+    private final DataBroker db;
+    private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
+    private final BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private ExecutorService executor;
+    private final ExecutorService executor;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
@@ -74,15 +73,14 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
+    public void onTransactionChainFailed(TransactionChain<?, ?> txChain,
             AsyncTransaction<?, ?> transaction, Throwable cause) {
         failedTransactionQueue.offer(transaction);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(TransactionChain<?, ?> txChain) {
         // NO OP
-
     }
 
     @Override
@@ -117,7 +115,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                         public void onFailure(final Throwable throwable) {
                             // NOOP - handled by failure of transaction chain
                         }
-                    });
+                    }, MoreExecutors.directExecutor());
                 }
                 transactionInFlight = null;
             } catch (IllegalStateException e) {
@@ -209,8 +207,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void uncaughtException(Thread thread, Throwable e) {
-        LOG.error("Failed to execute hwvtep transact command, re-submitting the transaction again", e);
+    public void uncaughtException(Thread thread, Throwable ex) {
+        LOG.error("Failed to execute hwvtep transact command, re-submitting the transaction again", ex);
         if (transactionInFlight != null) {
             failedTransactionQueue.offer(transactionInFlight);
         }

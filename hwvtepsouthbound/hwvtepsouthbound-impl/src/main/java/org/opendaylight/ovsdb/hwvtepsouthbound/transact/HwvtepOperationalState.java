@@ -10,6 +10,14 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -28,7 +36,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Acls;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.AclsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
@@ -51,27 +58,20 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 //TODO: need to be optimized, get entry by iid not name
 public class HwvtepOperationalState {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
 
-    private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
     private ReadWriteTransaction transaction;
     HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
-    private HwvtepDeviceInfo deviceInfo;
-    private HwvtepConnectionInstance connectionInstance;
-    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs = new ConcurrentHashMap<>();
-    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys = new ConcurrentHashMap<>();
+    private final HwvtepDeviceInfo deviceInfo;
+    private final HwvtepConnectionInstance connectionInstance;
+    private final Map<Class<? extends Identifiable>, Map<InstanceIdentifier, UUID>> currentTxUUIDs =
+            new ConcurrentHashMap<>();
+    private final Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys =
+            new ConcurrentHashMap<>();
 
     /* stores the modified and deleted data for each child type of each node id
        Map<nodeid , Pair < updated, deleted >
@@ -144,12 +144,15 @@ public class HwvtepOperationalState {
                 //but logical switch is in HwvtepGlobalAugmentation rather than PhysicalSwitchAugmentation
                 if (readNode.isPresent()) {
                     operationalNodes.put(entry.getKey(), readNode.get());
-                    HwvtepGlobalAugmentation hgAugmentation = readNode.get().getAugmentation(HwvtepGlobalAugmentation.class);
-                    PhysicalSwitchAugmentation psAugmentation = readNode.get().getAugmentation(PhysicalSwitchAugmentation.class);
+                    HwvtepGlobalAugmentation hgAugmentation =
+                            readNode.get().getAugmentation(HwvtepGlobalAugmentation.class);
+                    PhysicalSwitchAugmentation psAugmentation =
+                            readNode.get().getAugmentation(PhysicalSwitchAugmentation.class);
                     if (hgAugmentation != null && hgAugmentation.getSwitches() != null) {
                         for (Switches pswitch : hgAugmentation.getSwitches()) {
                             @SuppressWarnings("unchecked")
-                            InstanceIdentifier<Node> psNodeIid = (InstanceIdentifier<Node>) pswitch.getSwitchRef().getValue();
+                            InstanceIdentifier<Node> psNodeIid =
+                                    (InstanceIdentifier<Node>) pswitch.getSwitchRef().getValue();
                             Optional<Node> psNode = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL,
                                     psNodeIid);
                             if (psNode.isPresent()) {
@@ -159,7 +162,8 @@ public class HwvtepOperationalState {
                     }
                     if (psAugmentation != null) {
                         @SuppressWarnings("unchecked")
-                        InstanceIdentifier<Node> hgNodeIid = (InstanceIdentifier<Node>) psAugmentation.getManagedBy().getValue();
+                        InstanceIdentifier<Node> hgNodeIid =
+                                (InstanceIdentifier<Node>) psAugmentation.getManagedBy().getValue();
                         Optional<Node> hgNode = new MdsalUtils(db).readOptional(
                                 LogicalDatastoreType.OPERATIONAL, hgNodeIid);
                         if (hgNode.isPresent()) {
@@ -203,7 +207,8 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
-    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid, LogicalSwitchesKey logicalSwitchesKey) {
+    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid,
+            LogicalSwitchesKey logicalSwitchesKey) {
         Preconditions.checkNotNull(iid);
         Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
         if (nodeOptional.isPresent()) {
@@ -221,6 +226,11 @@ public class HwvtepOperationalState {
             }
         }
         return Optional.absent();
+    }
+
+    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<LogicalSwitches> iid) {
+        Optional<LogicalSwitches> lswitch = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
+        return lswitch;
     }
 
     public Optional<Tunnels> getTunnels(InstanceIdentifier<?> iid, TunnelsKey tunnelsKey) {
@@ -243,6 +253,11 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
+    public Optional<Tunnels> getTunnels(InstanceIdentifier<Tunnels> iid) {
+        Optional<Tunnels> tunnels = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
+        return tunnels;
+    }
+
     public Optional<HwvtepPhysicalPortAugmentation> getPhysicalPortAugmentation(InstanceIdentifier<?> iid,
             HwvtepNodeName hwvtepNodeName) {
         Preconditions.checkNotNull(iid);
@@ -250,7 +265,8 @@ public class HwvtepOperationalState {
         if (nodeOptional.isPresent()) {
             List<TerminationPoint> tpList = nodeOptional.get();
             for (TerminationPoint tp : tpList) {
-                HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                HwvtepPhysicalPortAugmentation hppAugmentation =
+                        tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
                     return Optional.fromNullable(hppAugmentation);
                 }
@@ -266,12 +282,22 @@ public class HwvtepOperationalState {
         if (nodeOptional.isPresent()) {
             List<TerminationPoint> tpList = nodeOptional.get();
             for (TerminationPoint tp : tpList) {
-                HwvtepPhysicalLocatorAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                HwvtepPhysicalLocatorAugmentation hppAugmentation =
+                        tp.getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getDstIp().equals(dstIp)
                         && hppAugmentation.getEncapsulationType().equals(encapType)) {
                     return Optional.fromNullable(hppAugmentation);
                 }
             }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<HwvtepPhysicalLocatorAugmentation>
+            getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
+        Optional<TerminationPoint> tp = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
+        if (tp.isPresent()) {
+            return Optional.fromNullable(tp.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
         }
         return Optional.absent();
     }
@@ -373,24 +399,6 @@ public class HwvtepOperationalState {
         return Optional.absent();
     }
 
-    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
-        Optional<TerminationPoint> tp = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
-        if (tp.isPresent()) {
-            return Optional.fromNullable(tp.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
-        }
-        return Optional.absent();
-    }
-
-    public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<LogicalSwitches> iid) {
-        Optional<LogicalSwitches> lswitch = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
-        return lswitch;
-    }
-
-    public Optional<Tunnels> getTunnels(InstanceIdentifier<Tunnels> iid) {
-        Optional<Tunnels> tunnels = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
-        return tunnels;
-    }
-
     public Optional<Acls> getAcls(InstanceIdentifier<Acls> iid) {
         Optional<Acls> acl = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
         return acl;
@@ -484,11 +492,11 @@ public class HwvtepOperationalState {
 
 
     public void clearIntransitKeys() {
-        currentTxUUIDs.forEach( (cls, map) -> {
-            map.forEach( (iid, uuid) -> deviceInfo.clearInTransit(cls, iid));
+        currentTxUUIDs.forEach((cls, map) -> {
+            map.forEach((iid, uuid) -> deviceInfo.clearInTransit(cls, iid));
         });
-        currentTxDeletedKeys.forEach( (cls, map) -> {
-            map.forEach( (iid, val) -> deviceInfo.clearInTransit(cls, iid));
+        currentTxDeletedKeys.forEach((cls, map) -> {
+            map.forEach((iid, val) -> deviceInfo.clearInTransit(cls, iid));
         });
         currentTxUUIDs.clear();
         currentTxDeletedKeys.clear();

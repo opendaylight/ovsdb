@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -63,7 +62,8 @@ public abstract class DependentJob<T extends Identifiable> {
     }
 
     /**
-     * This call back method gets called when all its dependencies are resolved
+     * This call back method gets called when all its dependencies are resolved.
+     *
      * @param operationalState   new current operational state
      * @param transactionBuilder transaction builder to create device transaction
      */
@@ -71,7 +71,8 @@ public abstract class DependentJob<T extends Identifiable> {
                                                  TransactionBuilder transactionBuilder);
 
     /**
-     * This method is to check if all the given dependency of this job or not
+     * This method is to check if all the given dependency of this job or not.
+     *
      * @param deviceInfo   The device info of tis job
      * @param cls          dependency type to be checked for
      * @param iid          instance identifier to be checked for
@@ -85,7 +86,8 @@ public abstract class DependentJob<T extends Identifiable> {
     }
 
     /**
-     * This method checks if all the dependencies of this job or met or not
+     * This method checks if all the dependencies of this job or met or not.
+     *
      * @param deviceInfo The device info of this job
      * @return true if all the dependencies are met
      */
@@ -118,9 +120,10 @@ public abstract class DependentJob<T extends Identifiable> {
     public void onSuccess(TransactionBuilder deviceTransaction) {
     }
 
-    public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob {
+    public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob<T> {
 
-        public ConfigWaitingJob(InstanceIdentifier key, T data, Map dependencies) {
+        public ConfigWaitingJob(InstanceIdentifier key, T data,
+                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
             super(key, data, dependencies);
         }
 
@@ -130,9 +133,10 @@ public abstract class DependentJob<T extends Identifiable> {
         }
     }
 
-    public abstract static class OpWaitingJob<T extends Identifiable> extends DependentJob {
+    public abstract static class OpWaitingJob<T extends Identifiable> extends DependentJob<T> {
 
-        public OpWaitingJob(InstanceIdentifier key, T data, Map dependencies) {
+        public OpWaitingJob(InstanceIdentifier key, T data,
+                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
             super(key, data, dependencies);
         }
 
@@ -147,8 +151,8 @@ public abstract class DependentJob<T extends Identifiable> {
 
                 //either the device acted on the selected iid/uuid and sent the updated event or it did not
                 //here we are querying the device directly to get the latest status on the iid
-                Optional<TypedBaseTable> latestDeviceStatus = deviceInfo.getConnectionInstance().
-                        getHwvtepTableReader().getHwvtepTableEntryUUID(cls, iid, controllerData.getUuid());
+                Optional<TypedBaseTable> latestDeviceStatus = deviceInfo.getConnectionInstance()
+                        .getHwvtepTableReader().getHwvtepTableEntryUUID(cls, iid, controllerData.getUuid());
 
                 TypedBaseTable latestDeviceData = latestDeviceStatus.isPresent() ? latestDeviceStatus.get() : null;
 
@@ -177,6 +181,7 @@ public abstract class DependentJob<T extends Identifiable> {
             return depenencyMet;
         }
 
+        @Override
         public boolean isConfigWaitingJob() {
             return false;
         }

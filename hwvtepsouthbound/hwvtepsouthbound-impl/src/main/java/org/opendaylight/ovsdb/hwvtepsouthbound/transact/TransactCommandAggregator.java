@@ -8,6 +8,12 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -22,17 +28,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 public class TransactCommandAggregator implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
 
-    private List<TransactCommand> commands = new ArrayList<>();
+    private final List<TransactCommand> commands = new ArrayList<>();
     private final HwvtepOperationalState operationalState;
     /* stores the modified and deleted data for each child type of each node id
        Map<nodeid , Pair < updated, deleted >
@@ -112,8 +111,8 @@ public class TransactCommandAggregator implements TransactCommand {
 
     private boolean isMacOnlyUpdate(final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
                                     final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
-        return (updatedData.containsKey(RemoteUcastMacs.class) && updatedData.size() == 1)
-                || (deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1);
+        return updatedData.containsKey(RemoteUcastMacs.class) && updatedData.size() == 1
+                || deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1;
     }
 
     private void extractDataChanged(final InstanceIdentifier<Node> key,
@@ -174,6 +173,8 @@ public class TransactCommandAggregator implements TransactCommand {
                     }
                     addToUpdatedData(deletedData, childClass, (Identifiable)dataBefore);
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -197,12 +198,12 @@ public class TransactCommandAggregator implements TransactCommand {
 
     @Override
     public void onFailure(TransactionBuilder deviceTransaction) {
-        commands.forEach( cmd -> cmd.onFailure(deviceTransaction));
+        commands.forEach(cmd -> cmd.onFailure(deviceTransaction));
         operationalState.clearIntransitKeys();
     }
 
     @Override
     public void onSuccess(TransactionBuilder deviceTransaction) {
-        commands.forEach( cmd -> cmd.onSuccess(deviceTransaction));
+        commands.forEach(cmd -> cmd.onSuccess(deviceTransaction));
     }
 }

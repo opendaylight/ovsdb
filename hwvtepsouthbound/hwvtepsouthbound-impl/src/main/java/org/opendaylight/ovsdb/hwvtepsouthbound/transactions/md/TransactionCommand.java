@@ -17,7 +17,6 @@ public interface TransactionCommand {
 
     /**
      * Sets the result future of the executed/submitted transaction.
-     * @param future
      */
     default void setTransactionResultFuture(ListenableFuture future) {
     }

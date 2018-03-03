@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -26,7 +25,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand<LogicalSwitches> {
 
-    public HwvtepLogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepLogicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -34,14 +34,14 @@ public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand
     public void execute(ReadWriteTransaction transaction) {
         Collection<LogicalSwitch> deletedLSRows =
                 TyperUtils.extractRowsRemoved(LogicalSwitch.class, getUpdates(), getDbSchema()).values();
-        for (LogicalSwitch lSwitch : deletedLSRows) {
+        for (LogicalSwitch logicalSwitch : deletedLSRows) {
             InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
             // TODO Delete any references
             transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
             getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalSwitches.class, switchIid);
-            addToDeviceUpdate(TransactionType.DELETE, lSwitch);
+            addToDeviceUpdate(TransactionType.DELETE, logicalSwitch);
         }
     }
 

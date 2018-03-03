@@ -8,11 +8,14 @@
 
 package org.opendaylight.ovsdb.lib.schema.typed;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -85,10 +88,10 @@ public final class TyperUtils {
          */
         int index = GET_STARTS_WITH.length();
         if (isGetData(method) || isSetData(method)) {
-            return method.getName().substring(index, method.getName().length()).toLowerCase();
+            return method.getName().substring(index, method.getName().length()).toLowerCase(Locale.ROOT);
         } else if (isGetColumn(method)) {
             return method.getName().substring(index, method.getName().indexOf(GETCOLUMN_ENDS_WITH,
-                    index)).toLowerCase();
+                    index)).toLowerCase(Locale.ROOT);
         }
 
         return null;
@@ -206,8 +209,8 @@ public final class TyperUtils {
     }
 
     private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion) {
-        if ((!fromVersion.equals(Version.NULL) && schemaVersion.compareTo(fromVersion) < 0) || (!untilVersion.equals(
-                Version.NULL) && schemaVersion.compareTo(untilVersion) > 0)) {
+        if (!fromVersion.equals(Version.NULL) && schemaVersion.compareTo(fromVersion) < 0 || !untilVersion.equals(
+                Version.NULL) && schemaVersion.compareTo(untilVersion) > 0) {
             throw new SchemaVersionMismatchException(schemaVersion, fromVersion, untilVersion);
         }
     }
@@ -345,10 +348,10 @@ public final class TyperUtils {
             }
 
             private Boolean isEqualsMethod(Method method, Object[] args) {
-                return (args != null
+                return args != null
                         && args.length == 1
                         && method.getName().equals("equals")
-                        && Object.class.equals(method.getParameterTypes()[0]));
+                        && Object.class.equals(method.getParameterTypes()[0]);
             }
 
             private Boolean isToStringMethod(Method method, Object[] args) {
@@ -378,18 +381,13 @@ public final class TyperUtils {
             }
 
             @Override
+            @SuppressFBWarnings({"EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS", "EQ_UNUSUAL"})
             public boolean equals(Object obj) {
-                if (obj == null) {
+                if (!(obj instanceof TypedBaseTable)) {
                     return false;
                 }
                 TypedBaseTable<?> typedRowObj = (TypedBaseTable<?>)obj;
-                if (row == null && typedRowObj.getRow() == null) {
-                    return true;
-                }
-                if (row.equals(typedRowObj.getRow())) {
-                    return true;
-                }
-                return false;
+                return Objects.equal(row, typedRowObj.getRow());
             }
 
             @Override public int hashCode() {

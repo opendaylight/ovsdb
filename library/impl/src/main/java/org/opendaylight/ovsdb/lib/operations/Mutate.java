@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.lib.operations;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.notation.Condition;
@@ -30,6 +31,7 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
         super(schema, MUTATE);
     }
 
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT") // validate call below
     public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema,
                                                                Mutator mutator, D value) {
         columnSchema.validate(value);

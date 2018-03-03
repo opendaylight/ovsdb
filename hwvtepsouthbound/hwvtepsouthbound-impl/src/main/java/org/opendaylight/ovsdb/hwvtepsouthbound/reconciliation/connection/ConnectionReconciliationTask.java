@@ -46,13 +46,13 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     public boolean reconcileConfiguration(HwvtepConnectionManager connectionManager) {
         boolean result = false;
         connectionAttempt.incrementAndGet();
-        InstanceIdentifier<Node> nIid = (InstanceIdentifier<Node>) nodeIid;
+        InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>) nodeIid;
         HwvtepGlobalAugmentation hwvtepNode = (HwvtepGlobalAugmentation) configData;
 
         LOG.info("Retry({}) connection to Ovsdb Node {} ", connectionAttempt.get(), hwvtepNode.getConnectionInfo());
         OvsdbClient client = null;
         try {
-            client = connectionManager.connect(nIid, hwvtepNode);
+            client = connectionManager.connect(nodeId, hwvtepNode);
             if (client != null) {
                 LOG.info("Successfully connected to Hwvtep Node {} ", hwvtepNode.getConnectionInfo());
                 result = true;

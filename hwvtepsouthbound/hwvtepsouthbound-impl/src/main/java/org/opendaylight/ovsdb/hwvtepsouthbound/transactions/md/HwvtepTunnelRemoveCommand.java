@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -43,16 +42,17 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void execute(ReadWriteTransaction transaction) {
         for (Tunnel tunnel : deletedTunnelRows) {
             try {
                 InstanceIdentifier<Tunnels> tunnelIid = getInstanceIdentifier(getOvsdbConnectionInstance(), tunnel);
-                if(tunnelIid != null) {
+                if (tunnelIid != null) {
                     transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIid);
                     LOG.trace("Deleting tunnel {}", tunnelIid);
                 }
                 getOvsdbConnectionInstance().getDeviceInfo().removePhysicalSwitchForTunnel(tunnel.getUuid());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOG.warn("Failed to delete tunnel {}", tunnel, e);
             }
         }
@@ -61,15 +61,15 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
     private InstanceIdentifier<Tunnels> getInstanceIdentifier(HwvtepConnectionInstance client, Tunnel tunnel) {
         InstanceIdentifier<Tunnels> result = null;
 
-        PhysicalSwitch pSwitch = client.getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());
-        if(pSwitch == null){
+        PhysicalSwitch phySwitch = client.getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());
+        if (phySwitch == null) {
             //PhysicalSwitch has already been removed, nothing to do here
             return null;
         }
-        InstanceIdentifier<Node> psIid = HwvtepSouthboundMapper.createInstanceIdentifier(client, pSwitch);
-        PhysicalLocator plLocal = getPhysicalLocatorFromUUID((tunnel.getLocalColumn().getData()));
-        PhysicalLocator plRemote = getPhysicalLocatorFromUUID((tunnel.getRemoteColumn().getData()));
-        if(plLocal != null && plRemote != null) {
+        InstanceIdentifier<Node> psIid = HwvtepSouthboundMapper.createInstanceIdentifier(client, phySwitch);
+        PhysicalLocator plLocal = getPhysicalLocatorFromUUID(tunnel.getLocalColumn().getData());
+        PhysicalLocator plRemote = getPhysicalLocatorFromUUID(tunnel.getRemoteColumn().getData());
+        if (plLocal != null && plRemote != null) {
             InstanceIdentifier<TerminationPoint> localTpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
                                                                 client.getInstanceIdentifier(), plLocal);
             InstanceIdentifier<TerminationPoint> remoteTpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
@@ -80,12 +80,11 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
     }
 
     private PhysicalLocator getPhysicalLocatorFromUUID(UUID uuid) {
-        PhysicalLocator pLoc = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(uuid);
-        if(pLoc == null) {
+        PhysicalLocator locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(uuid);
+        if (locator == null) {
             LOG.trace("Available PhysicalLocators: ",
                             getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocators());
         }
-        return pLoc;
+        return locator;
     }
-
 }

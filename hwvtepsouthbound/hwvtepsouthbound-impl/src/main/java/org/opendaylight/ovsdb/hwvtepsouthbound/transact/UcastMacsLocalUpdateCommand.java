@@ -10,11 +10,11 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -32,8 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalUpdateCommand.class);
@@ -59,9 +57,10 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
             InstanceIdentifier<Node> instanceIdentifier, List<LocalUcastMacs> localUcastMacs) {
         for (LocalUcastMacs localUcastMac: localUcastMacs) {
             LOG.debug("Creating localUcastMacs, mac address: {}", localUcastMac.getMacEntryKey().getValue());
-            Optional<LocalUcastMacs> operationalMacOptional =
+            final Optional<LocalUcastMacs> operationalMacOptional =
                     getOperationalState().getLocalUcastMacs(instanceIdentifier, localUcastMac.getKey());
-            UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsLocal.class);
+            UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    UcastMacsLocal.class);
             setIpAddress(ucastMacsLocal, localUcastMac);
             setLocator(transaction, ucastMacsLocal, localUcastMac);
             setLogicalSwitch(ucastMacsLocal, localUcastMac);
@@ -90,7 +89,8 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
     private void setLogicalSwitch(UcastMacsLocal ucastMacsLocal, LocalUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
+            InstanceIdentifier<LogicalSwitches> lswitchIid =
+                    (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
@@ -98,8 +98,9 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 ucastMacsLocal.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update localUcastMacs: No logical switch with iid {} found in operational datastore!",
-                        lswitchIid);
+                LOG.warn(
+                    "Create or update localUcastMacs: No logical switch with iid {} found in operational datastore!",
+                    lswitchIid);
             }
         }
     }
@@ -109,7 +110,8 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
         if (inputMac.getLocatorRef() != null) {
             UUID locatorUuid = null;
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<TerminationPoint> iid = (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
+            InstanceIdentifier<TerminationPoint> iid =
+                    (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
             //try to find locator in operational DS
             Optional<HwvtepPhysicalLocatorAugmentation> operationalLocatorOptional =
                     getOperationalState().getPhysicalLocatorAugmentation(iid);
@@ -151,6 +153,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
         }
     }
 
+    @Override
     protected List<LocalUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLocalUcastMacs();
     }

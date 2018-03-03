@@ -10,12 +10,12 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -27,8 +27,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalRemoveCommand.class);
@@ -63,8 +61,8 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
                 //locators in config DS is not deleted and user need to be removed explicitly by user.
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
                 ucastMacsLocal.getUuidColumn().setData(macEntryUUID);
-                transaction.add(op.delete(ucastMacsLocal.getSchema()).
-                        where(ucastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+                transaction.add(op.delete(ucastMacsLocal.getSchema())
+                        .where(ucastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("UcastMacLocal: Deleting " + mac.getMacEntryKey().getValue()));
             } else {
                 LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",

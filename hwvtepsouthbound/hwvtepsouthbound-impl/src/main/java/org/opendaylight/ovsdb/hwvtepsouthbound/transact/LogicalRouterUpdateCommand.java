@@ -42,28 +42,30 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
             Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
+
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LogicalRouters>> updates =
+        Map<InstanceIdentifier<Node>, List<LogicalRouters>> updateMap =
                 extractUpdated(getChanges(),LogicalRouters.class);
-        if (updates != null) {
+        if (updateMap != null) {
             for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> updated:
-                updates.entrySet()) {
+                updateMap.entrySet()) {
                 updateLogicalRouter(transaction,  updated.getKey(), updated.getValue());
             }
         }
     }
 
     private void updateLogicalRouter(TransactionBuilder transaction, final InstanceIdentifier<Node> instanceIdentifier,
-            final List<LogicalRouters> lRouterList) {
-        for (LogicalRouters lrouter: lRouterList) {
-            InstanceIdentifier<LogicalRouters> lRouterKey = instanceIdentifier.
-                    augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.getKey());
+            final List<LogicalRouters> routerList) {
+        for (LogicalRouters lrouter: routerList) {
+            InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
+                    .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.getKey());
             LOG.debug("Creating logical router named: {}", lrouter.getHwvtepNodeName());
 
-            Optional<LogicalRouters> operationalRouterOptional =
+            final Optional<LogicalRouters> operationalRouterOptional =
                     getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.getKey());
-            LogicalRouter logicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalRouter.class);
+            LogicalRouter logicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    LogicalRouter.class);
             setDescription(logicalRouter, lrouter);
 
             setSwitchBindings(transaction, logicalRouter, lrouter.getSwitchBindings());
@@ -76,11 +78,12 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                 transaction.add(op.insert(logicalRouter).withId(TransactUtils.getLogicalRouterId(lrouter)));
                 transaction.add(op.comment("Logical Router: Creating " + lrouter.getHwvtepNodeName().getValue()));
                 UUID lrUuid = new UUID(TransactUtils.getLogicalRouterId(lrouter));
-                updateCurrentTxData(LogicalRouters.class, lRouterKey, lrUuid, lrouter);
+                updateCurrentTxData(LogicalRouters.class, routerKey, lrUuid, lrouter);
             } else {
                 LogicalRouters updatedLRouter = operationalRouterOptional.get();
                 String existingLogicalRouterName = updatedLRouter.getHwvtepNodeName().getValue();
-                LogicalRouter extraLogicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), LogicalRouter.class);
+                LogicalRouter extraLogicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                        LogicalRouter.class);
                 extraLogicalRouter.setName("");
                 LOG.trace("Updating LogicalRouter entry: {}", logicalRouter);
                 transaction.add(op.update(logicalRouter)
@@ -93,12 +96,13 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
     }
 
     private void setDescription(final LogicalRouter logicalRouter, final LogicalRouters inputRouter) {
-        if(inputRouter.getHwvtepNodeDescription() != null) {
+        if (inputRouter.getHwvtepNodeDescription() != null) {
             logicalRouter.setDescription(inputRouter.getHwvtepNodeDescription());
         } else {
             LOG.warn("Logical router {} is missing a description string", inputRouter.getHwvtepNodeName());
         }
     }
+
     private void setName(final LogicalRouter logicalRouter, final LogicalRouters inputRouter,
             Optional<LogicalRouters> inputRouterOptional) {
         if (inputRouter.getHwvtepNodeName() != null) {
@@ -108,9 +112,10 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
         }
     }
 
-    private void setSwitchBindings(final TransactionBuilder transaction, final LogicalRouter logicalRouter, final List<SwitchBindings> switchBindings) {
+    private void setSwitchBindings(final TransactionBuilder transaction, final LogicalRouter logicalRouter,
+            final List<SwitchBindings> switchBindings) {
         if (switchBindings != null) {
-            Map<String, UUID> bindingMap = new HashMap<String, UUID>();
+            Map<String, UUID> bindingMap = new HashMap<>();
             for (SwitchBindings switchBinding : switchBindings) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<LogicalSwitches> lswitchIid =
@@ -121,7 +126,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                     Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
                     bindingMap.put(switchBinding.getDestinationAddress().getIpv4Prefix().getValue(),
                             new UUID(logicalSwitchUuid.getValue()));
-                }else{
+                } else {
                     bindingMap.put(switchBinding.getDestinationAddress().getIpv4Prefix().getValue(),
                             TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid));
                 }
@@ -132,7 +137,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
 
     private void setAclBindings(final LogicalRouter logicalRouter, final List<AclBindings> aclBindings) {
         if (aclBindings != null) {
-            Map<String, UUID> bindingMap = new HashMap<String, UUID>();
+            Map<String, UUID> bindingMap = new HashMap<>();
             for (AclBindings aclBinding : aclBindings) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Acls> aclIid =
@@ -140,19 +145,22 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                 Optional<Acls> operationalAclOptional =
                         getOperationalState().getAcls(aclIid);
                 if (operationalAclOptional.isPresent()) {
-                    Uuid AclUuid = operationalAclOptional.get().getAclUuid();
-                    bindingMap.put(String.valueOf(aclBinding.getRouterInterface().getValue()), new UUID(AclUuid.getValue()));
-                }else{
-                    bindingMap.put(String.valueOf(aclBinding.getRouterInterface().getValue()), TransactUtils.getAclUUID(aclIid));
+                    Uuid aclUuid = operationalAclOptional.get().getAclUuid();
+                    bindingMap.put(String.valueOf(aclBinding.getRouterInterface().getValue()),
+                            new UUID(aclUuid.getValue()));
+                } else {
+                    bindingMap.put(String.valueOf(aclBinding.getRouterInterface().getValue()),
+                            TransactUtils.getAclUUID(aclIid));
                 }
             }
             logicalRouter.setAclBinding(bindingMap);
         }
 
     }
+
     private void setStaticRoutes(final LogicalRouter logicalRouter, final List<StaticRoutes> staticRoutes) {
         if (staticRoutes != null) {
-            Map<String, String> staticRoutesMap = new HashMap<String, String>();
+            Map<String, String> staticRoutesMap = new HashMap<>();
             for (StaticRoutes staticRoute : staticRoutes) {
                 staticRoutesMap.put(String.valueOf(staticRoute.getDestinationAddress().getValue()),
                         String.valueOf(staticRoute.getNexthopAddress().getValue()));

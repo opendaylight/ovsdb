@@ -8,15 +8,14 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSchemaConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -35,17 +34,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand {
 
-    private Map<UUID, LogicalSwitch> updatedLSRows;
+    private final Map<UUID, LogicalSwitch> updatedLSRows;
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalSwitchUpdateCommand.class);
 
-    public HwvtepLogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepLogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
     }
@@ -57,51 +55,55 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private void updateLogicalSwitch(ReadWriteTransaction transaction, LogicalSwitch lSwitch) {
+    private void updateLogicalSwitch(ReadWriteTransaction transaction, LogicalSwitch logicalSwitch) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
-            Node connectionNode = buildConnectionNode(lSwitch);
+            Node connectionNode = buildConnectionNode(logicalSwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
             InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())));
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
             getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, switchIid,
-                    lSwitch.getUuid(), lSwitch);
-            addToDeviceUpdate(TransactionType.ADD, lSwitch);
+                    logicalSwitch.getUuid(), logicalSwitch);
+            addToDeviceUpdate(TransactionType.ADD, logicalSwitch);
             // TODO: Delete entries that are no longer needed
         }
     }
 
-    private Node buildConnectionNode(LogicalSwitch lSwitch) {
+    private Node buildConnectionNode(LogicalSwitch logicalSwitch) {
         //Update node with LogicalSwitch reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        List<LogicalSwitches> lSwitches = new ArrayList<>();
         LogicalSwitchesBuilder lsBuilder = new LogicalSwitchesBuilder();
-        lsBuilder.setLogicalSwitchUuid(new Uuid(lSwitch.getUuid().toString()));
-        lsBuilder.setHwvtepNodeDescription(lSwitch.getDescription());
+        lsBuilder.setLogicalSwitchUuid(new Uuid(logicalSwitch.getUuid().toString()));
+        lsBuilder.setHwvtepNodeDescription(logicalSwitch.getDescription());
         HwvtepGlobalAugmentation hwvtepGlobalAugmentation = getOvsdbConnectionInstance().getHwvtepGlobalAugmentation();
         if (hwvtepGlobalAugmentation != null) {
             Version minVersion = Version.fromString("1.6.0");
             Version dbVersion = Version.fromString(hwvtepGlobalAugmentation.getDbVersion());
             if (dbVersion.compareTo(minVersion) >= 0) {
-                if (lSwitch.getReplicationModeColumn().getData() != null && !lSwitch.getReplicationModeColumn().getData().isEmpty()) {
-                    lsBuilder.setReplicationMode(lSwitch.getReplicationModeColumn().getData().iterator().next());
+                if (logicalSwitch.getReplicationModeColumn().getData() != null
+                        && !logicalSwitch.getReplicationModeColumn().getData().isEmpty()) {
+                    lsBuilder.setReplicationMode(logicalSwitch.getReplicationModeColumn().getData().iterator().next());
                     LOG.debug("setReplicationMode to: {}",
-                            lSwitch.getReplicationModeColumn().getData().iterator().next());
+                            logicalSwitch.getReplicationModeColumn().getData().iterator().next());
                 }
             }
         }
-        HwvtepNodeName hwvtepName = new HwvtepNodeName(lSwitch.getName());
+        HwvtepNodeName hwvtepName = new HwvtepNodeName(logicalSwitch.getName());
         lsBuilder.setHwvtepNodeName(hwvtepName);
         lsBuilder.setKey(new LogicalSwitchesKey(hwvtepName));
-        if (lSwitch.getTunnelKeyColumn().getData() != null && !lSwitch.getTunnelKeyColumn().getData().isEmpty()) {
-            lsBuilder.setTunnelKey(lSwitch.getTunnelKeyColumn().getData().iterator().next().toString());
+        if (logicalSwitch.getTunnelKeyColumn().getData() != null
+                && !logicalSwitch.getTunnelKeyColumn().getData().isEmpty()) {
+            lsBuilder.setTunnelKey(logicalSwitch.getTunnelKeyColumn().getData().iterator().next().toString());
         }
-        lSwitches.add(lsBuilder.build());
-        hgAugmentationBuilder.setLogicalSwitches(lSwitches);
+
+        List<LogicalSwitches> switches = new ArrayList<>();
+        switches.add(lsBuilder.build());
+
+        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
+        hgAugmentationBuilder.setLogicalSwitches(switches);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         return connectionNode.build();
     }

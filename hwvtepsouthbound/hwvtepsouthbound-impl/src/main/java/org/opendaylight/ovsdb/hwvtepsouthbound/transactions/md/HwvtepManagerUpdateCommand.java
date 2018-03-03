@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
 public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepManagerUpdateCommand.class);
-    private Map<UUID, Manager> updatedMgrRows;
-    private Map<UUID, Manager> oldMgrRows;
+    private final Map<UUID, Manager> updatedMgrRows;
+    private final Map<UUID, Manager> oldMgrRows;
 
     public HwvtepManagerUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -70,14 +70,12 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
         // Update node with Manager reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        List<Managers> mList = new ArrayList<>();
-        ManagersBuilder mBuilder = new ManagersBuilder();
+        ManagersBuilder managersBuilder = new ManagersBuilder();
         if (manager.getTargetColumn().getData() != null && !manager.getTargetColumn().getData().isEmpty()) {
-            mBuilder.setTarget(new Uri(manager.getTargetColumn().getData()));
+            managersBuilder.setTarget(new Uri(manager.getTargetColumn().getData()));
         }
         if (manager.getIsConnectedColumn().getData() != null) {
-            mBuilder.setIsConnected(manager.getIsConnectedColumn().getData());
+            managersBuilder.setIsConnected(manager.getIsConnectedColumn().getData());
         }
         ManagerOtherConfigsBuilder mocBuilder = new ManagerOtherConfigsBuilder();
         if (manager.getOtherConfigColumn().getData() != null && !manager.getOtherConfigColumn().getData().isEmpty()) {
@@ -88,16 +86,18 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
                 mocBuilder.setOtherConfigValue(otherConfigEntry.getValue());
                 mocList.add(mocBuilder.build());
             }
-            mBuilder.setManagerOtherConfigs(mocList);
+            managersBuilder.setManagerOtherConfigs(mocList);
         }
-        mBuilder.setManagerUuid(new Uuid(manager.getUuid().toString()));
-        mList.add(mBuilder.build());
-        hgAugmentationBuilder.setManagers(mList);
+        managersBuilder.setManagerUuid(new Uuid(manager.getUuid().toString()));
+        List<Managers> managersList = new ArrayList<>();
+        managersList.add(managersBuilder.build());
+
+        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
+        hgAugmentationBuilder.setManagers(managersList);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         return connectionNode.build();
         // TODO Deletion of other config
     }
-
 }
 
 

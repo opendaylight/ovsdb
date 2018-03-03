@@ -38,10 +38,12 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+public class HardwareVTEPIT extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(HardwareVTEPIT.class);
     private UUID testManagerUuid = null;
 
+    @Override
     @Before
     public void setup() throws Exception {
         schema = LibraryIntegrationTestUtils.HARDWARE_VTEP;
@@ -61,10 +63,10 @@ public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
 
     /**
      * Create a new manager string in addition to whatever is already there
-     * Will modify the Global table to include the UUID to the new Manager row
+     * Will modify the Global table to include the UUID to the new Manager row.
      */
     @SuppressWarnings("unchecked")
-    public void managerInsert () throws ExecutionException, InterruptedException {
+    public void managerInsert() throws ExecutionException, InterruptedException {
         //Ensure test only proceeds if HW VTEP is supported
         assumeTrue(isSchemaSupported(getClient(), LibraryIntegrationTestUtils.HARDWARE_VTEP));
 
@@ -105,7 +107,7 @@ public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
         assertNotNull(getGlobalTableUuid(getClient(), getTableCache()));
     }
 
-    public void managerDelete () throws ExecutionException, InterruptedException {
+    public void managerDelete() throws ExecutionException, InterruptedException {
         assumeTrue(isSchemaSupported(getClient(), LibraryIntegrationTestUtils.HARDWARE_VTEP));
 
         Manager manager = getClient().getTypedRowWrapper(Manager.class, null);
@@ -126,7 +128,7 @@ public class HardwareVTEPIT  extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testManager () throws ExecutionException, InterruptedException {
+    public void testManager() throws ExecutionException, InterruptedException {
         managerInsert();
         managerDelete();
     }

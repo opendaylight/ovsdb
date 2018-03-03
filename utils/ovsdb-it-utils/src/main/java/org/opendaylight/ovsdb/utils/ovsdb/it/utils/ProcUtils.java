@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +90,10 @@ public final class ProcUtils {
         int exitValue = -1;
 
         // Use a try block to guarantee stdout and stderr are closed
-        try (BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-             BufferedReader stderr = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+        try (BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream(),
+                StandardCharsets.UTF_8));
+             BufferedReader stderr = new BufferedReader(new InputStreamReader(proc.getErrorStream(),
+                StandardCharsets.UTF_8))) {
 
             exitValue = waitForExitValue(waitFor, proc);
 

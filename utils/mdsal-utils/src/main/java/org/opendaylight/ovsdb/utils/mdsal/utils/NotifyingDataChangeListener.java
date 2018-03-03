@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -103,6 +104,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     }
 
     @Override
+    @SuppressFBWarnings("NN_NAKED_NOTIFY")
     public void onDataTreeChanged(Collection<DataTreeModification<DataObject>> changes) {
         if (!listen) {
             return;

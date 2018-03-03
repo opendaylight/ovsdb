@@ -17,13 +17,12 @@ import java.util.regex.Pattern;
  * @see <a href="http://tools.ietf.org/html/rfc7047#section-3.1">RFC7047 Section 3.1</a>
  */
 public class Version implements Comparable<Version> {
-
-    int major;
-    int minor;
-    int patch;
-
     private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
     private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
+
+    private int major;
+    private int minor;
+    private int patch;
 
     public Version(int major, int minor, int patch) {
         this.major = major;
@@ -39,12 +38,13 @@ public class Version implements Comparable<Version> {
         if (!matcher.find()) {
             throw new IllegalArgumentException("<" + version + "> does not match format " + Version.FORMAT);
         }
-        int major = Integer.valueOf(matcher.group(1));
-        int minor = Integer.valueOf(matcher.group(2));
-        int patch = Integer.valueOf(matcher.group(3));
+        int major = Integer.parseInt(matcher.group(1));
+        int minor = Integer.parseInt(matcher.group(2));
+        int patch = Integer.parseInt(matcher.group(3));
         return new Version(major, minor, patch);
     }
 
+    @Override
     public String toString() {
         return "" + major + "." + minor + "." + patch;
     }

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -53,7 +52,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ TerminationPointUpdateCommand.class, TransactUtils.class, TyperUtils.class, VlanMode.class,
-        TerminationPointCreateCommand.class, InstanceIdentifier.class })
+        TerminationPointCreateCommand.class, InstanceIdentifier.class, Operations.class })
 public class TerminationPointUpdateCommandTest {
 
     private static final String TERMINATION_POINT_NAME = "termination point name";
@@ -114,7 +113,7 @@ public class TerminationPointUpdateCommandTest {
         when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Interface.class))).thenReturn(extraInterface);
         doNothing().when(extraInterface).setName(anyString());
 
-        Operations op = (Operations) setField("op");
+        Operations op = OvsdbNodeUpdateCommandTest.setOpField();
         Update update = mock(Update.class);
         when(op.update(any(Interface.class))).thenReturn(update);
 
@@ -143,12 +142,5 @@ public class TerminationPointUpdateCommandTest {
         terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint,
                 mock(InstanceIdentifierCodec.class));
         verify(transaction, times(1)).add(any(Operation.class));
-    }
-
-    private Object setField(String fieldName) throws Exception {
-        Field field = Operations.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(field.get(Operations.class), mock(Operations.class));
-        return field.get(Operations.class);
     }
 }

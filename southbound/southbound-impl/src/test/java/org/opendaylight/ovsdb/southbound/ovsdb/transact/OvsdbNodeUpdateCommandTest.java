@@ -53,7 +53,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TransactUtils.class, TyperUtils.class, OvsdbNodeUpdateCommand.class, InstanceIdentifier.class})
+@PrepareForTest({TransactUtils.class, TyperUtils.class, OvsdbNodeUpdateCommand.class, InstanceIdentifier.class,
+    Operations.class})
 public class OvsdbNodeUpdateCommandTest {
 
     private static final String EXTERNAL_ID_KEY = "external id key";
@@ -105,7 +106,7 @@ public class OvsdbNodeUpdateCommandTest {
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
-        Operations op = (Operations) setField("op");
+        Operations op = setOpField();
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
@@ -130,10 +131,10 @@ public class OvsdbNodeUpdateCommandTest {
         verify(transaction, times(2)).add(any(Operation.class));
     }
 
-    private Object setField(String fieldName) throws Exception {
-        Field field = Operations.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(field.get(Operations.class), mock(Operations.class));
-        return field.get(Operations.class);
+    static Operations setOpField() throws Exception {
+        Field opField = PowerMockito.field(Operations.class, "op");
+        Operations mockOp = mock(Operations.class);
+        opField.set(Operations.class, mockOp);
+        return mockOp;
     }
 }

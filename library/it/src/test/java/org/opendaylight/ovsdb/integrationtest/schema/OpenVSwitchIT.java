@@ -43,8 +43,8 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.FlowSampleCollectorSet;
 import org.opendaylight.ovsdb.schema.openvswitch.FlowTable;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.IPFIX;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.Mirror;
 import org.opendaylight.ovsdb.schema.openvswitch.NetFlow;
@@ -82,21 +82,22 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private UUID testSFlowUuid = null;
     private UUID testSslUuid = null;
     private UUID testAutoattachUuid = null;
-    private Version flowSampleCollectorSetFromVersion = Version.fromString("7.1.0");
-    private Version flowTableFromVersion = Version.fromString("6.5.0");
-    private Version prefixesAddedVersion = Version.fromString("7.4.0");
-    private Version externalIdAddedVerson = Version.fromString("7.5.0");
-    private Version ipfixFromVersion = Version.fromString("7.1.0");
-    private Version ipfixCacheFromVersion = Version.fromString("7.3.0");
-    private Version autoAttachFromVersion = Version.fromString("7.11.2");
+    private final Version flowSampleCollectorSetFromVersion = Version.fromString("7.1.0");
+    private final Version flowTableFromVersion = Version.fromString("6.5.0");
+    private final Version prefixesAddedVersion = Version.fromString("7.4.0");
+    private final Version externalIdAddedVerson = Version.fromString("7.5.0");
+    private final Version ipfixFromVersion = Version.fromString("7.1.0");
+    private final Version ipfixCacheFromVersion = Version.fromString("7.3.0");
+    private final Version autoAttachFromVersion = Version.fromString("7.11.2");
 
+    @Override
     @Before
     public void setup() throws Exception {
         schema = LibraryIntegrationTestUtils.OPEN_VSWITCH;
         super.setup();
     }
 
-    public UUID getOpenVSwitchTableUuid (OvsdbClient ovs, Map<String, Map<UUID, Row>> tableCache) {
+    public UUID getOpenVSwitchTableUuid(OvsdbClient ovs, Map<String, Map<UUID, Row>> tableCache) {
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         Map<UUID, Row> ovsTable = tableCache.get(openVSwitch.getSchema().getName());
         if (ovsTable != null) {
@@ -107,7 +108,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         return null;
     }
 
-    public UUID bridgeInsert () throws ExecutionException, InterruptedException {
+    public UUID bridgeInsert() throws ExecutionException, InterruptedException {
         Bridge bridge = getClient().createTypedRowWrapper(Bridge.class);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
@@ -140,7 +141,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         return bridgeUuid;
     }
 
-    public void bridgeDelete (UUID bridgeUuid) throws ExecutionException, InterruptedException {
+    public void bridgeDelete(UUID bridgeUuid) throws ExecutionException, InterruptedException {
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
 
@@ -160,7 +161,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testBridge () throws ExecutionException, InterruptedException {
+    public void testBridge() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
 
         // Verify that the local cache was updated with the remote changes
@@ -173,7 +174,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private void controllerInsert () throws ExecutionException, InterruptedException {
+    private void controllerInsert() throws ExecutionException, InterruptedException {
         String controllerUuidStr = "controller";
         Controller controller1 = getClient().createTypedRowWrapper(Controller.class);
         controller1.setTarget("tcp:1.1.1.1:6640");
@@ -236,7 +237,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(2, monitoredBridge.getControllerColumn().getData().size());
     }
 
-    private void controllerDelete () throws ExecutionException, InterruptedException {
+    private void controllerDelete() throws ExecutionException, InterruptedException {
         Controller controller = getClient().getTypedRowWrapper(Controller.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
@@ -269,7 +270,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testController () throws ExecutionException, InterruptedException {
+    public void testController() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         controllerInsert();
         controllerDelete();
@@ -277,7 +278,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test(expected = SchemaVersionMismatchException.class)
-    public void testFlowSampleCollectorSetTableNotSupported () {
+    public void testFlowSampleCollectorSetTableNotSupported() {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) < 0);
 
@@ -285,7 +286,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void flowSampleCollectorSetInsert () throws ExecutionException, InterruptedException {
+    public void flowSampleCollectorSetInsert() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) >= 0);
 
@@ -316,14 +317,15 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 monitoredflowSampleCollectorSet.getIdColumn().getData());
     }
 
-    public void flowSampleCollectorSetDelete () throws ExecutionException, InterruptedException {
+    public void flowSampleCollectorSetDelete() throws ExecutionException, InterruptedException {
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) >= 0);
 
-        FlowSampleCollectorSet flowSampleCollectorSet = getClient().getTypedRowWrapper(FlowSampleCollectorSet.class, null);
+        FlowSampleCollectorSet flowSampleCollectorSet =
+                getClient().getTypedRowWrapper(FlowSampleCollectorSet.class, null);
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
                 .add(op.delete(flowSampleCollectorSet.getSchema())
-                        .where(flowSampleCollectorSet.getUuidColumn().getSchema().opEqual(testFlowSampleCollectorSetUuid))
-                        .build())
+                    .where(flowSampleCollectorSet.getUuidColumn().getSchema().opEqual(testFlowSampleCollectorSetUuid))
+                    .build())
                 .add(op.comment("FlowSampleCollectorSet: Deleting " + testFlowSampleCollectorSetUuid))
                 .add(op.commit(true));
 
@@ -331,7 +333,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testFlowSampleCollectorSet () throws ExecutionException, InterruptedException {
+    public void testFlowSampleCollectorSet() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) >= 0);
 
@@ -342,7 +344,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test(expected = SchemaVersionMismatchException.class)
-    public void testFlowTableTableNotSupported () {
+    public void testFlowTableTableNotSupported() {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) < 0);
 
@@ -350,28 +352,27 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void flowTableInsert () throws ExecutionException, InterruptedException {
+    public void flowTableInsert() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) >= 0);
 
         String flowTableUuidStr = "testFlowTable";
         String tableName = "flow_table_row_name";
         String overflowPolicy = "evict";
-        String groups = "group name";
         String prefixes = "wildcarding prefixes";
-        Long flowLimit = 50000L;
         Map<Long, UUID> flowTableBrRef = new HashMap<>();
         flowTableBrRef.put(1L, new UUID(flowTableUuidStr));
         FlowTable flowTable = getClient().createTypedRowWrapper(FlowTable.class);
         flowTable.setName(ImmutableSet.of(tableName));
         flowTable.setOverflowPolicy(ImmutableSet.of(overflowPolicy));
-        flowTable.setGroups(ImmutableSet.of(groups));
+        flowTable.setGroups(ImmutableSet.of("group name"));
         if (schemaVersion.compareTo(prefixesAddedVersion) >= 0) {
             flowTable.setPrefixes(ImmutableSet.of(prefixes));
         }
         if (schemaVersion.compareTo(externalIdAddedVerson) >= 0) {
             flowTable.setExternalIds(ImmutableMap.of("I <3", "OVS"));
         }
+        Long flowLimit = 50000L;
         flowTable.setFlowLimit(ImmutableSet.of(flowLimit));
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
 
@@ -396,7 +397,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(flowTable.getNameColumn().getData(), monitoredFlowTable.getNameColumn().getData());
     }
 
-    public void flowTableDelete () throws ExecutionException, InterruptedException {
+    public void flowTableDelete() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) >= 0);
 
@@ -418,18 +419,18 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void setTestFlowTableSet () throws ExecutionException, InterruptedException {
+    public void setTestFlowTableSet() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) >= 0);
 
-        UUID testBridgeUuid = bridgeInsert();
+        UUID bridgeUuid = bridgeInsert();
         flowTableInsert();
         flowTableDelete();
-        bridgeDelete(testBridgeUuid);
+        bridgeDelete(bridgeUuid);
     }
 
     @Test(expected = SchemaVersionMismatchException.class)
-    public void testIpfixTableNotSupported () {
+    public void testIpfixTableNotSupported() {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) < 0);
 
@@ -437,17 +438,15 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void ipfixInsert () throws ExecutionException, InterruptedException {
+    public void ipfixInsert() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
 
-        String ipfixUuidStr = "testIpfix";
         String ipfixTarget = "172.16.20.1:4739";
         Long obsDomainId = 112L;
         Long obsPointId = 358L;
         Long cacheMax = 132L;
         Long cacheTimeout = 134L;
-        Long sampling = 558L;
 
         IPFIX ipfix = getClient().createTypedRowWrapper(IPFIX.class);
         ipfix.setTargets(ImmutableSet.of(ipfixTarget));
@@ -458,10 +457,13 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
             ipfix.setCacheMaxFlows(ImmutableSet.of(cacheMax));
             ipfix.setCacheActiveTimeout(ImmutableSet.of(cacheTimeout));
         }
+
+        Long sampling = 558L;
         ipfix.setSampling(ImmutableSet.of(sampling));
         ipfix.setExternalIds(ImmutableMap.of("I <3", "ovs"));
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
 
+        String ipfixUuidStr = "testIpfix";
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
                 .add(op.insert(ipfix)
                         .withId(ipfixUuidStr))
@@ -480,11 +482,11 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         // Verify that the local cache was updated with the remote changes
         Row ipfixRow = getTableCache().get(ipfix.getSchema().getName()).get(testIpfixUuid);
-        IPFIX monitoredIPFIX = getClient().getTypedRowWrapper(IPFIX.class, ipfixRow);
-        assertEquals(testIpfixUuid, monitoredIPFIX.getUuidColumn().getData());
+        IPFIX monitoredIPFix = getClient().getTypedRowWrapper(IPFIX.class, ipfixRow);
+        assertEquals(testIpfixUuid, monitoredIPFix.getUuidColumn().getData());
     }
 
-    public void ipfixDelete () throws ExecutionException, InterruptedException {
+    public void ipfixDelete() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
 
@@ -506,7 +508,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testIpfix () throws ExecutionException, InterruptedException {
+    public void testIpfix() throws ExecutionException, InterruptedException {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
 
@@ -553,7 +555,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(externalIds, monitoredManager.getExternalIdsColumn().getData());
     }
 
-    public void managerDelete () throws ExecutionException, InterruptedException {
+    public void managerDelete() throws ExecutionException, InterruptedException {
         Manager manager = getClient().getTypedRowWrapper(Manager.class, null);
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
 
@@ -572,13 +574,13 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testManager () throws ExecutionException, InterruptedException {
+    public void testManager() throws ExecutionException, InterruptedException {
         managerInsert();
         managerDelete();
     }
 
     @SuppressWarnings("unchecked")
-    public void mirrorInsert () throws ExecutionException, InterruptedException {
+    public void mirrorInsert() throws ExecutionException, InterruptedException {
         String mirrorUuidStr = "testMirror";
         String mirrorName = "my_name_is_mirror";
         Long outputVid = 1024L;
@@ -616,7 +618,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(mirror.getExternalIdsColumn().getData(), monitoredMirror.getExternalIdsColumn().getData());
     }
 
-    private void mirrorDelete () throws ExecutionException, InterruptedException {
+    private void mirrorDelete() throws ExecutionException, InterruptedException {
         Mirror mirror = getClient().getTypedRowWrapper(Mirror.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
@@ -636,7 +638,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testMirror () throws ExecutionException, InterruptedException {
+    public void testMirror() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         mirrorInsert();
         mirrorDelete();
@@ -644,7 +646,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void netFlowInsert () throws ExecutionException, InterruptedException {
+    public void netFlowInsert() throws ExecutionException, InterruptedException {
         String netFlowUuidStr = "testNetFlow";
         String netFlowTargets = "172.16.20.200:6343";
         Long engineType = 128L;
@@ -684,7 +686,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(netFlow.getExternalIdsColumn().getData(), monitoredNetFlow.getExternalIdsColumn().getData());
     }
 
-    private void netFlowDelete () throws ExecutionException, InterruptedException {
+    private void netFlowDelete() throws ExecutionException, InterruptedException {
         NetFlow netFlow = getClient().getTypedRowWrapper(NetFlow.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
@@ -704,7 +706,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testNetFlow () throws ExecutionException, InterruptedException {
+    public void testNetFlow() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         netFlowInsert();
         netFlowDelete();
@@ -712,10 +714,8 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void portAndInterfaceInsert () throws ExecutionException, InterruptedException {
-        String portUuidStr = "testPort";
+    public void portAndInterfaceInsert() throws ExecutionException, InterruptedException {
         String intfUuidStr = "testIntf";
-        String tunnelEncap = "vxlan";
         Port port = getClient().createTypedRowWrapper(Port.class);
         port.setName("testPort");
         port.setTag(ImmutableSet.of(1L));
@@ -724,7 +724,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         Interface intf = getClient().createTypedRowWrapper(Interface.class);
         intf.setName(port.getNameColumn().getData());
-        intf.setType(tunnelEncap);
+        intf.setType("vxlan");
         intf.setExternalIds(ImmutableMap.of("vm-id", "12345abcedf78910"));
         // For per Flow TEPs use remote_ip=flow
         // For per Port TEPs use remote_ip=x.x.x.x (ipv4)
@@ -733,6 +733,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                 "key", "flow",
                 "dst_port", "8472"));
 
+        String portUuidStr = "testPort";
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
                 .add(op.insert(port.getSchema())
@@ -759,7 +760,8 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
                         .build())
                 .add(op.comment("Interface: Updating " + intfUuidStr))
                 .add(op.mutate(bridge.getSchema())
-                        .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT, Collections.singleton(new UUID(portUuidStr)))
+                        .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT,
+                                Collections.singleton(new UUID(portUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -781,7 +783,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(intf.getNameColumn().getData(), monitoredInterface.getNameColumn().getData());
     }
 
-    private void portAndInterfaceDelete () throws ExecutionException, InterruptedException {
+    private void portAndInterfaceDelete() throws ExecutionException, InterruptedException {
         Port port = getClient().getTypedRowWrapper(Port.class, null);
         Interface intf = getClient().getTypedRowWrapper(Interface.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
@@ -806,7 +808,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testPortAndInterface () throws ExecutionException, InterruptedException {
+    public void testPortAndInterface() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         portAndInterfaceInsert();
         portAndInterfaceDelete();
@@ -888,7 +890,6 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
     @SuppressWarnings("unchecked")
     public void qosInsert() throws ExecutionException, InterruptedException {
-        String portUuidStr = "testQosPortUuid";
         String intfUuidStr = "testQosIntfUuid";
         String qosUuidStr = "testQosUuid";
         String qosPort = "testQosPort";
@@ -910,6 +911,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
 
+        String portUuidStr = "testQosPortUuid";
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
                 .add(op.insert(port.getSchema())
                         .withId(portUuidStr)
@@ -942,13 +944,13 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
 
         int insertPortOperationIndex = 0;
         int insertInterfaceOperationIndex = 2;
-        int insertQosOperationIndex = 4;
         List<OperationResult> operationResults = executeTransaction(transactionBuilder,
                 "Insert and Mutate operation results for Port and Interface");
         testPortUuid = operationResults.get(insertPortOperationIndex).getUuid();
         assertNotNull(ASSERT_TRANS_UUID, testPortUuid);
         testInterfaceUuid = operationResults.get(insertInterfaceOperationIndex).getUuid();
         assertNotNull(ASSERT_TRANS_UUID, testInterfaceUuid);
+        int insertQosOperationIndex = 4;
         testQosUuid = operationResults.get(insertQosOperationIndex).getUuid();
         assertNotNull(ASSERT_TRANS_UUID, testQosUuid);
 
@@ -966,7 +968,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(qos.getTypeColumn().getData(), monitoredQos.getTypeColumn().getData());
     }
 
-    private void qosDelete () throws ExecutionException, InterruptedException {
+    private void qosDelete() throws ExecutionException, InterruptedException {
         Port port = getClient().getTypedRowWrapper(Port.class, null);
         Interface intf = getClient().getTypedRowWrapper(Interface.class, null);
         Qos qos = getClient().getTypedRowWrapper(Qos.class, null);
@@ -1000,7 +1002,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testQos () throws ExecutionException, InterruptedException {
+    public void testQos() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         qosInsert();
         qosDelete();
@@ -1059,7 +1061,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(queue.getExternalIdsColumn().getData(), monitoredQueue.getExternalIdsColumn().getData());
     }
 
-    private void queueDelete () throws ExecutionException, InterruptedException {
+    private void queueDelete() throws ExecutionException, InterruptedException {
         Queue queue = getClient().getTypedRowWrapper(Queue.class, null);
         Qos qos = getClient().getTypedRowWrapper(Qos.class, null);
         DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
@@ -1079,7 +1081,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testQueue () throws ExecutionException, InterruptedException {
+    public void testQueue() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         qosInsert();
         queueInsert();
@@ -1089,36 +1091,36 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void sFlowInsert () throws ExecutionException, InterruptedException {
-        String sFlowUuidStr = "testSFlow";
-        String sFlowTarget = "172.16.20.200:6343";
+    public void sFlowInsert() throws ExecutionException, InterruptedException {
         Long header = 128L;
         Long obsPointId = 358L;
-        Long polling =10L;
+        Long polling = 10L;
         String agent = "172.16.20.210";
         Long sampling = 64L;
-        SFlow sFlow = getClient().createTypedRowWrapper(SFlow.class);
-        sFlow.setTargets(ImmutableSet.of(sFlowTarget));
-        sFlow.setHeader(ImmutableSet.of(header));
-        sFlow.setPolling(ImmutableSet.of(obsPointId));
-        sFlow.setPolling(ImmutableSet.of(polling));
-        sFlow.setAgent(ImmutableSet.of(agent));
-        sFlow.setSampling(ImmutableSet.of(sampling));
-        sFlow.setExternalIds(ImmutableMap.of("kit", "tah"));
+        SFlow sflow = getClient().createTypedRowWrapper(SFlow.class);
+        sflow.setTargets(ImmutableSet.of("172.16.20.200:6343"));
+        sflow.setHeader(ImmutableSet.of(header));
+        sflow.setPolling(ImmutableSet.of(obsPointId));
+        sflow.setPolling(ImmutableSet.of(polling));
+        sflow.setAgent(ImmutableSet.of(agent));
+        sflow.setSampling(ImmutableSet.of(sampling));
+        sflow.setExternalIds(ImmutableMap.of("kit", "tah"));
+
+        String sflowUuidStr = "testSFlow";
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         TransactionBuilder transactionBuilder = getClient().transactBuilder(getDbSchema())
-                .add(op.insert(sFlow.getSchema())
-                        .withId(sFlowUuidStr)
-                        .value(sFlow.getTargetsColumn())
-                        .value(sFlow.getHeaderColumn())
-                        .value(sFlow.getPollingColumn())
-                        .value(sFlow.getAgentColumn())
-                        .value(sFlow.getSamplingColumn())
-                        .value(sFlow.getExternalIdsColumn()))
-                .add(op.comment("sFlow: Inserting " + sFlowUuidStr))
+                .add(op.insert(sflow.getSchema())
+                        .withId(sflowUuidStr)
+                        .value(sflow.getTargetsColumn())
+                        .value(sflow.getHeaderColumn())
+                        .value(sflow.getPollingColumn())
+                        .value(sflow.getAgentColumn())
+                        .value(sflow.getSamplingColumn())
+                        .value(sflow.getExternalIdsColumn()))
+                .add(op.comment("sFlow: Inserting " + sflowUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getSflowColumn().getSchema(), Mutator.INSERT,
-                                Collections.singleton(new UUID(sFlowUuidStr)))
+                                Collections.singleton(new UUID(sflowUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))
                         .build())
                 .add(op.comment("Bridge: Mutating " + TEST_BRIDGE_NAME));
@@ -1129,19 +1131,19 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertNotNull(ASSERT_TRANS_UUID, testSFlowUuid);
 
         // Verify that the local cache was updated with the remote changes
-        Row sFlowRow = getTableCache().get(sFlow.getSchema().getName()).get(testSFlowUuid);
-        Queue monitoredSFlow = getClient().getTypedRowWrapper(Queue.class, sFlowRow);
-        assertEquals(sFlow.getExternalIdsColumn().getData(), monitoredSFlow.getExternalIdsColumn().getData());
+        Row sflowRow = getTableCache().get(sflow.getSchema().getName()).get(testSFlowUuid);
+        Queue monitoredSFlow = getClient().getTypedRowWrapper(Queue.class, sflowRow);
+        assertEquals(sflow.getExternalIdsColumn().getData(), monitoredSFlow.getExternalIdsColumn().getData());
     }
 
-    private void sFlowDelete () throws ExecutionException, InterruptedException {
-        SFlow sFlow = getClient().getTypedRowWrapper(SFlow.class, null);
+    private void sFlowDelete() throws ExecutionException, InterruptedException {
+        SFlow sflow = getClient().getTypedRowWrapper(SFlow.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
-                .add(op.delete(sFlow.getSchema())
-                        .where(sFlow.getUuidColumn().getSchema().opEqual(testSFlowUuid))
+                .add(op.delete(sflow.getSchema())
+                        .where(sflow.getUuidColumn().getSchema().opEqual(testSFlowUuid))
                         .build())
                 .add(op.comment("SFlow: Deleting " + testSFlowUuid))
                 .add(op.mutate(bridge.getSchema()) // Delete an sflow column in the Bridge table
@@ -1154,7 +1156,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testSFlow () throws ExecutionException, InterruptedException {
+    public void testSFlow() throws ExecutionException, InterruptedException {
         testBridgeUuid = bridgeInsert();
         sFlowInsert();
         sFlowDelete();
@@ -1162,7 +1164,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    public void sslInsert () throws ExecutionException, InterruptedException {
+    public void sslInsert() throws ExecutionException, InterruptedException {
 
         String sslUuidStr = "sslUuidName";
         String caCert = "PARC";
@@ -1206,7 +1208,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         assertEquals(ssl.getExternalIdsColumn().getData(), monitoredSsl.getExternalIdsColumn().getData());
     }
 
-    public void sslDelete () throws ExecutionException, InterruptedException {
+    public void sslDelete() throws ExecutionException, InterruptedException {
         SSL ssl = getClient().getTypedRowWrapper(SSL.class, null);
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
 
@@ -1225,13 +1227,13 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testSsl () throws ExecutionException, InterruptedException {
+    public void testSsl() throws ExecutionException, InterruptedException {
         sslInsert();
         sslDelete();
     }
 
     @Test
-    public void testTyperUtilsSpecialMethodsToString () {
+    public void testTyperUtilsSpecialMethodsToString() {
         Bridge bridge = getClient().createTypedRowWrapper(Bridge.class);
         assertNotNull(bridge);
         bridge.setName(TEST_BRIDGE_NAME);
@@ -1244,7 +1246,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testTyperUtilsSpecialMethodsEquals () {
+    public void testTyperUtilsSpecialMethodsEquals() {
         Bridge bridge = getClient().createTypedRowWrapper(Bridge.class);
         assertNotNull(bridge);
         bridge.setName(TEST_BRIDGE_NAME);
@@ -1274,7 +1276,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     }
 
     @Test
-    public void testTyperUtilsSpecialMethodsHashCode () {
+    public void testTyperUtilsSpecialMethodsHashCode() {
         Bridge bridge = getClient().createTypedRowWrapper(Bridge.class);
 
         assertNotNull(bridge);

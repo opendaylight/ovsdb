@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
 import java.util.Map;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -35,7 +34,8 @@ public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand 
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortRemoveCommand.class);
 
-    public HwvtepPhysicalPortRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalPortRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -47,32 +47,31 @@ public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand 
                 TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
         Map<UUID, PhysicalSwitch> oldPSRows =
                 TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(), getDbSchema());
-        for (PhysicalPort pPort : deletedPortRows) {
+        for (PhysicalPort port : deletedPortRows) {
             PhysicalSwitch updatedPSwitchData = null;
             for (Map.Entry<UUID, PhysicalSwitch> updatedEntry : updatedPSRows.entrySet()) {
-                UUID pSwitchUUID = updatedEntry.getKey();
-                PhysicalSwitch oldPSwitchData = oldPSRows.get(pSwitchUUID);
+                UUID switchUUID = updatedEntry.getKey();
+                PhysicalSwitch oldPSwitchData = oldPSRows.get(switchUUID);
                 if (oldPSwitchData.getPortsColumn() != null
-                        && oldPSwitchData.getPortsColumn().getData().contains(pPort.getUuidColumn().getData())
-                        && (!updatedPSRows.isEmpty())) {
+                        && oldPSwitchData.getPortsColumn().getData().contains(port.getUuidColumn().getData())
+                        && !updatedPSRows.isEmpty()) {
                     updatedPSwitchData = updatedEntry.getValue();
                     break;
                 }
             }
             if (updatedPSwitchData == null) {
-                LOG.warn("PhysicalSwitch not found for port {}", pPort);
+                LOG.warn("PhysicalSwitch not found for port {}", port);
             } else {
-                String portName = pPort.getName();
+                String portName = port.getName();
                 final InstanceIdentifier<TerminationPoint> nodePath =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
                                 updatedPSwitchData).child(TerminationPoint.class,
                                 new TerminationPointKey(new TpId(portName)));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
                 addToDeviceUpdate(TransactionType.DELETE,
-                        new PortEvent(pPort, nodePath.firstKeyOf(Node.class).getNodeId()));
+                        new PortEvent(port, nodePath.firstKeyOf(Node.class).getNodeId()));
                 getDeviceInfo().clearDeviceOperData(TerminationPoint.class, nodePath);
             }
         }
     }
-
 }

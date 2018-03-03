@@ -17,8 +17,6 @@ public class ClientDisConnected {
 
     @Override
     public String toString() {
-        return "ClientConnected{" +
-                "port=" + port +
-                '}';
+        return "ClientDisConnected [port=" + port + "]";
     }
 }

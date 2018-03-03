@@ -7,8 +7,9 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.collect.Lists;
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Condition;
@@ -58,30 +58,28 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 public class HwvtepTableReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTableReader.class);
 
-    private final Class alltables[] = new Class[] {
-            ACLEntry.class,
-            ACL.class,
-            ArpSourcesLocal.class,
-            Global.class,
-            ArpSourcesRemote.class,
-            LogicalRouter.class,
-            Manager.class,
-            LogicalSwitch.class,
-            McastMacsLocal.class,
-            PhysicalLocator.class,
-            McastMacsRemote.class,
-            PhysicalPort.class,
-            Tunnel.class,
-            PhysicalLocatorSet.class,
-            PhysicalSwitch.class,
-            UcastMacsLocal.class,
-            UcastMacsRemote.class
+    private final Class[] alltables = new Class[] {
+        ACLEntry.class,
+        ACL.class,
+        ArpSourcesLocal.class,
+        Global.class,
+        ArpSourcesRemote.class,
+        LogicalRouter.class,
+        Manager.class,
+        LogicalSwitch.class,
+        McastMacsLocal.class,
+        PhysicalLocator.class,
+        McastMacsRemote.class,
+        PhysicalPort.class,
+        Tunnel.class,
+        PhysicalLocatorSet.class,
+        PhysicalSwitch.class,
+        UcastMacsLocal.class,
+        UcastMacsRemote.class
     };
 
     private final Map<Class, Function<InstanceIdentifier, List<Condition>>> whereClauseGetterMap = new HashMap();
@@ -180,6 +178,7 @@ public class HwvtepTableReader {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public Optional<TypedBaseTable> getHwvtepTableEntryUUID(Class<? extends Identifiable> cls,
                                                             InstanceIdentifier iid,
                                                             UUID existingUUID) {
@@ -245,12 +244,13 @@ public class HwvtepTableReader {
                 return Optional.of(globalRow);
             }
             return Optional.empty();
-        } catch (Throwable e) {
+        } catch (RuntimeException e) {
             LOG.error("Failed to get the hwvtep row for iid {} {} ", iid, e);
             return Optional.empty();
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public List<TypedBaseTable> getHwvtepTableEntries(Class<? extends Identifiable> cls) {
         try {
             List<TypedBaseTable> tableRows = new ArrayList<>();
@@ -290,7 +290,7 @@ public class HwvtepTableReader {
                 }
             }
             return tableRows;
-        } catch (Throwable e) {
+        } catch (RuntimeException e) {
             LOG.error("Failed to get the hwvtep ", e);
         }
         return Collections.emptyList();

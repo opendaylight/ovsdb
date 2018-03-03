@@ -10,6 +10,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -40,8 +40,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortUpdateCommand.class);
@@ -176,7 +174,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                                       final Map inTransitDependencies,
                                       final InstanceIdentifier<VlanBindings> vlanIid) {
 
-        DependentJob<VlanBindings> opWaitingJob = new DependentJob.OpWaitingJob(
+        DependentJob<VlanBindings> opWaitingJob = new DependentJob.OpWaitingJob<VlanBindings>(
                 vlanIid, vlanBinding, inTransitDependencies) {
             @Override
             public void onDependencyResolved(final HwvtepOperationalState operationalState,
@@ -195,7 +193,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                                      final Map configDependencies,
                                      final InstanceIdentifier<VlanBindings> vlanIid) {
 
-        DependentJob<VlanBindings> configWaitingJob = new DependentJob.ConfigWaitingJob(
+        DependentJob<VlanBindings> configWaitingJob = new DependentJob.ConfigWaitingJob<VlanBindings>(
                 vlanIid, vlanBinding, configDependencies) {
             @Override
             public void onDependencyResolved(final HwvtepOperationalState operationalState,
@@ -227,6 +225,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
 
     static class VlanBindingsUnMetDependencyGetter extends UnMetDependencyGetter<VlanBindings> {
 
+        @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(VlanBindings data) {
             if (data == null) {
                 return Collections.emptyList();
@@ -234,6 +233,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
             return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }
 
+        @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(VlanBindings data) {
             return Collections.emptyList();
         }
@@ -251,7 +251,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
                     if (created.getTerminationPoint() != null) {
                         for (TerminationPoint tp : created.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                            HwvtepPhysicalPortAugmentation hppAugmentation =
+                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListUpdated.add(hppAugmentation);
                             }
@@ -273,7 +274,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
-                    PhysicalSwitchAugmentation physicalSwitch = created.getAugmentation(PhysicalSwitchAugmentation.class);
+                    PhysicalSwitchAugmentation physicalSwitch =
+                            created.getAugmentation(PhysicalSwitchAugmentation.class);
                     if (physicalSwitch != null) {
                         result.put(key, physicalSwitch);
                     }
@@ -297,7 +299,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<>();
                     if (updated.getTerminationPoint() != null) {
                         for (TerminationPoint tp : updated.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                            HwvtepPhysicalPortAugmentation hppAugmentation =
+                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListUpdated.add(hppAugmentation);
                             }
@@ -305,7 +308,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     }
                     if (before.getTerminationPoint() != null) {
                         for (TerminationPoint tp : before.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                            HwvtepPhysicalPortAugmentation hppAugmentation =
+                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListBefore.add(hppAugmentation);
                             }

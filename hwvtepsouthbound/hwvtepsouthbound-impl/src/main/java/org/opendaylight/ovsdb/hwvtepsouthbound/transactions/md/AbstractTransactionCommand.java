@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -19,9 +18,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 
 public abstract class AbstractTransactionCommand<T extends DataObject> implements TransactionCommand {
 
-    private TableUpdates updates;
-    private DatabaseSchema dbSchema;
-    private HwvtepConnectionInstance key;
+    private final TableUpdates updates;
+    private final DatabaseSchema dbSchema;
+    private final HwvtepConnectionInstance key;
 
     public TableUpdates getUpdates() {
         return updates;

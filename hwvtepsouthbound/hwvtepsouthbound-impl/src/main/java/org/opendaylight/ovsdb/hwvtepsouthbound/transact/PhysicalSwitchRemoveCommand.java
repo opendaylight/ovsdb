@@ -10,12 +10,12 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -29,8 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchRemoveCommand.class);
@@ -57,19 +55,23 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
         LOG.debug("Removing a physical switch named: {}", physicalSwitchAugmentation.getHwvtepNodeName().getValue());
         Optional<PhysicalSwitchAugmentation> operationalPhysicalSwitchOptional =
                 getOperationalState().getPhysicalSwitchAugmentation(iid);
-        PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalSwitch.class, null);
-        if (operationalPhysicalSwitchOptional.isPresent() &&
-                operationalPhysicalSwitchOptional.get().getPhysicalSwitchUuid() != null) {
-            UUID physicalSwitchUuid = new UUID(operationalPhysicalSwitchOptional.get().getPhysicalSwitchUuid().getValue());
+        PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                PhysicalSwitch.class, null);
+        if (operationalPhysicalSwitchOptional.isPresent()
+                && operationalPhysicalSwitchOptional.get().getPhysicalSwitchUuid() != null) {
+            UUID physicalSwitchUuid = new UUID(operationalPhysicalSwitchOptional.get()
+                    .getPhysicalSwitchUuid().getValue());
             Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     Global.class, null);
             transaction.add(op.delete(physicalSwitch.getSchema())
                     .where(physicalSwitch.getUuidColumn().getSchema().opEqual(physicalSwitchUuid)).build());
-            transaction.add(op.comment("Physical Switch: Deleting " + physicalSwitchAugmentation.getHwvtepNodeName().getValue()));
+            transaction.add(op.comment("Physical Switch: Deleting "
+                    + physicalSwitchAugmentation.getHwvtepNodeName().getValue()));
             transaction.add(op.mutate(global.getSchema())
                     .addMutation(global.getSwitchesColumn().getSchema(), Mutator.DELETE,
                             Collections.singleton(physicalSwitchUuid)));
-            transaction.add(op.comment("Global: Mutating " + physicalSwitchAugmentation.getHwvtepNodeName().getValue() + " " + physicalSwitchUuid));
+            transaction.add(op.comment("Global: Mutating " + physicalSwitchAugmentation.getHwvtepNodeName().getValue()
+                    + " " + physicalSwitchUuid));
         } else {
             LOG.warn("Unable to delete physical switch {} because it was not found in the operational store",
                     physicalSwitchAugmentation.getHwvtepNodeName().getValue());
@@ -85,7 +87,8 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node removed = TransactUtils.getRemoved(mod);
                 if (removed != null) {
-                    PhysicalSwitchAugmentation physicalSwitch = removed.getAugmentation(PhysicalSwitchAugmentation.class);
+                    PhysicalSwitchAugmentation physicalSwitch =
+                            removed.getAugmentation(PhysicalSwitchAugmentation.class);
                     if (physicalSwitch != null) {
                         result.put(key, physicalSwitch);
                     }

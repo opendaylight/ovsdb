@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -64,8 +63,8 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                final RemoteUcastMacs remoteUcastMacs,
                                final InstanceIdentifier macKey,
                                final Object... extraData) {
-        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
         processDependencies(null, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 
@@ -75,28 +74,29 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final RemoteUcastMacs mac,
                                     final InstanceIdentifier macKey,
                                     final Object... extraData) {
-            LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
-            InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class).
-                    child(RemoteUcastMacs.class, mac.getKey());
-            HwvtepDeviceInfo.DeviceData deviceData =
-                    getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
-            UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    UcastMacsRemote.class, null);
-            if (deviceData != null && deviceData.getUuid() != null) {
-                //when mac entry is deleted, its referenced locators are deleted automatically.
-                //locators in config DS is not deleted and need to be removed explicitly by user.
-                UUID macEntryUUID = deviceData.getUuid();
-                ucastMacsRemote.getUuidColumn().setData(macEntryUUID);
-                transaction.add(op.delete(ucastMacsRemote.getSchema()).
-                        where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
-                transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
-                updateCurrentTxDeleteData(RemoteUcastMacs.class, macKey, mac);
-            } else {
-                LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
-                        mac.getMacEntryKey().getValue());
-            }
+        LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
+        InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, mac.getKey());
+        HwvtepDeviceInfo.DeviceData deviceData =
+                getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
+        UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                UcastMacsRemote.class, null);
+        if (deviceData != null && deviceData.getUuid() != null) {
+            //when mac entry is deleted, its referenced locators are deleted automatically.
+            //locators in config DS is not deleted and need to be removed explicitly by user.
+            UUID macEntryUUID = deviceData.getUuid();
+            ucastMacsRemote.getUuidColumn().setData(macEntryUUID);
+            transaction.add(op.delete(ucastMacsRemote.getSchema())
+                    .where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+            transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
+            updateCurrentTxDeleteData(RemoteUcastMacs.class, macKey, mac);
+        } else {
+            LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
+                    mac.getMacEntryKey().getValue());
+        }
     }
 
+    @Override
     protected List<RemoteUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteUcastMacs();
     }

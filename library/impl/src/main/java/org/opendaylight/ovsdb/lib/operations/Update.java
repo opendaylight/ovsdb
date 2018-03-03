@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
         this(typedTable.getSchema(), typedTable.getRow());
     }
 
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT") // validate call below
     public <T extends TableSchema<T>, D> Update<E> set(ColumnSchema<T, D> columnSchema, D value) {
         columnSchema.validate(value);
         Object untypedValue = columnSchema.getNormalizeData(value);

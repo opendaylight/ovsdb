@@ -13,7 +13,8 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 public class Operations {
-    public static Operations op = new Operations();
+    @SuppressWarnings("checkstyle:ConstantName")
+    public static final Operations op = new Operations();
 
     public <E extends TableSchema<E>> Insert<E> insert(TableSchema<E> schema) {
         return new Insert<>(schema);

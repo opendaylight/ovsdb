@@ -15,7 +15,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +44,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TyperUtils.class, TransactUtils.class})
+@PrepareForTest({TyperUtils.class, TransactUtils.class, Operations.class})
 public class OpenVSwitchBridgeAddCommandTest {
     private OpenVSwitchBridgeAddCommand ovsBridgeAddCommand;
 
@@ -82,7 +81,7 @@ public class OpenVSwitchBridgeAddCommandTest {
         doNothing().when(ovs).setBridges(any(Set.class));
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
-        Operations op = (Operations) setField("op");
+        Operations op = OvsdbNodeUpdateCommandTest.setOpField();
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(ovs.getBridgesColumn()).thenReturn(column);
@@ -94,12 +93,5 @@ public class OpenVSwitchBridgeAddCommandTest {
         ovsBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class),
                 mock(InstanceIdentifierCodec.class));
         verify(transaction).add(any(Operation.class));
-    }
-
-    private Object setField(String fieldName) throws Exception {
-        Field field = Operations.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(field.get(Operations.class), mock(Operations.class));
-        return field.get(Operations.class);
     }
 }

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 
 public class OvsdbMapSerializer extends JsonSerializer<OvsdbMap<?,?>> {
@@ -23,10 +24,11 @@ public class OvsdbMapSerializer extends JsonSerializer<OvsdbMap<?,?>> {
         generator.writeString("map");
         generator.writeStartArray();
         Map<?,?> javaMap = map.delegate();
-        for (Object set : javaMap.keySet()) {
+        for (Entry<?, ?> entry : javaMap.entrySet()) {
+            Object set = entry.getKey();
             generator.writeStartArray();
             generator.writeObject(set);
-            generator.writeObject(javaMap.get(set));
+            generator.writeObject(entry.getValue());
             generator.writeEndArray();
         }
         generator.writeEndArray();

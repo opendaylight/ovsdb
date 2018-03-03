@@ -10,13 +10,17 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
-import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -25,12 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
@@ -70,8 +68,8 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                                final RemoteUcastMacs remoteUcastMacs,
                                final InstanceIdentifier macKey,
                                final Object... extraData) {
-        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
         processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 
@@ -81,40 +79,43 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                                     final RemoteUcastMacs remoteUcastMac,
                                     final InstanceIdentifier macKey,
                                     final Object... extraData) {
-            LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
-            HwvtepDeviceInfo.DeviceData deviceData =
-                    getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macKey);
+        LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
+        final HwvtepDeviceInfo.DeviceData deviceData =
+                getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macKey);
 
-            UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), UcastMacsRemote.class);
-            setIpAddress(ucastMacsRemote, remoteUcastMac);
-            setLocator(transaction, ucastMacsRemote, remoteUcastMac);
-            setLogicalSwitch(transaction, ucastMacsRemote, remoteUcastMac);
-            if (deviceData == null) {
-                setMac(ucastMacsRemote, remoteUcastMac);
-                LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
-                transaction.add(op.insert(ucastMacsRemote));
-                getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
-            } else if (deviceData.getUuid() != null) {
-                UUID macEntryUUID = deviceData.getUuid();
-                UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                                UcastMacsRemote.class, null);
-                extraMac.getUuidColumn().setData(macEntryUUID);
-                LOG.trace("doDeviceTransaction: updating RemotUcastMac entry: {}", ucastMacsRemote);
-                transaction.add(op.update(ucastMacsRemote)
-                        .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
-                        .build());
-            } else {
-                LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
-                                remoteUcastMac.getMacEntryKey().getValue());
-            }
+        UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                UcastMacsRemote.class);
+        setIpAddress(ucastMacsRemote, remoteUcastMac);
+        setLocator(transaction, ucastMacsRemote, remoteUcastMac);
+        setLogicalSwitch(transaction, ucastMacsRemote, remoteUcastMac);
+        if (deviceData == null) {
+            setMac(ucastMacsRemote, remoteUcastMac);
+            LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
+            transaction.add(op.insert(ucastMacsRemote));
+            getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
+        } else if (deviceData.getUuid() != null) {
+            UUID macEntryUUID = deviceData.getUuid();
+            UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    UcastMacsRemote.class, null);
+            extraMac.getUuidColumn().setData(macEntryUUID);
+            LOG.trace("doDeviceTransaction: updating RemotUcastMac entry: {}", ucastMacsRemote);
+            transaction.add(op.update(ucastMacsRemote)
+                    .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
+                    .build());
+        } else {
+            LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
+                    remoteUcastMac.getMacEntryKey().getValue());
+        }
     }
 
-    private void setLogicalSwitch(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote, final RemoteUcastMacs inputMac) {
+    private void setLogicalSwitch(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote,
+            final RemoteUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
                     (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
-            ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid));
+            ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(
+                    transaction, getOperationalState(), lswitchIid));
         }
     }
 
@@ -143,12 +144,14 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
+    @Override
     protected List<RemoteUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteUcastMacs();
     }
 
     static class UcastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteUcastMacs> {
 
+        @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteUcastMacs data) {
             if (data == null) {
                 return Collections.emptyList();
@@ -156,6 +159,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }
 
+        @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteUcastMacs data) {
             if (data == null) {
                 return Collections.emptyList();

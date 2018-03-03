@@ -8,23 +8,20 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.util.concurrent.SettableFuture;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public abstract class SameThreadScheduledExecutor implements ScheduledExecutorService {
 
     @Override
+    public void execute(Runnable runnable) {
+        runnable.run();
+    }
+
+    @Override
     public Future<?> submit(Runnable runnable) {
         runnable.run();
-        SettableFuture ft = SettableFuture.create();
+        SettableFuture<?> ft = SettableFuture.create();
         ft.set(null);
         return ft;
     }

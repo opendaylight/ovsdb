@@ -8,10 +8,11 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.base.Strings;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.operations.Delete;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -23,12 +24,10 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);
-    private HwvtepConnectionInstance connectionInstance;
-    private DatabaseSchema dbSchema;
+    private final HwvtepConnectionInstance connectionInstance;
+    private final DatabaseSchema dbSchema;
 
     public TransactInvokerImpl(HwvtepConnectionInstance connectionInstance, DatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
@@ -61,7 +60,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                 } else {
                     command.onSuccess(tb);
                 }
-            } catch (Exception e) {
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Transact execution exception: ", e);
             }
             LOG.trace("invoke exit command: {}, tb: {}", command, tb);
@@ -83,11 +82,11 @@ public class TransactInvokerImpl implements TransactInvoker {
                 sb.append("]   ");
             } else if (op instanceof Delete) {
                 Delete delete = (Delete)op;
-                sb.append("delete from " );
+                sb.append("delete from ");
                 sb.append(delete.getTableSchema().getName());
             } else if (op instanceof Update) {
                 Update update = (Update)op;
-                sb.append("update [" );
+                sb.append("update [");
                 Map row = update.getRow();
                 if (row != null) {
                     for (Object key : row.keySet()) {

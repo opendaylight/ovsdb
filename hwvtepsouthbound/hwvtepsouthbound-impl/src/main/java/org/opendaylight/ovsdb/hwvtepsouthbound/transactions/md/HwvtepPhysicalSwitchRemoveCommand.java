@@ -26,7 +26,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepPhysicalSwitchRemoveCommand extends AbstractTransactionCommand {
 
-    public HwvtepPhysicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalSwitchRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -34,9 +35,9 @@ public class HwvtepPhysicalSwitchRemoveCommand extends AbstractTransactionComman
     public void execute(ReadWriteTransaction transaction) {
         Collection<PhysicalSwitch> deletedPSRows =
                 TyperUtils.extractRowsRemoved(PhysicalSwitch.class, getUpdates(), getDbSchema()).values();
-        for (PhysicalSwitch pSwitch : deletedPSRows) {
+        for (PhysicalSwitch phySwitch : deletedPSRows) {
             InstanceIdentifier<Node> nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(
-                    getOvsdbConnectionInstance(), pSwitch);
+                    getOvsdbConnectionInstance(), phySwitch);
             InstanceIdentifier<Switches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(Switches.class, new SwitchesKey(new HwvtepPhysicalSwitchRef(nodeIid)));
@@ -46,5 +47,4 @@ public class HwvtepPhysicalSwitchRemoveCommand extends AbstractTransactionComman
             getDeviceInfo().clearDeviceOperData(Node.class, switchIid);
         }
     }
-
 }

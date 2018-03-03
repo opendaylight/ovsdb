@@ -51,9 +51,9 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     }
 
     @Override
-    public void onGlobalContextUpdated(SchemaContext context) {
-        this.context = context;
-        this.dataSchemaContextTree = DataSchemaContextTree.from(context);
+    public void onGlobalContextUpdated(SchemaContext schemaContext) {
+        this.context = schemaContext;
+        this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);
     }
 
     public String serialize(InstanceIdentifier<?> iid) {

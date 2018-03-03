@@ -49,7 +49,8 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
 
             HwvtepGlobalAugmentationBuilder hwvtepGlobalBuilder = new HwvtepGlobalAugmentationBuilder();
             try {
-                Version version = getOvsdbConnectionInstance().getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get().getVersion();
+                Version version = getOvsdbConnectionInstance().getSchema(
+                        HwvtepSchemaConstants.HARDWARE_VTEP).get().getVersion();
                 hwvtepGlobalBuilder.setDbVersion(version.toString());
             } catch (InterruptedException | ExecutionException e) {
                 LOG.debug("Failed to get schema version on {} due to {}",

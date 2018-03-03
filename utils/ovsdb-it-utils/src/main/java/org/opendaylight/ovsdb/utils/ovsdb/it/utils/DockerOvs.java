@@ -13,12 +13,14 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -26,6 +28,7 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -139,9 +142,9 @@ public class DockerOvs implements AutoCloseable {
     private boolean runDocker;
     private boolean createOdlNetwork;
 
-    class DockerComposeServiceInfo {
-        public String name;
-        public String port;
+    private static class DockerComposeServiceInfo {
+        String name;
+        String port;
     }
 
     private final Map<String, DockerComposeServiceInfo> dockerComposeServices = new HashMap<>();
@@ -201,7 +204,7 @@ public class DockerOvs implements AutoCloseable {
         ProcUtils.runProcess(60000, upCmd);
         isRunning = true;
         int waitSeconds = Integer.parseInt(envDockerWaitForPing);
-        waitForOvsdbServers(waitSeconds * 1000);
+        waitForOvsdbServers(waitSeconds * 1000L);
     }
 
     private void setupEnvForDockerCompose(String venvWs) {
@@ -419,7 +422,8 @@ public class DockerOvs implements AutoCloseable {
         YamlReader yamlReader = null;
         Map root = null;
         try {
-            yamlReader = new YamlReader(new FileReader(tmpDockerComposeFile));
+            yamlReader = new YamlReader(new InputStreamReader(new FileInputStream(tmpDockerComposeFile),
+                    StandardCharsets.UTF_8));
             root = (Map) yamlReader.read();
         } catch (FileNotFoundException e) {
             LOG.warn("DockerOvs.parseDockerComposeYaml error reading yaml file", e);
@@ -476,7 +480,9 @@ public class DockerOvs implements AutoCloseable {
             isRunning = false;
         }
 
-        tmpDockerComposeFile.delete();
+        if (!tmpDockerComposeFile.delete()) {
+            LOG.warn("Failed to delete {}", tmpDockerComposeFile);
+        }
     }
 
     /**
@@ -485,8 +491,7 @@ public class DockerOvs implements AutoCloseable {
      * checked to make sure the Open_Vswitch DB is present. Note that this thread will
      * run until it succeeds unless its interrupt() method is called.
      */
-    private class OvsdbPing extends Thread {
-
+    private static class OvsdbPing extends Thread {
         private final String host;
         private final int port;
         private final AtomicInteger result;
@@ -498,12 +503,12 @@ public class DockerOvs implements AutoCloseable {
          * @param ovsNumber which OVS is this?
          * @param result an AtomicInteger that is incremented upon a successful "ping"
          */
-        OvsdbPing(int ovsNumber, AtomicInteger result) {
-            this.host = getOvsdbAddress(ovsNumber);
-            this.port = Integer.parseInt(getOvsdbPort(ovsNumber));
+        OvsdbPing(AtomicInteger result, String host, int port) {
+            this.host = host;
+            this.port = port;
             this.result = result;
             listDbsRequest = ByteBuffer.wrap(
-                    ("{\"method\": \"list_dbs\", \"params\": [], \"id\": " + port + "}").getBytes());
+                ("{\"method\": \"list_dbs\", \"params\": [], \"id\": " + port + "}").getBytes(StandardCharsets.UTF_8));
             listDbsRequest.mark();
         }
 
@@ -565,11 +570,12 @@ public class DockerOvs implements AutoCloseable {
 
         OvsdbPing[] pingers = new OvsdbPing[numOvs];
         if (numOvs == 1) {
-            pingers[0] = new OvsdbPing(0, numRunningOvs);
+            pingers[0] = new OvsdbPing(numRunningOvs, getOvsdbAddress(0), Integer.parseInt(getOvsdbPort(0)));
             pingers[0].start();
         } else {
             for (int i = 0; i < numOvs; i++) {
-                pingers[i] = new OvsdbPing(i + 1, numRunningOvs);
+                pingers[i] = new OvsdbPing(numRunningOvs, getOvsdbAddress(i + 1),
+                        Integer.parseInt(getOvsdbPort(i + 1)));
                 pingers[i].start();
             }
         }
@@ -605,8 +611,8 @@ public class DockerOvs implements AutoCloseable {
         try {
             tmpFile = File.createTempFile("ovsdb-it-tmp-", null);
 
-            try (Reader in = new InputStreamReader(url.openStream());
-                                FileWriter out = new FileWriter(tmpFile)) {
+            try (Reader in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
+                    Writer out = new OutputStreamWriter(new FileOutputStream(tmpFile), StandardCharsets.UTF_8)) {
                 char[] buf = new char[1024];
                 int read;
                 while (-1 != (read = in.read(buf))) {

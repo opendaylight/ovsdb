@@ -154,7 +154,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Integration tests for southbound-impl
+ * Integration tests for southbound-impl.
  *
  * @author Sam Hague (shague@redhat.com)
  */
@@ -178,7 +178,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
     private static Version schemaVersion;
-    @Inject @Filter(timeout=60000)
+    @Inject @Filter(timeout = 60000)
     private static DataBroker dataBroker = null;
 
     @Inject
@@ -190,13 +190,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL);
 
 
-    private static class NotifyingDataChangeListener implements DataTreeChangeListener<DataObject> {
+    private static final class NotifyingDataChangeListener implements DataTreeChangeListener<DataObject> {
+        private static final int RETRY_WAIT = 100;
+
         private final LogicalDatastoreType type;
         private final Set<InstanceIdentifier<?>> createdIids = new HashSet<>();
         private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
         private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
         private final InstanceIdentifier<?> iid;
-        private final int RETRY_WAIT = 100;
 
         private NotifyingDataChangeListener(LogicalDatastoreType type) {
             this.type = type;
@@ -241,21 +242,21 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 }
             }
 
-            synchronized(this) {
+            synchronized (this) {
                 notifyAll();
             }
         }
 
-        public boolean isCreated(InstanceIdentifier<?> iid) {
-            return createdIids.remove(iid);
+        public boolean isCreated(InstanceIdentifier<?> path) {
+            return createdIids.remove(path);
         }
 
-        public boolean isRemoved(InstanceIdentifier<?> iid) {
-            return removedIids.remove(iid);
+        public boolean isRemoved(InstanceIdentifier<?> path) {
+            return removedIids.remove(path);
         }
 
-        public boolean isUpdated(InstanceIdentifier<?> iid) {
-            return updatedIids.remove(iid);
+        public boolean isUpdated(InstanceIdentifier<?> path) {
+            return updatedIids.remove(path);
         }
 
         public void clear() {
@@ -271,34 +272,34 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         public void waitForCreation(long timeout) throws InterruptedException {
             synchronized (this) {
-                long _start = System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                 LOG.info("Waiting for {} DataChanged creation on {}", type, iid);
-                while (!isCreated(iid) && System.currentTimeMillis() - _start < timeout) {
+                while (!isCreated(iid) && System.currentTimeMillis() - start < timeout) {
                     wait(RETRY_WAIT);
                 }
-                LOG.info("Woke up, waited {}ms for creation of {}", System.currentTimeMillis() - _start, iid);
+                LOG.info("Woke up, waited {}ms for creation of {}", System.currentTimeMillis() - start, iid);
             }
         }
 
         public void waitForDeletion(long timeout) throws InterruptedException {
             synchronized (this) {
-                long _start = System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                 LOG.info("Waiting for {} DataChanged deletion on {}", type, iid);
-                while (!isRemoved(iid) && System.currentTimeMillis() - _start < timeout) {
+                while (!isRemoved(iid) && System.currentTimeMillis() - start < timeout) {
                     wait(RETRY_WAIT);
                 }
-                LOG.info("Woke up, waited {}ms for deletion of {}", System.currentTimeMillis() - _start, iid);
+                LOG.info("Woke up, waited {}ms for deletion of {}", System.currentTimeMillis() - start, iid);
             }
         }
 
         public void waitForUpdate(long timeout) throws InterruptedException {
             synchronized (this) {
-                long _start = System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                 LOG.info("Waiting for {} DataChanged update on {}", type, iid);
-                while (!isUpdated(iid) && System.currentTimeMillis() - _start < timeout) {
+                while (!isUpdated(iid) && System.currentTimeMillis() - start < timeout) {
                     wait(RETRY_WAIT);
                 }
-                LOG.info("Woke up, waited {}ms for update of {}", System.currentTimeMillis() - _start, iid);
+                LOG.info("Woke up, waited {}ms for update of {}", System.currentTimeMillis() - start, iid);
             }
         }
     }
@@ -366,15 +367,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private Option[] getPropertiesOptions() {
         Properties props = new Properties(System.getProperties());
-        String addressStr = props.getProperty(SouthboundITConstants.SERVER_IPADDRESS,
+        String ipAddressStr = props.getProperty(SouthboundITConstants.SERVER_IPADDRESS,
                 SouthboundITConstants.DEFAULT_SERVER_IPADDRESS);
         String portStr = props.getProperty(SouthboundITConstants.SERVER_PORT,
                 SouthboundITConstants.DEFAULT_SERVER_PORT);
-        String connectionType = props.getProperty(SouthboundITConstants.CONNECTION_TYPE,
+        String connectionTypeStr = props.getProperty(SouthboundITConstants.CONNECTION_TYPE,
                 SouthboundITConstants.CONNECTION_TYPE_ACTIVE);
 
         LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}",
-                connectionType, addressStr, portStr);
+                connectionTypeStr, ipAddressStr, portStr);
 
         return new Option[] {
                 propagateSystemProperties(
@@ -382,27 +383,23 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         SouthboundITConstants.SERVER_PORT,
                         SouthboundITConstants.CONNECTION_TYPE),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
-                        SouthboundITConstants.SERVER_IPADDRESS, addressStr),
+                        SouthboundITConstants.SERVER_IPADDRESS, ipAddressStr),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
                         SouthboundITConstants.SERVER_PORT, portStr),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
-                        SouthboundITConstants.CONNECTION_TYPE, connectionType),
+                        SouthboundITConstants.CONNECTION_TYPE, connectionTypeStr),
         };
     }
 
     @Before
     @Override
-    public void setup() throws InterruptedException {
+    public void setup() throws Exception {
         if (setup) {
             LOG.info("Skipping setup, already initialized");
             return;
         }
 
-        try {
-            super.setup();
-        } catch (Exception e) {
-            LOG.warn("Failed to setup test", e);
-        }
+        super.setup();
         Assert.assertNotNull("db should not be null", dataBroker);
 
         LOG.info("sleeping for 10s to let the features finish installing");
@@ -502,8 +499,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     /**
      * Test passive connection mode. The southbound starts in a listening mode waiting for connections on port
      * 6640. This test will wait for incoming connections for {@link SouthboundITConstants#CONNECTION_INIT_TIMEOUT} ms.
-     *
-     * @throws InterruptedException
      */
     @Test
     public void testPassiveNode() throws InterruptedException {
@@ -513,16 +508,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static ConnectionInfo getConnectionInfo(final String addressStr, final int portNumber) {
+    private static ConnectionInfo getConnectionInfo(final String ipAddressStr, final int portNum) {
         InetAddress inetAddress = null;
         try {
-            inetAddress = InetAddress.getByName(addressStr);
+            inetAddress = InetAddress.getByName(ipAddressStr);
         } catch (UnknownHostException e) {
-            fail("Could not resolve " + addressStr + ": " + e);
+            fail("Could not resolve " + ipAddressStr + ": " + e);
         }
 
         IpAddress address = SouthboundMapper.createIpAddress(inetAddress);
-        PortNumber port = new PortNumber(portNumber);
+        PortNumber port = new PortNumber(portNum);
 
         final ConnectionInfo connectionInfo = new ConnectionInfoBuilder()
                 .setRemoteIp(address)
@@ -574,37 +569,37 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private void waitForOperationalCreation(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
             while (!OPERATIONAL_LISTENER.isCreated(
-                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for creation of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {} for creation of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
     private static void waitForOperationalDeletion(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
             while (!OPERATIONAL_LISTENER.isRemoved(
-                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for deletion of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {} for deletion of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
     private void waitForOperationalUpdate(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged update on {}", iid);
             while (!OPERATIONAL_LISTENER.isUpdated(
-                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for update of {}", System.currentTimeMillis() - _start, iid);
+            LOG.info("Woke up, waited {} for update of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
@@ -658,7 +653,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         //dpdkTypes.add("dpdkvhost");
 
                         for (String dpdkType : dpdkTypes) {
-                            String testPortname = "test"+dpdkType+"port";
+                            String testPortname = "test" + dpdkType + "port";
                             LOG.info("DPDK portname and type is {}, {}", testPortname, dpdkType);
                             Class<? extends InterfaceTypeBase> dpdkIfType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
                                     .get(dpdkType);
@@ -677,7 +672,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
                         // Verify that each termination point has the specific DPDK ifType
                         for (String dpdkType : dpdkTypes) {
-                            String testPortname = "test"+dpdkType+"port";
+                            String testPortname = "test" + dpdkType + "port";
                             Class<? extends InterfaceTypeBase> dpdkIfType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
                                     .get(dpdkType);
                             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
@@ -854,7 +849,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param externalIds The external identifiers if any.
          * @param otherConfigs The other configuration items if any.
          */
-        public TestBridge(final ConnectionInfo connectionInfo, @Nullable InstanceIdentifier<Node> bridgeIid,
+        TestBridge(final ConnectionInfo connectionInfo, @Nullable InstanceIdentifier<Node> bridgeIid,
                                   final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
                                   final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
                                   @Nullable final Class<? extends DatapathTypeBase> dpType,
@@ -895,7 +890,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        public TestBridge(final ConnectionInfo connectionInfo, final String bridgeName) {
+        TestBridge(final ConnectionInfo connectionInfo, final String bridgeName) {
             this(connectionInfo, null, bridgeName, null, true,
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null, null);
         }
@@ -918,7 +913,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         private final Uri autoattachId;
         private final Uri bridgeId;
 
-        public TestAutoAttach (final ConnectionInfo connectionInfo,
+        TestAutoAttach(final ConnectionInfo connectionInfo,
                 final Uri autoattachId,
                 final Uri bridgeId,
                 @Nullable final String systemName,
@@ -951,6 +946,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.warn("Sleep interrupted while waiting for queue {}", iid, e);
             }
         }
+
         @Override
         public void close() {
             final InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
@@ -988,7 +984,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
             String bridgeId = nodeId.getValue();
-            try(TestAutoAttach testAutoattach = new TestAutoAttach(connectionInfo, new Uri(testAutoattachId),
+            try (TestAutoAttach testAutoattach = new TestAutoAttach(connectionInfo, new Uri(testAutoattachId),
                     new Uri(bridgeId), testSystemName, testSystemDescription, null, null)) {
                 // READ: Read md-sal operational datastore to see if the AutoAttach table was created
                 // and if Bridge table was updated with AutoAttach Uuid
@@ -1009,7 +1005,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertEquals(aaUuid, bridge.getAutoAttach());
 
                 // UPDATE: Update mappings column of AutoAttach table that was created
-                List<Mappings> mappings = ImmutableList.of(new MappingsBuilder().setMappingsKey(100L).setMappingsValue(200).build());
+                List<Mappings> mappings = ImmutableList.of(new MappingsBuilder().setMappingsKey(100L)
+                        .setMappingsValue(200).build());
                 Autoattach updatedAa = new AutoattachBuilder()
                         .setAutoattachId(new Uri(testAutoattachId))
                         .setMappings(mappings)
@@ -1043,8 +1040,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertNotNull(operAa);
                 List<Mappings> operMappingsList = operAa.getMappings();
                 for (Mappings operMappings: operMappingsList) {
-                    Assert.assertEquals(mappings.get(operMappingsList.indexOf(operMappings)).getMappingsKey(), operMappings.getMappingsKey());
-                    Assert.assertEquals(mappings.get(operMappingsList.indexOf(operMappings)).getMappingsValue(), operMappings.getMappingsValue());
+                    Assert.assertEquals(mappings.get(operMappingsList.indexOf(operMappings))
+                            .getMappingsKey(), operMappings.getMappingsKey());
+                    Assert.assertEquals(mappings.get(operMappingsList.indexOf(operMappings))
+                            .getMappingsValue(), operMappings.getMappingsValue());
                 }
                 List<AutoattachExternalIds> operExternalIds = operAa.getAutoattachExternalIds();
                 externalIds.add(new AutoattachExternalIdsBuilder()
@@ -1052,10 +1051,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         .setAutoattachExternalIdValue(operAa.getAutoattachId().getValue())
                         .build());
                 for (AutoattachExternalIds operExternalId : operExternalIds) {
-                    Assert.assertEquals(externalIds.get(operExternalIds.indexOf(operExternalId)).getAutoattachExternalIdKey(),
-                            operExternalId.getAutoattachExternalIdKey());
-                    Assert.assertEquals(externalIds.get(operExternalIds.indexOf(operExternalId)).getAutoattachExternalIdValue(),
-                            operExternalId.getAutoattachExternalIdValue());
+                    Assert.assertEquals(externalIds.get(operExternalIds.indexOf(operExternalId))
+                            .getAutoattachExternalIdKey(), operExternalId.getAutoattachExternalIdKey());
+                    Assert.assertEquals(externalIds.get(operExternalIds.indexOf(operExternalId))
+                            .getAutoattachExternalIdValue(), operExternalId.getAutoattachExternalIdValue());
                 }
 
                 // DELETE: Delete AutoAttach table
@@ -1067,8 +1066,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertNull(operAa);
             } catch (AssumptionViolatedException e) {
                 LOG.warn("Skipped test for Autoattach due to unsupported schema", e);
-            } catch (Exception e) {
-                fail("Unexpected exception in CRUD test for Autoattach table for schema:" + schemaVersion.toString() +". " + e);
             }
         }
     }
@@ -1098,7 +1095,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param externalIds The external identifiers if any.
          * @param otherConfigs The other configuration items if any.
          */
-        public TestQos(final ConnectionInfo connectionInfo,
+        TestQos(final ConnectionInfo connectionInfo,
                                   final Uri qosId,
                                   final Class<? extends QosTypeBase> qosType,
                                   @Nullable final List<QosExternalIds> externalIds,
@@ -1152,7 +1149,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class TestQueue implements AutoCloseable {
         private final ConnectionInfo connectionInfo;
         private final Uri queueId;
-        private final InstanceIdentifier<Queues> qIid;
+        private final InstanceIdentifier<Queues> queueIid;
 
         /**
          * Creates a test queue entry which can be automatically removed when no longer necessary.
@@ -1163,7 +1160,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param externalIds The external identifiers if any.
          * @param otherConfigs The other configuration items if any.
          */
-        public TestQueue(final ConnectionInfo connectionInfo,
+        TestQueue(final ConnectionInfo connectionInfo,
                                   final Uri queueId,
                                   final Short queueDscp,
                                   @Nullable final List<QueuesExternalIds> externalIds,
@@ -1177,16 +1174,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .setQueuesExternalIds(externalIds)
                 .setQueuesOtherConfig(otherConfigs)
                 .build();
-            qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(Queues.class, queue.getKey());
             final NotifyingDataChangeListener queueOperationalListener =
-                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qIid);
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queueIid);
             queueOperationalListener.registerDataChangeListener();
 
             Assert.assertTrue(
                     mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                    qIid, queue));
+                    queueIid, queue));
 
             try {
                 queueOperationalListener.waitForCreation(OVSDB_ROUNDTRIP_TIMEOUT);
@@ -1196,18 +1193,19 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         public InstanceIdentifier<Queues> getInstanceIdentifier() {
-            return qIid;
+            return queueIid;
         }
+
         @Override
         public void close() {
-            InstanceIdentifier<Queues> qIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            InstanceIdentifier<Queues> queuesIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(Queues.class, new QueuesKey(this.queueId));
             final NotifyingDataChangeListener queueOperationalListener =
-                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qIid);
+                    new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queuesIid);
             queueOperationalListener.registerDataChangeListener();
 
-            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qIid));
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, queuesIid));
             try {
                 queueOperationalListener.waitForDeletion(OVSDB_ROUNDTRIP_TIMEOUT);
             } catch (InterruptedException e) {
@@ -1249,7 +1247,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     /**
      * extract the <code>LogicalDataStoreType.OPERATIONAL</code> type data store contents for the particular bridge
-     * identified by <code>bridgeName</code>
+     * identified by <code>bridgeName</code>.
      *
      * @param connectionInfo the connection information
      * @param bridgeName the bridge name
@@ -1262,7 +1260,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     /**
      * Extract the node contents from <code>store</code> type data store for the
-     * bridge identified by <code>bridgeName</code>
+     * bridge identified by <code>bridgeName</code>.
      *
      * @param connectionInfo the connection information
      * @param bridgeName the bridge name
@@ -1277,7 +1275,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     /**
      * Extract the node contents from <code>LogicalDataStoreType.OPERATIONAL</code> data store for the
-     * bridge identified by <code>bridgeName</code>
+     * bridge identified by <code>bridgeName</code>.
      *
      * @param connectionInfo the connection information
      * @param bridgeName the bridge name
@@ -1304,7 +1302,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     /**
      * Extracts the <code>TerminationPointAugmentation</code> for the <code>index</code> <code>TerminationPoint</code>
-     * on <code>bridgeName</code>
+     * on <code>bridgeName</code>.
      *
      * @param connectionInfo the connection information
      * @param bridgeName the bridge name
@@ -1363,7 +1361,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRDTerminationPointOfPort() throws InterruptedException {
-        final Long OFPORT_EXPECTED = 45002L;
+        final Long ofportExpected = 45002L;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1379,7 +1377,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             String portName = "testOfPort";
             ovsdbTerminationBuilder.setName(portName);
 
-            ovsdbTerminationBuilder.setOfport(OFPORT_EXPECTED);
+            ovsdbTerminationBuilder.setOfport(ofportExpected);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1393,14 +1391,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
                     // if ephemeral port 45002 is in use, ofPort is set to 1
-                    Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(1L));
+                    Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(1L));
                     LOG.info("ofPort: {}", ofPort);
                 }
             }
 
             // UPDATE- Not Applicable.  From the OpenVSwitch Documentation:
-            //   "A client should ideally set this column’s value in the same database transaction that it uses to create
-            //   the interface."
+            //   "A client should ideally set this column’s value in the same database transaction that it uses to
+            //   create the interface."
 
             // DELETE handled by TestBridge
         }
@@ -1408,8 +1406,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRDTerminationPointOfPortRequest() throws InterruptedException {
-        final Long OFPORT_EXPECTED = 45008L;
-        final Long OFPORT_INPUT = 45008L;
+        final Long ofportExpected = 45008L;
+        final Long ofportInput = 45008L;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1417,14 +1415,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
-            NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
+            final NodeId nodeId = SouthboundUtils.createManagedNodeId(SouthboundUtils.createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testOfPortRequest";
             ovsdbTerminationBuilder.setName(portName);
-            Integer ofPortRequestExpected = OFPORT_EXPECTED.intValue();
-            ovsdbTerminationBuilder.setOfport(OFPORT_INPUT);
+            Integer ofPortRequestExpected = ofportExpected.intValue();
+            ovsdbTerminationBuilder.setOfport(ofportInput);
             ovsdbTerminationBuilder.setOfportRequest(ofPortRequestExpected);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
@@ -1439,7 +1437,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
                     // if ephemeral port 45008 is in use, ofPort is set to 1
-                    Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(1L));
+                    Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(1L));
                     LOG.info("ofPort: {}", ofPort);
 
                     Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest();
@@ -1466,6 +1464,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private interface SouthboundTerminationPointHelper<T> {
         void writeValues(OvsdbTerminationPointAugmentationBuilder builder, List<T> values);
+
         List<T> readValues(OvsdbTerminationPointAugmentation augmentation);
     }
 
@@ -1477,7 +1476,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private <T> void testCRUDTerminationPoint(
             KeyValueBuilder<T> builder, String prefix, SouthboundTerminationPointHelper<T> helper)
             throws InterruptedException {
-        final int TERMINATION_POINT_TEST_INDEX = 0;
+        final int terminationPointTestIndex = 0;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1508,7 +1507,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     // then repeat for OPERATIONAL data store
                     OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation =
                             getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeAndPortName,
-                                    LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+                                    LogicalDatastoreType.CONFIGURATION, terminationPointTestIndex);
                     if (updateFromConfigurationTerminationPointAugmentation != null) {
                         List<T> updateFromConfigurationValues =
                                 helper.readValues(updateFromConfigurationTerminationPointAugmentation);
@@ -1516,7 +1515,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     }
                     OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmentation =
                             getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeAndPortName,
-                                    LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+                                    LogicalDatastoreType.OPERATIONAL, terminationPointTestIndex);
                     if (updateFromOperationalTerminationPointAugmentation != null) {
                         List<T> updateFromOperationalValues =
                                 helper.readValues(updateFromOperationalTerminationPointAugmentation);
@@ -1546,7 +1545,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     // then repeat for OPERATIONAL data store
                     OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation =
                             getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeAndPortName,
-                                    LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+                                    LogicalDatastoreType.CONFIGURATION, terminationPointTestIndex);
                     if (updateToConfigurationTerminationPointAugmentation != null) {
                         List<T> updateToConfigurationValues =
                                 helper.readValues(updateToConfigurationTerminationPointAugmentation);
@@ -1555,7 +1554,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     }
                     OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation =
                             getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeAndPortName,
-                                    LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+                                    LogicalDatastoreType.OPERATIONAL, terminationPointTestIndex);
                     if (updateToOperationalTerminationPointAugmentation != null) {
                         List<T> updateToOperationalValues =
                                 helper.readValues(updateToOperationalTerminationPointAugmentation);
@@ -1721,8 +1720,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRUDTerminationPointVlan() throws InterruptedException {
-        final Integer CREATED_VLAN_ID = 4000;
-        final Integer UPDATED_VLAN_ID = 4001;
+        final Integer createdVlanId = 4000;
+        final Integer updatedVlanId = 4001;
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1736,7 +1735,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointVlanId";
             ovsdbTerminationBuilder.setName(portName);
-            ovsdbTerminationBuilder.setVlanTag(new VlanId(CREATED_VLAN_ID));
+            ovsdbTerminationBuilder.setVlanTag(new VlanId(createdVlanId));
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
@@ -1752,7 +1751,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                     Assert.assertNotNull(actualVlanId);
                     Integer actualVlanIdInt = actualVlanId.getValue();
-                    Assert.assertEquals(CREATED_VLAN_ID, actualVlanIdInt);
+                    Assert.assertEquals(createdVlanId, actualVlanIdInt);
                 }
             }
 
@@ -1760,7 +1759,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             NodeId testBridgeNodeId = getBridgeNode(connectionInfo, SouthboundITConstants.BRIDGE_NAME).getNodeId();
             OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                     new OvsdbTerminationPointAugmentationBuilder();
-            tpUpdateAugmentationBuilder.setVlanTag(new VlanId(UPDATED_VLAN_ID));
+            tpUpdateAugmentationBuilder.setVlanTag(new VlanId(updatedVlanId));
             InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
             NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
             NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
@@ -1785,7 +1784,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                     Assert.assertNotNull(actualVlanId);
                     Integer actualVlanIdInt = actualVlanId.getValue();
-                    Assert.assertEquals(UPDATED_VLAN_ID, actualVlanIdInt);
+                    Assert.assertEquals(updatedVlanId, actualVlanIdInt);
                 }
             }
 
@@ -1795,7 +1794,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRUDTerminationPointVlanModes() throws InterruptedException {
-        final VlanMode UPDATED_VLAN_MODE = VlanMode.Access;
+        final VlanMode updatedVlanMode = VlanMode.Access;
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         VlanMode []vlanModes = VlanMode.values();
         for (VlanMode vlanMode : vlanModes) {
@@ -1830,7 +1829,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 NodeId testBridgeNodeId = getBridgeNode(connectionInfo, SouthboundITConstants.BRIDGE_NAME).getNodeId();
                 OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setVlanMode(UPDATED_VLAN_MODE);
+                tpUpdateAugmentationBuilder.setVlanMode(updatedVlanMode);
                 InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
                 NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
@@ -1853,7 +1852,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
                     if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                         //test
-                        Assert.assertEquals(UPDATED_VLAN_MODE, ovsdbTerminationPointAugmentation.getVlanMode());
+                        Assert.assertEquals(updatedVlanMode, ovsdbTerminationPointAugmentation.getVlanMode());
                     }
                 }
 
@@ -1862,7 +1861,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private List<Set<Integer>> generateVlanSets() {
         int min = 0;
         int max = 4095;
@@ -1884,7 +1882,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRUDTerminationPointVlanTrunks() throws InterruptedException {
-        final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Collections.singleton(2011));
+        final List<Trunks> updatedTrunks = buildTrunkList(Collections.singleton(2011));
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Iterable<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
@@ -1924,7 +1922,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 NodeId testBridgeNodeId = getBridgeNode(connectionInfo, SouthboundITConstants.BRIDGE_NAME).getNodeId();
                 OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
-                tpUpdateAugmentationBuilder.setTrunks(UPDATED_TRUNKS);
+                tpUpdateAugmentationBuilder.setTrunks(updatedTrunks);
                 InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
                 NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
@@ -1947,7 +1945,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
                     if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                         //test
-                        Assert.assertEquals(UPDATED_TRUNKS, ovsdbTerminationPointAugmentation.getTrunks());
+                        Assert.assertEquals(updatedTrunks, ovsdbTerminationPointAugmentation.getTrunks());
                     }
                 }
 
@@ -1972,8 +1970,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     LogicalDatastoreType.OPERATIONAL);
             QosEntries operQos = getQos(new Uri(testQosId), ovsdbNodeAugmentation);
             Assert.assertNotNull(operQos);
-            Uuid qosUuid = new Uuid(operQos.getQosUuid().getValue());
-
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
             NodeId nodeId = SouthboundUtils.createManagedNodeId(connectionInfo, bridge.getBridgeName());
@@ -2047,6 +2043,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private interface SouthboundBridgeHelper<T> {
         void writeValues(OvsdbBridgeAugmentationBuilder builder, List<T> values);
+
         List<T> readValues(OvsdbBridgeAugmentation augmentation);
     }
 
@@ -2142,7 +2139,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         typeList.add(SouthboundConstants.QOS_LINUX_HFSC);
 
         for (String qosType : typeList) {
-            try (TestQos testQos = new TestQos(connectionInfo, qosUri, SouthboundMapper.createQosType(qosType), null, null)) {
+            try (TestQos testQos = new TestQos(connectionInfo, qosUri, SouthboundMapper.createQosType(qosType),
+                    null, null)) {
                 ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
                         LogicalDatastoreType.OPERATIONAL);
                 QosEntries operQosHtb = getQos(qosUri, ovsdbNodeAugmentation);
@@ -2198,6 +2196,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private interface SouthboundQueueHelper<T> {
         void writeValues(QueuesBuilder builder, List<T> values);
+
         List<T> readValues(Queues queue);
     }
 
@@ -2236,6 +2235,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private interface SouthboundQosHelper<T> {
         void writeValues(QosEntriesBuilder builder, List<T> values);
+
         List<T> readValues(QosEntries qos);
     }
 
@@ -2264,7 +2264,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 String testQueueId = String.format("%s_%s", prefix, updateToTestCase.name);
 
                 // CREATE: and update the test queue with starting values.
-                try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId), new Short("45"), null, null)) {
+                try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId),
+                        new Short("45"), null, null)) {
                     QueuesBuilder queuesBuilder = new QueuesBuilder();
                     queuesBuilder.setQueueId(new Uri(testQueueId));
                     InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
@@ -2286,7 +2287,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     // then repeat for OPERATIONAL data store
                     OvsdbNodeAugmentation updateFromConfigurationOvsdbNodeAugmentation = getOvsdbNode(connectionInfo,
                             LogicalDatastoreType.CONFIGURATION);
-                    Queues queueFromConfig = getQueue(new Uri(testQueueId), updateFromConfigurationOvsdbNodeAugmentation);
+                    Queues queueFromConfig =
+                            getQueue(new Uri(testQueueId), updateFromConfigurationOvsdbNodeAugmentation);
                     if (queueFromConfig != null) {
                         List<T> updateFromConfigurationValues =
                                 helper.readValues(queueFromConfig);
@@ -2404,7 +2406,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 String testQosId = String.format("%s_%s", prefix, updateToTestCase.name);
 
                 // CREATE: and update the test qos with starting values.
-                try (TestQos testQos = new TestQos(connectionInfo, new Uri(testQosId), SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB), null, null)) {
+                try (TestQos testQos = new TestQos(connectionInfo, new Uri(testQosId),
+                        SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB), null, null)) {
                     QosEntriesBuilder qosBuilder = new QosEntriesBuilder();
                     qosBuilder.setQosId(new Uri(testQosId));
                     InstanceIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
@@ -2489,6 +2492,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         testCRUDQos(new SouthboundQosOtherConfigBuilder(), "QosOtherConfig",
                 new SouthboundQosOtherConfigHelper());
     }
+
     @Test
     public void testCRUDQosQueues() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
@@ -2592,7 +2596,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private Boolean isQueueInList(List<QueueList> queueList, QueueList queue) {
         for (QueueList queueEntry : queueList) {
-            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())&& queueEntry.getQueueRef().equals(queue.getQueueRef())) {
+            if (queueEntry.getQueueNumber().equals(queue.getQueueNumber())
+                    && queueEntry.getQueueRef().equals(queue.getQueueRef())) {
                 return true;
             }
         }
@@ -2623,8 +2628,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param inputValues The input values (provided as input to the underlying augmentation builder).
          * @param expectedValues The expected values (checked against the output of the underlying augmentation).
          */
-        public SouthboundTestCase(
-                final String name, final List<T> inputValues, final List<T> expectedValues) {
+        SouthboundTestCase(final String name, final List<T> inputValues, final List<T> expectedValues) {
             this.name = name;
             this.inputValues = inputValues;
             this.expectedValues = expectedValues;
@@ -2645,30 +2649,30 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * Creates a builder. Builders may be reused, the generated immutable instances are independent of the
          * builders. There are no default values.
          */
-        public SouthboundTestCaseBuilder() {
+        SouthboundTestCaseBuilder() {
             // Nothing to do
         }
 
         /**
          * Sets the test case's name.
          *
-         * @param name The test case's name.
+         * @param value The test case's name.
          * @return The builder.
          */
-        public SouthboundTestCaseBuilder<T> name(final String name) {
-            this.name = name;
+        public SouthboundTestCaseBuilder<T> name(final String value) {
+            this.name = value;
             return this;
         }
 
         /**
          * Sets the input values.
          *
-         * @param inputValues The input values.
+         * @param values The input values.
          * @return The builder.
          */
         @SafeVarargs
-        public final SouthboundTestCaseBuilder<T> input(final T... inputValues) {
-            this.inputValues = Lists.newArrayList(inputValues);
+        public final SouthboundTestCaseBuilder<T> input(final T... values) {
+            this.inputValues = Lists.newArrayList(values);
             return this;
         }
 
@@ -2697,7 +2701,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          *
          * @return The test case.
          */
-        @SuppressWarnings("unchecked")
         public SouthboundTestCase<T> build() {
             return new SouthboundTestCase<>(name, inputValues, expectedValues);
         }
@@ -3004,9 +3007,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             KeyValueBuilder<T> builder, String testName) {
         List<SouthboundTestCase<T>> testCases = new ArrayList<>();
 
-        final String GOOD_KEY = "GoodKey";
-        final String GOOD_VALUE = "GoodValue";
-        final String NO_VALUE_FOR_KEY = "NoValueForKey";
+        final String goodKey = "GoodKey";
+        final String goodValue = "GoodValue";
+        final String noValueForKey = "NoValueForKey";
 
         final String idKey = testName + "Key";
         final String idValue = testName + "Value";
@@ -3055,8 +3058,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             testCases.add(new SouthboundTestCaseBuilder<T>()
                     .name(testOneGoodOneMalformedValueName)
                     .input(
-                            builder.build(testOneGoodOneMalformedValueName, GOOD_KEY, GOOD_VALUE),
-                            builder.build(testOneGoodOneMalformedValueName, NO_VALUE_FOR_KEY, null))
+                            builder.build(testOneGoodOneMalformedValueName, goodKey, goodValue),
+                            builder.build(testOneGoodOneMalformedValueName, noValueForKey, null))
                     .expectNoOutput()
                     .build());
             builder.reset();
@@ -3093,8 +3096,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class InterfaceLldpSouthboundHelper implements
-    SouthboundTerminationPointHelper<InterfaceLldp> {
+    private static class InterfaceLldpSouthboundHelper implements  SouthboundTerminationPointHelper<InterfaceLldp> {
         @Override
         public void writeValues(
                 OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceLldp> values) {

@@ -8,24 +8,20 @@
 package org.opendaylight.ovsdb.southbound.it;
 
 /**
- * Constants for SouthboundIT
+ * Constants for SouthboundIT.
  */
-public final class SouthboundITConstants {
-    private SouthboundITConstants() {
-        throw new AssertionError("This class should not be instantiated.");
-    }
-
-    public static final String ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
-    public static final String CUSTOM_PROPERTIES = "etc/custom.properties";
-    public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
-    public static final String SERVER_PORT = "ovsdbserver.port";
-    public static final String CONNECTION_TYPE = "ovsdbserver.connection";
-    public static final String CONNECTION_TYPE_ACTIVE = "active";
-    public static final String CONNECTION_TYPE_PASSIVE = "passive";
-    public static final int CONNECTION_INIT_TIMEOUT = 10000;
-    public static final String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
-    public static final String DEFAULT_SERVER_PORT = "6640";
-    public static final String DEFAULT_OPENFLOW_PORT = "6653";
-    public static final String BRIDGE_NAME = "brtest";
-    public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
+public interface SouthboundITConstants {
+    String ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
+    String CUSTOM_PROPERTIES = "etc/custom.properties";
+    String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
+    String SERVER_PORT = "ovsdbserver.port";
+    String CONNECTION_TYPE = "ovsdbserver.connection";
+    String CONNECTION_TYPE_ACTIVE = "active";
+    String CONNECTION_TYPE_PASSIVE = "passive";
+    int CONNECTION_INIT_TIMEOUT = 10000;
+    String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
+    String DEFAULT_SERVER_PORT = "6640";
+    String DEFAULT_OPENFLOW_PORT = "6653";
+    String BRIDGE_NAME = "brtest";
+    String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
 }

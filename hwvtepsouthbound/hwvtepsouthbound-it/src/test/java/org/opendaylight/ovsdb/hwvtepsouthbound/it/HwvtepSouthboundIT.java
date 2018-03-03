@@ -24,10 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -83,7 +81,6 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
 
     //Constants
 
-    public static final String ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
     public static final String CUSTOM_PROPERTIES = "etc/custom.properties";
     public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     public static final String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
@@ -106,7 +103,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static int portNumber;
     private static String connectionType;
     private static Node hwvtepNode;
-    @Inject @Filter(timeout=60000)
+    @Inject @Filter(timeout = 60000)
     private static DataBroker dataBroker = null;
     @Inject
     private BundleContext bundleContext;
@@ -114,7 +111,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static final NotifyingDataChangeListener OPERATIONAL_LISTENER =
             new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL);
 
-    private static class NotifyingDataChangeListener implements DataTreeChangeListener<Node> {
+    private static final class NotifyingDataChangeListener implements DataTreeChangeListener<Node> {
         private final LogicalDatastoreType type;
         private final Set<InstanceIdentifier<Node>> createdNodes = new HashSet<>();
         private final Set<InstanceIdentifier<Node>> removedNodes = new HashSet<>();
@@ -129,7 +126,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 final DataObjectModification<Node> mod = change.getRootNode();
-                    switch (mod.getModificationType()) {
+                switch (mod.getModificationType()) {
                     case DELETE:
                         removedNodes.add(key);
                         break;
@@ -146,7 +143,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
                         break;
                     default:
                         throw new IllegalArgumentException("Unhandled modification type " + mod.getModificationType());
-                    }
+                }
             }
         }
 
@@ -163,6 +160,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+    @Override
     @Configuration
     public Option[] config() {
         Option[] options = super.config();
@@ -225,34 +223,29 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
 
     private Option[] getPropertiesOptions() {
         Properties props = new Properties(System.getProperties());
-        String addressStr = props.getProperty(SERVER_IPADDRESS, DEFAULT_SERVER_IPADDRESS);
+        String ipAddressStr = props.getProperty(SERVER_IPADDRESS, DEFAULT_SERVER_IPADDRESS);
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
-        String connectionType = props.getProperty(CONNECTION_TYPE, CONNECTION_TYPE_ACTIVE);
+        String connectionTypeStr = props.getProperty(CONNECTION_TYPE, CONNECTION_TYPE_ACTIVE);
 
         LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}",
-                connectionType, addressStr, portStr);
+                connectionTypeStr, ipAddressStr, portStr);
 
         return new Option[] {
-                editConfigurationFilePut(CUSTOM_PROPERTIES, SERVER_IPADDRESS, addressStr),
+                editConfigurationFilePut(CUSTOM_PROPERTIES, SERVER_IPADDRESS, ipAddressStr),
                 editConfigurationFilePut(CUSTOM_PROPERTIES, SERVER_PORT, portStr),
-                editConfigurationFilePut(CUSTOM_PROPERTIES, CONNECTION_TYPE, connectionType),
+                editConfigurationFilePut(CUSTOM_PROPERTIES, CONNECTION_TYPE, connectionTypeStr),
         };
     }
 
     @Before
     @Override
-    public void setup() throws InterruptedException {
+    public void setup() throws Exception {
         if (setup) {
             LOG.info("Skipping setup, already initialized");
             return;
         }
 
-        try {
-            super.setup();
-        } catch (Exception e) {
-            LOG.warn("Failed to setup test", e);
-            fail("Failed to setup test: " + e);
-        }
+        super.setup();
 
         addressStr = bundleContext.getProperty(SERVER_IPADDRESS);
         String portStr = bundleContext.getProperty(SERVER_PORT);
@@ -350,38 +343,38 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
 
     private void waitForOperationalCreation(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
             while (!OPERATIONAL_LISTENER.isCreated(
-                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for creation of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {} for creation of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
     private static void waitForOperationalDeletion(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
-            long _start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
             while (!OPERATIONAL_LISTENER.isRemoved(
-                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for deletion of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {} for deletion of {}", System.currentTimeMillis() - start, iid);
         }
     }
 
-    private ConnectionInfo getConnectionInfo(String addressStr, int portNumber) {
+    private ConnectionInfo getConnectionInfo(String ipAddressStr, int portNum) {
         InetAddress inetAddress = null;
         try {
-            inetAddress = InetAddress.getByName(addressStr);
+            inetAddress = InetAddress.getByName(ipAddressStr);
         } catch (UnknownHostException e) {
-            fail("Could not resolve " + addressStr + ": " + e);
+            fail("Could not resolve " + ipAddressStr + ": " + e);
         }
 
         IpAddress address = HwvtepSouthboundMapper.createIpAddress(inetAddress);
-        PortNumber port = new PortNumber(portNumber);
+        PortNumber port = new PortNumber(portNum);
 
         final ConnectionInfo connectionInfo = new ConnectionInfoBuilder()
                 .setRemoteIp(address)
@@ -396,11 +389,11 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         private final String psName;
 
 
-        public TestPhysicalSwitch(final ConnectionInfo connectionInfo, String psName) {
+        TestPhysicalSwitch(final ConnectionInfo connectionInfo, String psName) {
             this(connectionInfo, psName, null, null, null, true, null, null, null);
         }
 
-        public TestPhysicalSwitch (final ConnectionInfo connectionInfo, final String name,
+        TestPhysicalSwitch(final ConnectionInfo connectionInfo, final String name,
                         @Nullable InstanceIdentifier<Node> psIid, @Nullable NodeId psNodeId,
                         @Nullable final String description, final boolean setManagedBy,
                         @Nullable final List<ManagementIps> managementIps,
@@ -409,19 +402,19 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             this.connectionInfo = connectionInfo;
             this.psName = name;
             NodeBuilder psNodeBuilder = new NodeBuilder();
-            if(psIid == null) {
+            if (psIid == null) {
                 psIid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName));
             }
-            if(psNodeId == null) {
+            if (psNodeId == null) {
                 psNodeId = HwvtepSouthboundMapper.createManagedNodeId(psIid);
             }
             psNodeBuilder.setNodeId(psNodeId);
             PhysicalSwitchAugmentationBuilder psAugBuilder = new PhysicalSwitchAugmentationBuilder();
             psAugBuilder.setHwvtepNodeName(new HwvtepNodeName(psName));
-            if(description != null) {
+            if (description != null) {
                 psAugBuilder.setHwvtepNodeDescription(description);
             }
-            if(setManagedBy) {
+            if (setManagedBy) {
                 InstanceIdentifier<Node> nodePath = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
                 psAugBuilder.setManagedBy(new HwvtepGlobalRef(nodePath));
             }
@@ -431,12 +424,12 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             psNodeBuilder.addAugmentation(PhysicalSwitchAugmentation.class, psAugBuilder.build());
             LOG.debug("Built with intent to store PhysicalSwitch data {}", psAugBuilder.toString());
             Assert.assertTrue(
-                            mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, psIid, psNodeBuilder.build()));
-                    try {
-                        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-                    } catch (InterruptedException e) {
-                        LOG.warn("Sleep interrupted while waiting for bridge creation (bridge {})", psName, e);
-                    }
+                    mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, psIid, psNodeBuilder.build()));
+            try {
+                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            } catch (InterruptedException e) {
+                LOG.warn("Sleep interrupted while waiting for bridge creation (bridge {})", psName, e);
+            }
         }
 
         @Override
@@ -505,9 +498,9 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
         try (TestPhysicalSwitch testPSwitch = new TestPhysicalSwitch(connectionInfo, PS_NAME)) {
-            PhysicalSwitchAugmentation pSwitch = getPhysicalSwitch(connectionInfo);
-            Assert.assertNotNull(pSwitch);
-            LOG.info("PhysicalSwitch: {}", pSwitch);
+            PhysicalSwitchAugmentation phySwitch = getPhysicalSwitch(connectionInfo);
+            Assert.assertNotNull(phySwitch);
+            LOG.info("PhysicalSwitch: {}", phySwitch);
         }
     }
 
@@ -531,7 +524,6 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private Node getPhysicalSwitchNode(ConnectionInfo connectionInfo, String psName, LogicalDatastoreType dataStore) {
         InstanceIdentifier<Node> psIid =
                         HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName));
-                return mdsalUtils.read(dataStore, psIid);
+        return mdsalUtils.read(dataStore, psIid);
     }
-
 }

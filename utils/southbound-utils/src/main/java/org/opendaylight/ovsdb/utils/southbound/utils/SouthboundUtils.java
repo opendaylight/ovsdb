@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
@@ -114,7 +115,7 @@ public class SouthboundUtils {
     private final MdsalUtils mdsalUtils;
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static final String OPENFLOW_SECURE_PROTOCOL = "ssl";
-    public static short OPENFLOW_PORT = 6653;
+    public static final short OPENFLOW_PORT = 6653;
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
     private static final String DISABLE_IN_BAND = "disable-in-band";
@@ -503,18 +504,6 @@ public class SouthboundUtils {
                 OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
         return protocolList;
-    }
-
-    public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
-                             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-                             final Class<? extends DatapathTypeBase> dpType,
-                             final List<BridgeExternalIds> externalIds,
-                             final List<ControllerEntry> controllerEntries,
-                             final List<BridgeOtherConfigs> otherConfigs,
-                             final String dpid) throws InterruptedException {
-        return addBridge(connectionInfo, bridgeIid, bridgeName, bridgeNodeId, setProtocolEntries, failMode,
-                setManagedBy, dpType, externalIds, controllerEntries, otherConfigs, dpid);
     }
 
     /*
@@ -936,11 +925,8 @@ public class SouthboundUtils {
         if (controllersStr.isEmpty()) {
             LOG.warn("Failed to determine OpenFlow controller ip address");
         } else if (LOG.isDebugEnabled()) {
-            controllerIpStr = "";
-            for (String currControllerIpStr : controllersStr) {
-                controllerIpStr += " " + currControllerIpStr;
-            }
-            LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(), controllerIpStr);
+            LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(),
+                    controllersStr.stream().collect(Collectors.joining(" ")));
         }
 
         return controllersStr;
@@ -1245,37 +1231,36 @@ public class SouthboundUtils {
             return false;
         }
 
-        if (dbVersion != null && !dbVersion.isEmpty() && minVersion != null
-                && !minVersion.isEmpty()) {
-            if (Integer.valueOf(dbVersionMatcher.group(1)).equals(Integer.valueOf(minVersionMatcher.group(1)))
-                   && Integer.valueOf(dbVersionMatcher.group(2)).equals(Integer.valueOf(minVersionMatcher.group(2)))
-                   && Integer.valueOf(dbVersionMatcher.group(3)).equals(Integer.valueOf(minVersionMatcher.group(3)))) {
+        if (dbVersion != null && !dbVersion.isEmpty() && minVersion != null && !minVersion.isEmpty()) {
+            final int dbVersionMatch1 = Integer.parseInt(dbVersionMatcher.group(1));
+            final int dbVersionMatch2 = Integer.parseInt(dbVersionMatcher.group(2));
+            final int dbVersionMatch3 = Integer.parseInt(dbVersionMatcher.group(3));
+            final int minVersionMatch1 = Integer.parseInt(minVersionMatcher.group(1));
+            final int minVersionMatch2 = Integer.parseInt(minVersionMatcher.group(2));
+            final int minVersionMatch3 = Integer.parseInt(minVersionMatcher.group(3));
+            if (dbVersionMatch1 == minVersionMatch1 && dbVersionMatch2 == minVersionMatch2
+                    && dbVersionMatch3 == minVersionMatch3) {
                 return true;
             }
 
-            if (Integer.valueOf(dbVersionMatcher.group(1)).intValue()
-                    > Integer.valueOf(minVersionMatcher.group(1)).intValue()) {
+            if (dbVersionMatch1 > minVersionMatch1) {
                 return true;
             }
 
-            if (Integer.valueOf(dbVersionMatcher.group(1)).intValue()
-                    < Integer.valueOf(minVersionMatcher.group(1)).intValue()) {
+            if (dbVersionMatch1 < minVersionMatch1) {
                 return false;
             }
 
             // major version is equal
-            if (Integer.valueOf(dbVersionMatcher.group(2)).intValue()
-                    > Integer.valueOf(minVersionMatcher.group(2)).intValue()) {
+            if (dbVersionMatch2 > minVersionMatch2) {
                 return true;
             }
 
-            if (Integer.valueOf(dbVersionMatcher.group(2)).intValue()
-                    < Integer.valueOf(minVersionMatcher.group(2)).intValue()) {
+            if (dbVersionMatch2 < minVersionMatch2) {
                 return false;
             }
 
-            if (Integer.valueOf(dbVersionMatcher.group(3)).intValue()
-                   > Integer.valueOf(minVersionMatcher.group(3)).intValue()) {
+            if (dbVersionMatch3 > minVersionMatch3) {
                 return true;
             }
         }

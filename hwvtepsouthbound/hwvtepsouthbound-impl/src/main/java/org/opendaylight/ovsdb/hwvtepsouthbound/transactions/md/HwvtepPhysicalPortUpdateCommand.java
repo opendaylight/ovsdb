@@ -8,19 +8,19 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -45,7 +45,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatus;
@@ -65,30 +64,28 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
 public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortUpdateCommand.class);
-    private Map<UUID, PhysicalPort> updatedPPRows;
-    private Map<UUID, PhysicalPort> oldPPRows;
-    private Map<UUID, PhysicalSwitch> switchUpdatedRows;
-    private Set<UUID> skipReconciliationPorts;
+    private final Map<UUID, PhysicalPort> updatedPPRows;
+    private final Map<UUID, PhysicalPort> oldPPRows;
+    private final Map<UUID, PhysicalSwitch> switchUpdatedRows;
+    private final Set<UUID> skipReconciliationPorts;
 
-    public HwvtepPhysicalPortUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalPortUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPPRows = TyperUtils.extractRowsUpdated(PhysicalPort.class, getUpdates(), getDbSchema());
         oldPPRows = TyperUtils.extractRowsOld(PhysicalPort.class, getUpdates(), getDbSchema());
         switchUpdatedRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
         skipReconciliationPorts = new HashSet<>();
-        for (Entry<UUID, PhysicalPort> pPortUpdateEntry : updatedPPRows.entrySet()) {
-            Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(pPortUpdateEntry.getKey());
+        for (Entry<UUID, PhysicalPort> portUpdateEntry : updatedPPRows.entrySet()) {
+            Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(portUpdateEntry.getKey());
             if (switchIid.isPresent()) {
                 if (getDeviceInfo().getDeviceOperData(Node.class, switchIid.get()) == null) {
                     //This is the first update from switch do not have to do reconciliation of this port
                     //it is taken care by switch reconciliation
-                    skipReconciliationPorts.add(pPortUpdateEntry.getKey());
+                    skipReconciliationPorts.add(portUpdateEntry.getKey());
                 }
             }
         }
@@ -110,10 +107,10 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     }
 
     private void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
-        for (Entry<UUID, PhysicalPort> pPortUpdateEntry : updatedPPRows.entrySet()) {
-            PhysicalPort pPortUpdate = pPortUpdateEntry.getValue();
-            String portName = pPortUpdate.getNameColumn().getData();
-            Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(pPortUpdateEntry.getKey());
+        for (Entry<UUID, PhysicalPort> portUpdateEntry : updatedPPRows.entrySet()) {
+            PhysicalPort portUpdate = portUpdateEntry.getValue();
+            String portName = portUpdate.getNameColumn().getData();
+            Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(portUpdateEntry.getKey());
             if (!switchIid.isPresent()) {
                 switchIid = getTerminationPointSwitch(transaction, node, portName);
             }
@@ -122,52 +119,52 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.setKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
-                InstanceIdentifier<TerminationPoint> tpPath = getInstanceIdentifier(switchIid.get(), pPortUpdate);
+                InstanceIdentifier<TerminationPoint> tpPath = getInstanceIdentifier(switchIid.get(), portUpdate);
                 HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalPortAugmentationBuilder();
-                buildTerminationPoint(tpAugmentationBuilder, pPortUpdate);
-                setPortFaultStatus(tpAugmentationBuilder, pPortUpdate);
+                buildTerminationPoint(tpAugmentationBuilder, portUpdate);
+                setPortFaultStatus(tpAugmentationBuilder, portUpdate);
                 tpBuilder.addAugmentation(HwvtepPhysicalPortAugmentation.class, tpAugmentationBuilder.build());
-                if (oldPPRows.containsKey(pPortUpdateEntry.getKey())) {
+                if (oldPPRows.containsKey(portUpdateEntry.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 }
                 NodeId psNodeId = tpPath.firstKeyOf(Node.class).getNodeId();
                 if (getDeviceInfo().getDeviceOperData(TerminationPoint.class, tpPath) == null) {
-                    addToDeviceUpdate(TransactionType.ADD, new PortEvent(pPortUpdate, psNodeId));
+                    addToDeviceUpdate(TransactionType.ADD, new PortEvent(portUpdate, psNodeId));
                 } else {
-                    addToDeviceUpdate(TransactionType.UPDATE, new PortEvent(pPortUpdate, psNodeId));
+                    addToDeviceUpdate(TransactionType.UPDATE, new PortEvent(portUpdate, psNodeId));
                 }
-                reconcileToPort(transaction, pPortUpdate, tpPath);
+                reconcileToPort(transaction, portUpdate, tpPath);
                 getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
-                        pPortUpdate.getUuid(), pPortUpdate);
+                        portUpdate.getUuid(), portUpdate);
                 // Update with Deleted VlanBindings
-                if (oldPPRows.get(pPortUpdateEntry.getKey()) != null
-                        && oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn() != null) {
-                    List<InstanceIdentifier<VlanBindings>> vBIiList = new ArrayList<>();
-                    Map<Long, UUID> oldVb = oldPPRows.get(pPortUpdateEntry.getKey()).getVlanBindingsColumn().getData();
-                    Map<Long, UUID> updatedVb = pPortUpdateEntry.getValue().getVlanBindingsColumn().getData();
+                if (oldPPRows.get(portUpdateEntry.getKey()) != null
+                        && oldPPRows.get(portUpdateEntry.getKey()).getVlanBindingsColumn() != null) {
+                    List<InstanceIdentifier<VlanBindings>> vlanBindingsList = new ArrayList<>();
+                    Map<Long, UUID> oldVb = oldPPRows.get(portUpdateEntry.getKey()).getVlanBindingsColumn().getData();
+                    Map<Long, UUID> updatedVb = portUpdateEntry.getValue().getVlanBindingsColumn().getData();
                     for (Map.Entry<Long, UUID> oldVbEntry : oldVb.entrySet()) {
                         Long key = oldVbEntry.getKey();
                         if (!updatedVb.containsKey(key)) {
-                            VlanBindings vBindings = createVlanBinding(key, oldVbEntry.getValue());
-                            InstanceIdentifier<VlanBindings> vBid = getInstanceIdentifier(tpPath, vBindings);
-                            vBIiList.add(vBid);
+                            VlanBindings vlanBindings = createVlanBinding(key, oldVbEntry.getValue());
+                            InstanceIdentifier<VlanBindings> vbIid = getInstanceIdentifier(tpPath, vlanBindings);
+                            vlanBindingsList.add(vbIid);
                         }
-                        deleteEntries(transaction, vBIiList);
+                        deleteEntries(transaction, vlanBindingsList);
                     }
                 }
                 // Update with Deleted portfaultstatus
-                deleteEntries(transaction,getPortFaultStatusToRemove( tpPath, pPortUpdate));
+                deleteEntries(transaction,getPortFaultStatusToRemove(tpPath, portUpdate));
             }
         }
     }
 
     private void reconcileToPort(final ReadWriteTransaction transaction,
-                                 final PhysicalPort pPortUpdate,
+                                 final PhysicalPort portUpdate,
                                  final InstanceIdentifier<TerminationPoint> tpPath) {
-        if (skipReconciliationPorts.contains(pPortUpdate.getUuid())) {
+        if (skipReconciliationPorts.contains(portUpdate.getUuid())) {
             //case of port added along with switch add
             //switch reconciliation will take care of this port along with other ports
             return;
@@ -177,7 +174,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             return;
         }
         //case of individual port add , reconcile to this port
-        getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath, pPortUpdate.getUuid(), pPortUpdate);
+        getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath, portUpdate.getUuid(), portUpdate);
         Futures.addCallback(transaction.read(LogicalDatastoreType.CONFIGURATION, tpPath),
                 new FutureCallback<Optional<TerminationPoint>>() {
                     @Override
@@ -188,9 +185,9 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                             return;
                         }
                         addToDeviceUpdate(TransactionType.ADD,
-                                new ReconcilePortEvent(pPortUpdate, tpPath.firstKeyOf(Node.class).getNodeId()));
+                                new ReconcilePortEvent(portUpdate, tpPath.firstKeyOf(Node.class).getNodeId()));
                         getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
-                                pPortUpdate.getUuid(), pPortUpdate);
+                                portUpdate.getUuid(), portUpdate);
                         TerminationPoint configTp = optionalConfigTp.get();
                         getDeviceInfo().scheduleTransaction((transactionBuilder) -> {
                             InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);
@@ -205,7 +202,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                     @Override
                     public void onFailure(Throwable throwable) {
                     }
-                });
+                }, MoreExecutors.directExecutor());
     }
 
     private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
@@ -216,8 +213,13 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     }
 
     private InstanceIdentifier<VlanBindings> getInstanceIdentifier(InstanceIdentifier<TerminationPoint> tpPath,
-            VlanBindings vBindings) {
-        return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), tpPath, vBindings);
+            VlanBindings vlanBindings) {
+        return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), tpPath, vlanBindings);
+    }
+
+    private InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> switchIid,
+            PhysicalPort port) {
+        return switchIid.child(TerminationPoint.class, new TerminationPointKey(new TpId(port.getName())));
     }
 
     private void buildTerminationPoint(HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder,
@@ -260,17 +262,17 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         VlanBindingsKey vbKey = new VlanBindingsKey(new VlanId(key.intValue()));
         vbBuilder.setKey(vbKey);
         vbBuilder.setVlanIdKey(vbKey.getVlanIdKey());
-        HwvtepLogicalSwitchRef lSwitchRef = this.getLogicalSwitchRef(value);
-        vbBuilder.setLogicalSwitchRef(lSwitchRef);
+        HwvtepLogicalSwitchRef switchRef = this.getLogicalSwitchRef(value);
+        vbBuilder.setLogicalSwitchRef(switchRef);
         return vbBuilder.build();
     }
 
     private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
         LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(switchUUID);
         if (logicalSwitch != null) {
-            InstanceIdentifier<LogicalSwitches> lSwitchIid =
+            InstanceIdentifier<LogicalSwitches> switchIid =
                     HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-            return new HwvtepLogicalSwitchRef(lSwitchIid);
+            return new HwvtepLogicalSwitchRef(switchIid);
         }
         LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
         LOG.trace("Available LogicalSwitches: {}",
@@ -308,11 +310,6 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         return Optional.absent();
     }
 
-    private InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> switchIid,
-            PhysicalPort pPort) {
-        return switchIid.child(TerminationPoint.class, new TerminationPointKey(new TpId(pPort.getName())));
-    }
-
     private void setPortFaultStatus(HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder,
             PhysicalPort portUpdate) {
         if (portUpdate.getPortFaultStatusColumn() != null && portUpdate.getPortFaultStatusColumn().getData() != null
@@ -327,15 +324,15 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     }
 
     private List<InstanceIdentifier<PortFaultStatus>> getPortFaultStatusToRemove(
-            InstanceIdentifier<TerminationPoint> tpPath, PhysicalPort pPort) {
+            InstanceIdentifier<TerminationPoint> tpPath, PhysicalPort port) {
         Preconditions.checkNotNull(tpPath);
-        Preconditions.checkNotNull(pPort);
+        Preconditions.checkNotNull(port);
         List<InstanceIdentifier<PortFaultStatus>> result = new ArrayList<>();
-        PhysicalPort oldPort = oldPPRows.get(pPort.getUuid());
+        PhysicalPort oldPort = oldPPRows.get(port.getUuid());
         if (oldPort != null && oldPort.getPortFaultStatusColumn() != null) {
             for (String portFltStat : oldPort.getPortFaultStatusColumn().getData()) {
-                if (pPort.getPortFaultStatusColumn() == null
-                        || !pPort.getPortFaultStatusColumn().getData().contains(portFltStat)) {
+                if (port.getPortFaultStatusColumn() == null
+                        || !port.getPortFaultStatusColumn().getData().contains(portFltStat)) {
                     InstanceIdentifier<PortFaultStatus> iid = tpPath.augmentation(HwvtepPhysicalPortAugmentation.class)
                             .child(PortFaultStatus.class, new PortFaultStatusKey(portFltStat));
                     result.add(iid);
@@ -344,5 +341,4 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         }
         return result;
     }
-
 }

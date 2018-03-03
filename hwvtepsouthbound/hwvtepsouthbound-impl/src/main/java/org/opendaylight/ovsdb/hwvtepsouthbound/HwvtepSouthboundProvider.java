@@ -9,10 +9,9 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -62,7 +61,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
     private HwvtepReconciliationManager hwvtepReconciliationManager;
-    private AtomicBoolean registered = new AtomicBoolean(false);
+    private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
 
     public HwvtepSouthboundProvider(final DataBroker dataBroker,
@@ -105,13 +104,14 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
         DataTreeIdentifier<Topology> treeId =
-                new DataTreeIdentifier<Topology>(LogicalDatastoreType.OPERATIONAL, path);
+                new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = db.registerDataTreeChangeListener(treeId, this);
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() throws Exception {
         LOG.info("HwvtepSouthboundProvider Closed");
         if (txInvoker != null) {
@@ -122,19 +122,19 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 LOG.error("HWVTEP Southbound Provider failed to close TransactionInvoker", e);
             }
         }
-        if(cm != null){
+        if (cm != null) {
             cm.close();
             cm = null;
         }
-        if(registration != null) {
+        if (registration != null) {
             registration.close();
             registration = null;
         }
-        if(providerOwnershipChangeListener != null) {
+        if (providerOwnershipChangeListener != null) {
             providerOwnershipChangeListener.close();
             providerOwnershipChangeListener = null;
         }
-        if(hwvtepDTListener != null) {
+        if (hwvtepDTListener != null) {
             hwvtepDTListener.close();
             hwvtepDTListener = null;
         }
@@ -159,7 +159,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
             } else {
                 transaction.cancel();
             }
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Error initializing hwvtep topology", e);
         }
     }
@@ -167,8 +167,8 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     public void handleOwnershipChange(EntityOwnershipChange ownershipChange) {
         if (ownershipChange.isOwner()) {
             LOG.info("*This* instance of HWVTEP southbound provider is set as a MASTER instance");
-            LOG.info("Initialize HWVTEP topology {} in operational and config data store if not already present"
-                    ,HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
+            LOG.info("Initialize HWVTEP topology {} in operational and config data store if not already present",
+                    HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
             initializeHwvtepTopology(LogicalDatastoreType.OPERATIONAL);
             initializeHwvtepTopology(LogicalDatastoreType.CONFIGURATION);
         } else {
@@ -194,8 +194,8 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     }
 
     private class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
-        private HwvtepSouthboundProvider hsp;
-        private EntityOwnershipListenerRegistration listenerRegistration;
+        private final HwvtepSouthboundProvider hsp;
+        private final EntityOwnershipListenerRegistration listenerRegistration;
 
         HwvtepsbPluginInstanceEntityOwnershipListener(HwvtepSouthboundProvider hsp,
                 EntityOwnershipService entityOwnershipService) {
@@ -206,6 +206,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
         public void close() {
             this.listenerRegistration.close();
         }
+
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             hsp.handleOwnershipChange(ownershipChange);

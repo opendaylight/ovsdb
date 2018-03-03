@@ -8,8 +8,10 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -37,17 +39,17 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-public class TestBuilders {
+public final class TestBuilders {
 
     public static final String VXLAN_OVER_IPV4 = "vxlan_over_ipv4";
 
-    public static List<LogicalSwitches> addLogicalSwitches(HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
+    private TestBuilders() {
+    }
+
+    public static List<LogicalSwitches> addLogicalSwitches(HwvtepGlobalAugmentationBuilder augmentationBuilder,
+            String[]... data) {
         List<LogicalSwitches> logicalSwitcheses = new ArrayList<>();
-        for (String row[] : data) {
+        for (String[] row : data) {
             logicalSwitcheses.add(TestBuilders.buildLogicalSwitch(row));
         }
         augmentationBuilder.setLogicalSwitches(logicalSwitcheses);
@@ -57,8 +59,8 @@ public class TestBuilders {
     public static List<RemoteMcastMacs> addRemoteMcastMacs(InstanceIdentifier<Node> iid,
                                           HwvtepGlobalAugmentationBuilder augmentationBuilder, String[]... data) {
         List<RemoteMcastMacs> remoteMcastMacses = new ArrayList<>();
-        for (String row[] : data) {
-            String teps[] = Arrays.copyOfRange(row, 2, row.length);
+        for (String[] row : data) {
+            String[] teps = Arrays.copyOfRange(row, 2, row.length);
             remoteMcastMacses.add(TestBuilders.buildRemoteMcastMacs(iid, row[0], row[1], teps));
         }
         augmentationBuilder.setRemoteMcastMacs(remoteMcastMacses);
@@ -69,7 +71,7 @@ public class TestBuilders {
                                                            HwvtepGlobalAugmentationBuilder augmentationBuilder,
                                                            String[]... data) {
         List<RemoteUcastMacs> remoteUcastMacses = new ArrayList<>();
-        for (String row[] : data) {
+        for (String[] row : data) {
             remoteUcastMacses.add(TestBuilders.buildRemoteUcastMacs(iid, row[0], row[1], row[2], row[3]));
         }
         augmentationBuilder.setRemoteUcastMacs(remoteUcastMacses);
@@ -79,17 +81,17 @@ public class TestBuilders {
     public static void addGlobalTerminationPoints(NodeBuilder nodeBuilder, InstanceIdentifier<Node> nodeIid,
                                                   String[]... data) {
         List<TerminationPoint> terminationPoints = new ArrayList<>();
-        for (String row[] : data) {
+        for (String[] row : data) {
             terminationPoints.add(TestBuilders.buildTerminationPoint(nodeIid, row[0]));
         }
         nodeBuilder.setTerminationPoint(terminationPoints);
     }
 
     public static HwvtepLogicalSwitchRef buildLogicalSwitchesRef(InstanceIdentifier<Node> nodeIid,
-                                                                 String logicalSwitchName ) {
-        InstanceIdentifier<LogicalSwitches> lSwitchIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                                                                 String logicalSwitchName) {
+        InstanceIdentifier<LogicalSwitches> switchIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitchName)));
-        return new HwvtepLogicalSwitchRef(lSwitchIid);
+        return new HwvtepLogicalSwitchRef(switchIid);
     }
 
     public static RemoteUcastMacs buildRemoteUcastMacs(InstanceIdentifier<Node> nodeIid, String vmMac,
@@ -104,7 +106,7 @@ public class TestBuilders {
     }
 
     public static TerminationPoint buildTerminationPoint(InstanceIdentifier<Node> nodeIid, String ip) {
-        TerminationPointKey tpKey = new TerminationPointKey(new TpId("vxlan_over_ipv4:"+ip));
+        TerminationPointKey tpKey = new TerminationPointKey(new TpId("vxlan_over_ipv4:" + ip));
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         if (nodeIid != null) {
             tpBuilder.setKey(tpKey);
@@ -132,23 +134,23 @@ public class TestBuilders {
     }
 
     public static RemoteMcastMacs buildRemoteMcastMacs(InstanceIdentifier<Node> iid, String mac,
-                                                       String logicalSwitchName,String tepIps[]) {
+                                                       String logicalSwitchName, String[] tepIps) {
 
-        RemoteMcastMacsBuilder mMacLocalBuilder = new RemoteMcastMacsBuilder();
+        RemoteMcastMacsBuilder macLocalBuilder = new RemoteMcastMacsBuilder();
         if (mac.equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
-            mMacLocalBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
+            macLocalBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
         } else {
-            mMacLocalBuilder.setMacEntryKey(new MacAddress(mac));
+            macLocalBuilder.setMacEntryKey(new MacAddress(mac));
         }
-        mMacLocalBuilder.setMacEntryUuid(getUUid(mac));
-        mMacLocalBuilder.setLogicalSwitchRef(buildLogicalSwitchesRef(iid, logicalSwitchName));
+        macLocalBuilder.setMacEntryUuid(getUUid(mac));
+        macLocalBuilder.setLogicalSwitchRef(buildLogicalSwitchesRef(iid, logicalSwitchName));
         List<LocatorSet> locatorSets = new ArrayList<>();
         for (String tepIp : tepIps) {
             locatorSets.add(new LocatorSetBuilder().setLocatorRef(
                     buildLocatorRef(iid, tepIp)).build());
         }
-        mMacLocalBuilder.setLocatorSet(locatorSets);
-        return mMacLocalBuilder.build();
+        macLocalBuilder.setLocatorSet(locatorSets);
+        return macLocalBuilder.build();
     }
 
     public static HwvtepPhysicalLocatorRef buildLocatorRef(InstanceIdentifier<Node> nodeIid,String tepIp) {
@@ -161,7 +163,7 @@ public class TestBuilders {
     }
 
     public static InstanceIdentifier<TerminationPoint> buildTpId(InstanceIdentifier<Node> nodeIid,String tepIp) {
-        String tpKeyStr = VXLAN_OVER_IPV4 +':'+tepIp;
+        String tpKeyStr = VXLAN_OVER_IPV4 + ':' + tepIp;
         TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpKeyStr));
         return nodeIid.child(TerminationPoint.class, tpKey);
     }

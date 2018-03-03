@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -41,32 +40,28 @@ import org.slf4j.LoggerFactory;
 public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
 
     private ListenerRegistration<HwvtepDataChangeListener> registration;
-    private HwvtepConnectionManager hcm;
-    private DataBroker db;
+    private final HwvtepConnectionManager hcm;
+    private final DataBroker db;
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListener.class);
 
     HwvtepDataChangeListener(DataBroker db, HwvtepConnectionManager hcm) {
         LOG.info("Registering HwvtepDataChangeListener");
         this.db = db;
         this.hcm = hcm;
-        registerListener(db);
+        registerListener();
     }
 
-    private void registerListener(final DataBroker db) {
+    private void registerListener() {
         final DataTreeIdentifier<Node> treeId =
                 new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
-        try {
-            LOG.trace("Registering on path: {}", treeId);
-            registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
-        } catch (final Exception e) {
-            LOG.warn("HwvtepDataChangeListener registration failed", e);
-            //TODO: Should we throw an exception here?
-        }
+
+        LOG.trace("Registering on path: {}", treeId);
+        registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
     }
 
     @Override
-    public void close() throws Exception {
-        if(registration != null) {
+    public void close() {
+        if (registration != null) {
             registration.close();
         }
     }
@@ -80,11 +75,11 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
          * Rest will be added later.
          */
         connect(changes);
-        
+
         updateConnections(changes);
-        
+
         updateData(changes);
-        
+
         disconnect(changes);
         /*
         for (DataTreeModification<Node> change : changes) {
@@ -131,7 +126,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                                         + "to same device, hence dropping the request {}", connection, hwvtepGlobal);
                     } else {
                         try {
-                            OvsdbClient client = hcm.connect(key, hwvtepGlobal);
+                            hcm.connect(key, hwvtepGlobal);
                         } catch (UnknownHostException | ConnectException e) {
                             LOG.warn("Failed to connect to HWVTEP node", e);
                         }
@@ -206,15 +201,14 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
     }
 
     private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE)
-                        && (mod.getDataBefore() == null)){
+        if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
             return mod.getDataAfter();
         }
         return null;
     }
 
     private Node getRemoved(DataObjectModification<Node> mod) {
-        if(mod.getModificationType() == ModificationType.DELETE){
+        if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
@@ -222,12 +216,12 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
     private Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
-        switch(mod.getModificationType()) {
+        switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
                 node = mod.getDataAfter();
                 break;
             case WRITE:
-                if(mod.getDataBefore() !=  null) {
+                if (mod.getDataBefore() != null) {
                     node = mod.getDataAfter();
                 }
                 break;
@@ -239,12 +233,12 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
     private Node getOriginal(DataObjectModification<Node> mod) {
         Node node = null;
-        switch(mod.getModificationType()) {
+        switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
                 node = mod.getDataBefore();
                 break;
             case WRITE:
-                if(mod.getDataBefore() !=  null) {
+                if (mod.getDataBefore() != null) {
                     node = mod.getDataBefore();
                 }
                 break;
@@ -271,12 +265,12 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         for (DataTreeModification<Node> change : changes) {
             final DataObjectModification<Node> mod = change.getRootNode();
             //From original node to get connection instance
-            Node node = mod.getDataBefore()!=null ? mod.getDataBefore() : mod.getDataAfter();
+            Node node = mod.getDataBefore() != null ? mod.getDataBefore() : mod.getDataAfter();
             HwvtepConnectionInstance connection = hcm.getConnectionInstanceFromNodeIid(
                     change.getRootPath().getRootIdentifier());
             if (connection != null) {
                 if (!result.containsKey(connection)) {
-                    List<DataTreeModification<Node>> tempChanges= new ArrayList<>();
+                    List<DataTreeModification<Node>> tempChanges = new ArrayList<>();
                     tempChanges.add(change);
                     result.put(connection, tempChanges);
                 } else {

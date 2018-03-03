@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
 public class HwvtepLogicalRouterRemoveCommand extends AbstractTransactionCommand<LogicalRouters> {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalRouterRemoveCommand.class);
 
-    public HwvtepLogicalRouterRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepLogicalRouterRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -36,8 +37,8 @@ public class HwvtepLogicalRouterRemoveCommand extends AbstractTransactionCommand
         Collection<LogicalRouter> deletedLRRows =
                 TyperUtils.extractRowsRemoved(LogicalRouter.class, getUpdates(), getDbSchema()).values();
         if (deletedLRRows != null) {
-            for (LogicalRouter lRouter : deletedLRRows) {
-                HwvtepNodeName routerNode = new HwvtepNodeName(lRouter.getName());
+            for (LogicalRouter router : deletedLRRows) {
+                HwvtepNodeName routerNode = new HwvtepNodeName(router.getName());
                 LOG.debug("Clearing device operational data for logical router {}", routerNode);
                 InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                         .augmentation(HwvtepGlobalAugmentation.class)

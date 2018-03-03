@@ -8,8 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import com.google.common.base.Optional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +16,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -46,11 +43,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
-    private Map<UUID, McastMacsLocal> updatedMMacsLocalRows;
-    private Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;
-    private Map<UUID, PhysicalLocator> updatedPLocRows;
+    private final Map<UUID, McastMacsLocal> updatedMMacsLocalRows;
+    private final Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;
+    private final Map<UUID, PhysicalLocator> updatedPLocRows;
 
-    public HwvtepMcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepMcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedMMacsLocalRows = TyperUtils.extractRowsUpdated(McastMacsLocal.class, getUpdates(), getDbSchema());
         updatedPLocSetRows = TyperUtils.extractRowsUpdated(PhysicalLocatorSet.class, getUpdates(), getDbSchema());
@@ -64,75 +62,75 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private void updateData(ReadWriteTransaction transaction, McastMacsLocal mMacLocal) {
+    private void updateData(ReadWriteTransaction transaction, McastMacsLocal macLocal) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Node connectionNode = buildConnectionNode(mMacLocal);
+        Node connectionNode = buildConnectionNode(macLocal);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
     }
 
-    private Node buildConnectionNode(McastMacsLocal mMacLocal) {
+    private Node buildConnectionNode(McastMacsLocal macLocal) {
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        LocalMcastMacsBuilder mMacLocalBuilder = new LocalMcastMacsBuilder();
-        if (mMacLocal.getMac().equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
-            mMacLocalBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
+        LocalMcastMacsBuilder macLocalBuilder = new LocalMcastMacsBuilder();
+        if (macLocal.getMac().equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
+            macLocalBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
         } else {
-            mMacLocalBuilder.setMacEntryKey(new MacAddress(mMacLocal.getMac()));
+            macLocalBuilder.setMacEntryKey(new MacAddress(macLocal.getMac()));
         }
-        mMacLocalBuilder.setMacEntryUuid(new Uuid(mMacLocal.getUuid().toString()));
-        setIpAddress(mMacLocalBuilder, mMacLocal);
-        setLocatorSet(mMacLocalBuilder, mMacLocal);
-        setLogicalSwitch(mMacLocalBuilder, mMacLocal);
+        macLocalBuilder.setMacEntryUuid(new Uuid(macLocal.getUuid().toString()));
+        setIpAddress(macLocalBuilder, macLocal);
+        setLocatorSet(macLocalBuilder, macLocal);
+        setLogicalSwitch(macLocalBuilder, macLocal);
 
-        List<LocalMcastMacs> mMacLocalList = new ArrayList<>();
-        mMacLocalList.add(mMacLocalBuilder.build());
-        hgAugmentationBuilder.setLocalMcastMacs(mMacLocalList);
+        List<LocalMcastMacs> macLocalList = new ArrayList<>();
+        macLocalList.add(macLocalBuilder.build());
+
+        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
+        hgAugmentationBuilder.setLocalMcastMacs(macLocalList);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         return connectionNode.build();
     }
 
-    private void setLogicalSwitch(LocalMcastMacsBuilder mMacLocalBuilder, McastMacsLocal mMacLocal) {
-        if (mMacLocal.getLogicalSwitchColumn() != null && mMacLocal.getLogicalSwitchColumn().getData() != null) {
-            UUID lsUUID = mMacLocal.getLogicalSwitchColumn().getData();
-            LogicalSwitch lSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
-            if (lSwitch != null) {
-                InstanceIdentifier<LogicalSwitches> lSwitchIid =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), lSwitch);
-                mMacLocalBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitchIid));
+    private void setLogicalSwitch(LocalMcastMacsBuilder macLocalBuilder, McastMacsLocal macLocal) {
+        if (macLocal.getLogicalSwitchColumn() != null && macLocal.getLogicalSwitchColumn().getData() != null) {
+            UUID lsUUID = macLocal.getLogicalSwitchColumn().getData();
+            LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
+            if (logicalSwitch != null) {
+                InstanceIdentifier<LogicalSwitches> switchIid =
+                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
+                macLocalBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
             }
         }
     }
 
-    private void setIpAddress(LocalMcastMacsBuilder mMacLocalBuilder, McastMacsLocal mMacLocal) {
-        if (mMacLocal.getIpAddr() != null && !mMacLocal.getIpAddr().isEmpty()) {
-            mMacLocalBuilder.setIpaddr(new IpAddress(mMacLocal.getIpAddr().toCharArray()));
+    private void setIpAddress(LocalMcastMacsBuilder macLocalBuilder, McastMacsLocal macLocal) {
+        if (macLocal.getIpAddr() != null && !macLocal.getIpAddr().isEmpty()) {
+            macLocalBuilder.setIpaddr(new IpAddress(macLocal.getIpAddr().toCharArray()));
         }
     }
 
-    private void setLocatorSet(LocalMcastMacsBuilder mMacLocalBuilder, McastMacsLocal mMacLocal) {
-        if (mMacLocal.getLocatorSetColumn() != null && mMacLocal.getLocatorSetColumn().getData() != null) {
-            UUID pLocSetUUID = mMacLocal.getLocatorSetColumn().getData();
-            PhysicalLocatorSet plSet = updatedPLocSetRows.get(pLocSetUUID);
+    private void setLocatorSet(LocalMcastMacsBuilder macLocalBuilder, McastMacsLocal macLocal) {
+        if (macLocal.getLocatorSetColumn() != null && macLocal.getLocatorSetColumn().getData() != null) {
+            UUID locSetUUID = macLocal.getLocatorSetColumn().getData();
+            PhysicalLocatorSet plSet = updatedPLocSetRows.get(locSetUUID);
             if (plSet != null) {
                 if (plSet.getLocatorsColumn() != null && plSet.getLocatorsColumn().getData() != null
                         && !plSet.getLocatorsColumn().getData().isEmpty()) {
                     List<LocatorSet> plsList = new ArrayList<>();
-                    for (UUID pLocUUID : plSet.getLocatorsColumn().getData()) {
-                        PhysicalLocator pLoc = updatedPLocRows.get(pLocUUID);
-                        if (pLoc == null) {
-                            pLoc = (PhysicalLocator) getOvsdbConnectionInstance().
-                                    getDeviceInfo().getDeviceOperData(TerminationPoint.class, pLocUUID);
+                    for (UUID locUUID : plSet.getLocatorsColumn().getData()) {
+                        PhysicalLocator locator = updatedPLocRows.get(locUUID);
+                        if (locator == null) {
+                            locator = (PhysicalLocator) getOvsdbConnectionInstance()
+                                    .getDeviceInfo().getDeviceOperData(TerminationPoint.class, locUUID);
                         }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
-                                getOvsdbConnectionInstance().getInstanceIdentifier(), pLoc);
+                                getOvsdbConnectionInstance().getInstanceIdentifier(), locator);
                         plsList.add(new LocatorSetBuilder()
                                 .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid)).build());
                     }
-                    mMacLocalBuilder.setLocatorSet(plsList);
+                    macLocalBuilder.setLocatorSet(plsList);
                 }
             }
         }
     }
-
 }

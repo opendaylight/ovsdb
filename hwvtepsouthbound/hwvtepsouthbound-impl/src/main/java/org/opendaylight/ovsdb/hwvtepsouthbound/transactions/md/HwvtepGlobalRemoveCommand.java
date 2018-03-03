@@ -8,6 +8,9 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -21,9 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepGlobalRemoveCommand.class);
@@ -70,13 +70,12 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
                             + " not deleting OvsdbNode form data store.");
                 }
             }
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failure to delete ovsdbNode", e);
         }
     }
 
     private boolean checkIfOnlyConnectedManager(HwvtepGlobalAugmentation hgAugmentation) {
-        Managers onlyConnectedManager = null;
         if (hgAugmentation != null) {
             int connectedManager = 0;
             if (hgAugmentation.getManagers() != null) {
@@ -86,7 +85,6 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
                         if (connectedManager > ONE_CONNECTED_MANAGER) {
                             return false;
                         }
-                        onlyConnectedManager = manager;
                     }
                 }
             }

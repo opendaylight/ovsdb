@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
@@ -16,15 +18,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SwitchConfigOperationalChangeGetter {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SwitchConfigOperationalChangeGetter.class);
+public final class SwitchConfigOperationalChangeGetter {
+    private SwitchConfigOperationalChangeGetter() {
+    }
 
     public static DataTreeModification<Node> getModification(InstanceIdentifier<Node> psNodeId,
                                                              Node configNode, Node operationalNode) {
@@ -76,7 +73,9 @@ public class SwitchConfigOperationalChangeGetter {
             if (augmentation != null) {
                 builder = new HwvtepPhysicalPortAugmentationBuilder(augmentation);
             }
-            if (augmentation != null && augmentation.getVlanBindings() != null && !augmentation.getVlanBindings().isEmpty() ) {
+
+            if (augmentation != null && augmentation.getVlanBindings() != null
+                    && !augmentation.getVlanBindings().isEmpty()) {
                 builder.setVlanBindings(augmentation.getVlanBindings());
                 terminationPointBuilder.addAugmentation(HwvtepPhysicalPortAugmentation.class, builder.build());
                 tpList.add(terminationPointBuilder.build());

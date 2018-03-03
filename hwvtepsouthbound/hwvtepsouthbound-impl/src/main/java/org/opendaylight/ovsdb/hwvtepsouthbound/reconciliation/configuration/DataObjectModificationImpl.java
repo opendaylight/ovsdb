@@ -7,20 +7,19 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Identifier;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.ChildOf;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
+import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class DataObjectModificationImpl<T extends DataObject> implements DataObjectModification<T> {
 
-    private Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();
+    private final Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();
     InstanceIdentifier<T> nodeId;
     T newNode;
     T oldNode;
@@ -91,6 +90,6 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{identifier = " + nodeId +"}";
+        return getClass().getSimpleName() + "{identifier = " + nodeId + "}";
     }
 }

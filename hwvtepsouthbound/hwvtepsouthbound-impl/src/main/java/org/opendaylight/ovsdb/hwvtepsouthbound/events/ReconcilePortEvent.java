@@ -22,9 +22,6 @@ public class ReconcilePortEvent {
 
     @Override
     public String toString() {
-        return "ReconcilePortEvent{" +
-                "port=" + port +
-                "nodeId=" + nodeId +
-                '}';
+        return "ReconcilePortEvent [port=" + port + ", nodeId=" + nodeId + "]";
     }
 }

@@ -22,9 +22,6 @@ public class PortEvent {
 
     @Override
     public String toString() {
-        return "PortEvent{" +
-                "port=" + port +
-                "nodeId=" + nodeId +
-                '}';
+        return "PortEvent [port=" + port + ", nodeId=" + nodeId + "]";
     }
 }

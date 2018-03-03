@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -91,7 +90,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             oldData = (T) getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key);
         }
         updates.putIfAbsent(getDeviceTransaction(), new ArrayList<MdsalUpdate<T>>());
-        updates.get(getDeviceTransaction()).add(new MdsalUpdate<T>(key, data, oldData));
+        updates.get(getDeviceTransaction()).add(new MdsalUpdate<>(key, data, oldData));
     }
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
@@ -103,13 +102,13 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         this.threadLocalDeviceTransaction.set(transaction);
         HwvtepDeviceInfo deviceInfo = getOperationalState().getDeviceInfo();
         Map inTransitDependencies = new HashMap<>();
-        Map confingDependencies = new HashMap<>();
+        Map configDependencies = new HashMap<>();
 
         if (!isRemoveCommand() && unMetDependencyGetter != null) {
             inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(getOperationalState(), data);
-            confingDependencies = unMetDependencyGetter.getUnMetConfigDependencies(getOperationalState(), data);
+            configDependencies = unMetDependencyGetter.getUnMetConfigDependencies(getOperationalState(), data);
             //we can skip the config termination point dependency as we can create them in device as part of this tx
-            confingDependencies.remove(TerminationPoint.class);
+            configDependencies.remove(TerminationPoint.class);
         }
 
         Type type = getClass().getGenericSuperclass();
@@ -120,7 +119,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             inTransitDependencies.put(classType, Collections.singletonList(key));
         }
 
-        if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies) && HwvtepSouthboundUtil.isEmptyMap(
+        if (HwvtepSouthboundUtil.isEmptyMap(configDependencies) && HwvtepSouthboundUtil.isEmptyMap(
                 inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
             if (isRemoveCommand()) {
@@ -129,9 +128,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                 getDeviceInfo().updateConfigData((Class<? extends Identifiable>) classType, key, data);
             }
         }
-        if (!HwvtepSouthboundUtil.isEmptyMap(confingDependencies)) {
-            DependentJob<T> configWaitingJob = new DependentJob.ConfigWaitingJob(
-                    key, data, confingDependencies) {
+        if (!HwvtepSouthboundUtil.isEmptyMap(configDependencies)) {
+            DependentJob<T> configWaitingJob = new DependentJob.ConfigWaitingJob<T>(
+                    key, data, configDependencies) {
 
                 @Override
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
@@ -140,20 +139,13 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                     AbstractTransactCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
                     onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
                 }
-
-                public void onFailure() {
-                    AbstractTransactCommand.this.onFailure(getDeviceTransaction());
-                }
-
-                public void onSuccess() {
-                    AbstractTransactCommand.this.onSuccess(getDeviceTransaction());
-                }
             };
             deviceInfo.addJobToQueue(configWaitingJob);
         }
+
         if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
 
-            DependentJob<T> opWaitingJob = new DependentJob.OpWaitingJob(
+            DependentJob<T> opWaitingJob = new DependentJob.OpWaitingJob<T>(
                     key, data, inTransitDependencies) {
 
                 @Override
@@ -170,24 +162,18 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                         LOG.warn("Skipping add of key: {} as it is not present txId: {}", key);
                     }
                 }
-
-                public void onFailure() {
-                    AbstractTransactCommand.this.onFailure(getDeviceTransaction());
-                }
-
-                public void onSuccess() {
-                    AbstractTransactCommand.this.onSuccess(getDeviceTransaction());
-                }
             };
             deviceInfo.addJobToQueue(opWaitingJob);
         }
     }
 
+    @Override
     public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
             InstanceIdentifier key, Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
+    @Override
     public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
             InstanceIdentifier key, Object... extraData) {
         //tobe removed as part of refactoring patch
@@ -205,7 +191,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected List<T> getData(A augmentation) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     protected List<T> getData(Node node) {
@@ -220,10 +206,10 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected Map<InstanceIdentifier<Node>, List<T>> extractRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<T> class1) {
+            Collection<DataTreeModification<Node>> modification, Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
+        if (modification != null && !modification.isEmpty()) {
+            for (DataTreeModification<Node> change : modification) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
                 List<T> removed;
@@ -240,10 +226,10 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected Map<InstanceIdentifier<Node>, List<T>> extractUpdated(
-            Collection<DataTreeModification<Node>> changes, Class<T> class1) {
+            Collection<DataTreeModification<Node>> modification, Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
+        if (modification != null && !modification.isEmpty()) {
+            for (DataTreeModification<Node> change : modification) {
                 InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
                 List<T> updated = null;
@@ -260,7 +246,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     List<T> getCascadeDeleteData(DataTreeModification<Node> change) {
         if (!cascadeDelete()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         DataObjectModification<Node> mod = change.getRootNode();
         Node updatedNode = TransactUtils.getUpdated(mod);
@@ -277,7 +263,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             }
             return removed;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     List<T> getRemoved(DataTreeModification<Node> change) {
@@ -296,9 +282,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return diffOf(updated, before, false);
     }
 
-    List<T> diffOf(Node include, Node a, Node b, boolean compareKeyOnly) {
+    List<T> diffOf(Node include, Node node1, Node node2, boolean compareKeyOnly) {
         List<T> data1 = getData(include);
-        List<T> data2 = diffOf(a, b, compareKeyOnly);
+        List<T> data2 = diffOf(node1, node2, compareKeyOnly);
         if (HwvtepSouthboundUtil.isEmpty(data1) && HwvtepSouthboundUtil.isEmpty(data2)) {
             return Collections.emptyList();
         }
@@ -307,11 +293,11 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return result;
     }
 
-    List<T> diffOf(Node a, Node b, boolean compareKeyOnly) {
+    List<T> diffOf(Node node1, Node node2, boolean compareKeyOnly) {
         List<T> result = new ArrayList<>();
 
-        List<T> list1 = getData(a);
-        List<T> list2 = getData(b);
+        List<T> list1 = getData(node1);
+        List<T> list2 = getData(node2);
 
         if (HwvtepSouthboundUtil.isEmpty(list1)) {
             return Collections.emptyList();
@@ -348,8 +334,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return classType;
     }
 
-    protected boolean areEqual(T a, T b) {
-        return a.getKey().equals(b.getKey());
+    protected boolean areEqual(T obj1, T obj2) {
+        return obj1.getKey().equals(obj2.getKey());
     }
 
     protected UnMetDependencyGetter getDependencyGetter() {
@@ -358,7 +344,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     /**
      * Tells if this object needs to be deleted if its dependent object gets deleted
-     * Ex : LocalUcastMac and LocalMacstMac
+     * Ex : LocalUcastMac and LocalMacstMac.
      *
      * @return true if this object needs to be deleted if its dependent object gets deleted
      */
@@ -378,6 +364,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return threadLocalDeviceTransaction.get();
     }
 
+    @Override
     public void onSuccess(TransactionBuilder deviceTransaction) {
         if (deviceTransaction == null || !updates.containsKey(deviceTransaction)) {
             return;
@@ -385,6 +372,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         onCommandSucceeded();
     }
 
+    @Override
     public void onFailure(TransactionBuilder deviceTransaction) {
         if (deviceTransaction == null || !updates.containsKey(deviceTransaction)) {
             return;

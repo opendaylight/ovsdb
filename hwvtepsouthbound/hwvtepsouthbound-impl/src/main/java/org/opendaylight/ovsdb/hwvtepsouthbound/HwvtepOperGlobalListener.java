@@ -8,20 +8,13 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -29,11 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.Mod
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -47,39 +36,36 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperGlobalListener.class);
 
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
     private ListenerRegistration<HwvtepOperGlobalListener> registration;
-    private HwvtepConnectionManager hcm;
-    private DataBroker db;
-    private Map<YangInstanceIdentifier, Node> connectedNodes = new ConcurrentHashMap<>();
+    private final HwvtepConnectionManager hcm;
+    private final DataBroker db;
+    private final Map<YangInstanceIdentifier, Node> connectedNodes = new ConcurrentHashMap<>();
 
     HwvtepOperGlobalListener(DataBroker db, HwvtepConnectionManager hcm) {
         LOG.info("Registering HwvtepOperGlobalListener");
         this.db = db;
         this.hcm = hcm;
-        registerListener(db);
+        registerListener();
     }
 
-    private void registerListener(final DataBroker db) {
+    private void registerListener() {
         final DataTreeIdentifier<Node> treeId =
-                        new DataTreeIdentifier<Node>(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
-        try {
-            registration = db.registerDataTreeChangeListener(treeId, HwvtepOperGlobalListener.this);
-        } catch (final Exception e) {
-            LOG.error("HwvtepDataChangeListener registration failed", e);
-        }
+                        new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
+
+        registration = db.registerDataTreeChangeListener(treeId, HwvtepOperGlobalListener.this);
     }
 
     @Override
-    public void close() throws Exception {
-        if(registration != null) {
+    public void close() {
+        if (registration != null) {
             registration.close();
         }
     }
 
     @Override
     public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
-        changes.forEach( (change) -> {
+        changes.forEach(change -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
             InstanceIdentifier<Node> nodeIid = change.getRootPath().getRootIdentifier();
@@ -108,15 +94,14 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     }
 
     private Node getCreated(DataObjectModification<Node> mod) {
-        if((mod.getModificationType() == ModificationType.WRITE)
-                        && (mod.getDataBefore() == null)){
+        if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
             return mod.getDataAfter();
         }
         return null;
     }
 
     private Node getRemoved(DataObjectModification<Node> mod) {
-        if(mod.getModificationType() == ModificationType.DELETE){
+        if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;

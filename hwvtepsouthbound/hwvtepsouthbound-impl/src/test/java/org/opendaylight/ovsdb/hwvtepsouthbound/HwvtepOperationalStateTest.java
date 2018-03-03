@@ -8,6 +8,11 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -21,11 +26,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class})
 public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {
@@ -34,8 +34,8 @@ public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {
 
     @Test
     public void testUpdateCurrentTxData() throws Exception {
-        InstanceIdentifier<LogicalSwitches> lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
+        InstanceIdentifier<LogicalSwitches> lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
 
         HwvtepOperationalState opState = new HwvtepOperationalState(connectionInstance);
 

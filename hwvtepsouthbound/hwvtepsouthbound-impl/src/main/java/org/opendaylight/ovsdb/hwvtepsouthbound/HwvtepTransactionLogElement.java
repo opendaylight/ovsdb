@@ -7,15 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepOperationalCommandAggregator;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
-import org.opendaylight.ovsdb.lib.MonitorCallBack;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionElement;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HwvtepTransactionLogElement extends TransactionElement {
 
@@ -36,9 +29,6 @@ public class HwvtepTransactionLogElement extends TransactionElement {
 
     @Override
     public String toString() {
-        return "{" +
-                "isDeviceLog=" + isDeviceLog +
-                super.toString() +
-                '}';
+        return "HwvtepTransactionLogElement [isDeviceLog=" + isDeviceLog + "]";
     }
 }

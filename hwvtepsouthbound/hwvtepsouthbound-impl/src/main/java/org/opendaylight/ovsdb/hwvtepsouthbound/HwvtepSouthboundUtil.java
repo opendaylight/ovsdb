@@ -8,8 +8,12 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -29,15 +33,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-public class HwvtepSouthboundUtil {
+public final class HwvtepSouthboundUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundUtil.class);
     private static final String SCHEMA_VERSION_MISMATCH =
@@ -83,22 +79,23 @@ public class HwvtepSouthboundUtil {
     }
 
     public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db,
-                    HwvtepPhysicalSwitchAttributes pNode) {
-        Preconditions.checkNotNull(pNode);
+                    HwvtepPhysicalSwitchAttributes node) {
+        Preconditions.checkNotNull(node);
         Optional<HwvtepGlobalAugmentation> result = null;
-        HwvtepGlobalRef ref = pNode.getManagedBy();
+        HwvtepGlobalRef ref = node.getManagedBy();
         if (ref != null && ref.getValue() != null) {
             result = getManagingNode(db, ref);
         } else {
-            LOG.warn("Cannot find client for PhysicalSwitch without a specified ManagedBy {}", pNode);
+            LOG.warn("Cannot find client for PhysicalSwitch without a specified ManagedBy {}", node);
             return Optional.absent();
         }
         if (!result.isPresent()) {
-            LOG.warn("Failed to find managing node for PhysicalSwitch {}", pNode);
+            LOG.warn("Failed to find managing node for PhysicalSwitch {}", node);
         }
         return result;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
         try {
             @SuppressWarnings("unchecked")
@@ -126,11 +123,12 @@ public class HwvtepSouthboundUtil {
                 LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
                 return Optional.absent();
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.warn("Failed to get HwvtepNode {}", ref, e);
             return Optional.absent();
         }
     }
+
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
         return String.valueOf(
                 connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
@@ -141,8 +139,8 @@ public class HwvtepSouthboundUtil {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, "hw_vtep", ex.getMessage());
     }
 
-    public static <KeyType, D> void updateData(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
-                                               Class<? extends Identifiable> cls, KeyType key, D data) {
+    public static <K, D> void updateData(Map<Class<? extends Identifiable>, Map<K, D>> map,
+            Class<? extends Identifiable> cls, K key, D data) {
         if (key == null) {
             return;
         }
@@ -152,8 +150,8 @@ public class HwvtepSouthboundUtil {
         map.get(cls).put(key, data);
     }
 
-    public static <KeyType, D> D getData(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
-                                         Class<? extends Identifiable> cls, KeyType key) {
+    public static <K, D> D getData(Map<Class<? extends Identifiable>, Map<K, D>> map,
+            Class<? extends Identifiable> cls, K key) {
         if (key == null) {
             return null;
         }
@@ -163,8 +161,8 @@ public class HwvtepSouthboundUtil {
         return null;
     }
 
-    public static <KeyType, D> boolean containsKey(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
-                                                   Class<? extends Identifiable> cls, KeyType key) {
+    public static <K, D> boolean containsKey(Map<Class<? extends Identifiable>, Map<K, D>> map,
+            Class<? extends Identifiable> cls, K key) {
         if (key == null) {
             return false;
         }
@@ -174,8 +172,8 @@ public class HwvtepSouthboundUtil {
         return false;
     }
 
-    public static <KeyType, D> void clearData(Map<Class<? extends Identifiable>, Map<KeyType, D>> map,
-                                              Class<? extends Identifiable> cls, KeyType key) {
+    public static <K, D> void clearData(Map<Class<? extends Identifiable>, Map<K, D>> map,
+            Class<? extends Identifiable> cls, K key) {
         if (key == null) {
             return;
         }

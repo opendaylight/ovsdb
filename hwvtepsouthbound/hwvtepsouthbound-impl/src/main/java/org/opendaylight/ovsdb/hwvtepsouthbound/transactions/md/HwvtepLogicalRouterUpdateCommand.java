@@ -55,9 +55,10 @@ import org.slf4j.LoggerFactory;
 
 public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalRouterUpdateCommand.class);
-    private Map<UUID, LogicalRouter> updatedLRRows;
+    private final Map<UUID, LogicalRouter> updatedLRRows;
 
-    public HwvtepLogicalRouterUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepLogicalRouterUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedLRRows = TyperUtils.extractRowsUpdated(LogicalRouter.class, getUpdates(), getDbSchema());
     }
@@ -70,47 +71,47 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private void updateLogicalRouter(ReadWriteTransaction transaction, final LogicalRouter lRouter) {
+    private void updateLogicalRouter(ReadWriteTransaction transaction, final LogicalRouter router) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
-            Node connectionNode = buildConnectionNode(lRouter);
+            Node connectionNode = buildConnectionNode(router);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
             InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(lRouter.getName())));
+                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())));
             getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalRouters.class, routerIid,
-                    lRouter.getUuid(), lRouter);
+                    router.getUuid(), router);
         }
     }
 
-    private Node buildConnectionNode(final LogicalRouter lRouter) {
+    private Node buildConnectionNode(final LogicalRouter router) {
         //Update node with LogicalRouter reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        List<LogicalRouters> lRouters = new ArrayList<>();
         LogicalRoutersBuilder lrBuilder = new LogicalRoutersBuilder();
-        lrBuilder.setLogicalRouterUuid(new Uuid(lRouter.getUuid().toString()));
-        lrBuilder.setHwvtepNodeDescription(lRouter.getDescription());
-        HwvtepNodeName hwvtepName = new HwvtepNodeName(lRouter.getName());
+        lrBuilder.setLogicalRouterUuid(new Uuid(router.getUuid().toString()));
+        lrBuilder.setHwvtepNodeDescription(router.getDescription());
+        HwvtepNodeName hwvtepName = new HwvtepNodeName(router.getName());
         lrBuilder.setHwvtepNodeName(hwvtepName);
         lrBuilder.setKey(new LogicalRoutersKey(hwvtepName));
 
-        setSwitchBindings(lRouter, lrBuilder);
-        setStaticRoutes(lRouter, lrBuilder);
-        setAclBindings(lRouter, lrBuilder);
+        setSwitchBindings(router, lrBuilder);
+        setStaticRoutes(router, lrBuilder);
+        setAclBindings(router, lrBuilder);
 
-        lRouters.add(lrBuilder.build());
-        hgAugmentationBuilder.setLogicalRouters(lRouters);
+        List<LogicalRouters> routers = new ArrayList<>();
+        routers.add(lrBuilder.build());
+        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
+        hgAugmentationBuilder.setLogicalRouters(routers);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         return connectionNode.build();
     }
 
-    private void setStaticRoutes(final LogicalRouter lRouter, final LogicalRoutersBuilder lrBuilder) {
-        if (isRouterHasStaticRoutes(lRouter)) {
+    private void setStaticRoutes(final LogicalRouter router, final LogicalRoutersBuilder lrBuilder) {
+        if (isRouterHasStaticRoutes(router)) {
             List<StaticRoutes> routes = new ArrayList<>();
-            for (Entry<String, String> entry : lRouter.getStaticRoutesColumn().getData().entrySet()) {
+            for (Entry<String, String> entry : router.getStaticRoutesColumn().getData().entrySet()) {
                 StaticRoutesBuilder staticRouteBuilder = new StaticRoutesBuilder();
                 staticRouteBuilder.setDestinationAddress(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                 staticRouteBuilder.setNexthopAddress(new IpAddress(new Ipv4Address(entry.getKey())));
@@ -120,15 +121,16 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private boolean isRouterHasStaticRoutes(final LogicalRouter lRouter) {
-        return lRouter != null && lRouter.getStaticRoutesColumn() != null && lRouter.getStaticRoutesColumn().getData() != null
-                && !lRouter.getStaticRoutesColumn().getData().isEmpty();
+    private boolean isRouterHasStaticRoutes(final LogicalRouter router) {
+        return router != null && router.getStaticRoutesColumn() != null
+                && router.getStaticRoutesColumn().getData() != null
+                && !router.getStaticRoutesColumn().getData().isEmpty();
     }
 
-    private void setAclBindings(final LogicalRouter lRouter, final LogicalRoutersBuilder lrBuilder) {
-        if (isRouterHasAcls(lRouter)) {
+    private void setAclBindings(final LogicalRouter router, final LogicalRoutersBuilder builder) {
+        if (isRouterHasAcls(router)) {
             List<AclBindings> bindings = new ArrayList<>();
-            for (Entry<String, UUID> entry : lRouter.getAclBindingColumn().getData().entrySet()) {
+            for (Entry<String, UUID> entry : router.getAclBindingColumn().getData().entrySet()) {
                 AclBindingsBuilder aclBindingBuiler = new AclBindingsBuilder();
                 UUID aclUUID = entry.getValue();
                 ACL acl = (ACL)getOvsdbConnectionInstance().getDeviceInfo().getDeviceOperData(Acls.class, aclUUID);
@@ -139,37 +141,39 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
                     aclBindingBuiler.setRouterInterface(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                     bindings.add(aclBindingBuiler.build());
                 }
-                lrBuilder.setAclBindings(bindings);
+                builder.setAclBindings(bindings);
             }
         }
     }
 
-    private boolean isRouterHasAcls(final LogicalRouter lRouter) {
-        return lRouter != null && lRouter.getAclBindingColumn() != null && lRouter.getAclBindingColumn().getData() != null
-                && !lRouter.getAclBindingColumn().getData().isEmpty();
+    private boolean isRouterHasAcls(final LogicalRouter router) {
+        return router != null && router.getAclBindingColumn() != null
+                && router.getAclBindingColumn().getData() != null
+                && !router.getAclBindingColumn().getData().isEmpty();
     }
 
-    private void setSwitchBindings(final LogicalRouter lRouter, final LogicalRoutersBuilder lrBuilder) {
-        if (isRouterHasSwitchBindings(lRouter)) {
+    private void setSwitchBindings(final LogicalRouter router, final LogicalRoutersBuilder builder) {
+        if (isRouterHasSwitchBindings(router)) {
             List<SwitchBindings> bindings = new ArrayList<>();
-            for (Entry<String, UUID> entry : lRouter.getSwitchBindingColumn().getData().entrySet()) {
+            for (Entry<String, UUID> entry : router.getSwitchBindingColumn().getData().entrySet()) {
                 SwitchBindingsBuilder switchBindingBuiler = new SwitchBindingsBuilder();
                 UUID lsUUID = entry.getValue();
                 LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
                 if (logicalSwitch != null) {
                     switchBindingBuiler.setDestinationAddress(new IpPrefix(new Ipv4Prefix(entry.getKey())));
-                    InstanceIdentifier<LogicalSwitches> lSwitchIid =
-                            HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                    switchBindingBuiler.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(lSwitchIid));
+                    InstanceIdentifier<LogicalSwitches> switchIid =
+                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
+                    switchBindingBuiler.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
                     bindings.add(switchBindingBuiler.build());
                 }
             }
-            lrBuilder.setSwitchBindings(bindings);
+            builder.setSwitchBindings(bindings);
         }
     }
 
-    private boolean isRouterHasSwitchBindings(final LogicalRouter lRouter) {
-        return lRouter != null && lRouter.getSwitchBindingColumn() != null && lRouter.getSwitchBindingColumn().getData() != null
-                && !lRouter.getSwitchBindingColumn().getData().isEmpty();
+    private boolean isRouterHasSwitchBindings(final LogicalRouter router) {
+        return router != null && router.getSwitchBindingColumn() != null
+                && router.getSwitchBindingColumn().getData() != null
+                && !router.getSwitchBindingColumn().getData().isEmpty();
     }
 }

@@ -60,8 +60,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         Collection<UcastMacsLocal> deletedLUMRows =
                 TyperUtils.extractRowsRemoved(UcastMacsLocal.class, getUpdates(), getDbSchema()).values();
         for (UcastMacsLocal lum : deletedLUMRows) {
-            if(lum.getMac() != null && lum.getLogicalSwitchColumn() != null &&
-                            lum.getLogicalSwitchColumn().getData() != null) {
+            if (lum.getMac() != null && lum.getLogicalSwitchColumn() != null
+                    && lum.getLogicalSwitchColumn().getData() != null) {
                 InstanceIdentifier<LocalUcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class).child(LocalUcastMacs.class,
                                     new LocalUcastMacsKey(getLogicalSwitchRef(lum.getLogicalSwitchColumn().getData()),
@@ -77,8 +77,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         Collection<UcastMacsRemote> deletedUMRRows =
                 TyperUtils.extractRowsRemoved(UcastMacsRemote.class, getUpdates(), getDbSchema()).values();
         for (UcastMacsRemote rum : deletedUMRRows) {
-            if(rum.getMac() != null && rum.getLogicalSwitchColumn() != null &&
-                            rum.getLogicalSwitchColumn().getData() != null) {
+            if (rum.getMac() != null && rum.getLogicalSwitchColumn() != null
+                    && rum.getLogicalSwitchColumn().getData() != null) {
                 InstanceIdentifier<RemoteUcastMacs> rumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class,
                                     new RemoteUcastMacsKey(getLogicalSwitchRef(rum.getLogicalSwitchColumn().getData()),
@@ -95,8 +95,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         Collection<McastMacsLocal> deletedLMMRows =
                 TyperUtils.extractRowsRemoved(McastMacsLocal.class, getUpdates(), getDbSchema()).values();
         for (McastMacsLocal lmm : deletedLMMRows) {
-            if(lmm.getMac() != null && lmm.getLogicalSwitchColumn() != null &&
-                            lmm.getLogicalSwitchColumn().getData() != null) {
+            if (lmm.getMac() != null && lmm.getLogicalSwitchColumn() != null
+                    && lmm.getLogicalSwitchColumn().getData() != null) {
                 InstanceIdentifier<LocalMcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(LocalMcastMacs.class,
@@ -113,8 +113,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         Collection<McastMacsRemote> deletedMMRRows =
                 TyperUtils.extractRowsRemoved(McastMacsRemote.class, getUpdates(), getDbSchema()).values();
         for (McastMacsRemote rmm : deletedMMRRows) {
-            if(rmm.getMac() != null && rmm.getLogicalSwitchColumn() != null &&
-                            rmm.getLogicalSwitchColumn().getData() != null) {
+            if (rmm.getMac() != null && rmm.getLogicalSwitchColumn() != null
+                    && rmm.getLogicalSwitchColumn().getData() != null) {
                 InstanceIdentifier<RemoteMcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(RemoteMcastMacs.class,
@@ -131,9 +131,9 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
     private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
         LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(switchUUID);
         if (logicalSwitch != null) {
-            InstanceIdentifier<LogicalSwitches> lSwitchIid =
+            InstanceIdentifier<LogicalSwitches> switchIid =
                     HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-            return new HwvtepLogicalSwitchRef(lSwitchIid);
+            return new HwvtepLogicalSwitchRef(switchIid);
         }
         LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
         LOG.trace("Available LogicalSwitches: {}",

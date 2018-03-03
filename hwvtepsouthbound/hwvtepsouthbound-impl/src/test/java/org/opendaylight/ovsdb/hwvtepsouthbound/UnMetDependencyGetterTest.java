@@ -8,6 +8,11 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -27,59 +32,53 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class})
 public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
 
-    UnMetDependencyGetter<RemoteMcastMacs> MCAST_MAC_DATA_VALIDATOR;
+    UnMetDependencyGetter<RemoteMcastMacs> mcastMacDataValidator;
     HwvtepOperationalState opState;
     RemoteMcastMacs mac;
     InstanceIdentifier<LogicalSwitches> lsIid;
     Map<Class<? extends Identifiable>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() {
-        MCAST_MAC_DATA_VALIDATOR =
+        mcastMacDataValidator =
                 Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);
         opState = new HwvtepOperationalState(connectionInstance);
         mac = TestBuilders.buildRemoteMcastMacs(nodeIid, "FF:FF:FF:FF:FF:FF", "ls0",
                 new String[] {"192.168.122.20", "192.168.122.30"});
-        lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
+        lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
     }
 
     @Test
     public void testLogicalSwitchConfigDependency() throws Exception {
         setupForTest();
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());
 
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getUnMetConfigDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getUnMetConfigDependencies(opState, mac);
         assertEquals(1, unMetDependencies.get(LogicalSwitches.class).size());
         assertEquals(2, unMetDependencies.get(TerminationPoint.class).size());
 
         opState.getDeviceInfo().updateConfigData(LogicalSwitches.class, lsIid, "ls0");
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getUnMetConfigDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getUnMetConfigDependencies(opState, mac);
         assertNull(unMetDependencies.get(LogicalSwitches.class));
     }
 
     @Test
     public void testLogicalSwitchInTransitDependency() throws Exception {
         setupForTest();
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());
 
         opState.getDeviceInfo().markKeyAsInTransit(LogicalSwitches.class, lsIid);
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
         assertEquals(1, unMetDependencies.size());
 
         opState.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());
     }
 }

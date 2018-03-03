@@ -7,6 +7,11 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -22,22 +27,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 public class HwvtepReconciliationTask extends ReconciliationTask {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HwvtepReconciliationTask.class);
-    private HwvtepConnectionInstance connectionInstance;
-    private DataBroker db;
-    private Node psNode;
-    private MdsalUtils mdsalUtils;
+    private final HwvtepConnectionInstance connectionInstance;
+    private final DataBroker db;
+    private final Node psNode;
+    private final MdsalUtils mdsalUtils;
 
     public HwvtepReconciliationTask(ReconciliationManager reconciliationManager,
                                     HwvtepConnectionManager connectionManager,
@@ -54,9 +49,9 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     private void transactChangesToDevice(final Collection<DataTreeModification<Node>> changes,
                                          final Node globalOperNode,
-                                         final Node psNode) {
+                                         final Node node) {
         HwvtepOperationalState hwvtepOperationalState = new HwvtepOperationalState(db, connectionInstance, changes,
-                globalOperNode, psNode);
+                globalOperNode, node);
         hwvtepOperationalState.setInReconciliation(true);
         boolean reconcile = true;
         connectionInstance.transact(new TransactCommandAggregator(hwvtepOperationalState,changes), reconcile);
@@ -108,5 +103,4 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
     public long retryDelayInMills() {
         return 0;
     }
-
 }

@@ -8,6 +8,10 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -19,12 +23,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+public final class GlobalConfigOperationalChangeGetter {
 
-public class GlobalConfigOperationalChangeGetter {
+    private GlobalConfigOperationalChangeGetter() {
+    }
 
     public static DataTreeModification<Node> getModification(InstanceIdentifier<Node> nodeId, Node configNode,
                                                              Node opNode) {
@@ -44,7 +46,8 @@ public class GlobalConfigOperationalChangeGetter {
         return new DataTreeModificationImpl<>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
     }
 
-    static void fillLocalMacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode, Node opNode) {
+    static void fillLocalMacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode,
+            Node opNode) {
         Set<String> logicalSwitchNamesToBeRemoved = getLogicalSwitchesToBeRemoved(configNode, opNode);
         List<LocalUcastMacs> localUcastMacsToBeRemoved = getLocalUcastMacsToBeRemoved(opNode,
                 logicalSwitchNamesToBeRemoved);
@@ -59,8 +62,8 @@ public class GlobalConfigOperationalChangeGetter {
         if (opNode == null || opNode.getAugmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
-        List<LocalUcastMacs> localUcastMacs = opNode.getAugmentation(HwvtepGlobalAugmentation.class).
-                getLocalUcastMacs();
+        List<LocalUcastMacs> localUcastMacs = opNode.getAugmentation(HwvtepGlobalAugmentation.class)
+                .getLocalUcastMacs();
         if (localUcastMacs == null) {
             return null;
         }
@@ -75,8 +78,8 @@ public class GlobalConfigOperationalChangeGetter {
         if (opNode == null || opNode.getAugmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
-        List<LocalMcastMacs> localMcastMacs = opNode.getAugmentation(HwvtepGlobalAugmentation.class).
-                getLocalMcastMacs();
+        List<LocalMcastMacs> localMcastMacs = opNode.getAugmentation(HwvtepGlobalAugmentation.class)
+                .getLocalMcastMacs();
         if (localMcastMacs == null) {
             return null;
         }
@@ -113,7 +116,7 @@ public class GlobalConfigOperationalChangeGetter {
         return removedSwitchNames;
     }
 
-    static HwvtepGlobalAugmentationBuilder getAugmentationFromNode(Node node ) {
+    static HwvtepGlobalAugmentationBuilder getAugmentationFromNode(Node node) {
         if (node == null) {
             return new HwvtepGlobalAugmentationBuilder();
         }

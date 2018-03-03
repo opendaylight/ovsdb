@@ -9,6 +9,8 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -29,15 +31,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
 
-    private Map<UUID, PhysicalLocator> updatedPLocRows;
-    private Map<UUID, PhysicalLocator> oldPLocRows;
+    private final Map<UUID, PhysicalLocator> updatedPLocRows;
+    private final Map<UUID, PhysicalLocator> oldPLocRows;
 
-    public HwvtepPhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
         oldPLocRows = TyperUtils.extractRowsOld(PhysicalLocator.class, getUpdates(), getDbSchema());
@@ -56,23 +56,23 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
     }
 
     private void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
-        for (Entry<UUID, PhysicalLocator> pLocUpdate : updatedPLocRows.entrySet()) {
-            PhysicalLocator pLoc = pLocUpdate.getValue();
+        for (Entry<UUID, PhysicalLocator> locUpdate : updatedPLocRows.entrySet()) {
+            PhysicalLocator locator = locUpdate.getValue();
             InstanceIdentifier<Node> nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
-            TerminationPointKey tpKey = HwvtepSouthboundMapper.getTerminationPointKey(pLoc);
+            TerminationPointKey tpKey = HwvtepSouthboundMapper.getTerminationPointKey(locator);
             if (nodeIid != null && tpKey != null) {
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.setKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
                 InstanceIdentifier<TerminationPoint> tpPath =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, pLoc);
+                        HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, locator);
                 HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalLocatorAugmentationBuilder();
-                tpAugmentationBuilder.setPhysicalLocatorUuid(new Uuid(pLoc.getUuid().toString()));
-                setEncapsType(tpAugmentationBuilder, pLoc);
-                setDstIp(tpAugmentationBuilder, pLoc);
+                tpAugmentationBuilder.setPhysicalLocatorUuid(new Uuid(locator.getUuid().toString()));
+                setEncapsType(tpAugmentationBuilder, locator);
+                setDstIp(tpAugmentationBuilder, locator);
                 tpBuilder.addAugmentation(HwvtepPhysicalLocatorAugmentation.class, tpAugmentationBuilder.build());
-                if (oldPLocRows.containsKey(pLocUpdate.getKey())) {
+                if (oldPLocRows.containsKey(locUpdate.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
                 } else {
@@ -80,20 +80,22 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
                             tpPath, tpBuilder.build());
                 }
                 getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(
-                        TerminationPoint.class, tpPath, pLoc.getUuid(), pLoc);
+                        TerminationPoint.class, tpPath, locator.getUuid(), locator);
             }
         }
     }
 
-    private void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder, PhysicalLocator pLoc) {
-        String encapsType = pLoc.getEncapsulationTypeColumn().getData();
+    private void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+            PhysicalLocator locator) {
+        String encapsType = locator.getEncapsulationTypeColumn().getData();
         if (HwvtepSouthboundMapper.createEncapsulationType(encapsType) != null) {
             tpAugmentationBuilder.setEncapsulationType(HwvtepSouthboundMapper.createEncapsulationType(encapsType));
         }
     }
 
-    private void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder, PhysicalLocator pLoc) {
-        IpAddress ip = new IpAddress(pLoc.getDstIpColumn().getData().toCharArray());
+    private void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+            PhysicalLocator locator) {
+        IpAddress ip = new IpAddress(locator.getDstIpColumn().getData().toCharArray());
         tpAugmentationBuilder.setDstIp(ip);
     }
 

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
@@ -73,8 +72,8 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     private void removeMcastMacRemote(final TransactionBuilder transaction,
                                       final InstanceIdentifier<Node> nodeIid, final List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac : macList) {
-            InstanceIdentifier<RemoteMcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                    child(RemoteMcastMacs.class, mac.getKey());
+            InstanceIdentifier<RemoteMcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteMcastMacs.class, mac.getKey());
             onConfigUpdate(transaction, nodeIid, mac, macKey);
         }
     }
@@ -94,24 +93,24 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final RemoteMcastMacs mac,
                                     final InstanceIdentifier macIid,
                                     final Object... extraData) {
-            LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
-            HwvtepDeviceInfo.DeviceData operationalMacOptional =
-                    getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macIid);
-            McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    McastMacsRemote.class, null);
-            if (operationalMacOptional != null && operationalMacOptional.getUuid() != null) {
-                //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
-                //TODO: locator in config DS is not deleted
-                UUID macEntryUUID = operationalMacOptional.getUuid();
-                mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
-                transaction.add(op.delete(mcastMacsRemote.getSchema()).
-                        where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
-                transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
-                updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
-            } else {
-                LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
-                        mac.getMacEntryKey().getValue());
-            }
+        LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
+        HwvtepDeviceInfo.DeviceData operationalMacOptional =
+                getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macIid);
+        McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                McastMacsRemote.class, null);
+        if (operationalMacOptional != null && operationalMacOptional.getUuid() != null) {
+            //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
+            //TODO: locator in config DS is not deleted
+            UUID macEntryUUID = operationalMacOptional.getUuid();
+            mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
+            transaction.add(op.delete(mcastMacsRemote.getSchema())
+                    .where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+            transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
+            updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
+        } else {
+            LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
+                    mac.getMacEntryKey().getValue());
+        }
     }
 
     @Override
@@ -120,8 +119,8 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected boolean areEqual(RemoteMcastMacs a, RemoteMcastMacs b) {
-        return a.getKey().equals(b.getKey()) && Objects.equals(a.getLocatorSet(), b.getLocatorSet());
+    protected boolean areEqual(RemoteMcastMacs macs1, RemoteMcastMacs macs2) {
+        return macs1.getKey().equals(macs2.getKey()) && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
     }
 
     @Override

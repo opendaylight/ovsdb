@@ -35,14 +35,14 @@ public class HwvtepManagerRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Collection<Manager> deletedManagerRows = TyperUtils.extractRowsRemoved(Manager.class, getUpdates(),getDbSchema()).values();
+        Collection<Manager> deletedManagerRows =
+                TyperUtils.extractRowsRemoved(Manager.class, getUpdates(),getDbSchema()).values();
         for (Manager manager : deletedManagerRows) {
             InstanceIdentifier<Managers> managerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                             .augmentation(HwvtepGlobalAugmentation.class)
                             .child(Managers.class, new ManagersKey(new Uri(manager.getTargetColumn().getData())));
-                    // TODO Delete any references
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid);
+            // TODO Delete any references
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid);
         }
     }
-
 }

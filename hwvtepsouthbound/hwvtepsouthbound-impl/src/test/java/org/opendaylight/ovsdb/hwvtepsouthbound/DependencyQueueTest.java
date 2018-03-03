@@ -8,6 +8,12 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static org.junit.Assert.assertEquals;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -33,15 +39,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class, DependencyQueue.class})
+@PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class,
+    DependencyQueue.class})
 public class DependencyQueueTest extends DataChangeListenerTestBase {
 
     String[][] terminationPoints = new String[][]{
@@ -49,7 +49,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
             {"192.168.122.30"}
     };
 
-    UnMetDependencyGetter<RemoteMcastMacs> MCAST_MAC_DATA_VALIDATOR;
+    UnMetDependencyGetter<RemoteMcastMacs> mcastMacDataValidator;
     HwvtepOperationalState opState;
     RemoteMcastMacs mac;
     InstanceIdentifier<RemoteMcastMacs> macIid;
@@ -57,27 +57,30 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     Map<Class<? extends Identifiable>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() throws Exception {
-        MCAST_MAC_DATA_VALIDATOR = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class, UnMetDependencyGetter.class);
+        mcastMacDataValidator = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class,
+                UnMetDependencyGetter.class);
         opState = new HwvtepOperationalState(connectionInstance);
         mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
                 new String[]{"192.168.122.20", "192.168.122.30"});
-        lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
-        macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).
-                child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.getKey()));
-        setFinalStatic(DependencyQueue.class, "executorService", PowerMockito.mock(SameThreadScheduledExecutor.class, Mockito.CALLS_REAL_METHODS));
+        lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
+        macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.getKey()));
+        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", PowerMockito.mock(SameThreadScheduledExecutor.class,
+                Mockito.CALLS_REAL_METHODS));
     }
 
     @Test
     public void testLogicalSwitchConfigDependency() throws Exception {
         setupForTest();
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getUnMetConfigDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getUnMetConfigDependencies(opState, mac);
         unMetDependencies.remove(TerminationPoint.class);
 
         final CountDownLatch latch = new CountDownLatch(1);
         opState.getDeviceInfo().addJobToQueue(new DependentJob.ConfigWaitingJob(macIid, mac, unMetDependencies) {
             @Override
-            protected void onDependencyResolved(HwvtepOperationalState operationalState, TransactionBuilder transactionBuilder) {
+            protected void onDependencyResolved(HwvtepOperationalState operationalState,
+                    TransactionBuilder transactionBuilder) {
                 latch.countDown();
             }
         });
@@ -91,12 +94,14 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     public void testLogicalSwitchInTransitDependency() throws Exception {
         setupForTest();
         opState.getDeviceInfo().markKeyAsInTransit(LogicalSwitches.class, lsIid);
-        unMetDependencies = MCAST_MAC_DATA_VALIDATOR.getInTransitDependencies(opState, mac);
+        unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
 
         final CountDownLatch latch = new CountDownLatch(1);
-        opState.getDeviceInfo().addJobToQueue(new DependentJob.OpWaitingJob<RemoteMcastMacs>(macIid, mac, unMetDependencies) {
+        opState.getDeviceInfo().addJobToQueue(new DependentJob.OpWaitingJob<RemoteMcastMacs>(
+                macIid, mac, (Map)unMetDependencies) {
             @Override
-            protected void onDependencyResolved(HwvtepOperationalState operationalState, TransactionBuilder transactionBuilder) {
+            protected void onDependencyResolved(HwvtepOperationalState operationalState,
+                    TransactionBuilder transactionBuilder) {
                 latch.countDown();
             }
         });

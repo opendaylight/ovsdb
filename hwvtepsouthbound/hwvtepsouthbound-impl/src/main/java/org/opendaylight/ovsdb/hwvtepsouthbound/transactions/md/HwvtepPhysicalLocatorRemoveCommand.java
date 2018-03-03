@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -24,7 +23,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionCommand {
 
-    public HwvtepPhysicalLocatorRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepPhysicalLocatorRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -32,15 +32,14 @@ public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionComma
     public void execute(ReadWriteTransaction transaction) {
         Collection<PhysicalLocator> deletedPLRows =
                 TyperUtils.extractRowsRemoved(PhysicalLocator.class, getUpdates(), getDbSchema()).values();
-        for (PhysicalLocator pLoc : deletedPLRows) {
+        for (PhysicalLocator locator : deletedPLRows) {
             final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
             final InstanceIdentifier<TerminationPoint> nodePath = HwvtepSouthboundMapper
-                    .createInstanceIdentifier(connectionIId, pLoc);
+                    .createInstanceIdentifier(connectionIId, locator);
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
             getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(TerminationPoint.class, nodePath);
 
             //TODO: Check if any cleanup is required
         }
     }
-
 }

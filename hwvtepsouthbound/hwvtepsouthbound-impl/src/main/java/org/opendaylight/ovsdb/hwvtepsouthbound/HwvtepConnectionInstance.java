@@ -8,6 +8,11 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,12 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.annotation.Nonnull;
-
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
@@ -60,23 +60,21 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 public class HwvtepConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepConnectionInstance.class);
     private ConnectionInfo connectionInfo;
-    private OvsdbClient client;
+    private final OvsdbClient client;
     private final HwvtepTableReader hwvtepTableReader;
     private InstanceIdentifier<Node> instanceIdentifier;
-    private TransactionInvoker txInvoker;
+    private final TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private HwvtepGlobalAugmentation initialCreatedData = null;
-    private HwvtepDeviceInfo deviceInfo;
-    private DataBroker dataBroker;
+    private final HwvtepDeviceInfo deviceInfo;
+    private final DataBroker dataBroker;
     private final HwvtepConnectionManager hwvtepConnectionManager;
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     private final SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
@@ -84,7 +82,7 @@ public class HwvtepConnectionInstance {
     private TransactionHistory controllerTxHistory;
     private TransactionHistory deviceUpdateHistory;
 
-    HwvtepConnectionInstance (HwvtepConnectionManager hwvtepConnectionManager, ConnectionInfo key, OvsdbClient client,
+    HwvtepConnectionInstance(HwvtepConnectionManager hwvtepConnectionManager, ConnectionInfo key, OvsdbClient client,
                               InstanceIdentifier<Node> iid, TransactionInvoker txInvoker, DataBroker dataBroker) {
         this.hwvtepConnectionManager = hwvtepConnectionManager;
         this.connectionInfo = key;
@@ -105,7 +103,7 @@ public class HwvtepConnectionInstance {
             LOG.info("Job waiting for reconciliation {}", nodeId);
             Futures.addCallback(reconciliationFt, new FutureCallback<Boolean>() {
                 @Override
-                public void onSuccess(Boolean aBoolean) {
+                public void onSuccess(Boolean notUsed) {
                     LOG.info("Running the job waiting for reconciliation {}", nodeId);
                     transact(command, false);
                 }
@@ -115,10 +113,11 @@ public class HwvtepConnectionInstance {
                     LOG.info("Running the job waiting for reconciliation {}", nodeId);
                     transact(command, false);
                 }
-            });
+            }, MoreExecutors.directExecutor());
+
             if (firstUpdate) {
                 LOG.info("Scheduling the reconciliation timeout task {}", nodeId);
-                scheduledExecutorService.schedule( () -> reconciliationFt.set(Boolean.TRUE),
+                scheduledExecutorService.schedule(() -> reconciliationFt.set(Boolean.TRUE),
                         HwvtepSouthboundConstants.CONFIG_NODE_UPDATE_MAX_DELAY_MS, TimeUnit.MILLISECONDS);
             }
         }
@@ -136,9 +135,13 @@ public class HwvtepConnectionInstance {
         }
     }
 
+    public ListenableFuture<List<OperationResult>> transact(DatabaseSchema dbSchema, List<Operation> operations) {
+        return client.transact(dbSchema, operations);
+    }
+
     public void registerCallbacks() {
-        if ( this.callback == null) {
-            if(this.initialCreatedData != null) {
+        if (this.callback == null) {
+            if (this.initialCreatedData != null) {
                 this.updateConnectionAttributes();
             }
 
@@ -163,7 +166,7 @@ public class HwvtepConnectionInstance {
             try {
                 transactInvokers = new HashMap<>();
                 DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
-                if(dbSchema != null) {
+                if (dbSchema != null) {
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -226,17 +229,13 @@ public class HwvtepConnectionInstance {
         return client.transactBuilder(dbSchema);
     }
 
-    public ListenableFuture<List<OperationResult>> transact(DatabaseSchema dbSchema, List<Operation> operations) {
-        return client.transact(dbSchema, operations);
+    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                    List<MonitorRequest> monitorRequests, MonitorCallBack monitorCallBack) {
+        return client.monitor(schema, monitorRequests, monitorCallBack);
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                    List<MonitorRequest> monitorRequests, MonitorCallBack callback) {
-        return client.monitor(schema, monitorRequests, callback);
-    }
-
-    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                    List<MonitorRequest> monitorRequests, MonitorHandle monitorHandle, MonitorCallBack callback) {
+            List<MonitorRequest> monitorRequests, MonitorHandle monitorHandle, MonitorCallBack monitorCallBack) {
         return null;
     }
 
@@ -314,7 +313,7 @@ public class HwvtepConnectionInstance {
         return this.connectedEntity;
     }
 
-    public void setConnectedEntity(Entity entity ) {
+    public void setConnectedEntity(Entity entity) {
         this.connectedEntity = entity;
     }
 
@@ -350,6 +349,7 @@ public class HwvtepConnectionInstance {
     public HwvtepGlobalAugmentation getHwvtepGlobalAugmentation() {
         return this.initialCreatedData;
     }
+
     public HwvtepDeviceInfo getDeviceInfo() {
         return this.deviceInfo;
     }

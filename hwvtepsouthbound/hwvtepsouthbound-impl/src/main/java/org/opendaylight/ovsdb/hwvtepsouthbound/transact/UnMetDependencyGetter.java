@@ -8,6 +8,10 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -18,15 +22,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Utility class to retrieve the unmet dependencies (config/operational) of the given object.
- *
- * @param <T>
  */
 public abstract class UnMetDependencyGetter<T extends Identifiable> {
 
@@ -98,6 +95,7 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
     }
 
     class ConfigDependencyGetter extends DependencyGetter {
+        @Override
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
                 Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
             return deviceInfo.isConfigDataAvailable(cls, key) || isConfigDataAvailable(opState, key);
@@ -111,6 +109,7 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
     }
 
     class InTransitDependencyGetter extends DependencyGetter {
+        @Override
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
                 Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
             return opState.isKeyPartOfCurrentTx(cls, key) || !deviceInfo.isKeyInTransit(cls, key);

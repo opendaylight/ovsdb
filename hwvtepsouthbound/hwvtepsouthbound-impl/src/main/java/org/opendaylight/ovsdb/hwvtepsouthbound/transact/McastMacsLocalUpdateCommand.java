@@ -10,11 +10,11 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -29,8 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsLocalUpdateCommand.class);
@@ -56,9 +54,10 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
             InstanceIdentifier<Node> instanceIdentifier, List<LocalMcastMacs> localMcastMacs) {
         for (LocalMcastMacs localMcastMac: localMcastMacs) {
             LOG.debug("Creating localMcastMac, mac address: {}", localMcastMac.getMacEntryKey().getValue());
-            Optional<LocalMcastMacs> operationalMacOptional =
+            final Optional<LocalMcastMacs> operationalMacOptional =
                     getOperationalState().getLocalMcastMacs(instanceIdentifier, localMcastMac.getKey());
-            McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), McastMacsLocal.class);
+            McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    McastMacsLocal.class);
             setIpAddress(mcastMacsLocal, localMcastMac);
             setLocatorSet(transaction, mcastMacsLocal, localMcastMac);
             setLogicalSwitch(mcastMacsLocal, localMcastMac);
@@ -87,7 +86,8 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
     private void setLogicalSwitch(McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid = (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
+            InstanceIdentifier<LogicalSwitches> lswitchIid =
+                   (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
@@ -95,15 +95,17 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 mcastMacsLocal.setLogicalSwitch(logicalSwitchUUID);
             } else {
-                LOG.warn("Create or update localMcastMac: No logical switch with iid {} found in operational datastore!",
-                        lswitchIid);
+                LOG.warn(
+                    "Create or update localMcastMac: No logical switch with iid {} found in operational datastore!",
+                    lswitchIid);
             }
         }
     }
 
     private void setLocatorSet(TransactionBuilder transaction, McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
         if (inputMac.getLocatorSet() != null && !inputMac.getLocatorSet().isEmpty()) {
-            UUID locatorSetUuid = TransactUtils.createPhysicalLocatorSet(getOperationalState(), transaction, inputMac.getLocatorSet());
+            UUID locatorSetUuid = TransactUtils.createPhysicalLocatorSet(getOperationalState(), transaction,
+                    inputMac.getLocatorSet());
             mcastMacsLocal.setLocatorSet(locatorSetUuid);
         }
     }

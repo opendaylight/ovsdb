@@ -10,12 +10,12 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -27,8 +27,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
 
 public class McastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsLocalRemoveCommand.class);
@@ -63,8 +61,8 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalMc
                 //TODO: locator in config DS is not deleted
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
                 mcastMacsLocal.getUuidColumn().setData(macEntryUUID);
-                transaction.add(op.delete(mcastMacsLocal.getSchema()).
-                        where(mcastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+                transaction.add(op.delete(mcastMacsLocal.getSchema())
+                        .where(mcastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 transaction.add(op.comment("McastMacLocal: Deleting " + mac.getMacEntryKey().getValue()));
             } else {
                 LOG.warn("Unable to delete localMcastMacs {} because it was not found in the operational store",
@@ -91,6 +89,7 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalMc
     static UnMetDependencyGetter MAC_DEPENDENCY_GETTER = new MacDependencyGetter();
 
     public static class MacDependencyGetter extends UnMetDependencyGetter<LocalMcastMacs> {
+        @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(LocalMcastMacs data) {
             return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }

@@ -8,7 +8,19 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.collect.Lists;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +30,6 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.lib.operations.Operations;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
@@ -26,7 +37,6 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.powermock.api.mockito.PowerMockito;
@@ -34,19 +44,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 /**
  * Unit tests for the data-tree change listener.
@@ -95,20 +92,20 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Before
     public void setupListener() throws Exception {
-        setFinalStatic(DependencyQueue.class, "executorService", PowerMockito.mock(SameThreadScheduledExecutor.class, Mockito.CALLS_REAL_METHODS));
-        opDataChangeListener = new HwvtepOperationalDataChangeListener(dataBroker, hwvtepConnectionManager, connectionInstance);
+        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", PowerMockito.mock(SameThreadScheduledExecutor.class,
+                Mockito.CALLS_REAL_METHODS));
+        opDataChangeListener = new HwvtepOperationalDataChangeListener(dataBroker, hwvtepConnectionManager,
+                connectionInstance);
     }
 
     @After
-    public void cleanupListener() {
-        try {
-            opDataChangeListener.close();
-        } catch (Exception e) {
-        }
+    public void cleanupListener() throws Exception {
+        opDataChangeListener.close();
     }
 
+    @Override
     void setFinalStatic(Class cls, String fieldName, Object newValue) throws Exception {
-        Field fields[] = FieldUtils.getAllFields(cls);
+        Field[] fields = FieldUtils.getAllFields(cls);
         for (Field field : fields) {
             if (fieldName.equals(field.getName())) {
                 field.setAccessible(true);
@@ -211,7 +208,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testAddMacs() throws Exception {
-        Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
@@ -228,7 +225,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testUpdateMacs() throws Exception {
-        Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
@@ -251,7 +248,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testUpdateMacsWithZeroLocators() throws Exception {
-        Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
@@ -272,7 +269,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testBackToBackMacsUpdate() throws Exception {
-        Node node = addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);

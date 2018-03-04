@@ -66,7 +66,6 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
     private Node buildConnectionNode(final Collection<UcastMacsRemote> macRemotes) {
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<RemoteUcastMacs> remoteUMacs = new ArrayList<>();
         macRemotes.forEach(mac -> remoteUMacs.add(buildRemoteUcast(mac)));

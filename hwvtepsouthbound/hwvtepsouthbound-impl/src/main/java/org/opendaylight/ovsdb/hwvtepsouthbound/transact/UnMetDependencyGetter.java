@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -66,8 +67,9 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
             allKeys.put(LogicalSwitches.class, getLogicalSwitchDependencies(data));
             allKeys.put(TerminationPoint.class, getTerminationPointDependencies(data));
 
-            for (Class<? extends Identifiable> cls : allKeys.keySet()) {
-                List<InstanceIdentifier<? extends DataObject>> keysToCheck = allKeys.get(cls);
+            for (Entry<Class<? extends Identifiable>, List<InstanceIdentifier<?>>> entry : allKeys.entrySet()) {
+                Class<? extends Identifiable> cls = entry.getKey();
+                List<InstanceIdentifier<? extends DataObject>> keysToCheck = entry.getValue();
                 for (InstanceIdentifier<? extends DataObject> key : keysToCheck) {
                     if (!isDependencyMet(opState, deviceInfo, cls, key)) {
                         result = addToResultMap(result, cls, key);

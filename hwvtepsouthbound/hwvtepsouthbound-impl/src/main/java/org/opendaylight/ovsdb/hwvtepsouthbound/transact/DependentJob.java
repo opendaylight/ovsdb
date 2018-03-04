@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -92,8 +93,9 @@ public abstract class DependentJob<T extends Identifiable> {
      * @return true if all the dependencies are met
      */
     boolean areDependenciesMet(HwvtepDeviceInfo deviceInfo) {
-        for (Class<? extends DataObject> cls : dependencies.keySet()) {
-            for (InstanceIdentifier iid : dependencies.get(cls)) {
+        for (Entry<Class<? extends DataObject>, List<InstanceIdentifier>> entry : dependencies.entrySet()) {
+            Class<? extends DataObject> cls = entry.getKey();
+            for (InstanceIdentifier<?> iid : entry.getValue()) {
                 if (!isDependencyMet(deviceInfo, cls, iid)) {
                     return false;
                 }
@@ -147,7 +149,6 @@ public abstract class DependentJob<T extends Identifiable> {
 
             if (DATA_INTRANSIT_EXPIRED.test(controllerData)) {
                 LOG.info("Intransit state expired for key: {} --- dependency {}", iid, getKey());
-                String clsName = cls.getSimpleName();
 
                 //either the device acted on the selected iid/uuid and sent the updated event or it did not
                 //here we are querying the device directly to get the latest status on the iid

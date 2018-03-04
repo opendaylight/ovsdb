@@ -144,9 +144,7 @@ public class TransactCommandAggregator implements TransactCommand {
             if (type == null) {
                 continue;
             }
-            InstanceIdentifier instanceIdentifier = null;
             Class<? extends Identifiable> childClass = (Class<? extends Identifiable>) child.getDataType();
-            InstanceIdentifier.PathArgument pathArgument = child.getIdentifier();
             switch (type) {
                 case WRITE:
                 case SUBTREE_MODIFIED:

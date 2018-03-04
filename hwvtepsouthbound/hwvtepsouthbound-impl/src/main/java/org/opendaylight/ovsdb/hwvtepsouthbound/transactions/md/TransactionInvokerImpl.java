@@ -69,13 +69,15 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void invoke(final TransactionCommand command) {
         // TODO what do we do if queue is full?
-        inputQueue.offer(command);
+        if (!inputQueue.offer(command)) {
+            LOG.error("inputQueue is full (size: {}) - could not offer {}", inputQueue.size(), command);
+        }
     }
 
     @Override
     public void onTransactionChainFailed(TransactionChain<?, ?> txChain,
             AsyncTransaction<?, ?> transaction, Throwable cause) {
-        failedTransactionQueue.offer(transaction);
+        offerFailedTransaction(transaction);
     }
 
     @Override
@@ -108,7 +110,10 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     Futures.addCallback(ft, new FutureCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
-                            successfulTransactionQueue.offer(transaction);
+                            if (!successfulTransactionQueue.offer(transaction)) {
+                                LOG.error("successfulTransactionQueue is full (size: {}) - could not offer {}",
+                                        successfulTransactionQueue.size(), transaction);
+                            }
                         }
 
                         @Override
@@ -124,11 +129,17 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     // retried from exceptions on which the command should NOT be retried.
                     // Then it should retry only the commands which should be retried, otherwise
                     // this method will retry commands which will never be successful forever.
-                    failedTransactionQueue.offer(transactionInFlight);
+                    offerFailedTransaction(transactionInFlight);
                 }
                 transactionInFlight = null;
                 LOG.warn("Failed to process an update notification from OVS.", e);
             }
+        }
+    }
+
+    private void offerFailedTransaction(AsyncTransaction<?, ?> transaction) {
+        if (!failedTransactionQueue.offer(transaction)) {
+            LOG.warn("failedTransactionQueue is full (size: {})", failedTransactionQueue.size());
         }
     }
 
@@ -210,7 +221,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     public void uncaughtException(Thread thread, Throwable ex) {
         LOG.error("Failed to execute hwvtep transact command, re-submitting the transaction again", ex);
         if (transactionInFlight != null) {
-            failedTransactionQueue.offer(transactionInFlight);
+            offerFailedTransaction(transactionInFlight);
         }
         transactionInFlight = null;
         executor.execute(this);

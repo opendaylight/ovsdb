@@ -48,32 +48,31 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalSwitches>> removeds =
                 extractRemoved(getChanges(),LogicalSwitches.class);
-        if (removeds != null) {
-            for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created: removeds.entrySet()) {
-                if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
-                    HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
-                    getDeviceInfo().scheduleTransaction(new TransactCommand() {
-                        @Override
-                        public void execute(TransactionBuilder transactionBuilder) {
-                            HwvtepOperationalState operState = new HwvtepOperationalState(
-                                    connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
-                            threadLocalOperationalState.set(operState);
-                            threadLocalDeviceTransaction.set(transactionBuilder);
-                            LOG.debug("Running delete logical switch in seperate tx {}", created.getKey());
-                            removeLogicalSwitch(transactionBuilder, created.getKey(), created.getValue());
-                        }
 
-                        @Override
-                        public void onSuccess(TransactionBuilder deviceTransaction) {
-                            LogicalSwitchRemoveCommand.this.onSuccess(deviceTransaction);
-                        }
+        for (Entry<InstanceIdentifier<Node>, List<LogicalSwitches>> created: removeds.entrySet()) {
+            if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
+                HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
+                getDeviceInfo().scheduleTransaction(new TransactCommand() {
+                    @Override
+                    public void execute(TransactionBuilder transactionBuilder) {
+                        HwvtepOperationalState operState = new HwvtepOperationalState(
+                                connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
+                        threadLocalOperationalState.set(operState);
+                        threadLocalDeviceTransaction.set(transactionBuilder);
+                        LOG.debug("Running delete logical switch in seperate tx {}", created.getKey());
+                        removeLogicalSwitch(transactionBuilder, created.getKey(), created.getValue());
+                    }
 
-                        @Override
-                        public void onFailure(TransactionBuilder deviceTransaction) {
-                            LogicalSwitchRemoveCommand.this.onFailure(deviceTransaction);
-                        }
-                    });
-                }
+                    @Override
+                    public void onSuccess(TransactionBuilder deviceTransaction) {
+                        LogicalSwitchRemoveCommand.this.onSuccess(deviceTransaction);
+                    }
+
+                    @Override
+                    public void onFailure(TransactionBuilder deviceTransaction) {
+                        LogicalSwitchRemoveCommand.this.onFailure(deviceTransaction);
+                    }
+                });
             }
         }
     }

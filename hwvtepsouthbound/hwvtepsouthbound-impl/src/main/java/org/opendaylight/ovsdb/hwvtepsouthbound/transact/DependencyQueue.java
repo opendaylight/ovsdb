@@ -102,7 +102,8 @@ public class DependencyQueue {
         final List<DependentJob> readyJobs =  getReadyJobs(queue);
         if (readyJobs.size() > 0) {
             EXECUTOR_SERVICE.execute(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
-                HwvtepOperationalState operationalState;
+                private HwvtepOperationalState operationalState;
+
                 @Override
                 public void execute(TransactionBuilder transactionBuilder) {
                     this.operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
@@ -114,13 +115,17 @@ public class DependencyQueue {
                 @Override
                 public void onFailure(TransactionBuilder deviceTransaction) {
                     readyJobs.forEach((job) -> job.onFailure(deviceTransaction));
-                    operationalState.clearIntransitKeys();
+                    if (operationalState != null) {
+                        operationalState.clearIntransitKeys();
+                    }
                 }
 
                 @Override
                 public void onSuccess(TransactionBuilder deviceTransaction) {
                     readyJobs.forEach((job) -> job.onSuccess(deviceTransaction));
-                    operationalState.getDeviceInfo().onOperDataAvailable();
+                    if (operationalState != null) {
+                        operationalState.getDeviceInfo().onOperDataAvailable();
+                    }
                 }
             }));
         }

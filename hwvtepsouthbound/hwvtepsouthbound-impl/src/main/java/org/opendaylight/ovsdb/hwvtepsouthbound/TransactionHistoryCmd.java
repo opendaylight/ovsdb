@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +15,6 @@ import java.util.stream.Collectors;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionElement;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -30,14 +27,9 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
             required = false, multiValued = false)
     String nodeid;
 
-    private HwvtepSouthboundProvider hwvtepProvider;
-    private DataBroker dataBroker;
+    private final HwvtepSouthboundProvider hwvtepProvider;
 
-    public void setDataBroker(DataBroker dataBroker) {
-        this.dataBroker = dataBroker;
-    }
-
-    public void setHwvtepProvider(HwvtepSouthboundProvider hwvtepProvider) {
+    public TransactionHistoryCmd(HwvtepSouthboundProvider hwvtepProvider) {
         this.hwvtepProvider = hwvtepProvider;
     }
 
@@ -86,10 +78,6 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
             session.getConsole().print(" ");
             session.getConsole().println(log.getData());
         });
-    }
-
-    private void sortLogsByDate(ArrayList<TransactionElement> logs) {
-        Collections.sort(logs, (o1, o2) -> (int) (o1.getDate() - o2.getDate()));
     }
 
     private List<HwvtepTransactionLogElement> mergeLogsByDate(

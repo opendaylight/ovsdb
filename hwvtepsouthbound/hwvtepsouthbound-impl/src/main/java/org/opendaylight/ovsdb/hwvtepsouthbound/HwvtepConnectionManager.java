@@ -27,7 +27,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -121,9 +120,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 externalClient.getConnectionInfo().getRemotePort(),
                 externalClient.getConnectionInfo().getLocalAddress(),
                 externalClient.getConnectionInfo().getLocalPort());
-        List<String> databases = new ArrayList<>();
         try {
-            databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
+            List<String> databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
             if (databases.contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {
                 HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(externalClient);
                 registerEntityForOwnership(hwClient);
@@ -507,7 +505,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@Nullable Optional<Node> node) {
+                    public void onSuccess(@Nonnull Optional<Node> node) {
                         if (node.isPresent()) {
                             HwvtepGlobalAugmentation augmentation = node.get()
                                     .getAugmentation(HwvtepGlobalAugmentation.class);
@@ -616,7 +614,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return deviceUpdateHistory;
     }
 
-    private class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
+    private static class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepConnectionManager hcm;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

@@ -183,14 +183,14 @@ public class HwvtepConnectionInstance {
                 if (!HwvtepSouthboundConstants.SKIP_HWVTEP_TABLE.containsKey(tableName)) {
                     LOG.info("HwvtepSouthbound monitoring Hwvtep schema table {}", tableName);
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-                    Set<String> columns = new HashSet<>(tableSchema.getColumns());
+                    final Set<String> columns = new HashSet<>(tableSchema.getColumns());
                     List<String> skipColumns = HwvtepSouthboundConstants.SKIP_COLUMN_FROM_HWVTEP_TABLE.get(tableName);
                     skipColumns = skipColumns == null ? new ArrayList<>() : new ArrayList<>(skipColumns);
                     skipColumns.add(HwvtepSouthboundConstants.VERSION_COLUMN);
-                    if (skipColumns != null) {
-                        LOG.info("HwvtepSouthbound NOT monitoring columns {} in table {}", skipColumns, tableName);
-                        columns.removeAll(skipColumns);
-                    }
+
+                    LOG.info("HwvtepSouthbound NOT monitoring columns {} in table {}", skipColumns, tableName);
+                    columns.removeAll(skipColumns);
+
                     monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)
                             .addColumns(columns)
                             .with(new MonitorSelect(true, true, true, true)).build());

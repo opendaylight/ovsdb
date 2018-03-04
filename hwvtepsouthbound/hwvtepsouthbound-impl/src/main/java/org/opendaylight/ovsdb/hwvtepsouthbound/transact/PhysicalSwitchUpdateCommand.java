@@ -186,7 +186,6 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                 UUID remoteUUID = getLocatorUUID(transaction,
                                 (InstanceIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue());
                 if (localUUID != null && remoteUUID != null) {
-                    UUID uuid;
                     // local and remote must exist
                     newTunnel.setLocal(localUUID);
                     newTunnel.setRemote(remoteUUID);
@@ -215,9 +214,8 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                                             .build());
                             transaction.add(op.comment("PhysicalSwitch: Mutating " + tunnelUuid));
                         }
-                        uuid = new UUID(tunnelUuid);
                     } else {
-                        uuid = new UUID(opTunnelOpt.get().getTunnelUuid().getValue());
+                        UUID uuid = new UUID(opTunnelOpt.get().getTunnelUuid().getValue());
                         Tunnel extraTunnel =
                                 TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class, null);
                         extraTunnel.getUuidColumn().setData(uuid);
@@ -290,8 +288,6 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             Optional<TerminationPoint> confLocOptional = new MdsalUtils(getOperationalState().getDataBroker())
                     .readOptional(LogicalDatastoreType.CONFIGURATION, iid);
             if (confLocOptional.isPresent()) {
-                HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                                confLocOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
                 locatorUUID = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);
             } else {
                 LOG.warn("Unable to find endpoint for tunnel. Endpoint indentifier is {}", iid);

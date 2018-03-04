@@ -47,11 +47,10 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalRouters>> updateMap =
                 extractUpdated(getChanges(),LogicalRouters.class);
-        if (updateMap != null) {
-            for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> updated:
-                updateMap.entrySet()) {
-                updateLogicalRouter(transaction,  updated.getKey(), updated.getValue());
-            }
+
+        for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> updated:
+            updateMap.entrySet()) {
+            updateLogicalRouter(transaction,  updated.getKey(), updated.getValue());
         }
     }
 

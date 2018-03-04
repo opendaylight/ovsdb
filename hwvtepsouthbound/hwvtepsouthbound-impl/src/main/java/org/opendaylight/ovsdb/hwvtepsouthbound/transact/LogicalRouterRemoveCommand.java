@@ -42,33 +42,32 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalRouters>> removed =
               extractRemoved(getChanges(),LogicalRouters.class);
-        if (removed != null) {
-            for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> created: removed.entrySet()) {
-                if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
-                    getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
-                        @Override
-                        public void execute(TransactionBuilder transactionBuilder) {
-                            HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
-                            HwvtepOperationalState operState = new HwvtepOperationalState(
-                                    connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
-                            threadLocalOperationalState.set(operState);
-                            threadLocalDeviceTransaction.set(transactionBuilder);
-                            LOG.debug("Running delete logical router in seperate tx {}", created.getKey());
-                            removeLogicalRouter(transactionBuilder, created.getKey(), created.getValue());
-                        }
+
+        for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> created: removed.entrySet()) {
+            if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
+                getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
+                    @Override
+                    public void execute(TransactionBuilder transactionBuilder) {
+                        HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
+                        HwvtepOperationalState operState = new HwvtepOperationalState(
+                                connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
+                        threadLocalOperationalState.set(operState);
+                        threadLocalDeviceTransaction.set(transactionBuilder);
+                        LOG.debug("Running delete logical router in seperate tx {}", created.getKey());
+                        removeLogicalRouter(transactionBuilder, created.getKey(), created.getValue());
+                    }
 
 
-                        @Override
-                        public void onSuccess(TransactionBuilder deviceTransaction) {
-                            LogicalRouterRemoveCommand.this.onSuccess(deviceTransaction);
-                        }
+                    @Override
+                    public void onSuccess(TransactionBuilder deviceTransaction) {
+                        LogicalRouterRemoveCommand.this.onSuccess(deviceTransaction);
+                    }
 
-                        @Override
-                        public void onFailure(TransactionBuilder deviceTransaction) {
-                            LogicalRouterRemoveCommand.this.onFailure(deviceTransaction);
-                        }
-                    });
-                }
+                    @Override
+                    public void onFailure(TransactionBuilder deviceTransaction) {
+                        LogicalRouterRemoveCommand.this.onFailure(deviceTransaction);
+                    }
+                });
             }
         }
     }

@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -117,11 +119,11 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.getKey());
     }
 
-    private void updateTunnelIps(final PhysicalSwitch newPSwitch, final PhysicalSwitch oldPSwitch,
+    private void updateTunnelIps(@Nonnull final PhysicalSwitch newPSwitch, @Nullable final PhysicalSwitch oldPSwitch,
                                  final ReadWriteTransaction transaction) {
         Set<String> oldTunnelIps = oldPSwitch != null && oldPSwitch.getTunnelIpsColumn() != null ? oldPSwitch
                 .getTunnelIpsColumn().getData() : Collections.emptySet();
-        Set<String> newTunelIps = newPSwitch != null && newPSwitch.getTunnelIpsColumn() != null ? newPSwitch
+        Set<String> newTunelIps = newPSwitch.getTunnelIpsColumn() != null ? newPSwitch
                 .getTunnelIpsColumn().getData() : Collections.emptySet();
 
         Set<String> addedTunnelIps = Sets.difference(newTunelIps, oldTunnelIps);
@@ -193,18 +195,6 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
                         new ManagementIpsBuilder().setKey(new ManagementIpsKey(ip)).setManagementIpsKey(ip).build());
             }
             psAugmentationBuilder.setManagementIps(mgmtIps);
-        }
-    }
-
-    private void setTunnelIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch phySwitch) {
-        if (phySwitch.getTunnelIpsColumn() != null && phySwitch.getTunnelIpsColumn().getData() != null
-                && !phySwitch.getTunnelIpsColumn().getData().isEmpty()) {
-            List<TunnelIps> tunnelIps = new ArrayList<>();
-            for (String tunnelIp : phySwitch.getTunnelIpsColumn().getData()) {
-                IpAddress ip = new IpAddress(tunnelIp.toCharArray());
-                tunnelIps.add(new TunnelIpsBuilder().setKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build());
-            }
-            psAugmentationBuilder.setTunnelIps(tunnelIps);
         }
     }
 

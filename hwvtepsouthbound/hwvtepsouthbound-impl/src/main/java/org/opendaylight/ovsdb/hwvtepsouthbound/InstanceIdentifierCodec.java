@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.net.URI;
-
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
@@ -27,7 +26,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
 
     private DataSchemaContextTree dataSchemaContextTree;
     private SchemaContext context;
-    private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
+    private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
     public InstanceIdentifierCodec(DOMSchemaService schemaService,
             BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
@@ -42,12 +41,13 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
 
     @Override
     protected Module moduleForPrefix(final String prefix) {
-        return context.findModule(prefix, Optional.empty()).orElse(null);
+        return context != null ? context.findModule(prefix, Optional.empty()).orElse(null) : null;
     }
 
     @Override
     protected String prefixForNamespace(final URI namespace) {
-        return context.findModule(namespace, Optional.empty()).map(Module::getName).orElse(null);
+        return context != null ? context.findModule(namespace, Optional.empty()).map(Module::getName).orElse(null)
+                : null;
     }
 
     @Override

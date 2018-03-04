@@ -235,15 +235,13 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
+            case DELETE:
                 node = mod.getDataBefore();
                 break;
             case WRITE:
                 if (mod.getDataBefore() != null) {
                     node = mod.getDataBefore();
                 }
-                break;
-            case DELETE:
-                node = mod.getDataBefore();
                 break;
             default:
                 break;

@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -183,6 +184,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
+    @SuppressFBWarnings("UC_USELESS_OBJECT")
     private void updateLocatorRefCounts(MdsalUpdate mdsalUpdate) {
         //decrement the refcounts from old mcast mac
         //increment the refcounts for new mcast mac
@@ -192,7 +194,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
         if (oldMac != null && !oldMac.equals(newMac)) {
             if (oldMac.getLocatorSet() != null) {
-                List<LocatorSet> removedLocators = new ArrayList(oldMac.getLocatorSet());
+                List<LocatorSet> removedLocators = new ArrayList<>(oldMac.getLocatorSet());
                 if (newMac.getLocatorSet() != null) {
                     removedLocators.removeAll(newMac.getLocatorSet());
                 }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -178,7 +179,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         Futures.addCallback(transaction.read(LogicalDatastoreType.CONFIGURATION, tpPath),
                 new FutureCallback<Optional<TerminationPoint>>() {
                     @Override
-                    public void onSuccess(Optional<TerminationPoint> optionalConfigTp) {
+                    public void onSuccess(@Nonnull Optional<TerminationPoint> optionalConfigTp) {
                         if (!optionalConfigTp.isPresent() || optionalConfigTp.get().getAugmentation(
                                 HwvtepPhysicalPortAugmentation.class) == null) {
                             //TODO port came with some vlan bindings clean them up use PortRemovedCommand

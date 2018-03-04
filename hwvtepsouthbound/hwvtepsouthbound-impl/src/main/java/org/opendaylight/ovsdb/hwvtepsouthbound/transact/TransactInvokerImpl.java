@@ -12,6 +12,7 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.operations.Delete;
@@ -72,11 +73,11 @@ public class TransactInvokerImpl implements TransactInvoker {
         for (Operation op : tb.getOperations()) {
             if (op instanceof Insert) {
                 Insert insert = (Insert)op;
-                Map row = insert.getRow();
+                Map<String, Object> row = insert.getRow();
                 sb.append("insert [");
                 if (row != null) {
-                    for (Object key : row.keySet()) {
-                        sb.append(key).append(" : ").append(row.get(key)).append(" , ");
+                    for (Entry<String, Object> entry : row.entrySet()) {
+                        sb.append(entry.getKey()).append(" : ").append(entry.getValue()).append(" , ");
                     }
                 }
                 sb.append("]   ");
@@ -87,10 +88,10 @@ public class TransactInvokerImpl implements TransactInvoker {
             } else if (op instanceof Update) {
                 Update update = (Update)op;
                 sb.append("update [");
-                Map row = update.getRow();
+                Map<String, Object> row = update.getRow();
                 if (row != null) {
-                    for (Object key : row.keySet()) {
-                        sb.append(key).append(" : ").append(row.get(key)).append(" , ");
+                    for (Entry<String, Object> entry : row.entrySet()) {
+                        sb.append(entry.getKey()).append(" : ").append(entry.getValue()).append(" , ");
                     }
                 }
                 sb.append("]");

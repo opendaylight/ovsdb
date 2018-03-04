@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -205,6 +206,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return Collections.emptyList();
     }
 
+    @Nonnull
     protected Map<InstanceIdentifier<Node>, List<T>> extractRemoved(
             Collection<DataTreeModification<Node>> modification, Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
@@ -225,6 +227,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return result;
     }
 
+    @Nonnull
     protected Map<InstanceIdentifier<Node>, List<T>> extractUpdated(
             Collection<DataTreeModification<Node>> modification, Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();

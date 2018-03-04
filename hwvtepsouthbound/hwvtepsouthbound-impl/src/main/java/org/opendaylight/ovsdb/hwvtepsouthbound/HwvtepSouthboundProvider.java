@@ -24,7 +24,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -47,11 +46,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-hwvtepsouthbound-provider";
 
-    public static DataBroker getDb() {
-        return db;
-    }
-
-    private static DataBroker db;
+    private final DataBroker dataBroker;
     private final EntityOwnershipService entityOwnershipService;
     private final OvsdbConnection ovsdbConnection;
 
@@ -69,7 +64,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
             final OvsdbConnection ovsdbConnection,
             final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
-        this.db = dataBroker;
+        this.dataBroker = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
@@ -83,10 +78,10 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
      */
     public void init() {
         LOG.info("HwvtepSouthboundProvider Session Initiated");
-        txInvoker = new TransactionInvokerImpl(db);
-        cm = new HwvtepConnectionManager(db, txInvoker, entityOwnershipService);
-        hwvtepDTListener = new HwvtepDataChangeListener(db, cm);
-        hwvtepReconciliationManager = new HwvtepReconciliationManager(db, cm);
+        txInvoker = new TransactionInvokerImpl(dataBroker);
+        cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService);
+        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
+        hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
                 new HwvtepsbPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);
@@ -94,7 +89,6 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
         try {
-            Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("HWVTEP Southbound Provider instance entity {} was already "
@@ -107,7 +101,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
-        operTopologyRegistration = db.registerDataTreeChangeListener(treeId, this);
+        operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
     }
 
     @Override
@@ -148,7 +142,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
-        ReadWriteTransaction transaction = db.newReadWriteTransaction();
+        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         CheckedFuture<Optional<Topology>, ReadFailedException> hwvtepTp = transaction.read(type, path);
         try {
             if (!hwvtepTp.get().isPresent()) {
@@ -193,7 +187,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
         }).start();
     }
 
-    private class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
+    private static class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepSouthboundProvider hsp;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

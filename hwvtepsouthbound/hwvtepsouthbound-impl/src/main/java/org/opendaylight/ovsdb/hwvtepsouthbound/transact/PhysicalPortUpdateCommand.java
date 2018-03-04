@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +28,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindingsKey;
@@ -54,8 +52,6 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> createds =
                 extractCreated(getChanges(),HwvtepPhysicalPortAugmentation.class);
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> createdPhysicalSwitches =
-                extractCreatedPhyscialSwitch(getChanges(),PhysicalSwitchAugmentation.class);
         if (!createds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> created:
                 createds.entrySet()) {
@@ -100,29 +96,6 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 transaction.add(op.comment("Physical Port: Updating " + existingPhysicalPortName));
                 updateControllerTxHistory(TransactionType.UPDATE, physicalPort);
             }
-        }
-    }
-
-    private PhysicalSwitchAugmentation getPhysicalSwitchBelong(InstanceIdentifier<Node> psNodeiid,
-            Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> createdPhysicalSwitches) {
-        Optional<PhysicalSwitchAugmentation> physicalSwitchOptional =
-                    getOperationalState().getPhysicalSwitchAugmentation(psNodeiid);
-        PhysicalSwitchAugmentation physicalSwitchAugmentation = null;
-        if (physicalSwitchOptional.isPresent()) {
-            physicalSwitchAugmentation = physicalSwitchOptional.get();
-        } else {
-            physicalSwitchAugmentation = createdPhysicalSwitches.get(psNodeiid);
-        }
-        return physicalSwitchAugmentation;
-    }
-
-    private void setName(PhysicalPort physicalPort, HwvtepPhysicalPortAugmentation inputPhysicalPort,
-            Optional<HwvtepPhysicalPortAugmentation> operationalLogicalSwitchOptional) {
-        if (inputPhysicalPort.getHwvtepNodeName() != null) {
-            physicalPort.setName(inputPhysicalPort.getHwvtepNodeName().getValue());
-        } else if (operationalLogicalSwitchOptional.isPresent()
-                && operationalLogicalSwitchOptional.get().getHwvtepNodeName() != null) {
-            physicalPort.setName(operationalLogicalSwitchOptional.get().getHwvtepNodeName().getValue());
         }
     }
 
@@ -259,26 +232,6 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                         }
                     }
                     result.put(key, portListUpdated);
-                }
-            }
-        }
-        return result;
-    }
-
-    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractCreatedPhyscialSwitch(
-            Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
-        if (changes != null && !changes.isEmpty()) {
-            for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
-                final DataObjectModification<Node> mod = change.getRootNode();
-                Node created = TransactUtils.getCreated(mod);
-                if (created != null) {
-                    PhysicalSwitchAugmentation physicalSwitch =
-                            created.getAugmentation(PhysicalSwitchAugmentation.class);
-                    if (physicalSwitch != null) {
-                        result.put(key, physicalSwitch);
-                    }
                 }
             }
         }

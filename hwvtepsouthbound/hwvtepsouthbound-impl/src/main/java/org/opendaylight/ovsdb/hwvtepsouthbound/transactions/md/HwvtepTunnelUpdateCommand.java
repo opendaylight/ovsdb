@@ -10,10 +10,9 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -80,10 +79,15 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         PhysicalSwitch phySwitch =
                         getOvsdbConnectionInstance().getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());
-        InstanceIdentifier<Node> psIid =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
-        InstanceIdentifier<Tunnels> tunnelIid = getInstanceIdentifier(psIid, tunnel);
-        if (connection.isPresent() && phySwitch != null && tunnelIid != null) {
+
+        InstanceIdentifier<Tunnels> tunnelIid = null;
+        if (phySwitch != null) {
+            InstanceIdentifier<Node> psIid =
+                    HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
+            tunnelIid = getInstanceIdentifier(psIid, tunnel);
+        }
+
+        if (connection.isPresent() && tunnelIid != null) {
             TunnelsBuilder builder = new TunnelsBuilder();
             builder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
                     getOvsdbConnectionInstance().getInstanceIdentifier(), tunnel.getLocalColumn().getData())));
@@ -106,18 +110,10 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private void setBfdLocalConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> localConfigs = tunnel.getBfdConfigLocalColumn().getData();
         if (localConfigs != null && !localConfigs.isEmpty()) {
-            Set<String> localConfigKeys = localConfigs.keySet();
-            List<BfdLocalConfigs> localConfigsList = new ArrayList<>();
-            String localConfigValue = null;
-            for (String localConfigKey: localConfigKeys) {
-                localConfigValue = localConfigs.get(localConfigKey);
-                if (localConfigValue != null && localConfigKey != null) {
-                    localConfigsList.add(new BfdLocalConfigsBuilder()
-                        .setBfdLocalConfigKey(localConfigKey)
-                        .setBfdLocalConfigValue(localConfigValue)
-                        .build());
-                }
-            }
+            List<BfdLocalConfigs> localConfigsList = localConfigs.entrySet().stream().map(
+                entry -> new BfdLocalConfigsBuilder().setBfdLocalConfigKey(entry.getKey())
+                    .setBfdLocalConfigValue(entry.getValue()).build()).collect(Collectors.toList());
+
             tunnelsBuilder.setBfdLocalConfigs(localConfigsList);
         }
     }
@@ -125,18 +121,10 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private void setBfdRemoteConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> remoteConfigs = tunnel.getBfdConfigRemoteColumn().getData();
         if (remoteConfigs != null && !remoteConfigs.isEmpty()) {
-            Set<String> remoteConfigKeys = remoteConfigs.keySet();
-            List<BfdRemoteConfigs> remoteConfigsList = new ArrayList<>();
-            String remoteConfigValue = null;
-            for (String remoteConfigKey: remoteConfigKeys) {
-                remoteConfigValue = remoteConfigs.get(remoteConfigKey);
-                if (remoteConfigValue != null && remoteConfigKey != null) {
-                    remoteConfigsList.add(new BfdRemoteConfigsBuilder()
-                        .setBfdRemoteConfigKey(remoteConfigKey)
-                        .setBfdRemoteConfigValue(remoteConfigValue)
-                        .build());
-                }
-            }
+            List<BfdRemoteConfigs> remoteConfigsList = remoteConfigs.entrySet().stream().map(
+                entry -> new BfdRemoteConfigsBuilder().setBfdRemoteConfigKey(entry.getKey())
+                    .setBfdRemoteConfigValue(entry.getValue()).build()).collect(Collectors.toList());
+
             tunnelsBuilder.setBfdRemoteConfigs(remoteConfigsList);
         }
     }
@@ -145,18 +133,10 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private void setBfdParams(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> params = tunnel.getBfdParamsColumn().getData();
         if (params != null && !params.isEmpty()) {
-            Set<String> paramKeys = params.keySet();
-            List<BfdParams> paramsList = new ArrayList<>();
-            String paramValue = null;
-            for (String paramKey: paramKeys) {
-                paramValue = params.get(paramKey);
-                if (paramValue != null && paramKey != null) {
-                    paramsList.add(new BfdParamsBuilder()
-                        .setBfdParamKey(paramKey)
-                        .setBfdParamValue(paramValue)
-                        .build());
-                }
-            }
+            List<BfdParams> paramsList = params.entrySet().stream().map(
+                entry -> new BfdParamsBuilder().setBfdParamKey(entry.getKey())
+                    .setBfdParamValue(entry.getValue()).build()).collect(Collectors.toList());
+
             tunnelsBuilder.setBfdParams(paramsList);
         }
     }
@@ -164,18 +144,10 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private void setBfdStatus(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> status = tunnel.getBfdStatusColumn().getData();
         if (status != null && !status.isEmpty()) {
-            Set<String> paramKeys = status.keySet();
-            List<BfdStatus> statusList = new ArrayList<>();
-            String paramValue = null;
-            for (String paramKey: paramKeys) {
-                paramValue = status.get(paramKey);
-                if (paramValue != null && paramKey != null) {
-                    statusList.add(new BfdStatusBuilder()
-                        .setBfdStatusKey(paramKey)
-                        .setBfdStatusValue(paramValue)
-                        .build());
-                }
-            }
+            List<BfdStatus> statusList = status.entrySet().stream().map(
+                entry -> new BfdStatusBuilder().setBfdStatusKey(entry.getKey())
+                    .setBfdStatusValue(entry.getValue()).build()).collect(Collectors.toList());
+
             tunnelsBuilder.setBfdStatus(statusList);
         }
     }

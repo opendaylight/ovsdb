@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
@@ -61,7 +60,6 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
     public boolean reconcileConfiguration(HwvtepConnectionManager connectionManagerOfDevice) {
         InstanceIdentifier<Node> psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
         InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>)nodeIid;
-        ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
 
         Node globalConfigNode = mdsalUtils.read(CONFIGURATION, nodeId);
         Node globalOpNode = mdsalUtils.read(OPERATIONAL, nodeId);

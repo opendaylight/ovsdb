@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85584244_22cf2b7c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOperationalDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-05T15:24:17Z",
+      "side": 1,
+      "message": "Perhaps breaks here in both cases? Seems safer to me long-term...",
+      "revId": "47f532bed56323d08d740b9d48a245cc879b7b58",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

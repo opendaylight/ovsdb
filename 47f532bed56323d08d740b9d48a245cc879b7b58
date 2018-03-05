@@ -16,6 +16,24 @@
       "revId": "47f532bed56323d08d740b9d48a245cc879b7b58",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21fa49bd_332324b8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepOperationalDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-05T15:28:23Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "85584244_22cf2b7c",
+      "revId": "47f532bed56323d08d740b9d48a245cc879b7b58",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

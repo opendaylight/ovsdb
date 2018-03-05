@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39b1d59e_755d1f8e",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-05T08:59:51Z",
+      "side": 1,
+      "message": "This change (and the following two) is worth explaining in the commit message IMO...",
+      "revId": "cfba8a49a92eac54774d0281106a6d691f519408",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

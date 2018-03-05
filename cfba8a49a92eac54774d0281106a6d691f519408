@@ -16,6 +16,24 @@
       "revId": "cfba8a49a92eac54774d0281106a6d691f519408",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0259081_89757e5d",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-05T12:25:45Z",
+      "side": 1,
+      "message": "Is it OK if I explain it here? These sets can be accessed by multiple threads, possibly concurrently, and thus need to be thread-safe. Same with the 4 fields below (lines 48-51), hence now volatile.  I know  these changes aren\u0027t related to checkstyle but sometimes I have a tendency to make additional changes outside of the intended scope just b/c \"while I\u0027m in here...\" - I know it\u0027s a bad habit - I can take these changes out if you prefer...",
+      "parentUuid": "39b1d59e_755d1f8e",
+      "revId": "cfba8a49a92eac54774d0281106a6d691f519408",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

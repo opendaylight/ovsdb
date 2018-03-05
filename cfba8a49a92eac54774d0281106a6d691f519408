@@ -34,6 +34,24 @@
       "revId": "cfba8a49a92eac54774d0281106a6d691f519408",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f24ac357_bdf312c1",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-05T14:04:35Z",
+      "side": 1,
+      "message": "I don’t mind having multiple changes, especially for small things — patches take too long to merge in many ODL projects for small changes to be easily managed :-/. I do however prefer to have this kind of information in the commit message, since that’s what survives in the long term (and is easily viewed when tracking down changes). I’ve updated the commit message.",
+      "parentUuid": "f0259081_89757e5d",
+      "revId": "cfba8a49a92eac54774d0281106a6d691f519408",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9614b06b_a60132bc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/InstanceIdentifierCodec.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-03-06T08:41:55Z",
+      "side": 1,
+      "message": "I just reverted to what it was, couldn\u0027t revert as you had the patch that was finally merged.",
+      "parentUuid": "6d397cd0_bd2a9c7e",
+      "revId": "f78728c7b6d9617b01d75a980680aa78e87277f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "681f8d40_71917c4c",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/InstanceIdentifierCodec.java",
         "patchSetId": 1

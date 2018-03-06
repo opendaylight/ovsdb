@@ -28,7 +28,6 @@ import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
@@ -76,7 +75,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        when(context.findModule(anyString(), any(Revision.class))).thenReturn(Optional.of(module));
+        when(context.findModule(anyString(), any(Optional.class))).thenReturn(Optional.of(module));
         assertEquals("Error, did not return correct Module object", module, instanceIdCodec.moduleForPrefix(""));
     }
 
@@ -84,7 +83,7 @@ public class InstanceIdentifierCodecTest {
     public void testPrefixForNamespace() throws URISyntaxException {
         Module module = mock(Module.class);
         URI namespace = new URI("");
-        when(context.findModule(any(URI.class), any(Revision.class))).thenReturn(Optional.empty()).thenReturn(
+        when(context.findModule(any(URI.class), any(Optional.class))).thenReturn(Optional.empty()).thenReturn(
                 Optional.of(module));
         when(module.getName()).thenReturn("");
         assertEquals("Error, null should have been returned", null, instanceIdCodec.prefixForNamespace(namespace));

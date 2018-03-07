@@ -24,10 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -163,6 +161,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+    @Override
     @Configuration
     public Option[] config() {
         Option[] options = super.config();
@@ -217,8 +216,11 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     @Override
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                logConfiguration(HwvtepSouthboundIT.class),
-                LogLevel.INFO.name());
+                "log4j2.logger.hwvtepsouthbound-it.name",
+                HwvtepSouthboundIT.class.getPackage().getName());
+        option = composite(option, editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                "log4j2.logger.hwvtepsouthbound-it.level",
+                LogLevel.INFO.name()));
         option = composite(option, super.getLoggingOption());
         return option;
     }
@@ -353,10 +355,10 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
             while (!OPERATIONAL_LISTENER.isCreated(
-                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for creation of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {} for creation of {}", System.currentTimeMillis() - _start, iid);
         }
     }
 
@@ -365,10 +367,10 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             long _start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
             while (!OPERATIONAL_LISTENER.isRemoved(
-                    iid) && (System.currentTimeMillis() - _start) < OVSDB_ROUNDTRIP_TIMEOUT) {
+                    iid) && System.currentTimeMillis() - _start < OVSDB_ROUNDTRIP_TIMEOUT) {
                 OPERATIONAL_LISTENER.wait(OVSDB_UPDATE_TIMEOUT);
             }
-            LOG.info("Woke up, waited {} for deletion of {}", (System.currentTimeMillis() - _start), iid);
+            LOG.info("Woke up, waited {} for deletion of {}", System.currentTimeMillis() - _start, iid);
         }
     }
 

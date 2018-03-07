@@ -50,7 +50,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.karaf.options.LogLevelOption;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,8 +141,11 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     @Override
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                logConfiguration(getClass()),
-                LogLevelOption.LogLevel.INFO.name());
+                "log4j2.logger.library-it.name",
+                getClass().getPackage().getName());
+        option = composite(option, editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                "log4j2.logger.library-it.level",
+                LogLevel.INFO.name()));
         option = composite(option, super.getLoggingOption());
         return option;
     }

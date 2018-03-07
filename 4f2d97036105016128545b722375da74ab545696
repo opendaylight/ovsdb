@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "807b287c_438164cc",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-07T21:44:21Z",
+      "side": 0,
+      "message": "Inefficient use of keySet iterator instead of entrySet iterator",
+      "revId": "4f2d97036105016128545b722375da74ab545696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75120c0f_e5f189de",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-07T21:44:21Z",
+      "side": 0,
+      "message": "Inefficient use of keySet iterator instead of entrySet iterator",
+      "revId": "4f2d97036105016128545b722375da74ab545696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b0a6093_66cebd20",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcEndpoint.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-07T21:44:21Z",
+      "side": 0,
+      "message": "Load of known null value",
+      "revId": "4f2d97036105016128545b722375da74ab545696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "151910a6_4c857f21",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-07T21:44:21Z",
+      "side": 0,
+      "message": "Boxing/unboxing to parse a primitive",
+      "revId": "4f2d97036105016128545b722375da74ab545696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fcff4b1_4aa1da6c",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-07T21:44:21Z",
+      "side": 0,
+      "message": "This code does not follow normal equals conventions and flagged several violations:\n\n- Equals method should not assume anything about the type of its argument\n- Equals checks for incompatible operand\n- Unusual equals method",
+      "revId": "4f2d97036105016128545b722375da74ab545696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

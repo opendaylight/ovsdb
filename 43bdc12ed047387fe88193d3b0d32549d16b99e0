@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d23b196_a6297d77",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/NotifyingDataChangeListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-07T21:47:06Z",
+      "side": 0,
+      "message": "FB doesn\u0027t like that no state is changed inside synchronized prior to notifyAll but it looks OK.",
+      "revId": "43bdc12ed047387fe88193d3b0d32549d16b99e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

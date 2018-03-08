@@ -1,0 +1,203 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e71da506_c163d396",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Redundant nullcheck of value known to be non-null",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09ed441d_cd50e400",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Parameter must be non-null but is marked as nullable",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c177c0a6_f376b6d9",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Method uses the same code for two switch clauses",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a33e1d8a_425c0a03",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Write to static field from instance method",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7606ef9c_31a63e48",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/InstanceIdentifierCodec.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Field not initialized in constructor but dereferenced without null check",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ed5b111_6dcc7f28",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconciliationTask.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Useless object created",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2d774a1_53d8c04a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependentJob.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Inefficient use of keySet iterator instead of entrySet iterator",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8e6818c_d49cb15a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Redundant nullcheck of value known to be non-null",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdecdebd_30b4934c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "FB reports this as a useless object but clearly it isn\u0027t.",
+      "range": {
+        "startLine": 195,
+        "startChar": 33,
+        "endLine": 195,
+        "endChar": 48
+      },
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a177e68_4eb2a66b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepTunnelUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Nullcheck of value previously dereferenced",
+      "range": {
+        "startLine": 86,
+        "startChar": 38,
+        "endLine": 86,
+        "endChar": 47
+      },
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "26fd6bac_54633e21",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-08T01:00:45Z",
+      "side": 0,
+      "message": "Method ignores exceptional return value",
+      "revId": "bcd6c6f45d246570955a9bf007f81cae0c643bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

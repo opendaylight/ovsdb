@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30e19a35_45f99d52",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/InstanceIdentifierCodec.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-03-08T18:32:06Z",
+      "side": 1,
+      "message": "This is wrong... if the namespace is not topology, that model will not be found. Use SchemaContext.findModules() instead.",
+      "range": {
+        "startLine": 55,
+        "startChar": 34,
+        "endLine": 55,
+        "endChar": 53
+      },
+      "revId": "5ee31ea1bcc0fb382c607f67d38caa771cb5d8e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -16,9 +17,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.field;
 
+import com.google.common.collect.ImmutableSet;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +30,6 @@ import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
@@ -76,20 +77,31 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        when(context.findModule(anyString(), any(Revision.class))).thenReturn(Optional.of(module));
-        assertEquals("Error, did not return correct Module object", module, instanceIdCodec.moduleForPrefix(""));
+        when(context.findModules("")).thenReturn(ImmutableSet.of(module));
+        assertEquals("Found Module", module, instanceIdCodec.moduleForPrefix(""));
+
+        when(context.findModules("foo")).thenReturn(ImmutableSet.of(module, mock(Module.class)));
+        assertEquals("Found Module", module, instanceIdCodec.moduleForPrefix("foo"));
+
+        when(context.findModules("bar")).thenReturn(Collections.emptySet());
+        assertNull(instanceIdCodec.moduleForPrefix("bar"));
     }
 
     @Test
     public void testPrefixForNamespace() throws URISyntaxException {
         Module module = mock(Module.class);
-        URI namespace = new URI("");
-        when(context.findModule(any(URI.class), any(Revision.class))).thenReturn(Optional.empty()).thenReturn(
-                Optional.of(module));
-        when(module.getName()).thenReturn("");
-        assertEquals("Error, null should have been returned", null, instanceIdCodec.prefixForNamespace(namespace));
-        assertEquals("Error, did not return the correct module name", anyString(),
-                instanceIdCodec.prefixForNamespace(namespace));
+        final String prefix = "prefix";
+        when(module.getName()).thenReturn(prefix);
+
+        URI namespace = new URI("foo");
+        when(context.findModules(namespace)).thenReturn(Collections.emptySet());
+        assertNull(instanceIdCodec.prefixForNamespace(namespace));
+
+        when(context.findModules(namespace)).thenReturn(ImmutableSet.of(module));
+        assertEquals("Found prefix", prefix, instanceIdCodec.prefixForNamespace(namespace));
+
+        when(context.findModules(namespace)).thenReturn(ImmutableSet.of(module, mock(Module.class)));
+        assertEquals("Found prefix", prefix, instanceIdCodec.prefixForNamespace(namespace));
     }
 
     @Test
@@ -106,7 +118,7 @@ public class InstanceIdentifierCodecTest {
         YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
         when(bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid)).thenReturn(yiid);
 
-        when((PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class)).serialize(yiid))
+        when(PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class).serialize(yiid))
                 .thenReturn("Serialized IID");
         assertEquals("Error, did not return correct string", anyString(), instanceIdCodec.serialize(iid));
     }
@@ -114,7 +126,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testBindingDeserializer() throws Exception {
         YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
-        when((PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class)).deserialize(anyString()))
+        when(PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class).deserialize(anyString()))
                 .thenReturn(yiid);
 
         mock(InstanceIdentifier.class);

@@ -9,11 +9,9 @@
 package org.opendaylight.ovsdb.southbound;
 
 import java.net.URI;
-
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
@@ -28,11 +26,10 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     implements SchemaContextListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(InstanceIdentifierCodec.class);
-    private static final Revision REVISION = Revision.of("2013-10-21");
 
     private DataSchemaContextTree dataSchemaContextTree;
     private SchemaContext context;
-    private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
+    private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
     public InstanceIdentifierCodec(DOMSchemaService schemaService,
             BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
@@ -47,12 +44,12 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
 
     @Override
     protected Module moduleForPrefix(final String prefix) {
-        return context.findModule(prefix, REVISION).orElse(null);
+        return context.findModules(prefix).stream().findFirst().orElse(null);
     }
 
     @Override
     protected String prefixForNamespace(final URI namespace) {
-        return context.findModule(namespace, REVISION).map(Module::getName).orElse(null);
+        return context.findModules(namespace).stream().map(Module::getName).findFirst().orElse(null);
     }
 
     @Override

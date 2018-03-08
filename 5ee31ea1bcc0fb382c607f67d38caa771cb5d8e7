@@ -22,6 +22,30 @@
       "revId": "5ee31ea1bcc0fb382c607f67d38caa771cb5d8e7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03ca5810_e8a69efc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/InstanceIdentifierCodec.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-03-08T18:35:14Z",
+      "side": 1,
+      "message": "Note the javadoc difference between the methods:\n\nfindModule():\n    /**\n     * Returns module instance (from the context) with specified namespace and revision.\n     *\n     * @param namespace\n     *            module namespace\n     * @param revision\n     *            module revision, may be null\n     * @return module instance which has name and revision the same as are the values specified in parameters\n     *         \u003ccode\u003enamespace\u003c/code\u003e and \u003ccode\u003erevision\u003c/code\u003e.\n     */\n\nfindModules():\n    /**\n     * Returns module instance (from the context) with concrete namespace. Returned Set is required to have its\n     * iteration order guarantee that the latest revision is encountered first.\n     *\n     * @param namespace\n     *            URI instance with specified namespace\n     * @return module instance which has namespace equal to the\n     *         \u003ccode\u003enamespace\u003c/code\u003e or \u003ccode\u003enull\u003c/code\u003e in other cases\n     */",
+      "parentUuid": "30e19a35_45f99d52",
+      "range": {
+        "startLine": 55,
+        "startChar": 34,
+        "endLine": 55,
+        "endChar": 53
+      },
+      "revId": "5ee31ea1bcc0fb382c607f67d38caa771cb5d8e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

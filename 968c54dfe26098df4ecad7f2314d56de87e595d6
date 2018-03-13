@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d02b53ea_df17450f",
+        "filename": "utils/odl-ovsdb-utils/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-03-13T23:27:55Z",
+      "side": 1,
+      "message": "This will need to be adjusted if this lands after Oxygen has shipped.",
+      "range": {
+        "startLine": 34,
+        "startChar": 25,
+        "endLine": 34,
+        "endChar": 39
+      },
+      "revId": "968c54dfe26098df4ecad7f2314d56de87e595d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

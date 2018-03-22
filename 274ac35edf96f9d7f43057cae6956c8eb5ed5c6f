@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0d3113bd_9acc8ad0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-22T20:10:37Z",
+      "side": 1,
+      "message": "yeah - but then if it is supported, will the dev know/remember to remove the FB suppression? That\u0027s why I commented it out. But I\u0027m fine either way - if you\u0027d rather have it suppressed.",
+      "parentUuid": "dcfe602c_2820d912",
+      "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e09e9050_4d206d86",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2018-03-22T16:50:05Z",
       "side": 1,
       "message": "While we’re at it,\n\n    if (!protocols.isEmpty()) {",
+      "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94dd5ab6_adc4277d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-22T20:10:37Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "554bea40_31d75a48",
       "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

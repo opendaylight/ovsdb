@@ -44,18 +44,16 @@ public class BridgeOperationalState {
         try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
             Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
                     TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-            if (nodeCreateOrUpdate != null) {
-                for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
-                    CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey());
-                    try {
-                        Optional<Node> nodeOptional = nodeFuture.get();
-                        if (nodeOptional.isPresent()) {
-                            operationalNodes.put(entry.getKey(), nodeOptional.get());
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        LOG.warn("Error reading from datastore",e);
+            for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
+                CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
+                        transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey());
+                try {
+                    Optional<Node> nodeOptional = nodeFuture.get();
+                    if (nodeOptional.isPresent()) {
+                        operationalNodes.put(entry.getKey(), nodeOptional.get());
                     }
+                } catch (InterruptedException | ExecutionException e) {
+                    LOG.warn("Error reading from datastore",e);
                 }
             }
         }

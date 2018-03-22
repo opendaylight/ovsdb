@@ -25,10 +25,10 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConnectionReconciliationTask.class);
 
-    private static final int RETRY_INTERVAL_FACTOR = 10000;
+    private static final long RETRY_INTERVAL_FACTOR = 10000;
     private static final int MAX_ATTEMPT = 10;
 
-    private AtomicInteger connectionAttempt = new AtomicInteger(0);
+    private final AtomicInteger connectionAttempt = new AtomicInteger(0);
 
     public ConnectionReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager
             connectionManager, InstanceIdentifier<?> nodeIid, DataObject configData) {

@@ -13,7 +13,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -263,11 +260,11 @@ public class ReconciliationManager implements AutoCloseable {
         }
     }
 
-    private class NodeConnectionMetadata {
-        Node node;
-        InstanceIdentifier<?> nodeIid;
-        OvsdbConnectionManager connectionManager;
-        OvsdbConnectionInstance connectionInstance;
+    private static class NodeConnectionMetadata {
+        private final Node node;
+        private InstanceIdentifier<?> nodeIid;
+        private final OvsdbConnectionManager connectionManager;
+        private final OvsdbConnectionInstance connectionInstance;
 
         NodeConnectionMetadata(Node node,
                                OvsdbConnectionManager connectionManager,

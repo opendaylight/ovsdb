@@ -57,9 +57,9 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    private Map<UUID, Qos> updatedQosRows;
-    private Map<UUID, Qos> oldQosRows;
-    private Map<UUID, Queue> updatedQueueRows;
+    private final Map<UUID, Qos> updatedQosRows;
+    private final Map<UUID, Qos> oldQosRows;
+    private final Map<UUID, Queue> updatedQueueRows;
 
     public OvsdbQosUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -190,7 +190,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         if (oldQos != null && oldQos.getOtherConfigColumn() != null) {
             oldOtherConfigs = oldQos.getOtherConfigColumn().getData();
         }
-        if ((oldOtherConfigs != null) && !oldOtherConfigs.isEmpty()) {
+        if (oldOtherConfigs != null && !oldOtherConfigs.isEmpty()) {
             removeOldConfigs(transaction, qosEntryBuilder, oldOtherConfigs, qos, nodeIId);
         }
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
@@ -215,11 +215,10 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private void setNewOtherConfigs(QosEntriesBuilder qosEntryBuilder,
             Map<String, String> otherConfig) {
-        Set<String> otherConfigKeys = otherConfig.keySet();
         List<QosOtherConfig> otherConfigList = new ArrayList<>();
-        String otherConfigValue;
-        for (String otherConfigKey : otherConfigKeys) {
-            otherConfigValue = otherConfig.get(otherConfigKey);
+        for (Entry<String, String> entry : otherConfig.entrySet()) {
+            String otherConfigKey = entry.getKey();
+            String otherConfigValue = entry.getValue();
             if (otherConfigKey != null && otherConfigValue != null) {
                 otherConfigList.add(new QosOtherConfigBuilder().setOtherConfigKey(otherConfigKey)
                         .setOtherConfigValue(otherConfigValue).build());
@@ -240,7 +239,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         if (oldQos != null && oldQos.getExternalIdsColumn() != null) {
             oldExternalIds = oldQos.getExternalIdsColumn().getData();
         }
-        if ((oldExternalIds != null) && !oldExternalIds.isEmpty()) {
+        if (oldExternalIds != null && !oldExternalIds.isEmpty()) {
             removeOldExternalIds(transaction, qosEntryBuilder, oldExternalIds, qos, nodeIId);
         }
         if (externalIds != null && !externalIds.isEmpty()) {
@@ -265,11 +264,10 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private void setNewExternalIds(QosEntriesBuilder qosEntryBuilder,
             Map<String, String> externalIds) {
-        Set<String> externalIdsKeys = externalIds.keySet();
         List<QosExternalIds> externalIdsList = new ArrayList<>();
-        String extIdValue;
-        for (String extIdKey : externalIdsKeys) {
-            extIdValue = externalIds.get(extIdKey);
+        for (Entry<String, String> entry : externalIds.entrySet()) {
+            String extIdKey = entry.getKey();
+            String extIdValue = entry.getValue();
             if (extIdKey != null && extIdValue != null) {
                 externalIdsList.add(new QosExternalIdsBuilder().setQosExternalIdKey(extIdKey)
                         .setQosExternalIdValue(extIdValue).build());
@@ -290,7 +288,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         if (oldQos != null && oldQos.getQueuesColumn() != null) {
             oldQueueList = oldQos.getQueuesColumn().getData();
         }
-        if ((oldQueueList != null) && !oldQueueList.isEmpty()) {
+        if (oldQueueList != null && !oldQueueList.isEmpty()) {
             removeOldQueues(transaction, qosEntryBuilder, oldQueueList, qos, nodeIId);
         }
         if (queueList != null && !queueList.isEmpty()) {
@@ -307,8 +305,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         Collection<Long> queueListKeys = oldQueueList.keySet();
         for (Long queueListKey : queueListKeys) {
             KeyedInstanceIdentifier<QueueList, QueueListKey> otherIId =
-                    qosIId
-                    .child(QueueList.class, new QueueListKey(new Long(queueListKey.toString())));
+                    qosIId.child(QueueList.class, new QueueListKey(Long.valueOf(queueListKey.toString())));
             transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId);
         }
     }

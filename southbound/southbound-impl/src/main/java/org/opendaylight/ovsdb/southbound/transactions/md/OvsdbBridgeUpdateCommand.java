@@ -38,7 +38,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -72,8 +71,8 @@ import org.slf4j.LoggerFactory;
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private Map<UUID,Bridge> updatedBridgeRows;
-    private Map<UUID, Bridge> oldBridgeRows;
+    private final Map<UUID,Bridge> updatedBridgeRows;
+    private final Map<UUID, Bridge> oldBridgeRows;
 
     public OvsdbBridgeUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -289,11 +288,10 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         Map<String, String> otherConfigs = bridge
                 .getOtherConfigColumn().getData();
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
-            Set<String> otherConfigKeys = otherConfigs.keySet();
             List<BridgeOtherConfigs> otherConfigList = new ArrayList<>();
-            String otherConfigValue;
-            for (String otherConfigKey : otherConfigKeys) {
-                otherConfigValue = otherConfigs.get(otherConfigKey);
+            for (Entry<String, String> entry : otherConfigs.entrySet()) {
+                String otherConfigKey = entry.getKey();
+                String otherConfigValue = entry.getValue();
                 if (otherConfigKey != null && otherConfigValue != null) {
                     otherConfigList.add(new BridgeOtherConfigsBuilder()
                             .setBridgeOtherConfigKey(otherConfigKey)
@@ -310,11 +308,10 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         Map<String, String> externalIds = bridge.getExternalIdsColumn()
                 .getData();
         if (externalIds != null && !externalIds.isEmpty()) {
-            Set<String> externalIdKeys = externalIds.keySet();
             List<BridgeExternalIds> externalIdsList = new ArrayList<>();
-            String externalIdValue;
-            for (String externalIdKey : externalIdKeys) {
-                externalIdValue = externalIds.get(externalIdKey);
+            for (Entry<String, String> entry : externalIds.entrySet()) {
+                String externalIdKey = entry.getKey();
+                String externalIdValue = entry.getValue();
                 if (externalIdKey != null && externalIdValue != null) {
                     externalIdsList.add(new BridgeExternalIdsBuilder()
                             .setBridgeExternalIdKey(externalIdKey)
@@ -328,9 +325,9 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
-        if (SouthboundMapper.createMdsalProtocols(bridge) != null
-                && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
-            ovsdbBridgeAugmentationBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
+        final List<ProtocolEntry> protocols = SouthboundMapper.createMdsalProtocols(bridge);
+        if (!protocols.isEmpty()) {
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(protocols);
         }
     }
 
@@ -362,15 +359,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 && controllerEntry.isIsConnected() != null && controllerEntry.isIsConnected()) {
                 String [] controllerTarget = controllerEntry.getTarget().getValue().split(":");
                 IpAddress bridgeControllerIpAddress = null;
-                PortNumber bridgeControllerPortNumber = null;
                 for (String targetElement : controllerTarget) {
                     if (InetAddresses.isInetAddress(targetElement)) {
                         bridgeControllerIpAddress = new IpAddress(targetElement.toCharArray());
                         continue;
                     }
                     if (NumberUtils.isNumber(targetElement)) {
-                        bridgeControllerPortNumber = new PortNumber(
-                                Integer.valueOf(String.valueOf(targetElement)));
                         continue;
                     }
                 }

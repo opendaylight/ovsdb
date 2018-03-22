@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -73,7 +73,7 @@ public class QueueUpdateCommand implements TransactCommand {
             if (queueEntry.getDscp() != null) {
                 try {
                     Set<Long> dscpSet = new HashSet<>();
-                    if (dscpSet.add(new Long(queueEntry.getDscp().toString()))) {
+                    if (dscpSet.add(Long.valueOf(queueEntry.getDscp().toString()))) {
                         queue.setDscp(dscpSet);
                     }
                 } catch (NumberFormatException e) {
@@ -107,8 +107,8 @@ public class QueueUpdateCommand implements TransactCommand {
             Uuid operQueueUuid = getQueueEntryUuid(operNode.getQueues(), queueEntry.getQueueId());
             if (operQueueUuid == null) {
                 UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
-                        + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes()));
-                transaction.add(op.insert(queue).withId(namedUuid.toString())).build();
+                        + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes(UTF_8)));
+                transaction.add(op.insert(queue).withId(namedUuid.toString()));
                 LOG.info("Added queue Uuid : {} for Ovsdb Node : {}",
                         namedUuid, operNode);
             } else {
@@ -121,7 +121,6 @@ public class QueueUpdateCommand implements TransactCommand {
                 LOG.info("Updated queue entries: {} for Ovsdb Node : {}",
                         queue, operNode);
             }
-            transaction.build();
         }
     }
 

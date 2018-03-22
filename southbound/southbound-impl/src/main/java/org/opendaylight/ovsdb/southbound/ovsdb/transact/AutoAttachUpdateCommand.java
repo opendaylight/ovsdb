@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.base.Optional;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
 public class AutoAttachUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachUpdateCommand.class);
 

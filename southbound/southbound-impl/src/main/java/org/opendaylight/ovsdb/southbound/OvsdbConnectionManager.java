@@ -14,7 +14,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-
+import com.google.common.util.concurrent.MoreExecutors;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -106,9 +105,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getRemotePort(),
                 externalClient.getConnectionInfo().getLocalAddress(),
                 externalClient.getConnectionInfo().getLocalPort());
-        List<String> databases = new ArrayList<>();
         try {
-            databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
+            List<String> databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
             if (databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
                 OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
                 // Register Cluster Ownership for ConnectionInfo
@@ -584,7 +582,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@Nullable Optional<Node> node) {
+                    public void onSuccess(@Nonnull Optional<Node> node) {
                         if (node.isPresent()) {
                             LOG.info("Disconnected/Failed connection {} was controller initiated, attempting "
                                     + "reconnection", ovsdbNode.getConnectionInfo());
@@ -600,7 +598,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     public void onFailure(Throwable throwable) {
                         LOG.warn("Read Config/DS for Node failed! {}", iid, throwable);
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 break;
             }
             default:
@@ -616,7 +614,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         reconciliationManager.enqueue(task);
     }
 
-    private class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
+    private static class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final OvsdbConnectionManager cm;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

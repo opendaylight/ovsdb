@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
@@ -184,7 +185,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
             }
             if (uuidSet.size() == 0) {
                 uuidSet.add(new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
-                        + TransactUtils.bytesToHexString(qosId.getValue().getBytes())));
+                        + TransactUtils.bytesToHexString(qosId.getValue().getBytes(UTF_8))));
             }
         }
         port.setQos(uuidSet);

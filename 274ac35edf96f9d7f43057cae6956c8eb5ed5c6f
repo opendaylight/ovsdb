@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dcfe602c_2820d912",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-22T16:50:05Z",
+      "side": 1,
+      "message": "I’d rather have the appropriate FB SuppressWarnings than a ton of commented-out code...\n\n(Of course, we should really check whether external_ids is supported yet!)",
+      "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e09e9050_4d206d86",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-22T16:50:05Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "554bea40_31d75a48",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-22T16:50:05Z",
+      "side": 1,
+      "message": "While we’re at it,\n\n    if (!protocols.isEmpty()) {",
+      "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

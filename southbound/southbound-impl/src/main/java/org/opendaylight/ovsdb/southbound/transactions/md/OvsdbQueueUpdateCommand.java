@@ -49,8 +49,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    private Map<UUID, Queue> updatedQueueRows;
-    private Map<UUID, Queue> oldQueueRows;
+    private final Map<UUID, Queue> updatedQueueRows;
+    private final Map<UUID, Queue> oldQueueRows;
 
     public OvsdbQueueUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -142,7 +142,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         if (oldQueue != null && oldQueue.getOtherConfigColumn() != null) {
             oldOtherConfigs = oldQueue.getOtherConfigColumn().getData();
         }
-        if ((oldOtherConfigs != null) && !oldOtherConfigs.isEmpty()) {
+        if (oldOtherConfigs != null && !oldOtherConfigs.isEmpty()) {
             removeOldConfigs(transaction, queuesBuilder, oldOtherConfigs, queue, nodeIId);
         }
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
@@ -167,11 +167,10 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private void setNewOtherConfigs(QueuesBuilder queuesBuilder,
             Map<String, String> otherConfig) {
-        Set<String> otherConfigKeys = otherConfig.keySet();
         List<QueuesOtherConfig> otherConfigList = new ArrayList<>();
-        String otherConfigValue;
-        for (String otherConfigKey : otherConfigKeys) {
-            otherConfigValue = otherConfig.get(otherConfigKey);
+        for (Entry<String, String> entry : otherConfig.entrySet()) {
+            String otherConfigKey = entry.getKey();
+            String otherConfigValue = entry.getValue();
             if (otherConfigKey != null && otherConfigValue != null) {
                 otherConfigList.add(new QueuesOtherConfigBuilder().setQueueOtherConfigKey(otherConfigKey)
                         .setQueueOtherConfigValue(otherConfigValue).build());
@@ -192,7 +191,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         if (oldQueue != null && oldQueue.getExternalIdsColumn() != null) {
             oldExternalIds = oldQueue.getExternalIdsColumn().getData();
         }
-        if ((oldExternalIds != null) && !oldExternalIds.isEmpty()) {
+        if (oldExternalIds != null && !oldExternalIds.isEmpty()) {
             removeOldExternalIds(transaction, queuesBuilder, oldExternalIds, queue, nodeIId);
         }
         if (externalIds != null && !externalIds.isEmpty()) {
@@ -217,11 +216,10 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private void setNewExternalIds(QueuesBuilder queuesBuilder,
             Map<String, String> externalIds) {
-        Set<String> externalIdsKeys = externalIds.keySet();
         List<QueuesExternalIds> externalIdsList = new ArrayList<>();
-        String externalIdValue;
-        for (String extIdKey : externalIdsKeys) {
-            externalIdValue = externalIds.get(extIdKey);
+        for (Entry<String, String> entry : externalIds.entrySet()) {
+            String extIdKey = entry.getKey();
+            String externalIdValue = entry.getValue();
             if (extIdKey != null && externalIdValue != null) {
                 externalIdsList.add(new QueuesExternalIdsBuilder().setQueuesExternalIdKey(extIdKey)
                         .setQueuesExternalIdValue(externalIdValue).build());

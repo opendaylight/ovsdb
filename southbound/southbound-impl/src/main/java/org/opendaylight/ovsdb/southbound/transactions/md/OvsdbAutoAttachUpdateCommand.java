@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -42,8 +41,8 @@ import org.slf4j.LoggerFactory;
 public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbAutoAttachUpdateCommand.class);
 
-    private Map<UUID, AutoAttach> updatedAutoAttachRows;
-    private Map<UUID, AutoAttach> oldAutoAttachRows;
+    private final Map<UUID, AutoAttach> updatedAutoAttachRows;
+    private final Map<UUID, AutoAttach> oldAutoAttachRows;
 
     public OvsdbAutoAttachUpdateCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -99,7 +98,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                 }
 
                 final AutoattachBuilder autoAttachBuilder =
-                        (currentAutoattach != null) ? new AutoattachBuilder(currentAutoattach)
+                        currentAutoattach != null ? new AutoattachBuilder(currentAutoattach)
                                 : new AutoattachBuilder()
                                 .setAutoattachUuid(new Uuid(entry.getKey().toString()))
                                 .setAutoattachId(uri)
@@ -138,10 +137,10 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     private void setMappings(AutoattachBuilder autoAttachBuilder,
             AutoAttach autoAttach) {
         final Map<Long, Long> mappings = autoAttach.getMappingsColumn().getData();
-        final Set<Long> mappingsKeys = mappings.keySet();
         final List<Mappings> mappingsList = new ArrayList<>();
-        for (final Long mappingsKey : mappingsKeys) {
-            final Integer mappingsValue = new Integer(mappings.get(mappingsKey).toString());
+        for (final Entry<Long, Long> entry : mappings.entrySet()) {
+            final Long mappingsKey = entry.getKey();
+            final Integer mappingsValue = Integer.valueOf(entry.getValue().intValue());
             if (mappingsKey != null) {
                 mappingsList.add(new MappingsBuilder()
                         .setKey(new MappingsKey(mappingsKey))

@@ -109,10 +109,10 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             oldOtherConfigs = oldEntry.getOtherConfigColumn().getData();
         }
 
-        if ((oldOtherConfigs != null) && (!oldOtherConfigs.isEmpty())) {
+        if (oldOtherConfigs != null && !oldOtherConfigs.isEmpty()) {
             removeOldConfigs(transaction, oldOtherConfigs, openVSwitch);
         }
-        if ((otherConfigs != null) && (!otherConfigs.isEmpty())) {
+        if (otherConfigs != null && !otherConfigs.isEmpty()) {
             setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
         }
     }
@@ -135,11 +135,10 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private void setNewOtherConfigs(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
             Map<String, String> otherConfigs) {
-        Set<String> otherConfigKeys = otherConfigs.keySet();
         List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<>();
-        String otherConfigValue;
-        for (String otherConfigKey : otherConfigKeys) {
-            otherConfigValue = otherConfigs.get(otherConfigKey);
+        for (Entry<String, String> entry : otherConfigs.entrySet()) {
+            String otherConfigKey = entry.getKey();
+            String otherConfigValue = entry.getValue();
             if (otherConfigKey != null && otherConfigValue != null) {
                 otherConfigsList.add(new OpenvswitchOtherConfigsBuilder().setOtherConfigKey(otherConfigKey)
                         .setOtherConfigValue(otherConfigValue).build());
@@ -159,7 +158,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         if (oldEntry != null && oldEntry.getExternalIdsColumn() != null) {
             oldExternalIds = oldEntry.getExternalIdsColumn().getData();
         }
-        if ((oldExternalIds == null) || oldExternalIds.isEmpty()) {
+        if (oldExternalIds == null || oldExternalIds.isEmpty()) {
             setNewExternalIds(ovsdbNodeBuilder, externalIds);
         } else if (externalIds != null && !externalIds.isEmpty()) {
             removeExternalIds(transaction, oldExternalIds, openVSwitch);
@@ -185,11 +184,10 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private void setNewExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
             Map<String, String> externalIds) {
-        Set<String> externalIdKeys = externalIds.keySet();
         List<OpenvswitchExternalIds> externalIdsList = new ArrayList<>();
-        String externalIdValue;
-        for (String externalIdKey : externalIdKeys) {
-            externalIdValue = externalIds.get(externalIdKey);
+        for (Entry<String, String> entry : externalIds.entrySet()) {
+            String externalIdKey = entry.getKey();
+            String externalIdValue = entry.getValue();
             if (externalIdKey != null && externalIdValue != null) {
                 externalIdsList.add(new OpenvswitchExternalIdsBuilder().setExternalIdKey(externalIdKey)
                         .setExternalIdValue(externalIdValue).build());

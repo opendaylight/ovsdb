@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.Collection;
 import java.util.Map;
-
+import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -59,11 +59,12 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
                 continue;
             }
             Bridge updatedBridgeData = null;
-            for (UUID bridgeUuid : bridgeUpdatedOldRows.keySet()) {
-                Bridge oldBridgeData = bridgeUpdatedOldRows.get(bridgeUuid);
+            for (Entry<UUID, Bridge> entry : bridgeUpdatedOldRows.entrySet()) {
+                UUID bridgeUuid = entry.getKey();
+                Bridge oldBridgeData = entry.getValue();
                 if (oldBridgeData.getPortsColumn() != null
                         && oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())
-                        && (! bridgeUpdatedRows.isEmpty())) {
+                        && ! bridgeUpdatedRows.isEmpty()) {
                     updatedBridgeData = bridgeUpdatedRows.get(bridgeUuid);
                     break;
                 }

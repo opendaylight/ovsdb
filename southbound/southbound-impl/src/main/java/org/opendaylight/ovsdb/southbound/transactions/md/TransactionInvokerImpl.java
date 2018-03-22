@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,13 +37,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
-    private DataBroker db;
-    private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
+    private final DataBroker db;
+    private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
+    private final BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private ExecutorService executor;
+    private final ExecutorService executor;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
         = new HashMap<>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
@@ -53,19 +54,21 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         this.chain = db.createTransactionChain(this);
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
         executor = Executors.newSingleThreadExecutor(threadFact);
-        executor.submit(this);
+        executor.execute(this);
     }
 
     @Override
     public void invoke(final TransactionCommand command) {
         // TODO what do we do if queue is full?
-        inputQueue.offer(command);
+        if (!inputQueue.offer(command)) {
+            LOG.error("inputQueue is full (size: {}) - could not offer {}", inputQueue.size(), command);
+        }
     }
 
     @Override
     public void onTransactionChainFailed(TransactionChain<?, ?> chainArg,
             AsyncTransaction<?, ?> transaction, Throwable cause) {
-        failedTransactionQueue.offer(transaction);
+        offerFailedTransaction(transaction);
     }
 
     @Override
@@ -96,14 +99,17 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
-                            successfulTransactionQueue.offer(transaction);
+                            if (!successfulTransactionQueue.offer(transaction)) {
+                                LOG.error("successfulTransactionQueue is full (size: {}) - could not offer {}",
+                                        successfulTransactionQueue.size(), transaction);
+                            }
                         }
 
                         @Override
                         public void onFailure(final Throwable throwable) {
                             // NOOP - handled by failure of transaction chain
                         }
-                    });
+                    }, MoreExecutors.directExecutor());
                 }
             } catch (IllegalStateException e) {
                 if (transactionInFlight != null) {
@@ -111,10 +117,16 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     // retried from exceptions on which the command should NOT be retried.
                     // Then it should retry only the commands which should be retried, otherwise
                     // this method will retry commands which will never be successful forever.
-                    failedTransactionQueue.offer(transactionInFlight);
+                    offerFailedTransaction(transactionInFlight);
                 }
                 LOG.warn("Failed to process an update notification from OVS.", e);
             }
+        }
+    }
+
+    private void offerFailedTransaction(AsyncTransaction<?, ?> transaction) {
+        if (!failedTransactionQueue.offer(transaction)) {
+            LOG.warn("failedTransactionQueue is full (size: {})", failedTransactionQueue.size());
         }
     }
 

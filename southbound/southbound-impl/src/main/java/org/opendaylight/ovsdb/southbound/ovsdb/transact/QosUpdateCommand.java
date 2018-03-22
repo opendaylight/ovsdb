@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
@@ -115,8 +116,8 @@ public class QosUpdateCommand implements TransactCommand {
             Uuid operQosUuid = getQosEntryUuid(operNode.getQosEntries(), qosEntry.getQosId());
             if (operQosUuid == null) {
                 UUID namedUuid = new UUID(SouthboundConstants.QOS_NAMED_UUID_PREFIX
-                        + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes()));
-                transaction.add(op.insert(qos).withId(namedUuid.toString())).build();
+                        + TransactUtils.bytesToHexString(qosEntry.getQosId().getValue().getBytes(UTF_8)));
+                transaction.add(op.insert(qos).withId(namedUuid.toString()));
                 LOG.info("Added QoS Uuid: {} for node : {} ", namedUuid, operNode.getConnectionInfo());
             } else {
                 UUID uuid = new UUID(operQosUuid.getValue());
@@ -127,7 +128,6 @@ public class QosUpdateCommand implements TransactCommand {
                         .where(extraQos.getUuidColumn().getSchema().opEqual(uuid)).build());
                 LOG.info("Updated  QoS Uuid : {} for node : {} ", operQosUuid, operNode.getConnectionInfo());
             }
-            transaction.build();
         }
     }
 
@@ -141,7 +141,7 @@ public class QosUpdateCommand implements TransactCommand {
             }
         }
         return SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
-                + TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes());
+                + TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes(UTF_8));
     }
 
     private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {

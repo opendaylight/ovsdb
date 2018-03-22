@@ -9,12 +9,11 @@ package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -27,7 +26,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -53,6 +51,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         return db;
     }
 
+    // FIXME: get rid of this static
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     private static DataBroker db;
     private OvsdbConnectionManager cm;
     private TransactionInvoker txInvoker;
@@ -63,7 +63,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private final OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
-    private AtomicBoolean registered = new AtomicBoolean(false);
+    private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
 
     public SouthboundProvider(final DataBroker dataBroker,
@@ -97,7 +97,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
         try {
-            Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(instanceEntity);
             registration = entityOwnershipService.registerCandidate(instanceEntity);
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB Southbound Provider instance entity {} was already "
@@ -107,7 +106,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
         DataTreeIdentifier<Topology> treeId =
-                new DataTreeIdentifier<Topology>(LogicalDatastoreType.OPERATIONAL, path);
+                new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = db.registerDataTreeChangeListener(treeId, this);
@@ -179,7 +178,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
-    private class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
+    private static class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
         private final SouthboundProvider sp;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

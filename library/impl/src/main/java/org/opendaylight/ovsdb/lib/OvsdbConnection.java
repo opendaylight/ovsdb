@@ -8,6 +8,8 @@
 package org.opendaylight.ovsdb.lib;
 
 import io.netty.channel.Channel;
+import org.opendaylight.aaa.cert.api.ICertificateManager;
+
 import java.net.InetAddress;
 import java.util.Collection;
 import javax.net.ssl.SSLContext;
@@ -40,10 +42,10 @@ public interface OvsdbConnection {
      * connection from the controller towards ovsdb-server.
      * @param address IP Address of the remote server that hosts the ovsdb server.
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
-     * @param sslContext Netty sslContext for channel configuration
+     * @param certificateManagerSrv Certificate manager for SSL/TLS
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
      */
-    OvsdbClient connectWithSsl(InetAddress address, int port, SSLContext sslContext);
+    OvsdbClient connectWithSsl(InetAddress address, int port, final ICertificateManager certificateManagerSrv);
 
     /**
      * Method to disconnect an existing connection.
@@ -60,16 +62,17 @@ public interface OvsdbConnection {
      * Method to start ovsdb server for passive connection with SSL.
      */
     boolean startOvsdbManagerWithSsl(int ovsdbListenPort,
-                                     SSLContext sslContext, String[] protocols, String[] cipherSuites);
+                                     final ICertificateManager certificateManagerSrv,
+                                     String[] protocols, String[] cipherSuites);
 
     /**
      * Method to restart ovsdb server for passive connection with SSL and user
      * specifies protocols and cipher suites.
      */
     boolean restartOvsdbManagerWithSsl(int ovsdbListenPort,
-        SSLContext sslContext,
-        String[] protocols,
-        String[] cipherSuites);
+                                       final ICertificateManager certificateManagerSrv,
+                                       String[] protocols,
+                                       String[] cipherSuites);
 
     /**
      * Method to register a Passive Connection Listener with the ConnectionService.

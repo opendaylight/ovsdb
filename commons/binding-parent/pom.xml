@@ -41,7 +41,6 @@
           <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
         </configuration>
       </plugin>
-<!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
@@ -49,7 +48,6 @@
           <failOnError>true</failOnError>
         </configuration>
       </plugin>
--->
     </plugins>
   </build>
 </project>

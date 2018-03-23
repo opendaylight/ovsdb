@@ -131,7 +131,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 LOG.error("Certificate Manager service is not available cannot establish the SSL communication.");
                 return null;
             }
-            return connectWithSsl(address, port, certManagerSrv.getServerContext());
+            return connectWithSsl(address, port, certManagerSrv);
         } else {
             return connectWithSsl(address, port, null /* SslContext */);
         }
@@ -139,7 +139,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Override
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                               final SSLContext sslContext) {
+                               final ICertificateManager certificateManagerSrv) {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(new NioEventLoopGroup());
@@ -150,6 +150,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel channel) throws Exception {
+                    SSLContext sslContext = certificateManagerSrv.getServerContext();
                     if (sslContext != null) {
                         /* First add ssl handler if ssl context is given */
                         SSLEngine engine =
@@ -256,9 +257,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     @Override
     public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
-                                     final SSLContext sslContext, String[] protocols, String[] cipherSuites) {
+                                                         final ICertificateManager certificateManagerSrv,
+                                                         String[] protocols, String[] cipherSuites) {
         if (!singletonCreated.getAndSet(true)) {
-            new Thread(() -> ovsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites)).start();
+            new Thread(() -> ovsdbManagerWithSsl(ovsdbListenPort, certificateManagerSrv, protocols, cipherSuites)).start();
             return true;
         } else {
             return false;
@@ -267,7 +269,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Override
     public synchronized boolean restartOvsdbManagerWithSsl(final int ovsdbListenPort,
-        final SSLContext sslContext,
+        final ICertificateManager certificateManagerSrv,
         final String[] protocols,
         final String[] cipherSuites) {
         if (singletonCreated.getAndSet(false) && serverChannel != null) {
@@ -275,7 +277,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             LOG.info("Server channel closed");
         }
         serverChannel = null;
-        return startOvsdbManagerWithSsl(ovsdbListenPort, sslContext, protocols, cipherSuites);
+        return startOvsdbManagerWithSsl(ovsdbListenPort, certificateManagerSrv, protocols, cipherSuites);
     }
 
     /**
@@ -290,7 +292,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 LOG.error("Certificate Manager service is not available cannot establish the SSL communication.");
                 return;
             }
-            ovsdbManagerWithSsl(port, certManagerSrv.getServerContext(), certManagerSrv.getTlsProtocols(),
+            ovsdbManagerWithSsl(port, certManagerSrv, certManagerSrv.getTlsProtocols(),
                     certManagerSrv.getCipherSuites());
         } else {
             ovsdbManagerWithSsl(port, null /* SslContext */, null, null);
@@ -301,8 +303,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext, final String[] protocols,
-            final String[] cipherSuites) {
+    private static void ovsdbManagerWithSsl(int port, final ICertificateManager certificateManagerSrv,
+                                            final String[] protocols, final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -315,6 +317,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
                             LOG.debug("New Passive channel created : {}", channel);
+                            SSLContext sslContext = certificateManagerSrv.getServerContext();
                             if (sslContext != null) {
                                 /* Add SSL handler first if SSL context is provided */
                                 SSLEngine engine = sslContext.createSSLEngine();

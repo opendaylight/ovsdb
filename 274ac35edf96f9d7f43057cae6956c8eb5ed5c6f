@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1cddd783_93bfa9ce",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-03-23T08:35:18Z",
+      "side": 1,
+      "message": "That’s a risk I’m willing to take ;-). I much prefer having suppressed warnings rather than a ton of commented code, because commented code doesn’t get refactored.",
+      "parentUuid": "0d3113bd_9acc8ad0",
+      "revId": "274ac35edf96f9d7f43057cae6956c8eb5ed5c6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e09e9050_4d206d86",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 1

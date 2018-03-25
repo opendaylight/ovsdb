@@ -36,14 +36,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>utils.mdsal-utils</artifactId>
+            <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>odl-ovsdb-utils</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>utils.southbound-utils</artifactId>
-            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
         </dependency>
         <dependency>
             <!-- finalname="etc/org.opendaylight.ovsdb.southbound.cfg" -->

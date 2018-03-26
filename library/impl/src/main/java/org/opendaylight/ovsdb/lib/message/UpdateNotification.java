@@ -20,16 +20,16 @@ public class UpdateNotification {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateNotification.class);
 
-    private Object context;
+    private String context;
     private DatabaseSchema databaseSchema;
     private TableUpdates update;
     private JsonNode updatesJson;
 
-    public Object getContext() {
+    public String getContext() {
         return context;
     }
 
-    public void setContext(Object context) {
+    public void setContext(String context) {
         this.context = context;
     }
 

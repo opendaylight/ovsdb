@@ -125,7 +125,7 @@ public class OvsdbClientImpl implements OvsdbClient {
             OvsdbRPC.Callback temp = new OvsdbRPC.Callback() {
                 @Override
                 public void update(Object node, UpdateNotification updateNotification) {
-                    Object key = updateNotification.getContext();
+                    String key = updateNotification.getContext();
                     CallbackContext callbackContext = monitorCallbacks.get(key);
                     MonitorCallBack monitorCallBack = callbackContext.monitorCallBack;
                     if (monitorCallBack == null) {

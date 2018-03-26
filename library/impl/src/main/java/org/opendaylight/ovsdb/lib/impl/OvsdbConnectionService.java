@@ -154,8 +154,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel channel) throws Exception {
-                    SSLContext sslContext = certificateManagerSrv.getServerContext();
-                    if (sslContext != null) {
+                    if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
+                        SSLContext sslContext = certificateManagerSrv.getServerContext();
                         /* First add ssl handler if ssl context is given */
                         SSLEngine engine =
                             sslContext.createSSLEngine(address.toString(), port);
@@ -322,9 +322,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
                             LOG.debug("New Passive channel created : {}", channel);
-                            SSLContext sslContext = certificateManagerSrv.getServerContext();
-                            if (sslContext != null) {
+                            if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
                                 /* Add SSL handler first if SSL context is provided */
+                                SSLContext sslContext = certificateManagerSrv.getServerContext();
                                 SSLEngine engine = sslContext.createSSLEngine();
                                 engine.setUseClientMode(false); // work in a server mode
                                 engine.setNeedClientAuth(true); // need client authentication

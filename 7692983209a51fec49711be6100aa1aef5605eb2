@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78e9f126_44b6ed6e",
+        "filename": "utils/mdsal-utils/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-04-03T05:17:07Z",
+      "side": 1,
+      "message": "FTR: this just makes southbound-api \u003cscope\u003etest",
+      "revId": "7692983209a51fec49711be6100aa1aef5605eb2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

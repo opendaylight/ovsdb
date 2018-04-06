@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Stephen Kitt <skitt@redhat.com>
+Code-Review+2: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Fri, 06 Apr 2018 15:45:19 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/69986
+Project: ovsdb
+Branch: refs/heads/stable/oxygen

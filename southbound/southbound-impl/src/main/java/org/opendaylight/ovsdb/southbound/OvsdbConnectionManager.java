@@ -28,16 +28,16 @@ import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.eos.binding.api.Entity;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
+import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -61,7 +61,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -378,7 +377,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                         : "that's currently NOT registered by *this* southbound plugin instance");
 
         if (ovsdbConnectionInstance == null) {
-            if (ownershipChange.isOwner()) {
+            if (ownershipChange.getState().isOwner()) {
                 LOG.warn("handleOwnershipChanged: *this* instance is elected as an owner of the device {} but it "
                         + "is NOT registered for ownership", ownershipChange.getEntity());
             } else {
@@ -392,7 +391,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
             // If entity has no owner, clean up the operational data store (it's possible because owner controller
             // might went down abruptly and didn't get a chance to clean up the operational data store.
-            if (!ownershipChange.hasOwner()) {
+            if (!ownershipChange.getState().hasOwner()) {
                 LOG.info("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
                 cleanEntityOperationalData(ownershipChange.getEntity());
             }
@@ -401,7 +400,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         //Connection detail need to be cached, irrespective of ownership result.
         putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(),ovsdbConnectionInstance);
 
-        if (ownershipChange.isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
+        if (ownershipChange.getState().isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
             LOG.info("handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",
                     ovsdbConnectionInstance.getConnectionInfo(), ovsdbConnectionInstance.getHasDeviceOwnership()
                             ? SouthboundConstants.OwnershipStates.OWNER.getState()
@@ -409,9 +408,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             return;
         }
 
-        ovsdbConnectionInstance.setHasDeviceOwnership(ownershipChange.isOwner());
+        ovsdbConnectionInstance.setHasDeviceOwnership(ownershipChange.getState().isOwner());
         // You were not an owner, but now you are
-        if (ownershipChange.isOwner()) {
+        if (ownershipChange.getState().isOwner()) {
             LOG.info("handleOwnershipChanged: *this* southbound plugin instance is an OWNER of the device {}",
                     ovsdbConnectionInstance.getConnectionInfo());
 
@@ -440,8 +439,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // are chances that other controller instance went down abruptly and it does
         // not clear manager entry, which OvsdbNodeRemoveCommand look for before cleanup.
 
-        @SuppressWarnings("unchecked") final InstanceIdentifier<Node> nodeIid =
-                (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializer(entity.getId());
+        @SuppressWarnings("unchecked")
+        final InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) entity.getIdentifier();
 
         txInvoker.invoke(transaction -> {
             Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
@@ -513,8 +512,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
             ovsdbConnectionInstance.setInstanceIdentifier(iid);
         }
-        YangInstanceIdentifier entityId = instanceIdentifierCodec.getYangInstanceIdentifier(iid);
-        Entity deviceEntity = new Entity(ENTITY_TYPE, entityId);
+        Entity deviceEntity = new Entity(ENTITY_TYPE, iid);
         LOG.debug("Entity {} created for device connection {}",
                 deviceEntity, ovsdbConnectionInstance.getConnectionInfo());
         return deviceEntity;
@@ -541,7 +539,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     entityOwnershipService.getOwnershipState(candidateEntity);
             if (ownershipStateOpt.isPresent()) {
                 EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
+                if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
                     LOG.info("OVSDB entity {} is already owned by other southbound plugin "
                                     + "instance, so *this* instance is NOT an OWNER of the device",
                             ovsdbConnectionInstance.getConnectionInfo());

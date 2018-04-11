@@ -8,7 +8,7 @@
     interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
     odl:type="default" />
   <reference id="eos"
-    interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService" />
+    interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService" />
   <reference id="ovsdbConnection" interface="org.opendaylight.ovsdb.lib.OvsdbConnection" />
   <reference id="schemaService"
     interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />

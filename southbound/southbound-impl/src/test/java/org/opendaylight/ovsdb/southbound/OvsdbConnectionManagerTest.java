@@ -35,10 +35,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.eos.binding.api.Entity;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
+import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
@@ -369,7 +370,8 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnManager, entityConnectionMap);
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "putConnectionInstance", ConnectionInfo.class,
                 OvsdbConnectionInstance.class));
-        EntityOwnershipChange ownershipChange = new EntityOwnershipChange(entity, true, false, false);
+        EntityOwnershipChange ownershipChange = new EntityOwnershipChange(entity,
+                EntityOwnershipChangeState.from(true, false, false));
         Whitebox.invokeMethod(ovsdbConnManager, "handleOwnershipChanged", ownershipChange);
         PowerMockito.verifyPrivate(ovsdbConnManager, times(1)).invoke("putConnectionInstance", key, ovsdbConnInstance);
     }

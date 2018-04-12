@@ -48,23 +48,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modules>
     <module>southbound-api</module>
     <module>southbound-impl</module>
+    <module>southbound-karaf</module>
     <module>southbound-features</module>
     <module>southbound-artifacts</module>
     <module>southbound-it</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>karaf</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-
-      <modules>
-        <module>southbound-karaf</module>
-      </modules>
-    </profile>
-  </profiles>
 
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
   <build>

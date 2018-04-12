@@ -26,7 +26,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>impl</module>
     <module>features</module>
     <module>artifacts</module>
-    <module>it</module>
   </modules>
 
   <profiles>
@@ -38,6 +37,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
       <modules>
         <module>karaf</module>
+        <module>it</module>
       </modules>
     </profile>
   </profiles>

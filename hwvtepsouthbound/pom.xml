@@ -27,7 +27,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <module>hwvtepsouthbound-impl</module>
     <module>hwvtepsouthbound-features</module>
     <module>hwvtepsouthbound-artifacts</module>
-    <module>hwvtepsouthbound-it</module>
   </modules>
 
   <profiles>
@@ -39,6 +38,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
       <modules>
         <module>hwvtepsouthbound-karaf</module>
+        <module>hwvtepsouthbound-it</module>
       </modules>
     </profile>
   </profiles>

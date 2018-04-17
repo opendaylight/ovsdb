@@ -38,6 +38,7 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -277,6 +278,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         ovsdbTerminationPointBuilder.setInterfaceType(
                 SouthboundMapper.createInterfaceType(type));
         updateIfIndex(interf, ovsdbTerminationPointBuilder);
+        updateMac(interf, ovsdbTerminationPointBuilder);
+        updateMacInUse(interf, ovsdbTerminationPointBuilder);
         updateOfPort(interf, ovsdbTerminationPointBuilder);
         updateOfPortRequest(interf, ovsdbTerminationPointBuilder);
         updateInterfaceExternalIds(interf, ovsdbTerminationPointBuilder);
@@ -432,6 +435,48 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             }
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("ifindex", "Interface", e);
+        }
+    }
+
+    private void updateMac(final Interface interf,
+                           final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        Set<String> macSet = null;
+        try {
+            if (interf.getMacColumn() != null) {
+                macSet = interf.getMacColumn().getData();
+            }
+            if (macSet != null && !macSet.isEmpty()) {
+                /*
+                 * It is a set due to way JSON decoder converts [] objects. OVS
+                 * only supports ONE mac, so we're fine.
+                 */
+                for (String mac: macSet) {
+                    ovsdbTerminationPointBuilder.setMac(new MacAddress(mac));
+                }
+            }
+        } catch (SchemaVersionMismatchException e) {
+            schemaMismatchLog("mac", "Interface", e);
+        }
+    }
+
+    private void updateMacInUse(final Interface interf,
+                               final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        Set<String> macInUseSet = null;
+        try {
+            if (interf.getMacInUseColumn() != null) {
+                macInUseSet = interf.getMacInUseColumn().getData();
+            }
+            if (macInUseSet != null && !macInUseSet.isEmpty()) {
+                /*
+                 * It is a set due to way JSON decoder converts [] objects. OVS
+                 * only supports ONE mac, so we're fine.
+                 */
+                for (String macInUse: macInUseSet) {
+                    ovsdbTerminationPointBuilder.setMacInUse(new MacAddress(macInUse));
+                }
+            }
+        } catch (SchemaVersionMismatchException e) {
+            schemaMismatchLog("mac_in_use", "Interface", e);
         }
     }
 

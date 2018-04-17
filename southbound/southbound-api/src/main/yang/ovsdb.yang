@@ -868,6 +868,17 @@ module ovsdb {
             config false;
         }
 
+        leaf mac {
+            description "Ethernet address to use for this interface. If unset, the default is used";
+            type yang:mac-address;
+        }
+
+        leaf mac-in-use {
+            description "The MAC address in use by this interface";
+            type yang:mac-address;
+            config false;
+        }
+
         leaf interface-type {
             description "The type of the OVSDB interface";
             type identityref {

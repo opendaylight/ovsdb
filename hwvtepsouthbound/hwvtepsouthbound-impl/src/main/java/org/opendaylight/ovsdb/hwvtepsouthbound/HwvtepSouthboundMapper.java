@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -177,7 +178,7 @@ public final class HwvtepSouthboundMapper {
     }
 
     public static IpAddress createIpAddress(Inet4Address address) {
-        return IetfInetUtil.INSTANCE.ipAddressFor(address);
+        return new IpAddress(new Ipv4Address(IetfInetUtil.INSTANCE.ipv4AddressFor(address)));
     }
 
     public static IpAddress createIpAddress(Inet6Address address) {

@@ -270,7 +270,7 @@ public class SouthboundUtils {
     }
 
     public static IpAddress createIpAddress(Inet4Address address) {
-        return IetfInetUtil.INSTANCE.ipAddressFor(address);
+        return new IpAddress(IetfInetUtil.INSTANCE.ipAddressFor(address));
     }
 
     public static IpAddress createIpAddress(Inet6Address address) {

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59cb4a40_de11e54d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-04-19T16:57:55Z",
+      "side": 1,
+      "message": "new Ipv4Address(IetfInetUtil.INSTANCE.ipv4AddressFor(address))",
+      "range": {
+        "startLine": 90,
+        "startChar": 29,
+        "endLine": 90,
+        "endChar": 72
+      },
+      "revId": "dd2380fbafb99b31dfb835a2ea014401b5c52cbd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

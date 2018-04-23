@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -129,7 +130,24 @@ public class StalePassiveConnectionService implements AutoCloseable {
 
             @Override
             public void onFailure(Throwable throwable) {
-                LOG.error("Error in checking stale connections)", throwable);
+                if (!(throwable instanceof CancellationException)) {
+                    LOG.error("Error in checking stale connections)", throwable);
+                    return;
+                }
+
+                LOG.debug("Ping for {} was cancelled as a result of timeout. Assuming client connection is gone.",
+                                        cbForClient);
+
+                if (cbForClient.isActive()) {
+                    cbForClient.disconnect();
+                }
+
+                clientFutureMap.remove(cbForClient);
+
+                if (clientFutureMap.isEmpty()) {
+                    OvsdbConnectionService.notifyListenerForPassiveConnection(newClient);
+                    pendingConnectionClients.remove(newClient);
+                }
             }
         };
     }

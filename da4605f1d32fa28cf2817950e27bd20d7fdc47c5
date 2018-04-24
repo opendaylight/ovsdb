@@ -22,6 +22,30 @@
       "revId": "da4605f1d32fa28cf2817950e27bd20d7fdc47c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd1d2cea_81ce08dd",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-04-24T20:58:52Z",
+      "side": 1,
+      "message": "It will always be a single mac. It is a set just coz of the way JSON input from switch is parsed into objects. it comes as [mac] so gets interpreted as set. OVS doesn\u0027t support multiple macs in this. You can find an old discussion on this between Sam and I from early days of hwvtep implementation.",
+      "parentUuid": "dc90fc95_be6e4e8d",
+      "range": {
+        "startLine": 450,
+        "startChar": 49,
+        "endLine": 450,
+        "endChar": 55
+      },
+      "revId": "da4605f1d32fa28cf2817950e27bd20d7fdc47c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

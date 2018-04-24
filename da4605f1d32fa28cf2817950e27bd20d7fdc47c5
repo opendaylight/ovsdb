@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc90fc95_be6e4e8d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-04-24T10:22:37Z",
+      "side": 1,
+      "message": "You are setting the last mac from the supplied set into the termination point. Is that what you want ?\nOr do you want to make the mac as leaf-list instead of leaf in the termination point yang ?",
+      "range": {
+        "startLine": 450,
+        "startChar": 49,
+        "endLine": 450,
+        "endChar": 55
+      },
+      "revId": "da4605f1d32fa28cf2817950e27bd20d7fdc47c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

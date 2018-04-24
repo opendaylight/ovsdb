@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b153826c_ee2c3105",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-04-24T10:38:24Z",
+      "side": 1,
+      "message": "May we should have separate callbacks for clientFuture and clientFuture.echo() to avoid confusion.",
+      "range": {
+        "startLine": 89,
+        "startChar": 43,
+        "endLine": 89,
+        "endChar": 46
+      },
+      "revId": "6fcc0bbe7d396b54433d3d1a487142d281b1a751",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0dc3b65_721a82f3",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-04-24T10:38:24Z",
+      "side": 1,
+      "message": "I do not understand this logic here.\nLet us say the already existing client.echo() succeded,\nthen we want to stick with the old client connection and continue to keep the new one in pending state.\n\nBut here the old client is removed and processing the new connection while the old client is still alive ?",
+      "range": {
+        "startLine": 125,
+        "startChar": 55,
+        "endLine": 125,
+        "endChar": 56
+      },
+      "revId": "6fcc0bbe7d396b54433d3d1a487142d281b1a751",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

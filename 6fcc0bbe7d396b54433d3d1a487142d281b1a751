@@ -93,6 +93,30 @@
       "revId": "6fcc0bbe7d396b54433d3d1a487142d281b1a751",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbcd449a_b2df0042",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-04-25T10:48:12Z",
+      "side": 1,
+      "message": "Agree, that can come in a separate patch\nLet us discuss that here https://git.opendaylight.org/gerrit/71303",
+      "parentUuid": "c7858d72_27fe6804",
+      "range": {
+        "startLine": 125,
+        "startChar": 55,
+        "endLine": 125,
+        "endChar": 56
+      },
+      "revId": "6fcc0bbe7d396b54433d3d1a487142d281b1a751",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

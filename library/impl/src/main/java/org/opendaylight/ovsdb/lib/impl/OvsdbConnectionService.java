@@ -112,8 +112,14 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static int listenerPort = 6640;
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
-            new StalePassiveConnectionService(executorService);
+            new StalePassiveConnectionService((client) -> {
+                notifyListenerForPassiveConnection(client);
+                return null;
+            });
+
     private static Channel serverChannel = null;
+    private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
+    private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
 

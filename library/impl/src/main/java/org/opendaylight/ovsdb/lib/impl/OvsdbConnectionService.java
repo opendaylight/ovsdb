@@ -98,7 +98,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             .newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("OVSDBConnNotifSer-%d").build());
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
-            new StalePassiveConnectionService(EXECUTOR_SERVICE);
+            new StalePassiveConnectionService((client) -> {
+                notifyListenerForPassiveConnection(client);
+                return null;
+            });
 
     private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();

@@ -10,14 +10,14 @@ package org.opendaylight.ovsdb.lib.impl;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +39,10 @@ public class StalePassiveConnectionService implements AutoCloseable {
     private static Map<OvsdbClient, Map<OvsdbClient, SettableFuture<List<String>>>> pendingConnectionClients =
             new ConcurrentHashMap<>();
 
-    private final ScheduledExecutorService executorService;
-    private static final int ECHO_TIMEOUT = 10;
+    Function<OvsdbClient, Void> callback;
 
-    public StalePassiveConnectionService(final ScheduledExecutorService executorService) {
-        this.executorService = executorService;
+    public StalePassiveConnectionService(Function<OvsdbClient, Void> callback) {
+        this.callback = callback;
     }
 
     /**
@@ -55,38 +54,36 @@ public class StalePassiveConnectionService implements AutoCloseable {
      */
     public void handleNewPassiveConnection(final OvsdbClient newOvsdbClient,
                                            final List<OvsdbClient> clientsFromSameNode) {
-        final Map<OvsdbClient, SettableFuture<List<String>>> clientFutureMap = new ConcurrentHashMap<>();
-        pendingConnectionClients.put(newOvsdbClient, clientFutureMap);
+        final Map<OvsdbClient, SettableFuture<List<String>>> oldClients = new ConcurrentHashMap<>();
+        pendingConnectionClients.put(newOvsdbClient, oldClients);
 
-        // scheduled task for ping response timeout. Connections that don't response to the
-        // ping or haven't disconnected after the timeout will be closed
-        final ScheduledFuture<?> echoTimeoutFuture =
-                executorService.schedule(() -> {
-                    for (Entry<OvsdbClient, SettableFuture<List<String>>> entry : clientFutureMap.entrySet()) {
-                        OvsdbClient client = entry.getKey();
-                        Future<?> clientFuture = entry.getValue();
-                        if (!clientFuture.isDone() && !clientFuture.isCancelled()) {
-                            clientFuture.cancel(true);
-                        }
-                        if (client.isActive()) {
-                            client.disconnect();
+        /*
+            if old client echo succeeds
+               do not notify new client as it has to wait
+            else
+                if all old clients got disconnected/echo failed notify the new client
+         */
+        for (final OvsdbClient oldClient : clientsFromSameNode) {
+            oldClients.put(oldClient, SettableFuture.create());
+            Futures.addCallback(oldClient.echo(),
+                new FutureCallback<List<String>>() {
+                    @Override
+                    public void onSuccess(List<String> result) {
+                        //old client active
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        //old client inactive
+                        oldClients.remove(oldClient);
+                        if (oldClients.isEmpty()) {
+                            if (pendingConnectionClients.remove(newOvsdbClient) != null) {
+                                //new client still active notify it
+                                callback.apply(newOvsdbClient);
+                            }
                         }
                     }
-                }, ECHO_TIMEOUT, TimeUnit.SECONDS);
-
-        // for every connection create a SettableFuture, save it to 'clientFutureMap', and send a ping (echo).
-        // The ping results in either:
-        // 1. ping response returns - the connection is active
-        // 2. the netty connection is closed due to IO exception -
-        // The future is removed from the 'clientFutureMap' when the onSuccess event for each future arrives
-        // If the map is empty we proceed with new connection process
-        for (final OvsdbClient client : clientsFromSameNode) {
-            SettableFuture<List<String>> clientFuture = SettableFuture.create();
-            clientFutureMap.put(client, clientFuture);
-            Futures.addCallback(clientFuture,
-                    createStaleConnectionFutureCallback(client, newOvsdbClient, clientFutureMap, echoTimeoutFuture));
-            Futures.addCallback(client.echo(),
-                    createStaleConnectionFutureCallback(client, newOvsdbClient, clientFutureMap, echoTimeoutFuture));
+                });
         }
     }
 
@@ -94,50 +91,43 @@ public class StalePassiveConnectionService implements AutoCloseable {
      * Notify the service that the given client has disconnected.
      * @param disconnectedClient the client just disconnected
      */
-    public void clientDisconnected(OvsdbClient disconnectedClient) {
-        for (Entry<OvsdbClient, Map<OvsdbClient, SettableFuture<List<String>>>> entry :
-                pendingConnectionClients.entrySet()) {
-            OvsdbClient pendingClient = entry.getKey();
+    public synchronized void clientDisconnected(OvsdbClient disconnectedClient) {
+        /*
+            if new or pending client got disconnected remove it from pending list
+            if old client got disconnected update its future
+         */
+        Iterator<Entry<OvsdbClient, Map<OvsdbClient, SettableFuture<List<String>>>>> pendingClientsIterator
+                = pendingConnectionClients.entrySet().iterator();
+        while (pendingClientsIterator.hasNext()) {
+            Entry<OvsdbClient, Map<OvsdbClient, SettableFuture<List<String>>>> pendingClientEntry
+                    = pendingClientsIterator.next();
+            OvsdbClient pendingClient = pendingClientEntry.getKey();
 
-            // set the future result for pending connections that wait for this client to be disconnected
-            if (pendingClient.getConnectionInfo().getRemoteAddress()
-                    .equals(disconnectedClient.getConnectionInfo().getRemoteAddress())) {
-                Map<OvsdbClient, SettableFuture<List<String>>> clientFutureMap = entry.getValue();
-                SettableFuture<List<String>> future = clientFutureMap.get(disconnectedClient);
-                if (future != null) {
-                    future.set(null);
+            //compare ip address and port aswell
+            if (pendingClient.getConnectionInfo().equals(disconnectedClient.getConnectionInfo())) {
+                //new client disconnected
+                pendingClientsIterator.remove();
+                continue;
+            }
+            Iterator<Entry<OvsdbClient, SettableFuture<List<String>>>> oldClientsIterator
+                    = pendingClientEntry.getValue().entrySet().iterator();
+            while (oldClientsIterator.hasNext()) {
+                Entry<OvsdbClient, SettableFuture<List<String>>> oldClientEntry = oldClientsIterator.next();
+                if (oldClientEntry.getKey().getConnectionInfo().equals(disconnectedClient.getConnectionInfo())) {
+                    //old client disconnected
+                    oldClientEntry.getValue().cancel(true);
+                    oldClientsIterator.remove();
+                    continue;
                 }
+            }
+            if (pendingClientEntry.getValue().isEmpty()) {
+                pendingClientsIterator.remove();
+                callback.apply(pendingClient);
             }
         }
     }
 
     @Override
     public void close() {
-    }
-
-    private FutureCallback<List<String>> createStaleConnectionFutureCallback(
-            final OvsdbClient cbForClient, final OvsdbClient newClient,
-            final Map<OvsdbClient, SettableFuture<List<String>>> clientFutureMap,
-            final ScheduledFuture<?> echoTimeoutFuture) {
-        return new FutureCallback<List<String>>() {
-            @Override
-            public void onSuccess(List<String> result) {
-                // The future is removed from the 'clientFutureMap' when the onSuccess event for each future arrives
-                // If the map is empty we proceed with new connection process
-                clientFutureMap.remove(cbForClient);
-                if (clientFutureMap.isEmpty()) {
-                    if (!echoTimeoutFuture.isDone() && !echoTimeoutFuture.isCancelled()) {
-                        echoTimeoutFuture.cancel(true);
-                    }
-                    OvsdbConnectionService.notifyListenerForPassiveConnection(newClient);
-                    pendingConnectionClients.remove(newClient);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-                LOG.error("Error in checking stale connections)", throwable);
-            }
-        };
     }
 }

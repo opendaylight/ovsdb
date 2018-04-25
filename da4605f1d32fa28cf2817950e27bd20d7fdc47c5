@@ -70,6 +70,30 @@
       "revId": "da4605f1d32fa28cf2817950e27bd20d7fdc47c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "61c3e1c9_22a5dbbc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-04-25T08:43:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e05de3e_7ffe2564",
+      "range": {
+        "startLine": 450,
+        "startChar": 49,
+        "endLine": 450,
+        "endChar": 55
+      },
+      "revId": "da4605f1d32fa28cf2817950e27bd20d7fdc47c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

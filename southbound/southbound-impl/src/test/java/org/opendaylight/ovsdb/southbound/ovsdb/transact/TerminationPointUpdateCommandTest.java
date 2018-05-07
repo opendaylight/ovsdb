@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -70,7 +69,7 @@ public class TerminationPointUpdateCommandTest {
             = new HashMap<>();
         created.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
         PowerMockito.mockStatic(TransactUtils.class);
-        PowerMockito.when(TransactUtils.extractCreated(any(AsyncDataChangeEvent.class),
+        PowerMockito.when(TransactUtils.extractCreated(any(DataChangeEvent.class),
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
                 TransactionBuilder.class, BridgeOperationalState.class,
@@ -82,12 +81,12 @@ public class TerminationPointUpdateCommandTest {
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated
             = new HashMap<>();
         updated.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
-        PowerMockito.when(TransactUtils.extractUpdated(any(AsyncDataChangeEvent.class),
+        PowerMockito.when(TransactUtils.extractUpdated(any(DataChangeEvent.class),
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(updated);
 
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
         terminationPointUpdateCommand.execute(transactionBuilder, mock(BridgeOperationalState.class),
-                mock(AsyncDataChangeEvent.class), mock(InstanceIdentifierCodec.class));
+                mock(DataChangeEvent.class), mock(InstanceIdentifierCodec.class));
         // TODO Verify something useful
     }
 

@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -90,7 +89,7 @@ public class OpenVSwitchBridgeAddCommandTest {
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        ovsBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class),
+        ovsBridgeAddCommand.execute(transaction, mock(BridgeOperationalState.class), mock(DataChangeEvent.class),
                 mock(InstanceIdentifierCodec.class));
         verify(transaction).add(any(Operation.class));
     }

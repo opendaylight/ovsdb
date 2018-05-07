@@ -25,7 +25,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -70,7 +69,7 @@ public class TerminationPointCreateCommandTest {
     @Ignore("This needs to be rewritten")
     public void testExecute() throws Exception {
         MemberModifier.suppress(MemberMatcher.method(TerminationPointCreateCommand.class, "getChanges"));
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asynEvent = mock(AsyncDataChangeEvent.class);
+        DataChangeEvent asynEvent = mock(DataChangeEvent.class);
         Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
         OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
         InstanceIdentifier terminationPointIid = mock(InstanceIdentifier.class);

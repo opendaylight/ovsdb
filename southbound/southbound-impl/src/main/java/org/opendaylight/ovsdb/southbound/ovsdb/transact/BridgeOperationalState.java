@@ -18,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -30,7 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +37,7 @@ public class BridgeOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeOperationalState.class);
     private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
 
-    public BridgeOperationalState(DataBroker db, AsyncDataChangeEvent<InstanceIdentifier<?>,
-            DataObject> changes) {
+    public BridgeOperationalState(DataBroker db, DataChangeEvent changes) {
         try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
             Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
                     TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);

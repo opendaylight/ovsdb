@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -24,19 +23,18 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class DataChangesManagedByOvsdbNodeEvent implements
-    AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> {
+public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
 
-    private InstanceIdentifier<?> iid;
-    private DataBroker db;
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
+    private final InstanceIdentifier<?> iid;
+    private final DataBroker db;
+    private final DataChangeEvent event;
     private Map<InstanceIdentifier<?>, DataObject> createdData = null;
     private Map<InstanceIdentifier<?>, DataObject> updatedData = null;
     private Map<InstanceIdentifier<?>, DataObject> originalData = null;
     private Set<InstanceIdentifier<?>> removedPaths;
 
     public DataChangesManagedByOvsdbNodeEvent(DataBroker dataBroker, InstanceIdentifier<?> iid,
-                                              AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+            DataChangeEvent event) {
         this.db = dataBroker;
         this.iid = iid;
         this.event = event;
@@ -161,17 +159,4 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         }
         return this.originalData;
     }
-
-    @Override
-    public DataObject getOriginalSubtree() {
-        // TODO Auto-generated method stub
-        return event.getOriginalSubtree();
-    }
-
-    @Override
-    public DataObject getUpdatedSubtree() {
-        // TODO Auto-generated method stub
-        return event.getUpdatedSubtree();
-    }
-
 }

@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -71,7 +70,7 @@ public class ProtocolUpdateCommandTest {
     @SuppressWarnings("unchecked")
     public void testExecute() throws Exception {
         PowerMockito.mockStatic(TransactUtils.class);
-        AsyncDataChangeEvent changes = mock(AsyncDataChangeEvent.class);
+        DataChangeEvent changes = mock(DataChangeEvent.class);
         when(TransactUtils.extractCreatedOrUpdated(changes, ProtocolEntry.class)).thenReturn(protocols);
         when(TransactUtils.extractCreatedOrUpdated(changes, OvsdbBridgeAugmentation.class)).thenReturn(
                 Collections.emptyMap());

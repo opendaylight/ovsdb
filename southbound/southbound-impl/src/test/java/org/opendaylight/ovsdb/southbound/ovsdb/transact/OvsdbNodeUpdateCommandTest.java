@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -45,7 +44,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -62,7 +60,7 @@ public class OvsdbNodeUpdateCommandTest {
     private static final String OTHER_CONFIG_KEY = "other config key";
     private static final String OTHER_CONFIG_VALUE = "other config value";
 
-    @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
+    @Mock private DataChangeEvent changes;
     private OvsdbNodeUpdateCommand ovsdbNodeUpdateCommand;
 
     @Before
@@ -79,7 +77,7 @@ public class OvsdbNodeUpdateCommandTest {
         updated.put(iid, ovsdbNode);
         PowerMockito.mockStatic(TransactUtils.class);
         PowerMockito.when(
-                TransactUtils.extractCreatedOrUpdated(any(AsyncDataChangeEvent.class), eq(OvsdbNodeAugmentation.class)))
+                TransactUtils.extractCreatedOrUpdated(any(DataChangeEvent.class), eq(OvsdbNodeAugmentation.class)))
                 .thenReturn(updated);
 
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);

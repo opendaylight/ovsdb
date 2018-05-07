@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
@@ -51,7 +50,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({InstanceIdentifier.class, TransactUtils.class, TyperUtils.class })
 public class ProtocolRemovedCommandTest {
 
-    private Set<InstanceIdentifier<ProtocolEntry>> removed = new HashSet<>();
+    private final Set<InstanceIdentifier<ProtocolEntry>> removed = new HashSet<>();
     @Mock private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges;
 
     @SuppressWarnings("unchecked")
@@ -89,7 +88,7 @@ public class ProtocolRemovedCommandTest {
         when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), any(Class.class))).thenReturn(bridge);
 
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        protocolRemovedCommand.execute(transaction, bridgeOpState, mock(AsyncDataChangeEvent.class),
+        protocolRemovedCommand.execute(transaction, bridgeOpState, mock(DataChangeEvent.class),
                 mock(InstanceIdentifierCodec.class));
         Mockito.verify(transaction).add(any(Operation.class));
     }

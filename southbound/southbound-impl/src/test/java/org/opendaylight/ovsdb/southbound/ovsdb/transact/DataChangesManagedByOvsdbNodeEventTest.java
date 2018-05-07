@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -36,7 +35,7 @@ public class DataChangesManagedByOvsdbNodeEventTest {
 
     @Mock private InstanceIdentifier<?> iid;
     @Mock private DataBroker db;
-    @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
+    @Mock private DataChangeEvent event;
     private Set<InstanceIdentifier<?>> removedPaths;
     private DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent;
 
@@ -71,14 +70,6 @@ public class DataChangesManagedByOvsdbNodeEventTest {
         assertEquals(data, dataChangesManagedByOvsdbNodeEvent.getOriginalData());
 
         DataObject dataObject = mock(DataObject.class);
-
-        //Test getOriginalSubtree()
-        when(event.getOriginalSubtree()).thenReturn(dataObject);
-        assertEquals(dataObject, dataChangesManagedByOvsdbNodeEvent.getOriginalSubtree());
-
-        //Test getUpdatedSubtree()
-        when(event.getUpdatedSubtree()).thenReturn(dataObject);
-        assertEquals(dataObject, dataChangesManagedByOvsdbNodeEvent.getUpdatedSubtree());
 
         //Test getRemovedPaths()
         removedPaths = new HashSet<>();

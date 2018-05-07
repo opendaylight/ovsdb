@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
@@ -109,7 +108,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreated(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,Class<T> klazz) {
+            DataChangeEvent changes, Class<T> klazz) {
         return extract(changes.getCreatedData(),klazz);
     }
 
@@ -128,7 +127,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
+            DataChangeEvent changes, Class<T> klazz) {
         return extract(changes.getUpdatedData(),klazz);
     }
 
@@ -169,7 +168,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
+            DataChangeEvent changes,Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = extractUpdated(changes,klazz);
         result.putAll(extractCreated(changes,klazz));
         return result;
@@ -190,8 +189,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
-            Class<T> klazz) {
+            DataChangeEvent changes, Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = extractCreatedOrUpdated(changes,klazz);
         result.putAll(extractRemovedObjects(changes, klazz));
         return result;
@@ -217,7 +215,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
+            DataChangeEvent changes, Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);
     }
 
@@ -241,7 +239,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
-            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
+            DataChangeEvent changes, Class<T> klazz) {
         Set<InstanceIdentifier<T>> result = new HashSet<>();
         if (changes != null && changes.getRemovedPaths() != null) {
             for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
@@ -342,7 +340,7 @@ public class TransactUtils {
         InstanceIdentifier<? extends DataObject> extendPath(
             InstanceIdentifier path,
             DataObjectModification child) {
-        Class<N> item = (Class<N>) child.getDataType();
+        Class<N> item = child.getDataType();
         if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
             K key = (K) ((InstanceIdentifier.IdentifiableItem) child.getIdentifier()).getKey();
             KeyedInstanceIdentifier<N, K> extendedPath = path.child(item, key);
@@ -354,8 +352,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
-            Class<T> klazz) {
+            DataChangeEvent changes, Class<T> klazz) {
         Set<InstanceIdentifier<T>> iids = extractRemoved(changes, klazz);
         return Maps.filterKeys(extractOriginal(changes, klazz),Predicates.in(iids));
     }

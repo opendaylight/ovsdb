@@ -20,11 +20,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -32,9 +29,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class TransactCommandAggregatorTest {
 
-    private List<TransactCommand> commands = new ArrayList<>();
+    private final List<TransactCommand> commands = new ArrayList<>();
     private TransactCommandAggregator transactCommandAggregator;
-    @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
+    @Mock private DataChangeEvent changes;
     @Mock private BridgeOperationalState operationalState;
 
     @Before
@@ -67,13 +64,13 @@ public class TransactCommandAggregatorTest {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         for (TransactCommand command: commands) {
             doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
-                    any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
+                    any(DataChangeEvent.class), any(InstanceIdentifierCodec.class));
         }
         transactCommandAggregator.execute(transaction, mock(BridgeOperationalState.class),
-                mock(AsyncDataChangeEvent.class), mock(InstanceIdentifierCodec.class));
+                mock(DataChangeEvent.class), mock(InstanceIdentifierCodec.class));
         for (TransactCommand command: commands) {
             verify(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
-                    any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
+                    any(DataChangeEvent.class), any(InstanceIdentifierCodec.class));
         }
     }
 }

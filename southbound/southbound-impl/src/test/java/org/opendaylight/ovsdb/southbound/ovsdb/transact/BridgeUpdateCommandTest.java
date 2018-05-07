@@ -17,11 +17,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -32,8 +30,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class BridgeUpdateCommandTest {
 
     @Mock private BridgeUpdateCommand briUpdatedCmd;
-    @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    @Mock private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> returnChanges;
+    @Mock private DataChangeEvent changes;
+    @Mock private DataChangeEvent returnChanges;
     @Mock private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> created;
     @Mock private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updated;
 

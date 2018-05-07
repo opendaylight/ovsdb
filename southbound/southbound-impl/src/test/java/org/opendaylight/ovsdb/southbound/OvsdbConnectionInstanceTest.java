@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
@@ -48,6 +47,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -98,12 +98,12 @@ public class OvsdbConnectionInstanceTest {
         field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
 
         TransactCommand command = mock(TransactCommand.class);
-        ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(AsyncDataChangeEvent.class),
+        ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(DataChangeEvent.class),
                 mock(InstanceIdentifierCodec.class));
         verify(transactInvoker1).invoke(any(TransactCommand.class), any(BridgeOperationalState.class),
-                any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
+                any(DataChangeEvent.class), any(InstanceIdentifierCodec.class));
         verify(transactInvoker2).invoke(any(TransactCommand.class), any(BridgeOperationalState.class),
-                any(AsyncDataChangeEvent.class), any(InstanceIdentifierCodec.class));
+                any(DataChangeEvent.class), any(InstanceIdentifierCodec.class));
     }
 
     @Test

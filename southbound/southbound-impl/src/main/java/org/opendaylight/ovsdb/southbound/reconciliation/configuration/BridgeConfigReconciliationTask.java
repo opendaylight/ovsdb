@@ -13,17 +13,14 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -31,6 +28,7 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsdbNodeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
@@ -156,7 +154,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     }
 
     private void reconcileBridgeConfigurations(final Map<InstanceIdentifier<?>, DataObject> changes) {
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changeEvents = new AsyncDataChangeEvent() {
+        DataChangeEvent changeEvents = new DataChangeEvent() {
             @Override
             public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
                 return changes;
@@ -175,16 +173,6 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             @Override
             public Set<InstanceIdentifier<?>> getRemovedPaths() {
                 return Collections.emptySet();
-            }
-
-            @Override
-            public DataObject getOriginalSubtree() {
-                return null;
-            }
-
-            @Override
-            public DataObject getUpdatedSubtree() {
-                return null;
             }
         };
 

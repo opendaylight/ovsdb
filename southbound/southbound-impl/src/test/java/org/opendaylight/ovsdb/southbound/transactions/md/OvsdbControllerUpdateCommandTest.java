@@ -165,7 +165,7 @@ public class OvsdbControllerUpdateCommandTest {
         Optional<Node> ovsdbNode = Optional.of(node);
         when(SouthboundUtil.readNode(transaction, connectionIId)).thenReturn(ovsdbNode);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
         List<ManagedNodeEntry> managedNodeEntries = new ArrayList<>();
         ManagedNodeEntry managedNodeEntry = mock(ManagedNodeEntry.class);
@@ -201,7 +201,7 @@ public class OvsdbControllerUpdateCommandTest {
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(nodeKey);
         PowerMockito.whenNew(TopologyKey.class).withAnyArguments().thenReturn(mock(TopologyKey.class));
         //PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
-        when(controllerEntry.getKey()).thenReturn(mock(ControllerEntryKey.class));
+        when(controllerEntry.key()).thenReturn(mock(ControllerEntryKey.class));
         assertEquals(KeyedInstanceIdentifier.class, (Whitebox
                 .invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME)
                 .getClass()));

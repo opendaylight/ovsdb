@@ -293,8 +293,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public OvsdbConnectionInstance getConnectionInstance(Node node) {
         Preconditions.checkNotNull(node);
-        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
-        OvsdbBridgeAugmentation ovsdbManagedNode = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
+        OvsdbBridgeAugmentation ovsdbManagedNode = node.augmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbNode != null) {
             return getConnectionInstance(ovsdbNode.getConnectionInfo());
         } else if (ovsdbManagedNode != null) {
@@ -446,7 +446,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
             if (ovsdbNodeOpt.isPresent()) {
                 Node ovsdbNode = ovsdbNodeOpt.get();
-                OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
                 if (nodeAugmentation != null) {
                     if (nodeAugmentation.getManagedNodeEntry() != null) {
                         for (ManagedNodeEntry managedNode : nodeAugmentation.getManagedNodeEntry()) {

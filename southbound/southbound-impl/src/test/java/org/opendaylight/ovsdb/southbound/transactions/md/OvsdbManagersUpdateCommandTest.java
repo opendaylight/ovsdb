@@ -158,7 +158,7 @@ public class OvsdbManagersUpdateCommandTest {
         PowerMockito.whenNew(NodeId.class).withAnyArguments().thenReturn(nodeId);
         NodeKey nodeKey = mock(NodeKey.class);
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(nodeKey);
-        when(managerEntry.getKey()).thenReturn(mock(ManagerEntryKey.class));
+        when(managerEntry.key()).thenReturn(mock(ManagerEntryKey.class));
         assertEquals(KeyedInstanceIdentifier.class,
                 Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "getManagerEntryIid", managerEntry).getClass());
     }

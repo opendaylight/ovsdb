@@ -519,7 +519,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
                     LogicalDatastoreType dataStore) {
         Node psNode = getPhysicalSwitchNode(connectionInfo, psName, dataStore);
         Assert.assertNotNull(psNode);
-        PhysicalSwitchAugmentation psAugmentation = psNode.getAugmentation(PhysicalSwitchAugmentation.class);
+        PhysicalSwitchAugmentation psAugmentation = psNode.augmentation(PhysicalSwitchAugmentation.class);
         Assert.assertNotNull(psAugmentation);
         return psAugmentation;
     }

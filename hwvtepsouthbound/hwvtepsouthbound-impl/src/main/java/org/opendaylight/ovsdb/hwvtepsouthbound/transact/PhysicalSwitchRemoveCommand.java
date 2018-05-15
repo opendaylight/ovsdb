@@ -88,7 +88,7 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
                 Node removed = TransactUtils.getRemoved(mod);
                 if (removed != null) {
                     PhysicalSwitchAugmentation physicalSwitch =
-                            removed.getAugmentation(PhysicalSwitchAugmentation.class);
+                            removed.augmentation(PhysicalSwitchAugmentation.class);
                     if (physicalSwitch != null) {
                         result.put(key, physicalSwitch);
                     }

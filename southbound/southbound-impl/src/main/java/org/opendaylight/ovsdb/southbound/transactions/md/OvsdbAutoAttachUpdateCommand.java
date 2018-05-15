@@ -102,7 +102,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                                 : new AutoattachBuilder()
                                 .setAutoattachUuid(new Uuid(entry.getKey().toString()))
                                 .setAutoattachId(uri)
-                                .setKey(new AutoattachKey(uri));
+                                .withKey(new AutoattachKey(uri));
 
                 if (autoAttach.getSystemNameColumn() != null
                         && autoAttach.getSystemNameColumn().getData() != null
@@ -127,7 +127,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                         ovsdbNode.get().getNodeId(), autoAttachEntry);
                 final InstanceIdentifier<Autoattach> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(Autoattach.class, autoAttachEntry.getKey());
+                        .child(Autoattach.class, autoAttachEntry.key());
                 transaction.put(LogicalDatastoreType.OPERATIONAL,
                         iid, autoAttachEntry);
             }
@@ -143,7 +143,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
             final Integer mappingsValue = Integer.valueOf(entry.getValue().intValue());
             if (mappingsKey != null) {
                 mappingsList.add(new MappingsBuilder()
-                        .setKey(new MappingsKey(mappingsKey))
+                        .withKey(new MappingsKey(mappingsKey))
                         .setMappingsKey(mappingsKey)
                         .setMappingsValue(mappingsValue)
                         .build());

@@ -55,7 +55,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
         for (LocalMcastMacs localMcastMac: localMcastMacs) {
             LOG.debug("Creating localMcastMac, mac address: {}", localMcastMac.getMacEntryKey().getValue());
             final Optional<LocalMcastMacs> operationalMacOptional =
-                    getOperationalState().getLocalMcastMacs(instanceIdentifier, localMcastMac.getKey());
+                    getOperationalState().getLocalMcastMacs(instanceIdentifier, localMcastMac.key());
             McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     McastMacsLocal.class);
             setIpAddress(mcastMacsLocal, localMcastMac);

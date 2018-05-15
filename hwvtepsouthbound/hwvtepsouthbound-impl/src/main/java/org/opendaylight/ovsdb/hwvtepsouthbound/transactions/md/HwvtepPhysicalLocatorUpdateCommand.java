@@ -62,7 +62,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
             TerminationPointKey tpKey = HwvtepSouthboundMapper.getTerminationPointKey(locator);
             if (nodeIid != null && tpKey != null) {
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-                tpBuilder.setKey(tpKey);
+                tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
                 InstanceIdentifier<TerminationPoint> tpPath =
                         HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, locator);

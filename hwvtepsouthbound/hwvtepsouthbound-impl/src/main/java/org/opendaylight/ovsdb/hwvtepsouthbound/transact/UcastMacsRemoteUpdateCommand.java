@@ -69,7 +69,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                                final InstanceIdentifier macKey,
                                final Object... extraData) {
         InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+                .child(RemoteUcastMacs.class, remoteUcastMacs.key());
         processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 

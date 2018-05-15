@@ -68,7 +68,7 @@ public final class SwitchConfigOperationalChangeGetter {
             TerminationPointBuilder terminationPointBuilder = new TerminationPointBuilder(tp);
             terminationPointBuilder.removeAugmentation(HwvtepPhysicalPortAugmentation.class);
 
-            HwvtepPhysicalPortAugmentation augmentation = tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+            HwvtepPhysicalPortAugmentation augmentation = tp.augmentation(HwvtepPhysicalPortAugmentation.class);
             HwvtepPhysicalPortAugmentationBuilder builder = new HwvtepPhysicalPortAugmentationBuilder();
             if (augmentation != null) {
                 builder = new HwvtepPhysicalPortAugmentationBuilder(augmentation);

@@ -121,18 +121,18 @@ public class BridgeConfigReconciliationTaskTest {
 
         when((InstanceIdentifier<Node>)ovsdbNodeRef.getValue()).thenReturn(iid);
         OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(bridgeName);
-        when(bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
+        when(bridgeNode.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
         when(ovsdbBridgeAugmentation.getBridgeName()).thenReturn(ovsdbBridgeName);
         ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
         ProtocolEntryKey protocolEntryKey = mock(ProtocolEntryKey.class);
         Mockito.when(protocolEntry.getProtocol()).thenAnswer(
                 (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
-        when(protocolEntry.getKey()).thenReturn(protocolEntryKey);
+        when(protocolEntry.key()).thenReturn(protocolEntryKey);
         when(ovsdbBridgeAugmentation.getProtocolEntry()).thenReturn(Collections.singletonList(protocolEntry));
 
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         ControllerEntryKey controllerEntryKey = mock(ControllerEntryKey.class);
-        when(controllerEntry.getKey()).thenReturn(controllerEntryKey);
+        when(controllerEntry.key()).thenReturn(controllerEntryKey);
         when(ovsdbBridgeAugmentation.getControllerEntry()).thenReturn(Collections.singletonList(controllerEntry));
 
         when(ovsdbBridgeAugmentation.getManagedBy()).thenReturn(ovsdbNodeRef);
@@ -141,7 +141,7 @@ public class BridgeConfigReconciliationTaskTest {
     }
 
     private Map<InstanceIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
-        OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
 
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =
@@ -152,12 +152,12 @@ public class BridgeConfigReconciliationTaskTest {
         changes.put(ovsdbBridgeIid, ovsdbBridge);
         for (ProtocolEntry protocolEntry : ovsdbBridge.getProtocolEntry()) {
             KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
-                    ovsdbBridgeIid.child(ProtocolEntry.class, protocolEntry.getKey());
+                    ovsdbBridgeIid.child(ProtocolEntry.class, protocolEntry.key());
             changes.put(protocolIid, protocolEntry);
         }
         for (ControllerEntry controller : ovsdbBridge.getControllerEntry()) {
             KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
-                    ovsdbBridgeIid.child(ControllerEntry.class, controller.getKey());
+                    ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
             changes.put(controllerIid, controller);
         }
         return changes;

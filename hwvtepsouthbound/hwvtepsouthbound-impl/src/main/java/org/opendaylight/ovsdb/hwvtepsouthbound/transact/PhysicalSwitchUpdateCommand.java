@@ -178,7 +178,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         //TODO: needs more testing
         if (physicalSwitchAugmentation.getTunnels() != null) {
             for (Tunnels tunnel : physicalSwitchAugmentation.getTunnels()) {
-                Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.getKey());
+                Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.key());
                 Tunnel newTunnel = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class);
 
                 UUID localUUID = getLocatorUUID(transaction,
@@ -306,7 +306,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
                     PhysicalSwitchAugmentation physicalSwitch =
-                            created.getAugmentation(PhysicalSwitchAugmentation.class);
+                            created.augmentation(PhysicalSwitchAugmentation.class);
                     if (physicalSwitch != null) {
                         result.put(key, physicalSwitch);
                     }
@@ -326,7 +326,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                 Node updated = TransactUtils.getUpdated(mod);
                 if (updated != null) {
                     PhysicalSwitchAugmentation physicalSwitch =
-                            updated.getAugmentation(PhysicalSwitchAugmentation.class);
+                            updated.augmentation(PhysicalSwitchAugmentation.class);
                     if (physicalSwitch != null) {
                         result.put(key, physicalSwitch);
                     }

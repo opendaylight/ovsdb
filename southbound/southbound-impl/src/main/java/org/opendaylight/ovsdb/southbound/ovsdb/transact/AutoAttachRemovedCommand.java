@@ -81,7 +81,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                         return;
                     }
                     final OvsdbNodeAugmentation currentOvsdbNode =
-                            state.getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                            state.getBridgeNode(ovsdbNodeIid).get().augmentation(OvsdbNodeAugmentation.class);
                     final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
                     for (final Autoattach origAutoattach : origAutoattachList) {
                         final Uri autoAttachId = origAutoattach.getAutoattachId();
@@ -146,7 +146,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             final Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid).get();
             if (nodeOptional.isPresent()) {
                 final List<ManagedNodeEntry> managedNodes =
-                        nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+                        nodeOptional.get().augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
                 for (final ManagedNodeEntry managedNode : managedNodes) {
                     final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
                     final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()

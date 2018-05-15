@@ -341,7 +341,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         if (nodes != null && nodes.get(nodeIid) != null) {
             Node node = nodes.get(nodeIid);
-            bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge == null) {
                 ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
                 CheckedFuture<Optional<Node>, ReadFailedException> future =
@@ -349,7 +349,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 try {
                     Optional<Node> nodeOptional = future.get();
                     if (nodeOptional.isPresent()) {
-                        bridge = nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class);
+                        bridge = nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("Error reading from datastore",e);

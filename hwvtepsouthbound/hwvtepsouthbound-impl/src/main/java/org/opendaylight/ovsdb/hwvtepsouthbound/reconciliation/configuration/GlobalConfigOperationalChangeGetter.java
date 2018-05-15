@@ -34,8 +34,8 @@ public final class GlobalConfigOperationalChangeGetter {
         NodeBuilder newNodeBuilder = getNodeBuilderFromNode(configNode);
         NodeBuilder oldNodeBuilder = getNodeBuilderFromNode(opNode);
 
-        HwvtepGlobalAugmentationBuilder newAugmentation = getAugmentationFromNode(configNode);
-        HwvtepGlobalAugmentationBuilder oldAugmentation = getAugmentationFromNode(opNode);
+        HwvtepGlobalAugmentationBuilder newAugmentation = augmentationFromNode(configNode);
+        HwvtepGlobalAugmentationBuilder oldAugmentation = augmentationFromNode(opNode);
 
         //fire removal of local ucast macs so that logical switches will be deleted
         fillLocalMacsToBeRemoved(oldAugmentation, configNode, opNode);
@@ -59,10 +59,10 @@ public final class GlobalConfigOperationalChangeGetter {
     }
 
     static List<LocalUcastMacs> getLocalUcastMacsToBeRemoved(Node opNode, final Set<String> removedSwitchNames) {
-        if (opNode == null || opNode.getAugmentation(HwvtepGlobalAugmentation.class) == null) {
+        if (opNode == null || opNode.augmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
-        List<LocalUcastMacs> localUcastMacs = opNode.getAugmentation(HwvtepGlobalAugmentation.class)
+        List<LocalUcastMacs> localUcastMacs = opNode.augmentation(HwvtepGlobalAugmentation.class)
                 .getLocalUcastMacs();
         if (localUcastMacs == null) {
             return null;
@@ -75,10 +75,10 @@ public final class GlobalConfigOperationalChangeGetter {
     }
 
     static List<LocalMcastMacs> getLocalMcastMacsToBeRemoved(Node opNode, final Set<String> removedSwitchNames) {
-        if (opNode == null || opNode.getAugmentation(HwvtepGlobalAugmentation.class) == null) {
+        if (opNode == null || opNode.augmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
-        List<LocalMcastMacs> localMcastMacs = opNode.getAugmentation(HwvtepGlobalAugmentation.class)
+        List<LocalMcastMacs> localMcastMacs = opNode.augmentation(HwvtepGlobalAugmentation.class)
                 .getLocalMcastMacs();
         if (localMcastMacs == null) {
             return null;
@@ -96,11 +96,11 @@ public final class GlobalConfigOperationalChangeGetter {
         List<LogicalSwitches> cfgLogicalSwitches = new ArrayList<>();
         List<LogicalSwitches> opLogicalSwitches = new ArrayList<>();
 
-        if (opNode != null && opNode.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-            opLogicalSwitches = opNode.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+        if (opNode != null && opNode.augmentation(HwvtepGlobalAugmentation.class) != null) {
+            opLogicalSwitches = opNode.augmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
         }
-        if (configNode != null && configNode.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
-            cfgLogicalSwitches = configNode.getAugmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
+        if (configNode != null && configNode.augmentation(HwvtepGlobalAugmentation.class) != null) {
+            cfgLogicalSwitches = configNode.augmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
         }
         if (opLogicalSwitches != null) {
             for (LogicalSwitches ls : opLogicalSwitches) {
@@ -116,11 +116,11 @@ public final class GlobalConfigOperationalChangeGetter {
         return removedSwitchNames;
     }
 
-    static HwvtepGlobalAugmentationBuilder getAugmentationFromNode(Node node) {
+    static HwvtepGlobalAugmentationBuilder augmentationFromNode(Node node) {
         if (node == null) {
             return new HwvtepGlobalAugmentationBuilder();
         }
-        HwvtepGlobalAugmentation src = node.getAugmentation(HwvtepGlobalAugmentation.class);
+        HwvtepGlobalAugmentation src = node.augmentation(HwvtepGlobalAugmentation.class);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         if (src != null) {
             builder.setLogicalSwitches(src.getLogicalSwitches());

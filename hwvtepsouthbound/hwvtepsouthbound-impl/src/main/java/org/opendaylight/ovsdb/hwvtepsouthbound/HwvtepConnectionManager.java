@@ -266,8 +266,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     public HwvtepConnectionInstance getConnectionInstance(Node node) {
         Preconditions.checkNotNull(node);
-        HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
-        PhysicalSwitchAugmentation switchNode = node.getAugmentation(PhysicalSwitchAugmentation.class);
+        HwvtepGlobalAugmentation hwvtepGlobal = node.augmentation(HwvtepGlobalAugmentation.class);
+        PhysicalSwitchAugmentation switchNode = node.augmentation(PhysicalSwitchAugmentation.class);
         if (hwvtepGlobal != null) {
             if (hwvtepGlobal.getConnectionInfo() != null) {
                 return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
@@ -505,7 +505,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     public void onSuccess(@Nonnull Optional<Node> node) {
                         if (node.isPresent()) {
                             HwvtepGlobalAugmentation augmentation = node.get()
-                                    .getAugmentation(HwvtepGlobalAugmentation.class);
+                                    .augmentation(HwvtepGlobalAugmentation.class);
                             if (augmentation == null || augmentation.getConnectionInfo() == null) {
                                 return;
                             }

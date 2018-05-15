@@ -142,7 +142,7 @@ public final class HwvtepSouthboundMapper {
     public static InstanceIdentifier<VlanBindings> createInstanceIdentifier(HwvtepConnectionInstance client,
             InstanceIdentifier<TerminationPoint> tpPath, VlanBindings vlanBindings) {
         return tpPath.augmentation(HwvtepPhysicalPortAugmentation.class).child(VlanBindings.class,
-                new VlanBindingsKey(vlanBindings.getKey()));
+                new VlanBindingsKey(vlanBindings.key()));
 
     }
 

@@ -53,7 +53,7 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
         for (LocalUcastMacs mac: macList) {
             LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<LocalUcastMacs> operationalMacOptional =
-                    getOperationalState().getLocalUcastMacs(instanceIdentifier, mac.getKey());
+                    getOperationalState().getLocalUcastMacs(instanceIdentifier, mac.key());
             UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     UcastMacsLocal.class, null);
             if (operationalMacOptional.isPresent() && operationalMacOptional.get().getMacEntryUuid() != null) {

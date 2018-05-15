@@ -58,7 +58,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
         for (LocalUcastMacs localUcastMac: localUcastMacs) {
             LOG.debug("Creating localUcastMacs, mac address: {}", localUcastMac.getMacEntryKey().getValue());
             final Optional<LocalUcastMacs> operationalMacOptional =
-                    getOperationalState().getLocalUcastMacs(instanceIdentifier, localUcastMac.getKey());
+                    getOperationalState().getLocalUcastMacs(instanceIdentifier, localUcastMac.key());
             UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     UcastMacsLocal.class);
             setIpAddress(ucastMacsLocal, localUcastMac);
@@ -125,7 +125,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
                         getOperationalState().getDataBroker()).readOptional(LogicalDatastoreType.CONFIGURATION, iid);
                 if (configLocatorOptional.isPresent()) {
                     HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                            configLocatorOptional.get().augmentation(HwvtepPhysicalLocatorAugmentation.class);
                     locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
                 } else {
                     LOG.warn("Create or update localUcastMac: No physical locator found in operational datastore!"

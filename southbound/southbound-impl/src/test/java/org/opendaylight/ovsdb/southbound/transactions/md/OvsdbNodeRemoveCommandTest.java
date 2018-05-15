@@ -80,7 +80,7 @@ public class OvsdbNodeRemoveCommandTest {
         Optional<Node> ovsdbNodeOptional = Optional.of(ovsdbNode);
         when(ovsdbNodeFuture.get()).thenReturn(ovsdbNodeOptional);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(ovsdbNode.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
         PowerMockito.doReturn(true).when(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager",
                 any(OvsdbNodeAugmentation.class));

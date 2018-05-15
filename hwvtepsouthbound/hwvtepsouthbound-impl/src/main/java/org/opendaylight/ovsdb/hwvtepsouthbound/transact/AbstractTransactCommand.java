@@ -180,14 +180,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         //tobe removed as part of refactoring patch
     }
 
-    protected A getAugmentation(Node node) {
+    protected A augmentation(Node node) {
         if (node == null) {
             return null;
         }
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
         Class<? extends Augmentation<Node>> augType =
                 (Class<? extends Augmentation<Node>>) parameterizedType.getActualTypeArguments()[1];
-        Augmentation<Node> augmentation = node.getAugmentation(augType);
+        Augmentation<Node> augmentation = node.augmentation(augType);
         return (A) augmentation;
     }
 
@@ -196,7 +196,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected List<T> getData(Node node) {
-        A augmentation = getAugmentation(node);
+        A augmentation = augmentation(node);
         if (augmentation != null) {
             List<T> data = getData(augmentation);
             if (data != null) {
@@ -317,7 +317,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             boolean found = false;
             while (it2.hasNext()) {
                 T other = it2.next();
-                found = compareKeyOnly ? Objects.equals(ele.getKey(), other.getKey()) : areEqual(ele, other);
+                found = compareKeyOnly ? Objects.equals(ele.key(), other.key()) : areEqual(ele, other);
                 if (found) {
                     it2.remove();
                     break;
@@ -338,7 +338,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected boolean areEqual(T obj1, T obj2) {
-        return obj1.getKey().equals(obj2.getKey());
+        return obj1.key().equals(obj2.key());
     }
 
     protected UnMetDependencyGetter getDependencyGetter() {

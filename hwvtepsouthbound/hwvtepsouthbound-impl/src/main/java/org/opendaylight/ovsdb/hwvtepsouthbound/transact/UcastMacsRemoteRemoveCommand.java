@@ -64,7 +64,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                final InstanceIdentifier macKey,
                                final Object... extraData) {
         InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+                .child(RemoteUcastMacs.class, remoteUcastMacs.key());
         processDependencies(null, transaction, nodeIid, macIid, remoteUcastMacs);
     }
 
@@ -76,7 +76,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final Object... extraData) {
         LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
         InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteUcastMacs.class, mac.getKey());
+                .child(RemoteUcastMacs.class, mac.key());
         HwvtepDeviceInfo.DeviceData deviceData =
                 getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
         UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),

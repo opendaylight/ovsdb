@@ -122,7 +122,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
             for (ManagerEntry managerEntry : managerEntries) {
                 InstanceIdentifier<ManagerEntry> iid = connectionIId
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(ManagerEntry.class, managerEntry.getKey());
+                        .child(ManagerEntry.class, managerEntry.key());
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
                         iid, managerEntry);
             }
@@ -148,7 +148,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
 
         return ovsdbNodeIid
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(ManagerEntry.class, managerEntry.getKey());
+                .child(ManagerEntry.class, managerEntry.key());
     }
 
     private Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {

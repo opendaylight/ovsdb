@@ -110,7 +110,7 @@ public final class HwvtepSouthboundUtil {
                 if (node instanceof HwvtepGlobalAugmentation) {
                     hwvtepNode = (HwvtepGlobalAugmentation) node;
                 } else if (node != null) {
-                    hwvtepNode = node.getAugmentation(HwvtepGlobalAugmentation.class);
+                    hwvtepNode = node.augmentation(HwvtepGlobalAugmentation.class);
                 }
                 if (hwvtepNode != null) {
                     return Optional.of(hwvtepNode);
@@ -202,7 +202,7 @@ public final class HwvtepSouthboundUtil {
     }
 
     public static Integer getRemotePort(Node node) {
-        HwvtepGlobalAugmentation augmentation = node.getAugmentation(HwvtepGlobalAugmentation.class);
+        HwvtepGlobalAugmentation augmentation = node.augmentation(HwvtepGlobalAugmentation.class);
         if (augmentation != null && augmentation.getConnectionInfo() != null) {
             return augmentation.getConnectionInfo().getRemotePort().getValue();
         }

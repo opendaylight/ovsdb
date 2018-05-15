@@ -225,7 +225,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     if (created.getTerminationPoint() != null) {
                         for (TerminationPoint tp : created.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListUpdated.add(hppAugmentation);
                             }
@@ -253,7 +253,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     if (updated.getTerminationPoint() != null) {
                         for (TerminationPoint tp : updated.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListUpdated.add(hppAugmentation);
                             }
@@ -262,7 +262,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                     if (before.getTerminationPoint() != null) {
                         for (TerminationPoint tp : before.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
                                 portListBefore.add(hppAugmentation);
                             }

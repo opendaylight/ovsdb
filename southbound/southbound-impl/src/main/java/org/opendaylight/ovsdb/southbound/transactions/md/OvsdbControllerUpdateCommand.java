@@ -121,7 +121,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                 final InstanceIdentifier<Node> bridgeIid = bridgeNodeEntry.getKey();
                 InstanceIdentifier<ControllerEntry> iid = bridgeIid
                         .augmentation(OvsdbBridgeAugmentation.class)
-                        .child(ControllerEntry.class, controllerEntry.getKey());
+                        .child(ControllerEntry.class, controllerEntry.key());
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
                         iid, controllerEntry);
             }
@@ -139,7 +139,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
-            OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.get().getAugmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.get().augmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null) {
                 final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation.getManagedNodeEntry();
                 for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
@@ -185,6 +185,6 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
 
         return bridgeIid
                 .augmentation(OvsdbBridgeAugmentation.class)
-                .child(ControllerEntry.class, controllerEntry.getKey());
+                .child(ControllerEntry.class, controllerEntry.key());
     }
 }

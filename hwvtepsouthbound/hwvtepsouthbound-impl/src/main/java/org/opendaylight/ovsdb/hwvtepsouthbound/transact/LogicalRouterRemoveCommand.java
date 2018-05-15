@@ -77,7 +77,7 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
         for (LogicalRouters lrouter: routerList) {
             LOG.debug("Removing logical router named: {}", lrouter.getHwvtepNodeName().getValue());
             Optional<LogicalRouters> operationalRouterOptional =
-                    getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.getKey());
+                    getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.key());
 
             if (operationalRouterOptional.isPresent()
                     && operationalRouterOptional.get().getLogicalRouterUuid() != null) {
@@ -101,6 +101,6 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
 
     @Override
     protected boolean areEqual(final LogicalRouters routers1, final LogicalRouters routers2) {
-        return routers1.getKey().equals(routers2.getKey());
+        return routers1.key().equals(routers2.key());
     }
 }

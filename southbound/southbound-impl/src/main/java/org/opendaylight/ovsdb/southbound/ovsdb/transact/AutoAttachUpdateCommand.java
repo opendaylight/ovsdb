@@ -91,7 +91,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
             }
 
             final OvsdbNodeAugmentation currentOvsdbNode =
-                    state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                    state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
             final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
             for (final Autoattach autoAttach : autoAttachList) {
                 final AutoAttach autoAttachWrapper =

@@ -73,7 +73,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                                   InstanceIdentifier macKey,
                                   Object... extraData) {
         InstanceIdentifier<RemoteMcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, remoteMcastMac.getKey());
+                .child(RemoteMcastMacs.class, remoteMcastMac.key());
         processDependencies(MCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteMcastMac);
     }
 
@@ -158,7 +158,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
     @Override
     protected boolean areEqual(RemoteMcastMacs macs1, RemoteMcastMacs macs2) {
-        return macs1.getKey().equals(macs2.getKey()) && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
+        return macs1.key().equals(macs2.key()) && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
     }
 
     static class McastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteMcastMacs> {

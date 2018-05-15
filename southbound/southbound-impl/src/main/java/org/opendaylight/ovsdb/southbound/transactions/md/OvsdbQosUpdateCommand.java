@@ -114,7 +114,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 LOG.debug("Update Ovsdb Node {} with qos entries {}",ovsdbNode.get(), qosEntry);
                 InstanceIdentifier<QosEntries> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(QosEntries.class, qosEntry.getKey());
+                        .child(QosEntries.class, qosEntry.key());
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
                         iid, qosEntry);
             }
@@ -160,7 +160,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             return (InstanceIdentifier<Queues>) instanceIdentifierCodec.bindingDeserializerOrNull(
                     queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
         } else {
-            OvsdbNodeAugmentation node = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation node = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
             if (node.getQueues() != null && !node.getQueues().isEmpty()) {
                 for (Queues q : node.getQueues()) {
                     if (q.getQueueUuid().equals(new Uuid(queueUuid.toString()))) {
@@ -203,7 +203,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             Qos qos, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<QosEntries> qosIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(QosEntries.class, qosEntryBuilder.build().getKey());
+                .child(QosEntries.class, qosEntryBuilder.build().key());
         Set<String> otherConfigKeys = oldOtherConfigs.keySet();
         for (String otherConfigKey : otherConfigKeys) {
             KeyedInstanceIdentifier<QosOtherConfig, QosOtherConfigKey> otherIId =
@@ -252,7 +252,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             Qos qos, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<QosEntries> qosIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(QosEntries.class, qosEntryBuilder.build().getKey());
+                .child(QosEntries.class, qosEntryBuilder.build().key());
         Set<String> externalIdsKeys = oldExternalIds.keySet();
         for (String extIdKey : externalIdsKeys) {
             KeyedInstanceIdentifier<QosExternalIds, QosExternalIdsKey> externalIId =
@@ -301,7 +301,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             Qos qos, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<QosEntries> qosIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(QosEntries.class, qosEntryBuilder.build().getKey());
+                .child(QosEntries.class, qosEntryBuilder.build().key());
         Collection<Long> queueListKeys = oldQueueList.keySet();
         for (Long queueListKey : queueListKeys) {
             KeyedInstanceIdentifier<QueueList, QueueListKey> otherIId =

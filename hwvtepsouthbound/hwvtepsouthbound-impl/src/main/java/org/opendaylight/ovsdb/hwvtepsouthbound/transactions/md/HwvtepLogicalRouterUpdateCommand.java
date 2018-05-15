@@ -94,7 +94,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         lrBuilder.setHwvtepNodeDescription(router.getDescription());
         HwvtepNodeName hwvtepName = new HwvtepNodeName(router.getName());
         lrBuilder.setHwvtepNodeName(hwvtepName);
-        lrBuilder.setKey(new LogicalRoutersKey(hwvtepName));
+        lrBuilder.withKey(new LogicalRoutersKey(hwvtepName));
 
         setSwitchBindings(router, lrBuilder);
         setStaticRoutes(router, lrBuilder);

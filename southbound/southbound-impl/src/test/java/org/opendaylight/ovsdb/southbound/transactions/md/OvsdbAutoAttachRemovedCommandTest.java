@@ -96,13 +96,13 @@ public class OvsdbAutoAttachRemovedCommandTest {
         when(SouthboundMapper.createInstanceIdentifier(nodeId)).thenReturn(nodeIid);
 
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
         List<Autoattach> autoAttachList = new ArrayList<>();
         Autoattach aaEntry = mock(Autoattach.class);
         autoAttachList.add(aaEntry);
         when(aaEntry.getAutoattachUuid()).thenReturn(new Uuid(AUTOATTACH_UUID.toString()));
         when(ovsdbNodeAugmentation.getAutoattach()).thenReturn(autoAttachList);
-        when(aaEntry.getKey()).thenReturn(aaKey);
+        when(aaEntry.key()).thenReturn(aaKey);
 
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }

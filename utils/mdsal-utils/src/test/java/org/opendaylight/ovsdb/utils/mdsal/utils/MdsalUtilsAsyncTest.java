@@ -52,7 +52,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
     private static final NodeId NODE_ID = new NodeId("test");
     private static final NodeKey NODE_KEY =  new NodeKey(NODE_ID);
-    private static final Node DATA = new NodeBuilder().setKey(NODE_KEY).setNodeId(NODE_ID).build();
+    private static final Node DATA = new NodeBuilder().withKey(NODE_KEY).setNodeId(NODE_ID).build();
 
     private static final InstanceIdentifier<Node> TEST_IID = InstanceIdentifier
             .create(NetworkTopology.class)
@@ -99,9 +99,9 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
     @Test
     public void testPutWithoutCallback() {
         final String operationDesc = "testPut";
-        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(
+        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().withKey(
                 new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
-        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(
+        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().withKey(
                 new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
         final Node data1 = new NodeBuilder(DATA).setSupportingNode(
@@ -131,9 +131,9 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
     @Test
     public void testMerge() {
         final String operationDesc = "testMerge";
-        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().setKey(
+        final SupportingNode supportingNodeBuilder1 = new SupportingNodeBuilder().withKey(
                 new SupportingNodeKey(new NodeId("id1"), TOPOLOGY_TEST)).build();
-        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().setKey(
+        final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().withKey(
                 new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
         final Node data1 = new NodeBuilder(DATA).setSupportingNode(

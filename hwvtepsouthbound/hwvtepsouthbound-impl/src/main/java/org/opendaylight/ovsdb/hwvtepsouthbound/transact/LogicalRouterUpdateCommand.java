@@ -58,11 +58,11 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
             final List<LogicalRouters> routerList) {
         for (LogicalRouters lrouter: routerList) {
             InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
-                    .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.getKey());
+                    .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.key());
             LOG.debug("Creating logical router named: {}", lrouter.getHwvtepNodeName());
 
             final Optional<LogicalRouters> operationalRouterOptional =
-                    getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.getKey());
+                    getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.key());
             LogicalRouter logicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     LogicalRouter.class);
             setDescription(logicalRouter, lrouter);

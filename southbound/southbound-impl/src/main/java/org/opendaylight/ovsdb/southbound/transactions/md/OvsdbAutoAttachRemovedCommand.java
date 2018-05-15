@@ -71,7 +71,7 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
     }
 
     private AutoattachKey getAutoAttachKeyToRemove(Node node, UUID autoAttachUuid) {
-        final List<Autoattach> autoAttachList = node.getAugmentation(OvsdbNodeAugmentation.class).getAutoattach();
+        final List<Autoattach> autoAttachList = node.augmentation(OvsdbNodeAugmentation.class).getAutoattach();
         if (autoAttachList == null || autoAttachList.isEmpty()) {
             return null;
         }

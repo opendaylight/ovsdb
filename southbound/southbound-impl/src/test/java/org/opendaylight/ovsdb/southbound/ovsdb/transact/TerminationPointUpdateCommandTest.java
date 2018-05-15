@@ -99,7 +99,7 @@ public class TerminationPointUpdateCommandTest {
         OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
         Node node = mock(Node.class);
-        when(node.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
+        when(node.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
         Optional<Node> optNode = Optional.of(node);
         when(state.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
 

@@ -93,7 +93,7 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         }
         HwvtepNodeName hwvtepName = new HwvtepNodeName(logicalSwitch.getName());
         lsBuilder.setHwvtepNodeName(hwvtepName);
-        lsBuilder.setKey(new LogicalSwitchesKey(hwvtepName));
+        lsBuilder.withKey(new LogicalSwitchesKey(hwvtepName));
         if (logicalSwitch.getTunnelKeyColumn().getData() != null
                 && !logicalSwitch.getTunnelKeyColumn().getData().isEmpty()) {
             lsBuilder.setTunnelKey(logicalSwitch.getTunnelKeyColumn().getData().iterator().next().toString());

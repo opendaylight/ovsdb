@@ -160,7 +160,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             return (InstanceIdentifier<Queues>) instanceIdentifierCodec.bindingDeserializerOrNull(
                     queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
         } else {
-            OvsdbNodeAugmentation node = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation node = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
             if (node.getQueues() != null && !node.getQueues().isEmpty()) {
                 for (Queues q : node.getQueues()) {
                     if (q.getQueueUuid().equals(new Uuid(queueUuid.toString()))) {

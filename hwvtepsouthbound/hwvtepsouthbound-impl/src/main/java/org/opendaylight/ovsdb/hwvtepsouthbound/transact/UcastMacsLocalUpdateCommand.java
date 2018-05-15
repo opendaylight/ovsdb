@@ -125,7 +125,7 @@ public class UcastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalUc
                         getOperationalState().getDataBroker()).readOptional(LogicalDatastoreType.CONFIGURATION, iid);
                 if (configLocatorOptional.isPresent()) {
                     HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                            configLocatorOptional.get().augmentation(HwvtepPhysicalLocatorAugmentation.class);
                     locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
                 } else {
                     LOG.warn("Create or update localUcastMac: No physical locator found in operational datastore!"

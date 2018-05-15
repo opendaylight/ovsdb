@@ -118,7 +118,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             if (switchIid.isPresent()) {
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-                tpBuilder.setKey(tpKey);
+                tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
                 InstanceIdentifier<TerminationPoint> tpPath = getInstanceIdentifier(switchIid.get(), portUpdate);
                 HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder =
@@ -180,7 +180,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 new FutureCallback<Optional<TerminationPoint>>() {
                     @Override
                     public void onSuccess(@Nonnull Optional<TerminationPoint> optionalConfigTp) {
-                        if (!optionalConfigTp.isPresent() || optionalConfigTp.get().getAugmentation(
+                        if (!optionalConfigTp.isPresent() || optionalConfigTp.get().augmentation(
                                 HwvtepPhysicalPortAugmentation.class) == null) {
                             //TODO port came with some vlan bindings clean them up use PortRemovedCommand
                             return;
@@ -196,7 +196,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                             PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(
                                     operState, Collections.EMPTY_LIST);
                             portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid,
-                                    Lists.newArrayList(configTp.getAugmentation(HwvtepPhysicalPortAugmentation.class)));
+                                    Lists.newArrayList(configTp.augmentation(HwvtepPhysicalPortAugmentation.class)));
                         });
                     }
 
@@ -261,7 +261,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     private VlanBindings createVlanBinding(Long key, UUID value) {
         VlanBindingsBuilder vbBuilder = new VlanBindingsBuilder();
         VlanBindingsKey vbKey = new VlanBindingsKey(new VlanId(key.intValue()));
-        vbBuilder.setKey(vbKey);
+        vbBuilder.withKey(vbKey);
         vbBuilder.setVlanIdKey(vbKey.getVlanIdKey());
         HwvtepLogicalSwitchRef switchRef = this.getLogicalSwitchRef(value);
         vbBuilder.setLogicalSwitchRef(switchRef);
@@ -293,7 +293,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
 
     private Optional<InstanceIdentifier<Node>> getTerminationPointSwitch(final ReadWriteTransaction transaction,
             Node node, String tpName) {
-        HwvtepGlobalAugmentation hwvtepNode = node.getAugmentation(HwvtepGlobalAugmentation.class);
+        HwvtepGlobalAugmentation hwvtepNode = node.augmentation(HwvtepGlobalAugmentation.class);
         List<Switches> switchNodes = hwvtepNode.getSwitches();
         for (Switches managedNodeEntry : switchNodes) {
             @SuppressWarnings("unchecked")
@@ -317,7 +317,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 && !portUpdate.getPortFaultStatusColumn().getData().isEmpty()) {
             List<PortFaultStatus> portFaultStatusLst = new ArrayList<>();
             for (String portFaultStatus : portUpdate.getPortFaultStatusColumn().getData()) {
-                portFaultStatusLst.add(new PortFaultStatusBuilder().setKey(new PortFaultStatusKey(portFaultStatus))
+                portFaultStatusLst.add(new PortFaultStatusBuilder().withKey(new PortFaultStatusKey(portFaultStatus))
                         .setPortFaultStatusKey(portFaultStatus).build());
             }
             tpAugmentationBuilder.setPortFaultStatus(portFaultStatusLst);

@@ -189,7 +189,7 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.whenNew(TerminationPointKey.class).withAnyArguments().thenReturn(tpKey);
         TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
         PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
-        when(tpBuilder.setKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
+        when(tpBuilder.withKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
         when(tpKey.getTpId()).thenReturn(mock(TpId.class));
         when(tpBuilder.setTpId(any(TpId.class))).thenReturn(tpBuilder);
         InstanceIdentifier<TerminationPoint> tpPath = mock(InstanceIdentifier.class);
@@ -352,7 +352,7 @@ public class OvsdbPortUpdateCommandTest {
     public void testGetTerminationPointBridge1() throws Exception {
         Node node = mock(Node.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
-        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
+        when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
         List<ManagedNodeEntry> managedNodes = new ArrayList<>();
         ManagedNodeEntry managedNodeEntry = mock(ManagedNodeEntry.class);
         managedNodes.add(managedNodeEntry);
@@ -371,7 +371,7 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
         PowerMockito.whenNew(TpId.class).withAnyArguments().thenReturn(mock(TpId.class));
         PowerMockito.whenNew(TerminationPointKey.class).withAnyArguments().thenReturn(mock(TerminationPointKey.class));
-        when(tpBuilder.setKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
+        when(tpBuilder.withKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
 
         List<TerminationPoint> terminationPointList = new ArrayList<>();
         TerminationPoint terminationPoint = mock(TerminationPoint.class);
@@ -379,7 +379,7 @@ public class OvsdbPortUpdateCommandTest {
         when(tpBuilder.build()).thenReturn(terminationPoint);
         when(managedNode.getTerminationPoint()).thenReturn(terminationPointList);
 
-        when(managedNode.getAugmentation(OvsdbBridgeAugmentation.class))
+        when(managedNode.augmentation(OvsdbBridgeAugmentation.class))
                 .thenReturn(mock(OvsdbBridgeAugmentation.class));
         TpId tpId = new TpId(TP_NAME);
         when(terminationPoint.getTpId()).thenReturn(tpId);

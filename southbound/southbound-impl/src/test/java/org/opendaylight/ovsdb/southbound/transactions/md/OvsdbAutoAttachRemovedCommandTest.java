@@ -96,7 +96,7 @@ public class OvsdbAutoAttachRemovedCommandTest {
         when(SouthboundMapper.createInstanceIdentifier(nodeId)).thenReturn(nodeIid);
 
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
         List<Autoattach> autoAttachList = new ArrayList<>();
         Autoattach aaEntry = mock(Autoattach.class);
         autoAttachList.add(aaEntry);

@@ -60,7 +60,7 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
             final DataObjectModification<Node> mod = change.getRootNode();
             Node deleted = getRemoved(mod);
             if (deleted != null) {
-                if (deleted.getAugmentation(HwvtepGlobalAugmentation.class) != null) {
+                if (deleted.augmentation(HwvtepGlobalAugmentation.class) != null) {
                     LOG.trace("Cancel config reconciliation for node {}", deleted.getKey());
                     hcm.stopConfigurationReconciliation(key);
                 }
@@ -73,12 +73,12 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
             if (node != null) {
-                PhysicalSwitchAugmentation physicalSwitch = node.getAugmentation(PhysicalSwitchAugmentation.class);
+                PhysicalSwitchAugmentation physicalSwitch = node.augmentation(PhysicalSwitchAugmentation.class);
                 if (physicalSwitch != null) {
                     HwvtepConnectionInstance connection =
                             hcm.getConnectionInstance(physicalSwitch);
                     if (connection != null) {
-                        LOG.trace("Reconcile config for node {}, IP : {}", node.getKey(),
+                        LOG.trace("Reconcile config for node {}, IP : {}", node.key(),
                                 connection.getConnectionInfo().getRemoteAddress());
                         hcm.reconcileConfigurations(connection, node);
                     }

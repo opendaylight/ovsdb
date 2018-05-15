@@ -75,7 +75,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
 
     InstanceIdentifier<RemoteMcastMacs> getMacIid(InstanceIdentifier<Node> connectionIId, Node connectionNode) {
         RemoteMcastMacsKey macsKey =
-                connectionNode.getAugmentation(HwvtepGlobalAugmentation.class).getRemoteMcastMacs().get(0).getKey();
+                connectionNode.augmentation(HwvtepGlobalAugmentation.class).getRemoteMcastMacs().get(0).getKey();
         InstanceIdentifier<RemoteMcastMacs> key = connectionIId.augmentation(HwvtepGlobalAugmentation.class)
                 .child(RemoteMcastMacs.class, macsKey);
         return key;

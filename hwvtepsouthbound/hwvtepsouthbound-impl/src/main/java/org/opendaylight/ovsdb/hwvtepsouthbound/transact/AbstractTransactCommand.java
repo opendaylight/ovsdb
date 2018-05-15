@@ -180,14 +180,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         //tobe removed as part of refactoring patch
     }
 
-    protected A getAugmentation(Node node) {
+    protected A augmentation(Node node) {
         if (node == null) {
             return null;
         }
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
         Class<? extends Augmentation<Node>> augType =
                 (Class<? extends Augmentation<Node>>) parameterizedType.getActualTypeArguments()[1];
-        Augmentation<Node> augmentation = node.getAugmentation(augType);
+        Augmentation<Node> augmentation = node.augmentation(augType);
         return (A) augmentation;
     }
 
@@ -196,7 +196,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected List<T> getData(Node node) {
-        A augmentation = getAugmentation(node);
+        A augmentation = augmentation(node);
         if (augmentation != null) {
             List<T> data = getData(augmentation);
             if (data != null) {

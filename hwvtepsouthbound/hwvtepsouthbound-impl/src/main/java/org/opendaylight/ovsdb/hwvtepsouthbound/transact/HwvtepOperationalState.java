@@ -114,7 +114,7 @@ public class HwvtepOperationalState {
                                   final Node psNode) {
         this(db, connectionInstance, changes);
         operationalNodes.put(connectionInstance.getInstanceIdentifier(), globalOperNode);
-        HwvtepGlobalAugmentation globalAugmentation = globalOperNode.getAugmentation(HwvtepGlobalAugmentation.class);
+        HwvtepGlobalAugmentation globalAugmentation = globalOperNode.augmentation(HwvtepGlobalAugmentation.class);
         if (globalAugmentation != null) {
             if (!HwvtepSouthboundUtil.isEmpty(globalAugmentation.getSwitches())) {
                 operationalNodes.put((InstanceIdentifier<Node>)
@@ -145,9 +145,9 @@ public class HwvtepOperationalState {
                 if (readNode.isPresent()) {
                     operationalNodes.put(entry.getKey(), readNode.get());
                     HwvtepGlobalAugmentation hgAugmentation =
-                            readNode.get().getAugmentation(HwvtepGlobalAugmentation.class);
+                            readNode.get().augmentation(HwvtepGlobalAugmentation.class);
                     PhysicalSwitchAugmentation psAugmentation =
-                            readNode.get().getAugmentation(PhysicalSwitchAugmentation.class);
+                            readNode.get().augmentation(PhysicalSwitchAugmentation.class);
                     if (hgAugmentation != null && hgAugmentation.getSwitches() != null) {
                         for (Switches pswitch : hgAugmentation.getSwitches()) {
                             @SuppressWarnings("unchecked")
@@ -184,7 +184,7 @@ public class HwvtepOperationalState {
         Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(HwvtepGlobalAugmentation.class));
+            return Optional.fromNullable(nodeOptional.get().augmentation(HwvtepGlobalAugmentation.class));
         }
         return Optional.absent();
     }
@@ -193,7 +193,7 @@ public class HwvtepOperationalState {
         Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(PhysicalSwitchAugmentation.class));
+            return Optional.fromNullable(nodeOptional.get().augmentation(PhysicalSwitchAugmentation.class));
         }
         return Optional.absent();
     }
@@ -266,7 +266,7 @@ public class HwvtepOperationalState {
             List<TerminationPoint> tpList = nodeOptional.get();
             for (TerminationPoint tp : tpList) {
                 HwvtepPhysicalPortAugmentation hppAugmentation =
-                        tp.getAugmentation(HwvtepPhysicalPortAugmentation.class);
+                        tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
                     return Optional.fromNullable(hppAugmentation);
                 }
@@ -283,7 +283,7 @@ public class HwvtepOperationalState {
             List<TerminationPoint> tpList = nodeOptional.get();
             for (TerminationPoint tp : tpList) {
                 HwvtepPhysicalLocatorAugmentation hppAugmentation =
-                        tp.getAugmentation(HwvtepPhysicalLocatorAugmentation.class);
+                        tp.augmentation(HwvtepPhysicalLocatorAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getDstIp().equals(dstIp)
                         && hppAugmentation.getEncapsulationType().equals(encapType)) {
                     return Optional.fromNullable(hppAugmentation);
@@ -297,7 +297,7 @@ public class HwvtepOperationalState {
             getPhysicalLocatorAugmentation(InstanceIdentifier<TerminationPoint> iid) {
         Optional<TerminationPoint> tp = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
         if (tp.isPresent()) {
-            return Optional.fromNullable(tp.get().getAugmentation(HwvtepPhysicalLocatorAugmentation.class));
+            return Optional.fromNullable(tp.get().augmentation(HwvtepPhysicalLocatorAugmentation.class));
         }
         return Optional.absent();
     }

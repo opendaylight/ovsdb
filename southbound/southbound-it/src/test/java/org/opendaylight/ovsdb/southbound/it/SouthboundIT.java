@@ -432,7 +432,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 (InstanceIdentifier)iid), OPERATIONAL_LISTENER);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         assertNotNull("The OvsdbNodeAugmentation cannot be null", ovsdbNodeAugmentation);
         schemaVersion = Version.fromString(ovsdbNodeAugmentation.getDbVersion());
         LOG.info("schemaVersion = {}", schemaVersion);
@@ -623,7 +623,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testDpdkSwitch() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        List<DatapathTypeEntry> datapathTypeEntries = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)
+        List<DatapathTypeEntry> datapathTypeEntries = ovsdbNode.augmentation(OvsdbNodeAugmentation.class)
                 .getDatapathTypeEntry();
         if (datapathTypeEntries == null) {
             LOG.info("DPDK not supported on this node.");
@@ -678,7 +678,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
                             for (TerminationPoint terminationPoint : terminationPoints) {
                                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
-                                        .getAugmentation(OvsdbTerminationPointAugmentation.class);
+                                        .augmentation(OvsdbTerminationPointAugmentation.class);
                                 if (ovsdbTerminationPointAugmentation.getName().equals(testPortname)) {
                                     Class<? extends InterfaceTypeBase> opPort = ovsdbTerminationPointAugmentation
                                             .getInterfaceType();
@@ -695,21 +695,21 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testOvsdbNodeOvsVersion() throws InterruptedException {
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
     }
 
     @Test
     public void testOvsdbNodeDbVersion() throws InterruptedException {
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getDbVersion());
     }
 
     @Test
     public void testOpenVSwitchOtherConfig() throws InterruptedException {
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeAugmentation.getOpenvswitchOtherConfigs();
         if (otherConfigsList != null) {
@@ -1218,7 +1218,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         InstanceIdentifier<Node> nodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         Node node = mdsalUtils.read(store, nodeIid);
         Assert.assertNotNull(node);
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         return ovsdbNodeAugmentation;
     }
@@ -1240,7 +1240,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                                               LogicalDatastoreType store) {
         Node bridgeNode = getBridgeNode(connectionInfo, bridgeName, store);
         Assert.assertNotNull(bridgeNode);
-        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
         Assert.assertNotNull(ovsdbBridgeAugmentation);
         return ovsdbBridgeAugmentation;
     }
@@ -1317,7 +1317,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         if (tpList == null) {
             return null;
         }
-        return tpList.get(index).getAugmentation(OvsdbTerminationPointAugmentation.class);
+        return tpList.get(index).augmentation(OvsdbTerminationPointAugmentation.class);
     }
 
     @Test
@@ -1349,7 +1349,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
             for (TerminationPoint terminationPoint : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                        terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     Long ifIndex = ovsdbTerminationPointAugmentation.getIfindex();
                     Assert.assertNotNull(ifIndex);
@@ -1387,7 +1387,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
             for (TerminationPoint terminationPoint : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                        terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
                     // if ephemeral port 45002 is in use, ofPort is set to 1
@@ -1433,7 +1433,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
             for (TerminationPoint terminationPoint : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                        terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
                     // if ephemeral port 45008 is in use, ofPort is set to 1
@@ -1532,7 +1532,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
                     portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                     TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
-                    tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testBridgeAndPortName)));
+                    tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(testBridgeAndPortName)));
                     tpUpdateBuilder.addAugmentation(
                             OvsdbTerminationPointAugmentation.class,
                             tpUpdateAugmentationBuilder.build());
@@ -1745,7 +1745,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
             OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation;
             for (TerminationPoint terminationPoint : terminationPoints) {
-                ovsdbTerminationPointAugmentation = terminationPoint.getAugmentation(
+                ovsdbTerminationPointAugmentation = terminationPoint.augmentation(
                         OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
@@ -1765,7 +1765,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
             portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
             TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
-            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+            tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
             tpUpdateBuilder.addAugmentation(
                     OvsdbTerminationPointAugmentation.class,
                     tpUpdateAugmentationBuilder.build());
@@ -1778,7 +1778,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             terminationPoints = terminationPointNode.getTerminationPoint();
             for (TerminationPoint terminationPoint : terminationPoints) {
-                ovsdbTerminationPointAugmentation = terminationPoint.getAugmentation(
+                ovsdbTerminationPointAugmentation = terminationPoint.augmentation(
                         OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
@@ -1818,7 +1818,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
                 for (TerminationPoint terminationPoint : terminationPoints) {
                     OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                            terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                            terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                     if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                         //test
                         Assert.assertTrue(ovsdbTerminationPointAugmentation.getVlanMode().equals(vlanMode));
@@ -1835,7 +1835,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+                tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
                 tpUpdateBuilder.addAugmentation(
                         OvsdbTerminationPointAugmentation.class,
                         tpUpdateAugmentationBuilder.build());
@@ -1849,7 +1849,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 terminationPoints = terminationPointNode.getTerminationPoint();
                 for (TerminationPoint terminationPoint : terminationPoints) {
                     OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                            terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                            terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                     if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                         //test
                         Assert.assertEquals(updatedVlanMode, ovsdbTerminationPointAugmentation.getVlanMode());
@@ -1908,7 +1908,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
                 for (TerminationPoint terminationPoint : terminationPoints) {
                     OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                            terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                            terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                     if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                         List<Trunks> actualTrunks = ovsdbTerminationPointAugmentation.getTrunks();
                         for (Trunks trunk : trunks) {
@@ -1928,7 +1928,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
-                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+                tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
                 tpUpdateBuilder.addAugmentation(
                         OvsdbTerminationPointAugmentation.class,
                         tpUpdateAugmentationBuilder.build());
@@ -1942,7 +1942,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 terminationPoints = terminationPointNode.getTerminationPoint();
                 for (TerminationPoint terminationPoint : terminationPoints) {
                     OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                            terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                            terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                     if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                         //test
                         Assert.assertEquals(updatedTrunks, ovsdbTerminationPointAugmentation.getTrunks());
@@ -1991,7 +1991,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     new OvsdbTerminationPointAugmentationBuilder();
             tpUpdateAugmentationBuilder.setName(portName);
             TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
-            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+            tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
             tpUpdateBuilder.addAugmentation(
                     OvsdbTerminationPointAugmentation.class,
                     tpUpdateAugmentationBuilder.build());
@@ -2094,7 +2094,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 final NodeBuilder bridgeUpdateNodeBuilder = new NodeBuilder();
                 final Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
                 bridgeUpdateNodeBuilder.setNodeId(bridgeNode.getNodeId());
-                bridgeUpdateNodeBuilder.setKey(bridgeNode.getKey());
+                bridgeUpdateNodeBuilder.withKey(bridgeNode.key());
                 bridgeUpdateNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,
                         bridgeUpdateAugmentationBuilder.build());
                 Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,

@@ -64,7 +64,7 @@ public class QueueRemovedCommand implements TransactCommand {
                 if (origQueues != null && !origQueues.isEmpty()) {
                     for (Queues origQueue : origQueues) {
                         OvsdbNodeAugmentation operNode =
-                                state.getBridgeNode(ovsdbNodeIid).get().getAugmentation(
+                                state.getBridgeNode(ovsdbNodeIid).get().augmentation(
                                         OvsdbNodeAugmentation.class);
                         List<Queues> operQueues = operNode.getQueues();
 

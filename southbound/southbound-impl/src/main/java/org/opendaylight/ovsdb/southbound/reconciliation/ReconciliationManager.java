@@ -151,7 +151,7 @@ public class ReconciliationManager implements AutoCloseable {
         Preconditions.checkNotNull(bridgeNodes, "Bridge Node list must not be null");
         if (!bridgeNodes.isEmpty()) {
             for (Node node : bridgeNodes) {
-                bridgeNodeCache.put(node.getKey(),
+                bridgeNodeCache.put(node.key(),
                         new NodeConnectionMetadata(node, connectionManager, connectionInstance));
             }
             registerBridgeCreatedDataTreeChangeListener();

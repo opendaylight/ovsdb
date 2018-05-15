@@ -85,7 +85,7 @@ public class BridgeOperationalState {
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getBridgeNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class));
+            return Optional.fromNullable(nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class));
         }
         return Optional.absent();
     }
@@ -112,7 +112,7 @@ public class BridgeOperationalState {
     public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(InstanceIdentifier<?> iid) {
         Optional<TerminationPoint> tpOptional = getBridgeTerminationPoint(iid);
         if (tpOptional.isPresent()) {
-            return Optional.fromNullable(tpOptional.get().getAugmentation(OvsdbTerminationPointAugmentation.class));
+            return Optional.fromNullable(tpOptional.get().augmentation(OvsdbTerminationPointAugmentation.class));
         }
         return Optional.absent();
     }

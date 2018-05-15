@@ -139,7 +139,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
-            OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.get().getAugmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.get().augmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null) {
                 final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation.getManagedNodeEntry();
                 for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {

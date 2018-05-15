@@ -87,7 +87,7 @@ public class BridgeOperationalStateTest {
         Optional<Node> optNode = Optional.of(node);
         when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
         OvsdbBridgeAugmentation ovsdbBriAug = mock(OvsdbBridgeAugmentation.class);
-        when(node.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBriAug);
+        when(node.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBriAug);
         Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(iid);
         assertNotNull(ovsdbBriAugOptional);
         assertTrue(ovsdbBriAugOptional.get() instanceof OvsdbBridgeAugmentation);
@@ -135,7 +135,7 @@ public class BridgeOperationalStateTest {
         Optional<TerminationPoint> termPntOptional = Optional.of(termPoint);
         when(briOperationState.getBridgeTerminationPoint(any(InstanceIdentifier.class))).thenReturn(termPntOptional);
         OvsdbTerminationPointAugmentation ovsdbTermPntAug = mock(OvsdbTerminationPointAugmentation.class);
-        when(termPoint.getAugmentation(OvsdbTerminationPointAugmentation.class)).thenReturn(ovsdbTermPntAug);
+        when(termPoint.augmentation(OvsdbTerminationPointAugmentation.class)).thenReturn(ovsdbTermPntAug);
         Optional<OvsdbTerminationPointAugmentation> ovsdbTermPointOpt = briOperationState
                 .getOvsdbTerminationPointAugmentation(iid);
         assertNotNull(ovsdbTermPointOpt);

@@ -134,7 +134,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             if (bridgeIid.isPresent()) {
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-                tpBuilder.setKey(tpKey);
+                tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
                 InstanceIdentifier<TerminationPoint> tpPath =
                         getInstanceIdentifier(bridgeIid.get(), portUpdate.getValue());
@@ -164,7 +164,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             if (bridgeIid.isPresent()) {
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(interfaceName));
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-                tpBuilder.setKey(tpKey);
+                tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
                 OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
@@ -233,7 +233,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     @SuppressWarnings("unchecked")
     private Optional<InstanceIdentifier<Node>> getTerminationPointBridge(
             final ReadWriteTransaction transaction, Node node, String tpName) {
-        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
         List<ManagedNodeEntry> managedNodes = ovsdbNode.getManagedNodeEntry();
         TpId tpId = new TpId(tpName);
         for (ManagedNodeEntry managedNodeEntry : managedNodes) {
@@ -353,7 +353,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             UUID qosUuid = qosUuidCol.iterator().next();
 
             NodeId nodeId = node.getNodeId();
-            OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
 
             // Delete an older QoS entry
             if (portOldRows.containsKey(port.getKey()) && portOldRows.get(port.getKey()).getQosColumn() != null) {
@@ -378,7 +378,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 List<QosEntry> qosList = new ArrayList<>();
                 OvsdbQosRef qosRef = new OvsdbQosRef(qosIid);
                 qosList.add(new QosEntryBuilder()
-                    .setKey(new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)))
+                    .withKey(new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)))
                     .setQosRef(qosRef).build());
                 ovsdbTerminationPointBuilder.setQosEntry(qosList);
             }
@@ -525,7 +525,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 if (optionsKeyString != null && optionsValueString != null) {
                     OptionsKey optionsKey = new OptionsKey(optionsKeyString);
                     options.add(new OptionsBuilder()
-                        .setKey(optionsKey)
+                        .withKey(optionsKey)
                         .setValue(optionsValueString).build());
                 }
             }
@@ -564,7 +564,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     String interfaceLldpValueString = entry.getValue();
                     if (interfaceLldpKeyString != null && interfaceLldpValueString != null) {
                         interfaceLldpList.add(new InterfaceLldpBuilder()
-                                .setKey(new InterfaceLldpKey(interfaceLldpKeyString))
+                                .withKey(new InterfaceLldpKey(interfaceLldpKeyString))
                                 .setLldpKey(interfaceLldpKeyString)
                                 .setLldpValue(interfaceLldpValueString)
                                 .build());
@@ -608,7 +608,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     String interfaceBfdStatusValueString = entry.getValue();
                     if (interfaceBfdStatusKeyString != null && interfaceBfdStatusValueString != null) {
                         interfaceBfdStatusList.add(new InterfaceBfdStatusBuilder()
-                                .setKey(new InterfaceBfdStatusKey(interfaceBfdStatusKeyString))
+                                .withKey(new InterfaceBfdStatusKey(interfaceBfdStatusKeyString))
                                 .setBfdStatusKey(interfaceBfdStatusKeyString)
                                 .setBfdStatusValue(interfaceBfdStatusValueString)
                                 .build());
@@ -633,7 +633,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     String interfaceBfdValueString = entry.getValue();
                     if (interfaceBfdKeyString != null && interfaceBfdValueString != null) {
                         interfaceBfdList.add(new InterfaceBfdBuilder()
-                                .setKey(new InterfaceBfdKey(interfaceBfdKeyString))
+                                .withKey(new InterfaceBfdKey(interfaceBfdKeyString))
                                 .setBfdKey(interfaceBfdKeyString)
                                 .setBfdValue(interfaceBfdValueString)
                                 .build());

@@ -121,7 +121,7 @@ public class BridgeConfigReconciliationTaskTest {
 
         when((InstanceIdentifier<Node>)ovsdbNodeRef.getValue()).thenReturn(iid);
         OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(bridgeName);
-        when(bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
+        when(bridgeNode.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
         when(ovsdbBridgeAugmentation.getBridgeName()).thenReturn(ovsdbBridgeName);
         ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
         ProtocolEntryKey protocolEntryKey = mock(ProtocolEntryKey.class);
@@ -141,7 +141,7 @@ public class BridgeConfigReconciliationTaskTest {
     }
 
     private Map<InstanceIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
-        OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
 
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =

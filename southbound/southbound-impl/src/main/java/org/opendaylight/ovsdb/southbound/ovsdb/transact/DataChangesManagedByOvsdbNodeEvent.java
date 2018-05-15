@@ -125,7 +125,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         Optional<?> bridgeNode =  SouthboundUtil.readNode(db.newReadWriteTransaction(),nodeEntryIid);
         if (bridgeNode.isPresent() && bridgeNode.get() instanceof Node) {
             Node node = (Node)bridgeNode.get();
-            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge != null && bridge.getManagedBy() != null) {
                 return bridge.getManagedBy().getValue();
             }
@@ -146,7 +146,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         // If we are contained in a bridge managed by this iid
         if (dataObject != null && dataObject instanceof Node) {
             Node node = (Node)dataObject;
-            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge != null && bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(this.iid)) {
                 return bridge.getManagedBy().getValue();
             }

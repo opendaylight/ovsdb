@@ -90,12 +90,12 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                         final List<Node> tpChanges = new ArrayList<>();
                         for (Node node : topology.getNode()) {
                             LOG.debug("Reconcile Configuration for node {}", node.getNodeId());
-                            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+                            OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
                             if (bridge != null && bridge.getManagedBy() != null
                                     && bridge.getManagedBy().getValue().equals(ndIid)) {
                                 brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
                                 tpChanges.add(node);
-                            } else if (node.getKey().getNodeId().getValue().startsWith(
+                            } else if (node.key().getNodeId().getValue().startsWith(
                                     nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
                                     && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
                                 tpChanges.add(node);

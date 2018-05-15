@@ -165,7 +165,7 @@ public class OvsdbControllerUpdateCommandTest {
         Optional<Node> ovsdbNode = Optional.of(node);
         when(SouthboundUtil.readNode(transaction, connectionIId)).thenReturn(ovsdbNode);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
         List<ManagedNodeEntry> managedNodeEntries = new ArrayList<>();
         ManagedNodeEntry managedNodeEntry = mock(ManagedNodeEntry.class);

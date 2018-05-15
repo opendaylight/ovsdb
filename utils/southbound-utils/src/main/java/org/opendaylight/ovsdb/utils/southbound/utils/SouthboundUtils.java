@@ -225,7 +225,7 @@ public class SouthboundUtils {
         InstanceIdentifier<TerminationPoint> terminationPointPath = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
-                .child(Node.class,node.getKey())
+                .child(Node.class,node.key())
                 .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
 
         LOG.debug("Termination point InstanceIdentifier generated : {}",terminationPointPath);
@@ -256,7 +256,7 @@ public class SouthboundUtils {
     }
 
     public OvsdbNodeAugmentation extractOvsdbNode(Node node) {
-        return node.getAugmentation(OvsdbNodeAugmentation.class);
+        return node.augmentation(OvsdbNodeAugmentation.class);
     }
 
     public static IpAddress createIpAddress(InetAddress address) {
@@ -398,7 +398,7 @@ public class SouthboundUtils {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
         Node bridgeNode = getBridgeNode(connectionInfo, bridgeName, store);
         if (bridgeNode != null) {
-            ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+            ovsdbBridgeAugmentation = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
         }
         return ovsdbBridgeAugmentation;
     }
@@ -451,21 +451,21 @@ public class SouthboundUtils {
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
-                    createInstanceIdentifier(node.getKey(), name);
+                    createInstanceIdentifier(node.key(), name);
             bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
         }
         return bridgeNode;
     }
 
     public OvsdbNodeAugmentation extractNodeAugmentation(Node node) {
-        return node.getAugmentation(OvsdbNodeAugmentation.class);
+        return node.augmentation(OvsdbNodeAugmentation.class);
     }
 
     public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
         if (node == null) {
             return null;
         }
-        return node.getAugmentation(OvsdbBridgeAugmentation.class);
+        return node.augmentation(OvsdbBridgeAugmentation.class);
     }
 
     public Node readOvsdbNode(Node bridgeNode) {
@@ -606,7 +606,7 @@ public class SouthboundUtils {
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-            InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+            InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.key(), bridgeName);
             NodeId bridgeNodeId = createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
@@ -626,7 +626,7 @@ public class SouthboundUtils {
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
             otherConfigs.add(bridgeOtherConfigsBuilder.build());
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
-            setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
+            setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.key());
             if (dpType != null) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
             }
@@ -671,7 +671,7 @@ public class SouthboundUtils {
         LOG.debug("setBridgeController: ovsdbNode: {}, bridgeNode: {}, controller(s): {}",
                 ovsdbNode, bridgeName, controllers);
 
-        InstanceIdentifier<Node> bridgeNodeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+        InstanceIdentifier<Node> bridgeNodeIid = createInstanceIdentifier(ovsdbNode.key(), bridgeName);
         Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
         if (bridgeNode == null) {
             LOG.info("setBridgeController could not find bridge in configuration {}", bridgeNodeIid);
@@ -706,7 +706,7 @@ public class SouthboundUtils {
 
         augBuilder.setControllerEntry(newControllerEntries);
         nodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, augBuilder.build());
-        InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
+        InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.key(), bridgeName);
         return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, nodeBuilder.build());
     }
 
@@ -737,7 +737,7 @@ public class SouthboundUtils {
             List<Options> optionsList = new ArrayList<>();
             for (Map.Entry<String, String> entry : options.entrySet()) {
                 OptionsBuilder optionsBuilder = new OptionsBuilder();
-                optionsBuilder.setKey(new OptionsKey(entry.getKey()));
+                optionsBuilder.withKey(new OptionsKey(entry.getKey()));
                 optionsBuilder.setOption(entry.getKey());
                 optionsBuilder.setValue(entry.getValue());
                 optionsList.add(optionsBuilder.build());
@@ -749,7 +749,7 @@ public class SouthboundUtils {
             List<InterfaceExternalIds> externalIdsList = new ArrayList<>();
             for (Map.Entry<String, String> entry : externalIds.entrySet()) {
                 InterfaceExternalIdsBuilder interfaceExternalIdsBuilder = new InterfaceExternalIdsBuilder();
-                interfaceExternalIdsBuilder.setKey(new InterfaceExternalIdsKey(entry.getKey()));
+                interfaceExternalIdsBuilder.withKey(new InterfaceExternalIdsKey(entry.getKey()));
                 interfaceExternalIdsBuilder.setExternalIdKey(entry.getKey());
                 interfaceExternalIdsBuilder.setExternalIdValue(entry.getValue());
                 externalIdsList.add(interfaceExternalIdsBuilder.build());
@@ -759,7 +759,7 @@ public class SouthboundUtils {
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
         /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
         return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
@@ -781,7 +781,7 @@ public class SouthboundUtils {
         List<Options> optionsList = new ArrayList<>();
         for (Map.Entry<String, String> entry : options.entrySet()) {
             OptionsBuilder optionsBuilder = new OptionsBuilder();
-            optionsBuilder.setKey(new OptionsKey(entry.getKey()));
+            optionsBuilder.withKey(new OptionsKey(entry.getKey()));
             optionsBuilder.setOption(entry.getKey());
             optionsBuilder.setValue(entry.getValue());
             optionsList.add(optionsBuilder.build());
@@ -790,7 +790,7 @@ public class SouthboundUtils {
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
         /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
         return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
@@ -806,7 +806,7 @@ public class SouthboundUtils {
             tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
+        tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
         return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
@@ -974,7 +974,7 @@ public class SouthboundUtils {
     }
 
     public String getDatapathId(Node node) {
-        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.augmentation(OvsdbBridgeAugmentation.class);
         return getDatapathId(ovsdbBridgeAugmentation);
     }
 
@@ -987,7 +987,7 @@ public class SouthboundUtils {
     }
 
     public String extractBridgeName(Node node) {
-        return node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
+        return node.augmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
     }
 
     public boolean isBridgeOnOvsdbNode(Node ovsdbNode, String bridgeName) {
@@ -1011,10 +1011,10 @@ public class SouthboundUtils {
     public OvsdbBridgeAugmentation getBridgeFromConfig(Node node, String bridge) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
         InstanceIdentifier<Node> bridgeIid =
-                createInstanceIdentifier(node.getKey(), bridge);
+                createInstanceIdentifier(node.key(), bridge);
         Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, bridgeIid);
         if (bridgeNode != null) {
-            ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+            ovsdbBridgeAugmentation = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
         }
         return ovsdbBridgeAugmentation;
     }
@@ -1062,7 +1062,7 @@ public class SouthboundUtils {
     }
 
     public OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {
-        if (bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+        if (bridgeNode.augmentation(OvsdbBridgeAugmentation.class) != null) {
             List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(bridgeNode);
             for (OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation : tpAugmentations) {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
@@ -1083,7 +1083,7 @@ public class SouthboundUtils {
         if (terminationPoints != null && !terminationPoints.isEmpty()) {
             for (TerminationPoint tp : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation != null) {
                     tpAugmentations.add(ovsdbTerminationPointAugmentation);
                 }
@@ -1147,11 +1147,11 @@ public class SouthboundUtils {
      * @return the value for key or null if key not found
      */
     public String getOpenvswitchOtherConfig(Node node, String key) {
-        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
         if (ovsdbNode == null) {
             Node nodeFromReadOvsdbNode = readOvsdbNode(node);
             if (nodeFromReadOvsdbNode != null) {
-                ovsdbNode = nodeFromReadOvsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                ovsdbNode = nodeFromReadOvsdbNode.augmentation(OvsdbNodeAugmentation.class);
             }
         }
 
@@ -1169,7 +1169,7 @@ public class SouthboundUtils {
     public static TerminationPoint getTerminationPointByExternalId(final Node bridgeNode, final String interfaceName) {
         if (bridgeNode.getTerminationPoint() != null) {
             for (TerminationPoint tp : bridgeNode.getTerminationPoint()) {
-                OvsdbTerminationPointAugmentation ovsdbTp = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                OvsdbTerminationPointAugmentation ovsdbTp = tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 String externalIdValue = getExternalInterfaceIdValue(ovsdbTp);
                 if (externalIdValue != null && externalIdValue.equals(interfaceName)) {
                     LOG.debug("Found matching termination point with iface-id {} on bridgeNode {}, returning tp {}",

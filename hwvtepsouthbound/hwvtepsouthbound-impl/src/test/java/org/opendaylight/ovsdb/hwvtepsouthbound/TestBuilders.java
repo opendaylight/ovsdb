@@ -109,7 +109,7 @@ public final class TestBuilders {
         TerminationPointKey tpKey = new TerminationPointKey(new TpId("vxlan_over_ipv4:" + ip));
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         if (nodeIid != null) {
-            tpBuilder.setKey(tpKey);
+            tpBuilder.withKey(tpKey);
             tpBuilder.setTpId(tpKey.getTpId());
             HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder =
                     new HwvtepPhysicalLocatorAugmentationBuilder();
@@ -125,7 +125,7 @@ public final class TestBuilders {
         String logicalSwitch = keys[0];
         String tunnelKey = keys[1];
         LogicalSwitchesBuilder logicalSwitchesBuilder = new LogicalSwitchesBuilder();
-        logicalSwitchesBuilder.setKey(new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch)));
+        logicalSwitchesBuilder.withKey(new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch)));
         logicalSwitchesBuilder.setHwvtepNodeName(new HwvtepNodeName(logicalSwitch));
         logicalSwitchesBuilder.setTunnelKey(tunnelKey);
         Uuid uuid = getUUid(logicalSwitch);

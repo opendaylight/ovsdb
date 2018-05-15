@@ -69,7 +69,7 @@ public class TerminationPointDeleteCommand implements TransactCommand {
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
             Node originalNode = originalNodes.get(removedTpIid.firstIdentifierOf(Node.class));
             OvsdbBridgeAugmentation originalOvsdbBridgeAugmentation =
-                    originalNode.getAugmentation(OvsdbBridgeAugmentation.class);
+                    originalNode.augmentation(OvsdbBridgeAugmentation.class);
             String bridgeName = null;
             if (originalOvsdbBridgeAugmentation != null) {
                 bridgeName = originalOvsdbBridgeAugmentation.getBridgeName().getValue();

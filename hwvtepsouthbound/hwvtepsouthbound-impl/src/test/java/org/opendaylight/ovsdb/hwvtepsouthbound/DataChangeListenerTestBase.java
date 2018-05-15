@@ -289,7 +289,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
             for (LogicalSwitches ls : logicalSwitches) {
                 InstanceIdentifier<LogicalSwitches> key =
-                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, ls.getKey());
+                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, ls.key());
                 tx.delete(logicalDatastoreType, key);
             }
         }
@@ -300,7 +300,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             List<RemoteUcastMacs> macs = TestBuilders.addRemoteUcastMacs(nodeIid, builder, data);
             for (RemoteUcastMacs mac : macs) {
                 InstanceIdentifier<RemoteUcastMacs> key =
-                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, mac.getKey());
+                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, mac.key());
                 tx.delete(logicalDatastoreType, key);
             }
         }
@@ -308,7 +308,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             List<RemoteMcastMacs> macs = TestBuilders.addRemoteMcastMacs(nodeIid, builder, data);
             for (RemoteMcastMacs mac : macs) {
                 InstanceIdentifier<RemoteMcastMacs> key =
-                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, mac.getKey());
+                        nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, mac.key());
                 tx.delete(logicalDatastoreType, key);
             }
         }

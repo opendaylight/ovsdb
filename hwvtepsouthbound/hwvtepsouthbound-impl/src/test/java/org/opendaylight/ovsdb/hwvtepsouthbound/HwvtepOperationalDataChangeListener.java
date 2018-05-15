@@ -116,19 +116,19 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         if (LogicalSwitches.class == childClass) {
             LogicalSwitches ls = (LogicalSwitches)data;
             instanceIdentifier = key.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
-                    ls.getKey());
+                    ls.key());
         } else if (org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology
                 .topology.node.TerminationPoint.class == childClass) {
             TerminationPoint tp = (TerminationPoint)data;
-            instanceIdentifier = key.child(TerminationPoint.class, tp.getKey());
+            instanceIdentifier = key.child(TerminationPoint.class, tp.key());
         } else if (RemoteUcastMacs.class == childClass) {
             RemoteUcastMacs mac = (RemoteUcastMacs)data;
             instanceIdentifier = key.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class,
-                    mac.getKey());
+                    mac.key());
         } else if (RemoteMcastMacs.class ==  childClass) {
             RemoteMcastMacs mac = (RemoteMcastMacs)data;
             instanceIdentifier = key.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class,
-                    mac.getKey());
+                    mac.key());
         }
         return instanceIdentifier;
     }

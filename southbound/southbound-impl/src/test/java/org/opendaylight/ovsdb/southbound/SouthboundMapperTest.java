@@ -382,12 +382,12 @@ public class SouthboundMapperTest {
         List<ManagerEntry> managerEntriesCreated = new ArrayList<>();
 
         //ovsdbNodeAugmentation is null
-        when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(null);
+        when(ovsdbNode.augmentation(OvsdbNodeAugmentation.class)).thenReturn(null);
         assertEquals(managerEntriesCreated, SouthboundMapper.createManagerEntries(ovsdbNode, updatedManagerRows));
 
         //ovsdbNodeAugmentation not null
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(ovsdbNode.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
         List<ManagerEntry> managerEntries = new ArrayList<>();
         ManagerEntry managerEntry = mock(ManagerEntry.class);

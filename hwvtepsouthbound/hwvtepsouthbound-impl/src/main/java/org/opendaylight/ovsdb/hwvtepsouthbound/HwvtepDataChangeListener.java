@@ -116,7 +116,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             final DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
             if (node != null) {
-                HwvtepGlobalAugmentation hwvtepGlobal = node.getAugmentation(HwvtepGlobalAugmentation.class);
+                HwvtepGlobalAugmentation hwvtepGlobal = node.augmentation(HwvtepGlobalAugmentation.class);
                 // We can only connect if user configured connection info
                 if (hwvtepGlobal != null && hwvtepGlobal.getConnectionInfo() != null) {
                     ConnectionInfo connection = hwvtepGlobal.getConnectionInfo();
@@ -143,8 +143,8 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             Node updated = getUpdated(mod);
             if (updated != null) {
                 Node original = getOriginal(mod);
-                HwvtepGlobalAugmentation hgUpdated = updated.getAugmentation(HwvtepGlobalAugmentation.class);
-                HwvtepGlobalAugmentation hgOriginal = original.getAugmentation(HwvtepGlobalAugmentation.class);
+                HwvtepGlobalAugmentation hgUpdated = updated.augmentation(HwvtepGlobalAugmentation.class);
+                HwvtepGlobalAugmentation hgOriginal = original.augmentation(HwvtepGlobalAugmentation.class);
                 // Check if user has updated connection information
                 if (hgUpdated != null && hgOriginal != null && hgUpdated.getConnectionInfo() != null
                                 && !hgUpdated.getConnectionInfo().equals(hgOriginal.getConnectionInfo())) {
@@ -187,7 +187,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             final DataObjectModification<Node> mod = change.getRootNode();
             Node deleted = getRemoved(mod);
             if (deleted != null) {
-                HwvtepGlobalAugmentation hgDeleted = deleted.getAugmentation(HwvtepGlobalAugmentation.class);
+                HwvtepGlobalAugmentation hgDeleted = deleted.augmentation(HwvtepGlobalAugmentation.class);
                 if (hgDeleted != null) {
                     try {
                         hcm.disconnect(hgDeleted);
@@ -275,7 +275,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                     result.get(connection).add(change);
                 }
             } else {
-                LOG.warn("Failed to get the connection of changed node: {}", node.getKey().getNodeId().getValue());
+                LOG.warn("Failed to get the connection of changed node: {}", node.key().getNodeId().getValue());
             }
         }
         LOG.trace("Connection Change Map: {}", result);

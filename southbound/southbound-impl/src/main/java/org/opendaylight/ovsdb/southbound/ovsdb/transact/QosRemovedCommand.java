@@ -66,7 +66,7 @@ public class QosRemovedCommand implements TransactCommand {
                 if (origQosEntries != null && !origQosEntries.isEmpty()) {
                     for (QosEntries origQosEntry : origQosEntries) {
                         OvsdbNodeAugmentation operNode =
-                                state.getBridgeNode(ovsdbNodeIid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                                state.getBridgeNode(ovsdbNodeIid).get().augmentation(OvsdbNodeAugmentation.class);
                         List<QosEntries> operQosEntries = operNode.getQosEntries();
 
                         boolean found = false;

@@ -201,7 +201,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         try {
             Optional<Node> nodeOptional = future.get();
             if (nodeOptional.isPresent()) {
-                operNode = nodeOptional.get().getAugmentation(OvsdbNodeAugmentation.class);
+                operNode = nodeOptional.get().augmentation(OvsdbNodeAugmentation.class);
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Error reading from datastore", e);

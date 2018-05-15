@@ -73,7 +73,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                       final InstanceIdentifier<Node> nodeIid, final List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac : macList) {
             InstanceIdentifier<RemoteMcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                    .child(RemoteMcastMacs.class, mac.getKey());
+                    .child(RemoteMcastMacs.class, mac.key());
             onConfigUpdate(transaction, nodeIid, mac, macKey);
         }
     }
@@ -120,7 +120,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
 
     @Override
     protected boolean areEqual(RemoteMcastMacs macs1, RemoteMcastMacs macs2) {
-        return macs1.getKey().equals(macs2.getKey()) && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
+        return macs1.key().equals(macs2.key()) && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
     }
 
     @Override

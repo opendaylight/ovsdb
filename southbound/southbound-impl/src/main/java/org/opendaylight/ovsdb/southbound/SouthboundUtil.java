@@ -61,7 +61,7 @@ public final class SouthboundUtil {
                     if (node instanceof OvsdbNodeAugmentation) {
                         ovsdbNode = (OvsdbNodeAugmentation) node;
                     } else if (node != null) {
-                        ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+                        ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
                     }
                     if (ovsdbNode != null) {
                         return Optional.of(ovsdbNode);
@@ -123,7 +123,7 @@ public final class SouthboundUtil {
     public static String getControllerTarget(Node ovsdbNode) {
         String target = null;
         String ipAddr = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
         LOG.info("connectionInfo: {}", connectionInfo);
         if (connectionInfo != null && connectionInfo.getLocalIp() != null) {

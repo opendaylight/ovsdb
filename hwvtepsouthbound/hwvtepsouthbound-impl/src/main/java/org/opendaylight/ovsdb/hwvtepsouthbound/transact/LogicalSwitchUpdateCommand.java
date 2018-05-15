@@ -57,7 +57,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                                      final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {
             InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, lswitch.getKey());
+                    .child(LogicalSwitches.class, lswitch.key());
             onConfigUpdate(transaction, nodeIid, lswitch, lsKey);
         }
     }
@@ -148,6 +148,6 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
 
     @Override
     protected boolean areEqual(LogicalSwitches sw1, LogicalSwitches sw2) {
-        return sw1.getKey().equals(sw2.getKey()) && Objects.equals(sw1.getTunnelKey(), sw2.getTunnelKey());
+        return sw1.key().equals(sw2.key()) && Objects.equals(sw1.getTunnelKey(), sw2.getTunnelKey());
     }
 }

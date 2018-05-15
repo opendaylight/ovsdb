@@ -90,12 +90,12 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                         final List<Node> tpChanges = new ArrayList<>();
                         for (Node node : topology.getNode()) {
                             LOG.debug("Reconcile Configuration for node {}", node.getNodeId());
-                            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+                            OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
                             if (bridge != null && bridge.getManagedBy() != null
                                     && bridge.getManagedBy().getValue().equals(ndIid)) {
                                 brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
                                 tpChanges.add(node);
-                            } else if (node.getKey().getNodeId().getValue().startsWith(
+                            } else if (node.key().getNodeId().getValue().startsWith(
                                     nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
                                     && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
                                 tpChanges.add(node);
@@ -136,7 +136,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             for (ProtocolEntry protocol : ovsdbBridge.getProtocolEntry()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
                     KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
-                            ovsdbBridgeIid.child(ProtocolEntry.class, protocol.getKey());
+                            ovsdbBridgeIid.child(ProtocolEntry.class, protocol.key());
                     changes.put(protocolIid, protocol);
                 } else {
                     throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
@@ -147,7 +147,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         if (ovsdbBridge.getControllerEntry() != null) {
             for (ControllerEntry controller : ovsdbBridge.getControllerEntry()) {
                 KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
-                        ovsdbBridgeIid.child(ControllerEntry.class, controller.getKey());
+                        ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
                 changes.put(controllerIid, controller);
             }
         }

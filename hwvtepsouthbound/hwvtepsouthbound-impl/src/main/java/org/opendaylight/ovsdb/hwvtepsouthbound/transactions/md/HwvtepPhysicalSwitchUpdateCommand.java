@@ -115,8 +115,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
 
     private InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp, final InstanceIdentifier<Node> psIid) {
         IpAddress ip = new IpAddress(tunnelIp.toCharArray());
-        TunnelIps tunnelIps = new TunnelIpsBuilder().setKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
-        return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.getKey());
+        TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
+        return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.key());
     }
 
     private void updateTunnelIps(@Nonnull final PhysicalSwitch newPSwitch, @Nullable final PhysicalSwitch oldPSwitch,
@@ -137,7 +137,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         for (String tunnelIp : addedTunnelIps) {
             IpAddress ip = new IpAddress(tunnelIp.toCharArray());
             InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
-            TunnelIps tunnelIps = new TunnelIpsBuilder().setKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
+            TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
             transaction.put(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier, tunnelIps, true);
         }
     }
@@ -192,7 +192,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             for (String mgmtIp : phySwitch.getManagementIpsColumn().getData()) {
                 IpAddress ip = new IpAddress(mgmtIp.toCharArray());
                 mgmtIps.add(
-                        new ManagementIpsBuilder().setKey(new ManagementIpsKey(ip)).setManagementIpsKey(ip).build());
+                        new ManagementIpsBuilder().withKey(new ManagementIpsKey(ip)).setManagementIpsKey(ip).build());
             }
             psAugmentationBuilder.setManagementIps(mgmtIps);
         }
@@ -259,7 +259,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             List<SwitchFaultStatus> switchFaultStatusLst = new ArrayList<>();
             for (String switchFaultStatus : phySwitch.getSwitchFaultStatusColumn().getData()) {
                 switchFaultStatusLst
-                        .add(new SwitchFaultStatusBuilder().setKey(new SwitchFaultStatusKey(switchFaultStatus))
+                        .add(new SwitchFaultStatusBuilder().withKey(new SwitchFaultStatusKey(switchFaultStatus))
                                 .setSwitchFaultStatusKey(switchFaultStatus).build());
             }
             psAugmentationBuilder.setSwitchFaultStatus(switchFaultStatusLst);

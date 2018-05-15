@@ -300,7 +300,7 @@ public final class SouthboundMapper {
                 bridgeNode, updatedControllerRows);
         final List<ControllerEntry> controllerEntriesCreated = new ArrayList<>();
         final OvsdbBridgeAugmentation ovsdbBridgeAugmentation =
-                bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+                bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation == null) {
             return controllerEntriesCreated;
         }
@@ -421,7 +421,7 @@ public final class SouthboundMapper {
                 ovsdbNode, updatedManagerRows);
         final List<ManagerEntry> managerEntriesCreated = new ArrayList<>();
         final OvsdbNodeAugmentation ovsdbNodeAugmentation =
-                ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+                ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         if (ovsdbNodeAugmentation == null) {
             return managerEntriesCreated;
         }
@@ -534,7 +534,7 @@ public final class SouthboundMapper {
         if (terminationPoints != null && !terminationPoints.isEmpty()) {
             for (TerminationPoint tp : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation != null) {
                     final InstanceIdentifier<OvsdbTerminationPointAugmentation> tpIid =
                             bridgeNodeIid

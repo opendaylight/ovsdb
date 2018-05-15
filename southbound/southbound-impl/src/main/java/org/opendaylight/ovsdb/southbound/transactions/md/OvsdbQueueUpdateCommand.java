@@ -101,7 +101,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 LOG.debug("Update Ovsdb Node {} with queue entries {}",ovsdbNode.get(), queues);
                 InstanceIdentifier<Queues> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(Queues.class, queues.getKey());
+                        .child(Queues.class, queues.key());
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
                         iid, queues);
             }
@@ -155,7 +155,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
             Queue queue, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(Queues.class, queuesBuilder.build().getKey());
+                .child(Queues.class, queuesBuilder.build().key());
         Set<String> otherConfigKeys = oldOtherConfigs.keySet();
         for (String otherConfigKey : otherConfigKeys) {
             KeyedInstanceIdentifier<QueuesOtherConfig, QueuesOtherConfigKey> otherIId =
@@ -204,7 +204,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
             Queue queue, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(Queues.class, queuesBuilder.build().getKey());
+                .child(Queues.class, queuesBuilder.build().key());
         Set<String> externalIdsKeys = oldExternalIds.keySet();
         for (String extIdKey : externalIdsKeys) {
             KeyedInstanceIdentifier<QueuesExternalIds, QueuesExternalIdsKey> externalIId =

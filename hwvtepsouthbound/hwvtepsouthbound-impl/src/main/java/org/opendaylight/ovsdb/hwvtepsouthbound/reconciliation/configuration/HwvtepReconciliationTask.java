@@ -74,13 +74,13 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         changes.add(change);
 
         if (globalConfigNode != null) {
-            HwvtepGlobalAugmentation augmentation = globalConfigNode.getAugmentation(HwvtepGlobalAugmentation.class);
+            HwvtepGlobalAugmentation augmentation = globalConfigNode.augmentation(HwvtepGlobalAugmentation.class);
             if (augmentation != null) {
                 if (augmentation.getLogicalSwitches() != null) {
                     for (LogicalSwitches logicalSwitches : augmentation.getLogicalSwitches()) {
                         connectionInstance.getDeviceInfo().updateConfigData(LogicalSwitches.class,
                                 nodeId.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
-                                        logicalSwitches.getKey()), logicalSwitches);
+                                        logicalSwitches.key()), logicalSwitches);
                     }
                 }
             }

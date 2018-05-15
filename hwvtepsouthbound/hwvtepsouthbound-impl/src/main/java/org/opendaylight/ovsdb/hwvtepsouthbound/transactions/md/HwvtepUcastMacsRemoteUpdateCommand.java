@@ -115,6 +115,6 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
 
     private InstanceIdentifier<RemoteUcastMacs> getMacIid(final RemoteUcastMacs remoteUcastMacs) {
         return getOvsdbConnectionInstance().getInstanceIdentifier()
-                .augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, remoteUcastMacs.getKey());
+                .augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, remoteUcastMacs.key());
     }
 }

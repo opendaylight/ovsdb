@@ -74,7 +74,7 @@ public class SouthboundUtilTest {
         Node node = mock(Node.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         when(nf.get()).thenReturn(Optional.of(node));
-        when(node.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
+        when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
         assertEquals("Failed to return correct Optional object", Optional.of(ovsdbNode),
                 SouthboundUtil.getManagingNode(db, mn));
 
@@ -136,7 +136,7 @@ public class SouthboundUtilTest {
     public void testGetControllerTarget() throws Exception {
         Node ovsdbNode = mock(Node.class);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
-        when(ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
+        when(ovsdbNode.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class, Mockito.RETURNS_DEEP_STUBS);
         when(ovsdbNodeAugmentation.getConnectionInfo()).thenReturn(connectionInfo);
 
@@ -148,7 +148,7 @@ public class SouthboundUtilTest {
         String testTarget = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
                 + String.valueOf(ipAddress) + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
         assertEquals("Incorrect controller IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode));
-        verify(ovsdbNode).getAugmentation(OvsdbNodeAugmentation.class);
+        verify(ovsdbNode).augmentation(OvsdbNodeAugmentation.class);
         verify(ovsdbNodeAugmentation).getConnectionInfo();
 
         //ipAddr null case

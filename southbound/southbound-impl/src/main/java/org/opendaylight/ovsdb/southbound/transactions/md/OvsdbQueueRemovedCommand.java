@@ -69,7 +69,7 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
     }
 
     private QueuesKey getQueueKey(Node node, UUID queueUuid) {
-        List<Queues> queueList = node.getAugmentation(OvsdbNodeAugmentation.class).getQueues();
+        List<Queues> queueList = node.augmentation(OvsdbNodeAugmentation.class).getQueues();
         if (queueList == null || queueList.isEmpty()) {
             LOG.debug("Deleting Queue {}, Ovsdb Node {} does not have a Queue list.", queueUuid.toString(), node);
             return null;
@@ -79,7 +79,7 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
         while (itr.hasNext()) {
             Queues queue = itr.next();
             if (queue.getQueueUuid().equals(quUuid)) {
-                return queue.getKey();
+                return queue.key();
             }
         }
         LOG.debug("Deleted Queue {} not found in Ovsdb Node {}", queueUuid.toString(), node);

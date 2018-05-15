@@ -70,7 +70,7 @@ public class QosUpdateCommand implements TransactCommand {
                 return;
             }
             OvsdbNodeAugmentation operNode =
-                state.getBridgeNode(iid).get().getAugmentation(OvsdbNodeAugmentation.class);
+                state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
 
             QosEntries qosEntry = qosMapEntry.getValue();
             Qos qos = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Qos.class);

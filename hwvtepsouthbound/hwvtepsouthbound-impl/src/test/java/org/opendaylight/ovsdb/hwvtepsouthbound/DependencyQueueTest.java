@@ -65,7 +65,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.getKey()));
+                .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()));
         setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", PowerMockito.mock(SameThreadScheduledExecutor.class,
                 Mockito.CALLS_REAL_METHODS));
     }

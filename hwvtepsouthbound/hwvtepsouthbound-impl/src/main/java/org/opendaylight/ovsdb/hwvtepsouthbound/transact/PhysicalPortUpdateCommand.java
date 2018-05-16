@@ -152,8 +152,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
             @Override
             public void onDependencyResolved(final HwvtepOperationalState operationalState,
                                              final TransactionBuilder transactionBuilder) {
-                PhysicalPortUpdateCommand.this.threadLocalOperationalState.set(operationalState);
-                PhysicalPortUpdateCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
+                hwvtepOperationalState = operationalState;
+                deviceTransaction = transactionBuilder;
                 updatePhysicalPort(transactionBuilder, psNodeiid, Lists.newArrayList(inputPhysicalPort));
             }
         };
@@ -171,8 +171,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
             @Override
             public void onDependencyResolved(final HwvtepOperationalState operationalState,
                                              final TransactionBuilder transactionBuilder) {
-                PhysicalPortUpdateCommand.this.threadLocalOperationalState.set(operationalState);
-                PhysicalPortUpdateCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
+                hwvtepOperationalState = operationalState;
+                deviceTransaction = transactionBuilder;
                 updatePhysicalPort(transactionBuilder, psNodeiid, Lists.newArrayList(inputPhysicalPort));
             }
         };

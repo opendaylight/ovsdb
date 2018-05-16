@@ -51,8 +51,8 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
                         HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
                         HwvtepOperationalState operState = new HwvtepOperationalState(
                                 connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
-                        threadLocalOperationalState.set(operState);
-                        threadLocalDeviceTransaction.set(transactionBuilder);
+                        LogicalRouterRemoveCommand.this.hwvtepOperationalState = operState;
+                        LogicalRouterRemoveCommand.this.deviceTransaction = transactionBuilder;
                         LOG.debug("Running delete logical router in seperate tx {}", created.getKey());
                         removeLogicalRouter(transactionBuilder, created.getKey(), created.getValue());
                     }

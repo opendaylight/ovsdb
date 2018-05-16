@@ -45,8 +45,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
     protected static final UUID TXUUID = new UUID("TXUUID");
-    protected ThreadLocal<HwvtepOperationalState> threadLocalOperationalState = new ThreadLocal<>();
-    protected ThreadLocal<TransactionBuilder> threadLocalDeviceTransaction = new ThreadLocal<>();
+    protected volatile HwvtepOperationalState hwvtepOperationalState = null;
+    protected volatile TransactionBuilder deviceTransaction = null;
     private Collection<DataTreeModification<Node>> changes;
     protected Map<TransactionBuilder, List<MdsalUpdate<T>>> updates = new ConcurrentHashMap<>();
 
@@ -55,12 +55,12 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     public AbstractTransactCommand(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
-        this.threadLocalOperationalState.set(state);
+        this.hwvtepOperationalState = state;
         this.changes = changes;
     }
 
     public HwvtepOperationalState getOperationalState() {
-        return threadLocalOperationalState.get();
+        return hwvtepOperationalState;
     }
 
     public DataBroker getDataBroker() {
@@ -100,7 +100,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             final InstanceIdentifier key,
             final T data, final Object... extraData) {
 
-        this.threadLocalDeviceTransaction.set(transaction);
+        this.deviceTransaction = transaction;
         HwvtepDeviceInfo deviceInfo = getOperationalState().getDeviceInfo();
         Map inTransitDependencies = new HashMap<>();
         Map configDependencies = new HashMap<>();
@@ -136,8 +136,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                 @Override
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
                         TransactionBuilder transactionBuilder) {
-                    AbstractTransactCommand.this.threadLocalOperationalState.set(operationalState);
-                    AbstractTransactCommand.this.threadLocalDeviceTransaction.set(transactionBuilder);
+                    AbstractTransactCommand.this.hwvtepOperationalState = operationalState;
+                    AbstractTransactCommand.this.deviceTransaction = transactionBuilder;
                     onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
                 }
             };
@@ -153,8 +153,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
                         TransactionBuilder transactionBuilder) {
                     //data would have got deleted by , push the data only if it is still in configds
-                    threadLocalOperationalState.set(operationalState);
-                    threadLocalDeviceTransaction.set(transactionBuilder);
+                    AbstractTransactCommand.this.hwvtepOperationalState = operationalState;
+                    AbstractTransactCommand.this.deviceTransaction = transactionBuilder;
                     T data = (T) new MdsalUtils(operationalState.getDataBroker()).read(
                             LogicalDatastoreType.CONFIGURATION, key);
                     if (data != null) {
@@ -364,23 +364,23 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     protected TransactionBuilder getDeviceTransaction() {
-        return threadLocalDeviceTransaction.get();
+        return deviceTransaction;
     }
 
     @Override
-    public void onSuccess(TransactionBuilder deviceTransaction) {
-        if (deviceTransaction == null || !updates.containsKey(deviceTransaction)) {
+    public void onSuccess(TransactionBuilder deviceTx) {
+        if (deviceTx == null || !updates.containsKey(deviceTx)) {
             return;
         }
         onCommandSucceeded();
     }
 
     @Override
-    public void onFailure(TransactionBuilder deviceTransaction) {
-        if (deviceTransaction == null || !updates.containsKey(deviceTransaction)) {
+    public void onFailure(TransactionBuilder deviceTx) {
+        if (deviceTx == null || !updates.containsKey(deviceTx)) {
             return;
         }
-        for (MdsalUpdate mdsalUpdate : updates.get(deviceTransaction)) {
+        for (MdsalUpdate mdsalUpdate : updates.get(deviceTx)) {
             getDeviceInfo().clearInTransit((Class<? extends Identifiable>) mdsalUpdate.getClass(),
                     mdsalUpdate.getKey());
         }

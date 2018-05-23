@@ -117,6 +117,30 @@
       "revId": "6fcc0bbe7d396b54433d3d1a487142d281b1a751",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81dc3589_2e626292",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2018-05-23T01:55:16Z",
+      "side": 1,
+      "message": "Here is the original patch that introduce this class. I had similar conversation with the author. Please refer to the following gerrit url, that capture that conversation, in case it helps.\n\nhttps://git.opendaylight.org/gerrit/#/c/39002/4/library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/StalePassiveConnectionService.java",
+      "parentUuid": "fbcd449a_b2df0042",
+      "range": {
+        "startLine": 125,
+        "startChar": 55,
+        "endLine": 125,
+        "endChar": 56
+      },
+      "revId": "6fcc0bbe7d396b54433d3d1a487142d281b1a751",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

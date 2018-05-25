@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Vishal Thapar <vthapar@redhat.com>
+Submitted-by: Vishal Thapar <vthapar@redhat.com>
+Submitted-at: Fri, 25 May 2018 10:45:22 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/71899
+Project: ovsdb
+Branch: refs/heads/stable/nitrogen

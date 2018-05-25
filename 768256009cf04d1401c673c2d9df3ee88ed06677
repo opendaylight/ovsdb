@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbe31954_95e221d8",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-05-25T06:02:15Z",
+      "side": 1,
+      "message": "Are we gonna support update reconciliation too?",
+      "revId": "768256009cf04d1401c673c2d9df3ee88ed06677",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "011f5871_f84a7919",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-05-25T06:02:15Z",
+      "side": 1,
+      "message": "we already have opendaylight-iid stamped on resources created/updated through OVSDB plugin. Can we reuse it instead of a new one?\n\nAlternately, if going for new one should consider using something like odl_owner:genius or odl_owner:genius-itm etc. Might come in handy.",
+      "revId": "768256009cf04d1401c673c2d9df3ee88ed06677",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99bda0e4_266b24d8",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-05-25T06:02:15Z",
+      "side": 1,
+      "message": "There was a QoS use case where OVS restart was recreating vm port on switch. If update reconciliation is to be supported, there maybe an impact.",
+      "revId": "768256009cf04d1401c673c2d9df3ee88ed06677",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c6e1c7d_623722f6",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-05-25T06:02:15Z",
+      "side": 1,
+      "message": "there should be csit for this as it is a useful feature.",
+      "revId": "768256009cf04d1401c673c2d9df3ee88ed06677",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

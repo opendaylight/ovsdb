@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e137644f_cdd33943",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 817
+      },
+      "writtenOn": "2018-05-28T11:39:47Z",
+      "side": 1,
+      "message": "Please explain how this will work in replay based upgrade scenarios, along with auto-tunnels",
+      "revId": "250308109c2418449bb0998ddc70af63bab8ecee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

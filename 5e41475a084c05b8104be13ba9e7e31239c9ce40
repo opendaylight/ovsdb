@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bec6261_0f630586",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalRouterRemoveCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-05-29T16:36:05Z",
+      "side": 1,
+      "message": "Why are you using a class specifier for this?",
+      "revId": "5e41475a084c05b8104be13ba9e7e31239c9ce40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

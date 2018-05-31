@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "34f14fb4_6a75dc5d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchRemoveCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 6393
+      },
+      "writtenOn": "2018-05-31T13:41:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b1797e8_88a7e921",
+      "revId": "6fdccdfcdab2926eb927e95acc44d205228968c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b83772d_4959d5d8",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchRemoveCommand.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2018-05-31T11:09:26Z",
       "side": 1,
       "message": "You shouldn’t change this, the new version will result in a stack overflow exception.",
+      "revId": "6fdccdfcdab2926eb927e95acc44d205228968c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "658000b7_28ae4284",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchRemoveCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 6393
+      },
+      "writtenOn": "2018-05-31T13:41:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b83772d_4959d5d8",
       "revId": "6fdccdfcdab2926eb927e95acc44d205228968c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

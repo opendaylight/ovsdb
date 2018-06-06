@@ -11,5 +11,7 @@ as a southbound plugin.
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+
+   specs/index
 

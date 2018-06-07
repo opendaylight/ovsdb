@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
@@ -148,31 +147,6 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
                 LogLevel.INFO.name()));
         option = composite(option, super.getLoggingOption());
         return option;
-    }
-
-    protected BindingAwareBroker.ProviderContext getProviderContext() {
-        BindingAwareBroker.ProviderContext providerContext = null;
-        for (int i = 0; i < 60; i++) {
-            LOG.info("Looking for ProviderContext, try {}", i);
-            providerContext = getSession();
-            if (providerContext != null) {
-                break;
-            } else {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    LOG.warn("Interrupted while waiting for provider context", e);
-                }
-            }
-        }
-        assertNotNull("providercontext should not be null", providerContext);
-        /* One more second to let the provider finish initialization */
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            LOG.warn("Interrupted while waiting for other provider", e);
-        }
-        return providerContext;
     }
 
     public boolean checkSchema(String schemaStr)
@@ -309,7 +283,6 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
         super.setup();
 
-        assertNotNull("ProviderContext was not found", getProviderContext());
         if (schema.equals(LibraryIntegrationTestUtils.OPEN_VSWITCH)) {
             assertTrue(schema + " is required.", checkSchema(schema));
         } else {
@@ -329,7 +302,6 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
         super.setup();
 
-        assertNotNull("ProviderContext was not found", getProviderContext());
         setSetup(true);
     }
 

@@ -20,7 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -49,7 +48,7 @@ public final class LibraryIntegrationTestUtils {
         // Nothing to do
     }
 
-    public static OvsdbClient getTestConnection(BindingAwareProvider provider) throws IOException,
+    public static OvsdbClient getTestConnection(Object provider) throws IOException,
             InterruptedException, ExecutionException, TimeoutException {
         Properties props = System.getProperties();
         String addressStr = props.getProperty(SERVER_IPADDRESS);

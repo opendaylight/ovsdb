@@ -23,6 +23,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
+import org.opendaylight.infrautils.ready.SystemReadyMonitor;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
@@ -47,7 +48,9 @@ import org.slf4j.LoggerFactory;
 public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
+
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
+    private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
 
     public static DataBroker getDb() {
         return db;
@@ -64,7 +67,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private final OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
+    private final SystemReadyMonitor systemReadyMonitor;
+
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
@@ -74,16 +78,16 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
             final OvsdbConnection ovsdbConnection,
             final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+            final SystemReadyMonitor systemReadyMonitor,
             final DiagStatusService diagStatusService) {
-
         this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
-        ovsdbStatusProvider = new OvsdbDiagStatusProvider(diagStatusService);
-
+        this.ovsdbStatusProvider = new OvsdbDiagStatusProvider(diagStatusService);
         this.instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService,
                 bindingNormalizedNodeSerializer);
+        this.systemReadyMonitor = systemReadyMonitor;
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
     }
 
@@ -177,7 +181,11 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         if (!registered.getAndSet(true)) {
             LOG.info("Starting the ovsdb port");
             ovsdbConnection.registerConnectionListener(cm);
-            ovsdbConnection.startOvsdbManager();
+            LOG.info("Registering deferred system ready listener to start OVSDB Manager later");
+            systemReadyMonitor.registerListener(() -> {
+                ovsdbConnection.startOvsdbManager();
+                LOG.info("Started OVSDB Manager (in system ready listener)");
+            });
             //mdsal registration/deregistration in mdsal update callback should be avoided
             new Thread(() -> {
                 if (operTopologyRegistration != null) {

@@ -14,6 +14,8 @@
     interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
   <reference id="bindingNormalizedNodeSerializer"
     interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer" />
+  <reference id="systemReadyMonitor"
+    interface="org.opendaylight.infrautils.ready.SystemReadyMonitor" />
 
   <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.southbound" update-strategy="none">
     <cm:default-properties>
@@ -32,6 +34,7 @@
     <argument ref="ovsdbConnection" />
     <argument ref="schemaService" />
     <argument ref="bindingNormalizedNodeSerializer" />
+    <argument ref="systemReadyMonitor" />
     <property name="skipMonitoringManagerStatus" value="${skip-monitoring-manager-status}"/>
   </bean>
 

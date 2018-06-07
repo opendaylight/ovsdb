@@ -25,6 +25,9 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.infrautils.ready.SystemReadyListener;
+import org.opendaylight.infrautils.ready.SystemReadyMonitor;
+import org.opendaylight.infrautils.ready.SystemState;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
@@ -67,7 +70,8 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class),
+                new ImmediateSystemReadyMonitor())) {
 
             // Initiate the session
             southboundProvider.init();
@@ -92,7 +96,8 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class),
+                new ImmediateSystemReadyMonitor())) {
 
             // Initiate the session
             southboundProvider.init();
@@ -119,7 +124,8 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class),
+                new ImmediateSystemReadyMonitor())) {
 
             southboundProvider.init();
 
@@ -141,7 +147,8 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
                 entityOwnershipService,
                 Mockito.mock(OvsdbConnection.class),
                 Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class))) {
+                Mockito.mock(BindingNormalizedNodeSerializer.class),
+                new ImmediateSystemReadyMonitor())) {
 
             southboundProvider.init();
 
@@ -171,5 +178,19 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
                     topologyIid).checkedGet().isPresent());
         }
+    }
+
+    private static class ImmediateSystemReadyMonitor implements SystemReadyMonitor {
+
+        @Override
+        public SystemState getSystemState() {
+            return SystemState.ACTIVE;
+        }
+
+        @Override
+        public void registerListener(SystemReadyListener listener) {
+            listener.onSystemBootReady();
+        }
+
     }
 }

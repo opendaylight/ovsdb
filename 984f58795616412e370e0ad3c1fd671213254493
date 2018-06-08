@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16a9a32f_bfe09094",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-06-08T05:09:06Z",
+      "side": 1,
+      "message": "Why not register for system ready in init, and on system ready write call initialize topology? Then we won\u0027t need Infrautils-44. We\u0027re already initializing our ports post system ready, why not do same for initialization of topology too? So, systemReady \u003e Init topology \u003e listening ports?",
+      "range": {
+        "startLine": 176,
+        "startChar": 12,
+        "endLine": 176,
+        "endChar": 50
+      },
+      "revId": "984f58795616412e370e0ad3c1fd671213254493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

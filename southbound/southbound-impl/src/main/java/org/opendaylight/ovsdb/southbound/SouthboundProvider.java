@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2018 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,6 +21,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.infrautils.diagstatus.DiagStatusService;
+import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
@@ -65,16 +67,20 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
+    private final OvsdbDiagStatusProvider ovsdbStatusProvider;
 
     public SouthboundProvider(final DataBroker dataBroker,
             final EntityOwnershipService entityOwnershipServiceDependency,
             final OvsdbConnection ovsdbConnection,
             final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+            final DiagStatusService diagStatusService) {
+
         this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
+        ovsdbStatusProvider = new OvsdbDiagStatusProvider(diagStatusService);
 
         this.instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService,
                 bindingNormalizedNodeSerializer);
@@ -86,6 +92,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
      */
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
+        ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec);
@@ -119,6 +126,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         try {
             txInvoker.close();
         } catch (InterruptedException e) {
+            ovsdbStatusProvider.reportStatus(ServiceState.ERROR, "OVSDB service shutdown error");
             LOG.debug("SouthboundProvider failed to close TransactionInvoker.");
         }
         cm.close();
@@ -129,6 +137,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
             operTopologyRegistration.close();
             operTopologyRegistration = null;
         }
+        ovsdbStatusProvider.reportStatus(ServiceState.UNREGISTERED, "OVSDB Service stopped");
     }
 
     private void initializeOvsdbTopology(LogicalDatastoreType type) {
@@ -176,6 +185,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                     operTopologyRegistration = null;
                 }
             }).start();
+            ovsdbStatusProvider.reportStatus(ServiceState.OPERATIONAL, "OVSDB initialization complete");
         }
     }
 

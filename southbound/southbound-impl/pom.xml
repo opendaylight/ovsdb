@@ -67,6 +67,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <!-- external dependencies -->
     <dependency>
+      <groupId>org.opendaylight.infrautils</groupId>
+      <artifactId>diagstatus-api</artifactId>
+      <version>1.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.cdi</groupId>
+      <artifactId>pax-cdi-api</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.sonarsource.java</groupId>
       <artifactId>sonar-jacoco-listeners</artifactId>
       <version>${sonar-jacoco-listeners.version}</version>

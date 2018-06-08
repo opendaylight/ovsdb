@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "370c1e1a_6353f761",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDiagStatusProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 817
+      },
+      "writtenOn": "2018-06-08T05:28:34Z",
+      "side": 1,
+      "message": "planning to add the dynamic status part later, or why not include here itself?",
+      "revId": "088e16d9f9e4f191c2925814226049bedea04ff6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

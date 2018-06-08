@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
@@ -87,16 +86,4 @@ public class OvsdbItUtils {
         LOG.info("isControllerConnected exit: false {}", controllerTarget);
         return false;
     }
-
-    /**
-     * Get a DataBroker and assert that it is not null.
-     * @param providerContext ProviderContext from which to retrieve the DataBroker
-     * @return the Databroker
-     */
-    public static DataBroker getDatabroker(BindingAwareBroker.ProviderContext providerContext) {
-        DataBroker dataBroker = providerContext.getSALService(DataBroker.class);
-        assertNotNull("dataBroker should not be null", dataBroker);
-        return dataBroker;
-    }
-
 }

@@ -22,6 +22,30 @@
       "revId": "984f58795616412e370e0ad3c1fd671213254493",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3e51aae_15a9f8cb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-06-11T17:49:21Z",
+      "side": 1,
+      "message": "Re. INFRAUTILS-44, the c/72766 (I4632ae9d27029175ad7935cd6b7567f142e76727) just got merged, so that is a non-issue; and therefore removing my initial self -1.\n\nRe. your point, I\u0027m afraid that you seem to assume that I understand a lot more about OVSDB internals than I actually do... ;-) What I have done in this change is relatively \"mechanical\" - as a first step.  I think this would work?  If you think that it can be improved upon based on what you wrote (which I am unable to translate into code without learning a lot more about OVSDB), perhaps you would like to do that in follow-up change to this?",
+      "parentUuid": "16a9a32f_bfe09094",
+      "range": {
+        "startLine": 176,
+        "startChar": 12,
+        "endLine": 176,
+        "endChar": 50
+      },
+      "revId": "984f58795616412e370e0ad3c1fd671213254493",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

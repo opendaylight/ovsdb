@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "800054a1_108b8ff8",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "Better is to write - \"entities of OVSDB tables which are owned by controller.\"",
+      "range": {
+        "startLine": 37,
+        "startChar": 44,
+        "endLine": 37,
+        "endChar": 52
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a89270a9_d2397bff",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "what is DS?",
+      "range": {
+        "startLine": 39,
+        "startChar": 38,
+        "endLine": 39,
+        "endChar": 40
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c636f27_1be4d68f",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "I think you mean - key-value",
+      "range": {
+        "startLine": 42,
+        "startChar": 5,
+        "endLine": 42,
+        "endChar": 10
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "534dde8c_c71c38d8",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "Better to write:\n\nReconciliation will support following operations:\n- create\n- delete\n\nUpdate reconciliation is not supported in this feature.",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 8
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b70a27d8_2219d102",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "I think, you are talking about network topology Oper DS.\nIf yes, please update accordingly.",
+      "range": {
+        "startLine": 52,
+        "startChar": 23,
+        "endLine": 52,
+        "endChar": 31
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "545855e3_b006f50a",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "How are you distinguishing between old and new ones config?\nPlease explain.",
+      "range": {
+        "startLine": 67,
+        "startChar": 20,
+        "endLine": 68,
+        "endChar": 17
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81d569a7_75c4b2e4",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2018-06-11T13:14:16Z",
+      "side": 1,
+      "message": "What do you expect in it?\nIf you consider change in tep/tz as change in external_ids column\u0027s transport-zone parameter and other_config column\u0027s local_ip paramter, then both configs are not done by ODL, they are done at switch side.\nBut your recon logic will work on entities configured by ODL, right?\nIn this case, delete reconciliation will delete old tunnel on what basis. Please explain details for it.",
+      "range": {
+        "startLine": 75,
+        "startChar": 32,
+        "endLine": 75,
+        "endChar": 62
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "616ddb5c_df84aa49",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-12T06:54:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "800054a1_108b8ff8",
+      "range": {
+        "startLine": 37,
+        "startChar": 44,
+        "endLine": 37,
+        "endChar": 52
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a89270a9_d2397bff",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2018-06-11T13:14:16Z",
       "side": 1,
       "message": "what is DS?",
+      "range": {
+        "startLine": 39,
+        "startChar": 38,
+        "endLine": 39,
+        "endChar": 40
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39f149bc_8c54f431",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-12T06:54:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a89270a9_d2397bff",
       "range": {
         "startLine": 39,
         "startChar": 38,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6c281a67_1d69f41a",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-12T06:54:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c636f27_1be4d68f",
+      "range": {
+        "startLine": 42,
+        "startChar": 5,
+        "endLine": 42,
+        "endChar": 10
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "534dde8c_c71c38d8",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "9a43d696_ed4dd5e0",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-12T06:54:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "534dde8c_c71c38d8",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 8
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b70a27d8_2219d102",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11
@@ -105,6 +201,30 @@
       "writtenOn": "2018-06-11T13:14:16Z",
       "side": 1,
       "message": "I think, you are talking about network topology Oper DS.\nIf yes, please update accordingly.",
+      "range": {
+        "startLine": 52,
+        "startChar": 23,
+        "endLine": 52,
+        "endChar": 31
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44c10e29_1a545fb2",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-12T06:54:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b70a27d8_2219d102",
       "range": {
         "startLine": 52,
         "startChar": 23,

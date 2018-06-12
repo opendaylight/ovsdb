@@ -22,6 +22,30 @@
       "revId": "4a7ee6d5e767f8cb5fc48197a19d7a48ccf8bbdf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ca20900_8bb1b3f1",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-12T06:35:09Z",
+      "side": 1,
+      "message": "Yes, this is what we concluded in the internal mail...\nBut currently also, reconciliation and publishing happens through two parallel tasks, if this is not the case please let me know.",
+      "parentUuid": "ac57942b_fa0f66c2",
+      "range": {
+        "startLine": 68,
+        "startChar": 49,
+        "endLine": 68,
+        "endChar": 50
+      },
+      "revId": "4a7ee6d5e767f8cb5fc48197a19d7a48ccf8bbdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

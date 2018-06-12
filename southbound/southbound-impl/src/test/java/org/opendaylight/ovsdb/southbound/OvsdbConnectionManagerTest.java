@@ -329,7 +329,7 @@ public class OvsdbConnectionManagerTest {
         when(SouthboundMapper.createInetAddress(any(IpAddress.class))).thenReturn(ip);
 
         PowerMockito.mockStatic(OvsdbConnectionService.class);
-        when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
+//        when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
         PortNumber port = mock(PortNumber.class);
         when(connectionInfo.getRemotePort()).thenReturn(port);
         when(port.getValue()).thenReturn(8080);

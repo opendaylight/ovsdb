@@ -15,7 +15,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
@@ -84,7 +83,6 @@ import org.slf4j.LoggerFactory;
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
  * and a Singleton object in a non-OSGi environment.
  */
-@SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
     private static final int IDLE_READER_TIMEOUT = 30;
@@ -102,24 +100,18 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
             new StalePassiveConnectionService(EXECUTOR_SERVICE);
 
-    private static final OvsdbConnection CONNECTION_SERVICE = new OvsdbConnectionService();
-
     private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
 
-    private static volatile boolean useSSL = false;
-    private static volatile ICertificateManager certManagerSrv;
+    private volatile boolean useSSL = false;
+    private volatile ICertificateManager certManagerSrv;
 
-    private static volatile int jsonRpcDecoderMaxFrameLength = 100000;
-    private static volatile Channel serverChannel;
+    private volatile int jsonRpcDecoderMaxFrameLength = 100000;
+    private volatile Channel serverChannel;
 
     private final AtomicBoolean singletonCreated = new AtomicBoolean(false);
     private volatile String listenerIp = "0.0.0.0";
     private volatile int listenerPort = 6640;
-
-    public static OvsdbConnection getService() {
-        return CONNECTION_SERVICE;
-    }
 
     /**
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
@@ -165,7 +157,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             new StringEncoder(CharsetUtil.UTF_8),
                             new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                             new ReadTimeoutHandler(READ_TIMEOUT),
-                            new ExceptionHandler());
+                            new ExceptionHandler(OvsdbConnectionService.this));
                 }
             });
 
@@ -291,7 +283,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
      * ODL certificateManager SSLContext and attributes.
      */
-    private static void ovsdbManager(String ip, int port) {
+    private void ovsdbManager(String ip, int port) {
         if (useSSL) {
             if (certManagerSrv == null) {
                 LOG.error("Certificate Manager service is not available cannot establish the SSL communication.");
@@ -308,7 +300,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
+    private void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
                                             final String[] protocols, final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -350,7 +342,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                  new StringEncoder(CharsetUtil.UTF_8),
                                  new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                                  new ReadTimeoutHandler(READ_TIMEOUT),
-                                 new ExceptionHandler());
+                                 new ExceptionHandler(OvsdbConnectionService.this));
 
                             handleNewPassiveConnection(channel);
                         }

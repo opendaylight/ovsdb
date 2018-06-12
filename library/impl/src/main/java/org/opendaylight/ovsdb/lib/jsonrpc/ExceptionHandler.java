@@ -17,8 +17,8 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.ReadTimeoutException;
 import java.io.IOException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +26,14 @@ public class ExceptionHandler extends ChannelDuplexHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExceptionHandler.class);
 
+    private final OvsdbConnection ovsdbConnectionService;
+
+    public ExceptionHandler(OvsdbConnection ovsdbConnectionService) {
+        this.ovsdbConnectionService = ovsdbConnectionService;
+    }
+
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (ctx.channel().isActive()) {
             LOG.error("Exception occurred while processing connection pipeline", cause);
             if ((cause instanceof InvalidEncodingException)
@@ -53,15 +59,14 @@ public class ExceptionHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if (evt instanceof IdleStateEvent) {
             LOG.debug("Get idle state event");
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.READER_IDLE) {
                 LOG.debug("Reader idle state. Send echo message to peer");
                 //Send echo message to peer
-                OvsdbClient client =
-                             OvsdbConnectionService.getService().getClient(ctx.channel());
+                OvsdbClient client = ovsdbConnectionService.getClient(ctx.channel());
                 client.echo();
             }
         }

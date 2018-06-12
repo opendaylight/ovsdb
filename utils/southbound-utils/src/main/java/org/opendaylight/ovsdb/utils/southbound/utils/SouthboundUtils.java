@@ -913,16 +913,6 @@ public class SouthboundUtils {
         }
 
         if (controllersStr.isEmpty()) {
-            // Neither user provided ip nor ovsdb node has manager entries. Lets use local machine ip address.
-            LOG.debug("Use local machine ip address as a OpenFlow Controller ip address");
-            controllerIpStr = getLocalControllerHostIpAddress();
-            if (controllerIpStr != null) {
-                controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
-                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
-            }
-        }
-
-        if (controllersStr.isEmpty()) {
             LOG.warn("Failed to determine OpenFlow controller ip address");
         } else if (LOG.isDebugEnabled()) {
             LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(),

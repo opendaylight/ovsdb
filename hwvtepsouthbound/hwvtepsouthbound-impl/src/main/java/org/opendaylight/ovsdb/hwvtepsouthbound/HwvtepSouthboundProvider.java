@@ -79,7 +79,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     public void init() {
         LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
-        cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService);
+        cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
         hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
         hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
         //Register listener for entityOnwership changes

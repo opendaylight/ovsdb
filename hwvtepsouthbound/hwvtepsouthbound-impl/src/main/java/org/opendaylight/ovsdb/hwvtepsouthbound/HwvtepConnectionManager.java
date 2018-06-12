@@ -48,8 +48,8 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
@@ -88,15 +88,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final HwvtepOperGlobalListener hwvtepOperGlobalListener;
     private final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxHistory = new ConcurrentHashMap<>();
     private final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
+    private final OvsdbConnection ovsdbConnectionService;
 
     public HwvtepConnectionManager(DataBroker db, TransactionInvoker txInvoker,
-                    EntityOwnershipService entityOwnershipService) {
+                    EntityOwnershipService entityOwnershipService, OvsdbConnection ovsdbConnectionService) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         this.hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this,entityOwnershipService);
         this.reconciliationManager = new ReconciliationManager(db);
         this.hwvtepOperGlobalListener = new HwvtepOperGlobalListener(db, this);
+        this.ovsdbConnectionService = ovsdbConnectionService;
     }
 
     @Override
@@ -177,7 +179,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                                HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException, ConnectException {
         LOG.info("Connecting to {}", HwvtepSouthboundUtil.connectionInfoToString(hwvtepGlobal.getConnectionInfo()));
         InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
-        OvsdbClient client = OvsdbConnectionService.getService()
+        OvsdbClient client = ovsdbConnectionService
                         .connect(ip, hwvtepGlobal.getConnectionInfo().getRemotePort().getValue());
         if (client != null) {
             putInstanceIdentifier(hwvtepGlobal.getConnectionInfo(), iid.firstIdentifierOf(Node.class));

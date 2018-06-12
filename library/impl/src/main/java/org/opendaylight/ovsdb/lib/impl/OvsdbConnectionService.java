@@ -108,6 +108,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static ICertificateManager certManagerSrv = null;
 
     private static int jsonRpcDecoderMaxFrameLength = 100000;
+    private static String listenerIp = "0.0.0.0";
     private static int listenerPort = 6640;
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
@@ -115,7 +116,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static Channel serverChannel = null;
 
     private static int retryPeriod = 100; // retry after 100 milliseconds
-
 
     public static OvsdbConnection getService() {
         if (connectionService == null) {
@@ -245,9 +245,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public synchronized boolean startOvsdbManager() {
         final int ovsdbListenerPort = this.listenerPort;
+        final String ovsdbListenerIp = this.listenerIp;
         if (!singletonCreated.getAndSet(true)) {
             LOG.info("startOvsdbManager: Starting");
-            new Thread(() -> ovsdbManager(ovsdbListenerPort)).start();
+            new Thread(() -> ovsdbManager(ovsdbListenerIp, ovsdbListenerPort)).start();
             return true;
         } else {
             return false;
@@ -260,11 +261,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * 6640 which can be overridden using the ovsdb.listenPort system property.
      */
     @Override
-    public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
+    public synchronized boolean startOvsdbManagerWithSsl(final String ovsdbListenIp, final int ovsdbListenPort,
                                                          final ICertificateManager certificateManagerSrv,
                                                          String[] protocols, String[] cipherSuites) {
         if (!singletonCreated.getAndSet(true)) {
-            new Thread(() -> ovsdbManagerWithSsl(ovsdbListenPort,
+            new Thread(() -> ovsdbManagerWithSsl(ovsdbListenIp, ovsdbListenPort,
                     certificateManagerSrv, protocols, cipherSuites)).start();
             return true;
         } else {
@@ -273,7 +274,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
-    public synchronized boolean restartOvsdbManagerWithSsl(final int ovsdbListenPort,
+    public synchronized boolean restartOvsdbManagerWithSsl(final String ovsdbListenIp,
+        final int ovsdbListenPort,
         final ICertificateManager certificateManagerSrv,
         final String[] protocols,
         final String[] cipherSuites) {
@@ -282,7 +284,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             LOG.info("Server channel closed");
         }
         serverChannel = null;
-        return startOvsdbManagerWithSsl(ovsdbListenPort, certificateManagerSrv, protocols, cipherSuites);
+        return startOvsdbManagerWithSsl(ovsdbListenIp, ovsdbListenPort,
+            certificateManagerSrv, protocols, cipherSuites);
     }
 
     /**
@@ -291,16 +294,16 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
      * ODL certificateManager SSLContext and attributes.
      */
-    private static void ovsdbManager(int port) {
+    private static void ovsdbManager(String ip, int port) {
         if (useSSL) {
             if (certManagerSrv == null) {
                 LOG.error("Certificate Manager service is not available cannot establish the SSL communication.");
                 return;
             }
-            ovsdbManagerWithSsl(port, certManagerSrv, certManagerSrv.getTlsProtocols(),
+            ovsdbManagerWithSsl(ip, port, certManagerSrv, certManagerSrv.getTlsProtocols(),
                     certManagerSrv.getCipherSuites());
         } else {
-            ovsdbManagerWithSsl(port, null /* SslContext */, null, null);
+            ovsdbManagerWithSsl(ip, port, null /* SslContext */, null, null);
         }
     }
 
@@ -308,7 +311,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(int port, final ICertificateManager certificateManagerSrv,
+    private static void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
                                             final String[] protocols, final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -359,7 +362,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             serverBootstrap.option(ChannelOption.RCVBUF_ALLOCATOR,
                     new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
             // Start the server.
-            ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(ip, port).sync();
             Channel serverListenChannel = channelFuture.channel();
             serverChannel = serverListenChannel;
             // Wait until the server socket is closed.
@@ -585,6 +588,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     public void setJsonRpcDecoderMaxFrameLength(int maxFrameLength) {
         jsonRpcDecoderMaxFrameLength = maxFrameLength;
         LOG.info("Json Rpc Decoder Max Frame Length set to : {}", jsonRpcDecoderMaxFrameLength);
+    }
+
+    public void setOvsdbListenerIp(String ip) {
+        LOG.info("OVSDB IP for listening connection is set to : {}", ip);
+        listenerIp = ip;
     }
 
     public void setOvsdbListenerPort(int portNumber) {

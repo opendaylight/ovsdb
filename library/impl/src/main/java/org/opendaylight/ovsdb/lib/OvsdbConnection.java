@@ -59,7 +59,8 @@ public interface OvsdbConnection {
     /**
      * Method to start ovsdb server for passive connection with SSL.
      */
-    boolean startOvsdbManagerWithSsl(int ovsdbListenPort,
+    boolean startOvsdbManagerWithSsl(String ovsdbListenIp,
+                                     int ovsdbListenPort,
                                      ICertificateManager certificateManagerSrv,
                                      String[] protocols, String[] cipherSuites);
 
@@ -67,7 +68,8 @@ public interface OvsdbConnection {
      * Method to restart ovsdb server for passive connection with SSL and user
      * specifies protocols and cipher suites.
      */
-    boolean restartOvsdbManagerWithSsl(int ovsdbListenPort,
+    boolean restartOvsdbManagerWithSsl(String ovsdbListenIp,
+                                       int ovsdbListenPort,
                                        ICertificateManager certificateManagerSrv,
                                        String[] protocols,
                                        String[] cipherSuites);

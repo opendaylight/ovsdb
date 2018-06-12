@@ -13,13 +13,10 @@ import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -913,16 +910,6 @@ public class SouthboundUtils {
         }
 
         if (controllersStr.isEmpty()) {
-            // Neither user provided ip nor ovsdb node has manager entries. Lets use local machine ip address.
-            LOG.debug("Use local machine ip address as a OpenFlow Controller ip address");
-            controllerIpStr = getLocalControllerHostIpAddress();
-            if (controllerIpStr != null) {
-                controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
-                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
-            }
-        }
-
-        if (controllersStr.isEmpty()) {
             LOG.warn("Failed to determine OpenFlow controller ip address");
         } else if (LOG.isDebugEnabled()) {
             LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(),
@@ -930,27 +917,6 @@ public class SouthboundUtils {
         }
 
         return controllersStr;
-    }
-
-    private String getLocalControllerHostIpAddress() {
-        String ipaddress = null;
-        try {
-            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
-                    ifaces.hasMoreElements();) {
-                NetworkInterface iface = ifaces.nextElement();
-
-                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                    InetAddress inetAddr = inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
-                        ipaddress = inetAddr.getHostAddress();
-                        break;
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            LOG.warn("Exception while fetching local host ip address ", e);
-        }
-        return ipaddress;
     }
 
     public long getDataPathId(Node node) {

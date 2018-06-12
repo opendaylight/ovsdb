@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ac57942b_fa0f66c2",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-06-12T06:26:11Z",
+      "side": 1,
+      "message": "Currently switch data is published to oper ds and then reconciliation kicks in, are you planning to change this ?",
+      "range": {
+        "startLine": 68,
+        "startChar": 49,
+        "endLine": 68,
+        "endChar": 50
+      },
+      "revId": "4a7ee6d5e767f8cb5fc48197a19d7a48ccf8bbdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

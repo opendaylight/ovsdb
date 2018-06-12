@@ -118,13 +118,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static int retryPeriod = 100; // retry after 100 milliseconds
 
 
-    public static OvsdbConnection getService() {
-        if (connectionService == null) {
-            connectionService = new OvsdbConnectionService();
-        }
-        return connectionService;
-    }
-
     /**
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
      * ODL certificateManager SSLContext and attributes.
@@ -169,7 +162,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                             new StringEncoder(CharsetUtil.UTF_8),
                             new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                             new ReadTimeoutHandler(READ_TIMEOUT),
-                            new ExceptionHandler());
+                            new ExceptionHandler(OvsdbConnectionService.this));
                 }
             });
 
@@ -295,7 +288,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
      * ODL certificateManager SSLContext and attributes.
      */
-    private static void ovsdbManager(String ip, int port) {
+    private void ovsdbManager(String ip, int port) {
         if (useSSL) {
             if (certManagerSrv == null) {
                 LOG.error("Certificate Manager service is not available cannot establish the SSL communication.");
@@ -312,7 +305,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
+    private void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
                                             final String[] protocols, final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -354,7 +347,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                  new StringEncoder(CharsetUtil.UTF_8),
                                  new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                                  new ReadTimeoutHandler(READ_TIMEOUT),
-                                 new ExceptionHandler());
+                                 new ExceptionHandler(OvsdbConnectionService.this));
 
                             handleNewPassiveConnection(channel);
                         }

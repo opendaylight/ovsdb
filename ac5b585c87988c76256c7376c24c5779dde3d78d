@@ -260,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "dfde7744_a1b00b28",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-13T05:01:07Z",
+      "side": 1,
+      "message": "change in configuration might happen when switch is disconnected. When switch connects back, configuration in config DataStore(DS) is new configuration and what is there in switch or operational DS is old configuration. When switch connects back, create reconciliation will push the new configuration to switch.",
+      "parentUuid": "545855e3_b006f50a",
+      "range": {
+        "startLine": 67,
+        "startChar": 20,
+        "endLine": 68,
+        "endChar": 17
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "81d569a7_75c4b2e4",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11
